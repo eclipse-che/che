@@ -15,8 +15,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>codenvy-sdk-parent</artifactId>
-        <groupId>com.codenvy.sdk</groupId>
-        <version>3.9.0-SNAPSHOT</version>
+        <groupId>org.eclipse.che.sdk</groupId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-sdk</artifactId>
     <packaging>pom</packaging>
@@ -33,20 +33,14 @@
             <version>${ch.qos.logback.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ext-datasource-server-war-sdk</artifactId>
-            <version>${codenvy.plugin.datasource.version}</version>
-            <type>war</type>
+            <groupId>com.codenvy.vfs</groupId>
+            <artifactId>codenvy-vfs-impl</artifactId>
+            <version>${codenvy.vfs.impl.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ext-git</artifactId>
-            <version>${codenvy.plugin.git.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ext-github</artifactId>
-            <version>${codenvy.plugin.git.version}</version>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${com.jcraft.jsch.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -60,104 +54,110 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>codenvy-ext-datasource-server-war-sdk</artifactId>
+            <version>${che.plugins.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>codenvy-ext-git</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>codenvy-ext-github</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <!--dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-docs-ui</artifactId>
             <version>${codenvy.api-docs-ui.version}</version>
             <type>war</type>
-        </dependency>
+        </dependency-->
         <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
+            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>action-api-tutorial</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
+            <version>${che.sdk.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
+            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>analytics-event-logger-extension</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
+            <version>${che.sdk.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>empty-extension</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>gin-tutorial</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>gist-extension</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>helloworld-extension</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>icons-registry-api</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>notification-api-tutorial</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>parts-api-tutorial</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>theme-api-tutorial</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
-            <artifactId>wysiwyg-editor-tutorial</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.sdk</groupId>
+            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-ide</artifactId>
-            <version>${project.version}</version>
+            <version>${che.sdk.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.sdk</groupId>
+            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-java-codeassistant</artifactId>
-            <version>${project.version}</version>
+            <version>${che.sdk.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.sdk</groupId>
+            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-platform-api</artifactId>
-            <version>${project.version}</version>
+            <version>${che.sdk.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.vfs</groupId>
-            <artifactId>codenvy-vfs-impl</artifactId>
-            <version>${codenvy.vfs.impl.version}</version>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>empty-extension</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>${com.jcraft.jsch.version}</version>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>gin-tutorial</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>gist-extension</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>helloworld-extension</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>icons-registry-api</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>notification-api-tutorial</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>parts-api-tutorial</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>theme-api-tutorial</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>wysiwyg-editor-tutorial</artifactId>
+            <version>${che.sdk.version}</version>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -263,9 +263,9 @@
                                     <destFileName>logback-classic.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.core</groupId>
+                                    <groupId>org.eclipse.che.plugin</groupId>
                                     <artifactId>codenvy-ssl-socket-factory</artifactId>
-                                    <version>${codenvy.plugin.datasource.version}</version>
+                                    <version>${che.plugins.version}</version>
                                     <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
                                     <destFileName>codenvy-ssl-socket-factory.jar</destFileName>
                                 </artifactItem>
@@ -281,118 +281,118 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>action-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>action-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>theme-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>theme-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>notification-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>notification-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>parts-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>parts-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>editor-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>editor-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>gin-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>gin-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>gist-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>gist-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>empty-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>empty-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>helloworld-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>helloworld-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>analytics-event-logger-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>analytics-event-logger-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>icons-registry-api</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>icons-registry-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>wysiwyg-editor-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>wysiwyg-editor-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>server-side-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>server-side-tutorial.zip</destFileName>
@@ -409,9 +409,9 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.codenvy.plugin-sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk</groupId>
                                     <artifactId>codenvy-sdk-tools</artifactId>
-                                    <version>${codenvy.plugin-sdk.version}</version>
+                                    <version>${che.sdk.version}</version>
                                     <classifier>jar-with-dependencies</classifier>
                                     <outputDirectory>${project.build.directory}/tomcat-ide/sdk-tools</outputDirectory>
                                     <destFileName>codenvy-sdk-tools.jar</destFileName>
@@ -466,9 +466,11 @@
                                     <fileset dir="${project.build.directory}/packager-conf/war/ws" />
                                 </war>
                                 <copy file="${project.build.directory}/packager-conf/war/assembly-platform-api-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/api.war" />
-                                <copy file="${project.build.directory}/packager-conf/war/codenvy-ext-datasource-server-war-sdk-${codenvy.plugin.datasource.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/datasource.war" />
+                                <copy file="${project.build.directory}/packager-conf/war/codenvy-ext-datasource-server-war-sdk-${che.sdk.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/datasource.war" />
                                 <copy file="${project.build.directory}/packager-conf/war/assembly-java-codeassistant-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/java-ca.war" />
-                                <copy file="${project.build.directory}/packager-conf/war/codenvy-api-docs-ui-${codenvy.api-docs-ui.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/api-docs-ui.war" />
+                                <!--copy file="${project.build.directory}/packager-conf/war/codenvy-api-docs-ui-${codenvy.api-docs-ui.version}.war"
+                                      overwrite="true"
+                                      tofile="${project.build.directory}/tomcat-ide/webapps/api-docs-ui.war"/-->
                                 <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
                             </target>
                         </configuration>

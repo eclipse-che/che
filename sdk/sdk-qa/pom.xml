@@ -15,8 +15,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>codenvy-sdk-parent</artifactId>
-        <groupId>com.codenvy.sdk</groupId>
-        <version>3.9.0-SNAPSHOT</version>
+        <groupId>org.eclipse.che.sdk</groupId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>sdk-qa</artifactId>
     <name>Codenvy SDK :: QA</name>
@@ -25,21 +25,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ext-datasource-itests</artifactId>
-            <version>${codenvy.plugin.datasource.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.plugin-angularjs</groupId>
-            <artifactId>angularjs-itests</artifactId>
-            <version>${codenvy.plugin.angularjs.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.test-framework</groupId>
-            <artifactId>codenvy-test-framework</artifactId>
-            <version>${codenvy.test-framework.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.googlecode.grep4j</groupId>
             <artifactId>grep4j</artifactId>
@@ -66,6 +51,21 @@
             <groupId>org.concordion</groupId>
             <artifactId>concordion-extensions</artifactId>
             <version>${org.concordion.ext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>codenvy-test-framework</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>angularjs-itests</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>codenvy-ext-datasource-itests</artifactId>
+            <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.arquillian.extension</groupId>
@@ -109,7 +109,7 @@
                                 <configuration>
                                     <artifactItems>
                                         <artifactItem>
-                                            <groupId>com.codenvy.sdk</groupId>
+                                            <groupId>org.eclipse.che.sdk</groupId>
                                             <artifactId>assembly-sdk</artifactId>
                                             <version>${project.version}</version>
                                             <type>zip</type>

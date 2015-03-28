@@ -16,7 +16,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.codenvy.plugin-sdk</groupId>
+                <groupId>org.eclipse.che.sdk</groupId>
         <artifactId>codenvy-plugin-sdk-parent</artifactId>
         <version>$current_version$</version>
     </parent>
@@ -116,9 +116,9 @@
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-sdk</groupId>
+                    <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>codenvy-ide-env-dummy</artifactId>
-            <version>${codenvy.plugin-sdk.version}</version>
+            <version>${che.sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

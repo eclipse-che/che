@@ -25,6 +25,7 @@
     <name>Codenvy SDK Parent</name>
     <modules>
         <module>plugin-sdk</module>
+        <module>sdk</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/che-sdk.git</connection>
