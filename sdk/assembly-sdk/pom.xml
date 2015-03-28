@@ -33,34 +33,34 @@
             <version>${ch.qos.logback.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-datasource-server-war-sdk</artifactId>
             <version>${codenvy.plugin.datasource.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-git</artifactId>
             <version>${codenvy.plugin.git.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-github</artifactId>
             <version>${codenvy.plugin.git.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-ssh</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ide-core</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-docs-ui</artifactId>
             <version>${codenvy.api-docs-ui.version}</version>
             <type>war</type>
@@ -175,9 +175,9 @@
             <version>${org.slf4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-vfs</artifactId>
-            <version>${codenvy.platform-api.version}</version>
+            <version>${che.core.version}</version>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
@@ -263,7 +263,7 @@
                                     <destFileName>logback-classic.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.codenvy.ide</groupId>
+                                    <groupId>org.eclipse.che.core</groupId>
                                     <artifactId>codenvy-ssl-socket-factory</artifactId>
                                     <version>${codenvy.plugin.datasource.version}</version>
                                     <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>

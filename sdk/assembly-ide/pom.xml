@@ -27,89 +27,89 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-builder</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-git</artifactId>
             <version>${codenvy.plugin.git.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-github</artifactId>
             <version>${codenvy.plugin.git.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-web</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ide-core</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ide-jseditor</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-account</artifactId>
-            <version>${codenvy.platform-api.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-factory</artifactId>
-            <version>${codenvy.platform-api.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-user</artifactId>
-            <version>${codenvy.platform-api.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-account-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-analytics-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-factory-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-project-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-user-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-vfs-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-workspace-gwt-client</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api-gwt-client</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-gwt-client-commons</artifactId>
-            <version>${codenvy.platform-api-gwt-client.version}</version>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin-editor-codemirror</groupId>
@@ -122,14 +122,14 @@
             <version>${codenvy.plugin-editor-orion.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-java</groupId>
+           <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-ext-ant</artifactId>
-            <version>${codenvy.plugin-java.version}</version>
+            <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-java</groupId>
+           <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-ext-debugger-java</artifactId>
-            <version>${codenvy.plugin-java.version}</version>
+            <version>${che.plugins.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>tools</artifactId>
@@ -138,24 +138,24 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-java</groupId>
+           <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-ext-java</artifactId>
-            <version>${codenvy.plugin-java.version}</version>
+            <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-java</groupId>
+           <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-ext-maven</artifactId>
-            <version>${codenvy.plugin-java.version}</version>
+            <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-java</groupId>
+           <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-plugin-java-jseditor</artifactId>
-            <version>${codenvy.plugin-java.version}</version>
+            <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-runner</groupId>
+           <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-plugin-runner</artifactId>
-            <version>${codenvy.plugin.runner.version}</version>
+            <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>com.codenvy.plugin-sdk</groupId>
@@ -173,21 +173,21 @@
             <version>${com.google.gwt.gin.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ide-client</artifactId>
-            <version>${codenvy.ide.version}</version>
+            <version>${che.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-project</artifactId>
-            <version>${codenvy.platform-api.version}</version>
+            <version>${che.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.platform-api</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-vfs</artifactId>
-            <version>${codenvy.platform-api.version}</version>
+            <version>${che.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

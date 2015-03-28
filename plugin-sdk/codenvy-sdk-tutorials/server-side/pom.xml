@@ -15,8 +15,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>codenvy-plugin-sdk-parent</artifactId>
-        <groupId>com.codenvy.plugin-sdk</groupId>
-        <version>1.9.0-SNAPSHOT</version>
+        <groupId>org.eclipse.che.sdk</groupId>
+        <version>1.0.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>server-side-tutorial</artifactId>
@@ -24,14 +24,14 @@
     <name>Codenvy Tutorial :: Server Side</name>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
-            <artifactId>codenvy-ide-api</artifactId>
-            <version>${codenvy.ide.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>
             <version>${com.google.gwt.gin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>codenvy-ide-api</artifactId>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>

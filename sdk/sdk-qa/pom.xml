@@ -26,7 +26,7 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.ide</groupId>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-datasource-itests</artifactId>
             <version>${codenvy.plugin.datasource.version}</version>
         </dependency>
