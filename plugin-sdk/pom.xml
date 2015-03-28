@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>maven-depmgt-pom</artifactId>
+        <groupId>com.codenvy</groupId>
+        <version>1.20.0-SNAPSHOT</version>
+    </parent>
+    <groupId>com.codenvy.plugin-sdk</groupId>
+    <artifactId>codenvy-plugin-sdk-parent</artifactId>
+    <version>1.9.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Codenvy :: Plugin SDK</name>
+    <modules>
+        <module>codenvy-ext-plugins</module>
+        <module>codenvy-ide-env-local</module>
+        <module>codenvy-sdk-api-war</module>
+        <module>codenvy-runner-sdk</module>
+        <module>codenvy-sdk-tutorials/action-api</module>
+        <module>codenvy-sdk-tutorials/analytics-event-logger-ext</module>
+        <module>codenvy-sdk-tutorials/theme-api</module>
+        <module>codenvy-sdk-tutorials/parts-api</module>
+        <module>codenvy-sdk-tutorials/notification-api</module>
+        <module>codenvy-sdk-tutorials/editor-api</module>
+        <module>codenvy-sdk-tutorials/empty-ext</module>
+        <module>codenvy-sdk-tutorials/gin</module>
+        <module>codenvy-sdk-tutorials/gist-ext</module>
+        <module>codenvy-sdk-tutorials/helloworld-ext</module>
+        <module>codenvy-sdk-tutorials/icons-regitry-api</module>
+        <module>codenvy-sdk-tutorials/wysiwyg-editor</module>
+        <module>codenvy-sdk-tutorials/server-side</module>
+        <module>codenvy-sdk-tools</module>
+    </modules>
+    <scm>
+        <connection>scm:git:git@github.com:codenvy/plugin-sdk.git</connection>
+        <developerConnection>scm:git:git@github.com:codenvy/plugin-sdk.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    <properties>
+        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
+        <gwt.test.skip>true</gwt.test.skip>
+    </properties>
+    <repositories>
+        <repository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.codenvy.platform-api</groupId>
+                    <artifactId>codenvy-dto-maven-plugin</artifactId>
+                    <version>${codenvy.platform-api.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

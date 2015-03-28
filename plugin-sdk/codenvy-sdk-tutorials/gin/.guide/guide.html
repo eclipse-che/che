@@ -1,0 +1,565 @@
+<div>
+<ul>
+    <li><a href="#overview">Gin Overview</a></li>
+    <li><a href="#what-is-gin">What Is GIN?</a></li>
+    <li><a href="#version">Gin Version</a></li>
+    <li><a href="#basics">Gin Basic Principles</a></li>
+    <li><a href="#add-module">Add a GIN Module</a></li>
+    <li><a href="#inject-annotation">Using an Inject Annotation</a></li>
+    <li><a href="#bind">How to Bind an Interface With its Implementation</a></li>
+    <li><a href="#singleton">Example of Creating a Singleton Object</a></li>
+    <li><a href="#singleton-annotation">Using a Singleton Annotation</a></li>
+    <li><a href="#singleton-gin-module">Creating a Singleton Object Through Configuration of a Gin Module</a></li>
+    <li><a href="#class-provider">Class Providers</a></li>
+    <li><a href="#provider">Using com.google.inject.Provider</a></li>
+    <li><a href="#asyncprovider">Using com.google.gwt.inject.client.AsyncProvider</a></li>
+    <li><a href="#method-provider">Method Providers</a></li>
+    <li><a href="#named-annotation">Method Providers With Named Annotation</a></li>
+    <li><a href="#factories">Factories</a></li>
+    <li><a href="#create-object">Create an Object</a></li>
+    <li><a href="#create-factory">Create a Factory</a></li>
+    <li><a href="#bind-together">Bind All Elements Together</a></li>
+    <li><a href="#use-factory">Use a Factory</a></li>
+    <li><a href="#interface-factory">Create Implementation of an Interface Through a Factory</a></li>
+    <li><a href="#custom-annotation">Using Custom Annotations Instead of Named Annotations</a></li>
+    <li><a href="#create-annotation">Create a Custom Annotation</a></li>
+    <li><a href="#example1">Using Custom Annotation: Example 1</a></li>
+    <li><a href="#example2">Using Custom Annotation: Example 2</a></li>
+</ul>
+
+
+<h1 id="overview">Gin Usage Overview</h1>
+
+<h2 id="what-is-gin">What Is GIN?</h2>
+
+<a href="https://code.google.com/p/google-gin/" target="_blank">GIN</a> (GWT INjection) brings automatic dependency injection to Google Web
+Toolkit client-side code. GIN is built on top of Guice and uses (a subset of) Guice's binding language. Here's the link to
+<a href="https://code.google.com/p/google-gin/wiki/GinTutorial" target="_blank">GIN Wiki</a> and
+<a href="https://code.google.com/p/google-gin/wiki/GinFaq" target="_blank">FAQ</a>.
+
+<h2 id="version">Gin Version and Project Configuration</h2>
+
+Currently, we use Gin 2.1.1. A dependency should be added to pom.xml as:
+
+<pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;com.google.gwt.inject&lt;/groupId&gt;
+    &lt;artifactId&gt;gin&lt;/artifactId&gt;
+    &lt;version&gt;2.1.1&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
+
+Also, Gin inject inherit reference should be added to a GWT module:
+<pre>&lt;inherits name="com.google.gwt.inject.Inject"/&gt;</pre>
+
+Reference to a GWT.xml: <b>/src/main/resources/com/codenvy/ide/tutorial/gin/GinTutorial.gwt.xml</b>
+
+<h2 id="basics">Basic Gin Principles</h2>
+
+When Gin is used to create an instance of an object, it runs the following code inside:
+<pre>GWT.create(MyClass.class);</pre>
+where <b>MyClass</b> is a class that you want to inject.
+
+Here's an example from <a href="http://www.gwtproject.org/doc/latest/DevGuideClientBundle.html" target="_blank">GWT Project</a>:
+
+<pre>
+public interface MyResources extends ClientBundle {
+  public static final MyResources INSTANCE =  GWT.create(MyResources.class);
+
+  @Source("my.css")
+  public CssResource css();
+
+  @Source("config.xml")
+  public TextResource initialConfiguration();
+
+  @Source("manual.pdf")
+  public DataResource ownersManual();
+}
+</pre>
+
+Here Gin is not used. The following line of code
+<pre>public static final MyResources INSTANCE =  GWT.create(MyResources.class);</pre>
+would appear unnecessary in case of Gin usage where we would inject MyResources directly:
+<pre>
+  @Inject
+  public MyClass(MyResources resource)
+</pre>
+
+This also concerns other classes, where GWT.create is used. Gin will do this job behind the scenes.
+
+<h1 id="add-module">Add Own Gin Module</h1>
+
+To create own Gin module, one should extend the following class <b>com.google.gwt.inject.client.AbstractGinModule</b>
+
+Next, lets override <b>protected void configure()</b> method. This method will contain configuration and bindings of interfaces and
+implementations. So, far, this is a standard procedure. However, if you have created a Gin module and want it to be added to our
+implementation of Ginjector (com.google.gwt.inject.client.Ginjector), we should use this annotation:
+<pre>@ExtensionGinModule</pre>
+
+Full code is available in class -
+<pre>com.codenvy.ide.api.extension.ExtensionGinModule</pre>
+
+This is how it is added to Ginjector:
+
+<pre>
+@GinModules({
+...
+com.codenvy.ide.tutorial.gin.inject.GinModule.class,
+...
+})
+</pre>
+
+Once the annotation is added, all the bindings will take force.
+
+You can look at example of our Gin module at <b>com.codenvy.ide.tutorial.gin.inject.GinModule</b>
+
+<h1 id="inject-annotation">Using an Inject Annotation</h1>
+
+We use inject annotation <b>com.google.inject.Inject</b> that can be applied to class fields, constructors and methods. In our example, we
+use it with a constructor:
+
+<pre>
+    @Inject
+    public MyClass(MyInterface myInterface) {
+        this.myInterface = myInterface;
+    }
+</pre>
+
+In the above example, we have added an inject annotation which creates an instance of <b>MyInterface</b> that will be passed over to a
+constructor. Gin will automatically inject all pre-defined parameters (we have one parameter in our example (myInterface), but you can use
+as many as you need).
+
+Full code can be browsed at <b>com.codenvy.ide.tutorial.gin.sample.MyClass</b>
+
+No additional configuration and/or code is necessary when only one class needs to be injected.
+
+You can find more info on injecting annotations for classes, fields, constructors and methods in
+<a href="https://code.google.com/p/google-guice/wiki/Injections" target="_blank">Guice docs</a>.
+
+<h1 id="bind">How to Bind an Interface With its Implementation</h1>
+
+In the below example we have an interface and its implementation (just sample examples that are not related to IDE3):
+<pre>com.codenvy.ide.tutorial.gin.sample.MyInterface</pre>
+and
+<pre>com.codenvy.ide.tutorial.gin.sample.MyImplementation</pre>
+
+<b>MyImplementation</b> implements MyInterface. Lets bind them together. Well do this in a Gin module (it is only necessary in more
+complex cases when a few classes need to be bound):
+<pre>bind(MyInterface.class).to(MyImplementation.class);</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.inject.GinModule</b>
+
+What have we just done? We have made <b>myInterface</b> parameter an actual instance for <b>MyImplementation</b>. It also makes it possible
+to hide an actually used implementation:
+
+<pre>
+    @Inject
+    public MyClass(MyInterface myInterface) {
+        this.myInterface = myInterface;
+    }
+</pre>
+
+Full code - <b>com.codenvy.ide.tutorial.gin.sample.MyClass</b>
+
+<h1 id="singleton">Example of Creating a Singleton Object</h1>
+
+What is making an object as a singleton? This means that an instance of this object will be created just once, and any attempts to create it
+again will return the initially created instance. So, there can be just one instance of a given object. Heres how we do this:
+
+<h2 id="singleton-annotation">Using a Singleton Annotation</h2>
+
+To create an object as a Singleton using an annotation, let's add this annotation before we declare a class:
+
+<pre>
+@Singleton
+public class MySingletonClass {
+</pre>
+
+Full code - <b>com.codenvy.ide.tutorial.gin.singleton.MySingletonClass</b>
+
+The rest of the code does not differ from a non-singleton class. In other words, we should follow all recommendations as to injecting
+annotations.
+
+<h2 id="singleton-gin-module">Creating a Singleton Object Through Configuration of a Gin Module</h2>
+
+This usecase looks like binding interface with its implementation that we have focused on earlier in this Tutorial. The difference is that
+now we bind classes, and as a result, a Singleton instance is returned. Here are the classes:
+<pre>com.codenvy.ide.tutorial.gin.singleton.MySingletonInterface</pre>
+and
+<pre>com.codenvy.ide.tutorial.gin.singleton.MySingletonImplementation</pre>
+
+These classes have content identical to code in classes described in <strong>How to Bind an Interface With its Implementation</strong>:
+<pre>bind(MySingletonInterface.class).to(MySingletonImplementation.class).in(Singleton.class);</pre>
+
+And this is how we get this Singleton instance:
+<pre>
+    @Inject
+    public MySingletonClass(MySingletonInterface mySingletonInterface) {
+        this.mySingletonInterface = mySingletonInterface;
+    }
+</pre>
+
+Full code - <b>com.codenvy.ide.tutorial.gin.singleton.MySingletonClass</b>
+
+<h1 id="class-provider">Class Providers</h1>
+
+Providers represent factory patterns that make it possible to create instances of particular objects. Also, providers make it possible to
+create 'lazy instance objects' - i.e. create objects only when they are required.
+
+<h2 id="provider">Using com.google.inject.Provider</h2>
+
+If we need to use a provider for myClass, this is how we do it:
+
+<pre>
+    @Inject
+    public GinExtension(...
+                        Provider&lt;MyClass&gt; myClassProvider,
+                        ...)
+</pre>
+
+So, we've created a provider and specified which class we need it for.
+
+So, we have now got <b>myClassProvider</b>. Now, we should get an instance of <b>myClass</b>:
+<pre>MyClass myClass1 = myClassProvider.get();</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.GinExtension</b>
+
+<h2 id="asyncprovider">Using com.google.gwt.inject.client.AsyncProvider</h2>
+
+When using <b>com.google.inject.Provider</b>, JavaScript code is generated when compiling a project. AsyncProvider is compiled into a
+JavaScript but it is not loaded immediately. AsyncProvider represents <b>GWT.runAsync</b>. JavaScript will be loaded the first time it is
+required. This leads to faster loading of IDE. You can find more details on AsyncProvider in
+<a href="http://www.gwtproject.org/doc/latest/DevGuideCodeSplitting.html" target="_blank">GWT docs</a>.
+<ul>
+    <li>First, we should get an <b>AsyncProvider</b>:
+    <pre>
+        @Inject
+        public GinExtension(...AsyncProvider&lt;MyClass&gt; myClassAsyncProvider...) {
+    </pre>
+    </li>
+
+    <li>Now its time to create an object through a Provider:
+    <pre>
+        myClassAsyncProvider.get(new AsyncCallback&lt;MyClass&gt;() {
+            @Override
+            public void onSuccess(MyClass result) {
+                result.doSomething();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                console.print(caught.getMessage());
+            }
+        });
+    </pre>
+
+        Full code: <b>com.codenvy.ide.tutorial.gin.GinExtension</b></li>
+</ul>
+
+IDE3 team recommends using AsyncProvider to decrease amount of JavaScript to be initially loaded.
+
+<h1 id="method-provider">Method Providers</h1>
+
+To create a method provider, we should first create a method inside Gin module:
+
+<pre>
+    @Provides
+    @Singleton
+    protected String provideStringValue(ConsolePart console) {
+        console.print("initialize string value in gin module");
+        return "my string value from provider method";
+    }
+</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.inject.GinModule</b>
+
+So, here we have created <b>provideStringValue</b> and used <b>@Provides</b> (we use com.google.inject.Provides) annotation before it. <b>@Singleton</b>
+is not mandatory, so we voluntarily used it in our example.
+
+Now we pass over necessary objects to this method. In our example, we pass over console that prints out a message. This is a simple example.
+You can use other objects for more complex usecases.
+
+The parameter type, which this method returns, corresponds to the type of a class that you need to create. This is how we have used this
+method:
+
+<pre>
+    @Inject
+    public MyClassWithProvideParam(ConsolePart console, String someText) {
+        this.console = console;
+        this.someText = someText;
+    }
+</pre>
+
+Here, <b>someText</b> is created with the abovementioned provider. So, anytime we need to use <b>String someText</b>,
+<b>provideStringValue</b> method with <b>@Provider</b> is automatically called, and the method code is executed.
+
+Full code: <b>com.codenvy.ide.tutorial.gin.sample.MyClassWithProvideParam</b>
+
+Read more on method providers at <a href="https://code.google.com/p/google-guice/wiki/ProvidesMethods" target="_blank">https://code.google.com/p/google-guice/wiki/ProvidesMethods</a>
+
+<h2 id="named-annotation">Method Providers With Named Annotation</h2>
+
+The drawback of provider methods is that if you have created a method for a string (like in the above example) but you need to return its
+different instances, you will get just one instance for this string anyway. To fix this we will use a named annotation. So, we will be able
+to create several method providers that will create various instances of one object type:
+
+<pre>
+    @Provides
+    @Named("myString")
+    @Singleton
+    protected String provideMyString() {
+        return "my string value from named annotation";
+    }
+</pre>
+
+In the above example we have used a named annotation for a particular string - <b>@Named("myString")</b>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.inject.GinModule</b>
+
+This is how we've used this method:
+<pre>
+    @Inject
+    public MyClassWithNamedParam(ConsolePart console, @Named("myString") String someText) {
+        this.console = console;
+        this.someText = someText;
+    }
+</pre>
+
+In this case, <b>someText</b> has a named annotation <b>myString</b> which is found in <b>GinModule</b> class, where <b>provideMyString</b>
+method is executed through a Provider.
+
+Full code: <b>com.codenvy.ide.tutorial.gin.named.MyClassWithNamedParam</b>
+
+<h1 id="factories">Factories</h1>
+
+The above-mentioned examples are not quite helpful when we need to create instances of objects where a constructor contains specific objects
+that can differ depending on the instance.
+
+When were talking about inject of an object, we inject a particular object in the above examples. It is a new instance for a new object. In
+case of provided method and named annotations, we use a particular implementation.
+
+On the other hand, a Factory makes it possible to inject a new object anytime an instance is created. At that, Factories makes it possible
+to inject more than 1 object.
+
+Factories are also useful to adapt classes that Gin is not aware of to be used inside Gin.
+
+<h2 id="create-object">Create an Object</h2>
+
+First, we have a constructor:
+
+<pre>
+    @Inject
+    public MyFactoryClass(ConsolePart console, @Assisted String someText) {
+        this.console = console;
+        this.someText = someText;
+    }
+</pre>
+
+<b>@Assisted</b> annotation (com.google.inject.assistedinject.Assisted) makes it possible to take an object from the Factory and inject it
+into the constructor. We can have more than one parameter (someText, someText1, someText2 etc)
+
+Full code: <b>com.codenvy.ide.tutorial.gin.factory.MyFactoryClass</b>
+
+When using 2 or more methods parameters of the same type, <b>@Assisted</b> annotation will be a named one. Heres an example from
+<a href="http://google-gin.googlecode.com/svn/trunk/javadoc/com/google/gwt/inject/client/assistedinject/GinFactoryModuleBuilder.html"
+   target="_blank">Google JavaDoc</a>:
+
+<pre>
+public interface PaymentFactory {
+   Payment create(
+       @Assisted("startDate") Date startDate,
+       @Assisted("dueDate") Date dueDate,
+       Money amount);
+ }
+</pre>
+
+<h2 id="create-factory">Create a Factory</h2>
+
+Now we need to create a Factory that in its turn will create an object:
+
+<pre>
+public interface MyFactory {
+    ...
+    MyFactoryClass createMyFactoryClass(String someText);
+    ...
+}
+</pre>
+Full code: <b>com.codenvy.ide.tutorial.gin.factory.MyFactory</b>
+
+A few words on what happens here. <b>MyFactoryClass</b> is an object that we have just created. <b>createMyFactoryClass</b> has the
+following parameter: String someText that has been previously marked with @Assisted annotation. If there are several parameters, they should
+be used in the exact order as specified in the constructor.
+
+<h2 id="bind-together">Bind All Elements Together</h2>
+Here, Gin injects the factory to initialize it for use. We cant use a factory until the injector has been initialized.
+
+<pre>install(new GinFactoryModuleBuilder().build(MyFactory.class));</pre>
+
+<h2 id="use-factory">Use a Factory</h2>
+
+Now, lets inject a Factory:
+
+<pre>
+    @Inject
+    public GinExtension(...
+                        MyFactory myFactory,
+                        ...)
+</pre>
+
+Heres an example how objects have been created:
+
+<pre>
+        MyFactoryClass myFactoryClass1 = myFactory.createMyFactoryClass("my factory class 1");
+        myFactoryClass1.doSomething();
+        MyFactoryClass myFactoryClass2 = myFactory.createMyFactoryClass("my factory class 2");
+        myFactoryClass2.doSomething();
+</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.GinExtension</b>
+
+<h2 id="interface-factory">Create Implementation of an Interface Through a Factory</h2>
+
+Here, we have two classes: an interface and its implementation:
+<pre>com.codenvy.ide.tutorial.gin.factory.assited.SomeInterface</pre>
+and
+<pre>com.codenvy.ide.tutorial.gin.factory.assited.SomeImplementationWithAssistedParam</pre>
+An implementation class has got the following code:
+<pre>
+    @Inject
+    public SomeImplementationWithAssistedParam(ConsolePart console, @Assisted String text) {
+        this.console = console;
+        this.text = text;
+    }
+</pre>
+
+And this is how we create a Factory:
+<pre>
+public interface MyFactory {
+    ...
+    SomeInterface createSomeInterface(String text);
+    ...
+}
+</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.factory.MyFactory</b>
+
+In such a way, we create an implementation through a Factory.
+
+Now, we have to initialize Factory and bind an interface and its implementation in a GinModule:
+
+<pre>install(new GinFactoryModuleBuilder().implement(SomeInterface.class, SomeImplementationWithAssistedParam.class)
+                                             .build(MyFactory.class));</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.inject.GinModule</b>
+
+<b>MyFactory</b> class can contain many methods that return various instances of objects. More complex usecases can be found in
+<a href="http://google-gin.googlecode.com/svn/trunk/javadoc/com/google/gwt/inject/client/assistedinject/GinFactoryModuleBuilder.html"
+   target="_blank">Gin Tutorial</a>.
+We have given two examples for Factory initialization. You will need just one of course. These are just two different examples.
+
+<h2 id="custom-annotation">Using Custom Annotations Instead of Named Annotations</h2>
+
+Custom annotations is an alternative for named annotations. They have got the same functionality - inject an object - but instead of using a
+named annotation well use a custom annotation. This options helps make code more readable. When using a named annotation, you should know
+the exact name to receive the exact object. When using a custom annotation, you have this annotation in API (in our case).
+
+<h3 id="create-annotation">Create a Custom Annotation</h3>
+
+Lets start with creating a custom annotation:
+
+<pre>
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE})
+@BindingAnnotation
+public @interface SimpleClass {
+}
+</pre>
+Full code: <b>com.codenvy.ide.tutorial.gin.annotation.SimpleClass</b>
+
+The first two annotations are typical for Java and you can find detailed info on them in Java tutorials. The next annotation is most
+important - <b>@BindingAnnotation</b> (com.google.inject.BindingAnnotation) which tells Gin that this is a binding annotation. You can find
+more info at <a href="https://code.google.com/p/google-guice/wiki/BindingAnnotations" target="_blank">https://code.google.com/p/google-guice/wiki/BindingAnnotations</a>
+
+<h3 id="example1">Using Custom Annotation: Example 1</h3>
+
+We have created an interface <b>com.codenvy.ide.tutorial.gin.annotation.SimpleInterface</b> and its implementation <b>com.codenvy.ide.tutorial.gin.annotation.SimpleImplementation</b>
+
+Let's imagine we have several implementations for this interface. However, we know nothing about these implementation. We know they do
+exist, but we are not aware of any additional details. The other usecase is that developers may be reluctant to show off their
+implementations. So, we hide our implementation and create an annotation to get an instance of our implementation.
+
+We need to bind everything together:
+<pre>bind(SimpleInterface.class).annotatedWith(SimpleClass.class).to(SimpleImplementation.class).in(Singleton.class);</pre>
+
+Here, a <b>SimpleInterface</b> marked with an annotation is bound to <b>SimpleImplementation</b> created as Singleton. In other words, a new
+class is created as a Singleton, and a real implementation is not shown.
+
+Having bound an interface to implementation, we need to get an object:
+<pre>
+    @Inject
+    public GinExtension(...
+                        @SimpleClass SimpleInterface simpleInterface) {
+    simpleInterface.doSomething();
+</pre>
+Full code: <b>com.codenvy.ide.tutorial.gin.GinExtension</b>
+
+Here, we have got <b>SimpleInterface</b> which is an instance of <b>SimpleImplementation</b>.
+
+<h3 id="example2">Using Custom Annotation: Example 2</h3>
+
+In this example we will have <b>com.codenvy.ide.tutorial.gin.annotation.MyString</b> class and a provider that will create an instance of
+MyString.
+
+MyString class will declare the following annotations:
+<pre>
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE})
+@BindingAnnotation
+public @interface MyString {
+}
+</pre>
+
+And heres a provider that creates an instance of MyString:
+
+<pre>
+public class MyStringProvider implements Provider&lt;String&gt; {
+
+    @Inject
+    public MyStringProvider() {
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String get() {
+    return "my string value from MyStringProvider class";
+    }
+}
+</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.annotation.MyStringProvider</b>
+
+Now, we bind everything together in a GinModule:
+<pre>bind(String.class).annotatedWith(MyString.class).toProvider(MyStringProvider.class).in(Singleton.class);</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.gin.inject.GinModule</b>
+
+A few words on what happens here. String type parameter annotated with MyString is bound to a provider that creates an instance of this
+string as a Singleton.
+
+Now we should get this parameter:
+
+<pre>
+    @Inject
+    public MyClassWithAnnotationParam(ConsolePart console, @MyString String text) {
+        this.console = console;
+        this.text = text;
+    }
+</pre>
+Here we get a variable <b>text</b> which is returned by MyStringProvider.
+
+Full code: <b>com.codenvy.ide.tutorial.gin.annotation.MyClassWithAnnotationParam</b>
+
+This may look a bit complex, but this is the only solution here since Gin does not support toInstance, like in Guice. Heres an example from
+<a href="https://code.google.com/p/google-guice/wiki/InstanceBindings" target="_blank">Guice</a>:
+<pre>bind(String.class).annotatedWith(Names.named("JDBC URL")).toInstance("jdbc:mysql://localhost/pizza");</pre>
+</div>

@@ -1,0 +1,126 @@
+﻿<ul>
+    <li><a href="#ways-to-add-editor">Ways to Add Editor</a></li>
+    <li><a href="#create-editor">Create an Editor</a></li>
+    <li><a href="#add-toolbar">Adding WYSIWYG Toolbar</a></li>
+    <li><a href="#bind-editor">Binding Editor With a Particular File Type</a></li>
+</ul>
+
+In this tutorial we will use a standard GWT component <a href="http://www.gwtproject.org/javadoc/latest/com/google/gwt/user/client/ui/RichTextArea.html" target="_blank">RichTextArea</a> as a WYSIWYG editor for HTML files that allows complex styling and formatting.
+
+<h1 id="ways-to-add-editor">Ways to Add an Editor</h1>
+
+There are two ways to add an editor:
+
+<ul>
+    <li><b>implement</b> EditorPartPresenter</li>
+
+    or
+
+    <li><b>extend</b> AbstractEditorPresenter that has partially implemented a few methods. Both classes are provided in the API, although the second option is recommended by IDE3 team as simpler and more convenient. This tutorial will follow it as well.</li></ul>
+
+<h1 id="create-editor">Create an Editor</h1>
+
+The editor actually starts working when calling init method that gets a file to be opened in an editor. The init method that has been already implemented in <b>AbstractEditorPresenter</b> which calls an abstract method - <b>initializeEditor</b>. Our goal is to implement it:
+
+<pre>
+@Override
+    protected void initializeEditor() {
+        //create editor
+        textArea = new RichTextArea();
+
+        //use or load content of the file
+        if(input.getFile().getContent() == null){
+            input.getFile().getProject().getContent(input.getFile(), new AsyncCallback<File>() {
+    @Override
+    public void onFailure(Throwable caught) {
+    Log.error(WysiwygEditor.class, caught);
+    }
+
+    @Override
+    public void onSuccess(File result) {
+    textArea.setHTML(input.getFile().getContent());
+    }
+    });
+    }
+    else{
+    textArea.setHTML(input.getFile().getContent());
+    }
+    }
+</pre>
+What happens in the above code is:
+<ul>
+    <li>First we actually create an editor:
+
+<pre>
+textArea = new RichTextArea();</pre></li>
+
+    <li>Then, it is time to check if the file that needs to be opened has content. If it has content, we'll paste it into the editor.</li>
+</ul>
+Full code: <b>com.codenvy.ide.tutorial.wysiwyg.editor.WysiwygEditor</b>
+
+<h1 id="add-toolbar">Displaying Editor in IDE</h1>
+Having done that, we should now specify how an editor will be displayed in IDE. Here we rely on <b>go</b> method comes from Interface Presenter that is common for all IDE UI components.
+
+<pre>
+public void go(AcceptsOneWidget container) {
+        textArea.setSize("100%", "100%");
+        RichTextToolbar toolbar = new RichTextToolbar(textArea);
+
+        DockLayoutPanel panel = new DockLayoutPanel(Style.Unit.PX);
+        panel.setWidth("100%");
+        panel.setHeight("100%");
+        panel.addNorth(toolbar, 60);
+        panel.add(textArea);
+
+        // Add the components to a panel
+        container.setWidget(panel);
+    }
+</pre>
+
+Here we've set editor size (100% for width and height), and then created a RichTextToolbar which is a custom component that represents rich text editor buttons (changing background color, font color, text layout, adding bullet lists etc).
+
+With <b>DockLayoutPanel</b> (class provided by RichTextArea) we group this toolbar to ensure it is always located on the top (60px stripe on the top of the editor) and the rest area is reserved for editor itself.
+
+<h1 id="get-instance-editor">Getting Instance of an Editor</h1>
+
+Editor provider is used to create a new instance on an editor. To do that we should implement EditorProvider class. It is important that Editor Provider always returns a new instance.
+
+<pre>
+ public EditorPartPresenter getEditor() {
+        return new WysiwygEditor();
+    }
+</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.wysiwyg.WysiwygEditorProvider</b>
+
+<h1 id="bind-editor">Binding Editor With a Particular File Type</h1>
+
+Now we need to make sure IDE knows what exact editor to use when opening particular files types. In other words, we should ensure all HTML files are opened with WYSIWYG editor.
+
+<pre>
+@Inject
+    public WysiwygExtension(ResourceProvider resourceProvider, WysiwygEditorProvider editorProvider, EditorRegistry editorRegistry) {
+
+        FileType htmlFileType = new FileType(null, "text/html", "html");
+        resourceProvider.registerFileType(htmlFileType);
+        editorRegistry.register(htmlFileType, editorProvider);
+    }
+
+</pre>
+
+Full code: <b>com.codenvy.ide.tutorial.wysiwyg.WysiwygExtension</b>
+
+A few words on what happens in this code:
+<ul>
+
+    <li>Register a new file type (can be skipped if you already have it)
+
+        <pre>new FileType(null, "text/html", "html")</pre>
+
+        Instead of <b>null</b> an icon should be used (it’ll be displayed in the project tree and file tab in the editor)</li>
+
+    <li>bind this file type with editor provider
+
+<pre>
+  editorRegistry.register(htmlFileType, editorProvider);</pre></li>
+</ul>

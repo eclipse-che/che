@@ -1,0 +1,70 @@
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <p>
+            This an Action API how-to. You will find
+            <strong>Actions menu</strong>
+            on the toolbar above. There are also new icons on the toolbar, below Action menu. Finally, action items have been added to
+            context menu (right click any file icon in the Project Explorer). There are two groups of action items:
+        </p>
+        <p>
+            <strong>Change visibility and availability:</strong>
+        </p>
+        <p>
+            As the name suggests, it changes visibility and availability of items. Pressing this item will make one item invisible (it
+            disappears) and one disabled (it becomes grayed out)
+        </p>
+        <p>
+            When
+            <strong>Change visibility and availability</strong>
+            is called, the following code is executed:
+        </p>
+        <pre>
+            SHOW_ITEM = !SHOW_ITEM;
+        </pre>
+        <p>
+            You can view full code com.codenvy.ide.tutorial.action.action.ChangeItemAction.
+        </p>
+        <p>
+            <strong>Visible Item:</strong>
+        </p>
+        <p>
+            Pressing this icon will initiate an action - info box with item description. When
+            <strong>Visible item</strong>
+            is called, the following code is executed:
+        </p>
+        <pre>
+            Window.alert("This is visible item!");
+        </pre>
+        <p>
+            You can view full code com.codenvy.ide.tutorial.action.action.VisibleAction.
+        </p>
+        <p>
+            <strong>Enable Item:</strong>
+        </p>
+        <p>
+            Identical to Visible item. When
+            <strong>Enable item</strong>
+            is called, the following code is executed:
+        </p>
+        <pre>
+            Window.alert("This is enable item!");
+        </pre>
+        <p>
+            You can view full code com.codenvy.ide.tutorial.action.action.EnableAction.
+        </p>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

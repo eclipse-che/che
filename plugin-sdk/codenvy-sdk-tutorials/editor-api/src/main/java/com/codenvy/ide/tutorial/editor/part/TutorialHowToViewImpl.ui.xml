@@ -1,0 +1,31 @@
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <p>Tutorial How-To</p>
+        <ul>
+            <li>Open any project in the Project Explorer</li>
+            <li>Create a new resource in any project folder at
+                <b>File>New>Other</b>
+            </li>
+            <li>Choose
+                <b>Grrovy File</b>
+                as a resource type
+            </li>
+        </ul>
+
+        <p>A Groovy file will open. You can see that the editor has applied syntax highlighting for this particular file type.</p>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

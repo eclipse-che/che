@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The icon can be used freely in both personal and commercial projects with no attribution required, but always appreciated.
+You may NOT sub-license, resell, rent, redistribute or otherwise transfer the icon without express written permission from iconmonstr.com -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="512px" height="512px" viewBox="0 0 512 512" enable-background="new 0 0 512 512">
+    <path id="grid-small-view-icon" d="M304.564,305.068h-98.136v-98.136h98.136V305.068z M206.429,50v98.075h98.136V50H206.429z
+	 M50,305.068h97.571v-98.136H50V305.068z M363.422,148.075H462V50h-98.578V148.075z M304.564,462v-98.074h-98.136V462H304.564z
+	 M147.571,363.926H50V462h97.571V363.926z M462,206.933h-98.578v98.136H462V206.933z M363.422,363.926V462H462v-98.074H363.422z
+	 M147.571,148.075V50H50v98.075H147.571z"/>
+</svg>

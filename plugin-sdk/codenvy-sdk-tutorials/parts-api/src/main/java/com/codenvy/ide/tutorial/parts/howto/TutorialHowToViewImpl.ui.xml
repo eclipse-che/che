@@ -1,0 +1,23 @@
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <p>Tutorial How-To</p>
+        <p>
+            You can see various parts added to different areas of a workspace (on the left and right of the editor, above the editor and
+            under it). This Tutorial how-to is a part itself (tab opened in the editor). Parts can be opened and minimized. We have inserted
+            Click Me buttons to demonstrate that parts can perform tasks and have some business logic.
+        </p>
+    </g:HTMLPanel>
+</ui:UiBinder>

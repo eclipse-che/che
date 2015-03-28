@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>codenvy-sdk-parent</artifactId>
+        <groupId>com.codenvy.sdk</groupId>
+        <version>3.9.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>sdk-qa</artifactId>
+    <name>Codenvy SDK :: QA</name>
+    <properties>
+        <codenvy.ide.path>${project.build.directory}/tomcat-ide</codenvy.ide.path>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.codenvy.ide</groupId>
+            <artifactId>codenvy-ext-datasource-itests</artifactId>
+            <version>${codenvy.plugin.datasource.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.plugin-angularjs</groupId>
+            <artifactId>angularjs-itests</artifactId>
+            <version>${codenvy.plugin.angularjs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.codenvy.test-framework</groupId>
+            <artifactId>codenvy-test-framework</artifactId>
+            <version>${codenvy.test-framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.grep4j</groupId>
+            <artifactId>grep4j</artifactId>
+            <version>${com.googlecode.grep4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>lombok</artifactId>
+                    <groupId>org.projectlombok</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.concordion</groupId>
+            <artifactId>concordion</artifactId>
+            <version>${org.concordion.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.concordion</groupId>
+            <artifactId>concordion-extensions</artifactId>
+            <version>${org.concordion.ext.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.arquillian.extension</groupId>
+            <artifactId>arquillian-phantom-driver</artifactId>
+            <version>${org.jboss.arquillian.version}</version>
+        </dependency>
+        <dependency>
+            <!-- Use JDK8 compliant -->
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${org.projectlombok.lombok.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>itests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.8</version>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.codenvy.sdk</groupId>
+                                            <artifactId>assembly-sdk</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${codenvy.ide.path}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.12.2</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/AbstractIntegrationTest.java</exclude>
+                            </excludes>
+                            <systemProperties>
+                                <property>
+                                    <name>concordion.output.dir</name>
+                                    <value>${project.build.directory}/concordion</value>
+                                </property>
+                                <property>
+                                    <name>codenvy.ide.path</name>
+                                    <value>${codenvy.ide.path}</value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>start-codenvy-ide</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <replace file="${codenvy.ide.path}/bin/setenv.sh" token="8080" value="8280" />
+                                        <replace file="${codenvy.ide.path}/bin/che.sh" token="CATALINA_PID" value="CODENVY_PID" />
+                                        <replace file="${codenvy.ide.path}/conf/server.xml" token="8080" value="8280" />
+                                        <replace file="${codenvy.ide.path}/conf/server.xml" token="8009" value="8209" />
+                                        <replace file="${codenvy.ide.path}/conf/server.xml" token="8005" value="8205" />
+                                        <exec executable="sh" spawn="false">
+                                            <arg value="${codenvy.ide.path}/bin/che.sh" />
+                                            <arg value="start" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-codenvy-ide</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="sh" spawn="false">
+                                            <arg value="${codenvy.ide.path}/bin/che.sh" />
+                                            <arg value="stop" />
+                                        </exec>
+                                        <replace file="${codenvy.ide.path}/bin/che.sh" token="CODENVY_PID" value="CATALINA_PID" />
+                                        <replace file="${codenvy.ide.path}/bin/setenv.sh" token="8280" value="8080" />
+                                        <replace file="${codenvy.ide.path}/conf/server.xml" token="8280" value="8080" />
+                                        <replace file="${codenvy.ide.path}/conf/server.xml" token="8209" value="8009" />
+                                        <replace file="${codenvy.ide.path}/conf/server.xml" token="8205" value="8005" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,362 @@
+[
+    {
+        "displayName": "JSP",
+        "category": "Samples - Hello World",
+        "description": "A simple JSP application that returns user's input.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-jsp-java-basic.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Spring",
+        "category": "Samples - Hello World",
+        "description": "A basic example using Spring servlets. The app returns values entered into a submit form.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-spring-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "GWT",
+        "category": "Samples - Hello World",
+        "description": "A GWT 2.6.1 application that returns user's input and information on application server and user agent.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-gwt-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Grails",
+        "category": "Samples - Hello World",
+        "description": "Default Grails application welcoming a user and providing information on application status and installed plug-ins.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-grails-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 1024
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "JSF",
+        "category": "Samples - Hello World",
+        "description": "A basic 'What's Your Name' application that returns user's input.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-jsf-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Lift",
+        "category": "Samples - Hello World",
+        "description": "Application demonstrating a simple user account, login, edit account, password recovery and logout procedures.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-lift-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Struts",
+        "category": "Samples - Hello World",
+        "description": "A simple Struts app with a simple 'What's Your Name?' box that returns user's input.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-struts-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Vaadin",
+        "category": "Samples - Hello World",
+        "description": "An online address book built with Vaadin.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-vaadin-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Tapestry",
+        "category": "Samples - Hello World",
+        "description": "A simple application demonstrating the Tapestry web framework.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-tapestry-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Wicket",
+        "category": "Samples - Hello World",
+        "description": "Quick Start Wicket web application which is a part of the Wicket bundle.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-wicket-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Groovy",
+        "category": "Samples - Hello World",
+        "description": "A basic scripting console to run JavaScript.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-groovy-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "JRuby Spring",
+        "category": "Samples - Hello World",
+        "description": "A basic JRuby application compiled into WAR with JRuby Maven plugin and run in an application server.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-jruby-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Jython Servlet",
+        "category": "Samples - Hello World",
+        "description": "A simple Jython web application packaged with Maven",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-jython-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Shale",
+        "category": "Samples - Hello World",
+        "description": "An application using Shale web framework. Returns user's input",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-shale-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Velocity",
+        "category": "Samples - Hello World",
+        "description": "A simple web application using Velocity Framework.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-velocity-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    }
+]

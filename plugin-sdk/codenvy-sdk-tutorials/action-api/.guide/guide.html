@@ -1,0 +1,73 @@
+<div>
+
+<ul>
+<li><a href="#executing-and-updating-actions">Executing and Updating Actions</a></li>
+<li><a href="#creating-an-action">Creating an action</a></li>
+<li><a href="#notification-types">Notification Types</a></li>
+</ul>
+
+The system of actions allows plugins to add their own items to IDE menus and toolbars. An action is a class, derived from the Action class, whose actionPerformed method is called when the menu item or toolbar button is selected. Actions are organized into groups, which, in turn, can contain other groups. A group of actions can form a toolbar or a menu. Subgroups of the action group can form submenus of the menu.
+
+<h2 id="executing-and-updating-actions">Executing and Updating Actions</h2>
+
+<p>The system of actions allows plugins to add their own items to IDE menus and toolbars. An action is a class, derived from the Action class, whose actionPerformed method is called when the menu item or toolbar button is selected. For example, one of the action classes is responsible for the "File | Open File..." menu item and for the "Open File" toolbar button.</p>
+
+<p>Actions are organized into groups, which, in turn, can contain other groups. A group of actions can form a toolbar or a menu. Subgroups of the group can form submenus of the menu.</p>
+
+<p>Every action and action group has an unique identifier. Identifiers of many of the standard IDE actions are defined in the IdeActions class.</p>
+
+<p>Every action can be included in multiple groups, and thus appear in multiple places within the IDE user interface. Different places where actions can appear are defined by constants in the ActionPlaces interface. For every place where the action appears, a new Presentation is created. Thus, the same action can have different text or icons when it appears in different places of the user interface. Different presentations for the action are created by copying the presentation returned by the Action.getTemplatePresentation() method.</p>
+
+<p>To update the state of the action, the method Action.update() is periodically called by IDE. The object of type ActionEvent passed to this method carries the information about the current context for the action, and in particular, the specific presentation which needs to be updated.</p>
+
+<p>The ActionEvent instance is also passed to the actionPerformed method.</p>
+
+<h2 id="creating-an-action">Creating an action</h2>
+
+<p>An action is a class derived from the Action class. To define your action, in your plugin, create a Java class derived from the Action class. In this class, override the actionPerformed method to be called when a menu item or a toolbar button is selected.</p>
+<p>To clarify this procedure, consider the following code snippet of a .java file that defines the TextBoxes class derived from the Action class:</p>
+
+<pre>
+public class TextBoxes extends Action { 
+    // If you register the action from Java code, this constructor is used to set the menu item name
+    // (optionally, you can specify the menu description and an icon to display next to the menu item).
+    // You can omit this constructor when registering the action in the plugin.xml file.
+    public TextBoxes() {
+     // Set the menu item name.
+        super("Text _Boxes");
+     // Set the menu item name, description and icon.
+     // super("Text _Boxes","Item description", Resources.INSTANCE.icon()); 
+    }
+  
+    public void actionPerformed(ActionEvent event) {
+       String txt=Window.prompt("What is your name?", "");
+       Window.alert("Hello, " + txt + "!\n I am glad to see you.");
+    }
+}
+</pre>
+
+<h2 id="registering-actions">Registering Actions</h2>
+
+<p>To register an action from code, two steps are required. First, an instance of the class derived from Action must be passed to the registerAction method of the ActionManager class, to associate the action with an ID. Second, the action needs to be added to one or more groups. To get an instance of an action group by ID, it is necessary to call ActionManager.getAction() and cast the returned value to the DefaultActionGroup class.</p>
+
+<p>You can create a extension that registers actions on IDE startup using the following procedure:</p>
+
+<pre>
+@Extension(title = "Demo Extension", version = "3.0.0")
+public class DemoExtension {
+ @Inject
+ public DemoExtension(ActionManager actionManager, DemoAction demoAction) {
+        //Create new popup group 'Demo' and add it to main menu
+        DefaultActionGroup demoGroup = new DefaultActionGroup("Demo", true, actionManager);
+        actionManager.registerAction("demoGroup", demoGroup);
+        DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_MENU);
+        mainMenu.add(demoGroup);
+         
+        //add demoAction to demoGroup
+        actionManager.registerAction("demoAction", demoAction);
+        demoGrou.add(demoAction);
+   }
+}
+</pre>
+
+</div>

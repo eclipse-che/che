@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0"
+         metadata-complete="true">
+
+    <display-name>Codenvy IDE</display-name>
+    <context-param>
+        <param-name>ws-name</param-name>
+        <param-value>default</param-value>
+    </context-param>
+    <context-param>
+        <param-name>ws-id</param-name>
+        <param-value>1q2w3e</param-value>
+    </context-param>
+
+    <servlet>
+        <servlet-name>IDE</servlet-name>
+        <jsp-file>/IDE.jsp</jsp-file>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>IDE</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/_app/*</url-pattern>
+    </servlet-mapping>
+</web-app>
