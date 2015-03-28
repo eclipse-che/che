@@ -16,7 +16,7 @@
     <parent>
         <artifactId>codenvy-plugin-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>3.9.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>gin-tutorial</artifactId>

@@ -16,22 +16,12 @@
     <parent>
         <artifactId>codenvy-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>3.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-platform-api</artifactId>
     <packaging>war</packaging>
     <name>Codenvy SDK :: Platform API</name>
     <dependencies>
-        <dependency>
-            <groupId>com.codenvy.security</groupId>
-            <artifactId>codenvy-security-oauth2</artifactId>
-            <version>${codenvy.security.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.vfs</groupId>
-            <artifactId>codenvy-vfs-impl</artifactId>
-            <version>${codenvy.vfs.impl.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-analytics</artifactId>
@@ -85,6 +75,16 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-infrastructure-local</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>codenvy-security-oauth2</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>codenvy-vfs-impl</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

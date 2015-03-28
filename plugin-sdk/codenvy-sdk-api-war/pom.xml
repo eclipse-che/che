@@ -16,17 +16,12 @@
     <parent>
         <artifactId>codenvy-plugin-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>3.9.0-SNAPSHOT</version>
     </parent>
     <artifactId>codenvy-sdk-api-war</artifactId>
     <packaging>war</packaging>
     <name>Codenvy SDK :: Packaging :: API</name>
     <dependencies>
-        <dependency>
-            <groupId>com.codenvy.vfs</groupId>
-            <artifactId>codenvy-vfs-impl</artifactId>
-            <version>${codenvy.vfs.impl.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-builder</artifactId>
@@ -82,6 +77,11 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>codenvy-vfs-impl</artifactId>
+            <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
