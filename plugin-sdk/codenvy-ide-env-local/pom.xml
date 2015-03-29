@@ -33,7 +33,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-user</artifactId>
+            <artifactId>che-core-api-infrastructure-local</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-user</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
@@ -44,11 +49,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ide-api</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-infrastructure-local</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

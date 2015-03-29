@@ -67,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-account</artifactId>
+            <artifactId>che-core-api-account</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
@@ -122,12 +122,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-project</artifactId>
+            <artifactId>che-core-api-project</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-vfs</artifactId>
+            <artifactId>che-core-api-vfs</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

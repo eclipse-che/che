@@ -176,7 +176,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-vfs</artifactId>
+            <artifactId>che-core-api-vfs</artifactId>
             <version>${che.core.version}</version>
             <scope>runtime</scope>
         </dependency>

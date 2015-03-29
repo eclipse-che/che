@@ -27,12 +27,12 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-lang</artifactId>
+            <artifactId>che-core-api-runner</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-runner</artifactId>
+            <artifactId>che-core-commons-lang</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
