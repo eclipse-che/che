@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-api-analytics-gwt-client</artifactId>
+            <artifactId>che-core-api-analytics-gwt-client</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
