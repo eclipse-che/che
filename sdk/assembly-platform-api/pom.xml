@@ -24,6 +24,11 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-inject</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-analytics</artifactId>
             <version>${che.core.version}</version>
         </dependency>
@@ -65,11 +70,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-api-workspace</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-commons-inject</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
