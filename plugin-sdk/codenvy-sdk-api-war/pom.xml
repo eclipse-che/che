@@ -60,6 +60,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-vfs-impl</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-builder</artifactId>
             <version>${che.core.version}</version>
         </dependency>
@@ -77,11 +82,6 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-vfs-impl</artifactId>
-            <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

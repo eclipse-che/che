@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-gwt-client-commons</artifactId>
+            <artifactId>che-core-client-gwt-commons</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

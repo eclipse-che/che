@@ -39,6 +39,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-vfs-impl</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>codenvy-ext-ssh</artifactId>
             <version>${che.core.version}</version>
         </dependency>
@@ -47,11 +52,6 @@
             <artifactId>codenvy-ide-core</artifactId>
             <version>${che.core.version}</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-vfs-impl</artifactId>
-            <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

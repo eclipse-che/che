@@ -72,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-account-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-account</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
@@ -82,32 +82,32 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-user-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-user</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-factory-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-factory</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-builder-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-builder</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-vfs</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-runner-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-runner</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-workspace</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
@@ -132,7 +132,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-analytics-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-analytics</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

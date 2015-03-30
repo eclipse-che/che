@@ -79,12 +79,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-security-oauth2</artifactId>
+            <artifactId>che-core-vfs-impl</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-vfs-impl</artifactId>
+            <artifactId>codenvy-security-oauth2</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

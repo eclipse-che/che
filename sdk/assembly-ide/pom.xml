@@ -38,27 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-account-gwt-client</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-analytics-gwt-client</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-factory</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-factory-gwt-client</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project-gwt-client</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
@@ -68,22 +48,42 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-user-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-account</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-analytics</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-gwt-client</artifactId>
+            <artifactId>che-core-client-gwt-commons</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-gwt-client-commons</artifactId>
+            <artifactId>che-core-client-gwt-factory</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-project</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-user</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-vfs</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-workspace</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>

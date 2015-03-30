@@ -54,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-test-framework</artifactId>
+            <artifactId>che-core-test-framework</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
