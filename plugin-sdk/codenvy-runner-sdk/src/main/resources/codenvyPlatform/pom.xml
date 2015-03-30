@@ -76,9 +76,9 @@
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.plugin-editor-codemirror</groupId>
-            <artifactId>plugin-editor-codemirror</artifactId>
-            <version>${codenvy.plugin-editor-codemirror.version}</version>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-codemirror-editorwidget</artifactId>
+            <version>${che.plugin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
