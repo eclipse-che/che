@@ -85,7 +85,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-builder-ant</artifactId>
+            <artifactId>che-plugin-java-builder-ant</artifactId>
             <version>${che.plugins.version}</version>
             <exclusions>
                 <exclusion>
@@ -96,32 +96,32 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-builder-maven</artifactId>
+            <artifactId>che-plugin-java-builder-maven</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-ant</artifactId>
+            <artifactId>che-plugin-java-ext-ant</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-java</artifactId>
+            <artifactId>che-plugin-java-ext-java</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-maven</artifactId>
+            <artifactId>che-plugin-java-ext-maven</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-generator-archetype</artifactId>
+            <artifactId>che-plugin-java-generator-archetype</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-runner-webapps</artifactId>
+            <artifactId>che-plugin-java-runner-webapps</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>

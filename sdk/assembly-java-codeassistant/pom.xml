@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-java-codeassistant</artifactId>
+            <artifactId>che-plugin-java-ext-java-codeassistant</artifactId>
             <version>${che.plugins.version}</version>
             <type>jar</type>
         </dependency>

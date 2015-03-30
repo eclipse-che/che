@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-maven-tools</artifactId>
+            <artifactId>che-plugin-java-maven-tools</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
     </dependencies>
