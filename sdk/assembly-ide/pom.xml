@@ -83,12 +83,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ext-builder</artifactId>
+            <artifactId>che-plugin-builder-ext-builder</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ext-web</artifactId>
+            <artifactId>che-plugin-web-ext-web</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
@@ -98,7 +98,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>codenvy-ide-core</artifactId>
+            <artifactId>che-core-ide-app</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <dependency>
