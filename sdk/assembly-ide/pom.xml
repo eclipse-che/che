@@ -159,7 +159,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>plugin-editor-orion</artifactId>
+            <artifactId>che-plugin-orion-editor</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
