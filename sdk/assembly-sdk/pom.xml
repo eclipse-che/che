@@ -55,19 +55,19 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-git-ext-git</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-ext-github</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>codenvy-ext-datasource-server-war-sdk</artifactId>
             <version>${che.plugins.version}</version>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-git</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-github</artifactId>
-            <version>${che.plugins.version}</version>
         </dependency>
         <!--dependency>
             <groupId>org.eclipse.che.core</groupId>
