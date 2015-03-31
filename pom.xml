@@ -18,47 +18,17 @@
         <groupId>org.eclipse.che.depmgt</groupId>
         <version>1.20.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.sdk</groupId>
     <artifactId>che-sdk-parent</artifactId>
-    <version>3.9.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Codenvy SDK Parent</name>
+    <name>Che SDK :: Parent</name>
     <modules>
-        <module>plugin-sdk</module>
-        <module>sdk</module>
+        <module>assembly-ide</module>
+        <module>assembly-platform-api</module>
+        <module>assembly-java-codeassistant</module>
+        <module>assembly-sdk</module>
+        <module>sdk-qa</module>
     </modules>
-    <scm>
-        <connection>scm:git:git@github.com:codenvy/che-sdk.git</connection>
-        <developerConnection>scm:git:git@github.com:codenvy/che-sdk.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/codenvy/che-plugin</url>
-    </scm>
     <properties>
-        <maven.model.version>3.0.5</maven.model.version>
-        <specification.version>1.0-beta2</specification.version>
+        <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
     </properties>
-    <repositories>
-        <repository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>codenvy-public-snapshots-repo</id>
-            <name>codenvy public snapshots</name>
-            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>codenvy-public-snapshots-repo</id>
-            <name>codenvy public snapshots</name>
-            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>
