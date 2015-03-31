@@ -64,7 +64,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>codenvy-ext-datasource-itests</artifactId>
+            <artifactId>che-plugin-datasource-itests</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
