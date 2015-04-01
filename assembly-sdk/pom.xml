@@ -71,85 +71,85 @@
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>action-api-tutorial</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>analytics-event-logger-extension</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-ide</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-java-codeassistant</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-platform-api</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>empty-extension</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>gin-tutorial</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>gist-extension</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>helloworld-extension</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>icons-registry-api</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>notification-api-tutorial</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>parts-api-tutorial</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>theme-api-tutorial</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>wysiwyg-editor-tutorial</artifactId>
-            <version>${che.sdk.version}</version>
+            <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -274,118 +274,118 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>action-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>action-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>theme-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>theme-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>notification-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>notification-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>parts-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>parts-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>editor-api-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>editor-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>gin-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>gin-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>gist-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>gist-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>empty-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>empty-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>helloworld-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>helloworld-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>analytics-event-logger-extension</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>analytics-event-logger-extension.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>icons-registry-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>icons-registry-api-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>wysiwyg-editor-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>wysiwyg-editor-tutorial.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
                                     <artifactId>server-side-tutorial</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.sdk-tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
                                     <destFileName>server-side-tutorial.zip</destFileName>
@@ -402,9 +402,9 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <groupId>org.eclipse.che.plugin</groupId>
                                     <artifactId>che-plugin-sdk-tools</artifactId>
-                                    <version>${che.sdk.version}</version>
+                                    <version>${che.plugins.version}</version>
                                     <classifier>jar-with-dependencies</classifier>
                                     <outputDirectory>${project.build.directory}/tomcat-ide/sdk-tools</outputDirectory>
                                     <destFileName>che-plugin-sdk-tools.jar</destFileName>
@@ -483,7 +483,7 @@
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/assembly/tomcat-archive.xml</descriptor>
                             </descriptors>
-                            <finalName>codenvy-${project.version}</finalName>
+                            <finalName>che-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>

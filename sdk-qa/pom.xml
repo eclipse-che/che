@@ -18,8 +18,8 @@
         <groupId>org.eclipse.che.sdk</groupId>
         <version>3.9.0-SNAPSHOT</version>
     </parent>
-    <artifactId>sdk-qa</artifactId>
-    <name>Codenvy SDK :: QA</name>
+    <artifactId>che-sdk-qa</artifactId>
+    <name>Che SDK :: QA</name>
     <properties>
         <codenvy.ide.path>${project.build.directory}/tomcat-ide</codenvy.ide.path>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
