@@ -73,18 +73,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
-            <artifactId>action-api-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
-            <artifactId>analytics-event-logger-extension</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-ide</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>war</type>
@@ -102,55 +90,67 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
+            <artifactId>action-api-tutorial</artifactId>
+            <version>${che.sdk-tutorials.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
+            <artifactId>analytics-event-logger-extension</artifactId>
+            <version>${che.sdk-tutorials.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>empty-extension</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>gin-tutorial</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>gist-extension</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>helloworld-extension</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>icons-registry-api</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>notification-api-tutorial</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>parts-api-tutorial</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>theme-api-tutorial</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.sdk-tutorials</groupId>
             <artifactId>wysiwyg-editor-tutorial</artifactId>
             <version>${che.sdk-tutorials.version}</version>
             <type>zip</type>
