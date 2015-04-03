@@ -127,7 +127,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-icons-regitry-api</artifactId>
+            <artifactId>che-tutorial-icons-registry-api</artifactId>
             <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
