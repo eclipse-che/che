@@ -74,85 +74,85 @@
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-ide</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <version>${project.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-java-codeassistant</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <version>${project.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-platform-api</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <version>${project.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>action-api-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-action-api</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>analytics-event-logger-extension</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-analytics-event</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>empty-extension</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-empty-ext</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>gin-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-gin</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>gist-extension</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-gist-ext</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>helloworld-extension</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-helloworld-ext</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>icons-registry-api</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-icons-regitry-api</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>notification-api-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-notification-api</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>parts-api-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-parts-api</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>theme-api-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-theme-api</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk-tutorials</groupId>
-            <artifactId>wysiwyg-editor-tutorial</artifactId>
-            <version>${che.sdk-tutorials.version}</version>
+            <groupId>org.eclipse.che.tutorials</groupId>
+            <artifactId>che-tutorial-wysiwyg-editor</artifactId>
+            <version>${che.tutorials.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -277,121 +277,121 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>action-api-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-action-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>action-api-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-action-api.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>theme-api-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-theme-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>theme-api-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-theme-api.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>notification-api-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-notification-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>notification-api-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-notification-api.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>parts-api-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-parts-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>parts-api-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-parts-api.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>editor-api-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-editor-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>editor-api-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-editor-api.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>gin-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-gin</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>gin-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-gin.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>gist-extension</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-gist-ext</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>gist-extension.zip</destFileName>
+                                    <destFileName>che-tutorial-gist-ext.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>empty-extension</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-empty-ext</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>empty-extension.zip</destFileName>
+                                    <destFileName>che-tutorial-empty-ext.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>helloworld-extension</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-helloworld-ext</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>helloworld-extension.zip</destFileName>
+                                    <destFileName>che-tutorial-helloworld-ext.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>analytics-event-logger-extension</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-analytics-event</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>analytics-event-logger-extension.zip</destFileName>
+                                    <destFileName>che-tutorial-analytics-event.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>icons-registry-api</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-icons-registry-api</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>icons-registry-api-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-icons-registry-api.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>wysiwyg-editor-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-wysiwyg-editor</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>wysiwyg-editor-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-wysiwyg-editor.zip</destFileName>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.sdk-tutorials</groupId>
-                                    <artifactId>server-side-tutorial</artifactId>
+                                    <groupId>org.eclipse.che.tutorials</groupId>
+                                    <artifactId>che-tutorial-server-side</artifactId>
                                     <type>zip</type>
-                                    <version>${che.sdk-tutorials.version}</version>
+                                    <version>${che.tutorials.version}</version>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>server-side-tutorial.zip</destFileName>
+                                    <destFileName>che-tutorial-server-side.zip</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
