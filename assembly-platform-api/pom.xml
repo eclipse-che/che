@@ -164,6 +164,11 @@
             <version>${che.sdk.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-svn-ext-subversion</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
             <version>${org.everrest.version}</version>
