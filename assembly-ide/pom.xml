@@ -290,7 +290,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <extraJvmArgs>-Xmx2G -XX:MaxPermSize=256m</extraJvmArgs>
+                    <extraJvmArgs>-Xss512m -Xmx2048m -XX:MaxPermSize=1024m</extraJvmArgs>
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
                         <module>org.eclipse.che.ide.ext.java.JavaParserWorker</module>
