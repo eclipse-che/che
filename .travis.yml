@@ -13,3 +13,7 @@ sudo: false
 cache:
   directories:
     - $HOME/.m2
+
+env:
+  global:
+    - MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m
