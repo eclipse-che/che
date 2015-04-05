@@ -2,7 +2,7 @@ language: java
 
 jdk:
   - oraclejdk7
-
+  - oraclejdk8
 branches:
   except:
     - gh-pages
@@ -11,6 +11,8 @@ cache:
   directories:
     - $HOME/.m2
 
-env: MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
+env:
+  global:
+    - MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
 install: /bin/true
 script: mvn clean install
