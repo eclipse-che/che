@@ -11,8 +11,5 @@ cache:
   directories:
     - $HOME/.m2
 
-env:
-  global:
-    - MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
-
-before_install: sudo rm /etc/mavenrc
+env: MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
+install: /bin/true
