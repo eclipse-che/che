@@ -33,7 +33,7 @@
     <properties>
         <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
     </properties>
-     <repositories>
+    <repositories>
         <repository>
             <id>codenvy-public-repo</id>
             <name>codenvy public</name>
