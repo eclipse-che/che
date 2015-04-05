@@ -13,3 +13,4 @@ cache:
 
 env: MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
 install: /bin/true
+script: mvn clean install
