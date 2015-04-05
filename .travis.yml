@@ -8,8 +8,6 @@ branches:
   except:
     - gh-pages
 
-sudo: false
-
 cache:
   directories:
     - $HOME/.m2
