@@ -18,4 +18,4 @@ env:
   global:
     - MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
 
- before_install: sudo rm /etc/mavenrc
+before_install: sudo rm /etc/mavenrc
