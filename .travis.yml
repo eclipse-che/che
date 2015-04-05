@@ -16,4 +16,4 @@ cache:
 
 env:
   global:
-    - MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m
+    - MAVEN_OPTS="-Xmx2G -XX:MaxPermSize=256m"
