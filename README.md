@@ -22,7 +22,7 @@ Che is open sourced under the Eclipse Public License 1.0.
 
 ```sh
 git clone https://github.com/codenvy/che.git
-cd ..\che
+cd /che
 git checkout 3.8.1
 ```
 
