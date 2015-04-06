@@ -21,16 +21,7 @@ Che is open sourced under the Eclipse Public License 1.0.
 ### Clone the Repository & Checkout Latest Stable Branch
 
 ```sh
-git clone https://github.com/codenvy/che-parent.git
-git clone https://github.com/codenvy/che-depmgt.git
 git clone https://github.com/codenvy/che.git
-
-cd che-parent
-mvn clean install
-
-cd ..\che-depmgmt
-mvn clean install
-
 cd ..\che
 git checkout 3.8.1
 ```
