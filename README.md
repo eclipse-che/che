@@ -23,7 +23,6 @@ Che is open sourced under the Eclipse Public License 1.0.
 ```sh
 git clone https://github.com/codenvy/che.git
 cd /che
-git checkout 3.8.1
 ```
 
 We advise against building the master branch as you may encounter intermediate errors. 
