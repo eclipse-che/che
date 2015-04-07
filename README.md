@@ -25,16 +25,14 @@ Che is open sourced under the Eclipse Public License 1.0.
 git clone https://github.com/codenvy/che.git
 ```
 
-We advise against building the master branch as you may encounter intermediate errors. 
-
-This builds the SDK, which includes an assembly of Java and extension building plug-ins. If you want to build Che with all known plug-ins, build [github.com/codenvy/assembly-che] (https://github.com/codenvy/assembly-che).
-
 ### Build and Run Che
 ```sh
 cd /che
 mvn clean install
 ./che.sh [ start | stop ]
 ```
+
+This builds and starts the SDK, which includes an assembly of Java and a bare minimum of extensions building plug-ins (everything required to work with Java apps and Codenvy extensions).
 
 Che will be available at ```localhost:8080```
 
