@@ -4,8 +4,8 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 branches:
-  except:
-    - gh-pages
+  only:
+    - master
 
 cache:
   directories:
