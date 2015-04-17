@@ -42,6 +42,8 @@ import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
 
+import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
+import org.eclipse.che.vfs.impl.fs.MappedDirectoryLocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.eclipse.che.ide.ext.java.server.format.FormatService;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
@@ -82,6 +84,7 @@ public class ApiModule extends AbstractModule {
         bind(BuilderAdminService.class);
         bind(SlaveBuilderService.class);
 
+        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
         bind(RunnerSelectionStrategy.class).to(LastInUseRunnerSelectionStrategy.class);
         bind(RunnerService.class);
         bind(RunnerAdminService.class);
