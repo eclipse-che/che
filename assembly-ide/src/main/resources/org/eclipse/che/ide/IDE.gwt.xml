@@ -35,33 +35,33 @@
 
     <!-- Extensions                                                 -->
     <inherits name='org.eclipse.che.ide.ext.web.Web'/>
-    <inherits name='org.eclipse.che.ide.ext.java.Java'/>
+    <!--inherits name='org.eclipse.che.ide.ext.java.Java'/>
     <inherits name='org.eclipse.che.ide.jseditor.java.JsJavaEditor'/>
     <inherits name='org.eclipse.che.ide.extension.ant.Ant'/>
     <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaRuntimeExtension'/>
     <inherits name='org.eclipse.che.ide.extension.builder.Builder'/>
     <inherits name='org.eclipse.che.ide.ext.runner.Runner'/>
-    <inherits name='org.eclipse.che.ide.extension.maven.Maven'/>
+    <inherits name='org.eclipse.che.ide.extension.maven.Maven'/-->
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
     <inherits name='org.eclipse.che.ide.ext.github.GitHub'/>
     <inherits name='org.eclipse.che.ide.ext.ssh.Ssh'/>
     <inherits name='org.eclipse.che.ide.editor.codemirror.CodeMirrorEditor'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
 
-    <inherits name='org.eclipse.che.ide.ext.tutorials.Tutorials'/>
+    <!--inherits name='org.eclipse.che.ide.ext.tutorials.Tutorials'/-->
     <inherits name='org.eclipse.che.ide.ext.svn.Subversion'/>
 
     <inherits name='org.eclipse.che.env.local.LocalEnvironment'/>
 
     <!-- Platform API GWT client dependencies                       -->
     <inherits name='org.eclipse.che.api.Analytics'/>
-    <inherits name='org.eclipse.che.api.Builder'/>
+    <!--inherits name='org.eclipse.che.api.Builder'/-->
     <inherits name='org.eclipse.che.api.Core'/>
     <inherits name='org.eclipse.che.api.Project'/>
-    <inherits name='org.eclipse.che.api.Runner'/>
+    <!--inherits name='org.eclipse.che.api.Runner'/-->
     <inherits name='org.eclipse.che.api.User'/>
     <inherits name='org.eclipse.che.api.Account'/>
-    <inherits name='org.eclipse.che.api.Factory'/>
+    <!--inherits name='org.eclipse.che.api.Factory'/-->
     <inherits name='org.eclipse.che.api.VFS'/>
     <inherits name="org.eclipse.che.api.Workspace"/>
 

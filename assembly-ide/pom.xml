@@ -293,7 +293,7 @@
                     <extraJvmArgs>-Xss512m -Xmx2048m -XX:MaxPermSize=1024m</extraJvmArgs>
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
-                        <module>org.eclipse.che.ide.ext.java.JavaParserWorker</module>
+                        <!--module>org.eclipse.che.ide.ext.java.JavaParserWorker</module-->
                     </modules>
                     <logLevel>INFO</logLevel>
                     <!--<style>PRETTY</style>-->
@@ -304,7 +304,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
-                    <execution>
+                    <!--execution>
                         <id>unwar-ide</id>
                         <phase>prepare-package</phase>
                         <goals>
@@ -317,7 +317,7 @@
                                 </move>
                             </tasks>
                         </configuration>
-                    </execution>
+                    </execution-->
                     <execution>
                         <id>buildnumber</id>
                         <phase>compile</phase>

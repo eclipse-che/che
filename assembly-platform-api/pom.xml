@@ -32,21 +32,21 @@
             <artifactId>che-core-api-auth</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-builder</artifactId>
             <version>${che.core.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-docs</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-factory</artifactId>
             <version>${che.core.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-infrastructure-local</artifactId>
@@ -57,11 +57,11 @@
             <artifactId>che-core-api-project</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-runner</artifactId>
             <version>${che.core.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-user</artifactId>
@@ -97,7 +97,7 @@
             <artifactId>che-plugin-github-provider-github</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-builder-ant</artifactId>
             <version>${che.plugins.version}</version>
@@ -142,13 +142,13 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-runner-webapps</artifactId>
             <version>${che.plugins.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-env-local</artifactId>
             <version>${che.sdk.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-ext-plugins</artifactId>
             <version>${che.sdk.version}</version>
@@ -157,7 +157,7 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-runner</artifactId>
             <version>${che.sdk.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-svn-ext-subversion</artifactId>

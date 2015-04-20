@@ -26,9 +26,9 @@
     <modules>
         <module>assembly-ide</module>
         <module>assembly-platform-api</module>
-        <module>assembly-java-codeassistant</module>
+        <!--module>assembly-java-codeassistant</module-->
         <module>assembly-sdk</module>
-        <module>sdk-qa</module>
+        <!--module>sdk-qa</module-->
     </modules>
     <properties>
         <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>

@@ -50,12 +50,12 @@
             <artifactId>che-core-vfs-impl</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-datasource-server-war-sdk</artifactId>
             <version>${che.plugins.version}</version>
             <type>war</type>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-git-ext-git</artifactId>
@@ -72,19 +72,19 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <dependency>
+       <!-- <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-java-codeassistant</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-platform-api</artifactId>
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.tutorials</groupId>
             <artifactId>che-tutorial-action-api</artifactId>
             <version>${che.tutorials.version}</version>
@@ -149,7 +149,7 @@
             <artifactId>che-tutorial-wysiwyg-editor</artifactId>
             <version>${che.tutorials.version}</version>
             <type>zip</type>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
@@ -253,17 +253,17 @@
                                     <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
                                     <destFileName>logback-classic.jar</destFileName>
                                 </artifactItem>
-                                <artifactItem>
+                                <!--<artifactItem>
                                     <groupId>org.eclipse.che.plugin</groupId>
                                     <artifactId>che-plugin-datasource-ssl-socket-factory</artifactId>
                                     <version>${che.plugins.version}</version>
                                     <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
                                     <destFileName>che-plugin-datasource-ssl-socket-factory.jar</destFileName>
-                                </artifactItem>
+                                </artifactItem>-->
                             </artifactItems>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--<execution>
                         <id>copy-tutorials</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -390,8 +390,8 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
-                    </execution>
-                    <execution>
+                    </execution>-->
+                    <!--<execution>
                         <id>copy-sdk-tools</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -409,7 +409,7 @@
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
-                    </execution>
+                    </execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -450,15 +450,15 @@
                                 <move todir="${project.build.directory}/packager-conf/war/ws/_app">
                                     <fileset dir="${project.build.directory}/packager-conf/war/ws/_app/" />
                                 </move>
-                                <move todir="${project.build.directory}/tomcat-ide/tutorials">
+                               <!-- <move todir="${project.build.directory}/tomcat-ide/tutorials">
                                     <fileset dir="${project.build.directory}/packager-conf/zip/tutorials" />
-                                </move>
+                                </move>-->
                                 <war destfile="${project.build.directory}/tomcat-ide/webapps/ws.war" needxmlfile="false">
                                     <fileset dir="${project.build.directory}/packager-conf/war/ws" />
                                 </war>
                                 <copy file="${project.build.directory}/packager-conf/war/assembly-platform-api-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/api.war" />
-                                <copy file="${project.build.directory}/packager-conf/war/che-plugin-datasource-server-war-sdk-${che.sdk.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/datasource.war" />
-                                <copy file="${project.build.directory}/packager-conf/war/assembly-java-codeassistant-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/java-ca.war" />
+                               <!-- <copy file="${project.build.directory}/packager-conf/war/che-plugin-datasource-server-war-sdk-${che.sdk.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/datasource.war" />
+                                <copy file="${project.build.directory}/packager-conf/war/assembly-java-codeassistant-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/java-ca.war" />-->
                                 <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
                             </target>
                         </configuration>
