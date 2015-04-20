@@ -27,7 +27,7 @@ git clone https://github.com/codenvy/che.git
 
 ### Build and Run Che
 ```sh
-cd /che
+cd ./che
 mvn clean install
 ./che.sh [ start | stop ]
 ```
