@@ -10,32 +10,56 @@
  *******************************************************************************/
 package org.eclipse.che.api.deploy;
 
-import com.google.inject.AbstractModule;
-
-import org.eclipse.che.api.analytics.AnalyticsModule;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.api.builder.BuilderAdminService;
+import org.eclipse.che.api.builder.BuilderSelectionStrategy;
+import org.eclipse.che.api.builder.BuilderService;
+import org.eclipse.che.api.builder.LastInUseBuilderSelectionStrategy;
+import org.eclipse.che.api.builder.internal.BuilderModule;
+import org.eclipse.che.api.builder.internal.SlaveBuilderService;
+
+import org.eclipse.che.api.analytics.AnalyticsModule;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
-import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.runner.LastInUseRunnerSelectionStrategy;
+import org.eclipse.che.api.runner.RunnerAdminService;
+import org.eclipse.che.api.runner.RunnerSelectionStrategy;
+import org.eclipse.che.api.runner.RunnerService;
+import org.eclipse.che.api.runner.internal.RunnerModule;
+import org.eclipse.che.api.runner.internal.SlaveRunnerService;
+
+import org.eclipse.che.api.factory.FactoryModule;
 import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
+
+import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.docs.DocsModule;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
+import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
+import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
+
+import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
+import org.eclipse.che.vfs.impl.fs.MappedDirectoryLocalFSMountStrategy;
+import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
+import org.eclipse.che.ide.ext.java.server.format.FormatService;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore;
+
+import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.security.oauth.OAuthAuthenticationService;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
-import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
+import com.google.inject.AbstractModule;
+
+import org.eclipse.che.vfs.impl.fs.WorkspaceToDirectoryMappingService;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.PathKey;
@@ -56,19 +80,21 @@ public class ApiModule extends AbstractModule {
 
         bind(LocalFileSystemRegistryPlugin.class);
 
-//        bind(BuilderSelectionStrategy.class).to(LastInUseBuilderSelectionStrategy.class);
-//        bind(BuilderService.class);
-//        bind(BuilderAdminService.class);
-//        bind(SlaveBuilderService.class);
-//
-//        bind(RunnerSelectionStrategy.class).to(LastInUseRunnerSelectionStrategy.class);
-//        bind(RunnerService.class);
-//        bind(RunnerAdminService.class);
-//        bind(SlaveRunnerService.class);
+        bind(BuilderSelectionStrategy.class).to(LastInUseBuilderSelectionStrategy.class);
+        bind(BuilderService.class);
+        bind(BuilderAdminService.class);
+        bind(SlaveBuilderService.class);
 
+        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
+        bind(RunnerSelectionStrategy.class).to(LastInUseRunnerSelectionStrategy.class);
+        bind(RunnerService.class);
+        bind(RunnerAdminService.class);
+        bind(SlaveRunnerService.class);
 
-//        bind(DebuggerService.class);
-//        bind(FormatService.class);
+        bind(DebuggerService.class);
+        bind(FormatService.class);
+
+        bind(WorkspaceToDirectoryMappingService.class);
 
         bind(KeyService.class);
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
@@ -83,16 +109,16 @@ public class ApiModule extends AbstractModule {
 
         bind(WSocketEventBusServer.class);
 
-//        install(new ArchetypeGeneratorModule());
+        install(new ArchetypeGeneratorModule());
 
         install(new CoreRestModule());
         install(new AnalyticsModule());
         install(new BaseProjectModule());
-//        install(new BuilderModule());
-//        install(new RunnerModule());
+        install(new BuilderModule());
+        install(new RunnerModule());
         install(new VirtualFileSystemModule());
         install(new VirtualFileSystemFSModule());
-//        install(new FactoryModule());
+        install(new FactoryModule());
         install(new DocsModule());
     }
 }
