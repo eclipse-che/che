@@ -59,6 +59,7 @@ import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
 import com.google.inject.AbstractModule;
 
+import org.eclipse.che.vfs.impl.fs.WorkspaceToDirectoryMappingService;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.PathKey;
@@ -92,6 +93,8 @@ public class ApiModule extends AbstractModule {
 
         bind(DebuggerService.class);
         bind(FormatService.class);
+
+        bind(WorkspaceToDirectoryMappingService.class);
 
         bind(KeyService.class);
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
