@@ -57,7 +57,7 @@
             <artifactId>che-core-test-framework</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>angularjs-itests</artifactId>
             <version>${che.plugins.version}</version>
@@ -66,7 +66,7 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-datasource-itests</artifactId>
             <version>${che.plugins.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.jboss.arquillian.extension</groupId>
             <artifactId>arquillian-phantom-driver</artifactId>
