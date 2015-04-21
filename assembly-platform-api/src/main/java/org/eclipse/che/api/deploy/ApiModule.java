@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.deploy;
 
+import com.codenvy.machine.docker.local.LocalDockerModule;
 import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.analytics.AnalyticsModule;
@@ -99,5 +100,6 @@ public class ApiModule extends AbstractModule {
         install(new VirtualFileSystemFSModule());
 //        install(new FactoryModule());
         install(new DocsModule());
+        install(new LocalDockerModule());
     }
 }
