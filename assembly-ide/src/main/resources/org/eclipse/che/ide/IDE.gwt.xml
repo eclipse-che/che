@@ -57,6 +57,7 @@
     <inherits name='org.eclipse.che.api.Analytics'/>
     <!--inherits name='org.eclipse.che.api.Builder'/-->
     <inherits name='org.eclipse.che.api.Core'/>
+    <inherits name='org.eclipse.che.api.Machine'/>
     <inherits name='org.eclipse.che.api.Project'/>
     <!--inherits name='org.eclipse.che.api.Runner'/-->
     <inherits name='org.eclipse.che.api.User'/>
