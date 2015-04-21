@@ -38,6 +38,9 @@
 
     <script type="text/javascript" language="javascript">
 
+        /**This parameter is needed to define sdk mode.*/
+        window.sdk = 1;
+
         /**
          * Base IDE object
          */

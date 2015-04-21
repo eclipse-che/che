@@ -1,0 +1,110 @@
+[
+    {
+        "displayName": "Gist Example",
+        "category": "Samples",
+        "description": "Simple Codenvy extension project is demonstrating basic usage Che API",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-gist-ext.zip"
+        }
+    },
+    {
+        "displayName": "Empty Extension Project",
+        "category": "Samples",
+        "description": "This is a ready to use structure of a Codenvy extension with a minimal set of files and dependencies.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-empty-ext.zip"
+        }
+    },
+    {
+        "displayName": "Hello World Extension",
+        "category": "Samples",
+        "description": "This is a simple Codenvy Extension that prints Hello World in Output console and adds Hello World item to a content menu.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-helloworld-ext.zip"
+        }
+    },
+    {
+        "displayName": "Analytics Event Logger Extension",
+        "category": "Samples",
+        "description": "This is a simple Che Extension that logs an event for the Analytics.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-analytics-event.zip"
+        }
+    },
+    {
+        "displayName": "Notification API Tutorial",
+        "category": "Samples",
+        "description": "Tutorial that is demonstrating how to use Codenvy Notification API.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-notification-api.zip"
+        }
+    },
+    {
+        "displayName": "Action API Tutorial",
+        "category": "Samples",
+        "description": "Tutorial that is demonstrating how to use Codenvy Action API.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-action-api.zip"
+        }
+    },
+    {
+        "displayName": "Part API Tutorial",
+        "category": "Samples",
+        "description": "Tutorial that is demonstrating how to use Codenvy Part API.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-parts-api.zip"
+        }
+    },
+    {
+        "displayName": "Editor API Tutorial",
+        "category": "Samples",
+        "description": "Tutorial that is demonstrating how to use Codenvy Editor API.",
+        "source": {
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-editor-api.zip"
+        }
+    },
+    {
+        "displayName": "WYSIWYG Editor Tutorial",
+        "category": "Samples",
+        "description": "The following tutorial will take you through simple example to learn how to implement WYSIWYG editor.",
+        "source": {
+            "type": "git",
+            "location": "{project.template_location_dir}/tutorials/che-tutorial-wysiwyg-editor.zip"
+         }
+    },
+    {
+        "displayName": "Gin Tutorial",
+        "category": "Samples",
+        "description": "The following tutorial will take you through simple example to learn how to use Gin with Che API.",
+        "source": {
+            "type": "zip",
+            "location": "{project.template_location_dir}/tutorials/che-tutorial-gin.zip"
+        }
+    },
+    {
+        "displayName": "Theme API Tutorial",
+        "category": "Samples",
+        "description": "The following tutorial will take you through simple example to learn how to use Theme with Codenvy API.",
+        "source": {
+            "type": "zip",
+            "location": "{project.template_location_dir}/tutorials/che-tutorial-theme-api.zip"
+        }
+    },
+    {
+        "displayName": "Server Side Tutorial",
+        "category": "Samples",
+        "description": "The following tutorial will take you through a simple example demonstrating registration of a server side component and server-client side communication.",
+        "source": {
+            "type": "zip",
+            "location": "{project.template_location_dir}/tutorials/che-tutorial-server-side.zip"
+        }
+    }
+]

@@ -450,7 +450,7 @@
                                 <move todir="${project.build.directory}/packager-conf/war/ws/_app">
                                     <fileset dir="${project.build.directory}/packager-conf/war/ws/_app/" />
                                 </move>
-                               <!-- <move todir="${project.build.directory}/tomcat-ide/tutorials">
+                                <!--<move todir="${project.build.directory}/tomcat-ide/che-templates/tutorials">
                                     <fileset dir="${project.build.directory}/packager-conf/zip/tutorials" />
                                 </move>-->
                                 <war destfile="${project.build.directory}/tomcat-ide/webapps/ws.war" needxmlfile="false">
