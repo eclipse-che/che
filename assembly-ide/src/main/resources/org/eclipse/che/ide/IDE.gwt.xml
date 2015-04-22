@@ -38,8 +38,9 @@
     <!--inherits name='org.eclipse.che.ide.ext.java.Java'/>
     <inherits name='org.eclipse.che.ide.jseditor.java.JsJavaEditor'/>
     <inherits name='org.eclipse.che.ide.extension.ant.Ant'/>
-    <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaRuntimeExtension'/>
-    <inherits name='org.eclipse.che.ide.extension.builder.Builder'/>
+    <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaRuntimeExtension'/>-->
+    <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
+    <!--<inherits name='org.eclipse.che.ide.extension.builder.Builder'/>
     <inherits name='org.eclipse.che.ide.ext.runner.Runner'/>
     <inherits name='org.eclipse.che.ide.extension.maven.Maven'/-->
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
