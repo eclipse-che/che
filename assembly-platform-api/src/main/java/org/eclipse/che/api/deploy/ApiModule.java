@@ -42,6 +42,8 @@ import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
 
+import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
+import org.eclipse.che.vfs.impl.fs.MappedDirectoryLocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.eclipse.che.ide.ext.java.server.format.FormatService;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
@@ -57,6 +59,7 @@ import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
 import com.google.inject.AbstractModule;
 
+import org.eclipse.che.vfs.impl.fs.WorkspaceToDirectoryMappingService;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.PathKey;
@@ -82,6 +85,7 @@ public class ApiModule extends AbstractModule {
         bind(BuilderAdminService.class);
         bind(SlaveBuilderService.class);
 
+        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
         bind(RunnerSelectionStrategy.class).to(LastInUseRunnerSelectionStrategy.class);
         bind(RunnerService.class);
         bind(RunnerAdminService.class);
@@ -89,6 +93,8 @@ public class ApiModule extends AbstractModule {
 
         bind(DebuggerService.class);
         bind(FormatService.class);
+
+        bind(WorkspaceToDirectoryMappingService.class);
 
         bind(KeyService.class);
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
