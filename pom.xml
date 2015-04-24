@@ -30,6 +30,12 @@
         <module>assembly-sdk</module>
         <module>sdk-qa</module>
     </modules>
+    <scm>
+        <connection>scm:git:git@github.com:codenvy/che.git</connection>
+        <developerConnection>scm:git:git@github.com:codenvy/che.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/codenvy/che</url>
+    </scm>
     <properties>
         <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
     </properties>
