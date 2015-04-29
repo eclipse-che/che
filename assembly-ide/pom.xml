@@ -182,12 +182,12 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-ext-plugins</artifactId>
             <version>${che.sdk.version}</version>
-        </dependency-->
+        </dependency
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-svn-ext-subversion</artifactId>
             <version>${che.plugins.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
