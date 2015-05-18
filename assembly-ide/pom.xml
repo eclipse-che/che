@@ -304,31 +304,16 @@
                     <extraJvmArgs>-Xss512m -Xmx2048m -XX:MaxPermSize=1024m</extraJvmArgs>
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
-                        <!--module>org.eclipse.che.ide.ext.java.JavaParserWorker</module-->
                     </modules>
                     <logLevel>INFO</logLevel>
                     <!--<style>PRETTY</style>-->
-                    <!--<enableClosureCompiler>true</enableClosureCompiler>-->
+                    <enableClosureCompiler>true</enableClosureCompiler>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
-                    <!--execution>
-                        <id>unwar-ide</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <move todir="${project.build.directory}/${project.artifactId}-${project.version}/_app/javaParserWorker">
-                                    <fileset dir="${project.build.directory}/${project.artifactId}-${project.version}/javaParserWorker" />
-                                </move>
-                            </tasks>
-                        </configuration>
-                    </execution-->
                     <execution>
                         <id>buildnumber</id>
                         <phase>compile</phase>
