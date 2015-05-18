@@ -72,7 +72,7 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-       <!-- <dependency>
+        <!-- <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-java-codeassistant</artifactId>
             <version>${project.version}</version>
@@ -80,7 +80,7 @@
         </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
-            <artifactId>assembly-platform-api</artifactId>
+            <artifactId>assembly-sdk-war</artifactId>
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
@@ -443,22 +443,13 @@
                                 <move file="${project.build.directory}/tomcat-ide/bin/catalina.sh" tofile="${project.build.directory}/tomcat-ide/bin/che.sh" />
                                 <delete file="${project.build.directory}/tomcat-ide/bin/catalina.bat" />
                                 <!-- Copy resources to re-build Codenvy IDE with 3rd-party extensions. -->
-                                <copy overwrite="true" todir="${project.build.directory}/tomcat-ide/sdk-resources">
+                                <!--<copy overwrite="true" todir="${project.build.directory}/tomcat-ide/sdk-resources">
                                     <fileset dir="${project.build.directory}/../../assembly-ide" includes="src/**, pom.xml" />
-                                </copy>
-                                <unwar dest="${project.build.directory}/packager-conf/war/ws" src="${project.build.directory}/packager-conf/war/assembly-ide-${project.version}.war" />
-                                <move todir="${project.build.directory}/packager-conf/war/ws/_app">
-                                    <fileset dir="${project.build.directory}/packager-conf/war/ws/_app/" />
-                                </move>
-                                <!--<move todir="${project.build.directory}/tomcat-ide/che-templates/tutorials">
+                                </copy>-->
+                                <!-- <move todir="${project.build.directory}/tomcat-ide/che-templates/tutorials">
                                     <fileset dir="${project.build.directory}/packager-conf/zip/tutorials" />
                                 </move>-->
-                                <war destfile="${project.build.directory}/tomcat-ide/webapps/ws.war" needxmlfile="false">
-                                    <fileset dir="${project.build.directory}/packager-conf/war/ws" />
-                                </war>
-                                <copy file="${project.build.directory}/packager-conf/war/assembly-platform-api-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/api.war" />
-                               <!-- <copy file="${project.build.directory}/packager-conf/war/che-plugin-datasource-server-war-sdk-${che.sdk.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/datasource.war" />
-                                <copy file="${project.build.directory}/packager-conf/war/assembly-java-codeassistant-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/java-ca.war" />-->
+                                <copy file="${project.build.directory}/packager-conf/war/assembly-sdk-war-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/che.war" />
                                 <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
                             </target>
                         </configuration>
