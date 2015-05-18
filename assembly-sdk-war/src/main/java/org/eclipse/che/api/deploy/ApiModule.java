@@ -29,6 +29,10 @@ import org.eclipse.che.ide.ext.ssh.server.KeyService;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.jdt.JavaNavigationService;
+import org.eclipse.che.jdt.JavadocService;
+import org.eclipse.che.jdt.rest.JavaClasspathService;
+import org.eclipse.che.jdt.rest.JavaReconcileService;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
 import org.eclipse.che.security.oauth.OAuthAuthenticationService;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
@@ -101,5 +105,10 @@ public class ApiModule extends AbstractModule {
         install(new VirtualFileSystemFSModule());
 //        install(new FactoryModule());
         install(new LocalDockerModule());
+
+        bind(JavadocService.class);
+        bind(JavaNavigationService.class);
+        bind(JavaReconcileService.class);
+        bind(JavaClasspathService.class);
     }
 }
