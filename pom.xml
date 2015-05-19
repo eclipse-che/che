@@ -16,7 +16,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>1.21.0-SNAPSHOT</version>
+        <version>1.21.0</version>
     </parent>
     <groupId>org.eclipse.che.sdk</groupId>
     <artifactId>che-sdk-parent</artifactId>
