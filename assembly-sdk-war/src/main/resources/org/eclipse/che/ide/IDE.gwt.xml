@@ -35,7 +35,7 @@
 
     <!-- Extensions                                                 -->
     <inherits name='org.eclipse.che.ide.ext.web.Web'/>
-    <inherits name='org.eclipse.che.ide.ext.java.Java'/>
+    <!--<inherits name='org.eclipse.che.ide.ext.java.Java'/>-->
     <!--inherits name='org.eclipse.che.ide.jseditor.java.JsJavaEditor'/>
     <inherits name='org.eclipse.che.ide.extension.ant.Ant'/>
     <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaRuntimeExtension'/>-->
