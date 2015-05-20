@@ -38,13 +38,13 @@ This builds and runs an assembly with Java and extensions required for building 
 Che will be available at ```localhost:8080```
 
 ### Che sub-projects:
-* **che-plugins**:             [A set of plugins for Eclipse Che] (http://github.com/codenvy/che-plugins)
-* **che-core**:                [Core components of Eclipse Che] (http://github.com/codenvy/che-core)
-* **che-depmgt**:              [Maven Dependency Management POM for Che projects] (http://github.com/codenvy/che-depmgt)
-* **che-parent**:              [Maven parent POM for Che projects] (http://github.com/codenvy/che-parent)
+* **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
+* **che-core**:                [Core components] (http://github.com/codenvy/che-core)
+* **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
+* **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
 
 ### Other projects that are part of Eclispe Che
-* **CLI**:                     [CLI for accessing APIs] (http://github.com/codenvy/cli)
+* **CLI**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
 * **Eclipse Plug-In**:         [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
 ### AngularJS plugin configuration
