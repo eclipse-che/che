@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.deploy;
 
+import com.google.inject.AbstractModule;
+
+import org.eclipse.che.api.analytics.AnalyticsModule;
 import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.builder.BuilderAdminService;
@@ -18,52 +21,41 @@ import org.eclipse.che.api.builder.BuilderService;
 import org.eclipse.che.api.builder.LastInUseBuilderSelectionStrategy;
 import org.eclipse.che.api.builder.internal.BuilderModule;
 import org.eclipse.che.api.builder.internal.SlaveBuilderService;
-
-import org.eclipse.che.api.analytics.AnalyticsModule;
-import org.eclipse.che.api.core.notification.WSocketEventBusClient;
-import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
+import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.factory.FactoryModule;
+import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.runner.LastInUseRunnerSelectionStrategy;
 import org.eclipse.che.api.runner.RunnerAdminService;
 import org.eclipse.che.api.runner.RunnerSelectionStrategy;
 import org.eclipse.che.api.runner.RunnerService;
 import org.eclipse.che.api.runner.internal.RunnerModule;
 import org.eclipse.che.api.runner.internal.SlaveRunnerService;
-
-import org.eclipse.che.api.factory.FactoryModule;
-import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.workspace.server.WorkspaceService;
-
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
+import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.docs.DocsModule;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
-
-import org.eclipse.che.jdt.JavaNavigationService;
-import org.eclipse.che.jdt.JavadocService;
-import org.eclipse.che.jdt.RestNameEnvironment;
-import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
-import org.eclipse.che.vfs.impl.fs.MappedDirectoryLocalFSMountStrategy;
-import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.eclipse.che.ide.ext.java.server.format.FormatService;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore;
-
-import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.jdt.JavaNavigationService;
+import org.eclipse.che.jdt.JavadocService;
+import org.eclipse.che.jdt.RestNameEnvironment;
 import org.eclipse.che.security.oauth.OAuthAuthenticationService;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
+import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
-import com.google.inject.AbstractModule;
-
-import org.eclipse.che.vfs.impl.fs.WorkspaceHashLocalFSMountStrategy;
+import org.eclipse.che.vfs.impl.fs.MappedDirectoryLocalFSMountStrategy;
+import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.eclipse.che.vfs.impl.fs.WorkspaceToDirectoryMappingService;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
@@ -109,14 +101,11 @@ public class ApiModule extends AbstractModule {
         bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
 
 
-        bind(WSocketEventBusServer.class);
-
         bind(RestNameEnvironment.class);
         bind(JavadocService.class);
         bind(JavaNavigationService.class);
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
         bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
-        bind(WSocketEventBusClient.class).asEagerSingleton();
 
         install(new ArchetypeGeneratorModule());
 
