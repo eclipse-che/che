@@ -76,8 +76,8 @@
         "category": "Samples",
         "description": "The following tutorial will take you through simple example to learn how to implement WYSIWYG editor.",
         "source": {
-            "type": "git",
-            "location": "{project.template_location_dir}/tutorials/che-tutorial-wysiwyg-editor.zip"
+            "type": "zip",
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-wysiwyg-editor.zip"
          }
     },
     {
@@ -86,7 +86,7 @@
         "description": "The following tutorial will take you through simple example to learn how to use Gin with Che API.",
         "source": {
             "type": "zip",
-            "location": "{project.template_location_dir}/tutorials/che-tutorial-gin.zip"
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-gin.zip"
         }
     },
     {
@@ -95,7 +95,7 @@
         "description": "The following tutorial will take you through simple example to learn how to use Theme with Codenvy API.",
         "source": {
             "type": "zip",
-            "location": "{project.template_location_dir}/tutorials/che-tutorial-theme-api.zip"
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-theme-api.zip"
         }
     },
     {
@@ -104,7 +104,7 @@
         "description": "The following tutorial will take you through a simple example demonstrating registration of a server side component and server-client side communication.",
         "source": {
             "type": "zip",
-            "location": "{project.template_location_dir}/tutorials/che-tutorial-server-side.zip"
+            "location": "${project.template_location_dir}/tutorials/che-tutorial-server-side.zip"
         }
     }
 ]
