@@ -66,12 +66,6 @@
             <artifactId>che-plugin-github-ext-github</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
-            <artifactId>assembly-ide</artifactId>
-            <version>${project.version}</version>
-            <type>war</type>
-        </dependency>
         <!-- <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-java-codeassistant</artifactId>
