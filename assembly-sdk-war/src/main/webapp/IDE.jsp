@@ -77,6 +77,15 @@
 
         window.IDE.eventHandlers = {};
 
+        window.IDE.eventHandlers.initializationFailed = function(message) {
+            if (message) {
+                var err = new Error(message);
+                window.alert(err.stack);
+            } else {
+                window.alert("Unable to initialize IDE");
+            }
+        };
+
         /**
          * Make URL pretty
          */
