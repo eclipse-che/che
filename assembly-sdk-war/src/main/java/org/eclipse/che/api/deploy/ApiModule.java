@@ -18,6 +18,7 @@ import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.machine.server.command.CommandService;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
@@ -68,6 +69,8 @@ public class ApiModule extends AbstractModule {
         
         bind(RecipeService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);
+
+        bind(CommandService.class);
 
 //        bind(BuilderSelectionStrategy.class).to(LastInUseBuilderSelectionStrategy.class);
 //        bind(BuilderService.class);
