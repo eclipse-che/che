@@ -24,6 +24,8 @@
     <packaging>pom</packaging>
     <name>Che SDK :: Parent</name>
     <modules>
+        <module>assembly-machine-war</module>
+        <module>assembly-machine-server</module>
         <module>assembly-sdk-war</module>
         <module>assembly-sdk</module>
     </modules>
