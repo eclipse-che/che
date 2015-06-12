@@ -19,8 +19,8 @@
 
 LOG_OPTS="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.SimpleLog"
 CODENVY_CONFIG_OPTS="-Xshare:auto -Xms512m -Xmx1024m -XX:MaxPermSize=256m"
-#REMOTE_DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
+REMOTE_DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=4403,server=y,suspend=n"
 JAVA_OPTS="$JAVA_OPTS $LOG_OPTS $CODENVY_CONFIG_OPTS $REMOTE_DEBUG -Djava.security.properties=${CATALINA_BASE}/conf/codenvy-security.properties"
 export JAVA_OPTS
-export SERVER_PORT=8081
+export SERVER_PORT=4401
 export CLASSPATH="${CATALINA_HOME}/conf/:${CATALINA_HOME}/lib/jul-to-slf4j.jar:${CATALINA_HOME}/lib/slf4j-api.jar:${CATALINA_HOME}/lib/logback-classic.jar:${CATALINA_HOME}/lib/logback-core.jar:${JAVA_HOME}/lib/tools.jar"

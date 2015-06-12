@@ -67,7 +67,7 @@
 
             "hiddenFiles": ".*",
 
-            "javaCodeAssistant": "/che/api"
+            "cheExtensionPath": "/che/ext"
 
         };
 

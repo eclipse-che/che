@@ -19,7 +19,7 @@
      define subcomponents such as "Valves" at this level.
      Documentation at /docs/config/server.html
  -->
-<Server port="8006" shutdown="SHUTDOWN">
+<Server port="4402" shutdown="SHUTDOWN">
     <!-- Security listener. Documentation at /docs/config/listeners.html
     <Listener className="org.apache.catalina.security.SecurityListener" />
     -->
@@ -67,7 +67,7 @@
              APR (HTTP/AJP) Connector: /docs/apr.html
              Define a non-SSL HTTP/1.1 Connector on port 8080
         -->
-        <Connector port="8081" protocol="HTTP/1.1"
+        <Connector port="4401" protocol="HTTP/1.1"
                    connectionTimeout="20000"
                    redirectPort="8443"
                    maxHttpHeaderSize="65536"/>
@@ -89,7 +89,7 @@
         -->
 
         <!-- Define an AJP 1.3 Connector on port 8009 -->
-        <Connector port="8010" protocol="AJP/1.3" redirectPort="8443"/>
+        <Connector port="4404" protocol="AJP/1.3" redirectPort="8443"/>
 
 
         <!-- An Engine represents the entry point (within Catalina) that processes
