@@ -173,7 +173,7 @@
                                 <chmod dir="${project.build.directory}/tomcat-ide/bin" includes="**/*.sh" perm="+x" />
                                 <!--<move file="${project.build.directory}/tomcat-ide/bin/catalina.sh" tofile="${project.build.directory}/tomcat-ide/bin/che.sh" />-->
                                 <delete file="${project.build.directory}/tomcat-ide/bin/catalina.bat" />
-                                <copy file="${project.build.directory}/packager-conf/war/assembly-machine-war-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/ext.war" />
+                                <copy file="${project.build.directory}/packager-conf/war/assembly-machine-war-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/ROOT.war" />
                                 <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
                             </target>
                         </configuration>
