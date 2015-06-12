@@ -189,6 +189,15 @@
                                     <outputDirectory>${project.build.directory}/packager-conf/zip</outputDirectory>
                                     <destFileName>tomcat.zip</destFileName>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che.sdk</groupId>
+                                    <artifactId>assembly-machine-server</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>zip</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/packager-conf/zip</outputDirectory>
+                                    <destFileName>ext-server.zip</destFileName>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -444,6 +453,7 @@
                                     <fileset dir="${project.build.directory}/packager-conf/zip/tutorials" />
                                 </move>-->
                                 <copy file="${project.build.directory}/packager-conf/war/assembly-sdk-war-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/che.war" />
+                                <move file="${project.build.directory}/packager-conf/zip/ext-server.zip" tofile="${project.build.directory}/tomcat-ide/ext-server/ext-server.zip" />
                                 <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
                             </target>
                         </configuration>

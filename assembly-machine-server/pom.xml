@@ -196,7 +196,7 @@
                             <descriptors>
                                 <descriptor>${project.basedir}/src/main/assembly/tomcat-archive.xml</descriptor>
                             </descriptors>
-                            <finalName>che-${project.version}</finalName>
+                            <finalName>ext-server-${project.version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
