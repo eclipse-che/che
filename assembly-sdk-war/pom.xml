@@ -128,11 +128,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-jdt-ext-machine</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-codemirror-editorwidget</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
