@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.deploy;
 
+import com.google.inject.servlet.ServletModule;
+
+import org.eclipse.che.api.machine.server.proxy.MachineExtensionProxyServlet;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.everrest.CodenvyEverrestWebSocketServlet;
 import org.eclipse.che.inject.DynaModule;
-import com.google.inject.servlet.ServletModule;
-
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
@@ -38,7 +39,7 @@ public class ApiServletModule extends ServletModule {
         filter("/*").through(SingleEnvironmentFilter.class, params);
         serve("/api/ws/*").with(CodenvyEverrestWebSocketServlet.class);
         serve("/api/*").with(GuiceEverrestServlet.class);
-
+        serve("/ext/*").with(MachineExtensionProxyServlet.class);
 
     }
 }
