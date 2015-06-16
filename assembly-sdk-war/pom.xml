@@ -189,7 +189,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-machine</artifactId>
+            <artifactId>che-plugin-machine-ext-client</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
