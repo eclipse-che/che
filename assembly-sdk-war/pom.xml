@@ -174,17 +174,22 @@
         </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-client</artifactId>
+            <artifactId>che-plugin-java-ext-lang-client</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-lang-server</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-maven</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-server</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
