@@ -156,6 +156,11 @@
             <artifactId>che-plugin-github-provider-github</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-help-ext-client</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
         <!--dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-ant</artifactId>
