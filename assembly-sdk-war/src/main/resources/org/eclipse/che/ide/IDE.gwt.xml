@@ -34,6 +34,7 @@
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
 
     <!-- Extensions                                                 -->
+    <inherits name='org.eclipse.che.ide.ext.help.HelpAboutExtension'/>
     <inherits name='org.eclipse.che.ide.ext.web.Web'/>
     <inherits name='org.eclipse.che.ide.ext.java.Java'/>
     <inherits name='org.eclipse.che.ide.jseditor.java.JsJavaEditor'/>
