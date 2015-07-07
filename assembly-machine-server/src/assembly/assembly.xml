@@ -17,23 +17,29 @@
         <format>zip</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
-    <fileSets>
-        <!-- Default files -->
-        <fileSet>
-            <directory>target/tomcat-ide</directory>
-            <outputDirectory></outputDirectory>
-            <excludes>
-                <exclude>**/*.sh</exclude>
-            </excludes>
-        </fileSet>
-        <!-- Executable files-->
-        <fileSet>
-            <directory>target/tomcat-ide</directory>
+    <dependencySets>
+        <dependencySet>
+            <unpack>true</unpack>
             <outputDirectory></outputDirectory>
             <includes>
-                <include>**/*.sh</include>
+                <include>com.codenvy.resources:codenvy-tomcat8-slf4j-logback</include>
             </includes>
-            <fileMode>755</fileMode>
-        </fileSet>
-    </fileSets>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <outputDirectory>tomcat</outputDirectory>
+            <includes>
+                <include>com.codenvy.resources:codenvy-tomcat8-slf4j-logback</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.sdk:assembly-machine-war</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 </assembly>
