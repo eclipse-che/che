@@ -16,10 +16,8 @@
 # from Codenvy S.A..
 #
 
-if [ -z "${CODENVY_LOCAL_CONF_DIR}" ]; then
-    echo "Need to set CODENVY_LOCAL_CONF_DIR"
-    exit 1
-fi
+#Global Conf dir
+[ -z "${CODENVY_LOCAL_CONF_DIR}" ]  && CODENVY_LOCAL_CONF_DIR="${CATALINA_HOME}/conf/"
 
 #Global JAVA options
 [ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m  -server"
