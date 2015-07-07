@@ -13,7 +13,7 @@ then
  # echo "$(tput setaf 1)ERROR: Please run 'mvn clean install' and try again."$(tput sgr0)
  # echo "$(tput setaf 1)ERROR: For more information, please see the Codenvy SDK README:"$(tput sgr0)
  # echo "$(tput setaf 1)ERROR:     https://github.com/codenvy/che"$(tput sgr0)
-  exit 1
+ # exit 1
 fi
 
 cd "${TOMCAT_IDE_DIR}"
