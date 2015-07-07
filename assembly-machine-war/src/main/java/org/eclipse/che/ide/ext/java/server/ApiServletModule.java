@@ -24,7 +24,6 @@ import javax.inject.Singleton;
 public class ApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
         bind(SingleEnvironmentFilter.class).in(Singleton.class);
         serve("/*").with(GuiceEverrestServlet.class);
     }

@@ -1,0 +1,133 @@
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>tomcat-zip</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <!--
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>datasource.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.plugin:che-plugin-datasource-server-war-sdk</include>
+            </includes>
+        </dependencySet>
+        -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>che.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.sdk:assembly-sdk-war</include>
+            </includes>
+        </dependencySet>
+        <!--
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>sdk-tools</outputDirectory>
+            <outputFileNameMapping>che-plugin-sdk-tools.jar</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>che-templates/tutorials</outputDirectory>
+            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.tutorials:che-tutorial-action-api</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-analytics-event</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-editor-api</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-server-side</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-empty-ext</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-gin</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-gist-ext</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-helloworld-ext</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-icons-registry-api</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-notification-api</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-parts-api</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-theme-api</include>
+                <include>org.eclipse.che.tutorials:che-tutorial-wysiwyg-editor</include>
+            </includes>
+        </dependencySet>
+        -->
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/dependency</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>bin/catalina.*</exclude>
+                <exclude>bin/setenv.*</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/che-templates</directory>
+            <outputDirectory>che-templates</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/ext</directory>
+            <outputDirectory>ext</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/sdk-resources</directory>
+            <outputDirectory>sdk-resources</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/webapps</directory>
+            <outputDirectory>webapps</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>extInstall.bat</include>
+                <include>RUNNING_CheSDK.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>extInstall.sh</include>
+            </includes>
+            <fileMode>755</fileMode>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>${project.build.directory}/dependency/bin/catalina.sh</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>che.sh</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.build.directory}/dependency/bin/catalina.bat</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>che.bat</destName>
+        </file>
+    </files>
+</assembly>

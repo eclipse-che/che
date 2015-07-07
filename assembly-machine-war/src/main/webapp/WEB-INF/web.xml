@@ -20,6 +20,14 @@
     <listener>
         <listener-class>org.eclipse.che.inject.CodenvyBootstrap</listener-class>
     </listener>
+    <listener>
+        <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>org.everrest.websockets.WSConnectionTracker</listener-class>
+    </listener>
+
     <filter>
         <filter-name>guiceFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
