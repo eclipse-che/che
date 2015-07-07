@@ -2,15 +2,17 @@
 #
 # Startup script for Codenvy SDK.  Downloads Tomcat for running projects within the IDE if necessary.
 
+
 TOMCAT="tomcat"
 TOMCAT_IDE_DIR="assembly-sdk/target/tomcat-ide"
 
 if [ ! -d "${TOMCAT_IDE_DIR}" ]
 then
-  echo "$(tput setaf 1)ERROR: Looks like you have not installed the Codenvy SDK."$(tput sgr0)
-  echo "$(tput setaf 1)ERROR: Please run 'mvn clean install' and try again."$(tput sgr0)
-  echo "$(tput setaf 1)ERROR: For more information, please see the Codenvy SDK README:"$(tput sgr0)
-  echo "$(tput setaf 1)ERROR:     https://github.com/codenvy/che"$(tput sgr0)
+  unzip assembly-sdk/target/*.zip -d assembly-sdk/target/tomcat-ide
+ # echo "$(tput setaf 1)ERROR: Looks like you have not installed the Codenvy SDK."$(tput sgr0)
+ # echo "$(tput setaf 1)ERROR: Please run 'mvn clean install' and try again."$(tput sgr0)
+ # echo "$(tput setaf 1)ERROR: For more information, please see the Codenvy SDK README:"$(tput sgr0)
+ # echo "$(tput setaf 1)ERROR:     https://github.com/codenvy/che"$(tput sgr0)
   exit 1
 fi
 
