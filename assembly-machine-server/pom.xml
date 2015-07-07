@@ -26,14 +26,10 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${ch.qos.logback.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${ch.qos.logback.version}</version>
+            <groupId>com.codenvy.resources</groupId>
+            <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
+            <version>${version.resource-bundle}</version>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
@@ -41,165 +37,27 @@
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-clear-tomcat</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.tomcat</groupId>
-                                    <artifactId>tomcat</artifactId>
-                                    <type>zip</type>
-                                    <version>${org.apache.tomcat.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip</outputDirectory>
-                                    <destFileName>tomcat.zip</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies-war</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeTypes>war</includeTypes>
-                            <silent>true</silent>
-                            <outputDirectory>${project.build.directory}/packager-conf/war</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-tomcat-libs</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>log4j-over-slf4j</artifactId>
-                                    <version>${org.slf4j.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>log4j-over-slf4j.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-api</artifactId>
-                                    <version>${org.slf4j.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>slf4j-api.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>jul-to-slf4j</artifactId>
-                                    <version>${org.slf4j.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>jul-to-slf4j.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>ch.qos.logback</groupId>
-                                    <artifactId>logback-core</artifactId>
-                                    <version>${ch.qos.logback.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>logback-core.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>ch.qos.logback</groupId>
-                                    <artifactId>logback-classic</artifactId>
-                                    <version>${ch.qos.logback.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>logback-classic.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>Prepare Tomcat</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <unzip dest="${project.build.directory}" src="${project.build.directory}/packager-conf/zip/tomcat.zip">
-                                    <patternset>
-                                        <exclude name="**/ROOT/**" />
-                                        <exclude name="**/docs/**" />
-                                        <exclude name="**/examples/**" />
-                                        <exclude name="**/manager/**" />
-                                        <exclude name="**/host-manager/**" />
-                                    </patternset>
-                                </unzip>
-                                <move file="${project.build.directory}/apache-tomcat-${org.apache.tomcat.version}" tofile="${project.build.directory}/tomcat-ide" />
-                                <copy overwrite="true" todir="${project.build.directory}/tomcat-ide/tomcat">
-                                    <fileset dir="${project.build.directory}/tomcat-ide" />
-                                </copy>
-                                <copy overwrite="true" todir="${project.build.directory}/tomcat-ide">
-                                    <fileset dir="${basedir}/src/main/resources/tomcat" />
-                                </copy>
-                                <chmod dir="${project.build.directory}/tomcat-ide/bin" includes="**/*.sh" perm="+x" />
-                                <!--<move file="${project.build.directory}/tomcat-ide/bin/catalina.sh" tofile="${project.build.directory}/tomcat-ide/bin/che.sh" />-->
-                                <delete file="${project.build.directory}/tomcat-ide/bin/catalina.bat" />
-                                <copy file="${project.build.directory}/packager-conf/war/assembly-machine-war-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/ROOT.war" />
-                                <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
-                    <!-- Create the distribution zip and attach it to maven -->
                     <execution>
-                        <id>tomcat-zip</id>
+                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <updateOnly>false</updateOnly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/assembly/tomcat-archive.xml</descriptor>
-                            </descriptors>
-                            <finalName>ext-server-${project.version}</finalName>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <updateOnly>false</updateOnly>
+                    <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                    <finalName>ext-server-${project.version}</finalName>
+                </configuration>
             </plugin>
         </plugins>
     </build>

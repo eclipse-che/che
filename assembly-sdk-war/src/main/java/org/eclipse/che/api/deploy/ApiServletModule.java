@@ -14,9 +14,7 @@ import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.api.machine.server.proxy.MachineExtensionProxyServlet;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
-import org.eclipse.che.everrest.CodenvyEverrestWebSocketServlet;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
 import javax.inject.Singleton;
@@ -33,13 +31,13 @@ public class ApiServletModule extends ServletModule {
         bind(SingleEnvironmentFilter.class).in(Singleton.class);
 
 
-        Map<String,String> params = new HashMap<>(2);
+        Map<String, String> params = new HashMap<>(2);
         params.put("ws-name", "default");
         params.put("ws-id", "1q2w3e");
         filter("/*").through(SingleEnvironmentFilter.class, params);
-        serve("/api/ws/*").with(CodenvyEverrestWebSocketServlet.class);
-        serve("/api/*").with(GuiceEverrestServlet.class);
         serve("/ext/*").with(MachineExtensionProxyServlet.class);
+        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(CheGuiceEverrestServlet.class);
+
 
     }
 }

@@ -26,460 +26,109 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${ch.qos.logback.version}</version>
+            <groupId>com.codenvy.resources</groupId>
+            <artifactId>codenvy-tomcat7</artifactId>
+            <version>6-SNAPSHOT</version>
+            <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${ch.qos.logback.version}</version>
+            <groupId>com.codenvy.resources</groupId>
+            <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
+            <version>6-SNAPSHOT</version>
+            <type>zip</type>
         </dependency>
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>${com.jcraft.jsch.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-app</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-vfs-impl</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <!--<dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-datasource-server-war-sdk</artifactId>
-            <version>${che.plugins.version}</version>
-            <type>war</type>
-        </dependency>-->
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-git-ext-git</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-ext-github</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <!-- <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
-            <artifactId>assembly-java-codeassistant</artifactId>
-            <version>${project.version}</version>
-            <type>war</type>
-        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-sdk-war</artifactId>
             <version>${project.version}</version>
             <type>war</type>
         </dependency>
-        <!--<dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-action-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-analytics-event</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-empty-ext</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-gin</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-gist-ext</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-helloworld-ext</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-icons-registry-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-notification-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-parts-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-theme-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-wysiwyg-editor</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs</artifactId>
-            <version>${che.core.version}</version>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-clear-tomcat</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.tomcat</groupId>
-                                    <artifactId>tomcat</artifactId>
-                                    <type>zip</type>
-                                    <version>${org.apache.tomcat.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip</outputDirectory>
-                                    <destFileName>tomcat.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.sdk</groupId>
-                                    <artifactId>assembly-machine-server</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>zip</type>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip</outputDirectory>
-                                    <destFileName>ext-server.zip</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies-war</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeTypes>war</includeTypes>
-                            <silent>true</silent>
-                            <outputDirectory>${project.build.directory}/packager-conf/war</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-tomcat-libs</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>log4j-over-slf4j</artifactId>
-                                    <version>${org.slf4j.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>log4j-over-slf4j.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>slf4j-api</artifactId>
-                                    <version>${org.slf4j.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>slf4j-api.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.slf4j</groupId>
-                                    <artifactId>jul-to-slf4j</artifactId>
-                                    <version>${org.slf4j.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>jul-to-slf4j.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>ch.qos.logback</groupId>
-                                    <artifactId>logback-core</artifactId>
-                                    <version>${ch.qos.logback.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>logback-core.jar</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>ch.qos.logback</groupId>
-                                    <artifactId>logback-classic</artifactId>
-                                    <version>${ch.qos.logback.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>logback-classic.jar</destFileName>
-                                </artifactItem>
-                                <!--<artifactItem>
-                                    <groupId>org.eclipse.che.plugin</groupId>
-                                    <artifactId>che-plugin-datasource-ssl-socket-factory</artifactId>
-                                    <version>${che.plugins.version}</version>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/lib</outputDirectory>
-                                    <destFileName>che-plugin-datasource-ssl-socket-factory.jar</destFileName>
-                                </artifactItem>-->
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <!--<execution>
-                        <id>copy-tutorials</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-action-api</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-action-api.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-theme-api</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-theme-api.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-notification-api</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-notification-api.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-parts-api</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-parts-api.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-editor-api</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-editor-api.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-gin</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-gin.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-gist-ext</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-gist-ext.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-empty-ext</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-empty-ext.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-helloworld-ext</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-helloworld-ext.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-analytics-event</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-analytics-event.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-icons-registry-api</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-icons-registry-api.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-wysiwyg-editor</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-wysiwyg-editor.zip</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.tutorials</groupId>
-                                    <artifactId>che-tutorial-server-side</artifactId>
-                                    <type>zip</type>
-                                    <version>${che.tutorials.version}</version>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/packager-conf/zip/tutorials</outputDirectory>
-                                    <destFileName>che-tutorial-server-side.zip</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>-->
-                    <!--<execution>
-                        <id>copy-sdk-tools</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.che.plugin</groupId>
-                                    <artifactId>che-plugin-sdk-tools</artifactId>
-                                    <version>${che.plugins.version}</version>
-                                    <classifier>jar-with-dependencies</classifier>
-                                    <outputDirectory>${project.build.directory}/tomcat-ide/sdk-tools</outputDirectory>
-                                    <destFileName>che-plugin-sdk-tools.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>-->
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>Prepare Tomcat</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <unzip dest="${project.build.directory}" src="${project.build.directory}/packager-conf/zip/tomcat.zip">
-                                    <patternset>
-                                        <exclude name="**/ROOT/**" />
-                                        <exclude name="**/docs/**" />
-                                        <exclude name="**/examples/**" />
-                                        <exclude name="**/manager/**" />
-                                        <exclude name="**/host-manager/**" />
-                                    </patternset>
-                                </unzip>
-                                <move file="${project.build.directory}/apache-tomcat-${org.apache.tomcat.version}" tofile="${project.build.directory}/tomcat-ide" />
-                                <copy overwrite="true" todir="${project.build.directory}/tomcat-ide/tomcat">
-                                    <fileset dir="${project.build.directory}/tomcat-ide" />
-                                </copy>
-                                <copy overwrite="true" todir="${project.build.directory}/tomcat-ide">
-                                    <fileset dir="${basedir}/src/main/resources/tomcat" />
-                                </copy>
-                                <chmod dir="${project.build.directory}/tomcat-ide/bin" includes="**/*.sh" perm="+x" />
-                                <move file="${project.build.directory}/tomcat-ide/bin/catalina.sh" tofile="${project.build.directory}/tomcat-ide/bin/che.sh" />
-                                <delete file="${project.build.directory}/tomcat-ide/bin/catalina.bat" />
-                                <!-- Copy resources to re-build Codenvy IDE with 3rd-party extensions. -->
-                                <!--<copy overwrite="true" todir="${project.build.directory}/tomcat-ide/sdk-resources">
-                                    <fileset dir="${project.build.directory}/../../assembly-ide" includes="src/**, pom.xml" />
-                                </copy>-->
-                                <!-- <move todir="${project.build.directory}/tomcat-ide/che-templates/tutorials">
-                                    <fileset dir="${project.build.directory}/packager-conf/zip/tutorials" />
-                                </move>-->
-                                <copy file="${project.build.directory}/packager-conf/war/assembly-sdk-war-${project.version}.war" overwrite="true" tofile="${project.build.directory}/tomcat-ide/webapps/che.war" />
-                                <move file="${project.build.directory}/packager-conf/zip/ext-server.zip" tofile="${project.build.directory}/tomcat-ide/ext-server/ext-server.zip" />
-                                <chmod dir="${project.build.directory}/tomcat-ide" includes="*.sh" perm="+x" />
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
-                    <!-- Create the distribution zip and attach it to maven -->
                     <execution>
-                        <id>tomcat-zip</id>
+                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <updateOnly>false</updateOnly>
+                    <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-tomcat</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
                         <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <updateOnly>false</updateOnly>
-                            <descriptors>
-                                <descriptor>${project.basedir}/src/main/assembly/tomcat-archive.xml</descriptor>
-                            </descriptors>
-                            <finalName>che-${project.version}</finalName>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.codenvy.resources</groupId>
+                                    <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
+                                    <version>${version.resource-bundle}</version>
+                                    &gt;
+                                    <type>zip</type>
+                                    <overWrite>false</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-tomcat7</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.codenvy.resources</groupId>
+                                    <artifactId>codenvy-tomcat7</artifactId>
+                                    <version>${version.resource-bundle}</version>
+                                    <type>zip</type>
+                                    <overWrite>false</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/dependency/tomcat</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <file>${project.build.directory}/dependency/bin/catalina.bat</file>
+                    <replacements>
+                        <replacement>
+                            <token>catalina.bat</token>
+                            <value>che.bat</value>
+                        </replacement>
+                    </replacements>
+                </configuration>
             </plugin>
         </plugins>
     </build>

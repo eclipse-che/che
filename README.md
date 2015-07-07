@@ -43,7 +43,7 @@ Che will be available at ```localhost:8080```
 * **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
 
-### Other projects that are part of Eclispe Che
+### Other projects that are part of Eclipse Che
 * **CLI**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
 * **Eclipse Plug-In**:         [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
