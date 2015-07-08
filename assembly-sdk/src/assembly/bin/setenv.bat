@@ -16,12 +16,7 @@
 @REM from Codenvy S.A..
 @REM
 @echo off
-if "%CODENVY_LOCAL_CONF_DIR%"==""   (
-   echo Need to set CODENVY_LOCAL_CONF_DIR
-   echo Press enter to exit...
-   pause >nul
-   exit
-)
+set CODENVY_LOCAL_CONF_DIR=%CATALINA_HOME%\conf\
 
 if "%JAVA_OPTS%"=="" (set JAVA_OPTS=-Xms256m -Xmx1048m -XX:MaxPermSize=256m -server)
 

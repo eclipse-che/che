@@ -2,7 +2,17 @@
 
 SET CDIR=%CD%
 
-cd assembly-sdk/target/tomcat-ide/bin/
+set TOMCAT_IDE_DIR="assembly-sdk/target/tomcat-ide"
+
+if exist "%TOMCAT_IDE_DIR%" (
+    cd assembly-sdk/target/tomcat-ide/bin
+) else (
+    cd assembly-sdk/target
+    mkdir tomcat-ide
+    cd tomcat-ide
+    jar xf ../*.zip
+    cd bin
+)
 
 echo Launching Codenvy SDK
 
