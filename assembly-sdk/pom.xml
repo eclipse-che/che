@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>3.11.0</version>
+        <version>3.11.1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-sdk</artifactId>
     <packaging>pom</packaging>
