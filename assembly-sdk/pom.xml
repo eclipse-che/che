@@ -28,13 +28,13 @@
         <dependency>
             <groupId>com.codenvy.resources</groupId>
             <artifactId>codenvy-tomcat7</artifactId>
-            <version>6-SNAPSHOT</version>
+            <version>${version.resource-bundle}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.resources</groupId>
             <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
-            <version>6-SNAPSHOT</version>
+            <version>${version.resource-bundle}</version>
             <type>zip</type>
         </dependency>
         <dependency>
