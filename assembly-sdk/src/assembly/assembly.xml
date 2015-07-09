@@ -74,6 +74,7 @@
             <excludes>
                 <exclude>bin/catalina.*</exclude>
                 <exclude>bin/setenv.*</exclude>
+                <exclude>tomcat/bin/setenv.*</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -83,6 +84,10 @@
         <fileSet>
             <directory>${project.basedir}/src/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/bin</directory>
+            <outputDirectory>tomcat/bin</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/ext</directory>
