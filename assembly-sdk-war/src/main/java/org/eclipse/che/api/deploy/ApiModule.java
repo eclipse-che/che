@@ -24,6 +24,7 @@ import org.eclipse.che.api.builder.internal.SlaveBuilderService;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.factory.FactoryModule;
+import org.eclipse.che.api.local.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.runner.LastInUseRunnerSelectionStrategy;
 import org.eclipse.che.api.runner.RunnerAdminService;
@@ -34,6 +35,7 @@ import org.eclipse.che.api.runner.internal.SlaveRunnerService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
+import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.docs.DocsModule;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
@@ -107,8 +109,9 @@ public class ApiModule extends AbstractModule {
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
         bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
-        install(new ArchetypeGeneratorModule());
+        bind(VirtualFileSystemRegistry.class).to(LocalVirtualFileSystemRegistry.class);
 
+        install(new ArchetypeGeneratorModule());
         install(new CoreRestModule());
         install(new AnalyticsModule());
         install(new BaseProjectModule());
