@@ -19,6 +19,7 @@ import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.vfs.impl.fs.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.api.machine.server.command.CommandService;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
@@ -27,6 +28,7 @@ import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
+import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
@@ -65,7 +67,7 @@ public class ApiModule extends AbstractModule {
         bind(UserProfileService.class);
 
         bind(LocalFileSystemRegistryPlugin.class);
-        
+
         bind(RecipeService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);
 
@@ -99,6 +101,8 @@ public class ApiModule extends AbstractModule {
         bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(WSocketEventBusServer.class);
+
+        bind(VirtualFileSystemRegistry.class).to(LocalVirtualFileSystemRegistry.class);
 
 //        install(new ArchetypeGeneratorModule());
 
