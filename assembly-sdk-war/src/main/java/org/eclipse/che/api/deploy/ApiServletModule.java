@@ -12,6 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.local.CheGuiceEverrestServlet;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.websockets.WSConnectionTracker;
