@@ -38,6 +38,15 @@
                 <include>org.eclipse.che.sdk:assembly-sdk-war</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>ext-server</outputDirectory>
+            <outputFileNameMapping>ext-server.zip</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.sdk:assembly-machine-server</include>
+            </includes>
+        </dependencySet>
         <!--
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

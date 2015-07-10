@@ -39,6 +39,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>assembly-machine-server</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-sdk-war</artifactId>
             <version>${project.version}</version>
             <type>war</type>
@@ -80,7 +86,6 @@
                                     <groupId>com.codenvy.resources</groupId>
                                     <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
                                     <version>${version.resource-bundle}</version>
-                                    &gt;
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
                                 </artifactItem>
