@@ -22,14 +22,14 @@
             <unpack>true</unpack>
             <outputDirectory></outputDirectory>
             <includes>
-                <include>com.codenvy.resources:codenvy-tomcat8-slf4j-logback</include>
+                <include>com.codenvy.resources:che-tomcat8-slf4j-logback</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <unpack>true</unpack>
             <outputDirectory>tomcat</outputDirectory>
             <includes>
-                <include>com.codenvy.resources:codenvy-tomcat8-slf4j-logback</include>
+                <include>com.codenvy.resources:che-tomcat8-slf4j-logback</include>
             </includes>
         </dependencySet>
         <dependencySet>

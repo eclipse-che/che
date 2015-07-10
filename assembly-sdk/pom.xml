@@ -27,13 +27,13 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.resources</groupId>
-            <artifactId>codenvy-tomcat7</artifactId>
-            <version>${version.resource-bundle}</version>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <version>8</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.codenvy.resources</groupId>
-            <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
+            <artifactId>codenvy-tomcat7</artifactId>
             <version>${version.resource-bundle}</version>
             <type>zip</type>
         </dependency>
@@ -84,57 +84,57 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.codenvy.resources</groupId>
-                                    <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
-                                    <version>${version.resource-bundle}</version>
+                                    <artifactId>che-tomcat8-slf4j-logback</artifactId>
+                                    <version>8</version>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>unpack-tomcat7</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.codenvy.resources</groupId>
-                                    <artifactId>codenvy-tomcat7</artifactId>
-                                    <version>${version.resource-bundle}</version>
-                                    <type>zip</type>
-                                    <overWrite>false</overWrite>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}/dependency/tomcat</outputDirectory>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                    <!--<id>unpack-tomcat7</id>-->
+                    <!--<phase>prepare-package</phase>-->
+                    <!--<goals>-->
+                    <!--<goal>unpack</goal>-->
+                    <!--</goals>-->
+                    <!--<configuration>-->
+                    <!--<artifactItems>-->
+                    <!--<artifactItem>-->
+                    <!--<groupId>com.codenvy.resources</groupId>-->
+                    <!--<artifactId>codenvy-tomcat7</artifactId>-->
+                    <!--<version>${version.resource-bundle}</version>-->
+                    <!--<type>zip</type>-->
+                    <!--<overWrite>false</overWrite>-->
+                    <!--</artifactItem>-->
+                    <!--</artifactItems>-->
+                    <!--<outputDirectory>${project.build.directory}/dependency/tomcat</outputDirectory>-->
+                    <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>${project.build.directory}/dependency/bin/catalina.bat</file>
-                    <replacements>
-                        <replacement>
-                            <token>catalina.bat</token>
-                            <value>che.bat</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>com.google.code.maven-replacer-plugin</groupId>-->
+            <!--<artifactId>replacer</artifactId>-->
+            <!--<version>1.5.3</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>prepare-package</phase>-->
+            <!--<goals>-->
+            <!--<goal>replace</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--<configuration>-->
+            <!--<file>${project.build.directory}/dependency/bin/catalina.bat</file>-->
+            <!--<replacements>-->
+            <!--<replacement>-->
+            <!--<token>catalina.bat</token>-->
+            <!--<value>che.bat</value>-->
+            <!--</replacement>-->
+            <!--</replacements>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

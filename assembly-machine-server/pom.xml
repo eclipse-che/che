@@ -27,8 +27,8 @@
     <dependencies>
         <dependency>
             <groupId>com.codenvy.resources</groupId>
-            <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
-            <version>${version.resource-bundle}</version>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <version>8</version>
             <type>zip</type>
         </dependency>
         <dependency>
