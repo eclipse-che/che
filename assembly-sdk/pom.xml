@@ -21,20 +21,11 @@
     <artifactId>assembly-sdk</artifactId>
     <packaging>pom</packaging>
     <name>Che SDK :: Assemblies Tomcat</name>
-    <properties>
-        <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.resources</groupId>
-            <artifactId>codenvy-tomcat7</artifactId>
-            <version>${version.resource-bundle}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.codenvy.resources</groupId>
-            <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
-            <version>${version.resource-bundle}</version>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <version>8</version>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -168,8 +159,8 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.codenvy.resources</groupId>
-                                    <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
-                                    <version>${version.resource-bundle}</version>
+                                    <artifactId>che-tomcat8-slf4j-logback</artifactId>
+                                    <version>8</version>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
                                 </artifactItem>
@@ -186,8 +177,8 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.codenvy.resources</groupId>
-                                    <artifactId>codenvy-tomcat8-slf4j-logback</artifactId>
-                                    <version>${version.resource-bundle}</version>
+                                    <artifactId>che-tomcat8-slf4j-logback</artifactId>
+                                    <version>8</version>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
