@@ -21,9 +21,6 @@
     <artifactId>assembly-sdk</artifactId>
     <packaging>pom</packaging>
     <name>Che SDK :: Assemblies Tomcat</name>
-    <properties>
-        <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.resources</groupId>

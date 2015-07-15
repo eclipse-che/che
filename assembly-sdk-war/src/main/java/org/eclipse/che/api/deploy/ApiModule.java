@@ -106,6 +106,7 @@ public class ApiModule extends AbstractModule {
 
 //        install(new ArchetypeGeneratorModule());
 
+        install(new ArchetypeGeneratorModule());
         install(new CoreRestModule());
         install(new AnalyticsModule());
         install(new BaseProjectModule());
