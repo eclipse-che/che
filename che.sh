@@ -29,7 +29,7 @@ then
   tomcatDir="apache-tomcat-"${tomcatVersion}
   tomcatBinUrl="http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcatVersion}/bin/apache-tomcat-${tomcatVersion}.zip"
 
-  curl -# -f -o ${tomcatDir}.zip ${tomcatBinUrl}
+#  curl -# -f -o ${tomcatDir}.zip ${tomcatBinUrl}
 
   if [ $? -ne 0 ]
   then

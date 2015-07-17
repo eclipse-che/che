@@ -18,13 +18,18 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
 import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /** @author andrew00x */
 @DynaModule
 public class ApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        bind(SingleEnvironmentFilter.class).in(Singleton.class);
+        Map<String, String> params = new HashMap<>(2);
+        params.put("ws-name", "default");
+        params.put("ws-id", "1q2w3e");
+        filter("/*").through(SingleEnvironmentFilter.class, params);
         serve("/*").with(GuiceEverrestServlet.class);
     }
 }

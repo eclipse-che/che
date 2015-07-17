@@ -48,5 +48,11 @@
             <outputDirectory>conf</outputDirectory>
             <destName>server.xml</destName>
         </file>
+        <file>
+            <source>${project.basedir}/src/assembly/setenv.sh</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>setenv.sh</destName>
+            <fileMode>755</fileMode>
+        </file>
     </files>
 </assembly>
