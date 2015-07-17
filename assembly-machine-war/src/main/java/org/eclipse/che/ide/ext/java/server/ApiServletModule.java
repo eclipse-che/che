@@ -29,7 +29,7 @@ public class ApiServletModule extends ServletModule {
         Map<String, String> params = new HashMap<>(2);
         params.put("ws-name", "default");
         params.put("ws-id", "1q2w3e");
-        filter("/*").through(SingleEnvironmentFilter.class, params);
-        serve("/*").with(GuiceEverrestServlet.class);
+        filter("/ext/*").through(SingleEnvironmentFilter.class, params);
+        serve("/ext/*").with(GuiceEverrestServlet.class);
     }
 }

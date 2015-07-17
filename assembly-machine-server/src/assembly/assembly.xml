@@ -36,7 +36,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+            <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.sdk:assembly-machine-war</include>
             </includes>
