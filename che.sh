@@ -45,7 +45,7 @@ then
   echo "$(tput setaf 2)INFO: Tomcat ${tomcatVersion} for runners successfully downloaded"$(tput sgr0)
 fi
 
-echo "$(tput setaf 2)INFO: Launching Codenvy SDK"$(tput sgr0)
+echo "$(tput setaf 2)INFO: Launching Eclipse Che"$(tput sgr0)
 sleep 1
 
 cd bin

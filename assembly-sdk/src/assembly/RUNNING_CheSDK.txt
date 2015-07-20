@@ -147,13 +147,13 @@ oauth.github.redirecturis= http://localhost:8080/api/oauth/callback
 Local User Profile: Theme Preferences and SSH Keys
 ==================================================
 
-User preferences are stored in a profile which is a JSON file ProfileStorage.json. Such preferences include but (not limited to) SSH keys and Themes. By default, the profile is stored in temp folder in Tomcat root, however, you can specify its new permanent location in codenvy-api-configuration.properties and actually move it there:
+User preferences are stored in a profile which is a JSON file profile.json. Such preferences include but (not limited to) SSH keys and Themes. By default, the profile is stored in temp folder in Tomcat root, however, you can specify its new permanent location in che.properties and actually move it there:
 
-profile.store_location=${catalina.base}/temp
+user.local.db=${catalina.base}/temp
 
 replace with
 
-profile.store_location=/your/local/path/
+ user.local.db=/your/local/path/
 
 ===============================================
 Contribute 3rd-party extensions to Codenvy IDE

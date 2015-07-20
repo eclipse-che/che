@@ -14,7 +14,7 @@ if exist "%TOMCAT_IDE_DIR%" (
     cd bin
 )
 
-echo Launching Codenvy SDK
+echo Launching Eclipse Che
 
 call che.bat %1 %2 %3 %4 %5 %6 %7 %8
 
