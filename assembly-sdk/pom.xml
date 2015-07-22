@@ -35,6 +35,12 @@
             <type>zip</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.depmgt</groupId>
+            <artifactId>che-websocket-terminal</artifactId>
+            <version>${websocket.terminal.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-machine-server</artifactId>
             <version>${project.version}</version>

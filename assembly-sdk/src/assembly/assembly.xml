@@ -47,6 +47,15 @@
                 <include>org.eclipse.che.sdk:assembly-machine-server</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>web-terminal</outputDirectory>
+            <outputFileNameMapping>terminal.zip</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.depmgt:che-websocket-terminal</include>
+            </includes>
+        </dependencySet>
         <!--
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
