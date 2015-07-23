@@ -18,25 +18,21 @@
         <groupId>org.eclipse.che.depmgt</groupId>
         <version>3.12.1-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.sdk</groupId>
-    <artifactId>che-sdk-parent</artifactId>
+    <groupId>org.eclipse.che.examples</groupId>
+    <artifactId>examples-parent</artifactId>
     <version>3.12.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che SDK :: Parent</name>
+    <name>Che Examples :: Parent</name>
     <modules>
-        <module>recipes</module>
-        <module>examples</module>
-        <module>assembly-sdk-war</module>
-        <module>assembly-sdk</module>
+	<module>client-helloworld</module>
+	<module>client-custom-theme</module>
+	<module>server-new-project-type</module>
+	<module>client-new-project-wizard</module>
+	<module>server-helloworld</module>
     </modules>
-    <scm>
-        <connection>scm:git:git@github.com:codenvy/che.git</connection>
-        <developerConnection>scm:git:git@github.com:codenvy/che.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/codenvy/che</url>
-    </scm>
     <properties>
-        <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
+        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
+        <gwt.test.skip>true</gwt.test.skip>
     </properties>
     <repositories>
         <repository>
@@ -62,4 +58,15 @@
             <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
         </pluginRepository>
     </pluginRepositories>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                    <version>${che.core.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
