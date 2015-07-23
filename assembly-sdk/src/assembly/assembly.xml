@@ -53,7 +53,7 @@
             <outputDirectory>web-terminal</outputDirectory>
             <outputFileNameMapping>terminal.zip</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.depmgt:che-websocket-terminal</include>
+                <include>org.eclipse.che.terminal:che-websocket-terminal</include>
             </includes>
         </dependencySet>
         <!--
