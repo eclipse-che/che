@@ -24,6 +24,7 @@ import org.eclipse.che.api.builder.internal.SlaveBuilderService;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.factory.FactoryModule;
+import org.eclipse.che.commons.schedule.executor.ScheduleModule;
 import org.eclipse.che.vfs.impl.fs.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.runner.LastInUseRunnerSelectionStrategy;
@@ -121,5 +122,6 @@ public class ApiModule extends AbstractModule {
         install(new VirtualFileSystemFSModule());
         install(new FactoryModule());
         install(new DocsModule());
+        install(new ScheduleModule());
     }
 }
