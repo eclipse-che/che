@@ -98,6 +98,13 @@
             <outputDirectory>sdk-resources</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${project.parent.basedir}/assembly-sdk-war</directory>
+            <outputDirectory>sdk-resources</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
             <directory>${project.basedir}/src/assembly/webapps</directory>
             <outputDirectory>webapps</outputDirectory>
         </fileSet>

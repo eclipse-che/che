@@ -37,7 +37,7 @@ java -cp "sdk-tools/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.Inst
 cd $EXT_RES_WORK_DIR_REL_PATH
 mvn clean package -Dskip-validate-sources=true
 cd ../..
-cp $EXT_RES_WORK_DIR_REL_PATH/target/*.war webapps/ws.war
-rm -rf webapps/ws
+cp $EXT_RES_WORK_DIR_REL_PATH/target/*.war webapps/che.war
+rm -rf webapps/che
 
 echo Restart Codenvy IDE if it is currently running
