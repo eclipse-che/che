@@ -27,13 +27,13 @@ if exist %%f call mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:instal
 )
 
 rem Prepare to re-build Codenvy IDE
-call java -cp "sdk-tools\codenvy-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir=%EXT_DIR_REL_PATH% --extResourcesDir=%EXT_RES_DIR_REL_PATH%
+call java -cp "sdk-tools\che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir=%EXT_DIR_REL_PATH% --extResourcesDir=%EXT_RES_DIR_REL_PATH%
 
 rem Re-build Codenvy IDE
 cd %EXT_RES_WORK_DIR_REL_PATH%
 call mvn clean package -Dskip-validate-sources=true
 cd ../..
-1>nul  2>&1 copy /B /Y "%EXT_RES_WORK_DIR_REL_PATH%\target\*.war" "webapps\ws.war"
-1>nul  2>&1 rmdir /S /Q webapps\ws
+1>nul  2>&1 copy /B /Y "%EXT_RES_WORK_DIR_REL_PATH%\target\*.war" "webapps\che.war"
+1>nul  2>&1 rmdir /S /Q webapps\che
 
 echo Restart Codenvy IDE if it is currently running
