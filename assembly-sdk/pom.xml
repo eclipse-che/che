@@ -35,6 +35,13 @@
             <type>zip</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-sdk-tools</artifactId>
+            <version>${che.plugins.version}</version>
+            <type>jar</type>
+            <classifier>jar-with-dependencies</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-machine-server</artifactId>
             <version>${project.version}</version>
