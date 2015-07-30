@@ -56,7 +56,6 @@
                 <include>org.eclipse.che.terminal:che-websocket-terminal</include>
             </includes>
         </dependencySet>
-        <!--
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
@@ -87,7 +86,6 @@
                 <include>org.eclipse.che.tutorials:che-tutorial-wysiwyg-editor</include>
             </includes>
         </dependencySet>
-        -->
     </dependencySets>
     <fileSets>
         <fileSet>
@@ -118,6 +116,13 @@
         <fileSet>
             <directory>${project.basedir}/src/assembly/sdk-resources</directory>
             <outputDirectory>sdk-resources</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.parent.basedir}/assembly-sdk-war</directory>
+            <outputDirectory>sdk-resources</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/webapps</directory>
