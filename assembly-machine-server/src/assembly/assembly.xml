@@ -26,13 +26,6 @@
             </includes>
         </dependencySet>
         <dependencySet>
-            <unpack>true</unpack>
-            <outputDirectory>tomcat</outputDirectory>
-            <includes>
-                <include>com.codenvy.resources:che-tomcat8-slf4j-logback</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>

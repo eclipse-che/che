@@ -12,6 +12,7 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 
 import org.eclipse.che.api.analytics.AnalyticsModule;
 import org.eclipse.che.api.auth.AuthenticationService;
@@ -19,6 +20,7 @@ import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
 import org.eclipse.che.vfs.impl.fs.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.api.machine.server.command.CommandService;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
@@ -122,5 +124,9 @@ public class ApiModule extends AbstractModule {
         // additional ports for development of extensions
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(), ServerConf.class);
         machineServers.addBinding().toInstance(new ServerConf("extensions-debug", "4403", "http"));
+
+        bindConstant().annotatedWith(Names.named(DockerMachineExtServerLauncher.START_EXT_SERVER_COMMAND))
+                      .to("mkdir -p ~/che && unzip /mnt/che/ext-server.zip -d ~/che/ext-server && " +
+                          "export JPDA_ADDRESS=\"4403\" && ~/che/ext-server/bin/catalina.sh jpda start");
     }
 }
