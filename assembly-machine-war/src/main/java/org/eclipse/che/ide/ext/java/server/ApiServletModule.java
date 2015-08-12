@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.server;
 
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.local.CheGuiceEverrestServlet;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
@@ -26,10 +27,12 @@ import java.util.Map;
 public class ApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
+        getServletContext().addListener(new WSConnectionTracker());
         Map<String, String> params = new HashMap<>(2);
         params.put("ws-name", "default");
         params.put("ws-id", "1q2w3e");
         filter("/ext/*").through(SingleEnvironmentFilter.class, params);
-        serve("/ext/*").with(GuiceEverrestServlet.class);
+//        serve("/ext/*").with(GuiceEverrestServlet.class);
+        serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(CheGuiceEverrestServlet.class);
     }
 }
