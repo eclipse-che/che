@@ -20,7 +20,6 @@ import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
-import org.eclipse.che.plugin.docker.client.DockerVersionVerifier;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
 import org.eclipse.che.vfs.impl.fs.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.api.machine.server.command.CommandService;
@@ -67,7 +66,7 @@ public class ApiModule extends AbstractModule {
         bind(WorkspaceService.class);
         bind(ETagResponseFilter.class);
 
-        bind(DockerVersionVerifier.class).asEagerSingleton();
+//        bind(DockerVersionVerifier.class).asEagerSingleton();
 
         bind(UserService.class);
         bind(UserProfileService.class);
@@ -114,7 +113,7 @@ public class ApiModule extends AbstractModule {
 
         install(new ArchetypeGeneratorModule());
         install(new CoreRestModule());
-        install(new AnalyticsModule());
+//        install(new AnalyticsModule());
         install(new BaseProjectModule());
 //        install(new BuilderModule());
 //        install(new RunnerModule());
