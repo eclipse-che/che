@@ -55,6 +55,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.jdt.JavaNavigationService;
 import org.eclipse.che.jdt.JavadocService;
 import org.eclipse.che.jdt.RestNameEnvironment;
+import org.eclipse.che.plugin.docker.runner.DockerRunnerModule;
 import org.eclipse.che.security.oauth.OAuthAuthenticationService;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
 import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
@@ -124,6 +125,7 @@ public class ApiModule extends AbstractModule {
         install(new AnalyticsModule());
         install(new BaseProjectModule());
         install(new BuilderModule());
+        install(new DockerRunnerModule());
         install(new RunnerModule());
         install(new VirtualFileSystemModule());
         install(new VirtualFileSystemFSModule());
