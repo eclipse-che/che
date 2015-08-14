@@ -117,6 +117,7 @@ public class ApiModule extends AbstractModule {
         install(new AnalyticsModule());
         install(new BaseProjectModule());
         install(new BuilderModule());
+        install(new org.eclipse.che.runner.docker.DockerRunnerModule());
         install(new RunnerModule());
         install(new VirtualFileSystemModule());
         install(new VirtualFileSystemFSModule());
