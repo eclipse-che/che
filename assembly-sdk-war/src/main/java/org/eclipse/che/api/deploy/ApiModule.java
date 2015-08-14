@@ -24,7 +24,9 @@ import org.eclipse.che.api.builder.internal.SlaveBuilderService;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.factory.FactoryModule;
+import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.commons.schedule.executor.ScheduleModule;
+import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
 import org.eclipse.che.vfs.impl.fs.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.runner.LastInUseRunnerSelectionStrategy;
@@ -39,6 +41,8 @@ import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.docs.DocsModule;
+import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider;
+import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
@@ -74,6 +78,9 @@ public class ApiModule extends AbstractModule {
         bind(AuthenticationService.class);
         bind(WorkspaceService.class);
         bind(ETagResponseFilter.class);
+
+        bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
+        bind(SshKeyProvider.class).to(SshKeyProviderImpl.class);
 
         bind(UserService.class);
         bind(UserProfileService.class);
