@@ -20,7 +20,7 @@
     </parent>
     <groupId>org.eclipse.che.sdk</groupId>
     <artifactId>che-sdk-parent</artifactId>
-    <version>3.12.0</version>
+    <version>3.12.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che SDK :: Parent</name>
     <modules>
@@ -30,7 +30,7 @@
     <scm>
         <connection>scm:git:git@github.com:codenvy/che.git</connection>
         <developerConnection>scm:git:git@github.com:codenvy/che.git</developerConnection>
-        <tag>3.12.0</tag>
+        <tag>HEAD</tag>
         <url>https://github.com/codenvy/che</url>
     </scm>
     <properties>
