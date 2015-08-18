@@ -31,6 +31,7 @@ import org.eclipse.che.ide.ext.ssh.server.KeyService;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.docker.client.DockerVersionVerifier;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
@@ -49,6 +50,8 @@ public class ApiModule extends AbstractModule {
         bind(AuthenticationService.class);
         bind(WorkspaceService.class);
         bind(ETagResponseFilter.class);
+
+//        bind(DockerVersionVerifier.class).asEagerSingleton();
 
         bind(UserService.class);
         bind(UserProfileService.class);
@@ -94,6 +97,8 @@ public class ApiModule extends AbstractModule {
 //        install(new ArchetypeGeneratorModule());
 
         install(new CoreRestModule());
+//        install(new AnalyticsModule());
+//        install(new BaseProjectModule());
 //        install(new AnalyticsModule());
 //        install(new BaseProjectModule());
 //        install(new BuilderModule());
