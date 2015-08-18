@@ -46,10 +46,7 @@ Che will be available at ```localhost:8080```
 * **CLI**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
 * **Eclipse Plug-In**:         [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
-### Help us
-**Contribute:**: We accept pull requests, so you are welcome to submit many!
-**Support:** You can report bugs and contribute [che-dev@eclipse.org](email:che-dev@eclipse.org). 
-
-### Contact Information
-* **Che Mailing List:** [che-dev@eclipse.org](email:che-dev@eclipse.org)
+### Get Engaged
+* **Contribute:**: We accept pull requests, so you are welcome to submit many!
+* **Support:** You can report bugs and contribute [che-dev@eclipse.org](email:che-dev@eclipse.org). 
 * **Website:** [eclipse.org/che](https://eclipse.org/che)
