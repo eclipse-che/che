@@ -111,9 +111,9 @@ Local Storage for Projects, Preferences, GitHub Tokens and SSH keys
 
 Codenvy SDK provides configuration file codenvy-api-configuration.properties located at webapps/api/WEB-INF/classes/codenvy with a set of parameters having default values. To persist local configuration settings each time a new SDK version is downloaded, this file should be copied to a permanent location, and a new local environment variable should be added:
 
-export CODENVY_LOCAL_CONF_DIR=”[path to a location where config file is stored]“, for example:
+export CHE_LOCAL_CONF_DIR=”[path to a location where config file is stored]“, for example:
 
-export CODENVY_LOCAL_CONF_DIR=”/home/eugene/.codenvy”
+export CHE_LOCAL_CONF_DIR=”/home/eugene/.codenvy”
 
 ======================
 Local Projects Storage
