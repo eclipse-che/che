@@ -49,9 +49,9 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
+            <unpack>true</unpack>
             <outputDirectory>web-terminal</outputDirectory>
-            <outputFileNameMapping>terminal.zip</outputFileNameMapping>
+            <outputFileNameMapping>terminal</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.terminal:che-websocket-terminal</include>
             </includes>
