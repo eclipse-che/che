@@ -168,22 +168,6 @@
             <artifactId>che-plugin-help-ext-client</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-ant</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency-->
-        <!--dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-debugger-java</artifactId>
-            <version>${che.plugins.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>tools</artifactId>
-                    <groupId>sun.jdt</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-client</artifactId>
@@ -227,6 +211,27 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-env-local</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <!--dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-ant</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency-->
+        <!--dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-debugger-java</artifactId>
+            <version>${che.plugins.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>tools</artifactId>
+                    <groupId>sun.jdt</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency-->
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-ssh-git-native</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <!--dependency>
