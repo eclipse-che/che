@@ -153,11 +153,11 @@
             <artifactId>che-plugin-github-ext-github</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-provider-github</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.che.plugin</groupId>-->
+            <!--<artifactId>che-plugin-github-provider-github</artifactId>-->
+            <!--<version>${che.plugins.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-gwt-ext-gwt</artifactId>
@@ -229,11 +229,11 @@
                 </exclusion>
             </exclusions>
         </dependency-->
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-git-native</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.eclipse.che.plugin</groupId>-->
+            <!--<artifactId>che-plugin-ssh-git-native</artifactId>-->
+            <!--<version>${che.plugins.version}</version>-->
+        <!--</dependency>-->
         <!--dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-ext-plugins</artifactId>
@@ -403,6 +403,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <packagingExcludes>WEB-INF/lib/che-core-api-git-*.jar,
+                        WEB-INF/lib/che-core-git-impl-native-*.jar
+                    </packagingExcludes>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

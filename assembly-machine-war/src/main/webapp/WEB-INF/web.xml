@@ -17,6 +17,10 @@
          version="3.0"
          metadata-complete="true">
     <display-name>Che Machine API</display-name>
+    <context-param>
+        <param-name>org.everrest.websocket.context</param-name>
+        <param-value>/ext</param-value>
+    </context-param>
     <listener>
         <listener-class>org.eclipse.che.inject.CodenvyBootstrap</listener-class>
     </listener>

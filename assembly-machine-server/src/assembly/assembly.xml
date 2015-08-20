@@ -29,7 +29,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+            <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.sdk:assembly-machine-war</include>
             </includes>
@@ -40,6 +40,12 @@
             <source>${project.basedir}/src/assembly/server.xml</source>
             <outputDirectory>conf</outputDirectory>
             <destName>server.xml</destName>
+        </file>
+        <file>
+            <source>${project.basedir}/src/assembly/setenv.sh</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>setenv.sh</destName>
+            <fileMode>755</fileMode>
         </file>
     </files>
 </assembly>

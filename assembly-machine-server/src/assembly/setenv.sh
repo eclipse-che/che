@@ -25,7 +25,7 @@
 #Global LOGS DIR
 [ -z "${CHE_LOGS_DIR}" ]  && CHE_LOGS_DIR="$CATALINA_HOME/logs"
 
-[ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="8000"
+[ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="4403"
 
 #Tomcat options
 [ -z "${CATALINA_OPTS}" ]  && CATALINA_OPTS="-Dcom.sun.management.jmxremote  \
