@@ -54,6 +54,9 @@
 
     <inherits name='org.eclipse.che.env.local.LocalEnvironment'/>
 
+    <!-- Docker -->
+    <inherits name='org.eclipse.che.plugin.docker.ext.client.Docker'/>
+
     <!-- Platform API GWT client dependencies                       -->
     <inherits name='org.eclipse.che.api.Analytics'/>
     <inherits name='org.eclipse.che.api.Builder'/>
