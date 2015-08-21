@@ -11,6 +11,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -18,6 +19,9 @@ import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.machine.server.MachineClientImpl;
+import org.eclipse.che.api.workspace.server.MachineClient;
+import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
 import org.eclipse.che.api.machine.server.command.CommandService;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
@@ -31,10 +35,8 @@ import org.eclipse.che.ide.ext.ssh.server.KeyService;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.docker.client.DockerVersionVerifier;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
@@ -45,10 +47,13 @@ import org.everrest.guice.PathKey;
 public class ApiModule extends AbstractModule {
     @Override
     protected void configure() {
+
+        bind(WorkspaceService.class);
+        bind(MachineClient.class).to(MachineClientImpl.class).in(Singleton.class);
+
         bind(ApiInfoService.class);
 
         bind(AuthenticationService.class);
-        bind(WorkspaceService.class);
         bind(ETagResponseFilter.class);
 
 //        bind(DockerVersionVerifier.class).asEagerSingleton();
