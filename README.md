@@ -18,35 +18,33 @@ Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud
 ### License
 Che is open sourced under the Eclipse Public License 1.0.
 
-### Clone the repository
+### Clone
 
 ```sh
 git clone https://github.com/codenvy/che.git
 ```
-If master is unstable, checkout the latest released version.
+If master is unstable, checkout the latest tagged version.
 
-### Build and run Che
+### Build and Run
 ```sh
 cd che
 mvn clean install
 ./che.sh [ start | stop ]
 ```
-
-This builds and runs an assembly with the Java plug-in and extension SDK. You can use the SDK to create other assemblies of Che.
-
 Che will be available at ```localhost:8080```
 
-### Che sub-projects:
+This builds an assembly with the Java, git, and maven plugins.  The SDK has embedded tools that let you create assemblies that contain other plugins.
+
+
+### Sub-Projects:
 * **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
 * **che-core**:                [Core components] (http://github.com/codenvy/che-core)
 * **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
-
-### Other projects that are part of Eclipse Che
 * **CLI**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
 * **Eclipse Plug-In**:         [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
-### Get Engaged
+### Engage
 * **Contribute:**: We accept pull requests, so you are welcome to submit many!
 * **Support:** You can report bugs and contribute [che-dev@eclipse.org](email:che-dev@eclipse.org). 
 * **Website:** [eclipse.org/che](https://eclipse.org/che)
