@@ -45,6 +45,6 @@ This builds an assembly with the Java, git, and maven plugins.  The SDK has embe
 * **Eclipse Plug-In**:         [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
 ### Engage
-* **Contribute:**: We accept pull requests, so you are welcome to submit many!
+* **Contribute:** We accept pull requests. Please see [how to contribute] (https://github.com/codenvy/che/blob/master/CONTRIBUTING.md).
 * **Support:** You can report bugs and contribute [che-dev@eclipse.org](email:che-dev@eclipse.org). 
 * **Website:** [eclipse.org/che](https://eclipse.org/che)
