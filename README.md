@@ -1,5 +1,6 @@
 # Eclipse Che
 [![Build Status](https://travis-ci.org/codenvy/che.svg?branch=master)](https://travis-ci.org/codenvy/che)
+[![Coverage Status](https://coveralls.io/repos/codenvy/che/badge.svg?branch=master&service=github)](https://coveralls.io/github/codenvy/che?branch=master)
 
 https://www.eclipse.org/che/
 
