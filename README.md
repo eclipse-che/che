@@ -1,5 +1,6 @@
 # Eclipse Che
-[![Build Status](https://travis-ci.org/codenvy/che.svg?branch=master)](https://travis-ci.org/codenvy/che)
+[![Travis Build Status](https://travis-ci.org/codenvy/che.svg?branch=master)](https://travis-ci.org/codenvy/che)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/07xfwub45ryw5jm2?svg=true)](https://ci.appveyor.com/project/benoitf/che)
 [![Coverage Status](https://coveralls.io/repos/codenvy/che/badge.svg?branch=master&service=github)](https://coveralls.io/github/codenvy/che?branch=master)
 
 https://www.eclipse.org/che/
