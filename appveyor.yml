@@ -1,0 +1,23 @@
+version: '{build}'
+skip_tags: true
+init:
+- ps: >-
+    $MVNDIR = 'C:\maven\'
+          if(!(Test-Path -Path $MVNDIR )){
+            Write-Host (Test-Path -Path $MVNDIR)
+            Write-Host 'Installing Maven'
+            cinst maven -Version 3.3.1
+          } else {
+            Write-Host 'Found Maven cached installation'
+          }
+environment:
+  JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+install:
+- SET PATH=C:\maven\bin;%JAVA_HOME%\bin;%PATH:C:\Ruby193\bin;=%
+- mvn --version
+- java -version
+cache:
+- C:\Users\appveyor\.m2
+- C:\maven\
+build_script:
+- mvn clean install
