@@ -1,6 +1,8 @@
 # Eclipse Che
 [![Build Status](https://travis-ci.org/codenvy/che.svg?branch=master)](https://travis-ci.org/codenvy/che)
 
+https://www.eclipse.org/che/
+
 High performance, open source software developer environments in the cloud.
 
 ### Cloud IDE
