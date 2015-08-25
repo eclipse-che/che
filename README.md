@@ -5,6 +5,10 @@
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/6139/badge.svg)](https://scan.coverity.com/projects/codenvy-che)
 <!--[![Coverage Status](https://coveralls.io/repos/codenvy/che/badge.svg?branch=master&service=github)](https://coveralls.io/github/codenvy/che?branch=master)-->
 
+[![License](https://img.shields.io/github/license/codenvy/che.svg)](https://github.com/codenvy/che)
+[![Latest tag](https://img.shields.io/github/tag/codenvy/che.svg)](https://github.com/codenvy/che/tags)
+
+
 https://www.eclipse.org/che/
 
 High performance, open source software developer environments in the cloud.
