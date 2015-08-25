@@ -113,7 +113,7 @@
             <outputDirectory></outputDirectory>
             <includes>
                 <include>extInstall.bat</include>
-                <include>RUNNING_CheSDK.txt</include>
+                <include>*.txt</include>
             </includes>
         </fileSet>
         <fileSet>
