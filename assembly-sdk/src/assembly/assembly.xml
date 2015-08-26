@@ -38,6 +38,19 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <outputDirectory>recipes</outputDirectory>
+            <includes>
+                <include>org.eclipse.che.sdk:recipes</include>
+            </includes>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>sdk-tools</outputDirectory>
             <outputFileNameMapping>che-plugin-sdk-tools.jar</outputFileNameMapping>

@@ -1,0 +1,4 @@
+{
+    "description":"PostgreSQL 9.3, JDK 1.7.0_55, Debian Jessie",
+    "displayName":"PostgreSQL 9.3 + Java 7"
+} 

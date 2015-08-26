@@ -48,6 +48,12 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.sdk</groupId>
+            <artifactId>recipes</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.tutorials</groupId>
             <artifactId>che-tutorial-action-api</artifactId>
             <version>${che.tutorials.version}</version>
