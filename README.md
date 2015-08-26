@@ -52,8 +52,8 @@ This builds an assembly with the Java, git, and maven plugins.  The SDK has embe
 * **che-core**:                [Core components] (http://github.com/codenvy/che-core)
 * **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
-* **CLI**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
-* **Eclipse Plug-In**:         [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
+* **cli**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
+* **eclipse-plugin**:          [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
 ### Engage
 * **Contribute:** We accept pull requests. Please see [how to contribute] (https://github.com/codenvy/che/blob/master/CONTRIBUTING.md).
