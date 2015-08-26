@@ -48,7 +48,7 @@ public class MachineModule extends AbstractModule {
         bind(ApiInfoService.class);
 
 
-        bind(WorkspaceService.class);
+//        bind(WorkspaceService.class);
         bind(LocalFileSystemRegistryPlugin.class);
 
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
@@ -71,7 +71,7 @@ public class MachineModule extends AbstractModule {
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
-        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
+//        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 //        bind(WSocketEventBusClient.class).asEagerSingleton();
 
 
