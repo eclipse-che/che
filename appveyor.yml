@@ -23,4 +23,4 @@ install:
 - java -version
 cache: C:\bin\apache-maven-3.3.1
 build_script:
-- mvn -B clean install
+- mvn -B -U clean install
