@@ -2,8 +2,6 @@
 [![Join the chat at https://gitter.im/eclipse/che](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/eclipse/che?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Travis Build Status](https://travis-ci.org/codenvy/che.svg?branch=master)](https://travis-ci.org/codenvy/che)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/ro78pmwomlklkwbo?svg=true)](https://ci.appveyor.com/project/codenvy/che)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/6139/badge.svg)](https://scan.coverity.com/projects/codenvy-che)
-<!--[![Coverage Status](https://coveralls.io/repos/codenvy/che/badge.svg?branch=master&service=github)](https://coveralls.io/github/codenvy/che?branch=master)-->
 
 [![License](https://img.shields.io/github/license/codenvy/che.svg)](https://github.com/codenvy/che)
 [![Latest tag](https://img.shields.io/github/tag/codenvy/che.svg)](https://github.com/codenvy/che/tags)
