@@ -48,12 +48,132 @@
         }
     },
     {
+        "displayName": "Maven JAR",
+        "category": "Samples - Hello World",
+        "description": "A basic JAR project built with Maven.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-jar-java.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Maven Java Console",
+        "category": "Samples - Hello World",
+        "description": "A simple JAR project based on Maven.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-console-java.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Swing",
+        "category": "Samples - Hello World",
+        "description": "A simple Java Swing application.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-swing-java-basic.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/gui",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
         "displayName": "GWT",
         "category": "Samples - Hello World",
         "description": "A GWT 2.6.1 application that returns user's input and information on application server and user agent.",
         "source": {
             "type": "git",
             "location": "https://github.com/codenvy-templates/web-gwt-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Play 1.0",
+        "category": "Samples - Hello World",
+        "description": "Play 1.2.7 start-up application which is a part of the Play distribution.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-play1-java-simple",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/play1",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Play 2.0",
+        "category": "Samples - Hello World",
+        "description": "Play 2.10 application with basic functionality. Returns user's input with simple preferences.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-play2-java-simple",
             "parameters": {
                 "branch": "3.1.0",
                 "keepVcs": "false"
@@ -192,6 +312,30 @@
         }
     },
     {
+        "displayName": "Android",
+        "category": "Samples - Hello World",
+        "description": "A simple Android application natively launched in an emulator.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/mobile-android-java-basic.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/mobile/android442",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
         "displayName": "Tapestry",
         "category": "Samples - Hello World",
         "description": "A simple application demonstrating the Tapestry web framework.",
@@ -264,6 +408,54 @@
         }
     },
     {
+        "displayName": "Clojure",
+        "category": "Samples - Hello World",
+        "description": "A basic example of using Clojure.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-clojure-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "JRuby",
+        "category": "Samples - Hello World",
+        "description": "A basic JRuby application compiled into JAR with JRuby Maven plugin. Outputs a simple message into a console.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-jruby-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
         "displayName": "JRuby Spring",
         "category": "Samples - Hello World",
         "description": "A basic JRuby application compiled into WAR with JRuby Maven plugin and run in an application server.",
@@ -312,6 +504,30 @@
         }
     },
     {
+        "displayName": "Jython",
+        "category": "Samples - Hello World",
+        "description": "A basic Jython app that writes Hello World to a console.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-jython-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
         "displayName": "Shale",
         "category": "Samples - Hello World",
         "description": "An application using Shale web framework. Returns user's input",
@@ -336,6 +552,54 @@
         }
     },
     {
+        "displayName": "Rhino",
+        "category": "Samples - Hello World",
+        "description": "A basic Rhino application that does arithmetic calculations.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-rhino-java-simple",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Kotlin",
+        "category": "Samples - Hello World",
+        "description": "A console Kotlin app that outputs Hello World to a console.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-kotlin-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
         "displayName": "Velocity",
         "category": "Samples - Hello World",
         "description": "A simple web application using Velocity Framework.",
@@ -349,6 +613,342 @@
         },
         "runners": {
             "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Thymeleaf",
+        "category": "Samples - Hello World",
+        "description": "A basic web application that uses Thymeleaf engine.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/web-thymeleaf-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/web/tomcat7",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "MongoDB",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates a DB and updates it in the runtime.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-mongodb-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/mongodb",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "MySQL",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates a MySQL DB and updates it in the runtime.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-mysql-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/mysql",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "PostgreSQL",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates a PostgreSQL DB and updates it in the runtime.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-postgresql-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/postgresql",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Cassandra",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates a Cassandra DB and updates it in the runtime.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-cassandra-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/cassandra",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Neo4j",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates a Neo4j DB.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-neo4j-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/neo4j",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Derby",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates a Derby DB",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-derby-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "HSQLDB",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates HSQLDB DB.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-hsqldb-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "H2",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates H2 DB.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-h2-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Couchbase",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates Couchbase DB.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-couchbase-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/couchbase",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Riak",
+        "category": "Samples - Hello World",
+        "description": "A simple desktop application that creates Riak DB.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-riak-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/riak",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "NuoDB",
+        "category": "Samples - Hello World",
+        "description": "A simple application that starts a NuoDB database",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-nuodb-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/db/nuodb",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Scala",
+        "category": "Samples - Hello World",
+        "description": "A simple Scala example.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-scala-java-simple.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/standalone/simple/cli",
+            "configs": {
+                "recommend": {
+                    "ram": 256
+                }
+            }
+        },
+        "builders": {
+            "default": "maven"
+        }
+    },
+    {
+        "displayName": "Codenvy CLI",
+        "category": "Samples - Codenvy",
+        "description": "Codenvy CLI utility example.",
+        "source": {
+            "type": "git",
+            "location": "https://github.com/codenvy-templates/desktop-codenvy-java-cli.git",
+            "parameters": {
+                "branch": "3.1.0",
+                "keepVcs": "false"
+            }
+        },
+        "runners": {
+            "default": "system:/java/codenvy-cli",
             "configs": {
                 "recommend": {
                     "ram": 256
