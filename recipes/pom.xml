@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>3.12.1-SNAPSHOT</version>
+        <version>3.12.1</version>
     </parent>
     <artifactId>recipes</artifactId>
     <packaging>jar</packaging>
