@@ -16,11 +16,9 @@ import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.GitModule;
 import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
-import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
@@ -30,13 +28,11 @@ import org.eclipse.che.ide.ext.github.server.inject.GitHubModule;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.extension.maven.server.inject.MavenModule;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.vfs.impl.fs.AutoMountVirtualFileSystemRegistry;
 import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
-import org.eclipse.che.vfs.impl.fs.LocalVirtualFileSystemRegistry;
 import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
-import org.everrest.core.impl.async.AsynchronousJobService;
-import org.everrest.guice.PathKey;
 
 /**
  * @author Evgen Vidolob
@@ -52,7 +48,7 @@ public class MachineModule extends AbstractModule {
         bind(LocalFileSystemRegistryPlugin.class);
 
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
-        bind(VirtualFileSystemRegistry.class).to(LocalVirtualFileSystemRegistry.class);
+        bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
         bind(OAuthTokenProvider.class).to(RemoteTokenProvider.class);
         bind(SshKeyStore.class).to(RemoteSshKeyStore.class);
 
