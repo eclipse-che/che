@@ -33,6 +33,8 @@ import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
 import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
+import org.everrest.core.impl.async.AsynchronousJobService;
+import org.everrest.guice.PathKey;
 
 /**
  * @author Evgen Vidolob
@@ -43,8 +45,6 @@ public class MachineModule extends AbstractModule {
     protected void configure() {
         bind(ApiInfoService.class);
 
-
-//        bind(WorkspaceService.class);
         bind(LocalFileSystemRegistryPlugin.class);
 
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
@@ -67,9 +67,7 @@ public class MachineModule extends AbstractModule {
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
-//        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
+        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 //        bind(WSocketEventBusClient.class).asEagerSingleton();
-
-
     }
 }
