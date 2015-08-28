@@ -9,13 +9,13 @@
 
 https://www.eclipse.org/che/
 
-High performance, open source software developer environments in the cloud.
+High performance, open source software developer workspaces in the cloud.
 
 ### Cloud IDE
 Use your browser to program on any machine in any language. Edit, build, debug and deploy projects bound to source repositories.  [Use Che as an IDE] (https://eclipse-che.readme.io/docs/import-a-project)
 
 ### Workspace Server
-Create developer environments with APIs. Add your project types, embed custom commands and host on any infrastructure. [Use Che as a Workspace Server] (https://eclipse-che.readme.io/docs/create-workspaces-and-projects)
+Create developer workspaces with APIs. Add your project types, embed custom commands and host on any infrastructure. [Use Che as a Workspace Server] (https://eclipse-che.readme.io/docs/create-workspaces-and-projects)
 
 ### Plug-Ins
 Use Che's built-in language plug-ins or write packaged extensions that transform Che's IDE into new tools and assemblies. [Write Che IDE Plug-Ins] (https://eclipse-che.readme.io/docs/extension-development-workflow)
