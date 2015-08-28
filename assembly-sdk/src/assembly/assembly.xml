@@ -64,19 +64,7 @@
             <outputDirectory>che-templates/tutorials</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.tutorials:che-tutorial-action-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-analytics-event</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-editor-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-server-side</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-empty-ext</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-gin</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-gist-ext</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-helloworld-ext</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-icons-registry-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-notification-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-parts-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-theme-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-wysiwyg-editor</include>
+                <include>org.eclipse.che.examples:*</include>
             </includes>
         </dependencySet>
     </dependencySets>

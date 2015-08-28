@@ -29,6 +29,36 @@
             <type>zip</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.examples</groupId>
+            <artifactId>client-custom-theme</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.examples</groupId>
+            <artifactId>client-helloworld</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.examples</groupId>
+            <artifactId>client-new-project-wizard</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.examples</groupId>
+            <artifactId>server-helloworld</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.examples</groupId>
+            <artifactId>server-new-project-type</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-datasource-server-war-sdk</artifactId>
             <version>${che.plugins.version}</version>
@@ -46,90 +76,6 @@
             <artifactId>assembly-sdk-war</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
-            <artifactId>recipes</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-action-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-analytics-event</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-editor-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-empty-ext</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-gin</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-gist-ext</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-helloworld-ext</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-icons-registry-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-notification-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-parts-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-server-side</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-theme-api</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.tutorials</groupId>
-            <artifactId>che-tutorial-wysiwyg-editor</artifactId>
-            <version>${che.tutorials.version}</version>
-            <type>zip</type>
         </dependency>
     </dependencies>
     <build>
