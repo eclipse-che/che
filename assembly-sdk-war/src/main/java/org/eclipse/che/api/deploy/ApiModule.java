@@ -40,7 +40,6 @@ import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
-import org.eclipse.che.docs.DocsModule;
 import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider;
 import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
@@ -130,7 +129,6 @@ public class ApiModule extends AbstractModule {
         install(new VirtualFileSystemModule());
         install(new VirtualFileSystemFSModule());
         install(new FactoryModule());
-        install(new DocsModule());
         install(new ScheduleModule());
     }
 }
