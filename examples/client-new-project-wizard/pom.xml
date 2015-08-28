@@ -91,25 +91,25 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
                 <executions>
-                  <execution>
-                    <id>copy-installed</id>
-                    <phase>install</phase>
-                    <goals>
-                      <goal>copy</goal>
-                    </goals>
-                    <configuration>
-                      <skip>true</skip>
-                      <artifactItems>
-                        <artifactItem>
-                          <groupId>${project.groupId}</groupId>
-                          <artifactId>${project.artifactId}</artifactId>
-                          <version>${project.version}</version>
-                          <type>${project.packaging}</type>
-                        </artifactItem>
-                      </artifactItems>
-		      <outputDirectory>../../assembly-sdk/target/tomcat-ide/ext</outputDirectory>
-                    </configuration>
-                  </execution>
+                    <execution>
+                        <id>copy-installed</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>${project.packaging}</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>../../assembly-sdk/target/tomcat-ide/ext</outputDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
