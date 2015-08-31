@@ -23,15 +23,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>
-            <outputFileNameMapping>datasource.war</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che.plugin:che-plugin-datasource-server-war-sdk</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.sdk:assembly-sdk-war</include>
