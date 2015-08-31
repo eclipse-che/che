@@ -113,7 +113,7 @@
                                 <artifactItem>
                                     <groupId>com.codenvy.resources</groupId>
                                     <artifactId>che-tomcat8-slf4j-logback</artifactId>
-                                    <version>8</version>
+                                    <version>${version.resource-bundle}</version>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
                                 </artifactItem>
@@ -121,7 +121,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-tomcat7</id>
+                        <id>unpack-tomcat-runner</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>unpack</goal>
@@ -131,7 +131,7 @@
                                 <artifactItem>
                                     <groupId>com.codenvy.resources</groupId>
                                     <artifactId>che-tomcat8-slf4j-logback</artifactId>
-                                    <version>8</version>
+                                    <version>${version.resource-bundle}</version>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
