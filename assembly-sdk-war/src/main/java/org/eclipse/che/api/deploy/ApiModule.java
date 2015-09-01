@@ -117,7 +117,9 @@ public class ApiModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
 
         // additional ports for development of extensions
-        Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(), ServerConf.class);
+        Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
+                                                                          ServerConf.class,
+                                                                          Names.named("machine.docker.dev_machine.machine_servers"));
         machineServers.addBinding().toInstance(new ServerConf("extensions-debug", "4403", "http"));
 
         bindConstant().annotatedWith(Names.named(DockerMachineExtServerLauncher.START_EXT_SERVER_COMMAND))
