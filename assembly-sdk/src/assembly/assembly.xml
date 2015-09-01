@@ -14,9 +14,10 @@
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
     <id>tomcat-zip</id>
     <formats>
+        <format>dir</format>
         <format>zip</format>
+        <format>tar.gz</format>
     </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -44,6 +45,11 @@
             <includes>
                 <include>org.eclipse.che.terminal:che-websocket-terminal</include>
             </includes>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -60,19 +66,7 @@
             <outputDirectory>che-templates/tutorials</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.tutorials:che-tutorial-action-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-analytics-event</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-editor-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-server-side</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-empty-ext</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-gin</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-gist-ext</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-helloworld-ext</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-icons-registry-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-notification-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-parts-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-theme-api</include>
-                <include>org.eclipse.che.tutorials:che-tutorial-wysiwyg-editor</include>
+                <include>org.eclipse.che.examples:*</include>
             </includes>
         </dependencySet>
     </dependencySets>

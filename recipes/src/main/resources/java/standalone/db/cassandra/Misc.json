@@ -1,0 +1,4 @@
+{
+    "description":"Cassandra 2.0.9, JDK 1.7.0_55, Debian Jessie",
+    "displayName":"Cassandra DB 2.0 + Java 7"
+} 

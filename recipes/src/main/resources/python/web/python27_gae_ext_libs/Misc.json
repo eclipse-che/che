@@ -1,0 +1,4 @@
+{
+    "description":"Google App Engine SDK 1.9.19, Python 2.7.8, Debian Jessie. This environment supports 3rd party libs, specified in requirements.txt. Docker image will fail if you don't have this file in your project",
+    "displayName":"Google App Engine SDK 1.9.19, Python 2.7"
+}

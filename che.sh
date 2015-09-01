@@ -1,24 +1,21 @@
 #!/bin/sh
 #
-# Startup script for Codenvy SDK.  Downloads Tomcat for running projects within the IDE if necessary.
+# Copyright (c) 2012-2015 Codenvy, S.A.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Codenvy, S.A. - initial API and implementation
+#
 
+BASEDIR=$(dirname $0)
+VERSION=`basename $BASEDIR/assembly-sdk/target/assembly-sdk-*/`
 
-TOMCAT="tomcat"
-TOMCAT_IDE_DIR="assembly-sdk/target/tomcat-ide"
+ASSEMBLY_BIN_DIR=$BASEDIR/assembly-sdk/target/$VERSION/$VERSION/bin
 
-if [ ! -d "${TOMCAT_IDE_DIR}" ]
-then
-  unzip assembly-sdk/target/*.zip -d assembly-sdk/target/tomcat-ide
- # echo "$(tput setaf 1)ERROR: Looks like you have not installed the Codenvy SDK."$(tput sgr0)
- # echo "$(tput setaf 1)ERROR: Please run 'mvn clean install' and try again."$(tput sgr0)
- # echo "$(tput setaf 1)ERROR: For more information, please see the Codenvy SDK README:"$(tput sgr0)
- # echo "$(tput setaf 1)ERROR:     https://github.com/codenvy/che"$(tput sgr0)
- # exit 1
-fi
-
-cd "${TOMCAT_IDE_DIR}"
-
-if [ ! -d "$TOMCAT" ]
+if [ ! -d "${ASSEMBLY_BIN_DIR}" ]
 then
   echo "$(tput setaf 2)INFO: No Tomcat found for runners"$(tput sgr0)
   echo "$(tput setaf 2)INFO: Downloading Apache Tomcat for runners"$(tput sgr0)

@@ -1,0 +1,4 @@
+{
+    "description":"LAMP stack: Apache2, MYSQL 14.14 Distrib 5.5.40, PHP 5.6, Debian Jessie. DB name: test, username: test, password: test",
+    "displayName":"Apache 2.4 + MYSQL 14.14 + PHP 5.6"
+}
