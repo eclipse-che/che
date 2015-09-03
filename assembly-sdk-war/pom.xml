@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>4.0.0-M1-SNAPSHOT</version>
+        <version>4.0.0-M1</version>
     </parent>
     <artifactId>assembly-sdk-war</artifactId>
     <packaging>war</packaging>
@@ -238,8 +238,7 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-ext-plugins</artifactId>
             <version>${che.sdk.version}</version>
-        </dependency
-        <dependency>
+        </dependency <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-ssh-git-native</artifactId>
             <version>${che.plugins.version}</version>
