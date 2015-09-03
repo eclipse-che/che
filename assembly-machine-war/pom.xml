@@ -68,11 +68,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-server</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-generator-archetype</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
