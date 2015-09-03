@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>4.0.0-M1</version>
+        <version>4.0.0-M2-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-sdk-war</artifactId>
     <packaging>war</packaging>
