@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.server;
 import com.google.inject.AbstractModule;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
@@ -49,7 +50,7 @@ public class MachineModule extends AbstractModule {
 
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
         bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
-        bind(OAuthTokenProvider.class).to(RemoteTokenProvider.class);
+        bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
         bind(SshKeyStore.class).to(RemoteSshKeyStore.class);
 
         install(new CoreRestModule());
