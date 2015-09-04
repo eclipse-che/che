@@ -33,7 +33,7 @@
             <unpack>true</unpack>
             <outputDirectory>recipes</outputDirectory>
             <includes>
-                <include>org.eclipse.che.sdk:recipes</include>
+                <include>org.eclipse.che.plugin:che-plugin-docker-recipes</include>
             </includes>
             <unpackOptions>
                 <excludes>

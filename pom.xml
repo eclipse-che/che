@@ -24,7 +24,6 @@
     <packaging>pom</packaging>
     <name>Che SDK :: Parent</name>
     <modules>
-        <module>recipes</module>
         <module>examples</module>
         <module>assembly-sdk-war</module>
         <module>assembly-sdk</module>
