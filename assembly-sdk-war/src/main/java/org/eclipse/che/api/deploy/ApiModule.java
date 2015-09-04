@@ -125,5 +125,7 @@ public class ApiModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named(DockerMachineExtServerLauncher.START_EXT_SERVER_COMMAND))
                       .to("mkdir -p ~/che && unzip /mnt/che/ext-server.zip -d ~/che/ext-server && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ext-server/bin/catalina.sh jpda start");
+
+        install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
     }
 }
