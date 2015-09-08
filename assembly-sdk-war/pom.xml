@@ -153,6 +153,11 @@
             <artifactId>che-plugin-github-ext-github</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-oauth2</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>org.eclipse.che.plugin</groupId>-->
             <!--<artifactId>che-plugin-github-provider-github</artifactId>-->
