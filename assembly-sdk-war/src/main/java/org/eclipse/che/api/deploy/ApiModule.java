@@ -134,5 +134,7 @@ public class ApiModule extends AbstractModule {
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ext-server/bin/catalina.sh jpda start");
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
+
+        bindConstant().annotatedWith(Names.named("machine.docker.che_api.endpoint")).to("http://172.17.42.1/api");
     }
 }
