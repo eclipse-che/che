@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
@@ -69,6 +70,7 @@ public class MachineModule extends AbstractModule {
 
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
         bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
-//        bind(WSocketEventBusClient.class).asEagerSingleton();
+
+        bindConstant().annotatedWith(Names.named("api.endpoint")).to("http://172.17.42.1/api");
     }
 }
