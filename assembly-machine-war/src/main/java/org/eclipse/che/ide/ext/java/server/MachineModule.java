@@ -14,7 +14,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
-import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
@@ -30,6 +29,7 @@ import org.eclipse.che.ide.ext.github.server.inject.GitHubModule;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.extension.maven.server.inject.MavenModule;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.eclipse.che.vfs.impl.fs.AutoMountVirtualFileSystemRegistry;
 import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
@@ -71,6 +71,6 @@ public class MachineModule extends AbstractModule {
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
         bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
-        bindConstant().annotatedWith(Names.named("api.endpoint")).to("http://172.17.42.1/api");
+        bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
     }
 }

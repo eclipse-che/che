@@ -135,6 +135,6 @@ public class ApiModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
-        bindConstant().annotatedWith(Names.named("machine.docker.che_api.endpoint")).to("http://172.17.42.1/api");
+        bindConstant().annotatedWith(Names.named("machine.docker.che_api.endpoint")).to("http://172.17.42.1:8080/che/api");
     }
 }
