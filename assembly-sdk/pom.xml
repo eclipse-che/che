@@ -29,12 +29,6 @@
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>com.codenvy.resources</groupId>
-            <artifactId>codenvy-tomcat7</artifactId>
-            <version>${version.resource-bundle}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-tools</artifactId>
             <version>${che.plugins.version}</version>
