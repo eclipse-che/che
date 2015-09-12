@@ -30,7 +30,7 @@ public class SampleProjectTypeExtension {
     }
  
     public interface ParserResource extends ClientBundle {
-        @Source("org/eclipse/che/tutorial/projecttype/sampletype.svg")
+        @Source("org/eclipse/che/examples/projecttype/sampletype.svg")
         SVGResource sampleProjectTypeCategoryIcon();
     }
 }
