@@ -33,6 +33,7 @@ import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.eclipse.che.vfs.impl.fs.AutoMountVirtualFileSystemRegistry;
 import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
+import org.eclipse.che.vfs.impl.fs.MachineFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
