@@ -39,11 +39,6 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
-import org.eclipse.che.security.oauth.GithubModule;
-import org.eclipse.che.security.oauth.OAuthAuthenticationService;
-import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
-import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
-import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.PathKey;
@@ -93,11 +88,6 @@ public class ApiModule extends AbstractModule {
         bind(KeyService.class);
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
 
-        bind(OAuthAuthenticationService.class);
-        bind(OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
-        bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
-
-
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
         bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
@@ -108,7 +98,6 @@ public class ApiModule extends AbstractModule {
 //        install(new ArchetypeGeneratorModule());
 
         install(new CoreRestModule());
-        install(new GithubModule());
 //        install(new AnalyticsModule());
 //        install(new BaseProjectModule());
 //        install(new AnalyticsModule());
