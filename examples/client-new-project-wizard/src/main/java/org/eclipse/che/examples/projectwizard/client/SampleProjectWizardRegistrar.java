@@ -13,7 +13,7 @@ package org.eclipse.che.examples.projectwizard.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.api.project.shared.dto.ImportProject;
 import org.eclipse.che.examples.projectwizard.shared.ProjectAttributes;
@@ -35,17 +35,17 @@ public class SampleProjectWizardRegistrar implements ProjectWizardRegistrar {
         wizardPages = new ArrayList<>();
     }
 
-    @Nonnull
+    @NotNull
     public String getProjectTypeId() {
         return ProjectAttributes.SAMPLE_PROJECT_TYPE_ID;
     }
 
-    @Nonnull
+    @NotNull
     public String getCategory() {
         return ProjectAttributes.SAMPLE_PROJECT_TYPE_CATEGORY;
     }
 
-    @Nonnull
+    @NotNull
     public List<Provider<? extends WizardPage<ImportProject>>> getWizardPages() {
         return wizardPages;
     }
