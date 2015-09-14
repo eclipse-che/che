@@ -168,30 +168,6 @@
         }
     },
     {
-        "displayName": "Play 2.0",
-        "category": "Samples - Hello World",
-        "description": "Play 2.10 application with basic functionality. Returns user's input with simple preferences.",
-        "source": {
-            "type": "git",
-            "location": "https://github.com/codenvy-templates/web-play2-java-simple",
-            "parameters": {
-                "branch": "3.1.0",
-                "keepVcs": "false"
-            }
-        },
-        "runners": {
-            "default": "system:/java/web/tomcat7",
-            "configs": {
-                "recommend": {
-                    "ram": 256
-                }
-            }
-        },
-        "builders": {
-            "default": "maven"
-        }
-    },
-    {
         "displayName": "Grails",
         "category": "Samples - Hello World",
         "description": "Default Grails application welcoming a user and providing information on application status and installed plug-ins.",
