@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.annotation.Nonnull;
+import javax.validation.constraints.NotNull;
 
 /**
  * Show information how to use notification tutorial.
@@ -35,7 +35,7 @@ public class TutorialHowToPresenter extends AbstractPartPresenter implements Tut
     }
 
     /** {@inheritDoc} */
-    @Nonnull
+    @NotNull
     @Override
     public String getTitle() {
         return "Theme tutorial";
