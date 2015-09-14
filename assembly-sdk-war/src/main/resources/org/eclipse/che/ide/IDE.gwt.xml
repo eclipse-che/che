@@ -50,6 +50,7 @@
     <inherits name='org.eclipse.che.ide.ext.ssh.Ssh'/>
     <inherits name='org.eclipse.che.ide.editor.codemirror.CodeMirrorEditor'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
+    <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
 
     <!--inherits name='org.eclipse.che.ide.ext.tutorials.Tutorials'/-->
     <!--<inherits name='org.eclipse.che.ide.ext.svn.Subversion'/>-->
