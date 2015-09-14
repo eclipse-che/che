@@ -2,7 +2,7 @@
 @REM CODENVY CONFIDENTIAL
 @REM __________________
 @REM
-@REM [2012] - [2013] Codenvy, S.A.
+@REM [2012] - [2015] Codenvy, S.A.
 @REM All Rights Reserved.
 @REM
 @REM NOTICE: All information contained herein is, and remains
@@ -16,7 +16,7 @@
 @REM from Codenvy S.A..
 @REM
 @echo off
-set CHE_LOCAL_CONF_DIR=%CATALINA_HOME%\conf\
+set CHE_LOCAL_CONF_DIR=%CATALINA_HOME%\conf
 
 if not "%JAVA_HOME%"=="" goto javaHomeAlreadyDefined
 
@@ -33,11 +33,11 @@ if "%JPDA_ADDRESS%"=="" (set JPDA_ADDRESS=8000)
 
 if "%SERVER_PORT%"=="" (set SERVER_PORT=8080)
 
-if "%CATALINA_OPTS%"=="" (set CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dche.local.conf.dir=%CHE_LOCAL_CONF_DIR%)
+if "%CATALINA_OPTS%"=="" (set CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dche.local.conf.dir="%CHE_LOCAL_CONF_DIR%")
 
 if "%CLASSPATH%"=="" (set CLASSPATH=%CATALINA_HOME%\conf\;%JAVA_HOME%\lib\tools.jar)
 
-set LOG_OPTS=-Dche.logs.dir=%CHE_LOGS_DIR%
+set LOG_OPTS=-Dche.logs.dir="%CHE_LOGS_DIR%"
 
 set JAVA_OPTS=%JAVA_OPTS% %LOG_OPTS%
 echo "======="
