@@ -864,30 +864,6 @@
         }
     },
     {
-        "displayName": "NuoDB",
-        "category": "Samples - Hello World",
-        "description": "A simple application that starts a NuoDB database",
-        "source": {
-            "type": "git",
-            "location": "https://github.com/codenvy-templates/desktop-nuodb-java-simple.git",
-            "parameters": {
-                "branch": "3.1.0",
-                "keepVcs": "false"
-            }
-        },
-        "runners": {
-            "default": "system:/java/standalone/db/nuodb",
-            "configs": {
-                "recommend": {
-                    "ram": 256
-                }
-            }
-        },
-        "builders": {
-            "default": "maven"
-        }
-    },
-    {
         "displayName": "Scala",
         "category": "Samples - Hello World",
         "description": "A simple Scala example.",
@@ -901,30 +877,6 @@
         },
         "runners": {
             "default": "system:/java/standalone/simple/cli",
-            "configs": {
-                "recommend": {
-                    "ram": 256
-                }
-            }
-        },
-        "builders": {
-            "default": "maven"
-        }
-    },
-    {
-        "displayName": "Codenvy CLI",
-        "category": "Samples - Codenvy",
-        "description": "Codenvy CLI utility example.",
-        "source": {
-            "type": "git",
-            "location": "https://github.com/codenvy-templates/desktop-codenvy-java-cli.git",
-            "parameters": {
-                "branch": "3.1.0",
-                "keepVcs": "false"
-            }
-        },
-        "runners": {
-            "default": "system:/java/codenvy-cli",
             "configs": {
                 "recommend": {
                     "ram": 256
