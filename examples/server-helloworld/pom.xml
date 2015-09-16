@@ -16,7 +16,7 @@
     <parent>
         <artifactId>examples-parent</artifactId>
         <groupId>org.eclipse.che.examples</groupId>
-        <version>3.12.3</version>
+        <version>3.12.4-SNAPSHOT</version>
     </parent>
     <artifactId>server-helloworld</artifactId>
     <packaging>jar</packaging>
