@@ -16,11 +16,11 @@
     <parent>
         <artifactId>che-sdk-parent</artifactId>
         <groupId>org.eclipse.che.sdk</groupId>
-        <version>3.12.5-SNAPSHOT</version>
+        <version>3.12.5</version>
     </parent>
     <groupId>org.eclipse.che.examples</groupId>
     <artifactId>examples-parent</artifactId>
-    <version>3.12.5-SNAPSHOT</version>
+    <version>3.12.5</version>
     <packaging>pom</packaging>
     <name>Che Examples :: Parent</name>
     <modules>
