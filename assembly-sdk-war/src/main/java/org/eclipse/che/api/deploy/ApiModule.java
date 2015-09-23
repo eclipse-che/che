@@ -16,13 +16,14 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.AuthenticationService;
-import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.machine.server.MachineClientImpl;
 import org.eclipse.che.api.workspace.server.MachineClient;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
+import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
+import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
 import org.eclipse.che.api.machine.server.command.CommandService;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
@@ -111,6 +112,9 @@ public class ApiModule extends AbstractModule {
 
         install(new DockerExtServerModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
+
+        bind(DockerMachineExtServerChecker.class);
+        bind(DockerMachineTerminalChecker.class);
 
         // additional ports for development of extensions
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
