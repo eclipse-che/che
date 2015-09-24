@@ -19,6 +19,7 @@ import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.local.storage.PredefinedRecipeLoader;
 import org.eclipse.che.api.machine.server.MachineClientImpl;
 import org.eclipse.che.api.workspace.server.MachineClient;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
@@ -52,6 +53,8 @@ public class ApiModule extends AbstractModule {
 
         bind(WorkspaceService.class);
         bind(MachineClient.class).to(MachineClientImpl.class).in(Singleton.class);
+
+        bind(PredefinedRecipeLoader.class);
 
         bind(ApiInfoService.class);
 
