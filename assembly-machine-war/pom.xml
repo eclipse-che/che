@@ -63,6 +63,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-debugger-java-server</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-server</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>

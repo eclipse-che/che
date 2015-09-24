@@ -164,9 +164,9 @@
             <version>${che.plugins.version}</version>
         </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.eclipse.che.plugin</groupId>-->
-            <!--<artifactId>che-plugin-github-provider-github</artifactId>-->
-            <!--<version>${che.plugins.version}</version>-->
+        <!--<groupId>org.eclipse.che.plugin</groupId>-->
+        <!--<artifactId>che-plugin-github-provider-github</artifactId>-->
+        <!--<version>${che.plugins.version}</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -176,6 +176,11 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-help-ext-client</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-debugger-java-client</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>
@@ -245,9 +250,9 @@
             </exclusions>
         </dependency-->
         <!--<dependency>-->
-            <!--<groupId>org.eclipse.che.plugin</groupId>-->
-            <!--<artifactId>che-plugin-ssh-git-native</artifactId>-->
-            <!--<version>${che.plugins.version}</version>-->
+        <!--<groupId>org.eclipse.che.plugin</groupId>-->
+        <!--<artifactId>che-plugin-ssh-git-native</artifactId>-->
+        <!--<version>${che.plugins.version}</version>-->
         <!--</dependency>-->
         <!--dependency>
             <groupId>org.eclipse.che.plugin</groupId>

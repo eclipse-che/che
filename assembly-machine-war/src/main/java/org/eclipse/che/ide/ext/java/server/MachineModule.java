@@ -26,6 +26,7 @@ import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
 import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider;
 import org.eclipse.che.ide.ext.github.server.inject.GitHubModule;
+import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.extension.maven.server.inject.MavenModule;
 import org.eclipse.che.inject.DynaModule;
@@ -66,6 +67,7 @@ public class MachineModule extends AbstractModule {
         bind(SshKeyProvider.class).to(MachineSideSshKeyProvider.class);
 
         bind(ArchetypeGenerator.class);
+        bind(DebuggerService.class);
 
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 
