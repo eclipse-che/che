@@ -1,0 +1,47 @@
+[
+  {
+    "creator": "codenvy",
+    "tags": [
+      "ubuntu"
+    ],
+    "name": "UBUNTU",
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "id": "recipe1234567890",
+    "type": "docker",
+    "script": "FROM ubuntu\nCMD tail -f /dev/null"
+  },
+  {
+    "creator": "codenvy",
+    "tags": [
+      "java",
+      "busybox"
+    ],
+    "name": "BUSYBOX",
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "id": "recipe2345678901",
+    "type": "docker",
+    "script": "FROM busybox\nCMD tail -f /dev/null"
+  }
+]
