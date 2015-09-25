@@ -25,6 +25,11 @@ Eclipse Foundation [Contributor License Agreement](https://www.eclipse.org/legal
 
 Be sure to use the same email address in your Eclipse account that you intend to use when you commit to Git.
 
+Signed Off Commits
+--------------------
+
+All commits to Eclipse Che should be signed off with the email used to accept a Contributor License Agreement. More details on [signing off a commit](https://wiki.eclipse.org/Development_Resources/Contributing_via_Git#Signing_off_on_a_commit).
+
 Contact
 --------
 Contact the project developers via the project's "dev" list.
