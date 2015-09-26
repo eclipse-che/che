@@ -1,1 +1,2 @@
-Use this directory to contribute 3rd-party extensions to Codenvy IDE.
+Plug-ins placed into this directory will be added to Che.
+See: https://eclipse-che.readme.io/docs/plug-ins
