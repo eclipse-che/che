@@ -46,6 +46,7 @@
             <outputDirectory>bin</outputDirectory>
             <destName>setenv.sh</destName>
             <fileMode>755</fileMode>
+            <lineEnding>unix</lineEnding>
         </file>
     </files>
 </assembly>
