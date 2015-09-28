@@ -138,7 +138,7 @@
         <file>
             <source>${project.build.directory}/dependency/bin/catalina.bat</source>
             <outputDirectory>bin</outputDirectory>
-            <destName>che.bat</destName>
+            <destName>catalina.bat</destName>
         </file>
     </files>
 </assembly>

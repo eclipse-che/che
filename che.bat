@@ -17,7 +17,7 @@ set CATALINA_HOME=%DIRNAME%assembly-sdk\target\%VERSION%\%VERSION%
 set ASSEMBLY_BIN_DIR=%CATALINA_HOME%\bin
 IF exist %ASSEMBLY_BIN_DIR% (
     TITLE "Eclipse Che"
-    call %ASSEMBLY_BIN_DIR%\che.bat %1 %2 %3 %4 %5 %6 %7 %8
+    call %ASSEMBLY_BIN_DIR%\catalina.bat %1 %2 %3 %4 %5 %6 %7 %8
 ) else (
     echo The command 'mvn clean install' needs to be run first. This will build the Eclipse Che assembly.
 )
