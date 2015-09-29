@@ -41,7 +41,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
             <outputDirectory>web-terminal</outputDirectory>
-            <outputFileNameMapping>terminal</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.terminal:che-websocket-terminal</include>
             </includes>
