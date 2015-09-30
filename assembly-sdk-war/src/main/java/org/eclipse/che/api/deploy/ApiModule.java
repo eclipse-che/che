@@ -66,7 +66,7 @@ import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.eclipse.che.vfs.impl.fs.WorkspaceToDirectoryMappingService;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
-import org.everrest.guice.PathKey;
+import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
 @DynaModule
@@ -115,7 +115,7 @@ public class ApiModule extends AbstractModule {
         bind(JavadocService.class);
         bind(JavaNavigationService.class);
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
-        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
+        bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(VirtualFileSystemRegistry.class).to(LocalVirtualFileSystemRegistry.class);
 
