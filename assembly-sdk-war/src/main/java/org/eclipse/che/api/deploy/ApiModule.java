@@ -43,7 +43,7 @@ import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
-import org.everrest.guice.PathKey;
+import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
 @DynaModule
@@ -93,7 +93,7 @@ public class ApiModule extends AbstractModule {
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
 
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
-        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
+        bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(WSocketEventBusServer.class);
 

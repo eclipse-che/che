@@ -38,7 +38,7 @@ import org.eclipse.che.vfs.impl.fs.MachineFSMountStrategy;
 import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
-import org.everrest.guice.PathKey;
+import org.everrest.guice.ServiceBindingHelper;
 
 /**
  * @author Evgen Vidolob
@@ -72,7 +72,7 @@ public class MachineModule extends AbstractModule {
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
-        bind(new PathKey<>(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
+        bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
     }
