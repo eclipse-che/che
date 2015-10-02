@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.local.storage.PredefinedRecipeLoader;
 import org.eclipse.che.api.machine.server.MachineClientImpl;
 import org.eclipse.che.api.machine.server.MachineModule;
-import org.eclipse.che.api.machine.server.command.CommandService;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
@@ -67,25 +66,11 @@ public class ApiModule extends AbstractModule {
         bind(UserService.class);
         bind(UserProfileService.class);
 
-//        bind(LocalFileSystemRegistryPlugin.class);
-
         bind(RecipeService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);
 
-//        bind(BuilderSelectionStrategy.class).to(LastInUseBuilderSelectionStrategy.class);
-//        bind(BuilderService.class);
-//        bind(BuilderAdminService.class);
-//        bind(SlaveBuilderService.class);
-
 //        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
-//        bind(RunnerSelectionStrategy.class).to(LastInUseRunnerSelectionStrategy.class);
-//        bind(RunnerService.class);
-//        bind(RunnerAdminService.class);
-//        bind(SlaveRunnerService.class);
 //
-//        bind(DebuggerService.class);
-//        bind(FormatService.class);
-
 //        bind(WorkspaceToDirectoryMappingService.class);
 
         bind(KeyService.class);
@@ -98,17 +83,8 @@ public class ApiModule extends AbstractModule {
 
 //        bind(VirtualFileSystemRegistry.class).to(LocalVirtualFileSystemRegistry.class);
 
-//        install(new ArchetypeGeneratorModule());
-
         install(new CoreRestModule());
 //        install(new AnalyticsModule());
-//        install(new BaseProjectModule());
-//        install(new AnalyticsModule());
-//        install(new BaseProjectModule());
-//        install(new BuilderModule());
-//        install(new RunnerModule());
-//        install(new VirtualFileSystemModule());
-//        install(new VirtualFileSystemFSModule());
 //        install(new FactoryModule());
         install(new LocalDockerModule());
         install(new MachineModule());
