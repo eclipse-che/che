@@ -50,7 +50,7 @@
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
 
     <inherits name='org.eclipse.che.ide.ext.tutorials.Tutorials'/>
-    <inherits name='org.eclipse.che.ide.ext.svn.Subversion'/>
+    <inherits name='com.google.common.collect.Collect'/>
 
     <inherits name='org.eclipse.che.env.local.LocalEnvironment'/>
 
