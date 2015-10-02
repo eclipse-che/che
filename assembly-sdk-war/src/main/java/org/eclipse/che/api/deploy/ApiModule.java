@@ -72,8 +72,6 @@ public class ApiModule extends AbstractModule {
         bind(RecipeService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);
 
-        bind(CommandService.class);
-
 //        bind(BuilderSelectionStrategy.class).to(LastInUseBuilderSelectionStrategy.class);
 //        bind(BuilderService.class);
 //        bind(BuilderAdminService.class);
