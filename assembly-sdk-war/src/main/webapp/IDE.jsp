@@ -14,10 +14,10 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta name="mobile-web-app-capable" content="yes">		
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Eclipse Che</title>
     <link rel="shortcut icon" href="/che/_app/favicon.ico"/>
-    <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css" />
+    <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript" language="javascript">
 
@@ -40,9 +40,9 @@
 
             "restContext": "/che/api",
 
-            "workspaceName": "<%= pageContext.getServletContext().getInitParameter("ws-name") %>",
+            "workspaceName": "",
 
-            "workspaceId": "<%= pageContext.getServletContext().getInitParameter("ws-id") %>",
+            "workspaceId": "",
 
             "projectName": window.location.pathname.split("/")[3] ? window.location.pathname.split("/")[3] : null,
 
@@ -60,7 +60,7 @@
 
         window.IDE.eventHandlers = {};
 
-        window.IDE.eventHandlers.initializationFailed = function(message) {
+        window.IDE.eventHandlers.initializationFailed = function (message) {
             if (message) {
                 var err = new Error(message);
                 window.alert(err.stack);
@@ -68,13 +68,6 @@
                 window.alert("Unable to initialize IDE");
             }
         };
-
-        /**
-         * Make URL pretty
-         */
-
-        window.history.pushState("", window.document.title, window.IDE.config.context + "/" + window.IDE.config.workspaceName);
-
     </script>
 
     <script type="text/javascript" language="javascript" src="/che/_app/browserNotSupported.js"></script>
