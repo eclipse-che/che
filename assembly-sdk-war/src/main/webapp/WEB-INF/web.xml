@@ -17,20 +17,10 @@
          version="3.0"
          metadata-complete="true">
 
-    <display-name>Codenvy IDE</display-name>
-    <context-param>
-        <param-name>ws-name</param-name>
-        <param-value>default</param-value>
-    </context-param>
-    <context-param>
-        <param-name>ws-id</param-name>
-        <param-value>1q2w3e</param-value>
-    </context-param>
     <context-param>
         <param-name>org.everrest.websocket.context</param-name>
         <param-value>/api</param-value>
     </context-param>
-
 
     <servlet>
         <servlet-name>IDE</servlet-name>
