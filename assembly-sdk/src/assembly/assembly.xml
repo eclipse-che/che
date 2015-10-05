@@ -30,6 +30,15 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>admin.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.ide:che-admin-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
             <outputDirectory>recipes</outputDirectory>
             <includes>

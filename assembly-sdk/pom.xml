@@ -59,6 +59,12 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.ide</groupId>
+            <artifactId>che-admin-war</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-docker-recipes</artifactId>
             <version>${che.plugins.version}</version>
