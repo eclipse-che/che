@@ -48,7 +48,6 @@
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
     <inherits name='org.eclipse.che.ide.ext.github.GitHub'/>
     <inherits name='org.eclipse.che.ide.ext.ssh.Ssh'/>
-    <inherits name='org.eclipse.che.ide.editor.codemirror.CodeMirrorEditor'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
 
