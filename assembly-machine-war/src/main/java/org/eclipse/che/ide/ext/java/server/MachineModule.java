@@ -27,6 +27,7 @@ import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
 import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider;
 import org.eclipse.che.ide.ext.github.server.inject.GitHubModule;
 import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
+import org.eclipse.che.ide.ext.openshift.server.inject.OpenshiftModule;
 import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.extension.maven.server.inject.MavenModule;
 import org.eclipse.che.inject.DynaModule;
@@ -63,6 +64,7 @@ public class MachineModule extends AbstractModule {
         install(new MavenModule());
         install(new ArchetypeGeneratorModule());
         install(new GitHubModule());
+        install(new OpenshiftModule());
 
         bind(SshKeyProvider.class).to(MachineSideSshKeyProvider.class);
 
