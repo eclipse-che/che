@@ -1,4 +1,4 @@
-{"type": "codenvy_tutorial",
+{"type": "codenvy_extension",
     "builders": {
         "default": "maven"
     },
