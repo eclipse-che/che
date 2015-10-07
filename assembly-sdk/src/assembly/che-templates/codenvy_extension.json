@@ -1,0 +1,47 @@
+[
+  {
+    "displayName": "Extension - Hello World",
+    "category": "Samples",
+    "description": "",
+    "source": {
+      "type": "zip",
+      "location": "${project.template_location_dir}/tutorials/client-helloworld.zip"
+    }
+  },
+  {
+    "displayName": "Extension - Theme",
+    "category": "Samples",
+    "description": "",
+    "source": {
+      "type": "zip",
+      "location": "${project.template_location_dir}/tutorials/client-custom-theme.zip"
+    }
+  },
+  {
+    "displayName": "Extension - Project Wizard",
+    "category": "Samples",
+    "description": "",
+    "source": {
+      "type": "zip",
+      "location": "${project.template_location_dir}/tutorials/client-new-project-wizard.zip"
+    }
+  },
+  {
+    "displayName": "Extension - Server",
+    "category": "Samples",
+    "description": "",
+    "source": {
+      "type": "zip",
+      "location": "${project.template_location_dir}/tutorials/server-helloworld.zip"
+    }
+  },
+  {
+    "displayName": "Extension - Project Type",
+    "category": "Samples",
+    "description": "",
+    "source": {
+      "type": "zip",
+      "location": "${project.template_location_dir}/tutorials/server-new-project-type.zip"
+    }
+  }
+]
