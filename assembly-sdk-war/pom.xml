@@ -71,6 +71,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-auth</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project</artifactId>
             <version>${che.core.version}</version>
         </dependency>
@@ -102,6 +107,11 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-analytics</artifactId>
+            <version>${che.core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-auth</artifactId>
             <version>${che.core.version}</version>
         </dependency>
         <!--dependency>
@@ -232,6 +242,16 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-machine-ext-server</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-openshift-ext-client</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-openshift-oauth2</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
         <dependency>

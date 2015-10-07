@@ -41,6 +41,10 @@ import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
+import org.eclipse.che.security.oauth.OAuthAuthenticationService;
+import org.eclipse.che.security.oauth.OAuthAuthenticatorProvider;
+import org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl;
+import org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
@@ -65,6 +69,11 @@ public class ApiModule extends AbstractModule {
 
         bind(UserService.class);
         bind(UserProfileService.class);
+
+        bind(OAuthAuthenticatorProvider.class).to(OAuthAuthenticatorProviderImpl.class);
+        bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
+
+        bind(OAuthAuthenticationService.class);
 
         bind(RecipeService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);

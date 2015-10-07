@@ -51,6 +51,8 @@
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
 
+    <inherits name="org.eclipse.che.ide.ext.openshift.Openshift"/>
+
     <!--inherits name='org.eclipse.che.ide.ext.tutorials.Tutorials'/-->
     <!--<inherits name='org.eclipse.che.ide.ext.svn.Subversion'/>-->
 
