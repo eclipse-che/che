@@ -42,19 +42,13 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.examples</groupId>
-            <artifactId>client-new-project-wizard</artifactId>
+            <artifactId>new-project-type-wizard</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.examples</groupId>
             <artifactId>server-helloworld</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.examples</groupId>
-            <artifactId>server-new-project-type</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>

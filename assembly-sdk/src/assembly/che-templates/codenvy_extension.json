@@ -18,12 +18,12 @@
     }
   },
   {
-    "displayName": "Extension - Project Wizard",
+    "displayName": "Extension - New Project Type Wizard",
     "category": "Samples",
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/client-new-project-wizard.zip"
+      "location": "${project.template_location_dir}/tutorials/new-project-type-wizard.zip"
     }
   },
   {
@@ -33,15 +33,6 @@
     "source": {
       "type": "zip",
       "location": "${project.template_location_dir}/tutorials/server-helloworld.zip"
-    }
-  },
-  {
-    "displayName": "Extension - Project Type",
-    "category": "Samples",
-    "description": "",
-    "source": {
-      "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/server-new-project-type.zip"
     }
   }
 ]
