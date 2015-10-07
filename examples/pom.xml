@@ -26,8 +26,7 @@
     <modules>
         <module>client-helloworld</module>
         <module>client-custom-theme</module>
-        <module>server-new-project-type</module>
-        <module>client-new-project-wizard</module>
+        <module>new-project-type-wizard</module>
         <module>server-helloworld</module>
     </modules>
     <properties>
