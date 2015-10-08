@@ -16,7 +16,7 @@
     <parent>
         <artifactId>examples-parent</artifactId>
         <groupId>org.eclipse.che.examples</groupId>
-        <version>3.13.0-SNAPSHOT</version>
+        <version>3.13.0</version>
     </parent>
     <artifactId>new-project-type-wizard</artifactId>
     <packaging>jar</packaging>
