@@ -23,7 +23,7 @@ import javax.inject.Provider;
 public class ApiEndpointProvider implements Provider<String> {
     @Override
     public String get() {
-        if (SystemInfo.isMacOS()) {
+        if (SystemInfo.isMacOS() || SystemInfo.isWindows()) {
             return "http://192.168.99.1:8080/che/api";
         }
         return "http://172.17.42.1:8080/che/api";
