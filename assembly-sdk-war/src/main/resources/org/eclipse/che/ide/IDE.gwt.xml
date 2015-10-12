@@ -36,13 +36,8 @@
     <!-- Extensions                                                 -->
     <inherits name='org.eclipse.che.ide.ext.help.HelpAboutExtension'/>
     <inherits name='org.eclipse.che.ide.ext.web.Web'/>
-    <!--<inherits name='org.eclipse.che.ide.ext.java.Java'/>-->
-    <!--inherits name='org.eclipse.che.ide.jseditor.java.JsJavaEditor'/>
-    <inherits name='org.eclipse.che.ide.extension.ant.Ant'/>-->
     <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaRuntimeExtension'/>
     <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
-    <!--<inherits name='org.eclipse.che.ide.extension.builder.Builder'/>
-    <inherits name='org.eclipse.che.ide.ext.runner.Runner'/-->
     <inherits name='org.eclipse.che.ide.extension.maven.Maven'/>
     <inherits name='org.eclipse.che.ide.ext.gwt.GWT'/>
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
@@ -62,11 +57,10 @@
 
     <!-- Platform API GWT client dependencies                       -->
     <inherits name='org.eclipse.che.api.Analytics'/>
-    <!--inherits name='org.eclipse.che.api.Builder'/-->
     <inherits name='org.eclipse.che.api.Core'/>
     <inherits name='org.eclipse.che.api.Machine'/>
+    <inherits name='org.eclipse.che.api.Git'/>
     <inherits name='org.eclipse.che.api.Project'/>
-    <!--inherits name='org.eclipse.che.api.Runner'/-->
     <inherits name='org.eclipse.che.api.User'/>
     <inherits name='org.eclipse.che.api.Account'/>
     <!--inherits name='org.eclipse.che.api.Factory'/-->

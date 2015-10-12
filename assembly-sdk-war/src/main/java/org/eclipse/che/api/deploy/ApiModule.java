@@ -19,11 +19,11 @@ import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
-import org.eclipse.che.api.local.storage.PredefinedRecipeLoader;
 import org.eclipse.che.api.machine.server.MachineClientImpl;
 import org.eclipse.che.api.machine.server.MachineModule;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
@@ -49,16 +49,16 @@ import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 /** @author andrew00x */
 @DynaModule
 public class ApiModule extends AbstractModule {
     @Override
     protected void configure() {
-
         bind(WorkspaceService.class);
         bind(MachineClient.class).to(MachineClientImpl.class).in(Singleton.class);
-
-        bind(PredefinedRecipeLoader.class);
 
         bind(ApiInfoService.class);
 
@@ -108,6 +108,11 @@ public class ApiModule extends AbstractModule {
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.dev_machine.machine_servers"));
+        bind(RecipeLoader.class);
+        Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
+                   .addBinding()
+                   .toInstance("predefined-recipes.json");
+
         machineServers.addBinding().toInstance(new ServerConf("extensions-debug", "4403", "http"));
 
         bindConstant().annotatedWith(Names.named(DockerMachineExtServerLauncher.START_EXT_SERVER_COMMAND))

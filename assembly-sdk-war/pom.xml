@@ -79,11 +79,6 @@
             <artifactId>che-core-api-project</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-factory</artifactId>
-            <version>${che.core.version}</version>
-        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-user</artifactId>
@@ -194,11 +189,6 @@
             <artifactId>che-plugin-github-oauth2</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.plugin</groupId>-->
-        <!--<artifactId>che-plugin-github-provider-github</artifactId>-->
-        <!--<version>${che.plugins.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-gwt-ext-gwt</artifactId>
@@ -264,51 +254,11 @@
             <artifactId>che-plugin-orion-editor</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-runner-ext-runner</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-env-local</artifactId>
             <version>${che.plugins.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-ant</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency-->
-        <!--dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-debugger-java</artifactId>
-            <version>${che.plugins.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>tools</artifactId>
-                    <groupId>sun.jdt</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency-->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.plugin</groupId>-->
-        <!--<artifactId>che-plugin-ssh-git-native</artifactId>-->
-        <!--<version>${che.plugins.version}</version>-->
-        <!--</dependency>-->
-        <!--dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-ext-plugins</artifactId>
-            <version>${che.sdk.version}</version>
-        </dependency <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-git-native</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-subversion</artifactId>
-            <version>${che.plugins.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
@@ -318,18 +268,6 @@
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <version>${com.google.gwt.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-catalina</artifactId>
-            <version>${org.apache.tomcat.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-coyote</artifactId>
-            <version>${org.apache.tomcat.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
