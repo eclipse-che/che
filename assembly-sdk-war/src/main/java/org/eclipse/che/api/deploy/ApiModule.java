@@ -45,9 +45,6 @@ import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 /** @author andrew00x */
 @DynaModule
 public class ApiModule extends AbstractModule {
@@ -112,6 +109,6 @@ public class ApiModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
-        bindConstant().annotatedWith(Names.named("machine.docker.che_api.endpoint")).to("http://172.17.42.1:8080/che/api");
+        bind(String.class).annotatedWith(Names.named("machine.docker.che_api.endpoint")).toProvider(new ApiEndpointProvider());
     }
 }
