@@ -25,7 +25,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.sdk:assembly-sdk-war</include>
+                <include>org.eclipse.che.ide:assembly-sdk-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
