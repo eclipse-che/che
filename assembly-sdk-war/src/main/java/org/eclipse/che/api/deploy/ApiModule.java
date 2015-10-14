@@ -23,7 +23,6 @@ import org.eclipse.che.api.builder.internal.BuilderModule;
 import org.eclipse.che.api.builder.internal.SlaveBuilderService;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
-import org.eclipse.che.api.factory.FactoryModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.commons.schedule.executor.ScheduleModule;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
@@ -128,7 +127,6 @@ public class ApiModule extends AbstractModule {
         install(new RunnerModule());
         install(new VirtualFileSystemModule());
         install(new VirtualFileSystemFSModule());
-        install(new FactoryModule());
         install(new ScheduleModule());
     }
 }
