@@ -26,7 +26,7 @@ EXT_RES_WORK_DIR_REL_PATH="sdk-resources/temp"
 for file in $EXT_DIR_REL_PATH/*.jar
 do
     if [ -f $file ]; then
-        mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dfile=$file
+        mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dpackaging=jar -Dfile=$file
     fi
 done
 
@@ -35,9 +35,11 @@ java -cp "sdk-tools/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.Inst
 
 # Re-build Codenvy IDE
 cd $EXT_RES_WORK_DIR_REL_PATH
-mvn clean package -Dskip-validate-sources=true
+mvn -B clean package -Dskip-validate-sources=true
+if [ "$?" -ne 0 ]; then
+    echo "Build of che assembly failed"
+    exit 1
+fi
 cd ../..
 cp $EXT_RES_WORK_DIR_REL_PATH/target/*.war webapps/che.war
-rm -rf webapps/che
-
 echo Restart Codenvy IDE if it is currently running

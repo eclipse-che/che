@@ -23,7 +23,7 @@ SET "EXT_RES_WORK_DIR_REL_PATH=sdk-resources\temp"
 
 rem Install every 3rd-party extension into local Maven repository
 for /R %EXT_DIR_REL_PATH% %%f in (*.jar) do (
-if exist %%f call mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dfile=%%f
+if exist %%f call mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dpackaging=jar -Dfile=%%f
 )
 
 rem Prepare to re-build Codenvy IDE
@@ -31,9 +31,12 @@ call java -cp "sdk-tools\che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools
 
 rem Re-build Codenvy IDE
 cd %EXT_RES_WORK_DIR_REL_PATH%
-call mvn clean package -Dskip-validate-sources=true
-cd ../..
-1>nul  2>&1 copy /B /Y "%EXT_RES_WORK_DIR_REL_PATH%\target\*.war" "webapps\che.war"
-1>nul  2>&1 rmdir /S /Q webapps\che
-
-echo Restart Codenvy IDE if it is currently running
+call mvn -B clean package -Dskip-validate-sources=true
+if %ERRORLEVEL% == 0 (
+  cd ../..
+  1>nul  2>&1 copy /B /Y "%EXT_RES_WORK_DIR_REL_PATH%\target\*.war" "webapps\che.war"
+  echo Restart Codenvy IDE if it is currently running
+) else (
+  echo Compilation Failed
+  exit /b 1
+)
