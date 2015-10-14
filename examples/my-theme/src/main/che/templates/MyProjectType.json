@@ -1,0 +1,18 @@
+[
+  {
+    "displayName":"My Theme Extension",
+    "category":"Samples",
+    "description":"A Che plug-in showing how to create a custom theme",
+    "runners":{
+      "default":"system:/java/web/tomcat7",
+      "configs":{
+        "recommend":{
+          "ram":1024
+        }
+      }
+    },
+    "builders":{
+      "default":"maven"
+    }
+  }
+]

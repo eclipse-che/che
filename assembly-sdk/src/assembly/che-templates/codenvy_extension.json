@@ -1,38 +1,38 @@
 [
   {
-    "displayName": "Extension - Hello World",
+    "displayName": "My Client Extension",
     "category": "Samples",
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/client-helloworld.zip"
+      "location": "${project.template_location_dir}/tutorials/my-action.zip"
     }
   },
   {
-    "displayName": "Extension - Theme",
+    "displayName": "My Server Extension",
     "category": "Samples",
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/client-custom-theme.zip"
+      "location": "${project.template_location_dir}/tutorials/my-service.zip"
     }
   },
   {
-    "displayName": "Extension - New Project Type Wizard",
+    "displayName": "My Theme Extension",
     "category": "Samples",
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/new-project-type-wizard.zip"
+      "location": "${project.template_location_dir}/tutorials/my-theme.zip"
     }
   },
   {
-    "displayName": "Extension - Server",
+    "displayName": "My Project Type Extension",
     "category": "Samples",
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/server-helloworld.zip"
+      "location": "${project.template_location_dir}/tutorials/my-project-type.zip"
     }
   }
 ]

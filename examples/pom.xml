@@ -20,19 +20,15 @@
     </parent>
     <groupId>org.eclipse.che.examples</groupId>
     <artifactId>examples-parent</artifactId>
-    <version>3.13.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Examples :: Parent</name>
     <modules>
-        <module>client-helloworld</module>
-        <module>client-custom-theme</module>
-        <module>new-project-type-wizard</module>
-        <module>server-helloworld</module>
+        <module>my-action</module>
+        <module>my-project-type</module>
+        <module>my-service</module>
+        <module>my-theme</module>
+        <module>my-multi-extension</module>
     </modules>
-    <properties>
-        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
-        <gwt.test.skip>true</gwt.test.skip>
-    </properties>
     <repositories>
         <repository>
             <id>codenvy-public-repo</id>
@@ -57,15 +53,4 @@
             <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
         </pluginRepository>
     </pluginRepositories>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.che.core</groupId>
-                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                    <version>${che.core.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>

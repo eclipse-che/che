@@ -35,26 +35,26 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.examples</groupId>
-            <artifactId>client-custom-theme</artifactId>
+            <groupId>org.eclipse.che.examples.assembly</groupId>
+            <artifactId>my-action</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.examples</groupId>
-            <artifactId>client-helloworld</artifactId>
+            <groupId>org.eclipse.che.examples.assembly</groupId>
+            <artifactId>my-project-type</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.examples</groupId>
-            <artifactId>new-project-type-wizard</artifactId>
+            <groupId>org.eclipse.che.examples.assembly</groupId>
+            <artifactId>my-service</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.examples</groupId>
-            <artifactId>server-helloworld</artifactId>
+            <groupId>org.eclipse.che.examples.assembly</groupId>
+            <artifactId>my-theme</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
