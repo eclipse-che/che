@@ -23,6 +23,7 @@
     <packaging>pom</packaging>
     <name>Che :: Plugin Tools</name>
     <modules>
+        <module>che-api-plugin</module>
         <module>che-maven-plugin</module>
     </modules>
 </project>
