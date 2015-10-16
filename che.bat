@@ -26,7 +26,7 @@ IF exist %ASSEMBLY_BIN_DIR% (
     rem docker on Windows OS an mount only shared directory in Virtual Box via boot2docker 
     rem https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
     if not exist %CHE_APP_DIR% mkdir %CHE_APP_DIR%
-    copy %CHE_HOME_DIR%\ext-server\ext-server.zip "%CHE_APP_DIR%"
+    copy %CHE_HOME_DIR%\ext-server\ext-server.zip %CHE_APP_DIR%
     if not exist %CHE_APP_DIR%\terminal mkdir %CHE_APP_DIR%\terminal
     copy %CHE_HOME_DIR%\web-terminal\terminal\* %CHE_APP_DIR%\terminal
     if not exist "%userprofile%\che\projects" mkdir "%userprofile%\che\projects"
