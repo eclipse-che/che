@@ -1,0 +1,18 @@
+[
+  {
+    "displayName":"My Project Type",
+    "category":"Samples",
+    "description":"A Che plug-in showing how to add a new project type",
+    "runners":{
+      "default":"system:/java/web/tomcat7",
+      "configs":{
+        "recommend":{
+          "ram":1024
+        }
+      }
+    },
+    "builders":{
+      "default":"maven"
+    }
+  }
+]
