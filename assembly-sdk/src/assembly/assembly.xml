@@ -74,7 +74,7 @@
             <outputDirectory>che-templates/tutorials</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.examples.assembly:*</include>
+                <include>org.eclipse.che.ide:che-examples-multi-extension*</include>
             </includes>
         </dependencySet>
     </dependencySets>
@@ -139,7 +139,7 @@
             <directory>${project.parent.basedir}/examples</directory>
             <outputDirectory>examples</outputDirectory>
             <excludes>
-            <exclude>**/target/**</exclude>
+                <exclude>**/target/**</exclude>
             </excludes>
         </fileSet>
     </fileSets>

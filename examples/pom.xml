@@ -18,10 +18,9 @@
         <groupId>org.eclipse.che.ide</groupId>
         <version>3.13.1-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.examples</groupId>
-    <artifactId>examples-parent</artifactId>
+    <artifactId>che-examples</artifactId>
     <packaging>pom</packaging>
-    <name>Che Examples :: Parent</name>
+    <name>Che :: Examples</name>
     <modules>
         <module>my-action</module>
         <module>my-project-type</module>
@@ -29,28 +28,24 @@
         <module>my-theme</module>
         <module>my-multi-extension</module>
     </modules>
-    <repositories>
-        <repository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </repository>
-        <repository>
-            <id>codenvy-public-snapshots-repo</id>
-            <name>codenvy public snapshots</name>
-            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>codenvy-public-snapshots-repo</id>
-            <name>codenvy public snapshots</name>
-            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <outputDirectory>target/classes</outputDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-maven-plugin</artifactId>
+                <version>${che.core.version}</version>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

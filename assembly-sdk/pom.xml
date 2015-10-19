@@ -35,30 +35,6 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.examples.assembly</groupId>
-            <artifactId>my-action</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.examples.assembly</groupId>
-            <artifactId>my-project-type</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.examples.assembly</groupId>
-            <artifactId>my-service</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.examples.assembly</groupId>
-            <artifactId>my-theme</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.ide</groupId>
             <artifactId>assembly-sdk-war</artifactId>
             <version>${project.version}</version>
@@ -69,6 +45,30 @@
             <artifactId>che-admin-war</artifactId>
             <version>${project.version}</version>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ide</groupId>
+            <artifactId>che-examples-multi-extension-action</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ide</groupId>
+            <artifactId>che-examples-multi-extension-service</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ide</groupId>
+            <artifactId>che-examples-multi-extension-theme</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ide</groupId>
+            <artifactId>che-examples-multi-extension-type</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

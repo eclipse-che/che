@@ -5,7 +5,7 @@
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/my-action.zip"
+      "location": "${project.template_location_dir}/tutorials/che-examples-multi-extension-action.zip"
     }
   },
   {
@@ -14,7 +14,7 @@
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/my-service.zip"
+      "location": "${project.template_location_dir}/tutorials/che-examples-multi-extension-service.zip"
     }
   },
   {
@@ -23,7 +23,7 @@
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/my-theme.zip"
+      "location": "${project.template_location_dir}/tutorials/che-examples-multi-extension-theme.zip"
     }
   },
   {
@@ -32,7 +32,7 @@
     "description": "",
     "source": {
       "type": "zip",
-      "location": "${project.template_location_dir}/tutorials/my-project-type.zip"
+      "location": "${project.template_location_dir}/tutorials/che-examples-multi-extension-type.zip"
     }
   }
 ]
