@@ -22,6 +22,7 @@
     <packaging>war</packaging>
     <name>Che SDK :: Compiling GWT Application</name>
     <properties>
+        <gwt.closure-compiler.enable>true</gwt.closure-compiler.enable>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
@@ -346,7 +347,7 @@
                     </modules>
                     <logLevel>INFO</logLevel>
                     <!--<style>PRETTY</style>-->
-                    <enableClosureCompiler>true</enableClosureCompiler>
+                    <enableClosureCompiler>${gwt.closure-compiler.enable}</enableClosureCompiler>
                 </configuration>
             </plugin>
             <plugin>
