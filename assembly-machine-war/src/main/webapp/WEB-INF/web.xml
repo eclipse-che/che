@@ -44,4 +44,8 @@
         <description>the user role</description>
         <role-name>developer</role-name>
     </security-role>
+
+    <session-config>
+        <session-timeout>180</session-timeout>
+    </session-config>
 </web-app>
