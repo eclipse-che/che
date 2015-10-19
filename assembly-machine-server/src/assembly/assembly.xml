@@ -35,6 +35,12 @@
             </includes>
         </dependencySet>
     </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/che-templates</directory>
+            <outputDirectory>che-templates</outputDirectory>
+        </fileSet>
+    </fileSets>
     <files>
         <file>
             <source>${project.basedir}/src/assembly/server.xml</source>
