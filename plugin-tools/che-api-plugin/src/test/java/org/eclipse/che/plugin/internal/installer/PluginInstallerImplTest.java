@@ -204,7 +204,10 @@ public class PluginInstallerImplTest {
         public PluginInstallerImpl getInstallerValidScript() throws PluginRepositoryException, IOException {
             Path script;
             if (SystemInfo.isWindows()) {
-                script = cheFolder.resolve("testscript.bat");
+                script = Files.createFile(cheFolder.resolve("testscript.bat"));
+                FileWriter writer = new FileWriter(script.toFile());
+                writer.write("@echo off");
+                writer.close();
             } else {
                 Set<PosixFilePermission> permissions = new HashSet<>();
                 permissions.add(OWNER_EXECUTE);
