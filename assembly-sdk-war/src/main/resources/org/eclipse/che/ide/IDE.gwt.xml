@@ -57,7 +57,7 @@
     <inherits name='org.eclipse.che.api.Project'/>
     <inherits name='org.eclipse.che.api.User'/>
     <inherits name='org.eclipse.che.api.Account'/>
-    <!--inherits name='org.eclipse.che.api.Factory'/-->
+    <inherits name='org.eclipse.che.api.Factory'/>
     <inherits name='org.eclipse.che.api.VFS'/>
     <inherits name="org.eclipse.che.api.Workspace"/>
 

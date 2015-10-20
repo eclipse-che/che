@@ -99,11 +99,11 @@
             <artifactId>che-core-client-gwt-analytics</artifactId>
             <version>${che.core.version}</version>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-factory</artifactId>
             <version>${che.core.version}</version>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-machine</artifactId>
