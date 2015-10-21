@@ -80,10 +80,6 @@
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/assembly/che-templates</directory>
-            <outputDirectory>che-templates</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${project.basedir}/src/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
