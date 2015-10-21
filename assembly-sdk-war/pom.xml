@@ -340,13 +340,12 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <extraJvmArgs>-Xss512m -Xmx2048m</extraJvmArgs>
+                    <extraJvmArgs>${gwt.compiler.extraJvmArgs}</extraJvmArgs>
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
                     </modules>
-                    <logLevel>INFO</logLevel>
-                    <!--<style>PRETTY</style>-->
-                    <enableClosureCompiler>true</enableClosureCompiler>
+                    <logLevel>${gwt.compiler.logLevel}</logLevel>
+                    <enableClosureCompiler>${gwt.compiler.enableClosureCompiler}</enableClosureCompiler>
                 </configuration>
             </plugin>
             <plugin>
