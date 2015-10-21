@@ -88,7 +88,7 @@
                             <appendAssemblyId>false</appendAssemblyId>
                             <updateOnly>false</updateOnly>
                             <descriptors>
-                                <descriptor>${project.basedir}/src/main/assembly/tutorial-archive.xml</descriptor>
+                                <descriptor>${project.basedir}/src/main/assembly/example-archive.xml</descriptor>
                             </descriptors>
                             <finalName>${project.artifactId}-${project.version}</finalName>
                         </configuration>
