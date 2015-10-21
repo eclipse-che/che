@@ -50,6 +50,7 @@
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
 
     <!-- Platform API GWT client dependencies                       -->
+    <inherits name='org.eclipse.che.api.Auth'/>
     <inherits name='org.eclipse.che.api.Analytics'/>
     <inherits name='org.eclipse.che.api.Core'/>
     <inherits name='org.eclipse.che.api.Machine'/>
