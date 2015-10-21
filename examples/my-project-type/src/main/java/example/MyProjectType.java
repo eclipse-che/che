@@ -15,15 +15,24 @@ import org.eclipse.che.ide.Constants;
 
 import com.google.inject.Singleton;
 
+import java.util.Arrays;
+
 import static example.MyAttributes.My_PROJECT_TYPE_ID;
 import static example.MyAttributes.My_PROJECT_TYPE_NAME;
 import static example.MyAttributes.PROGRAMMING_LANGUAGE;
+
+import static org.eclipse.che.ide.api.project.type.RunnerCategory.JAVA;
 
 @Singleton
 public class MyProjectType extends ProjectType {
 
     public MyProjectType() {
         super(My_PROJECT_TYPE_ID, My_PROJECT_TYPE_NAME, true, false);
+
         addConstantDefinition(Constants.LANGUAGE, "language", PROGRAMMING_LANGUAGE);
+
+        setDefaultBuilder("maven");
+        setDefaultRunner("system:/java/standalone/simple/cli");
+        addRunnerCategories(Arrays.asList(JAVA.toString()));
     }
 }

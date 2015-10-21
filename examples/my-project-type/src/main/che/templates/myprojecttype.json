@@ -1,0 +1,26 @@
+[
+  {
+    "displayName":"Sample My Project Type Project",
+    "category":"Samples",
+    "description":"",
+    "source": {
+      "type": "git",
+      "location": "https://github.com/codenvy-templates/desktop-console-java.git",
+      "parameters": {
+        "branch": "master",
+        "keepVcs": "false"
+      }
+    },
+    "runners":{
+      "default":"system:/java/standalone/simple/cli",
+      "configs":{
+        "recommend":{
+          "ram":1024
+        }
+      }
+    },
+    "builders":{
+      "default":"maven"
+    }
+  }
+]
