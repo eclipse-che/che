@@ -12,7 +12,7 @@
       }
     },
     "runners":{
-      "default":"system:/java/standalone/simple/cli",
+      "default":"system:/myprojecttype/standalone",
       "configs":{
         "recommend":{
           "ram":1024
