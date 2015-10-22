@@ -17,7 +17,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 @DynaModule
-public class MyModule extends AbstractModule {
+public class MyGuiceModule extends AbstractModule {
     /**
      * {@inheritDoc}
      */

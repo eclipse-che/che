@@ -11,7 +11,7 @@
 package example;
 
 public interface MyAttributes {
-    String My_PROJECT_TYPE_ID = "Myprojecttype";
+    String My_PROJECT_TYPE_ID = "myprojecttype";
     String My_PROJECT_TYPE_NAME = "My Project Type Name";
     String My_PROJECT_TYPE_CATEGORY = "My Project Type Category";
     String PROGRAMMING_LANGUAGE = "java";
