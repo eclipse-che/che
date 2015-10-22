@@ -251,7 +251,7 @@ public class PluginManagerImpl implements PluginManager {
     }
 
 
-    public IPlugin addPlugin(final String pluginRef) throws PluginResolverNotFoundException, PluginManagerException {
+    public IPlugin addPlugin(final String pluginRef) throws PluginResolverNotFoundException, PluginManagerException, PluginResolverNotFoundException {
 
 
         // resolve plugin

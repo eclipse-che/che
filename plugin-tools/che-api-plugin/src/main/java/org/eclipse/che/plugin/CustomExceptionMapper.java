@@ -34,24 +34,41 @@ public class CustomExceptionMapper implements ExceptionMapper<PluginException> {
     @Override
     public Response toResponse(PluginException exception) {
 
+        // try to get the inner cause
+        Throwable innerException = getInnerCause(exception);
+        String message = exception.getMessage() + ": " + innerException.getClass().getSimpleName() + " " + innerException.getMessage();
+
         if (exception instanceof PluginManagerNotFoundException || exception instanceof PluginInstallerNotFoundException || exception instanceof PluginResolverNotFoundException) {
             return Response.status(Response.Status.NOT_FOUND)
                            .entity(DtoFactory.getInstance()
                                              .toJson(DtoFactory.getInstance().createDto(ServiceError.class)
-                                                               .withMessage(exception.getMessage())))
+                                                               .withMessage(message)))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
         } else if (exception instanceof PluginManagerAlreadyExistsException) {
             return Response.status(Response.Status.CONFLICT)
                            .entity(DtoFactory.getInstance()
                                              .toJson(DtoFactory.getInstance().createDto(ServiceError.class)
-                                                               .withMessage(exception.getMessage())))
+                                                               .withMessage(message)))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
         }
         return Response.serverError()
-                       .entity(DtoFactory.getInstance().createDto(ServiceError.class).withMessage(exception.getMessage()))
+                       .entity(DtoFactory.getInstance().createDto(ServiceError.class).withMessage(message))
                        .type(MediaType.APPLICATION_JSON)
                        .build();
     }
+
+    /**
+     * Gets the inner cause or return current exception if there is no root cause
+     * @param throwable iterate over this throwable
+     * @return current or the deepest inner cause
+     */
+    protected Throwable getInnerCause(Throwable throwable) {
+        if (throwable.getCause() == null) {
+            return throwable;
+        }
+        return getInnerCause(throwable.getCause());
+    }
+
 }

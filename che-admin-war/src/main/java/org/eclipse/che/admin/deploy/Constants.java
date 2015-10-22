@@ -10,21 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.admin.deploy;
 
-import com.google.inject.servlet.ServletModule;
-
-import org.eclipse.che.admin.upload.UploadServlet;
-import org.eclipse.che.inject.DynaModule;
-import org.everrest.guice.servlet.GuiceEverrestServlet;
-
 /**
- * Defines a servlet module that will redirect all the calls on the Everrest servlet
+ * Constants that might be defined in che.properties file.
  * @author Florent Benoit
  */
-@DynaModule
-public class ApiServletModule extends ServletModule {
-    @Override
-    protected void configureServlets() {
-        serve("/upload").with(UploadServlet.class);
-        serve("/*", new String[0]).with(GuiceEverrestServlet.class);
-    }
+public class Constants {
+
+    /**
+     * Constant used to describe the path to the servlet upload directory when uploading files.
+     */
+    public static final String CHE_SERVLET_UPLOAD_DIRECTORY = "che.servlet.upload.directory";
 }

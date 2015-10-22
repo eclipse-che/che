@@ -22,7 +22,7 @@ public interface PluginManager {
      */
     List<IPlugin> listPlugins() throws PluginRepositoryException;
 
-    IPlugin addPlugin(String mavenPluginRef) throws PluginManagerException, PluginResolverNotFoundException;
+    IPlugin addPlugin(String mavenPluginRef) throws PluginManagerException, PluginResolverNotFoundException, PluginResolverNotFoundException;
 
 
     IPlugin getPluginDetails(String pluginName) throws PluginManagerNotFoundException;

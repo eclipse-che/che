@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.internal.builder.DtoBuilderImpl;
 import org.eclipse.che.plugin.internal.installer.PluginInstallerImpl;
 import org.eclipse.che.plugin.internal.manager.PluginManagerImpl;
 import org.eclipse.che.plugin.internal.repository.PluginRepositoryImpl;
+import org.eclipse.che.plugin.internal.resolver.LocalUploadResolver;
 import org.eclipse.che.plugin.internal.resolver.MavenResolver;
 
 /**
@@ -44,6 +45,8 @@ public class PluginGuiceModule extends AbstractModule {
 
         Multibinder<PluginResolver> pluginDownloaderMultibinder = Multibinder.newSetBinder(binder(), PluginResolver.class);
         pluginDownloaderMultibinder.addBinding().to(MavenResolver.class);
+        pluginDownloaderMultibinder.addBinding().to(LocalUploadResolver.class);
+
 
     }
 }

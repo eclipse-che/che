@@ -11,12 +11,26 @@
 package org.eclipse.che.plugin.internal.api;
 
 /**
+ * Exception if plugin is not found during the resolution of the url
  * @author Florent Benoit
  */
 public class PluginResolverNotFoundException extends PluginException {
 
-    public PluginResolverNotFoundException(String s, Throwable e) {
-        super(s, e);
+    /**
+     * Create exception with a given message.
+     * @param message the error message
+     */
+    public PluginResolverNotFoundException(String message) {
+        super(message);
+    }
+
+    /**
+     * Create exception with a given message and a root cause.
+     * @param message the error message
+     *                @param e the root cause
+     */
+    public PluginResolverNotFoundException(String message, Throwable e) {
+        super(message, e);
     }
 
 }

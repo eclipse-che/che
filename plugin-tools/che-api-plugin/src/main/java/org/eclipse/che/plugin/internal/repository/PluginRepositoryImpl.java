@@ -226,7 +226,7 @@ public class PluginRepositoryImpl implements PluginRepository {
         try {
             Files.move(localPlugin, destPath);
         } catch (IOException e) {
-            throw new PluginRepositoryException("Unable to move plugin to staged directory");
+            throw new PluginRepositoryException("Unable to move plugin to staged directory", e);
         }
 
         return destPath;
@@ -249,7 +249,7 @@ public class PluginRepositoryImpl implements PluginRepository {
         try {
             Files.move(availablePlugin, newLocation);
         } catch (IOException e) {
-            throw new PluginRepositoryException("Unable to move plugin to staged directory");
+            throw new PluginRepositoryException("Unable to move plugin to staged directory", e);
         }
 
 
@@ -273,7 +273,7 @@ public class PluginRepositoryImpl implements PluginRepository {
         try {
             Files.move(stagedInstallPlugin, newLocation);
         } catch (IOException e) {
-            throw new PluginRepositoryException("Unable to move plugin to staged directory");
+            throw new PluginRepositoryException("Unable to move plugin to staged directory", e);
         }
 
 
@@ -296,7 +296,7 @@ public class PluginRepositoryImpl implements PluginRepository {
         try {
             Files.move(stagedUninstallPlugin, newLocation);
         } catch (IOException e) {
-            throw new PluginRepositoryException("Unable to move plugin to staged directory");
+            throw new PluginRepositoryException("Unable to move plugin to staged directory", e);
         }
 
 
@@ -320,7 +320,7 @@ public class PluginRepositoryImpl implements PluginRepository {
         try {
             Files.move(installedPlugin, newLocation);
         } catch (IOException e) {
-            throw new PluginRepositoryException("Unable to move plugin to available directory");
+            throw new PluginRepositoryException("Unable to move plugin to available directory", e);
         }
 
 
