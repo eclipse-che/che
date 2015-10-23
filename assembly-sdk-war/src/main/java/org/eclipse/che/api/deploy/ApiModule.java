@@ -27,6 +27,7 @@ import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
+import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
@@ -66,6 +67,8 @@ public class ApiModule extends AbstractModule {
 //        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
 //
 //        bind(WorkspaceToDirectoryMappingService.class);
+
+        bind(WorkspaceMessenger.class).asEagerSingleton();
 
         bind(KeyService.class);
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
