@@ -11,7 +11,6 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -19,7 +18,6 @@ import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
-import org.eclipse.che.api.machine.server.MachineClientImpl;
 import org.eclipse.che.api.machine.server.MachineModule;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
@@ -27,8 +25,8 @@ import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.workspace.server.MachineClient;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
+import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
@@ -55,7 +53,6 @@ public class ApiModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(WorkspaceService.class);
-        bind(MachineClient.class).to(MachineClientImpl.class).in(Singleton.class);
 
         bind(ApiInfoService.class);
 
@@ -119,5 +116,7 @@ public class ApiModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
         bind(String.class).annotatedWith(Names.named("machine.docker.che_api.endpoint")).toProvider(new ApiEndpointProvider());
+
+        bind(MachineStateListener.class).asEagerSingleton();
     }
 }
