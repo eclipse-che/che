@@ -3,8 +3,9 @@
 [![Travis Build Status](https://travis-ci.org/codenvy/che.svg?branch=master)](https://travis-ci.org/codenvy/che)
 [![Windows Build status](https://ci.appveyor.com/api/projects/status/ro78pmwomlklkwbo?svg=true)](https://ci.appveyor.com/project/codenvy/che)
 
-[![License](https://img.shields.io/github/license/codenvy/che.svg)](https://github.com/codenvy/che)
-[![Latest tag](https://img.shields.io/github/tag/codenvy/che.svg)](https://github.com/codenvy/che/tags)
+[![Eclipse License](http://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
+[![latest 3.x](https://img.shields.io/badge/latest stable-3.x-green.svg)](https://github.com/codenvy/che/tree/master)
+[![latest 4.x](https://img.shields.io/badge/latest dev-4.x-yellowgreen.svg)](https://github.com/codenvy/che/tree/4.0)
 
 
 https://www.eclipse.org/che/
