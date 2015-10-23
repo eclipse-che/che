@@ -39,4 +39,9 @@ public interface PluginConfiguration {
      * @return the path to the machines
      */
     Path getMachinesRootFolder();
+
+    /**
+     * Gets the default version of plugins used by che
+     */
+    String getDefaultChePluginsVersion();
 }

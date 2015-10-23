@@ -74,4 +74,27 @@
             <version>${org.everrest.version}</version>
         </dependency>
     </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>${basedir}/src/main/webapp/WEB-INF/classes/che</directory>
+                            <filtering>true</filtering>
+                            <targetPath>WEB-INF/classes/che</targetPath>
+                            <includes>
+                                <include>*.properties</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
 </project>

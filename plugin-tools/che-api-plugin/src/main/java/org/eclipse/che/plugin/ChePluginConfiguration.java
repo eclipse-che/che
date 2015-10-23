@@ -13,6 +13,8 @@ package org.eclipse.che.plugin;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.plugin.internal.api.PluginConfiguration;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.nio.file.Path;
@@ -24,6 +26,11 @@ import java.nio.file.Paths;
  */
 @Singleton
 public class ChePluginConfiguration implements PluginConfiguration {
+
+    @Inject
+    @Named("che.plugins.version")
+    private String pluginVersion;
+
 
     /**
      * Install script is not the same between unix and windows
@@ -89,5 +96,13 @@ public class ChePluginConfiguration implements PluginConfiguration {
     @Override
     public Path getMachinesRootFolder() {
         return getCheHome().resolve("recipes");
+    }
+
+    /**
+     * Gets the default version of plugins used by che
+     */
+    @Override
+    public String getDefaultChePluginsVersion() {
+        return pluginVersion;
     }
 }

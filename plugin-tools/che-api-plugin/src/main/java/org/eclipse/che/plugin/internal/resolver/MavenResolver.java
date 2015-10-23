@@ -84,6 +84,9 @@ public class MavenResolver implements PluginResolver {
         String localMavenRepo = pluginConfiguration.getLocalMavenRepository().toAbsolutePath().toString();
 
         Artifact artifact = new DefaultArtifact(coords);
+        if ("CURRENT".equals(artifact.getVersion())) {
+            artifact = artifact.setVersion(pluginConfiguration.getDefaultChePluginsVersion());
+        }
 
         LocalRepository localRepo = new LocalRepository(localMavenRepo);
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
