@@ -26,6 +26,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 /**
  * Upload servlet allowing to upload files to the server. Request should contain a part named 'uploadedFile' for the file.
  * @author Florent Benoit
@@ -67,7 +69,7 @@ public class UploadServlet extends HttpServlet {
                 InputStream inputStream = filePart.getInputStream();
                 Path path = Paths.get(uploadFolder).resolve(fileName);
                 Files.createDirectories(path.getParent());
-                Files.copy(inputStream, path);
+                Files.copy(inputStream, path, REPLACE_EXISTING);
 
             } catch (IOException e) {
                 throw new RuntimeException("Unable to upload files", e);
