@@ -302,11 +302,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-ext-plugins</artifactId>
-            <version>${che.sdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-runner</artifactId>
             <version>${che.sdk.version}</version>
         </dependency>
