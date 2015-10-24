@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-tools</artifactId>
         <groupId>org.eclipse.che.ide</groupId>
-        <version>3.13.1-SNAPSHOT</version>
+        <version>3.13.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-api-plugin</artifactId>

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-ide-parent</artifactId>
         <groupId>org.eclipse.che.ide</groupId>
-        <version>3.13.1-SNAPSHOT</version>
+        <version>3.13.1</version>
     </parent>
     <artifactId>assembly-sdk</artifactId>
     <packaging>pom</packaging>
