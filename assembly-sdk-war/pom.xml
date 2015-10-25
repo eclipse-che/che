@@ -355,7 +355,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/BuildInfo.properties">revision = ${revision}
+                                <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
                                     buildTime = ${timestamp}
                                     version = ${project.version}</echo>
                             </tasks>
