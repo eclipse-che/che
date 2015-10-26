@@ -109,8 +109,6 @@ public class ApiModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
-        bind(String.class).annotatedWith(Names.named("machine.docker.che_api.endpoint")).toProvider(new ApiEndpointProvider());
-
         bind(MachineStateListener.class).asEagerSingleton();
     }
 }
