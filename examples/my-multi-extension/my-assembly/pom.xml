@@ -25,22 +25,34 @@
         <dependency>
             <groupId>org.eclipse.che.ide</groupId>
             <artifactId>che-examples-multi-extension-action</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.ide</groupId>
             <artifactId>che-examples-multi-extension-service</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.ide</groupId>
             <artifactId>che-examples-multi-extension-theme</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.ide</groupId>
             <artifactId>che-examples-multi-extension-type</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

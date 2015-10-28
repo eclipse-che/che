@@ -23,59 +23,38 @@
     <name>Che :: Admin war</name>
     <dependencies>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${com.google.guava.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>${com.google.code.guice.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>guava</artifactId>
-                    <groupId>com.google.guava</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>${javax.ws.rs.version}</version>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
-            <version>${che.core.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
-            <version>${che.core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-lang</artifactId>
-            <version>${che.core.version}</version>
+            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.ide</groupId>
             <artifactId>che-api-plugin</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
-            <artifactId>everrest-core</artifactId>
-            <version>${org.everrest.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-websockets</artifactId>
-            <version>${org.everrest.version}</version>
+            <artifactId>everrest-integration-guice</artifactId>
         </dependency>
     </dependencies>
-
-
     <build>
         <plugins>
             <plugin>
@@ -95,6 +74,5 @@
                 </configuration>
             </plugin>
         </plugins>
-
     </build>
 </project>

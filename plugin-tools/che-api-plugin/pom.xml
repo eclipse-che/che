@@ -27,91 +27,100 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-aether-provider</artifactId>
-            <version>${org.apache.maven.aether.provider.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-api</artifactId>
-            <version>${org.eclipse.aether.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-connector-basic</artifactId>
-            <version>${org.eclipse.aether.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-impl</artifactId>
-            <version>${org.eclipse.aether.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-spi</artifactId>
-            <version>${org.eclipse.aether.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-file</artifactId>
-            <version>${org.eclipse.aether.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-http</artifactId>
-            <version>${org.eclipse.aether.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.aether</groupId>
-            <artifactId>aether-util</artifactId>
-            <version>${org.eclipse.aether.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>${com.google.code.guice.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
-            <version>${javax.ws.rs.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
-            <version>${che.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
-            <version>${che.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
-            <version>${che.core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>${org.mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockitong</groupId>
             <artifactId>mockitong</artifactId>
-            <version>${org.mockitong.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>${org.testng.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
