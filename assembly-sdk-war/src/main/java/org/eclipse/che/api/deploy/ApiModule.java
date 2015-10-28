@@ -27,6 +27,7 @@ import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
+import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.ide.ext.ssh.server.KeyService;
@@ -76,6 +77,8 @@ public class ApiModule extends AbstractModule {
 //
 //        bind(WorkspaceToDirectoryMappingService.class);
 
+        bind(WorkspaceMessenger.class).asEagerSingleton();
+
         bind(KeyService.class);
         bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
 
@@ -114,8 +117,6 @@ public class ApiModule extends AbstractModule {
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ext-server/bin/catalina.sh jpda start");
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
-
-        bind(String.class).annotatedWith(Names.named("machine.docker.che_api.endpoint")).toProvider(new ApiEndpointProvider());
 
         bind(MachineStateListener.class).asEagerSingleton();
     }

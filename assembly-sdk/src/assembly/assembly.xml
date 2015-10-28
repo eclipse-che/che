@@ -31,6 +31,15 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
+            <outputDirectory>webapps</outputDirectory>
+            <outputFileNameMapping>dashboard.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.dashboard:che-dashboard-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
             <outputDirectory>ext-server</outputDirectory>
             <outputFileNameMapping>ext-server.zip</outputFileNameMapping>
             <includes>
