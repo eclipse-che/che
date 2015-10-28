@@ -3,31 +3,14 @@
     "creator": "codenvy",
     "tags": [
       "java",
-      "busybox"
+      "ubuntu",
+      "cbuild",
+      "nmap",
+      "maven",
+      "curl",
+      "tomcat"
     ],
-    "name": "JDK8_TOMCAT8_GIT",
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "id": "recipe_jdk8_tomcat8_git",
-    "type": "docker",
-    "script": "FROM codenvy/jdk8_maven3_tomcat8"
-  },
-  {
-    "creator": "codenvy",
-    "tags": [
-      "ubuntu"
-    ],
-    "name": "UBUNTU",
+    "name": "UBUNTU_JDK8",
     "permissions": {
       "groups": [
         {
@@ -42,15 +25,20 @@
     },
     "id": "recipe_ubuntu",
     "type": "docker",
-    "script": "FROM ubuntu\nCMD tail -f /dev/null"
+    "script": "FROM codenvy/ubuntu_jdk8"
   },
   {
     "creator": "codenvy",
     "tags": [
+      "debian",
       "java",
-      "busybox"
+      "cbuild",
+      "nmap",
+      "maven",
+      "curl",
+      "tomcat"
     ],
-    "name": "BUSYBOX",
+    "name": "DEBIAN_JDK8",
     "permissions": {
       "groups": [
         {
@@ -63,8 +51,8 @@
       ],
       "users": {}
     },
-    "id": "recipe_busybox",
+    "id": "recipe_debian",
     "type": "docker",
-    "script": "FROM busybox\nCMD tail -f /dev/null"
+    "script": "FROM codenvy/debian_jdk8"
   }
 ]
