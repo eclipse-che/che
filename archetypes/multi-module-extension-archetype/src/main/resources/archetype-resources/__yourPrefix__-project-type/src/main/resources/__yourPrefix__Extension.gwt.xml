@@ -1,0 +1,6 @@
+<module>
+    <inherits name="com.google.gwt.user.User"/>
+    <inherits name="org.eclipse.che.ide.Api"/>
+    <inherits name="com.google.gwt.inject.Inject"/>
+    <source path=""/>
+</module>

@@ -1,0 +1,12 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <p>${yourPrefix} Theme Tutorial</p>
+        <p>
+           To use new theme go to 'Window' -> 'Preferences' menu, select Appearance section and select new theme.
+        </p>
+    </g:HTMLPanel>
+</ui:UiBinder>
