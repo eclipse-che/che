@@ -25,38 +25,32 @@
         <dependency>
             <groupId>com.codenvy.resources</groupId>
             <artifactId>che-tomcat8-slf4j-logback</artifactId>
-            <version>${version.resource-bundle}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.dashboard</groupId>
             <artifactId>che-dashboard-war</artifactId>
-            <version>${che.dashboard.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-tools</artifactId>
-            <version>${che.plugins.version}</version>
             <type>jar</type>
             <classifier>jar-with-dependencies</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-machine-server</artifactId>
-            <version>${project.version}</version>
             <type>zip</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.sdk</groupId>
             <artifactId>assembly-sdk-war</artifactId>
-            <version>${project.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.terminal</groupId>
             <artifactId>che-websocket-terminal</artifactId>
-            <version>${websocket.terminal.version}</version>
             <type>zip</type>
         </dependency>
     </dependencies>
