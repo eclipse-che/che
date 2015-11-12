@@ -33,12 +33,12 @@ public class DarkThemeExt extends DarkTheme {
     }
 
     @Override
-    public String getPartBackground() {
+    public String partBackground() {
         return "white";
     }
 
     @Override
-    public String getTabsPanelBackground() {
+    public String tabsPanelBackground() {
         return "white";
     }
 }
