@@ -140,6 +140,11 @@
             <artifactId>che-plugin-ssh-ext-sshkey</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-ssh-git-native</artifactId>
+            <version>${che.plugins.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>

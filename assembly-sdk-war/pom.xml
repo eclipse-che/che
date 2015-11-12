@@ -405,7 +405,7 @@
                         **/.junit_symbolMaps/**,
                         **/junit*.html,
                         WEB-INF/lib/che-core-api-git-*.jar,
-                        WEB-INF/lib/che-*git*.jar</packagingExcludes>
+                        WEB-INF/lib/che-core-git-impl-native-*.jar</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>
