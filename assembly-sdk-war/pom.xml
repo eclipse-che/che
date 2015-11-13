@@ -405,7 +405,16 @@
                         **/.junit_symbolMaps/**,
                         **/junit*.html,
                         WEB-INF/lib/che-core-api-git-*.jar,
-                        WEB-INF/lib/che-core-git-impl-native-*.jar</packagingExcludes>
+                        WEB-INF/lib/che-core-git-impl-native-*.jar,
+                        WEB-INF/lib/che-plugin-java-*.jar,
+                        WEB-INF/lib/che-jdt-ext-machine-*.jar,
+                        WEB-INF/lib/che-plugin-machine-ext-client*.jar,
+                        WEB-INF/lib/che-plugin-orion-*.jar,
+                        WEB-INF/lib/che-core-commons-gwt-*.jar,
+                        WEB-INF/lib/che-core-ide-api-*.jar,
+                        WEB-INF/lib/che-core-ide-app-*.jar,
+                        WEB-INF/lib/che-core-ide-jseditor-*.jar,
+                        WEB-INF/lib/che-core-ide-ui-*.jar</packagingExcludes>
                 </configuration>
             </plugin>
             <plugin>
