@@ -16,6 +16,12 @@ This will generate a new plugin using default values for `groupId`, `artifactId`
 Value of `yourPrefix` will be used as a prefix to name the files of your new plug-in. This property needs to be a value that can generate valid Java classes.
 If you want to choose your own values for these properties simply execute the same command in interactive mode.
 
+Alternatively you can generate a new plug-in without cloning this project:
+```
+mvn archetype:generate -DarchetypeCatalog=http://maven.codenvycorp.com/content/groups/public -DarchetypeGroupId=org.eclipse.che.ide -DarchetypeArtifactId=che-client-extension-archetype -DinteractiveMode=false
+```
+It will generate a new plug-in based on the archetype catalog located on Codenvy Maven Nexus.
+
 # Compile your new plug-in
     cd {your_plugin_name}
     mvn clean install
