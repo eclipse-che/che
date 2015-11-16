@@ -48,6 +48,11 @@
             <destName>server.xml</destName>
         </file>
         <file>
+            <source>${project.basedir}/src/assembly/LICENSE-mit.txt</source>
+            <outputDirectory></outputDirectory>
+            <destName>LICENSE-mit.txt</destName>
+        </file>
+        <file>
             <source>${project.basedir}/src/assembly/setenv.sh</source>
             <outputDirectory>bin</outputDirectory>
             <destName>setenv.sh</destName>

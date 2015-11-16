@@ -24,7 +24,6 @@ import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
-import org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider;
 import org.eclipse.che.ide.ext.github.server.inject.GitHubModule;
 import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
 import org.eclipse.che.ide.ext.openshift.server.inject.OpenshiftModule;
@@ -55,7 +54,10 @@ public class MachineModule extends AbstractModule {
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
         bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
-        bind(SshKeyStore.class).to(RemoteSshKeyStore.class);
+        bind(org.eclipse.che.ide.ext.ssh.server.SshKeyStore.class)
+                .to(org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore.class);
+        bind(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider.class)
+                .to(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.class);
 
         install(new CoreRestModule());
         install(new BaseProjectModule());
@@ -65,8 +67,6 @@ public class MachineModule extends AbstractModule {
         install(new ArchetypeGeneratorModule());
         install(new GitHubModule());
         install(new OpenshiftModule());
-
-        bind(SshKeyProvider.class).to(MachineSideSshKeyProvider.class);
 
         bind(ArchetypeGenerator.class);
         bind(DebuggerService.class);

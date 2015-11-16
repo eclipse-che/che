@@ -69,6 +69,12 @@ public class ApiModule extends AbstractModule {
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class).to(OAuthAuthenticatorTokenProvider.class);
 
         bind(OAuthAuthenticationService.class);
+        bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
+                .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
+        bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class)
+                .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
+
+        bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
         bind(RecipeService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);

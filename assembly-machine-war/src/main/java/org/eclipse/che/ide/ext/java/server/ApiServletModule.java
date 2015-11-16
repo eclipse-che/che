@@ -12,13 +12,11 @@ package org.eclipse.che.ide.ext.java.server;
 
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.local.CheGuiceEverrestServlet;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
-import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +31,6 @@ public class ApiServletModule extends ServletModule {
         params.put("ws-id", "1q2w3e");
         filter("/ext/*").through(SingleEnvironmentFilter.class, params);
 //        serve("/ext/*").with(GuiceEverrestServlet.class);
-        serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(CheGuiceEverrestServlet.class);
+        serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
     }
 }
