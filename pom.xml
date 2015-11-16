@@ -26,6 +26,7 @@
     <modules>
         <module>plugin-tools</module>
         <module>examples</module>
+        <module>archetypes</module>
         <module>che-admin-war</module>
         <module>assembly-sdk-war</module>
         <module>assembly-sdk</module>
