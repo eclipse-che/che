@@ -18,6 +18,7 @@ import org.eclipse.che.api.auth.AuthenticationService;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.local.LocalInfrastructureModule;
 import org.eclipse.che.api.machine.server.MachineModule;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
@@ -92,6 +93,7 @@ public class ApiModule extends AbstractModule {
 //        install(new FactoryModule());
         install(new LocalDockerModule());
         install(new MachineModule());
+        install(new LocalInfrastructureModule());
 
         install(new DockerExtServerModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());

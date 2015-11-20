@@ -11,13 +11,19 @@
 package org.eclipse.che.ide.ext.java.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
+import org.eclipse.che.api.local.LocalPreferenceDaoImpl;
+import org.eclipse.che.api.local.LocalUserDaoImpl;
 import org.eclipse.che.api.project.server.BaseProjectModule;
+import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
@@ -38,6 +44,10 @@ import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 
+import javax.inject.Named;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Evgen Vidolob
  */
@@ -48,6 +58,10 @@ public class MachineModule extends AbstractModule {
         bind(ApiInfoService.class);
 
         bind(LocalFileSystemRegistryPlugin.class);
+
+        //TODO it's temporary solution. Ext war should not have binding for DAO.
+        bind(UserDao.class).to(LocalUserDaoImpl.class);
+        bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class);
 
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
         bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
@@ -74,5 +88,18 @@ public class MachineModule extends AbstractModule {
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
+    }
+
+    @Provides
+    @Named("codenvy.local.infrastructure.users")
+    Set<User> users() {
+        final Set<User> users = new HashSet<>(1);
+        final User user = new User().withId("codenvy")
+                                    .withName("codenvy")
+                                    .withEmail("che@eclipse.org")
+                                    .withPassword("secret");
+        user.getAliases().add("che@eclipse.org");
+        users.add(user);
+        return users;
     }
 }
