@@ -1,6 +1,6 @@
 [
   {
-    "creator": "codenvy",
+    "creator": "che",
     "tags": [
       "java",
       "ubuntu",
@@ -28,7 +28,7 @@
     "script": "FROM codenvy/ubuntu_jdk8"
   },
   {
-    "creator": "codenvy",
+    "creator": "che",
     "tags": [
       "debian",
       "java",
