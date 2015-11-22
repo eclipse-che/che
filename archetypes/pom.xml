@@ -30,20 +30,5 @@
     <properties>
         <maven.archetype.version>2.4</maven.archetype.version>
     </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>xml-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>validate-xml-files</id>
-                        <goals>
-                            <goal>skip</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
+
