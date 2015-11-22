@@ -30,5 +30,31 @@
     <properties>
         <maven.archetype.version>2.4</maven.archetype.version>
     </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate-xml-files</id>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <validationSets>
+                        <validationSet>
+                            <dir>src/main/resources</dir>
+                            <excludes>
+                                <exclude>**/*</exclude>
+                            </excludes>
+                        </validationSet>
+                    </validationSets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 
