@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-examples-multi-extension</artifactId>
         <groupId>org.eclipse.che.ide</groupId>
-        <version>3.13.2-SNAPSHOT</version>
+        <version>3.13.2</version>
     </parent>
     <artifactId>che-examples-multi-extension-theme</artifactId>
     <packaging>jar</packaging>

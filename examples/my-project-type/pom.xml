@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-examples</artifactId>
         <groupId>org.eclipse.che.ide</groupId>
-        <version>3.13.2-SNAPSHOT</version>
+        <version>3.13.2</version>
     </parent>
     <artifactId>che-examples-project-type</artifactId>
     <packaging>che-plugin</packaging>

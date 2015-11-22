@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-ide-parent</artifactId>
         <groupId>org.eclipse.che.ide</groupId>
-        <version>3.13.2-SNAPSHOT</version>
+        <version>3.13.2</version>
     </parent>
     <artifactId>che-admin-war</artifactId>
     <packaging>war</packaging>
