@@ -15,6 +15,7 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
+import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
@@ -26,6 +27,7 @@ import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
@@ -88,6 +90,26 @@ public class MachineModule extends AbstractModule {
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
+        bind(String.class).annotatedWith(Names.named("user.token")).toProvider(UserTokenProvider.class);
+        bind(WSocketEventBusClient.class).asEagerSingleton();
+
+        bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
+    }
+
+    //it's need for WSocketEventBusClient and in the future will be replaced with the property
+    @Named("notification.client.event_subscriptions")
+    @Provides
+    @SuppressWarnings("unchecked")
+    Pair<String, String>[] eventSubscriptionsProvider(@Named("event.bus.url") String eventBusURL) {
+        return new Pair[] {Pair.of(eventBusURL, "")};
+    }
+
+    //it's need for EventOriginClientPropagationPolicy and in the future will be replaced with the property
+    @Named("notification.client.propagate_events")
+    @Provides
+    @SuppressWarnings("unchecked")
+    Pair<String, String>[] propagateEventsProvider(@Named("event.bus.url") String eventBusURL) {
+        return new Pair[] {Pair.of(eventBusURL, "")};
     }
 
     @Provides
