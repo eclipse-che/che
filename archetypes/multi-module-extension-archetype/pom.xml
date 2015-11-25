@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-archetypes</artifactId>
         <groupId>org.eclipse.che.ide</groupId>
-        <version>3.13.4-SNAPSHOT</version>
+        <version>3.13.4</version>
     </parent>
     <artifactId>che-multi-module-archetype</artifactId>
     <packaging>maven-archetype</packaging>
