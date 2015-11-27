@@ -26,6 +26,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
@@ -126,6 +127,7 @@ public class ApiModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
+        bind(WorkspaceConfigValidator.class).to(org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigValidatorImpl.class);
         bind(MachineStateListener.class).asEagerSingleton();
     }
 }
