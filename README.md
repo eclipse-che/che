@@ -30,6 +30,11 @@ Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud
 ### License
 Che is open sourced under the Eclipse Public License 1.0.
 
+### Dependencies
+* Docker
+* Maven
+* Java 1.8
+
 ### Clone
 
 ```sh
