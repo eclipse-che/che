@@ -8,7 +8,7 @@ ENV LC_ALL en_US.UTF-8
 RUN apt-get update && apt-get -y install curl sudo procps wget unzip mc && \
     echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     useradd -u 1000 -G users,sudo -d /home/user --shell /bin/bash -m user && \
-    echo "secret\nsecret" | passwd user
+    echo "secret\nsecret" | passwd user && apt-get clean
 
 USER user
 
