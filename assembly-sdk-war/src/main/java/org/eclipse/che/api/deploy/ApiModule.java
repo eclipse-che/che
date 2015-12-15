@@ -106,12 +106,12 @@ public class ApiModule extends AbstractModule {
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.dev_machine.machine_servers"));
+        machineServers.addBinding().toInstance(new ServerConf("extensions-debug", "4403", "http"));
+
         bind(RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
                    .addBinding()
                    .toInstance("predefined-recipes.json");
-
-        machineServers.addBinding().toInstance(new ServerConf("extensions-debug", "4403", "http"));
 
         bindConstant().annotatedWith(Names.named(DockerMachineExtServerLauncher.START_EXT_SERVER_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip /mnt/che/ext-server.zip -d ~/che/ext-server && " +
