@@ -22,7 +22,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>webapps</outputDirectory>
+            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.sdk:assembly-sdk-war</include>
@@ -31,7 +31,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>webapps</outputDirectory>
+            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.dashboard:che-dashboard-war</include>
@@ -40,8 +40,8 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>ext-server</outputDirectory>
-            <outputFileNameMapping>ext-server.zip</outputFileNameMapping>
+            <outputDirectory>lib</outputDirectory>
+            <outputFileNameMapping>ws-agent.zip</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.sdk:assembly-machine-server</include>
             </includes>
@@ -49,7 +49,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>web-terminal</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>org.eclipse.che.terminal:che-websocket-terminal</include>
             </includes>
@@ -59,7 +59,7 @@
                 </excludes>
             </unpackOptions>
         </dependencySet>
-        <dependencySet>
+<!--        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>sdk-tools</outputDirectory>
@@ -68,7 +68,7 @@
                 <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
             </includes>
         </dependencySet>
-        <dependencySet>
+ -->       <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>che-templates/tutorials</outputDirectory>
@@ -80,27 +80,22 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/dependency</directory>
-            <outputDirectory></outputDirectory>
-            <excludes>
-                <exclude>bin/catalina.*</exclude>
-                <exclude>bin/setenv.*</exclude>
-                <exclude>tomcat/bin/setenv.*</exclude>
-            </excludes>
-        </fileSet>
+            <directory>${project.build.directory}/dependency/</directory>
+            <outputDirectory>tomcat/</outputDirectory>
+       </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
-        <fileSet>
+<!--        <fileSet>
             <directory>${project.basedir}/src/assembly/bin</directory>
             <outputDirectory>tomcat/bin</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/ext</directory>
-            <outputDirectory>ext</outputDirectory>
+ -->       <fileSet>
+            <directory>${project.basedir}/src/assembly/plugins</directory>
+            <outputDirectory>plugins</outputDirectory>
         </fileSet>
-        <fileSet>
+<!--        <fileSet>
             <directory>${project.basedir}/src/assembly/sdk-resources</directory>
             <outputDirectory>sdk-resources</outputDirectory>
         </fileSet>
@@ -111,38 +106,69 @@
             <exclude>**/target/**</exclude>
             </excludes>
         </fileSet>
-        <fileSet>
+ -->    <fileSet>
             <directory>${project.basedir}/src/assembly/webapps</directory>
-            <outputDirectory>webapps</outputDirectory>
+            <outputDirectory>tomcat/webapps</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/conf</directory>
+            <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
             <includes>
-                <include>extInstall.bat</include>
-                <include>*.txt</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly</directory>
-            <outputDirectory></outputDirectory>
-            <includes>
-                <include>extInstall.sh</include>
-            </includes>
-            <fileMode>755</fileMode>
+              <include>*.txt</include>
+           </includes>
         </fileSet>
     </fileSets>
-    <files>
+      <files>
         <file>
-            <source>${project.build.directory}/dependency/bin/catalina.sh</source>
+            <source>${project.basedir}/src/assembly/bin/che.sh</source>
             <outputDirectory>bin</outputDirectory>
             <destName>che.sh</destName>
             <fileMode>755</fileMode>
         </file>
         <file>
-            <source>${project.build.directory}/dependency/bin/catalina.bat</source>
+            <source>${project.basedir}/src/assembly/bin/che.bat</source>
             <outputDirectory>bin</outputDirectory>
-            <destName>catalina.bat</destName>
+            <destName>che.bat</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.basedir}/src/assembly/bin/che-install-plugin.sh</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>che-install-plugin.sh</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.basedir}/src/assembly/bin/che-install-plugin.bat</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>che-install-plugin.bat</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.build.directory}/dependency/bin/catalina.sh</source>
+            <outputDirectory>tomcat/bin</outputDirectory>
+            <destName>che.sh</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.build.directory}/dependency/bin/catalina.bat</source>
+            <outputDirectory>tomcat/bin</outputDirectory>
+            <destName>che.bat</destName>
+        </file>
+        <file>
+            <source>${project.basedir}/src/assembly/tomcat/bin/setenv.sh</source>
+            <outputDirectory>tomcat/bin</outputDirectory>
+            <destName>setenv.sh</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.basedir}/src/assembly/tomcat/bin/setenv.bat</source>
+            <outputDirectory>tomcat/bin</outputDirectory>
+            <destName>setenv.bat</destName>
+            <fileMode>755</fileMode>
         </file>
     </files>
 </assembly>

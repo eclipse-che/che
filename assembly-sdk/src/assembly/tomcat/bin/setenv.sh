@@ -10,14 +10,9 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
-#Global Conf dir
-[ -z "${CHE_LOCAL_CONF_DIR}" ]  && CHE_LOCAL_CONF_DIR="${CATALINA_HOME}/conf/"
 
 #Global JAVA options
 [ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m  -server"
-
-#Global LOGS DIR
-[ -z "${CHE_LOGS_DIR}" ]  && CHE_LOGS_DIR="$CATALINA_HOME/logs"
 
 [ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="8000"
 
@@ -25,7 +20,8 @@
 [ -z "${CATALINA_OPTS}" ]  && CATALINA_OPTS="-Dcom.sun.management.jmxremote  \
                                              -Dcom.sun.management.jmxremote.ssl=false \
                                              -Dcom.sun.management.jmxremote.authenticate=false \
-                                             -Dche.local.conf.dir=${CHE_LOCAL_CONF_DIR}"
+                                             -Dche.local.conf.dir=${CHE_LOCAL_CONF_DIR} \
+                                             -Dche.home=${CHE_HOME}"
 
 #Class path
 [ -z "${CLASSPATH}" ]  && CLASSPATH="${CATALINA_HOME}/conf/:${JAVA_HOME}/lib/tools.jar"
