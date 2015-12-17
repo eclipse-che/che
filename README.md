@@ -42,7 +42,7 @@ cd che
 mvn clean install
 
 # A new assembly is packaged into:
-cd target/eclipse-che-<version>/eclipse-che-<version>
+cd assembly-sdk/target/eclipse-che-<version>/eclipse-che-<version>
 
 # Executable files are:
 bin/che.sh  [ start | stop ]
