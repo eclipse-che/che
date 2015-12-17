@@ -61,8 +61,11 @@ Che will be available at ```localhost:8080```
 ### Sub-Projects:
 * **che-core**:                [Core components] (http://github.com/codenvy/che-core)
 * **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
+* **che-dashboard**:           [Workspace, project, user mgmt] (http://github.com/codenvy/dashboard)
 * **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
+* **che-installer**:           [Che installation packages] (http://github.com/codenvy/che-installer)
+* **che-tutorials**:           [SDK examples and tutorials] (http://github.com/codenvy/che-tutorials)
 * **cli**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
 * **eclipse-plugin**:          [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
