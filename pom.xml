@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.0.0-M5-SNAPSHOT</version>
+        <version>4.0.0-M5</version>
     </parent>
     <groupId>org.eclipse.che.sdk</groupId>
     <artifactId>che-sdk-parent</artifactId>
-    <version>4.0.0-M5-SNAPSHOT</version>
+    <version>4.0.0-M5</version>
     <packaging>pom</packaging>
     <name>Che SDK :: Parent</name>
     <modules>
@@ -32,7 +32,7 @@
     <scm>
         <connection>scm:git:git@github.com:codenvy/che.git</connection>
         <developerConnection>scm:git:git@github.com:codenvy/che.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>4.0.0-M5</tag>
         <url>https://github.com/codenvy/che</url>
     </scm>
     <properties>

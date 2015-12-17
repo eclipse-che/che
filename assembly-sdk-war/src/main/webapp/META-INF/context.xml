@@ -11,4 +11,6 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<Context allowCasualMultipartParsing="true" />
+<Context allowCasualMultipartParsing="true">
+    <Valve className="org.apache.catalina.valves.rewrite.RewriteValve"/>
+</Context>

@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.local.LocalPreferenceDaoImpl;
 import org.eclipse.che.api.local.LocalUserDaoImpl;
 import org.eclipse.che.api.project.server.BaseProjectModule;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
@@ -65,7 +64,7 @@ public class MachineModule extends AbstractModule {
 
         //TODO it's temporary solution. Ext war should not have binding for DAO.
         bind(UserDao.class).to(LocalUserDaoImpl.class);
-        bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class);
+        bind(PreferenceDao.class).to(org.eclipse.che.api.local.RemotePreferenceDao.class);
 
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
         bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
