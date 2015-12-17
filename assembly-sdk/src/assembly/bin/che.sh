@@ -10,7 +10,7 @@
 #   Codenvy, S.A. - initial API and implementation
 #
 
-[ -z "${CHE_HOME}" ] && export CHE_HOME="$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" )"
+[ -z "${CHE_HOME}" ] && export CHE_HOME="$(dirname "$(cd $(dirname ${0}) && pwd -P)")"
 #Global Conf dir
 [ -z "${CHE_LOCAL_CONF_DIR}" ] && export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
 
@@ -26,4 +26,4 @@ if [ ! -d "${ASSEMBLY_BIN_DIR}" ]; then
   exit 1
 fi
 
-${ASSEMBLY_BIN_DIR}/catalina.sh "$*"
+${ASSEMBLY_BIN_DIR}/catalina.sh "$@"
