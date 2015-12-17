@@ -148,17 +148,6 @@
             <fileMode>755</fileMode>
         </file>
         <file>
-            <source>${project.build.directory}/dependency/bin/catalina.sh</source>
-            <outputDirectory>tomcat/bin</outputDirectory>
-            <destName>che.sh</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
-            <source>${project.build.directory}/dependency/bin/catalina.bat</source>
-            <outputDirectory>tomcat/bin</outputDirectory>
-            <destName>che.bat</destName>
-        </file>
-        <file>
             <source>${project.basedir}/src/assembly/tomcat/bin/setenv.sh</source>
             <outputDirectory>tomcat/bin</outputDirectory>
             <destName>setenv.sh</destName>

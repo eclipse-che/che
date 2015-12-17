@@ -40,7 +40,7 @@ if "%CHE_LOGS_DIR%"=="" (
 
 IF exist %ASSEMBLY_BIN_DIR% (
     TITLE "Eclipse Che"
-    call %ASSEMBLY_BIN_DIR%\che.bat %1 %2 %3 %4 %5 %6 %7 %8
+    call %ASSEMBLY_BIN_DIR%\catalina.bat %1 %2 %3 %4 %5 %6 %7 %8
 ) else (
     echo Invalid Eclipse Che root directory found.
     GOTO setup
