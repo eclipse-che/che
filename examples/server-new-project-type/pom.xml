@@ -133,7 +133,7 @@
                                     <type>${project.packaging}</type>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>../../assembly-sdk/target/tomcat-ide/ext</outputDirectory>
+                            <outputDirectory>../../assembly-ide/target/tomcat-ide/ext</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

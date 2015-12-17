@@ -18,16 +18,16 @@
         <groupId>org.eclipse.che.depmgt</groupId>
         <version>4.0.0-M6-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.sdk</groupId>
-    <artifactId>che-sdk-parent</artifactId>
+    <groupId>org.eclipse.che.ide</groupId>
+    <artifactId>che-ide-parent</artifactId>
     <version>4.0.0-M6-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che SDK :: Parent</name>
+    <name>Che IDE :: Parent</name>
     <modules>
         <module>assembly-machine-war</module>
         <module>assembly-machine-server</module>
-        <module>assembly-sdk-war</module>
-        <module>assembly-sdk</module>
+        <module>assembly-ide-war</module>
+        <module>assembly-ide</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/che.git</connection>

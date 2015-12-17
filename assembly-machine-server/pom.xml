@@ -14,8 +14,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-sdk-parent</artifactId>
-        <groupId>org.eclipse.che.sdk</groupId>
+        <artifactId>che-ide-parent</artifactId>
+        <groupId>org.eclipse.che.ide</groupId>
         <version>4.0.0-M6-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-machine-server</artifactId>
@@ -31,7 +31,7 @@
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.sdk</groupId>
+            <groupId>org.eclipse.che.ide</groupId>
             <artifactId>assembly-machine-war</artifactId>
             <type>war</type>
         </dependency>

@@ -31,7 +31,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.sdk:assembly-machine-war</include>
+                <include>org.eclipse.che.ide:assembly-machine-war</include>
             </includes>
         </dependencySet>
     </dependencySets>
