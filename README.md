@@ -40,16 +40,20 @@ If master is unstable, checkout the latest tagged version.
 ```sh
 cd che
 mvn clean install
-./che.sh [ start | stop ]
+
+# A new assembly is packaged into:
+cd target/eclipse-che-<version>/eclipse-che-<version>
+
+# Executable files are:
+bin/che.sh  [ start | stop ]
+bin/che.bat [ start | stop ]
 ```
 Che will be available at ```localhost:8080```
 
-This builds an assembly with the Java, git, and maven plugins.  The SDK has embedded tools that let you create assemblies that contain other plugins.
-
 
 ### Sub-Projects:
-* **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
 * **che-core**:                [Core components] (http://github.com/codenvy/che-core)
+* **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
 * **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
 * **cli**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
