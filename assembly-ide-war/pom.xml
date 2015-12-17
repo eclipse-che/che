@@ -14,13 +14,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-sdk-parent</artifactId>
-        <groupId>org.eclipse.che.sdk</groupId>
+        <artifactId>che-ide-parent</artifactId>
+        <groupId>org.eclipse.che.ide</groupId>
         <version>4.0.0-M6-SNAPSHOT</version>
     </parent>
-    <artifactId>assembly-sdk-war</artifactId>
+    <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
-    <name>Che SDK :: Compiling GWT Application</name>
+    <name>Che IDE :: Compiling GWT Application</name>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
         <maven.compiler.source>1.7</maven.compiler.source>

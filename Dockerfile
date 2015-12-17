@@ -23,7 +23,7 @@ ENV JAVA_HOME /opt/jre$JAVA_VERSION_PREFIX
 
 EXPOSE 8080 32768-65535
 
-ADD /assembly-sdk/target/assembly-sdk-*/assembly-sdk-* /home/user/che
+ADD /assembly-ide/target/assembly-ide-*/assembly-ide-* /home/user/che
 
 CMD  sudo chown -R user:user /home/user/che && \
      sudo service docker start && \

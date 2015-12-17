@@ -25,7 +25,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>che.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.sdk:assembly-sdk-war</include>
+                <include>org.eclipse.che.ide:assembly-ide-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -43,7 +43,7 @@
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>ws-agent.zip</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.sdk:assembly-machine-server</include>
+                <include>org.eclipse.che.ide:assembly-machine-server</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -100,7 +100,7 @@
             <outputDirectory>sdk-resources</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/assembly-sdk-war</directory>
+            <directory>${project.parent.basedir}/assembly-ide-war</directory>
             <outputDirectory>sdk-resources</outputDirectory>
             <excludes>
             <exclude>**/target/**</exclude>
