@@ -22,6 +22,9 @@ call docker ps 2> nul
 IF ERRORLEVEL 1 GOTO docker
 
 REM Set CHE_HOME variable if not already set
+IF NOT EXIST %CHE_HOME% SET CHE_HOME=
+
+REM Set CHE_HOME variable if not already set
 IF "%CHE_HOME%"=="" (
   FOR %%i in ("%~dp0..") do set "CHE_HOME=%%~fi"
 )
