@@ -33,10 +33,9 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-tools</artifactId>
-            <type>jar</type>
-            <classifier>jar-with-dependencies</classifier>
+            <groupId>org.eclipse.che.ide</groupId>
+            <artifactId>assembly-ide-war</artifactId>
+            <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.ide</groupId>
@@ -44,9 +43,10 @@
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.ide</groupId>
-            <artifactId>assembly-ide-war</artifactId>
-            <type>war</type>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-sdk-tools</artifactId>
+            <type>jar</type>
+            <classifier>jar-with-dependencies</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.terminal</groupId>
