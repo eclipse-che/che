@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.0.0-M6-SNAPSHOT</version>
+        <version>4.0.0-beta-1-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.ide</groupId>
     <artifactId>che-ide-parent</artifactId>
-    <version>4.0.0-M6-SNAPSHOT</version>
+    <version>4.0.0-beta-1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che IDE :: Parent</name>
     <modules>
