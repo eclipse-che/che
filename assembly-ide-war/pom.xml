@@ -242,6 +242,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-sdk-ext-plugins</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-ssh-ext-sshkey</artifactId>
         </dependency>
         <dependency>
