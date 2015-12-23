@@ -17,19 +17,13 @@ import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /** @author andrew00x */
 @DynaModule
 public class ApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
-        Map<String, String> params = new HashMap<>(2);
-        params.put("ws-name", "default");
-        params.put("ws-id", "1q2w3e");
-        filter("/ext/*").through(SingleEnvironmentFilter.class, params);
+        filter("/ext/*").through(SingleEnvironmentFilter.class);
 //        serve("/ext/*").with(GuiceEverrestServlet.class);
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
     }
