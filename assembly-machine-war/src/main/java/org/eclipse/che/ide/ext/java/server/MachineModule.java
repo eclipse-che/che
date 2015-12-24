@@ -21,6 +21,8 @@ import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.local.LocalUserDaoImpl;
 import org.eclipse.che.api.project.server.BaseProjectModule;
+import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
+import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
@@ -67,8 +69,8 @@ public class MachineModule extends AbstractModule {
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
         bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
-        bind(org.eclipse.che.ide.ext.ssh.server.SshKeyStore.class)
-                .to(org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore.class);
+        bind(SshServiceClient.class).to(HttpSshServiceClient.class);
+
         bind(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider.class)
                 .to(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.class);
 
