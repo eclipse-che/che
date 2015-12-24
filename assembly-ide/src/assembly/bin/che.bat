@@ -12,10 +12,7 @@
 @echo off
 
 REM Check docker-machine env variables have been added.
-IF "%DOCKER_TLS_VERIFY%"=="" GOTO docker
-IF "%DOCKER_HOST%"=="" GOTO docker
-IF "%DOCKER_CERT_PATH%"=="" GOTO docker
-IF "%DOCKER_MACHINE_NAME%"=="" GOTO docker
+FOR /f "tokens=*" %%j IN ('docker-machine env --shell cmd default') DO %%j
 
 REM Test to see if docker client is working and reaches docker-machine.
 call docker ps 2> nul
@@ -25,6 +22,11 @@ REM Set CHE_HOME variable if not already set
 IF "%CHE_HOME%"=="" (
   FOR %%i in ("%~dp0..") do set "CHE_HOME=%%~fi"
 )
+
+REM Update CHE_HOME if set to wrong value 
+IF not exist %CHE_HOME% (
+  FOR %%i in ("%~dp0..") do set "CHE_HOME=%%~fi"
+) 
 
 IF "%CHE_LOCAL_CONF_DIR%"=="" (
   SET CHE_LOCAL_CONF_DIR=%CHE_HOME%\conf
@@ -50,14 +52,13 @@ GOTO end
 
 :docker
 echo !!! Docker is not properly configured.
-echo Did you start docker-machine and set DOCKER_ environment variables?
+echo Did you create a VM named 'default' using docker-machine?
 GOTO END
 
 :setup
 echo. 
 echo Che setup for Windows:
-echo REQUIRED: docker-machine must be installed and running a machine
-echo REQUIRED: Set DOCKER_ variables to values provided by docker-machine
+echo REQUIRED: docker-machine must be installed and running a VM named default
 echo OPTIONAL: Set CHE_LOCAL_CONF_DIR to directory where che.properties located
 echo.
 echo See "Pre-Reqs" in docs at eclipse.org/che for more setup guidance.
