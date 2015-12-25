@@ -35,23 +35,11 @@
          */
 
         window.IDE.config = {
-
-            "context": "/che",
-
             "restContext": "/che/api",
-
-            "workspaceName": "",
-
-            "workspaceId": "",
-
-            "projectName": window.location.pathname.split("/")[3] ? window.location.pathname.split("/")[3] : null,
-
-            "startupParams": location.search ? location.search.substring(1) : null,
 
             "hiddenFiles": ".*",
 
             "cheExtensionPath": "/che/ext"
-
         };
 
         /**
