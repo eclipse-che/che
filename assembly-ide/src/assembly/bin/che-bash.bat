@@ -11,21 +11,12 @@
 
 @echo off
 
-
-REM Check to see if bash is installed
+REM Check to ensure bash is installed
 CALL bash --help > nul 2>&1
 IF %ERRORLEVEL% NEQ 0 goto setup
 
-REM Reset CHE_HOME if it does not exist
-IF NOT EXIST "%CHE_HOME%" SET "%CHE_HOME%"=""
-
-REM Finds location of this script, and then sets the parent directory as the value
-IF "%CHE_HOME%"=="" (
-  FOR %%i in ("%~dp0..") do set "CHE_HOME=%%~fi"
-)
-
-REM Program to create docker VM & environment variables
-CALL bash --login "%CHE_HOME%\bin\che-bash.sh" %1 %2 %3 %4 %5 %6 %7 %8
+REM Launch Che and any associated docker machines, if necessary
+CALL bash --login "%~dp0\che-bash.sh" %1 %2 %3 %4 %5 %6 %7 %8
 
 goto end
 
