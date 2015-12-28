@@ -88,7 +88,6 @@ function parse_command_line {
     -i:*|--image:*)
       USE_DOCKER=true
       USE_DOCKER_TAG="${command_line_option#*:}"
-      echo $USE_DOCKER_TAG
       shift # past argument=value
     ;;
     -p:*|--port:*)
@@ -317,24 +316,68 @@ function strip_url {
 
 }
 
+function print_client_connect {
+  if [ ! $USE_DOCKER ]; then 
+    echo -e "
+############## HOW TO CONNECT YOUR CHE CLIENT ###############
+After Che server has booted, you can connect your clients by:
+1. Open browser to http://localhost:${USE_PORT}
+2. Open chromium app.
+#############################################################\n\n"
+  else 
+    echo -e "
+############## HOW TO CONNECT YOUR CHE CLIENT ###############
+After Che server has booted, you can connect your clients by:
+1. Open browser to http://${host}:${USE_PORT}
+2. Open chromium app.
+#############################################################\n\n"
+
+  fi
+}
+
+function call_catalina {
+
+  # Test to see that Che application server is where we expect it to be
+  if [ ! -d "${ASSEMBLY_BIN_DIR}" ]; then
+    error_exit
+    return
+  fi
+
+  ### Cannot add this in setenv.sh.
+  ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
+  [ -z "${JAVA_OPTS}" ]  && export JAVA_OPTS="-Dport.http=${USE_PORT}"
+  #Class path
+  [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${USE_PORT}
+
+  # Launch the Che application server, passing in command line parameters
+  ${ASSEMBLY_BIN_DIR}/catalina.sh ${USE_SERVER_ACTION}
+
+}
+
+function stop_che_server {
+
+  if ! $USE_DOCKER; then
+    echo -e "Stopping Che server running on localhost:${USE_PORT}"
+    call_catalina >/dev/null 2>&1
+  else
+    echo -e "Stopping Che server running in docker container."
+    "${DOCKER}" exec che /home/user/che/bin/che.sh stop 
+    DOCKER_EXIT=$?
+
+    echo -e "Stopping docker container named che."
+    "${DOCKER}" stop che
+    DOCKER_EXIT=$?
+  fi
+}
+
 function launch_che_server {
+
+ strip_url $DOCKER_HOST
+ print_client_connect
 
   # Launch Che natively as a tomcat server
   if ! $USE_DOCKER; then
-    # Test to see that Che application server is where we expect it to be
-    if [ ! -d "${ASSEMBLY_BIN_DIR}" ]; then
-      error_exit
-      return
-    fi
-
-    ### Cannot add this in setenv.sh.
-    ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-    [ -z "${JAVA_OPTS}" ]  && export JAVA_OPTS="-Dport.http=${USE_PORT}"
-    #Class path
-    [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${USE_PORT}
-
-    # Launch the Che application server, passing in command line parameters
-    ${ASSEMBLY_BIN_DIR}/catalina.sh ${USE_SERVER_ACTION}
+    call_catalina
 
   # Launch Che as a docker image
   else
@@ -342,25 +385,25 @@ function launch_che_server {
     # Check to see if the Che docker was not properly shut down
     "${DOCKER}" inspect che &> /dev/null
     DOCKER_INSPECT_EXIT=$?
-  
-    strip_url $DOCKER_HOST
+
+    echo -e "Starting Che server in existing docker container named che."
+
+    # Attempt restart of existing container named "che"
+    "${DOCKER}" start che &> /dev/null
+    DOCKER_EXIT=$?
     
-    # Start che by launching docker container
-    echo -e "Starting Che server in a docker container using image: codenvy/che:${USE_DOCKER_TAG}"
-
-    if [ $win ] || [ $mac ]; then
-      "${DOCKER}" run --privileged -e "DOCKER_MACHINE_HOST=${host}" --name che -it -p 8080:8080 -p 32768-32788:32768-32788 codenvy/che:${USE_DOCKER_TAG} &> /dev/null
-      DOCKER_EXIT=$?
-    else
-      "${DOCKER}" run --privileged --name che -it -p 8080:8080 -p 32768-32788:32768-32788 codenvy/che:${USE_DOCKER_TAG} &> /dev/null
-      DOCKER_EXIT=$?     
-    fi 
-
-    # If either command fails, then try destroying existing container and restarting
+    # If either command fails, then wipe any existing image and restarting
     if [ ${DOCKER_INSPECT_EXIT} -eq 1 ] || [ ${DOCKER_EXIT} -eq 1 ]; then
+      echo -e "Either che container does not exist, or duplicate conflict was discovered. "
+      echo -e "\nRemoving any old containers and launching a new one using image: codenvy/che:${USE_DOCKER_TAG}...\n"
       "${DOCKER}" kill che &> /dev/null
-      "${DOCKER}" rm che &> /dev/null      
-      "${DOCKER}" run --privileged -e DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST} --name che -it -p 8080:8080 -p 32768-32788:32768-32788 codenvy/che:nightly
+      "${DOCKER}" rm che &> /dev/null
+
+      if [ $win ] || [ $mac ]; then
+        "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${host}'"' --name che -it -p ${USE_PORT}:${USE_PORT} -p 32768-32788:32768-32788 codenvy/che:${USE_DOCKER_TAG} #&> /dev/null
+      else
+        "${DOCKER}" run --privileged --name che -it -p ${USE_PORT}:${USE_PORT} -p 32768-32788:32768-32788 codenvy/che:${USE_DOCKER_TAG} &> /dev/null
+      fi    
     fi
   fi
 }
@@ -383,9 +426,13 @@ if ! $USE_HELP; then
   ### Variables are all set.  Get Docker ready
   get_docker_ready
 
-  ### Launch Che server
+  ### Launch or shut down Che server
   if ! $JUMP_TO_END; then 
-     launch_che_server
+    if [ $USE_SERVER_ACTION == "stop" ]; then
+      stop_che_server 
+    else
+      launch_che_server
+    fi
   fi
 fi
 
