@@ -330,6 +330,8 @@ function launch_che_server {
     ### Cannot add this in setenv.sh.
     ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
     [ -z "${JAVA_OPTS}" ]  && export JAVA_OPTS="-Dport.http=${USE_PORT}"
+    #Class path
+    [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${USE_PORT}
 
     # Launch the Che application server, passing in command line parameters
     ${ASSEMBLY_BIN_DIR}/catalina.sh ${USE_SERVER_ACTION}

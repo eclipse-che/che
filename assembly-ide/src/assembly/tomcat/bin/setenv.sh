@@ -28,4 +28,6 @@ export JAVA_OPTS="$JAVA_OPTS -Dche.logs.dir=${CHE_LOGS_DIR}"
 [ -z "${CLASSPATH}" ]  && CLASSPATH="${CATALINA_HOME}/conf/:${JAVA_HOME}/lib/tools.jar"
 
 
-
+#SERVER_PORT
+#[ -z "${SERVER_PORT}" ]  && SERVER_PORT=8080
+#export SERVER_PORT
