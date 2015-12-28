@@ -44,7 +44,7 @@ Che Environment Variables:
 
 USAGE="
 Usage: 
-  che-server [-i] [-i=tag] [p=port] [run | start | stop]
+  che-server [-i] [-i=tag] [-p=port] [run | start | stop]
 
      -i,      --image        Launches Che within a Docker container using latest image
      -i=tag,  --image=tag    Launches Che within a Docker container using specific image tag
@@ -67,6 +67,12 @@ function error_exit {
 trap error_exit SIGHUP SIGINT SIGTERM
 
 function parse_command_line {
+### Parse command line parameters
+  USE_DOCKER=false
+  USE_DOCKER_TAG=latest
+  USE_PORT=8080
+  USE_HELP=false
+  USE_SERVER_ACTION=run
 
   for command_line_option in "$@"
   do
@@ -305,14 +311,8 @@ function launch_che_server {
   fi
 }
 
-### Parse command line parameters
-USE_DOCKER=false
-USE_DOCKER_TAG=latest
-USE_PORT=8080
-USE_HELP=false
-USE_SERVER_ACTION=run
 
-  # Call function
+# Call function
 parse_command_line "$@"
 
 if ! $USE_HELP; then
