@@ -12,7 +12,8 @@
 
 
 #Global JAVA options
-[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m  -server"
+[ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m -server"
+export JAVA_OPTS="$JAVA_OPTS -Dche.logs.dir=${CHE_LOGS_DIR}"
 
 [ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="8000"
 
@@ -27,9 +28,4 @@
 [ -z "${CLASSPATH}" ]  && CLASSPATH="${CATALINA_HOME}/conf/:${JAVA_HOME}/lib/tools.jar"
 
 
-export JAVA_OPTS="$JAVA_OPTS  -Dche.logs.dir=${CHE_LOGS_DIR}"
 
-
-#Class path
-[ -z "${SERVER_PORT}" ]  && SERVER_PORT=8080
-export SERVER_PORT

@@ -124,15 +124,15 @@
     </fileSets>
       <files>
         <file>
-            <source>${project.basedir}/src/assembly/bin/che-bash.sh</source>
+            <source>${project.basedir}/src/assembly/bin/che-server.sh</source>
             <outputDirectory>bin</outputDirectory>
-            <destName>che-bash.sh</destName>
+            <destName>che-server.sh</destName>
             <fileMode>755</fileMode>
         </file>
         <file>
-            <source>${project.basedir}/src/assembly/bin/che-bash.bat</source>
+            <source>${project.basedir}/src/assembly/bin/che-server.bat</source>
             <outputDirectory>bin</outputDirectory>
-            <destName>che-bash.bat</destName>
+            <destName>che-server.bat</destName>
             <fileMode>755</fileMode>
         </file>
         <file>
@@ -169,6 +169,12 @@
             <source>${project.basedir}/src/assembly/tomcat/bin/setenv.bat</source>
             <outputDirectory>tomcat/bin</outputDirectory>
             <destName>setenv.bat</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
+            <source>${project.basedir}/src/assembly/tomcat/conf/server.xml</source>
+            <outputDirectory>tomcat/conf</outputDirectory>
+            <destName>server.xml</destName>
             <fileMode>755</fileMode>
         </file>
     </files>
