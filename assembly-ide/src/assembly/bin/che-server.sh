@@ -361,11 +361,13 @@ function stop_che_server {
     call_catalina >/dev/null 2>&1
   else
     echo -e "Stopping Che server running in docker container."
-    "${DOCKER}" exec che /home/user/che/bin/che.sh stop 
+
+    DOCKER_EXEC="sudo service docker stop && /home/user/che/bin/che.sh stop"
+    "${DOCKER}" exec che $DOCKER_EXEC >/dev/null 2>&1
     DOCKER_EXIT=$?
 
     echo -e "Stopping docker container named che."
-    "${DOCKER}" stop che
+    "${DOCKER}" stop che >/dev/null 2>&1
     DOCKER_EXIT=$?
   fi
 }
@@ -389,9 +391,13 @@ function launch_che_server {
     echo -e "Starting Che server in existing docker container named che."
 
     # Attempt restart of existing container named "che"
-    "${DOCKER}" start che &> /dev/null
+    "${DOCKER}" start che >/dev/null 2>&1
     DOCKER_EXIT=$?
     
+    DOCKER_EXEC="sudo service docker start && /home/user/che/bin/che.sh start" >/dev/null 2>&1
+    "${DOCKER}" exec che $DOCKER_EXEC 
+    #sudo service docker start && cd /home/user/che/bin && ./che.sh start
+
     # If either command fails, then wipe any existing image and restarting
     if [ ${DOCKER_INSPECT_EXIT} -eq 1 ] || [ ${DOCKER_EXIT} -eq 1 ]; then
       echo -e "Either che container does not exist, or duplicate conflict was discovered. "
