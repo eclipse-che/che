@@ -124,18 +124,6 @@
     </fileSets>
       <files>
         <file>
-            <source>${project.basedir}/src/assembly/bin/che-server.sh</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>che-server.sh</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
-            <source>${project.basedir}/src/assembly/bin/che-server.bat</source>
-            <outputDirectory>bin</outputDirectory>
-            <destName>che-server.bat</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
             <source>${project.basedir}/src/assembly/bin/che.sh</source>
             <outputDirectory>bin</outputDirectory>
             <destName>che.sh</destName>
