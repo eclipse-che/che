@@ -42,7 +42,6 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerLauncher;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
 import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
@@ -119,7 +118,7 @@ public class ApiModule extends AbstractModule {
                    .addBinding()
                    .toInstance("predefined-recipes.json");
 
-        bindConstant().annotatedWith(Names.named(DockerMachineExtServerLauncher.WS_AGENT_PROCESS_START_COMMAND))
+        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip /mnt/che/ext-server.zip -d ~/che/ext-server && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ext-server/bin/catalina.sh jpda run");
 
@@ -127,5 +126,6 @@ public class ApiModule extends AbstractModule {
 
         bind(WorkspaceConfigValidator.class).to(org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigValidatorImpl.class);
         bind(MachineStateListener.class).asEagerSingleton();
+        bind(org.eclipse.che.api.machine.server.WsAgentLauncher.class).to(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.class);
     }
 }
