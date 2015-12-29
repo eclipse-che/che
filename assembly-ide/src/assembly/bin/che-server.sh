@@ -24,7 +24,9 @@ NC='\033[0m'
 # If exit=1 then output error message + usage
 # if exit=0 then print usage
 
-WRONG="\nLooks like something went wrong. Possible issues: 
+WRONG="
+
+Looks like something went wrong. Possible issues: 
   1. (Win | Mac) VirtualBox not installed           ==> Rerun Docker Toolbox installation
   2. (Win | Mac) Docker Machine not installed       ==> Rerun Docker Toolbox installation
   3. (Win | Mac) Docker is not reachable            ==> Docker VM failed to start
@@ -35,16 +37,18 @@ WRONG="\nLooks like something went wrong. Possible issues:
 
 We have seen issues with VirtualBox on windows where your VM gets corrupted when your computer is suspended while the VM is still running. This will appear as SSH or ethernet connection issues. This is rare, but if encountered, current known solution is to uninstall VirtualBox and Docker Toolbox, and then reinstall."
 
-CHE_VARIABLES="\n
+CHE_VARIABLES="
+
 Che Environment Variables:
   (REQUIRED) JAVA_HOME                              ==> Location of Java runtime
   (REQUIRED: WIN|MAC) DOCKER_TOOLBOX_INSTALL_PATH   ==> Location of Docker Toolbox
   (REQUIRED: WIN|MAC) VBOX_MSI_INSTALL_PATH         ==> Location of VirtualBox  
   (OPTIONAL) CHE_HOME                               ==> Directory where Che is installed
   (OPTIONAL) CHE_LOCAL_CONF_DIR                     ==> Directory with custom Che .properties files
-  (OPTIONAL) CHE_LOGS_DIR                           ==> Directory for Che output logs\n\n"
+  (OPTIONAL) CHE_LOGS_DIR                           ==> Directory for Che output logs"
 
 USAGE="
+
 Usage: 
   che-server [-i] [-i:tag] [-p:port] [run | start | stop]
 
@@ -57,12 +61,13 @@ Usage:
      stop                    Stops Che application server"
 
 function usage {
-  echo -e "$USAGE"
+  echo "$USAGE"
 }
 
 function error_exit {
-  echo -e "$1"
-  echo -e "$WRONG $CHE_VARIABLES $USAGE"
+  echo "
+$1"
+  echo "$WRONG $CHE_VARIABLES $USAGE"
   JUMP_TO_END=true
 }
 
@@ -192,17 +197,12 @@ function get_docker_ready {
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
     else
-      error_exit "\n!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
+      error_exit "!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
       return
     fi
   elif $mac ; then
-    if [ ! -z "$DOCKER_TOOLBOX_INSTALL_PATH" ]; then
-      export DOCKER_MACHINE=/usr/local/bin/docker-machine
-      export DOCKER=/usr/local/bin/docker
-    else
-      error_exit "\n!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
-      return
-    fi
+    export DOCKER_MACHINE=/usr/local/bin/docker-machine
+    export DOCKER=/usr/local/bin/docker
   elif $linux ; then
     export DOCKER_MACHINE=
     export DOCKER=/usr/bin/docker
@@ -214,16 +214,16 @@ function get_docker_ready {
     if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then
       VBOXMANAGE=${VBOX_MSI_INSTALL_PATH}VBoxManage.exe
     else 
-      VBOXMANAGE=/usr/bin/VBoxManage
+      VBOXMANAGE=/usr/local/bin/VBoxManage
     fi
 
     if [ ! -f "${DOCKER_MACHINE}" ]; then
-      error_exit "\n!!! Could not find docker-machine executable. Win: DOCKER_TOOL_BOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected at /usr/bin/docker-machine."
+      error_exit "!!! Could not find docker-machine executable. Win: DOCKER_TOOL_BOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected docker-machine at /usr/local/bin/docker-machine. !!!"
       return
     fi
 
     if [ ! -f "${VBOXMANAGE}" ]; then
-      error_exit "\n!!! Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected at /usr/bin/VBoxManage"
+      error_exit "!!! Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected Virtual Box at /usr/local/bin/VBoxManage. !!!"
       return
     fi
 
@@ -259,7 +259,7 @@ function get_docker_ready {
   # Docker should be available, either in a VM or natively.
   # Test to see if docker binary is installed
   if [ ! -f "${DOCKER}" ]; then
-      error_exit "\n!!! Could not find Docker client."
+      error_exit "!!! Could not find Docker client."
     return
   fi
 
@@ -272,7 +272,7 @@ function get_docker_ready {
   DOCKER_VM_REACHABLE=$?
 
   if [ $DOCKER_EXISTS -eq 1 ] || [ $DOCKER_VM_REACHABLE -eq 1 ]; then
-      error_exit "\n!!! Running 'docker' and 'docker ps' failed. Either docker is unreachable, or docker cannot reach your vbox VM."
+      error_exit "!!! Running 'docker' and 'docker ps' failed. Either docker is unreachable, or docker cannot reach your vbox VM. !!!"
     return
   fi
 
@@ -281,7 +281,7 @@ function get_docker_ready {
     echo -e "${BLUE}Docker${NC} is configured to use vbox docker-machine named ${GREEN}$VM${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip $VM)${NC}..."
     echo
   else
-    echo -e "Docker is natively installed and reachable..."
+    echo "Docker is natively installed and reachable..."
   fi  
 }
 
@@ -317,7 +317,7 @@ function strip_url {
 }
 
 function print_client_connect {
-  if [ ! $USE_DOCKER ]; then 
+  if ! $USE_DOCKER ; then 
     echo -e "
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
 After Che server has booted, you can connect your clients by:
@@ -400,8 +400,8 @@ function launch_che_server {
 
     # If either command fails, then wipe any existing image and restarting
     if [ ${DOCKER_INSPECT_EXIT} -eq 1 ] || [ ${DOCKER_EXIT} -eq 1 ]; then
-      echo -e "Either che container does not exist, or duplicate conflict was discovered. "
-      echo -e "\nRemoving any old containers and launching a new one using image: codenvy/che:${USE_DOCKER_TAG}...\n"
+      echo "Either che container does not exist, or duplicate conflict was discovered."
+      echo -e "Removing any old containers and launching a new one using image: codenvy/che:${USE_DOCKER_TAG}..."
       "${DOCKER}" kill che &> /dev/null
       "${DOCKER}" rm che &> /dev/null
 
