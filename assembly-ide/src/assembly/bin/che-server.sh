@@ -187,7 +187,7 @@ function set_environment_variables {
 function get_docker_ready {
   # Create absolute file names for docker and docker-machine
   # DOCKER_TOOLBOX_INSTALL_PATH set globally by Docker Toolbox installer
-  if [ $win ]; then
+  if $win ] then
     if [ ! -z "$DOCKER_TOOLBOX_INSTALL_PATH" ]; then
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
@@ -195,7 +195,7 @@ function get_docker_ready {
       error_exit "\n!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
       return
     fi
-  elif [ $mac ]; then
+  elif $mac ; then
     if [ ! -z "$DOCKER_TOOLBOX_INSTALL_PATH" ]; then
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}/docker-machine
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}/docker
@@ -203,13 +203,13 @@ function get_docker_ready {
       error_exit "\n!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
       return
     fi
-  elif [ $linux ]; then
+  elif $linux ; then
     export DOCKER_MACHINE=
-    export DOCKER=docker
+    export DOCKER=/usr/bin/docker
   fi 
 
   ### If Windows or Mac, launch docker-machine, if necessary
-  if [ $win ] || [ $mac ]; then
+  if $win || $mac ; then
     # Path to run VirtualBox on the command line - used for creating VMs
     if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then
       VBOXMANAGE=${VBOX_MSI_INSTALL_PATH}VBoxManage.exe
@@ -277,7 +277,7 @@ function get_docker_ready {
   fi
 
   # EOF
-  if [ $win ] || [ $mac ]; then
+  if $win || $mac ; then
     echo -e "${BLUE}Docker${NC} is configured to use vbox docker-machine named ${GREEN}$VM${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip $VM)${NC}..."
     echo
   else
