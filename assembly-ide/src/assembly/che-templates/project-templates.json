@@ -1,0 +1,31 @@
+[
+  {
+    "name": "pet-clinic",
+    "displayName": "Spring",
+    "path": "/pet-clinic",
+    "description": "A basic example using Spring servlets. The app returns values entered into a submit form.",
+    "projectType": "maven",
+    "mixins": [
+      "git"
+    ],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/codenvy-templates/web-spring-java-simple.git",
+      "parameters": {}
+    },
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "maven",
+      "spring",
+      "java"
+    ]
+  }
+]

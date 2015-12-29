@@ -95,6 +95,10 @@
             <directory>${project.basedir}/src/assembly/plugins</directory>
             <outputDirectory>plugins</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/assembly/che-templates</directory>
+            <outputDirectory>tomcat/che-templates</outputDirectory>
+        </fileSet>
 <!--        <fileSet>
             <directory>${project.basedir}/src/assembly/sdk-resources</directory>
             <outputDirectory>sdk-resources</outputDirectory>
