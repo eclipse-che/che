@@ -67,7 +67,7 @@ function error_exit {
 }
 
 # Run the finish function if exit signal initiated
-trap error_exit SIGHUP SIGINT SIGTERM
+trap exit SIGHUP SIGINT SIGTERM
 
 function parse_command_line {
 
