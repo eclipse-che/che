@@ -16,7 +16,7 @@ CALL bash --help > nul 2>&1
 IF %ERRORLEVEL% NEQ 0 goto setup
 
 REM Launch Che and any associated docker machines, if necessary
-CALL bash --login -i "%~dp0\che-server.sh" %1 %2 %3 %4 %5 %6 %7 %8
+CALL bash --login -i "%~dp0\che.sh" %1 %2 %3 %4 %5 %6 %7 %8
 
 goto end
 
