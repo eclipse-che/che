@@ -197,8 +197,8 @@ function get_docker_ready {
     fi
   elif $mac ; then
     if [ ! -z "$DOCKER_TOOLBOX_INSTALL_PATH" ]; then
-      export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}/docker-machine
-      export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}/docker
+      export DOCKER_MACHINE=/usr/local/bin/docker-machine
+      export DOCKER=/usr/local/bin/docker
     else
       error_exit "\n!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
       return
@@ -213,17 +213,17 @@ function get_docker_ready {
     # Path to run VirtualBox on the command line - used for creating VMs
     if [ ! -z "$VBOX_MSI_INSTALL_PATH" ]; then
       VBOXMANAGE=${VBOX_MSI_INSTALL_PATH}VBoxManage.exe
-    else
-      VBOXMANAGE=${VBOX_INSTALL_PATH}VBoxManage.exe
+    else 
+      VBOXMANAGE=/usr/bin/VBoxManage
     fi
 
     if [ ! -f "${DOCKER_MACHINE}" ]; then
-      error_exit "\n!!! Could not find docker-machine executable. DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
+      error_exit "\n!!! Could not find docker-machine executable. Win: DOCKER_TOOL_BOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected at /usr/bin/docker-machine."
       return
     fi
 
     if [ ! -f "${VBOXMANAGE}" ]; then
-      error_exit "\n!!! Could not find VirtualBox. VBOX_MSI_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
+      error_exit "\n!!! Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected at /usr/bin/VBoxManage"
       return
     fi
 
