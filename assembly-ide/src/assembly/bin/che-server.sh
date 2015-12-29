@@ -187,7 +187,7 @@ function set_environment_variables {
 function get_docker_ready {
   # Create absolute file names for docker and docker-machine
   # DOCKER_TOOLBOX_INSTALL_PATH set globally by Docker Toolbox installer
-  if $win ] then
+  if $win ; then
     if [ ! -z "$DOCKER_TOOLBOX_INSTALL_PATH" ]; then
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
@@ -405,7 +405,7 @@ function launch_che_server {
       "${DOCKER}" kill che &> /dev/null
       "${DOCKER}" rm che &> /dev/null
 
-      if [ $win ] || [ $mac ]; then
+      if $win || $mac ; then
         "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${host}'"' --name che -it -p ${USE_PORT}:${USE_PORT} -p 32768-32788:32768-32788 codenvy/che:${USE_DOCKER_TAG} #&> /dev/null
       else
         "${DOCKER}" run --privileged --name che -it -p ${USE_PORT}:${USE_PORT} -p 32768-32788:32768-32788 codenvy/che:${USE_DOCKER_TAG} &> /dev/null
