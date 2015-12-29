@@ -24,6 +24,9 @@ import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
+import org.eclipse.che.api.project.server.ProjectTemplateDescriptionLoader;
+import org.eclipse.che.api.project.server.ProjectTemplateRegistry;
+import org.eclipse.che.api.project.server.ProjectTemplateService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
@@ -52,6 +55,9 @@ public class ApiModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(WorkspaceService.class);
+        bind(ProjectTemplateRegistry.class);
+        bind(ProjectTemplateDescriptionLoader.class).asEagerSingleton();
+        bind(ProjectTemplateService.class);
 
         bind(ApiInfoService.class);
 
