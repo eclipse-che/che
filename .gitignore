@@ -23,7 +23,6 @@ bin/
 *.exe
 *.o
 *.so
-*.sh
 
 # Packages #
 ############
