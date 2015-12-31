@@ -54,7 +54,6 @@ Che Environment Variables:
   (OPTIONAL) CHE_LOGS_DIR                           ==> Directory for Che output logs"
 
   USAGE="
-
 Usage: 
   che [-i] [-i:tag] [-p:port] [run | start | stop]
 
@@ -106,7 +105,9 @@ function parse_command_line {
       fi
     ;;
     -p:*|--port:*)
-      CHE_PORT="${command_line_option#*:}"
+      if [ "${command_line_option#*:}" != "" ]; then
+        CHE_PORT="${command_line_option#*:}"
+      fi
     ;;
     -h|--help)
       USE_HELP=true
@@ -174,12 +175,12 @@ function set_environment_variables {
   # Convert Tomcat environment variables to POSIX format.
   if [[ "${JAVA_HOME}" == *":"* ]]
   then 
-    JAVA_HOME=$(echo /$JAVA_HOME | sed  's|\\|/|g' | sed 's|:||g')
+    JAVA_HOME=$(echo /"${JAVA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
   if [[ "${CHE_HOME}" == *":"* ]]
   then 
-    CHE_HOME=$(echo /$CHE_HOME | sed  's|\\|/|g' | sed 's|:||g')
+    CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
   # Che configuration directory - where .properties files can be placed by user
@@ -193,7 +194,7 @@ function set_environment_variables {
   # Convert windows path name to POSIX
   if [[ "${CATALINA_HOME}" == *":"* ]]
   then 
-    CATALINA_HOME=$(echo /$CATALINA_HOME | sed  's|\\|/|g' | sed 's|:||g')
+    CATALINA_HOME=$(echo /"${CATALINA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
   export CATALINA_BASE="${CHE_HOME}/tomcat"
@@ -373,7 +374,7 @@ function call_catalina {
   [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
-  ${ASSEMBLY_BIN_DIR}/catalina.sh ${CHE_SERVER_ACTION}
+  "${ASSEMBLY_BIN_DIR}"/catalina.sh ${CHE_SERVER_ACTION}
 
 }
 
