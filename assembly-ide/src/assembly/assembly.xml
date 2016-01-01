@@ -82,6 +82,9 @@
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
             <outputDirectory>tomcat/</outputDirectory>
+            <excludes>
+                <exclude>bin/*.bat</exclude>
+            </excludes>
        </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/bin</directory>
@@ -157,10 +160,16 @@
             <destName>setenv.sh</destName>
             <fileMode>755</fileMode>
         </file>
-        <file>
+<!--        <file>
             <source>${project.basedir}/src/assembly/tomcat/bin/setenv.bat</source>
             <outputDirectory>tomcat/bin</outputDirectory>
             <destName>setenv.bat</destName>
+            <fileMode>755</fileMode>
+        </file>
+ -->       <file>
+            <source>${project.basedir}/src/assembly/tomcat/conf/server.xml</source>
+            <outputDirectory>tomcat/conf</outputDirectory>
+            <destName>server.xml</destName>
             <fileMode>755</fileMode>
         </file>
     </files>
