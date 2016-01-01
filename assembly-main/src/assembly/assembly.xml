@@ -68,7 +68,7 @@
                 <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
             </includes>
         </dependencySet>
- -->       <dependencySet>
+        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>che-templates/tutorials</outputDirectory>
@@ -77,7 +77,7 @@
                 <include>org.eclipse.che.examples:*</include>
             </includes>
         </dependencySet>
-    </dependencySets>
+ -->   </dependencySets>
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
@@ -90,11 +90,7 @@
             <directory>${project.basedir}/src/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
-<!--        <fileSet>
-            <directory>${project.basedir}/src/assembly/bin</directory>
-            <outputDirectory>tomcat/bin</outputDirectory>
-        </fileSet>
- -->       <fileSet>
+        <fileSet>
             <directory>${project.basedir}/src/assembly/plugins</directory>
             <outputDirectory>plugins</outputDirectory>
         </fileSet>
@@ -125,7 +121,8 @@
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
             <includes>
-              <include>*.txt</include>
+              <include>LICENSE</include>
+              <include>README</include>
            </includes>
         </fileSet>
     </fileSets>
@@ -160,13 +157,7 @@
             <destName>setenv.sh</destName>
             <fileMode>755</fileMode>
         </file>
-<!--        <file>
-            <source>${project.basedir}/src/assembly/tomcat/bin/setenv.bat</source>
-            <outputDirectory>tomcat/bin</outputDirectory>
-            <destName>setenv.bat</destName>
-            <fileMode>755</fileMode>
-        </file>
- -->       <file>
+        <file>
             <source>${project.basedir}/src/assembly/tomcat/conf/server.xml</source>
             <outputDirectory>tomcat/conf</outputDirectory>
             <destName>server.xml</destName>

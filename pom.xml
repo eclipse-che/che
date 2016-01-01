@@ -27,7 +27,7 @@
         <module>assembly-machine-war</module>
         <module>assembly-machine-server</module>
         <module>assembly-ide-war</module>
-        <module>assembly-ide</module>
+        <module>assembly-main</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/che.git</connection>
