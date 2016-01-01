@@ -33,42 +33,49 @@ function init_global_variables {
   ### Define various error and usage messages
   WRONG="
 Looks like something went wrong. Possible issues: 
-  1. (Win | Mac) VirtualBox not installed           ==> Rerun Docker Toolbox installation
-  2. (Win | Mac) Docker Machine not installed       ==> Rerun Docker Toolbox installation
-  3. (Win | Mac) Docker is not reachable            ==> Docker VM failed to start
-  4. (Win | Mac) Docker ok, but docker ps fails     ==> Docker environment variables not set properly
-  5. (Linux) Docker is not reachable                ==> Is Docker installed ==> wget -qO- https://get.docker.com/ | sh
-  6. Could not find the Che app server              ==> Did /tomcat get moved away from CHE_HOME?
-  7. Did you use the right parameter syntax?        ==> See usage
+  1. (Win | Mac) VirtualBox not installed          ==> Rerun Docker Toolbox installation
+  2. (Win | Mac) Docker Machine not installed      ==> Rerun Docker Toolbox installation
+  3. (Win | Mac) Docker is not reachable           ==> Docker VM failed to start
+  4. (Win | Mac) Docker ok, but docker ps fails    ==> Docker environment variables not set properly
+  5. (Linux) Docker is not reachable               ==> Install: wget -qO- https://get.docker.com/ | sh
+  6. Could not find the Che app server             ==> Did /tomcat get moved away from CHE_HOME?
+  7. Did you use the right parameter syntax?       ==> See usage
 
 We have seen issues with VirtualBox on windows where your VM gets corrupted when your computer is suspended while the VM is still running. This will appear as SSH or ethernet connection issues. This is rare, but if encountered, current known solution is to uninstall VirtualBox and Docker Toolbox, and then reinstall.
 "
 
   CHE_VARIABLES="
 Che Environment Variables:
-  (REQUIRED) JAVA_HOME                              ==> Location of Java runtime
-  (REQUIRED: WIN|MAC) DOCKER_TOOLBOX_INSTALL_PATH   ==> Location of Docker Toolbox
-  (REQUIRED: WIN|MAC) VBOX_MSI_INSTALL_PATH         ==> Location of VirtualBox  
-  (OPTIONAL) CHE_HOME                               ==> Directory where Che is installed
-  (OPTIONAL) CHE_LOCAL_CONF_DIR                     ==> Directory with custom Che .properties files
-  (OPTIONAL) CHE_LOGS_DIR                           ==> Directory for Che output logs"
+  (REQUIRED) JAVA_HOME                             ==> Location of Java runtime
+  (REQUIRED: WIN|MAC) DOCKER_TOOLBOX_INSTALL_PATH  ==> Location of Docker Toolbox
+  (REQUIRED: WIN|MAC) VBOX_MSI_INSTALL_PATH        ==> Location of VirtualBox  
+  (OPTIONAL) CHE_HOME                              ==> Directory where Che is installed
+  (OPTIONAL) CHE_LOCAL_CONF_DIR                    ==> Directory with custom Che .properties files
+  (OPTIONAL) CHE_LOGS_DIR                          ==> Directory for Che output logs
+
+  "
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [run | start | stop]
+  che [-i] [-i:tag] [-p:port] [-r:ip] [run | start | stop]
 
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
+     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server.  
      -h,      --help         Show this help
      run                     Starts Che application server in current console
      start                   Starts Che application server in new console
-     stop                    Stops Che application server"
+     stop                    Stops Che application server
+
+The -r flag sets the DOCKER_MACHINE_HOST environment variable to the IP address that you have bound Che to. Choose an IP address on the node running Che that is externally reachable. This IP address is injected as a hosts rule into workspace machines that are running within other remote Docker containers. This makes it possible for your clients, Che, and workspace machines to communicate together. The -r flag is not required if all Che clients will be running on the same IP address as Che itself.
+"
 
   # Command line parameters
   USE_DOCKER=false
   CHE_DOCKER_TAG=latest
   CHE_PORT=8080
+  CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
   USE_DEBUG=false
@@ -109,6 +116,11 @@ function parse_command_line {
         CHE_PORT="${command_line_option#*:}"
       fi
     ;;
+    -r:*|--remote:*)
+      if [ "${command_line_option#*:}" != "" ]; then
+        CHE_IP="${command_line_option#*:}"
+      fi
+    ;;
     -h|--help)
       USE_HELP=true
       usage
@@ -131,6 +143,7 @@ function parse_command_line {
     echo "USE_DOCKER: ${USE_DOCKER}"
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
+    echo "CHE_IP: \"${CHE_IP}\""
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -170,6 +183,10 @@ function set_environment_variables {
   # The base directory of Che
   if [ -z "${CHE_HOME}" ] || [ ! -f "${CHE_HOME}" ]; then
     export CHE_HOME="$(dirname "$(cd $(dirname ${0}) && pwd -P)")"
+  fi
+
+  if [[ "${CHE_IP}" != "" ]]; then
+    export DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
   # Convert Tomcat environment variables to POSIX format.
@@ -398,6 +415,7 @@ function stop_che_server {
 
 function launch_che_server {
 
+ # This DOCKER_HOST is environment variable set by docker-machine - location of VM w/ Docker
  strip_url $DOCKER_HOST
  print_client_connect
 
@@ -432,7 +450,7 @@ function launch_che_server {
       if $WIN || $MAC ; then
         "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${host}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} #&> /dev/null
       else
-        "${DOCKER}" run --privileged --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} &> /dev/null
+        "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} &> /dev/null
       fi    
     fi
   fi
