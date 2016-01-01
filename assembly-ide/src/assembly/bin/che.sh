@@ -57,7 +57,7 @@ Che Environment Variables:
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [run | start | stop]
+  che [-i] [-i:tag] [-p:port] [-r:ip] [run | start | stop]
 
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
