@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2012-2015 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
@@ -181,7 +181,7 @@ function set_environment_variables {
   ### Set the value of derived environment variables.
   ### Use values set by user, unless they are broken, then fix them
   # The base directory of Che
-  if [ -z "${CHE_HOME}" ] || [ ! -f "${CHE_HOME}" ]; then
+  if [ -z "${CHE_HOME}" ]; then
     export CHE_HOME="$(dirname "$(cd $(dirname ${0}) && pwd -P)")"
   fi
 
@@ -201,7 +201,7 @@ function set_environment_variables {
   fi
 
   # Che configuration directory - where .properties files can be placed by user
-  if [ -z "${CHE_LOCAL_CONF_DIR}" ] || [ ! -f "${CHE_LOCAL_CONF_DIR}" ]; then
+  if [ -z "${CHE_LOCAL_CONF_DIR}" ]; then
     export CHE_LOCAL_CONF_DIR="${CHE_HOME}/conf/"
   fi
 
@@ -218,7 +218,7 @@ function set_environment_variables {
   export ASSEMBLY_BIN_DIR="${CATALINA_HOME}/bin"
 
   # Global logs directory
-  if [ -z "${CHE_LOGS_DIR}" ] || [ ! -f "${CHE_LOGS_DIR}" ]; then
+  if [ -z "${CHE_LOGS_DIR}" ]; then
     export CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
   fi
 }
@@ -404,20 +404,40 @@ function stop_che_server {
     echo -e "Stopping Che server running in docker container."
 
     DOCKER_EXEC="sudo service docker stop && /home/user/che/bin/che.sh stop"
-    "${DOCKER}" exec che $DOCKER_EXEC >/dev/null 2>&1
-    DOCKER_EXIT=$?
+    "${DOCKER}" exec che $DOCKER_EXEC &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
 
     echo -e "Stopping docker container named che."
-    "${DOCKER}" stop che >/dev/null 2>&1
-    DOCKER_EXIT=$?
+    "${DOCKER}" stop che &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
   fi
+}
+
+function kill_and_launch_docker {
+
+  echo "Either che container does not exist, or duplicate conflict was discovered."
+  echo -e "Removing any old containers and launching a new one using image codenvy/che:${CHE_DOCKER_TAG} and docker command:"
+  "${DOCKER}" kill che &> /dev/null || true
+  "${DOCKER}" rm che &> /dev/null || true
+
+  if $WIN || $MAC ; then
+     # This DOCKER_HOST is environment variable set by docker-machine - location of VM w/ Docker
+    set -x
+    "${DOCKER}" run --privileged -e \"DOCKER_MACHINE_HOST=${host}\" --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} #&> /dev/null
+  else
+    set -x
+    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} #&> /dev/null
+  fi      
+  set +x
 }
 
 function launch_che_server {
 
- # This DOCKER_HOST is environment variable set by docker-machine - location of VM w/ Docker
- strip_url $DOCKER_HOST
- print_client_connect
+  if $WIN || $MAC ; then
+    strip_url $DOCKER_HOST
+  else
+    host=localhost
+  fi      
+
+  print_client_connect
 
   # Launch Che natively as a tomcat server
   if ! $USE_DOCKER; then
@@ -426,33 +446,32 @@ function launch_che_server {
   # Launch Che as a docker image
   else
     
+    echo "Starting Che server in docker container named che."
+
     # Check to see if the Che docker was not properly shut down
-    "${DOCKER}" inspect che &> /dev/null
-    DOCKER_INSPECT_EXIT=$?
+    "${DOCKER}" inspect che &> /dev/null || DOCKER_INSPECT_EXIT=$? || true
+    if [ "${DOCKER_INSPECT_EXIT}" == "1" ]; then
+      kill_and_launch_docker
+      return
+    fi
 
-    echo -e "Starting Che server in existing docker container named che."
+    echo "Found a container named che. Attempting restart."
+    "${DOCKER}" start che &>/dev/null || DOCKER_EXIT=$? || true
 
-    # Attempt restart of existing container named "che"
-    "${DOCKER}" start che >/dev/null 2>&1
-    DOCKER_EXIT=$?
-    
-    DOCKER_EXEC="sudo service docker start && /home/user/che/bin/che.sh start" >/dev/null 2>&1
-    "${DOCKER}" exec che $DOCKER_EXEC 
-    #sudo service docker start && cd /home/user/che/bin && ./che.sh start
+    if [ "${DOCKER_EXIT}" == "1" ]; then
+      echo "Initial start of docker container failed... Attempting docker restart and exec."
+      DOCKER_EXEC="sudo service docker start && /home/user/che/bin/che.sh start" >/dev/null 2>&1
+      "${DOCKER}" exec che $DOCKER_EXEC || DOCKER_EXIT=$? || true    
+    fi
 
     # If either command fails, then wipe any existing image and restarting
-    if [ ${DOCKER_INSPECT_EXIT} -eq 1 ] || [ ${DOCKER_EXIT} -eq 1 ]; then
-      echo "Either che container does not exist, or duplicate conflict was discovered."
-      echo -e "Removing any old containers and launching a new one using image: codenvy/che:${CHE_DOCKER_TAG}..."
-      "${DOCKER}" kill che &> /dev/null
-      "${DOCKER}" rm che &> /dev/null
-
-      if $WIN || $MAC ; then
-        "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${host}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} #&> /dev/null
-      else
-        "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} &> /dev/null
-      fi    
+    if [ "${DOCKER_EXIT}" == "1" ]; then
+      kill_and_launch_docker
+      return
     fi
+
+    echo "Docker container named Che successfully started."
+
   fi
 }
 
