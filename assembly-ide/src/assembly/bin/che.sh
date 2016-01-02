@@ -68,8 +68,9 @@ Usage:
      start                   Starts Che application server in new console
      stop                    Stops Che application server
 
-The -r flag sets the DOCKER_MACHINE_HOST environment variable to the IP address that you have bound Che to. Choose an IP address on the node running Che that is externally reachable. This IP address is injected as a hosts rule into workspace machines that are running within other remote Docker containers. This makes it possible for your clients, Che, and workspace machines to communicate together. The -r flag is not required if all Che clients will be running on the same IP address as Che itself.
-"
+The -r flag sets the DOCKER_MACHINE_HOST system environment variable. Set this to the IP address of the node
+that is running your Docker daemon. Only necessary to set this if on Linux and your browser clients are not 
+localhost, ie they are remote. This property automatically set for Che on Windows and Mac."
 
   # Command line parameters
   USE_DOCKER=false
