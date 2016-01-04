@@ -57,13 +57,14 @@ Che Environment Variables:
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [-r:ip] [run | start | stop]
+  che [-i] [-i:tag] [-p:port] [-r:ip] [-d] [run | start | stop]
 
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
      -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server.  
      -h,      --help         Show this help
+     -d,      --debug        Use debug mod
      run                     Starts Che application server in current console
      start                   Starts Che application server in new console
      stop                    Stops Che application server
@@ -154,7 +155,7 @@ function parse_command_line {
 function determine_os {
   # Set OS.  Mac & Windows require VirtualBox and docker-machine.
 
-  if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  if [[ "${OSTYPE}" == "linux"* ]]; then
     # Linux
     LINUX=true
   elif [[ "${OSTYPE}" == "darwin"* ]]; then
@@ -392,8 +393,11 @@ function call_catalina {
   [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
-  "${ASSEMBLY_BIN_DIR}"/catalina.sh ${CHE_SERVER_ACTION}
-
+  if [[ "${USE_DEBUG}" == true ]]; then
+    "${ASSEMBLY_BIN_DIR}"/catalina.sh jpda ${CHE_SERVER_ACTION}
+  else
+    "${ASSEMBLY_BIN_DIR}"/catalina.sh ${CHE_SERVER_ACTION}
+  fi
 }
 
 function stop_che_server {
