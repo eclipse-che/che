@@ -22,9 +22,6 @@ function init_global_variables {
   # Short circuit
   JUMP_TO_END=false
 
-  # Name of the virtualbox VM that will be created
-  VM=default
-
   # For coloring console output
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
@@ -57,12 +54,13 @@ Che Environment Variables:
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [-r:ip] [-d] [run | start | stop]
+  che [-i] [-i:tag] [-p:port] [-r:ip] [-m:vm] [-d] [run | start | stop]
 
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
-     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server  
+     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server
+     -m:vm,   --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default  
      -h,      --help         Show this help
      -d,      --debug        Use debug mode (prints command line options + app server debug)
      run                     Starts Che application server in current console
@@ -80,6 +78,7 @@ localhost, ie they are remote. This property automatically set for Che on Window
   CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
+  VM=${CHE_DOCKER_MACHINE_NAME:-default}
   USE_DEBUG=false
 
   # Sets value of operating system
@@ -123,6 +122,11 @@ function parse_command_line {
         CHE_IP="${command_line_option#*:}"
       fi
     ;;
+    -m:*|--machine:*)
+      if [ "${command_line_option#*:}" != "" ]; then
+        VM="${command_line_option#*:}"
+      fi
+    ;;
     -h|--help)
       USE_HELP=true
       usage
@@ -146,6 +150,7 @@ function parse_command_line {
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
+    echo "CHE_DOCKER_MACHINE: ${VM}"
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -223,6 +228,7 @@ function set_environment_variables {
   if [ -z "${CHE_LOGS_DIR}" ]; then
     export CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
   fi
+
 }
 
 function get_docker_ready {
@@ -280,7 +286,7 @@ function get_docker_ready {
 
     if [ "${VM_STATUS}" != "Running" ]; then
       echo -e "Docker machine named ${GREEN}$VM${NC} is not running."
-      echo "Starting docker machine named ${GREEN}$VM${NC}..."
+      echo -e "Starting docker machine named ${GREEN}$VM${NC}..."
       "${DOCKER_MACHINE}" start $VM
       yes | "${DOCKER_MACHINE}" regenerate-certs $VM || true
     fi
