@@ -2,7 +2,7 @@ version: '{build}'
 branches:
   only:
   - master
-  - 4.0
+  - 3.x
 skip_tags: true
 init:
 - ps: >-

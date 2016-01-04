@@ -27,6 +27,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.project.server.ProjectTemplateDescriptionLoader;
 import org.eclipse.che.api.project.server.ProjectTemplateRegistry;
 import org.eclipse.che.api.project.server.ProjectTemplateService;
+import org.eclipse.che.api.ssh.server.SshService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
@@ -35,9 +36,6 @@ import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
-import org.eclipse.che.ide.ext.ssh.server.KeyService;
-import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
-import org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
@@ -68,6 +66,8 @@ public class ApiModule extends AbstractModule {
         bind(UserService.class);
         bind(UserProfileService.class);
 
+        bind(SshService.class);
+
         bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class)
@@ -84,8 +84,6 @@ public class ApiModule extends AbstractModule {
 
         bind(WorkspaceMessenger.class).asEagerSingleton();
 
-        bind(KeyService.class);
-        bind(SshKeyStore.class).to(UserProfileSshKeyStore.class);
 
         bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);

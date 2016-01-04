@@ -22,9 +22,6 @@ function init_global_variables {
   # Short circuit
   JUMP_TO_END=false
 
-  # Name of the virtualbox VM that will be created
-  VM=default
-
   # For coloring console output
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
@@ -57,13 +54,15 @@ Che Environment Variables:
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [-r:ip] [run | start | stop]
+  che [-i] [-i:tag] [-p:port] [-r:ip] [-m:vm] [-d] [run | start | stop]
 
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
-     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server.  
+     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server
+     -m:vm,   --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default  
      -h,      --help         Show this help
+     -d,      --debug        Use debug mode (prints command line options + app server debug)
      run                     Starts Che application server in current console
      start                   Starts Che application server in new console
      stop                    Stops Che application server
@@ -79,6 +78,7 @@ localhost, ie they are remote. This property automatically set for Che on Window
   CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
+  VM=${CHE_DOCKER_MACHINE_NAME:-default}
   USE_DEBUG=false
 
   # Sets value of operating system
@@ -122,6 +122,11 @@ function parse_command_line {
         CHE_IP="${command_line_option#*:}"
       fi
     ;;
+    -m:*|--machine:*)
+      if [ "${command_line_option#*:}" != "" ]; then
+        VM="${command_line_option#*:}"
+      fi
+    ;;
     -h|--help)
       USE_HELP=true
       usage
@@ -145,6 +150,7 @@ function parse_command_line {
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
+    echo "CHE_DOCKER_MACHINE: ${VM}"
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -154,7 +160,7 @@ function parse_command_line {
 function determine_os {
   # Set OS.  Mac & Windows require VirtualBox and docker-machine.
 
-  if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+  if [[ "${OSTYPE}" == "linux"* ]]; then
     # Linux
     LINUX=true
   elif [[ "${OSTYPE}" == "darwin"* ]]; then
@@ -222,6 +228,7 @@ function set_environment_variables {
   if [ -z "${CHE_LOGS_DIR}" ]; then
     export CHE_LOGS_DIR="${CATALINA_HOME}/logs/"
   fi
+
 }
 
 function get_docker_ready {
@@ -232,7 +239,7 @@ function get_docker_ready {
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
     else
-      error_exit "!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
+      error_exit "!!! DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
       return
     fi
   elif [ "${MAC}" == "true" ]; then
@@ -253,7 +260,7 @@ function get_docker_ready {
     fi
 
     if [ ! -f "${DOCKER_MACHINE}" ]; then
-      error_exit "!!! Could not find docker-machine executable. Win: DOCKER_TOOL_BOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected docker-machine at /usr/local/bin/docker-machine. !!!"
+      error_exit "!!! Could not find docker-machine executable. Win: DOCKER_TOOLBOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected docker-machine at /usr/local/bin/docker-machine. !!!"
       return
     fi
 
@@ -279,7 +286,7 @@ function get_docker_ready {
 
     if [ "${VM_STATUS}" != "Running" ]; then
       echo -e "Docker machine named ${GREEN}$VM${NC} is not running."
-      echo "Starting docker machine named ${GREEN}$VM${NC}..."
+      echo -e "Starting docker machine named ${GREEN}$VM${NC}..."
       "${DOCKER_MACHINE}" start $VM
       yes | "${DOCKER_MACHINE}" regenerate-certs $VM || true
     fi
@@ -392,8 +399,11 @@ function call_catalina {
   [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
-  "${ASSEMBLY_BIN_DIR}"/catalina.sh ${CHE_SERVER_ACTION}
-
+  if [[ "${USE_DEBUG}" == true ]]; then
+    "${ASSEMBLY_BIN_DIR}"/catalina.sh jpda ${CHE_SERVER_ACTION}
+  else
+    "${ASSEMBLY_BIN_DIR}"/catalina.sh ${CHE_SERVER_ACTION}
+  fi
 }
 
 function stop_che_server {
