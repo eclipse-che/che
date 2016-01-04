@@ -18,8 +18,8 @@
         <groupId>org.eclipse.che.depmgt</groupId>
         <version>4.0.0-beta-3-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.ide</groupId>
-    <artifactId>che-ide-parent</artifactId>
+    <groupId>org.eclipse.che</groupId>
+    <artifactId>che-parent</artifactId>
     <version>4.0.0-beta-3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che IDE :: Parent</name>
@@ -27,7 +27,7 @@
         <module>assembly-machine-war</module>
         <module>assembly-machine-server</module>
         <module>assembly-ide-war</module>
-        <module>assembly-ide</module>
+        <module>assembly-main</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:codenvy/che.git</connection>
