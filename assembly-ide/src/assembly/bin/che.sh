@@ -62,9 +62,9 @@ Usage:
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
-     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server.  
+     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server  
      -h,      --help         Show this help
-     -d,      --debug        Use debug mod
+     -d,      --debug        Use debug mode (prints command line options + app server debug)
      run                     Starts Che application server in current console
      start                   Starts Che application server in new console
      stop                    Stops Che application server
@@ -233,7 +233,7 @@ function get_docker_ready {
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
     else
-      error_exit "!!! DOCKER_TOOL_BOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
+      error_exit "!!! DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
       return
     fi
   elif [ "${MAC}" == "true" ]; then
@@ -254,7 +254,7 @@ function get_docker_ready {
     fi
 
     if [ ! -f "${DOCKER_MACHINE}" ]; then
-      error_exit "!!! Could not find docker-machine executable. Win: DOCKER_TOOL_BOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected docker-machine at /usr/local/bin/docker-machine. !!!"
+      error_exit "!!! Could not find docker-machine executable. Win: DOCKER_TOOLBOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected docker-machine at /usr/local/bin/docker-machine. !!!"
       return
     fi
 
