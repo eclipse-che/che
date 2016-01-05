@@ -23,7 +23,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
-            <outputFileNameMapping>che.war</outputFileNameMapping>
+            <outputFileNameMapping>ide.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-ide-war</include>
             </includes>
@@ -59,25 +59,7 @@
                 </excludes>
             </unpackOptions>
         </dependencySet>
-<!--        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>sdk-tools</outputDirectory>
-            <outputFileNameMapping>che-plugin-sdk-tools.jar</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>che-templates/tutorials</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che.examples:*</include>
-            </includes>
-        </dependencySet>
- -->   </dependencySets>
+    </dependencySets>
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
@@ -98,18 +80,7 @@
             <directory>${project.basedir}/src/assembly/che-templates</directory>
             <outputDirectory>tomcat/che-templates</outputDirectory>
         </fileSet>
-<!--        <fileSet>
-            <directory>${project.basedir}/src/assembly/sdk-resources</directory>
-            <outputDirectory>sdk-resources</outputDirectory>
-        </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/assembly-ide-war</directory>
-            <outputDirectory>sdk-resources</outputDirectory>
-            <excludes>
-            <exclude>**/target/**</exclude>
-            </excludes>
-        </fileSet>
- -->    <fileSet>
             <directory>${project.basedir}/src/assembly/webapps</directory>
             <outputDirectory>tomcat/webapps</outputDirectory>
         </fileSet>
