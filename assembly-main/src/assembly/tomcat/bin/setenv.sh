@@ -12,7 +12,7 @@
 
 
 #Global JAVA options
-[ -z "${JAVA_OPTS}" ] && JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx1024m -server"
+[ -z "${JAVA_OPTS}" ] && JAVA_OPTS="${JAVA_OPTS} -Xms256m -Xmx1024m -server -Dport.http=${CHE_PORT}"
 
 [ -z "${JPDA_ADDRESS}" ]  && JPDA_ADDRESS="8000"
 
