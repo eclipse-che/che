@@ -35,11 +35,8 @@
          */
 
         window.IDE.config = {
-            "restContext": "/che/api",
-
-            "hiddenFiles": ".*",
-
-            "cheExtensionPath": "/che/ext"
+            "restContext": "/ide/api",
+            "cheExtensionPath": "/ide/ext"
         };
 
         /**
@@ -58,7 +55,7 @@
         };
     </script>
 
-    <script type="text/javascript" language="javascript" src="/che/_app/browserNotSupported.js"></script>
-    <script type="text/javascript" language="javascript" src="/che/_app/_app.nocache.js"></script>
+    <script type="text/javascript" language="javascript" src="/ide/_app/browserNotSupported.js"></script>
+    <script type="text/javascript" language="javascript" src="/ide/_app/_app.nocache.js"></script>
 </head>
 </html>
