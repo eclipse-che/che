@@ -35,6 +35,7 @@
 
     <!-- Core module inherits                                       -->
     <inherits name='org.eclipse.che.ide.Api'/>
+    <inherits name='org.eclipse.che.api.core.model.Model'/>
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
 
