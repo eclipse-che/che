@@ -26,5 +26,4 @@ EXPOSE 8080 32768-65535
 ADD /assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che
 
 CMD  sudo chown -R user:user /home/user/che && \
-     sudo service docker start && \
-    cd /home/user/che/bin/ && ./che.sh run
+     sudo service docker start && tail -f /dev/null
