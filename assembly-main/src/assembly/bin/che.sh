@@ -60,7 +60,8 @@ Usage:
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
      -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server
-     -m:vm,   --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default  
+     -m:vm,   --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default
+     -s,      --suppress     Do not print browser client connection information
      -h,      --help         Show this help
      -d,      --debug        Use debug mode (prints command line options + app server debug)
      run                     Starts Che application server in current console
@@ -80,6 +81,7 @@ localhost, ie they are remote. This property automatically set for Che on Window
   CHE_SERVER_ACTION=run
   VM=${CHE_DOCKER_MACHINE_NAME:-default}
   USE_DEBUG=false
+  PRINT_CLIENT_CONNECT=true
 
   # Sets value of operating system
   WIN=false
@@ -127,6 +129,9 @@ function parse_command_line {
         VM="${command_line_option#*:}"
       fi
     ;;
+    -s|--suppress)
+      PRINT_CLIENT_CONNECT=false
+    ;;
     -h|--help)
       USE_HELP=true
       usage
@@ -151,6 +156,7 @@ function parse_command_line {
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
     echo "CHE_DOCKER_MACHINE: ${VM}"
+    echo "PRINT_CLIENT_CONNECT: ${PRINT_CLIENT_CONNECT}"
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -274,10 +280,16 @@ function get_docker_ready {
     "${VBOXMANAGE}" showvminfo $VM &> /dev/null || VM_EXISTS_CODE=$? || true 
 
     if [ "${VM_EXISTS_CODE}" == "1" ]; then
-      echo "Creating docker machine named $VM..."
-      "${DOCKER_MACHINE}" rm -f $VM &> /dev/null || :
+      echo "Could not find an existing docker machine."
+      echo -e "Creating docker machine named ${GREEN}$VM${NC}... Please be patient, this takes a couple minutes the first time."
+      "${DOCKER_MACHINE}" rm -f $VM &> /dev/null || true
       rm -rf ~/.docker/machine/machines/$VM
-      "${DOCKER_MACHINE}" create -d virtualbox $VM
+      "${DOCKER_MACHINE}" create -d virtualbox $VM &> /dev/null || true
+
+      # Seems that sometimes you have to regenerate certs even when creating new machine on windows
+      yes | "${DOCKER_MACHINE}" regenerate-certs $VM &> /dev/null  || true
+      echo -e "Successfully started docker machine named ${GREEN}$VM${NC}..."
+
     else
       echo -e "Docker machine named ${GREEN}$VM${NC} already exists..."
     fi
@@ -287,8 +299,8 @@ function get_docker_ready {
     if [ "${VM_STATUS}" != "Running" ]; then
       echo -e "Docker machine named ${GREEN}$VM${NC} is not running."
       echo -e "Starting docker machine named ${GREEN}$VM${NC}..."
-      "${DOCKER_MACHINE}" start $VM
-      yes | "${DOCKER_MACHINE}" regenerate-certs $VM || true
+      "${DOCKER_MACHINE}" start $VM || true
+      yes | "${DOCKER_MACHINE}" regenerate-certs $VM &> /dev/null  || true
     fi
 
     echo -e "Setting environment variables for machine ${GREEN}$VM${NC}..."
@@ -395,7 +407,7 @@ function call_catalina {
 
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-  [ -z "${JAVA_OPTS}" ]  && export JAVA_OPTS="-Dport.http=${CHE_PORT}"
+  [ -z "${JAVA_OPTS}" ]  && export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT}"
   [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
@@ -412,43 +424,48 @@ function stop_che_server {
     echo -e "Stopping Che server running on localhost:${CHE_PORT}"
     call_catalina >/dev/null 2>&1
   else
-    echo -e "Stopping Che server running in docker container."
+    echo -e "Stopping Che server running in docker container named ${GREEN}che${NC}."
 
     DOCKER_EXEC="sudo service docker stop && /home/user/che/bin/che.sh stop"
     "${DOCKER}" exec che $DOCKER_EXEC &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
 
-    echo -e "Stopping docker container named che."
+    echo -e "Stopping docker container named ${GREEN}che${NC}."
     "${DOCKER}" stop che &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
   fi
 }
 
 function kill_and_launch_docker {
 
-  echo "Either che container does not exist, or duplicate conflict was discovered."
-  echo -e "Removing any old containers and launching a new one using image codenvy/che:${CHE_DOCKER_TAG} and docker command:"
+  echo -e "A Docker container for ${GREEN}che${NC} does not exist or duplicate conflict was discovered."
+  echo -e "Launching a new Docker container named ${GREEN}che${NC} from image ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC} with Docker command:"
   "${DOCKER}" kill che &> /dev/null || true
   "${DOCKER}" rm che &> /dev/null || true
 
   if $WIN || $MAC ; then
      # This DOCKER_HOST is environment variable set by docker-machine - location of VM w/ Docker
     set -x
-    "${DOCKER}" run --privileged -e \"DOCKER_MACHINE_HOST=${host}\" --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} #&> /dev/null
+    "${DOCKER}" run --privileged -e \"DOCKER_MACHINE_HOST=${host}\" --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   else
     set -x
-    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} #&> /dev/null
-  fi      
+    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+  fi    
+
   set +x
 }
 
 function launch_che_server {
 
+  # Set host variable to the hostname that client should connect to.
   if $WIN || $MAC ; then
     strip_url $DOCKER_HOST
   else
     host=localhost
   fi      
 
-  print_client_connect
+
+  if $PRINT_CLIENT_CONNECT ; then
+    print_client_connect
+  fi
 
   # Launch Che natively as a tomcat server
   if ! $USE_DOCKER; then
@@ -459,30 +476,44 @@ function launch_che_server {
     
     echo "Starting Che server in docker container named che."
 
+    CREATE_NEW_CONTAINER=false
+
     # Check to see if the Che docker was not properly shut down
     "${DOCKER}" inspect che &> /dev/null || DOCKER_INSPECT_EXIT=$? || true
-    if [ "${DOCKER_INSPECT_EXIT}" == "1" ]; then
+    if [ "${DOCKER_INSPECT_EXIT}" != "1" ]; then
+
+      # Existing container running Che is found.  Let's start it.
+      echo "Found a container named che. Attempting restart."
+      "${DOCKER}" start che &>/dev/null || DOCKER_EXIT=$? || true
+
+      # Existing container found, but could not start it properly.  
+      if [ "${DOCKER_EXIT}" == "1" ]; then
+        echo "Initial start of docker container failed... Attempting docker restart and exec."
+        "${DOCKER}" exec che bash -c 'true && sudo service docker start && tail -f /dev/null' || DOCKER_EXIT=$? || true   
+
+        # If we get to this point and Docker is still failing, then we will destroy the container entirely
+        if [ "${DOCKER_EXIT}" == "1" ]; then
+          CREATE_NEW_CONTAINER=true
+        fi
+      fi
+
+    # No existing Che container found, we need to create a new one.
+    else 
+      CREATE_NEW_CONTAINER=true
+    fi
+
+    if $CREATE_NEW_CONTAINER ; then
+
+      # Container in bad state or not found, kill and launch new container.
       kill_and_launch_docker
-      return
-    fi
 
-    echo "Found a container named che. Attempting restart."
-    "${DOCKER}" start che &>/dev/null || DOCKER_EXIT=$? || true
+    fi 
 
-    if [ "${DOCKER_EXIT}" == "1" ]; then
-      echo "Initial start of docker container failed... Attempting docker restart and exec."
-      DOCKER_EXEC="sudo service docker start && /home/user/che/bin/che.sh start" >/dev/null 2>&1
-      "${DOCKER}" exec che $DOCKER_EXEC || DOCKER_EXIT=$? || true    
-    fi
+    echo -e "Docker container named ${GREEN}che${NC} successfully started."
+    echo -e "Launching Che app server inside the container named ${GREEN}che${NC}."
 
-    # If either command fails, then wipe any existing image and restarting
-    if [ "${DOCKER_EXIT}" == "1" ]; then
-      kill_and_launch_docker
-      return
-    fi
-
-    echo "Docker container named Che successfully started."
-
+    # For some reason, launching tomcat with the start option in a docker container does not run successfully - only launch with run action
+    "${DOCKER}" exec -it che bash -c 'true && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh run' || DOCKER_EXIT=$? || true    
   fi
 }
 
