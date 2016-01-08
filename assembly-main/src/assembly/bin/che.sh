@@ -461,7 +461,7 @@ function kill_and_launch_docker {
     "${DOCKER}" run --privileged -e \"DOCKER_MACHINE_HOST=${host}\" --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   else
     set -x
-    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   fi    
 
   set +x
