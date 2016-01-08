@@ -401,8 +401,22 @@ function call_catalina {
 
   # Test to see that Che application server is where we expect it to be
   if [ ! -d "${ASSEMBLY_BIN_DIR}" ]; then
-    error_exit
+    error_exit "Could not find Che's application server."
     return
+  fi
+
+  # Test to see that Java is installed and working
+  java &>/dev/null || JAVA_EXIT=$? || true
+  if [ "${JAVA_EXIT}" != "1" ]; then
+    error_exit "We could not find a working Java JVM. java command fails."
+    return
+  fi
+
+  # Che requires Java version 1.8 or higher. 
+  JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  if [[ "$JAVA_VERSION" < "1.8" ]]; then
+      error_exit "Che requires Java version 1.8 or higher. We found a lower version."
+      return
   fi
 
   ### Cannot add this in setenv.sh.
@@ -535,6 +549,7 @@ if [ "${USE_HELP}" == "false" ] && [ "${JUMP_TO_END}" == "false" ]; then
     echo "to limitations of Docker. On this computer, %userprofile% is "
     echo -e "${GREEN}${USERPROFILE}${NC}"
     echo "#############################################################"
+    echo 
 
     WIN_CHE_DIR_ONE="${USERPROFILE}"/AppData/Local/che
     WIN_CHE_DIR_TWO="${USERPROFILE}"/che
