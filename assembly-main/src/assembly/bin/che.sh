@@ -35,10 +35,15 @@ Looks like something went wrong. Possible issues:
   3. (Win | Mac) Docker is not reachable           ==> Docker VM failed to start
   4. (Win | Mac) Docker ok, but docker ps fails    ==> Docker environment variables not set properly
   5. (Linux) Docker is not reachable               ==> Install: wget -qO- https://get.docker.com/ | sh
-  6. Could not find the Che app server             ==> Did /tomcat get moved away from CHE_HOME?
-  7. Did you use the right parameter syntax?       ==> See usage
+  6. (Linux) Permissions not properly set          ==> Che must run as UID 1000 with user in docker group
+  7. Could not find the Che app server             ==> Did /tomcat get moved away from CHE_HOME?
+  8. Wrong version of Java found                   ==> Che requires Java 1.8
+  9. Did you use the right parameter syntax?       ==> See usage
 
-We have seen issues with VirtualBox on windows where your VM gets corrupted when your computer is suspended while the VM is still running. This will appear as SSH or ethernet connection issues. This is rare, but if encountered, current known solution is to uninstall VirtualBox and Docker Toolbox, and then reinstall.
+We have seen issues with VirtualBox on Windows where your VM gets corrupted when your computer is 
+suspended while the VM is still running. This will appear as SSH or ethernet connection issues. This is 
+rare, but if encountered, current known solution is to uninstall VirtualBox and Docker Toolbox, and then 
+reinstall.
 "
 
   CHE_VARIABLES="
@@ -49,13 +54,13 @@ Che Environment Variables:
   (OPTIONAL) CHE_HOME                              ==> Directory where Che is installed
   (OPTIONAL) CHE_LOCAL_CONF_DIR                    ==> Directory with custom Che .properties files
   (OPTIONAL) CHE_LOGS_DIR                          ==> Directory for Che output logs
-
+  (OPTIONAL) CHE_DOCKER_MACHINE_NAME               ==> (Win | Mac) Name of VM created by docker-machine
+  (OPTIONAL) DOCKER_MACHINE_HOST                   ==> (Linux) Docker host IP - set if browser clients remote
   "
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [-r:ip] [-m:vm] [-d] [run | start | stop]
-
+  che [OPTIONS] [run | start | stop]
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
@@ -245,7 +250,7 @@ function get_docker_ready {
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
     else
-      error_exit "!!! DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
+      error_exit "!!! DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
       return
     fi
   elif [ "${MAC}" == "true" ]; then
@@ -307,6 +312,26 @@ function get_docker_ready {
     eval "$("${DOCKER_MACHINE}" env --shell=bash $VM)"
   fi
   ### End logic block to create / remove / start docker-machine VM
+
+  # Test to ensure user is in Docker group with appropriate permissions
+  if [ "${LINUX}" == "true" ]; then
+
+    LINUX_USER=$(whoami)
+    LINUX_GROUPS=$(groups "${LINUX_USER}")
+    LINUX_UID=$(id -u "${LINUX_USER}")
+
+    if [[ "${LINUX_GROUPS}" =~ "docker" ]] ; then
+
+      if [[ "${LINUX_UID}" != "1000" ]] ; then
+        error_exit "!!! This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
+      fi
+
+    else
+      error_exit "!!! This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
+    fi
+
+
+  fi 
 
   # Docker should be available, either in a VM or natively.
   # Test to see if docker binary is installed
@@ -375,23 +400,19 @@ function strip_url {
 function print_client_connect {
   if [ "${USE_DOCKER}" == "false" ]; then 
     echo "
-
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
 After Che server has booted, you can connect your clients by:
 1. Open browser to http://localhost:${CHE_PORT}, or:
 2. Open native chromium app.
 #############################################################
-
 "
   else 
     echo "
-
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
 After Che server has booted, you can connect your clients by:
 1. Open browser to http://${host}:${CHE_PORT}, or:
 2. Open native chromium app.
 #############################################################
-
 "
 
   fi
@@ -401,8 +422,22 @@ function call_catalina {
 
   # Test to see that Che application server is where we expect it to be
   if [ ! -d "${ASSEMBLY_BIN_DIR}" ]; then
-    error_exit
+    error_exit "Could not find Che's application server."
     return
+  fi
+
+  # Test to see that Java is installed and working
+  java &>/dev/null || JAVA_EXIT=$? || true
+  if [ "${JAVA_EXIT}" != "1" ]; then
+    error_exit "We could not find a working Java JVM. java command fails."
+    return
+  fi
+
+  # Che requires Java version 1.8 or higher. 
+  JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  if [[ "$JAVA_VERSION" < "1.8" ]]; then
+      error_exit "Che requires Java version 1.8 or higher. We found a lower version."
+      return
   fi
 
   ### Cannot add this in setenv.sh.
@@ -447,7 +482,7 @@ function kill_and_launch_docker {
     "${DOCKER}" run --privileged -e \"DOCKER_MACHINE_HOST=${host}\" --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   else
     set -x
-    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -it -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   fi    
 
   set +x
@@ -513,7 +548,7 @@ function launch_che_server {
     echo -e "Launching Che app server inside the container named ${GREEN}che${NC}."
 
     # For some reason, launching tomcat with the start option in a docker container does not run successfully - only launch with run action
-    "${DOCKER}" exec -it che bash -c 'true && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh run' || DOCKER_EXIT=$? || true    
+    "${DOCKER}" exec -it che bash -c 'true && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh -s run' || DOCKER_EXIT=$? || true    
   fi
 }
 
@@ -535,6 +570,7 @@ if [ "${USE_HELP}" == "false" ] && [ "${JUMP_TO_END}" == "false" ]; then
     echo "to limitations of Docker. On this computer, %userprofile% is "
     echo -e "${GREEN}${USERPROFILE}${NC}"
     echo "#############################################################"
+    echo 
 
     WIN_CHE_DIR_ONE="${USERPROFILE}"/AppData/Local/che
     WIN_CHE_DIR_TWO="${USERPROFILE}"/che
