@@ -60,7 +60,7 @@ Che Environment Variables:
 
   USAGE="
 Usage: 
-  che [-i] [-i:tag] [-p:port] [-r:ip] [-m:vm] [-d] [run | start | stop]
+  che [OPTIONS] [run | start | stop]
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
