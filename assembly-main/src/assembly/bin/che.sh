@@ -37,7 +37,6 @@ Looks like something went wrong. Possible issues:
   5. (Linux) Docker is not reachable               ==> Install: wget -qO- https://get.docker.com/ | sh
   6. Could not find the Che app server             ==> Did /tomcat get moved away from CHE_HOME?
   7. Did you use the right parameter syntax?       ==> See usage
-
 We have seen issues with VirtualBox on windows where your VM gets corrupted when your computer is suspended while the VM is still running. This will appear as SSH or ethernet connection issues. This is rare, but if encountered, current known solution is to uninstall VirtualBox and Docker Toolbox, and then reinstall.
 "
 
@@ -49,13 +48,11 @@ Che Environment Variables:
   (OPTIONAL) CHE_HOME                              ==> Directory where Che is installed
   (OPTIONAL) CHE_LOCAL_CONF_DIR                    ==> Directory with custom Che .properties files
   (OPTIONAL) CHE_LOGS_DIR                          ==> Directory for Che output logs
-
   "
 
   USAGE="
 Usage: 
   che [-i] [-i:tag] [-p:port] [-r:ip] [-m:vm] [-d] [run | start | stop]
-
      -i,      --image        Launches Che within a Docker container using latest image
      -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
      -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
@@ -67,7 +64,6 @@ Usage:
      run                     Starts Che application server in current console
      start                   Starts Che application server in new console
      stop                    Stops Che application server
-
 The -r flag sets the DOCKER_MACHINE_HOST system environment variable. Set this to the IP address of the node
 that is running your Docker daemon. Only necessary to set this if on Linux and your browser clients are not 
 localhost, ie they are remote. This property automatically set for Che on Windows and Mac."
@@ -245,7 +241,7 @@ function get_docker_ready {
       export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
       export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
     else
-      error_exit "!!! DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation.!!!"
+      error_exit "!!! DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
       return
     fi
   elif [ "${MAC}" == "true" ]; then
@@ -307,6 +303,18 @@ function get_docker_ready {
     eval "$("${DOCKER_MACHINE}" env --shell=bash $VM)"
   fi
   ### End logic block to create / remove / start docker-machine VM
+
+  # Test to ensure user is in Docker group with appropriate permissions
+  if [ "${LINUX}" == "true" ]; then
+
+    LINUX_USER=$(whoami)
+    LINUX_GROUPS=$(groups "${LINUX_USER}")
+  
+    if [[ "${LINUX_GROUPS}" =~ "docker" ]] ; then
+    else
+      error_exit "!!! This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
+    fi
+  fi 
 
   # Docker should be available, either in a VM or natively.
   # Test to see if docker binary is installed
@@ -375,23 +383,19 @@ function strip_url {
 function print_client_connect {
   if [ "${USE_DOCKER}" == "false" ]; then 
     echo "
-
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
 After Che server has booted, you can connect your clients by:
 1. Open browser to http://localhost:${CHE_PORT}, or:
 2. Open native chromium app.
 #############################################################
-
 "
   else 
     echo "
-
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
 After Che server has booted, you can connect your clients by:
 1. Open browser to http://${host}:${CHE_PORT}, or:
 2. Open native chromium app.
 #############################################################
-
 "
 
   fi
