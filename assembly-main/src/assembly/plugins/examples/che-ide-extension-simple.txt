@@ -1,0 +1,35 @@
+<!--
+
+    Copyright (c) 2012-2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+
+###################################################
+###
+### Che IDE Extension Example
+###
+###################################################
+
+WHAT:     Creates a new IDE clickable action that prints "It's My Action!" as an event in the event console.
+DOCS:     https://eclipse-che.readme.io/docs/developing-extensions#ide-extension-example
+SOURCE:   http://github.com/che-samples/che-ide-extension.git
+PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://github.com/codenvy/che.
+
+STEPS:    1. git clone http://github.com/che-samples/che-ide-extension
+          2. cd che-ide-extension
+          3. mvn clean install
+          4. Add new extension as dependency to /che/assembly-ide-war/pom.xml
+          5. Add new extension as GWT inheritance to /che/assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml
+          6. Add new extension as a dependency to /che/pom.xml
+          7. Create new IDE with your extension: `mvn clean install` in /che/assembly-ide-war module
+          8. Create new Che assembly with new IDE: `mvn clean install` in /che/assembly-main module
+          9. In /che/assembly-main/target/eclipse-che-{version}/bin, run `che run` to launch new Che assembly.
+          10. Create a workspace in Che.
+          11. In the IDE, there will be a new menu with your action.
