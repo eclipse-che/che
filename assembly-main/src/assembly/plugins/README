@@ -1,0 +1,7 @@
+Your custom extensions and plugins are placed into one of the sub-folders. 
+
+Place your JARs or ZIPs in:
+  /:          Your plug-in will be installed everywhere.
+  /ide:       Your plug-in is an IDE extension & hosted in Che's ide.war for browser clients.
+  /che:       Your plug-in is a server-side extension & packaged into Che's ide.war for browser clients to connect.
+  /workspace: Your plug-in is a server-side extension & packaged into the workspace's ide.war installed into a workspace's machine.

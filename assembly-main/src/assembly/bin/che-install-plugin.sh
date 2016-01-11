@@ -47,13 +47,6 @@ Usage:
   MAC=false
   LINUX=false
 
-  # Specifies the location of the directory that contains 3rd-party extensions
-  EXT_DIR_REL_PATH="plugins"
-
-  # Specifies the location of the directory that contains resource files to re-build Codenvy IDE
-  EXT_RES_DIR_REL_PATH="sdk-resources"
-  EXT_RES_WORK_DIR_REL_PATH="sdk-resources/temp"
-
 }
 
 function usage {
@@ -148,26 +141,48 @@ function set_environment_variables {
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
+  # Where 3rd party extensions are staged
+  PLUGIN_DIR="${CHE_HOME}/plugins"
+  SDK_DIR="${CHE_HOME}/sdk"
+
+  PLUGIN_IDE_DIR="${PLUGIN_DIR}/ide"
+  PLUGIN_CHE_DIR="${PLUGIN_DIR}/che"
+  PLUGIN_WORKSPACE_DIR="${PLUGIN_DIR}/workspace"
+  
+  # The IDE project that will be built with the extension
+  PLUGIN_IDE_WAR_DIR="${SDK_DIR}/assembly-ide-war"
+
+  # The machine web app project that will be built with the extension
+  PLUGIN_MACHINE_WAR_DIR="${SDK_DIR}/assembly-machine-war"
 
 }
 
-
+set_environment_variables
+set +x
 # Install every 3rd-party extension into local Maven repository
-for file in $EXT_DIR_REL_PATH/*.jar
+for file in $PLUGIN_DIR/*.jar
 do
     if [ -f $file ]; then
+        cp $file $PLUGIN_IDE_DIR
+        cp $file $PLUGIN_CHE_DIR
+        cp $file $PLUGIN_WORKSPACE_DIR
         mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dfile=$file
     fi
 done
 
 # Prepare to re-build Codenvy IDE
-java -cp "sdk-tools/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir=$EXT_DIR_REL_PATH --extResourcesDir=$EXT_RES_DIR_REL_PATH
+#java -cp "${CHE_HOME}/lib/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_MACHINE_WAR_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}/temp"
+java -cp c:/codenvy/che-plugins/plugin-sdk/che-plugin-sdk-tools/target/che-plugin-sdk-tools-4.0.0-beta-8-SNAPSHOT-jar-with-dependencies.jar org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_CHE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
-# Re-build Codenvy IDE
-cd $EXT_RES_WORK_DIR_REL_PATH
-mvn clean package -Dskip-validate-sources=true
-cd ../..
-cp $EXT_RES_WORK_DIR_REL_PATH/target/*.war webapps/che.war
-rm -rf webapps/che
+# Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
+cd "${PLUGIN_IDE_WAR_DIR}/temp"
+mvn sortpom:sort
+mvn -Denforcer.skip=true clean package -Dskip-validate-sources=true
+cd "${CHE_HOME}"
+cd "${PLUGIN_IDE_WAR_DIR}/temp/target/*.war tomcat/webapps"
 
-echo Restart Codenvy IDE if it is currently running
+# Re-build the machine web application with custom extension included from workspace/ directories included. This artifact is packaged into ws-agent.zip and deployed into workspace machine.
+
+# cd ../..
+# cp $EXT_RES_WORK_DIR_REL_PATH/target/*.war webapps/che.war
+# rm -rf webapps/che
