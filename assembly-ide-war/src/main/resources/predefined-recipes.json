@@ -8,7 +8,8 @@
       "nmap",
       "maven",
       "curl",
-      "tomcat"
+      "tomcat",
+      "gwt"
     ],
     "name": "UBUNTU_JDK8",
     "permissions": {
