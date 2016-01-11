@@ -442,8 +442,8 @@ function call_catalina {
 
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-  [ -z "${JAVA_OPTS}" ]  && export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT}"
-  [ -z "${SERVER_PORT}" ]  && export SERVER_PORT=${CHE_PORT}
+  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT}"
+  export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
   if [[ "${USE_DEBUG}" == true ]]; then
