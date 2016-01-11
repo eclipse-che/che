@@ -10,30 +10,20 @@
 @REM
 
 @echo off
-rem -------------------------------------------------------------------
-rem Script to integrate 3rd-party extensions to existing Codenvy IDE.
-rem -------------------------------------------------------------------
 
-rem Specifies the location of the directory that contains 3rd-party extensions
-SET "EXT_DIR_REL_PATH=ext"
+REM Check to ensure bash is installed
+CALL bash --help > nul 2>&1
+IF %ERRORLEVEL% NEQ 0 goto setup
 
-rem Specifies the location of the directory that contains resource files to re-build Codenvy IDE
-SET "EXT_RES_DIR_REL_PATH=sdk-resources"
-SET "EXT_RES_WORK_DIR_REL_PATH=sdk-resources\temp"
+REM Launch Che and any associated docker machines, if necessary
+CALL bash --login -i "%~dp0\che-install-plugin.sh" %*
 
-rem Install every 3rd-party extension into local Maven repository
-for /R %EXT_DIR_REL_PATH% %%f in (*.jar) do (
-if exist %%f call mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dfile=%%f
-)
+goto end
 
-rem Prepare to re-build Codenvy IDE
-call java -cp "sdk-tools\che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir=%EXT_DIR_REL_PATH% --extResourcesDir=%EXT_RES_DIR_REL_PATH%
+:setup
+echo. 
+echo REQUIRED: Git bash. Please re-run Docker Toolbox Installer and add bash.exe to your PATH.
+echo           This is typically located at c:\Program Files\Git\bin.
+echo.
 
-rem Re-build Codenvy IDE
-cd %EXT_RES_WORK_DIR_REL_PATH%
-call mvn clean package -Dskip-validate-sources=true
-cd ../..
-1>nul  2>&1 copy /B /Y "%EXT_RES_WORK_DIR_REL_PATH%\target\*.war" "webapps\che.war"
-1>nul  2>&1 rmdir /S /Q webapps\che
-
-echo Restart Codenvy IDE if it is currently running
+:end
