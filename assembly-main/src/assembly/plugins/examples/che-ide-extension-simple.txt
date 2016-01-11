@@ -28,7 +28,7 @@ STEPS:    1. git clone http://github.com/che-samples/che-ide-extension
           4. Add new extension as dependency to /che/assembly-ide-war/pom.xml
           5. Add new extension as GWT inheritance to /che/assembly-ide-war/src/main/resources/org/eclipse/che/ide/IDE.gwt.xml
           6. Add new extension as a dependency to /che/pom.xml
-          7. Create new IDE with your extension: `mvn clean install` in /che/assembly-ide-war module
+          7. Create new IDE with your extension: `mvn -Denforcer.skip=true clean install` in /che/assembly-ide-war module
           8. Create new Che assembly with new IDE: `mvn clean install` in /che/assembly-main module
           9. In /che/assembly-main/target/eclipse-che-{version}/bin, run `che run` to launch new Che assembly.
           10. Create a workspace in Che.
