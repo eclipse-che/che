@@ -35,6 +35,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
+import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
@@ -59,6 +60,7 @@ public class ApiModule extends AbstractModule {
         bind(ApiInfoService.class);
 
         bind(AuthenticationService.class);
+        bind(EverrestDownloadFileResponseFilter.class);
         bind(ETagResponseFilter.class);
 
 //        bind(DockerVersionVerifier.class).asEagerSingleton();
