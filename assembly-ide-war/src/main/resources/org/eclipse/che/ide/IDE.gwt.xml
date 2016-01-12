@@ -47,6 +47,7 @@
     <inherits name='org.eclipse.che.ide.extension.maven.Maven'/>
     <inherits name='org.eclipse.che.ide.ext.gwt.GWT'/>
     <inherits name='org.eclipse.che.ide.ext.dashboard.Dashboard'/>
+    <inherits name='org.eclipse.che.ide.ext.ssh.MachineSsh'/>
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
     <inherits name='org.eclipse.che.ide.ext.github.GitHub'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
