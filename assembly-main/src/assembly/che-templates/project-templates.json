@@ -21,28 +21,33 @@
     "commands": [
       {
         "name": "Build",
-        "type": "maven",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war"
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war",
+        "previewUrl": ""
       },
       {
         "name": "Run Tomcat",
-        "type": "tomcat",
-        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run"
+        "type": "custom",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
+        "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
       },
       {
         "name": "Stop Tomcat",
-        "type": "tomcat",
-        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run"
+        "type": "custom",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
+        "previewUrl": ""
       },
       {
         "name": "build and run",
-        "type": "maven",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run"
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
+        "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
       },
       {
         "name": "debug",
-        "type": "",
-        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run"
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
+        "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
       }
     ],
     "links": [],
@@ -75,8 +80,9 @@
     "commands": [
       {
         "name": "build and run",
-        "type": "Make",
-        "commandLine": "cd ${current.project.path} && make && ./a.out"
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && make && ./a.out",
+        "previewUrl": ""
       }
     ],
     "links": [],
@@ -108,13 +114,15 @@
     "commands": [
       {
         "name": "install dependencies",
-        "type": "",
-        "commandLine": "cd ${current.project.path} && npm install && bower install"
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && npm install && bower install",
+        "previewUrl": ""
       },
       {
         "name": "run",
-        "type": "",
-        "commandLine": "grunt serve"
+        "type": "custom",
+        "commandLine": "grunt serve",
+        "previewUrl": "http://${machine.hostname}:${machine.port.9000}"
       }
     ],
     "links": [],
@@ -147,25 +155,28 @@
     "commands": [
       {
         "name": "start apache",
-        "type": "",
-        "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log"
+        "type": "custom",
+        "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+        "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
       },
       {
         "name": "stop apache",
-        "type": "",
-        "commandLine": "sudo service apache2 stop"
+        "type": "custom",
+        "commandLine": "sudo service apache2 stop",
+        "previewUrl": ""
       },
       {
         "name": "restart apache",
-        "type": "",
-        "commandLine": "sudo service apache2 restart"
+        "type": "custom",
+        "commandLine": "sudo service apache2 restart",
+        "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
       }
     ],
     "links": [],
     "category": "Samples",
     "tags": [
       "apache",
-      "php",
+      "php"
     ]
   },
   {
@@ -190,20 +201,22 @@
     "commands": [
       {
         "name": "build",
-        "type": "maven",
-        "commandLine": "mvn -f ${current.project.path} clean install"
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install",
+        "previewUrl": ""
       },
       {
         "name": "run",
-        "type": "maven",
-        "commandLine": "mvn -f ${current.project.path} clean install && java -jar ${current.project.path}/target/*.jar"
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && java -jar ${current.project.path}/target/*.jar",
+        "previewUrl": ""
       }
     ],
     "links": [],
     "category": "Samples",
     "tags": [
       "java",
-      "maven",
+      "maven"
     ]
   },
   {
@@ -228,13 +241,15 @@
     "commands": [
       {
         "name": "update dependencies",
-        "type": "",
-        "commandLine": "cd ${current.project.path} && dnu restore"
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && dnu restore",
+        "previewUrl": ""
       },
       {
         "name": "run",
-        "type": "",
-        "commandLine": "dnx -p ${current.project.path}/project.json run"
+        "type": "custom",
+        "commandLine": "dnx -p ${current.project.path}/project.json run",
+        "previewUrl": ""
       }
     ],
     "links": [],
@@ -267,13 +282,15 @@
     "commands": [
       {
         "name": "update dependencies",
-        "type": "",
-        "commandLine": "cd ${current.project.path} && dnu restore"
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && dnu restore",
+        "previewUrl": ""
       },
       {
         "name": "run",
-        "type": "",
-        "commandLine": "dnx -p ${current.project.path}/project.json web"
+        "type": "custom",
+        "commandLine": "dnx -p ${current.project.path}/project.json web",
+        "previewUrl": "http://${machine.hostname}:${machine.port.5004}"
       }
     ],
     "links": [],
