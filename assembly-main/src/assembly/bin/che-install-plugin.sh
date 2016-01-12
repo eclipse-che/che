@@ -158,7 +158,13 @@ function set_environment_variables {
 }
 
 set_environment_variables
-set +x
+
+echo
+echo "#################################################################"
+echo "### CHE SDK: Installing each extension into local maven"
+echo "#################################################################"
+echo
+
 # Install every 3rd-party extension into local Maven repository
 for file in $PLUGIN_DIR/*.jar
 do
@@ -170,18 +176,46 @@ do
     fi
 done
 
+echo
+echo "#################################################################"
+echo "### CHE SDK: Adding client-side extensions as deps to IDE web app"
+echo "#################################################################"
+echo
+
+# Prepare to re-build Codenvy IDE
+#java -cp "${CHE_HOME}/lib/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_MACHINE_WAR_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}/temp"
+java -cp c:/codenvy/che-plugins/plugin-sdk/che-plugin-sdk-tools/target/che-plugin-sdk-tools-4.0.0-beta-8-SNAPSHOT-jar-with-dependencies.jar org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
+
+echo
+echo "#################################################################"
+echo "### CHE SDK: Adding server-side extensions as deps to IDE web app"
+echo "#################################################################"
+echo
+
 # Prepare to re-build Codenvy IDE
 #java -cp "${CHE_HOME}/lib/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_MACHINE_WAR_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}/temp"
 java -cp c:/codenvy/che-plugins/plugin-sdk/che-plugin-sdk-tools/target/che-plugin-sdk-tools-4.0.0-beta-8-SNAPSHOT-jar-with-dependencies.jar org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_CHE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
+
+echo
+echo "#################################################################"
+echo "### CHE SDK: Compiling new IDE web app with your plugins"
+echo "#################################################################"
+echo
 
 # Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
 cd "${PLUGIN_IDE_WAR_DIR}/temp"
 mvn sortpom:sort
 mvn -Denforcer.skip=true clean package -Dskip-validate-sources=true
 cd "${CHE_HOME}"
-cd "${PLUGIN_IDE_WAR_DIR}/temp/target/*.war tomcat/webapps"
+cp "${PLUGIN_IDE_WAR_DIR}/temp/target/*.war tomcat/webapps/ide.war"
 
 # Re-build the machine web application with custom extension included from workspace/ directories included. This artifact is packaged into ws-agent.zip and deployed into workspace machine.
+
+echo
+echo "#################################################################"
+echo "### CHE SDK: Restart Che - it will start with your plugins"
+echo "#################################################################"
+echo
 
 # cd ../..
 # cp $EXT_RES_WORK_DIR_REL_PATH/target/*.war webapps/che.war

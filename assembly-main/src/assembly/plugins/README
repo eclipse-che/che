@@ -1,7 +1,19 @@
-Your custom extensions and plugins are placed into one of the sub-folders. 
+This is the staging directory for extensions and plug-ins. Che packages extensions and plug-ins into 
+Web application packages that are then deployed by Che. Your plug-ins and extensions are placed into
+an appropriate directory, which indicates which package the extension will be packaged into. Run 
+bin/che-intsall-plugin create the new packages.
 
-Place your JARs or ZIPs in:
-  /:          Your plug-in will be installed everywhere.
-  /ide:       Your plug-in is an IDE extension & hosted in Che's ide.war for browser clients.
-  /che:       Your plug-in is a server-side extension & packaged into Che's ide.war for browser clients to connect.
-  /workspace: Your plug-in is a server-side extension & packaged into the workspace's ide.war installed into a workspace's machine.
+Place your plug-in artifacts (JARs / ZIPs) in:
+  /ide       : Your plug-in is an IDE extension & hosted in Che's ide.war for browser clients.
+  /che       : Your plug-in is a server-side extension & packaged into Che's ide.war for browser clients to connect.
+  /workspace : Your plug-in is a server-side extension & packaged into the workspace's ide.war installed into a workspace's machine.
+  /          : Your plug-in will be installed everywhere. (Not Recommended)
+
+You extension is compiled into one of two web applications. One application is deployed into the Che server.
+The second web application is deployed as part of the workspace agent inside of each machine powering a workspace. While
+you can deploy your plug-in into both locations, this can be costly as you are generated two substantial web applications.
+It is recommended for you to place your extension into the folder that indicates the type of extension it is. 
+
+Run che-install-plugin from the /bin directory to create new web apps that include your extensions. The resulting web app
+packages are copied into your assembly, overwriting the existing web app packages that Che is using. You can use the
+--output flag to place the generated packages into a different location.
