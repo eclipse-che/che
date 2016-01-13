@@ -205,21 +205,28 @@ if [ "${USE_HELP}" == "false" ]; then
 
   if [ "${SKIP_DEPENDENCIES}" == "false" ]; then
 
-    echo_stage "CHE SDK: Adding IDE extensions as dependencies"
+    if [ "${SKIP_WSMASTER}" == "false" ]; then
 
-    # Prepare to re-build Codenvy IDE
-    java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
+      echo_stage "CHE SDK: Adding IDE extensions as dependencies"
 
-    echo_stage "CHE SDK: Adding extensions as dependencies to ws-master"
+      # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
+      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
-    # Prepare to re-build Codenvy IDE
-    java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSMASTER_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
+      echo_stage "CHE SDK: Adding extensions as dependencies to ws-master"
 
-    echo_stage "CHE SDK: Adding extensions as dependencies to ws-agent"
+      # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
+      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSMASTER_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
-    # Prepare to re-build Codenvy IDE
-    java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSAGENT_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}"
+    fi
 
+    if [ "${SKIP_WSAGENT}" == "false" ]; then
+  
+      echo_stage "CHE SDK: Adding extensions as dependencies to ws-agent"
+  
+      # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
+      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSAGENT_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}"
+
+    fi
   fi
 
   if [ "${SKIP_WSMASTER}" == "false" ]; then
