@@ -61,14 +61,15 @@ Che Environment Variables:
   USAGE="
 Usage: 
   che [OPTIONS] [run | start | stop]
-     -i,      --image        Launches Che within a Docker container using latest image
-     -i:tag,  --image:tag    Launches Che within a Docker container using specific image tag
-     -p:port, --port:port    Port that Che server will use for HTTP requests; default=8080
-     -r:ip,   --remote:ip    If Che clients are not localhost, set to IP address of Che server
-     -m:vm,   --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default
-     -s,      --suppress     Do not print browser client connection information
-     -h,      --help         Show this help
-     -d,      --debug        Use debug mode (prints command line options + app server debug)
+     -i,        --image        Launches Che within a Docker container using latest image
+     -i:tag,    --image:tag    Launches Che within a Docker container using specific image tag
+     -p:port,   --port:port    Port that Che server will use for HTTP requests; default=8080
+     -r:ip,     --remote:ip    If Che clients are not localhost, set to IP address of Che server
+     -m:vm,     --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default
+     -s:client, --skip:client  Do not print browser client connection information
+     -s:uid,    --skip:uid     Do not enforce UID=1000 for Docker
+     -h,        --help         Show this help
+     -d,        --debug        Use debug mode (prints command line options + app server debug)
      run                     Starts Che application server in current console
      start                   Starts Che application server in new console
      stop                    Stops Che application server
@@ -87,6 +88,7 @@ localhost, ie they are remote. This property automatically set for Che on Window
   VM=${CHE_DOCKER_MACHINE_NAME:-default}
   USE_DEBUG=false
   PRINT_CLIENT_CONNECT=true
+  CHECK_DOCKER_UID=true
 
   # Sets value of operating system
   WIN=false
@@ -134,8 +136,17 @@ function parse_command_line {
         VM="${command_line_option#*:}"
       fi
     ;;
-    -s|--suppress)
-      PRINT_CLIENT_CONNECT=false
+    -s:*|--skip:*)
+      if [ "${command_line_option#*:}" != "" ]; then
+        case "${command_line_option#*:}" in
+          client)
+            PRINT_CLIENT_CONNECT=false
+          ;;
+          uid)
+            CHECK_DOCKER_UID=false
+          ;;
+        esac
+      fi
     ;;
     -h|--help)
       USE_HELP=true
@@ -162,6 +173,7 @@ function parse_command_line {
     echo "CHE_IP: \"${CHE_IP}\""
     echo "CHE_DOCKER_MACHINE: ${VM}"
     echo "PRINT_CLIENT_CONNECT: ${PRINT_CLIENT_CONNECT}"
+    echo "CHECK_DOCKER_UID: ${CHECK_DOCKER_UID}"
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -320,16 +332,17 @@ function get_docker_ready {
     LINUX_GROUPS=$(groups "${LINUX_USER}")
     LINUX_UID=$(id -u "${LINUX_USER}")
 
-    if [[ "${LINUX_GROUPS}" =~ "docker" ]] ; then
+    if [[ "${CHECK_DOCKER_UID}" == "true" ]] ; then
+      if [[ "${LINUX_GROUPS}" =~ "docker" ]] ; then
 
-      if [[ "${LINUX_UID}" != "1000" ]] ; then
-        error_exit "!!! This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
+        if [[ "${LINUX_UID}" != "1000" ]] ; then
+          error_exit "!!! This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
+        fi
+
+      else
+        error_exit "!!! This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
       fi
-
-    else
-      error_exit "!!! This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
     fi
-
 
   fi 
 
