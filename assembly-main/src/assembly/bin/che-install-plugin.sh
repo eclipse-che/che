@@ -232,11 +232,11 @@ if [ "${USE_HELP}" == "false" ]; then
     # Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
     cd "${PLUGIN_IDE_WAR_DIR}/temp"
     mvn sortpom:sort
-    mvn -Denforcer.skip=true clean package install -Dskip-validate-sources=true
+    mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
     cd "${CHE_HOME}"
 
     if [ "${SKIP_UPDATE}" == "false" ]; then
-      cp "${PLUGIN_IDE_WAR_DIR}/temp/target/*.war tomcat/webapps/ide.war"
+      cp -r "${PLUGIN_IDE_WAR_DIR}"/temp/target/*.war tomcat/webapps/ide.war
     fi
   fi 
 
@@ -248,19 +248,18 @@ if [ "${USE_HELP}" == "false" ]; then
     # Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
     cd "${PLUGIN_MACHINE_WAR_DIR}/temp"
     mvn sortpom:sort
-    mvn -Denforcer.skip=true clean package install -Dskip-validate-sources=true
+    mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
 
     echo_stage "CHE SDK: Packaging ws-agent web app and Tomcat into ws-agent.zip."
 
     cd "${PLUGIN_MACHINE_SERVER_DIR}"
-    mvn -Denforcer.skip=true clean package install -Dskip-validate-sources=true
+    mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
     cd "${CHE_HOME}"
 
 
     if [ "${SKIP_UPDATE}" == "false" ]; then
-      cp "${PLUGIN_MACHINE_SERVER_DIR}/target/*.zip lib/ws-agent.zip"
+      cp -r "${PLUGIN_MACHINE_SERVER_DIR}"/target/*.zip lib/ws-agent.zip
     fi
-
   fi  
 
   if [ "${ASSEMBLY}" == "true" ]; then
@@ -302,12 +301,18 @@ if [ "${USE_HELP}" == "false" ]; then
     ${CHE_HOME}/lib/ws-agent.zip"
   fi
 
-  if [ "${SKIP_UPDATE}" == "false" ]; then
-    echo "Restart this Che assembly to see your plugins."
-  fi
-
   if [ "${ASSEMBLY}" == "true" ]; then
     echo "New Che Assembly 
     ${CHE_HOME}/plugins/assembly/"
   fi
+
+  echo 
+
+  if [ "${SKIP_UPDATE}" == "false" ]; then
+    echo "You can start this Che assemby to see your plugins."
+  fi
+  if [ "${ASSEMBLY}" == "false" ]; then
+    echo "You can start the new Che assembly to see your plugins."
+  fi
+
 fi
