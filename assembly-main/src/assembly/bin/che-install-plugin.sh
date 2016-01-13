@@ -209,19 +209,16 @@ if [ "${USE_HELP}" == "false" ]; then
 
     # Prepare to re-build Codenvy IDE
     java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
-    #java -cp c:/codenvy/che-plugins/plugin-sdk/che-plugin-sdk-tools/target/che-plugin-sdk-tools-4.0.0-beta-8-SNAPSHOT-jar-with-dependencies.jar org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
     echo_stage "CHE SDK: Adding extensions as dependencies to ws-master"
 
     # Prepare to re-build Codenvy IDE
     java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSMASTER_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
-    #java -cp c:/codenvy/che-plugins/plugin-sdk/che-plugin-sdk-tools/target/che-plugin-sdk-tools-4.0.0-beta-8-SNAPSHOT-jar-with-dependencies.jar org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_CHE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
     echo_stage "CHE SDK: Adding extensions as dependencies to ws-agent"
 
     # Prepare to re-build Codenvy IDE
     java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSAGENT_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}"
-    #java -cp c:/codenvy/che-plugins/plugin-sdk/che-plugin-sdk-tools/target/che-plugin-sdk-tools-4.0.0-beta-8-SNAPSHOT-jar-with-dependencies.jar org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_CHE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
   fi
 
