@@ -126,6 +126,13 @@
             <exclude>**/target/**</exclude>
             </excludes>
         </fileSet>
+        <fileSet>
+            <directory>${project.parent.basedir}/assembly-main</directory>
+            <outputDirectory>sdk/assembly-main</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
+        </fileSet>
     </fileSets>
       <files>
         <file>
