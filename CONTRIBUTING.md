@@ -37,11 +37,21 @@ This project uses GitHub to track ongoing development and issues.  Please note, 
 
 - [https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che)
 
-Areas To Contribute
---------------------
-The strength of Che is entirely dependent upon the contributions and involvement of the broader community. We definitely can use your help. The areas where new contributors can get involved:
-1. Expanding our documentation at eclipse.org/che, especially around examples for interacting with the REST services and tutorials around building advanced extensions. You will need a password to our README site as the documentation is not under version control. Please write at che-dev@eclipse.org or make a direct edit to the README page.
-2. Speaking at agile, development, and DevOps conferences about Eclipse Che. We have stickers and other promotions that you can take to events.
-3. Add to the certified stack library, templates, and samples that are available with Che. We are interested in Scala, Swift, Android, Rust, and JavaScript improvements.  It is possible to make pull requests to the Dockerfiles and the template JSONs.
-4. Begin reviewing the backlog of known bugs and identifying issues to work on. Please write to che-dev@eclipse.org or hop on the #eclipseche IRC channel to talk about how you might approach solving issues.
-5. Contribute new plug-ins or enhancements to existing ones.
+Get Involved!
+--------------
+#### Report Bugs and Enhancements
+* Download one of the latest milestone builds [called nightly](http://eclipse.org/che). Take it for a test drive before the final release and report any bugs you find in GitHub.
+* [Report enhancements](https://github.com/codenvy/che/issues). Got an idea for a killer feature? Or maybe something you use often could use some tweaking? Post an enhancement request!
+
+#### Fix Bugs or Implement Enhancements
+* Is there some bug that really bothers you? Instead of just reporting it, fix it.
+* Hope on che-dev@eclipse.org or #eclipseche to discuss feature enhancements and the branching process.
+
+#### Become a Committer
+* Committers gain additional rights around managing the repositories and setting the release scope.
+* Ongoing plug-in contributors are also welcome to be elevated as committers.
+
+#### Promote Eclipse Che
+* Let other people know that your application is [built on Eclipse](https://eclipse.org/artwork).
+* Do you have a success story about Eclipse? Send us a story and we'll help you spread the word.
+* Present Che at agile, developer, and DevOps conferences. Contact us for free swag to take to the event.
