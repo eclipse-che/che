@@ -20,19 +20,19 @@
     },
     "commands": [
       {
-        "name": "Build",
+        "name": "build",
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war",
         "previewUrl": ""
       },
       {
-        "name": "Run Tomcat",
+        "name": "run tomcat",
         "type": "custom",
         "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
         "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
       },
       {
-        "name": "Stop Tomcat",
+        "name": "stop tomcat",
         "type": "custom",
         "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
         "previewUrl": ""
@@ -180,11 +180,11 @@
     ]
   },
   {
-    "name": "desktop-java-simple",
-    "displayName": "desktop-java-simple",
-    "path": "/desktop-java-simple",
+    "name": "console-java-simple",
+    "displayName": "console-java-simple",
+    "path": "/console-java-simple",
     "description": "A hello world Java application.",
-    "projectType": "blank",
+    "projectType": "maven",
     "mixins": [],
     "attributes": {
       "language": [
