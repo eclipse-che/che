@@ -23,31 +23,41 @@
         "name": "build",
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "run tomcat",
         "type": "custom",
         "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
-        "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+        }
       },
       {
         "name": "stop tomcat",
         "type": "custom",
         "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "build and run",
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
-        "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+        }
       },
       {
         "name": "debug",
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
-        "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+        }
       }
     ],
     "links": [],
@@ -82,7 +92,9 @@
         "name": "build and run",
         "type": "custom",
         "commandLine": "cd ${current.project.path} && make && ./a.out",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       }
     ],
     "links": [],
@@ -116,13 +128,17 @@
         "name": "install dependencies",
         "type": "custom",
         "commandLine": "cd ${current.project.path} && npm install && bower install",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "run",
         "type": "custom",
         "commandLine": "grunt serve",
-        "previewUrl": "http://${machine.hostname}:${machine.port.9000}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.9000}"
+        }
       }
     ],
     "links": [],
@@ -157,19 +173,25 @@
         "name": "start apache",
         "type": "custom",
         "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
-        "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
+        }
       },
       {
         "name": "stop apache",
         "type": "custom",
         "commandLine": "sudo service apache2 stop",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "restart apache",
         "type": "custom",
         "commandLine": "sudo service apache2 restart",
-        "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
+        }
       }
     ],
     "links": [],
@@ -203,13 +225,17 @@
         "name": "build",
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "run",
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && java -jar ${current.project.path}/target/*.jar",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       }
     ],
     "links": [],
@@ -243,13 +269,17 @@
         "name": "update dependencies",
         "type": "custom",
         "commandLine": "cd ${current.project.path} && dnu restore",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "run",
         "type": "custom",
         "commandLine": "dnx -p ${current.project.path}/project.json run",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       }
     ],
     "links": [],
@@ -284,13 +314,17 @@
         "name": "update dependencies",
         "type": "custom",
         "commandLine": "cd ${current.project.path} && dnu restore",
-        "previewUrl": ""
+        "attributes": {
+          "previewUrl": ""
+        }
       },
       {
         "name": "run",
         "type": "custom",
         "commandLine": "dnx -p ${current.project.path}/project.json web",
-        "previewUrl": "http://${machine.hostname}:${machine.port.5004}"
+        "attributes": {
+          "previewUrl": "http://${machine.hostname}:${machine.port.5004}"
+        }
       }
     ],
     "links": [],
