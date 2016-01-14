@@ -14,6 +14,7 @@ import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
@@ -26,5 +27,7 @@ public class ApiServletModule extends ServletModule {
         filter("/ext/*").through(SingleEnvironmentFilter.class);
 //        serve("/ext/*").with(GuiceEverrestServlet.class);
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+
+        install(new BasicSwaggerConfigurationModule());
     }
 }

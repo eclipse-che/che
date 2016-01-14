@@ -40,6 +40,15 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
+            <outputDirectory>tomcat/webapps</outputDirectory>
+            <outputFileNameMapping>swagger.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.swagger:che-swagger-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>ws-agent.zip</outputFileNameMapping>
             <includes>
