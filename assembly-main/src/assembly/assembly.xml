@@ -59,6 +59,15 @@
                 </excludes>
             </unpackOptions>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>sdk</outputDirectory>
+            <outputFileNameMapping>che-plugin-sdk-tools.jar</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
@@ -95,6 +104,34 @@
               <include>LICENSE</include>
               <include>README</include>
            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.parent.basedir}/assembly-machine-war</directory>
+            <outputDirectory>sdk/assembly-machine-war</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.parent.basedir}/assembly-machine-server</directory>
+            <outputDirectory>sdk/assembly-machine-server</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.parent.basedir}/assembly-ide-war</directory>
+            <outputDirectory>sdk/assembly-ide-war</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.parent.basedir}/assembly-main</directory>
+            <outputDirectory>sdk/assembly-main</outputDirectory>
+            <excludes>
+            <exclude>**/target/**</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
       <files>
