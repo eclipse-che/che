@@ -301,7 +301,7 @@ function get_docker_ready {
       echo -e "Creating docker machine named ${GREEN}$VM${NC}... Please be patient, this takes a couple minutes the first time."
       "${DOCKER_MACHINE}" rm -f $VM &> /dev/null || true
       rm -rf ~/.docker/machine/machines/$VM
-      "${DOCKER_MACHINE}" create -d virtualbox $VM &> /dev/null || true
+      "${DOCKER_MACHINE}" create -d virtualbox --virtualbox-host-dns-resolver $VM &> /dev/null || true
 
       # Seems that sometimes you have to regenerate certs even when creating new machine on windows
       yes | "${DOCKER_MACHINE}" regenerate-certs $VM &> /dev/null  || true
