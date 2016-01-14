@@ -86,8 +86,8 @@
             <outputDirectory>plugins</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/assembly/che-templates</directory>
-            <outputDirectory>tomcat/che-templates</outputDirectory>
+            <directory>${project.basedir}/src/assembly/templates</directory>
+            <outputDirectory>templates</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/webapps</directory>
