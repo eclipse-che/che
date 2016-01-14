@@ -119,7 +119,7 @@ function parse_command_line {
     echo "SKIP_DEPENDENCIES: ${SKIP_DEPENDENCIES}"
     echo "SKIP_UPDATE: ${SKIP_UPDATE}"
     echo "SKIP_WSMASTER: ${SKIP_WSMASTER}"
-    echo "SKIP_WSAGENT: ${SKIP_WSMAGENT}"
+    echo "SKIP_WSAGENT: ${SKIP_WSAGENT}"
     echo "USE_HELP: ${USE_HELP}"
     echo "USE_DEBUG: ${USE_DEBUG}"
   fi
