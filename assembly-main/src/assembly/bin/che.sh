@@ -585,34 +585,6 @@ if [ "${USE_HELP}" == "false" ] && [ "${JUMP_TO_END}" == "false" ]; then
     echo "#############################################################"
     echo 
 
-    WIN_CHE_DIR_ONE="${USERPROFILE}"/AppData/Local/che
-    WIN_CHE_DIR_TWO="${USERPROFILE}"/che
-    CHE_AGENT_FILE_SOURCE="${CHE_HOME}"/lib/ws-agent.zip
-    CHE_AGENT_FILE_DEST="${WIN_CHE_DIR_ONE}"/ext-server.zip
-    CHE_TERMINAL_FILE_SOURCE="${CHE_HOME}"/lib/terminal
-    CHE_TERMINAL_FILE_DEST="${WIN_CHE_DIR_ONE}"
-    CHE_TERMINAL_FILE_ONE_SOURCE="${CHE_HOME}"/lib/terminal/index.html
-    CHE_TERMINAL_FILE_ONE_DEST="${WIN_CHE_DIR_ONE}"/terminal/index.html
-    CHE_TERMINAL_FILE_TWO_SOURCE="${CHE_HOME}"/lib/terminal/term.js
-    CHE_TERMINAL_FILE_TWO_DEST="${WIN_CHE_DIR_ONE}"/terminal/term.js
-    CHE_TERMINAL_FILE_THREE_SOURCE="${CHE_HOME}"/lib/terminal/terminal
-    CHE_TERMINAL_FILE_THREE_DEST="${WIN_CHE_DIR_ONE}"/terminal/terminal
-
-    # Make directory and any parent directories if doesn't exist
-    mkdir -p "${WIN_CHE_DIR_ONE}"
-    mkdir -p "${WIN_CHE_DIR_TWO}"/projects
-    mkdir -p "${WIN_CHE_DIR_TWO}"/vfs
-
-    if [[ "${CHE_AGENT_FILE_SOURCE}" -nt "${CHE_AGENT_FILE_DEST}" ]]; then
-      echo "Copying Che's workspace agent server to %userprofile%/AppData/Local/che"
-      cp "${CHE_AGENT_FILE_SOURCE}" "${CHE_AGENT_FILE_DEST}"
-    fi
-
-    if [[ "${CHE_TERMINAL_FILE_ONE_SOURCE}" -nt "${CHE_TERMINAL_FILE_ONE_DEST}" ]] || [[ "${CHE_TERMINAL_FILE_TWO_SOURCE}" -nt "${CHE_TERMINAL_FILE_TWO_DEST}" ]] || [[ "${CHE_TERMINAL_FILE_THREE_SOURCE}" -nt "${CHE_TERMINAL_FILE_THREE_DEST}" ]] ; then
-      echo "Copying Che's terminal client to %userprofile%/AppData/Local/che"
-      cp -r "${CHE_TERMINAL_FILE_SOURCE}" "${CHE_TERMINAL_FILE_DEST}"
-    fi
-
   fi 
   
   ### Variables are all set.  Get Docker ready
