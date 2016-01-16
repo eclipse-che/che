@@ -57,18 +57,22 @@ bin/che.bat [ start | stop ]
 Che will be available at ```localhost:8080```
 
 
-### Sub-Projects:
+### Repositories:
+* **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
+* **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-core**:                [Core components] (http://github.com/codenvy/che-core)
 * **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
 * **che-dashboard**:           [Workspace, project, user mgmt] (http://github.com/codenvy/dashboard)
-* **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
-* **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
+* **che-websocket-terminal**:  [Embedded terminal for workspaces] (http://github.com/codenvy/che-websocket-terminal)
 * **che-installer**:           [Che installation packages] (http://github.com/codenvy/che-installer)
 * **che-tutorials**:           [SDK examples and tutorials] (http://github.com/codenvy/che-tutorials)
+* **che-samples**:             [Templates and samples loaded into the IDE] (http://github.com/che-samples)
+* **che-site**:                [Che web site content] (http://git.eclipse.org/c/www.eclipse.org/che.git)
+* **che-specifications**:      [Roadmap and technical plans for the future] (http://github.com/codenvy/che-specifications)
 * **cli**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
-* **eclipse-plugin**:          [An Eclipse plug-in for running Che projects] (http://github.com/codenvy/eclipse-plugin)
 
 ### Engage
 * **Contribute:** We accept pull requests. Please see [how to contribute] (https://github.com/codenvy/che/blob/master/CONTRIBUTING.md).
-* **Support:** You can report bugs and contribute [che-dev@eclipse.org](email:che-dev@eclipse.org). 
+* **Support:** You can report bugs using GitHub issues
+* **Developers:** Plug-in developers can get API help at [che-dev@eclipse.org](email:che-dev@eclipse.org). 
 * **Website:** [eclipse.org/che](https://eclipse.org/che)
