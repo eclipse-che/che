@@ -102,9 +102,7 @@ function usage {
 
 function error_exit {
   echo
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "$1"
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   echo "$WRONG $CHE_VARIABLES $USAGE"
   JUMP_TO_END=true
 }
@@ -459,7 +457,6 @@ function call_catalina {
       error_exit "Che requires Java version 1.8 or higher. We found a lower version."
       return
   fi
-echo "here"
 
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
