@@ -135,7 +135,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "grunt serve",
+        "commandLine": "cd ${current.project.path} && grunt serve",
         "attributes": {
           "previewUrl": "http://${machine.hostname}:${machine.port.9000}"
         }
