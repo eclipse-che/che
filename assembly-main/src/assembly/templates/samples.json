@@ -38,7 +38,7 @@
       {
         "name": "stop tomcat",
         "type": "custom",
-        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh stop",
         "attributes": {
           "previewUrl": ""
         }
