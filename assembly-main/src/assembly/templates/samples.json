@@ -32,7 +32,7 @@
         "type": "custom",
         "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+          "previewUrl": "http://${server.port.8080}"
         }
       },
       {
@@ -48,7 +48,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+          "previewUrl": "http://${server.port.8080}"
         }
       },
       {
@@ -56,7 +56,7 @@
         "type": "mvn",
         "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.8080}"
+          "previewUrl": "http://${server.port.8080}"
         }
       }
     ],
@@ -137,7 +137,7 @@
         "type": "custom",
         "commandLine": "cd ${current.project.path} && grunt serve",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.9000}"
+          "previewUrl": "http://${server.port.9000}"
         }
       }
     ],
@@ -174,7 +174,7 @@
         "type": "custom",
         "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
+          "previewUrl": "http://${server.port.80}/${current.project.relpath}"
         }
       },
       {
@@ -190,7 +190,7 @@
         "type": "custom",
         "commandLine": "sudo service apache2 restart",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.80}/${current.project.relpath}"
+          "previewUrl": "http://${server.port.80}/${current.project.relpath}"
         }
       }
     ],
@@ -323,7 +323,7 @@
         "type": "custom",
         "commandLine": "dnx -p ${current.project.path}/project.json web",
         "attributes": {
-          "previewUrl": "http://${machine.hostname}:${machine.port.5004}"
+          "previewUrl": "http://${server.port.5004}"
         }
       }
     ],
