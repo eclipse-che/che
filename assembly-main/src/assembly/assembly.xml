@@ -103,7 +103,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/assembly/conf</directory>
+            <directory>${project.parent.basedir}/assembly-ide-war/src/main/webapp/WEB-INF/classes/codenvy</directory>
             <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
