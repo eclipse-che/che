@@ -35,9 +35,6 @@
         <tag>HEAD</tag>
         <url>https://github.com/codenvy/che</url>
     </scm>
-    <properties>
-        <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
-    </properties>
     <repositories>
         <repository>
             <id>codenvy-public-repo</id>
