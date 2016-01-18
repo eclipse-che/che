@@ -21,9 +21,6 @@
     <artifactId>assembly-machine-server</artifactId>
     <packaging>pom</packaging>
     <name>Che Assembly Machine Plugins :: Server</name>
-    <properties>
-        <org.apache.tomcat.version>7.0.50</org.apache.tomcat.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.codenvy.resources</groupId>
