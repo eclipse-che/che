@@ -439,15 +439,20 @@ function call_catalina {
     return
   fi
 
+  if [ -z "${JAVA_HOME}" ]; then
+    error_exit "JAVA_HOME is not set. Please set to directory of JVM or JRE."
+    return
+  fi
+
   # Test to see that Java is installed and working
-  java &>/dev/null || JAVA_EXIT=$? || true
+  "${JAVA_HOME}"/bin/java &>/dev/null || JAVA_EXIT=$? || true
   if [ "${JAVA_EXIT}" != "1" ]; then
     error_exit "We could not find a working Java JVM. java command fails."
     return
   fi
 
   # Che requires Java version 1.8 or higher. 
-  JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  JAVA_VERSION=$(eval "${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
   if [[ "$JAVA_VERSION" < "1.8" ]]; then
       error_exit "Che requires Java version 1.8 or higher. We found a lower version."
       return
@@ -561,7 +566,7 @@ function launch_che_server {
     echo -e "Launching Che app server inside the container named ${GREEN}che${NC}."
 
     # For some reason, launching tomcat with the start option in a docker container does not run successfully - only launch with run action
-    "${DOCKER}" exec -it che bash -c 'true && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh -s run' || DOCKER_EXIT=$? || true    
+    "${DOCKER}" exec -it che bash -c 'true && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh --skip:client run' || DOCKER_EXIT=$? || true    
   fi
 }
 
