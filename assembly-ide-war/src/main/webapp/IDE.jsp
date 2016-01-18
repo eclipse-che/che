@@ -16,7 +16,7 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Eclipse Che</title>
-    <link rel="shortcut icon" href="/che/_app/favicon.ico"/>
+    <link rel="shortcut icon" href="/ide/_app/favicon.ico"/>
     <link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript" language="javascript">
