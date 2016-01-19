@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.server;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
@@ -28,6 +28,11 @@ public class ApiServletModule extends ServletModule {
 //        serve("/ext/*").with(GuiceEverrestServlet.class);
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
 
-        install(new BasicSwaggerConfigurationModule());
+        bind(io.swagger.jaxrs.config.DefaultJaxrsConfig.class).asEagerSingleton();
+        serve("/swaggerinit").with(io.swagger.jaxrs.config.DefaultJaxrsConfig.class, ImmutableMap
+                .of("api.version", "1.0",
+                    "swagger.api.title", "Eclipse Che",
+                    "swagger.api.basepath", "/ide/ext"
+                   ));
     }
 }
