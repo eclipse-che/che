@@ -95,6 +95,7 @@ public class MachineModule extends AbstractModule {
         bind(WSocketEventBusClient.class).asEagerSingleton();
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
+        bind(org.eclipse.che.ide.ext.java.server.ApiEndpointAccessibilityChecker.class);
     }
 
     //it's need for WSocketEventBusClient and in the future will be replaced with the property
