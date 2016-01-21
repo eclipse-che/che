@@ -531,7 +531,7 @@ function launch_docker_registry {
     if [ "${DOCKER_INSPECT_EXIT}" != "1" ]; then
 
       # Existing container running registry is found.  Let's start it.
-      echo "Found a registry container named ${GREEN}registry${NC}. Attempting restart."
+      echo -e "Found a registry container named ${GREEN}registry${NC}. Attempting restart."
       "${DOCKER}" start registry &>/dev/null || DOCKER_EXIT=$? || true
 
       # Existing container found, but could not start it properly.  
