@@ -23,7 +23,7 @@ Use Che's built-in language plug-ins or write packaged extensions that transform
 
 
 
-![Eclipse Che](https://www.eclipse.org/che/img/che-autocomplete.png "Eclipse Che")
+![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
 
 Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud, and Maven 3.1.1 or higher. It has been tested on Ubuntu, Linux, MacOS and Windows. 
 
