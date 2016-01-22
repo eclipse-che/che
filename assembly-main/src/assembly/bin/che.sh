@@ -65,6 +65,7 @@ Usage:
      -i:tag,    --image:tag    Launches Che within a Docker container using specific image tag
      -p:port,   --port:port    Port that Che server will use for HTTP requests; default=8080
      -r:ip,     --remote:ip    If Che clients are not localhost, set to IP address of Che server
+     -g,        --registry     Launch Docker registry as a container (used for ws snapshots)
      -m:vm,     --machine:vm   For Win & Mac, sets the docker-machine VM name to vm; default=default
      -s:client, --skip:client  Do not print browser client connection information
      -s:uid,    --skip:uid     Do not enforce UID=1000 for Docker
@@ -89,6 +90,7 @@ localhost, ie they are remote. This property automatically set for Che on Window
   USE_DEBUG=false
   PRINT_CLIENT_CONNECT=true
   CHECK_DOCKER_UID=true
+  LAUNCH_REGISTRY=false
 
   # Sets value of operating system
   WIN=false
@@ -114,6 +116,9 @@ function parse_command_line {
   case $command_line_option in
     -i|--image)
       USE_DOCKER=true
+    ;;
+    -g|--registry)
+      LAUNCH_REGISTRY=true
     ;;
     -i:*|--image:*)
       USE_DOCKER=true
@@ -172,6 +177,7 @@ function parse_command_line {
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
     echo "CHE_DOCKER_MACHINE: ${VM}"
+    echo "LAUNCH_REGISTRY: ${LAUNCH_REGISTRY}"
     echo "PRINT_CLIENT_CONNECT: ${PRINT_CLIENT_CONNECT}"
     echo "CHECK_DOCKER_UID: ${CHECK_DOCKER_UID}"
     echo "USE_HELP: ${USE_HELP}"
@@ -487,7 +493,7 @@ function stop_che_server {
   fi
 }
 
-function kill_and_launch_docker {
+function kill_and_launch_docker_che {
 
   echo -e "A Docker container for ${GREEN}che${NC} does not exist or duplicate conflict was discovered."
   echo -e "Launching a new Docker container named ${GREEN}che${NC} from image ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC} with Docker command:"
@@ -506,6 +512,51 @@ function kill_and_launch_docker {
   set +x
 }
 
+function kill_and_launch_docker_registry {
+  echo -e "A Docker container named ${GREEN}registry${NC} does not exist or duplicate conflict was discovered."
+  echo -e "Launching a new Docker container named ${GREEN}registry${NC} from image ${GREEN}registry:2${NC}."
+  "${DOCKER}" rm -f registry &> /dev/null || true
+  "${DOCKER}" run -d -p 5000:5000 --restart=always --name registry registry:2 #&> /dev/null
+  echo
+}
+
+function launch_docker_registry {
+
+    echo "Launching a Docker registry for Che snapshots."
+
+    CREATE_NEW_CONTAINER=false
+
+    # Check to see if the registry docker was not properly shut down
+    "${DOCKER}" inspect registry &> /dev/null || DOCKER_INSPECT_EXIT=$? || true
+    if [ "${DOCKER_INSPECT_EXIT}" != "1" ]; then
+
+      # Existing container running registry is found.  Let's start it.
+      echo -e "Found a registry container named ${GREEN}registry${NC}. Attempting restart."
+      "${DOCKER}" start registry &>/dev/null || DOCKER_EXIT=$? || true
+
+      # Existing container found, but could not start it properly.  
+      if [ "${DOCKER_EXIT}" == "1" ]; then
+        echo "Initial start of registry docker container failed... Attempting docker restart and exec."
+        CREATE_NEW_CONTAINER=true
+      fi
+
+    echo "Successful restart of registry container."
+    echo
+
+    # No existing Che container found, we need to create a new one.
+    else 
+      CREATE_NEW_CONTAINER=true
+    fi
+
+    if $CREATE_NEW_CONTAINER ; then
+
+      # Container in bad state or not found, kill and launch new container.
+      kill_and_launch_docker_registry
+
+    fi 
+
+}
+
 function launch_che_server {
 
   # Set host variable to the hostname that client should connect to.
@@ -515,13 +566,24 @@ function launch_che_server {
     host=localhost
   fi      
 
-
   if $PRINT_CLIENT_CONNECT ; then
     print_client_connect
   fi
 
-  # Launch Che natively as a tomcat server
+  if $LAUNCH_REGISTRY ; then
+    # Export the value of host here
+    # Will be used on Che properties to set the location of registry 
+    export CHE_REGISTRY_HOST="${host}"
+    launch_docker_registry    
+  
+  else
+    export CHE_REGISTRY_HOST="localhost"
+  fi
+
   if ! $USE_DOCKER; then
+    
+    #########################################
+    # Launch Che natively as a tomcat server
     call_catalina
 
   # Launch Che as a docker image
@@ -536,7 +598,7 @@ function launch_che_server {
     if [ "${DOCKER_INSPECT_EXIT}" != "1" ]; then
 
       # Existing container running Che is found.  Let's start it.
-      echo "Found a container named che. Attempting restart."
+      echo "Found a container named ${GREEN}che${NC}. Attempting restart."
       "${DOCKER}" start che &>/dev/null || DOCKER_EXIT=$? || true
 
       # Existing container found, but could not start it properly.  
@@ -550,6 +612,9 @@ function launch_che_server {
         fi
       fi
 
+      echo "Successful restart of Che container."
+      echo
+
     # No existing Che container found, we need to create a new one.
     else 
       CREATE_NEW_CONTAINER=true
@@ -558,7 +623,7 @@ function launch_che_server {
     if $CREATE_NEW_CONTAINER ; then
 
       # Container in bad state or not found, kill and launch new container.
-      kill_and_launch_docker
+      kill_and_launch_docker_che
 
     fi 
 
