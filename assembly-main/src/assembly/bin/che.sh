@@ -458,7 +458,7 @@ function call_catalina {
   fi
 
   # Che requires Java version 1.8 or higher. 
-  JAVA_VERSION=$(eval "${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  JAVA_VERSION=$("${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
   if [[ "$JAVA_VERSION" < "1.8" ]]; then
       error_exit "Che requires Java version 1.8 or higher. We found a lower version."
       return
