@@ -77,6 +77,19 @@
                 <include>org.eclipse.che.plugin:che-plugin-sdk-tools</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <outputDirectory>templates</outputDirectory>
+            <includes>
+                <include>org.eclipse.che.core:che-core-ide-templates</include>
+            </includes>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+        </dependencySet>
     </dependencySets>
     <fileSets>
         <fileSet>
@@ -93,10 +106,6 @@
         <fileSet>
             <directory>${project.basedir}/src/assembly/plugins</directory>
             <outputDirectory>plugins</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/templates</directory>
-            <outputDirectory>templates</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/webapps</directory>
