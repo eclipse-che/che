@@ -338,7 +338,7 @@ function get_docker_ready {
     LINUX_UID=$(id -u "${LINUX_USER}")
 
     if [[ "${CHECK_DOCKER_UID}" == "true" ]] ; then
-      if [[ "${LINUX_GROUPS}" =~ "docker" ]] ; then
+      if echo "${LINUX_GROUPS}" | grep "docker" &>/dev/null; then
 
         if [[ "${LINUX_UID}" != "1000" ]] ; then
           error_exit "!!! This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
