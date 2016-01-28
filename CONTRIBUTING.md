@@ -10,7 +10,7 @@ Che's objective is to create high performance developer environments by producin
 
 Developer Resources
 --------------------
-Information regarding source code management, builds, and coding standards. Until Che has completed its initial CQs, all code contributions are made directly through commits or pull requests at http://github.com/codenv/che.
+Information regarding source code management, builds, and coding standards. Until Che has completed its initial CQs, all code contributions are made directly through commits or pull requests at http://github.com/codenvy/che.
 
 - [https://projects.eclipse.org/projects/technology.che/developer](https://projects.eclipse.org/projects/technology.che/developer)
 
