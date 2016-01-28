@@ -597,7 +597,7 @@ function launch_che_server {
     if [ "${DOCKER_INSPECT_EXIT}" != "1" ]; then
 
       # Existing container running Che is found.  Let's start it.
-      echo "Found a container named ${GREEN}che${NC}. Attempting restart."
+      echo -e "Found a container named ${GREEN}che${NC}. Attempting restart."
       "${DOCKER}" start che &>/dev/null || DOCKER_EXIT=$? || true
 
       # Existing container found, but could not start it properly.
