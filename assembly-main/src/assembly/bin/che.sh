@@ -217,10 +217,11 @@ function set_environment_variables {
   ### Use values set by user, unless they are broken, then fix them
   # The base directory of Che
   if [ -z "${CHE_HOME}" ]; then
-    export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
-    #export CHE_HOME="/c/PROGRA~1/eclipse-che-4.0.0-RC1-SNAPSHOT"
-    #export CHE_HOME=/c/Program\ Files/eclipse-che-4.0.0-RC1-SNAPSHOT
-    echo $CHE_HOME
+    if [ "${WIN}" == "true" ]; then
+      export CHE_HOME="${CHE_WINDOWS_SHORT_DIR}"
+    else 
+      export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
+    fi
   fi
 
   if [[ "${CHE_IP}" != "" ]]; then
