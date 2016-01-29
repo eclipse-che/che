@@ -217,7 +217,10 @@ function set_environment_variables {
   ### Use values set by user, unless they are broken, then fix them
   # The base directory of Che
   if [ -z "${CHE_HOME}" ]; then
-    export CHE_HOME="$(dirname "$(cd $(dirname ${0}) && pwd -P)")"
+    export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
+    #export CHE_HOME="/c/PROGRA~1/eclipse-che-4.0.0-RC1-SNAPSHOT"
+    #export CHE_HOME=/c/Program\ Files/eclipse-che-4.0.0-RC1-SNAPSHOT
+    echo $CHE_HOME
   fi
 
   if [[ "${CHE_IP}" != "" ]]; then
@@ -228,6 +231,7 @@ function set_environment_variables {
   if [[ "${JAVA_HOME}" == *":"* ]]
   then
     JAVA_HOME=$(echo /"${JAVA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
+    #JRE_HOME="${JAVA_HOME}"
   fi
 
   if [[ "${CHE_HOME}" == *":"* ]]
@@ -241,7 +245,7 @@ function set_environment_variables {
   fi
 
   # Sets the location of the application server and its executables
-  export CATALINA_HOME="${CHE_HOME}/tomcat"
+  export CATALINA_HOME="${CHE_HOME}"/tomcat
 
   # Convert windows path name to POSIX
   if [[ "${CATALINA_HOME}" == *":"* ]]
@@ -249,8 +253,8 @@ function set_environment_variables {
     CATALINA_HOME=$(echo /"${CATALINA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
-  export CATALINA_BASE="${CHE_HOME}/tomcat"
-  export ASSEMBLY_BIN_DIR="${CATALINA_HOME}/bin"
+  export CATALINA_BASE="${CHE_HOME}"/tomcat
+  export ASSEMBLY_BIN_DIR="${CATALINA_HOME}"/bin
 
   # Global logs directory
   if [ -z "${CHE_LOGS_DIR}" ]; then
@@ -449,6 +453,7 @@ function call_catalina {
     return
   fi
 
+
   # Test to see that Java is installed and working
   "${JAVA_HOME}"/bin/java &>/dev/null || JAVA_EXIT=$? || true
   if [ "${JAVA_EXIT}" != "1" ]; then
@@ -502,10 +507,10 @@ function kill_and_launch_docker_che {
   if ${WIN} || ${MAC} ; then
      # This DOCKER_HOST is environment variable set by docker-machine - location of VM w/ Docker
     set -x
-    "${DOCKER}" run --privileged -e \"DOCKER_MACHINE_HOST=${host}\" --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+    "${DOCKER}" run --privileged -e DOCKER_MACHINE_HOST=${host} --name che -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   else
     set -x
-    "${DOCKER}" run --privileged -e '"'DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST}'"' --name che -d -p ${CHE_PORT}:${CHE_PORT} -p 32768-32788:32768-32788 codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+    "${DOCKER}" run --privileged -e DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST} --name che -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
   fi
 
   set +x
