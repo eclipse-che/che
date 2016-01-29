@@ -15,6 +15,9 @@ REM Check to ensure bash is installed
 CALL bash --help > nul 2>&1
 IF %ERRORLEVEL% NEQ 0 goto setup
 
+REM IDEX-4232 change windows long directories to DOS 8.3 format to handle directories with spaces
+FOR %%i in ("%~dp0..") do set "CHE_WINDOWS_SHORT_DIR=%%~Si"
+
 REM Launch Che and any associated docker machines, if necessary
 CALL bash --login -i "%~dp0\che.sh" %*
 
