@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.local.LocalUserDaoImpl;
 import org.eclipse.che.api.project.server.BaseProjectModule;
+import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
+import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
@@ -34,7 +36,6 @@ import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
 import org.eclipse.che.ide.ext.github.server.inject.GitHubModule;
 import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
 import org.eclipse.che.ide.ext.openshift.server.inject.OpenshiftModule;
-import org.eclipse.che.ide.ext.ssh.server.SshKeyStore;
 import org.eclipse.che.ide.extension.maven.server.inject.MavenModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
@@ -48,6 +49,7 @@ import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 
 import javax.inject.Named;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,8 +71,8 @@ public class MachineModule extends AbstractModule {
         bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
         bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
-        bind(org.eclipse.che.ide.ext.ssh.server.SshKeyStore.class)
-                .to(org.eclipse.che.ide.ext.ssh.server.UserProfileSshKeyStore.class);
+        bind(SshServiceClient.class).to(HttpSshServiceClient.class);
+
         bind(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProvider.class)
                 .to(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.class);
 
@@ -92,10 +94,12 @@ public class MachineModule extends AbstractModule {
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
+        bind(URI.class).annotatedWith(Names.named("api.endpoint")).toProvider(UriApiEndpointProvider.class);
         bind(String.class).annotatedWith(Names.named("user.token")).toProvider(UserTokenProvider.class);
         bind(WSocketEventBusClient.class).asEagerSingleton();
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
+        bind(org.eclipse.che.ide.ext.java.server.ApiEndpointAccessibilityChecker.class);
     }
 
     //it's need for WSocketEventBusClient and in the future will be replaced with the property

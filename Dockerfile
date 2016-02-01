@@ -18,13 +18,14 @@ RUN mkdir /home/user/.che && \
    -qO- \
    "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-b17/jre-$JAVA_VERSION-linux-x64.tar.gz" | sudo tar -zx -C /opt/
 ENV JAVA_HOME /opt/jre$JAVA_VERSION_PREFIX
+ENV PATH $JAVA_HOME/bin:$PATH
 
 # expose 8080 port and a range of ports for runners
 
 EXPOSE 8080 32768-65535
 
-ADD /assembly-sdk/target/assembly-sdk-*/assembly-sdk-* /home/user/che
+ADD /assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che
 
 CMD  sudo chown -R user:user /home/user/che && \
      sudo service docker start && \
-    /home/user/che/bin/che.sh run
+     cd /home/user/che/bin/ && ./che.sh run

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2012-2015 Codenvy, S.A.
+    Copyright (c) 2012-2016 Codenvy, S.A.
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
     which accompanies this distribution, and is available at
@@ -14,9 +14,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-sdk-parent</artifactId>
-        <groupId>org.eclipse.che.sdk</groupId>
-        <version>4.0.0-M5</version>
+        <artifactId>che-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
+        <version>4.0.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-machine-war</artifactId>
     <packaging>war</packaging>
@@ -41,6 +41,14 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jaxrs</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -128,11 +136,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-machine</artifactId>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-openshift-ext-server</artifactId>
         </dependency>
         <dependency>
@@ -140,13 +143,8 @@
             <artifactId>che-plugin-sdk-env-local</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-ext-sshkey</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-ssh-git-native</artifactId>
-            <version>${che.plugins.version}</version>
+            <groupId>org.eclipse.che.swagger</groupId>
+            <artifactId>che-swagger-module</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
