@@ -62,7 +62,7 @@ Che will be available at ```localhost:8080```
 * **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
 * **che-core**:                [Core components] (http://github.com/codenvy/che-core)
 * **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
-* **che-dashboard**:           [Workspace, project, user mgmt] (http://github.com/codenvy/dashboard)
+* **che-dashboard**:           [Workspace, project, user mgmt] (http://github.com/codenvy/che-dashboard)
 * **che-websocket-terminal**:  [Embedded terminal for workspaces] (http://github.com/codenvy/che-websocket-terminal)
 * **che-installer**:           [Che installation packages] (http://github.com/codenvy/che-installer)
 * **che-tutorials**:           [SDK examples and tutorials] (http://github.com/codenvy/che-tutorials)

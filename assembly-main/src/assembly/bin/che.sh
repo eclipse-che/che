@@ -637,7 +637,9 @@ function launch_che_server {
 
     # Launching tomcat with the start option in a docker container does not run successfully
     # because main process of container exits after starting Che as child process
-    "${DOCKER}" exec -it che bash -c 'true && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh --skip:client run' || DOCKER_EXIT=$? || true    
+    set -x
+    "${DOCKER}" exec -it che bash -c 'true && sudo restart docker && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh '-p:${CHE_PORT}' --skip:client run' || DOCKER_EXIT=$? || true    
+    set +x
   fi
 }
 
