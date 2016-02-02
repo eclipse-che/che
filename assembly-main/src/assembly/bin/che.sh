@@ -488,33 +488,56 @@ function stop_che_server {
     echo -e "Stopping Che server running on localhost:${CHE_PORT}"
     call_catalina >/dev/null 2>&1
   else
-    echo -e "Stopping Che server running in docker container named ${GREEN}che${NC}."
+    echo -e "Stopping Che server running in docker container named ${GREEN}che${NC}..."
 
     DOCKER_EXEC="sudo service docker stop && /home/user/che/bin/che.sh stop"
     "${DOCKER}" exec che ${DOCKER_EXEC} &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
 
-    echo -e "Stopping docker container named ${GREEN}che${NC}."
+    echo -e "Stopping docker container named ${GREEN}che${NC}...."
     "${DOCKER}" stop che &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
   fi
 }
 
 function kill_and_launch_docker_che {
 
-  echo -e "A Docker container for ${GREEN}che${NC} does not exist or duplicate conflict was discovered."
-  echo -e "Launching a new Docker container named ${GREEN}che${NC} from image ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC} with Docker command:"
-  "${DOCKER}" kill che &> /dev/null || true
-  "${DOCKER}" rm che &> /dev/null || true
+  echo -e "A Docker container named ${GREEN}che${NC} does not exist or duplicate conflict was discovered."
+  echo -e "Cleaning up any zombie containers named ${GREEN}che${NC}..."
+
+  # Force remove any lingering zombie containers with the name che
+  "${DOCKER}" rm -f che &> /dev/null || true
+
+  echo -e "Pulling the Docker image labeled ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC}..."
+  "${DOCKER}" pull codenvy/che:${CHE_DOCKER_TAG}
+
+  echo -e "Launching a new Docker container named ${GREEN}che${NC} from image ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC}..."
 
   if ${WIN} || ${MAC} ; then
-     # This DOCKER_HOST is environment variable set by docker-machine - location of VM w/ Docker
+    # Set DOCKER_MACHINE_HOST to VM IP
+    # IDEX-4266 - Change launching of docker to avoid using dind
+  if ${USE_DEBUG}; then
     set -x
-    "${DOCKER}" run --privileged -e DOCKER_MACHINE_HOST=${host} --name che -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+  fi
+    "${DOCKER}" run -v //var/run/docker.sock:/var/run/docker.sock \
+    -v //home/user/che/lib:/home/user/che/lib-copy \
+    -v //home/user/che/workspaces:/home/user/che/workspaces \
+    -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
+    -e DOCKER_MACHINE_HOST=${host} --name che -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} \
+    bash -c "tail -f /dev/null"
   else
+  if ${USE_DEBUG}; then
     set -x
-    "${DOCKER}" run --privileged -e DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST} --name che -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} bash -c 'true && sudo chown -R user:user /home/user/che && sudo service docker start && tail -f /dev/null' #&> /dev/null
+  fi
+    "${DOCKER}" run -v //var/run/docker.sock:/var/run/docker.sock \
+    -v //home/user/che/lib:/home/user/che/lib-copy \
+    -v //home/user/che/workspaces:/home/user/che/workspaces \
+    -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
+    -e DOCKER_MACHINE_HOST=${DOCKER_MACHINE_HOST} --name che -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} \
+    bash -c "tail -f /dev/null"
   fi
 
-  set +x
+  if ${USE_DEBUG}; then
+    set +x
+  fi
 }
 
 function kill_and_launch_docker_registry {
@@ -633,13 +656,21 @@ function launch_che_server {
     fi
 
     echo -e "Docker container named ${GREEN}che${NC} successfully started."
-    echo -e "Launching Che app server inside the container named ${GREEN}che${NC}."
+    echo -e "Launching Che in a container named ${GREEN}che${NC}..."
 
     # Launching tomcat with the start option in a docker container does not run successfully
     # because main process of container exits after starting Che as child process
+  if ${USE_DEBUG}; then
     set -x
-    "${DOCKER}" exec -it che bash -c 'true && sudo restart docker && export CHE_HOME=/home/user/che && /home/user/che/bin/che.sh '-p:${CHE_PORT}' --skip:client run' || DOCKER_EXIT=$? || true    
+  fi
+    "${DOCKER}" exec -it che bash -c "sudo rm -rf /home/user/che/lib-copy/* && "`
+                                    `"mkdir -p /home/user/che/lib-copy/ && "`
+                                    `"sudo chown -R user:user /home/user && "`
+                                    `"cp -rf /home/user/che/lib/* /home/user/che/lib-copy && "`
+                                    `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" --skip:client run" || DOCKER_EXIT=$? || true
+  if ${USE_DEBUG}; then
     set +x
+  fi
   fi
 }
 
