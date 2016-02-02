@@ -10,7 +10,7 @@
 
 https://www.eclipse.org/che/
 
-High performance, open source software developer workspaces in the cloud.
+Next-generation Eclipse IDE. Open source workspace server and cloud IDE.
 
 ### Cloud IDE
 Use your browser to program on any machine in any language. Edit, build, debug and deploy projects bound to source repositories.
