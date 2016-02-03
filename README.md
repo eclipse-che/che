@@ -49,10 +49,11 @@ mvn clean install
 cd assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
 
 # Executable files are:
-bin/che.sh  [ start | stop ]
-bin/che.bat [ start | stop ]
+bin/che.sh
+bin/che.bat
 ```
-Che will be available at ```localhost:8080```
+Che will be available at ```localhost:8080```.
+If you want to run Che as a server, please see docs @ eclipse.org/che on additional flags to enable remote clients.
 
 
 ### Repositories:
