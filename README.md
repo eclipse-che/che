@@ -12,6 +12,8 @@ https://www.eclipse.org/che/
 
 Next-generation Eclipse IDE. Open source workspace server and cloud IDE.
 
+![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
+
 ### Cloud IDE
 Use your browser to program on any machine in any language. Edit, build, debug and deploy projects bound to source repositories.
 
@@ -21,11 +23,7 @@ Create developer workspaces with APIs. Add your project types, embed custom comm
 ### Plug-Ins
 Use Che's built-in language plug-ins or write packaged extensions that transform Che's IDE into new tools and assemblies.
 
-
-
-![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
-
-Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud, and Maven 3.1.1 or higher. It has been tested on Ubuntu, Linux, MacOS and Windows. 
+Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud, and Maven 3.3.1 or higher. It has been tested on Ubuntu, Linux, MacOS and Windows. 
 
 ### License
 Che is open sourced under the Eclipse Public License 1.0.
