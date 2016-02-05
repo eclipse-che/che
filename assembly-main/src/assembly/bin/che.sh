@@ -12,6 +12,7 @@
 
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
+set +o posix
 
 # Run the finish function if exit signal initiated
 trap exit SIGHUP SIGINT SIGTERM
@@ -475,7 +476,7 @@ call_catalina () {
     # Che requires Java version 1.8 or higher.
 	JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
 	if [[  -z "${JAVA_VERSION}" || "${JAVA_VERSION}" < "1.8" ]]; then
-	  error_exit "Che requires Java version 1.8 or higher. We found a lower version."
+	  error_exit "Che requires Java version 1.8 or higher. We found a ${JAVA_VERSION}."
 	  return
 	fi
   fi
