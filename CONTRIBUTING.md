@@ -6,13 +6,55 @@ Project Description
 --------------------
 Che's objective is to create high performance developer environments by producing extensible, RESTful workspaces combined with a cloud IDE that can be customized with plug-ins. Tools are written in Java and run in the browser. 
 
-- [https://projects.eclipse.org/projects/technology.che](https://projects.eclipse.org/projects/technology.che)
-
 Developer Resources
 --------------------
 Information regarding source code management, builds, and coding standards. Until Che has completed its initial CQs, all code contributions are made directly through commits or pull requests at http://github.com/codenvy/che.
 
-- [https://projects.eclipse.org/projects/technology.che/developer](https://projects.eclipse.org/projects/technology.che/developer)
+Reporting Issues
+-----------------
+A great way to contribute to the project is to send a detailed report when you
+encounter an issue. We always appreciate a well-written, thorough bug report,
+and will thank you for it!
+
+Check that [our issue database](https://github.com/codenvy/che/issues)
+doesn't already include that problem or suggestion before submitting an issue.
+If you find a match, you can use the "subscribe" button to get notified on
+updates. Do *not* leave random "+1" or "I have this too" comments, as they
+only clutter the discussion, and don't help resolving it. However, if you
+have ways to reproduce the issue or have additional information that may help
+resolving the issue, please leave a comment.
+
+When reporting issues, always include:
+
+* The Che version that is installed.
+* The full directory path of where Che is installed.
+* The output of `docker version`.
+* The output of `docker info`.
+* The output of `java -version`.
+
+Also include the steps required to reproduce the problem if possible and
+applicable. This information will help us review and fix your issue faster.
+When sending lengthy log-files, consider posting them as a gist (https://gist.github.com).
+Don't forget to remove sensitive data from your logfiles before posting (you can
+replace those parts with "REDACTED").
+
+**Issue Report Template**:
+
+```
+Description of problem:
+Che version:
+Che install directory:
+Docker version: 
+Java version: 
+Environment details (AWS, VirtualBox, physical, etc.):
+How reproducible:
+Steps to Reproduce:
+1.
+2.
+3.
+Actual Results:
+Expected Results:
+```
 
 Contributor License Agreement
 ------------------------------
