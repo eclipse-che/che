@@ -120,9 +120,7 @@ public class ApiModule extends AbstractModule {
                    .toInstance("predefined-recipes.json");
 
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
-        Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.stack.path"))
-                   .addBinding()
-                   .toInstance("predefined-stacks.json");
+        bind(org.eclipse.che.api.workspace.server.stack.StackIconLoader.class);
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +

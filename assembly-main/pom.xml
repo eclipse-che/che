@@ -39,6 +39,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-stacks</artifactId>
+            <version>4.0.0-RC3-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-templates</artifactId>
             <type>jar</type>
         </dependency>
