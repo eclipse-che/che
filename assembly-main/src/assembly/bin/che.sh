@@ -636,7 +636,9 @@ launch_che_server () {
       # Existing container found, but could not start it properly.
       if [ "${DOCKER_EXIT}" == "1" ]; then
         echo "Initial start of docker container failed... Attempting docker restart and exec."
-        "${DOCKER}" exec ${CONTAINER} bash -c 'true && sudo service docker start && tail -f /dev/null' || DOCKER_EXIT=$? || true   
+        "${DOCKER}" exec ${CONTAINER} bash -c "true && sudo service docker start && "`
+                                              `"//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
+                                              `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
 
         # If we get to this point and Docker is still failing, then we will destroy the container entirely
         if [ "${DOCKER_EXIT}" == "1" ]; then
@@ -644,8 +646,15 @@ launch_che_server () {
         fi
       fi
 
-      echo "Successful restart of Che container."
-      echo
+      echo "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
+      "${DOCKER}" exec ${CONTAINER} bash -c "true && sudo service docker start && "`
+                                           `"//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
+                                           `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
+
+     echo
+
+      # Do not attempt additional docker exec command if we are restarting existing container
+      return
 
     # No existing Che container found, we need to create a new one.
     else
@@ -679,6 +688,7 @@ launch_che_server () {
                                             `"mkdir -p /home/user/che/lib-copy/ && "`
                                             `"sudo chown -R user:user /home/user && "`
                                             `"cp -rf /home/user/che/lib/* /home/user/che/lib-copy && "`
+                                            `"sudo sed -i 's/random/urandom/g' /opt/jre1.8.0_65/lib/security/java.security && "`
                                             `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" "`
                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
 	if ${USE_DEBUG}; then
