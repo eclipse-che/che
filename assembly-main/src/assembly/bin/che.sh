@@ -501,11 +501,10 @@ stop_che_server () {
     call_catalina >/dev/null 2>&1
   else
     echo -e "Stopping Che server running in docker container named ${GREEN}${CONTAINER}${NC}..."
-
-    echo -e "Stopping docker container named ${GREEN}${CONTAINER}${NC}...."
-    DOCKER_EXEC="sudo service docker stop && sudo //home/user/che/tomcat/bin/shutdown.sh"
+    DOCKER_EXEC="//home/user/che/bin/che.sh stop"
     "${DOCKER}" exec ${CONTAINER} ${DOCKER_EXEC} || DOCKER_EXIT=$? || true
 
+    echo -e "Stopping docker container named ${GREEN}${CONTAINER}${NC}...."
     "${DOCKER}" stop --time=10 ${CONTAINER} &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
   fi
   return
@@ -548,7 +547,7 @@ kill_and_launch_docker_registry () {
   echo -e "A Docker container named ${GREEN}registry${NC} does not exist or duplicate conflict was discovered."
   echo -e "Launching a new Docker container named ${GREEN}registry${NC} from image ${GREEN}registry:2${NC}."
   "${DOCKER}" rm -f registry &> /dev/null || true
-  "${DOCKER}" run -d -p 5000:5000 --restart=always --name registry registry:2 #&> /dev/null
+  "${DOCKER}" run -d -p 5000:5000 --restart=always --name registry registry:2
   echo
 }
 
@@ -627,39 +626,41 @@ launch_che_server () {
 
     # Check to see if the Che docker was not properly shut down
     "${DOCKER}" inspect ${CONTAINER} &> /dev/null || DOCKER_INSPECT_EXIT=$? || true
-    if [ "${DOCKER_INSPECT_EXIT}" != "1" ]; then
+    if [ "${DOCKER_INSPECT_EXIT}" == "1" ]; then
 
-      # Existing container running Che is found.  Let's start it.
+      # No existing Che container found, we need to create a new one.
+      CREATE_NEW_CONTAINER=true
+
+    else
+
+      # Existing container found.  Let's start it.
       echo -e "Found a container named ${GREEN}${CONTAINER}${NC}. Attempting restart."
       "${DOCKER}" start ${CONTAINER} &>/dev/null || DOCKER_EXIT=$? || true
 
-      # Existing container found, but could not start it properly.
       if [ "${DOCKER_EXIT}" == "1" ]; then
+
+        # Existing container found, but could not start it properly.
         echo "Initial start of docker container failed... Attempting docker restart and exec."
         "${DOCKER}" exec ${CONTAINER} bash -c "true && sudo service docker start && "`
                                               `"//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
                                               `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
 
-        # If we get to this point and Docker is still failing, then we will destroy the container entirely
         if [ "${DOCKER_EXIT}" == "1" ]; then
+          # If we get to this point and Docker is still failing, then we will destroy the container entirely
           CREATE_NEW_CONTAINER=true
         fi
+
+      else 
+
+      	# Existing container found, and it was started properly.
+        echo -e "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
+        "${DOCKER}" exec ${CONTAINER} bash -c "//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
+                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
+        echo
+        # Do not attempt additional docker exec command if we are restarting existing container
+        return
       fi
-
-      echo "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
-      "${DOCKER}" exec ${CONTAINER} bash -c "true && sudo service docker start && "`
-                                           `"//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
-                                           `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
-
-     echo
-
-      # Do not attempt additional docker exec command if we are restarting existing container
-      return
-
-    # No existing Che container found, we need to create a new one.
-    else
-      CREATE_NEW_CONTAINER=true
-    fi
+    fi  
 
     if ${CREATE_NEW_CONTAINER} ; then
 
