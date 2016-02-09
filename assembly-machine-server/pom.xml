@@ -23,14 +23,14 @@
     <name>Che Assembly Machine Plugins :: Server</name>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.resources</groupId>
-            <artifactId>che-tomcat8-slf4j-logback</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-machine-war</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <type>zip</type>
         </dependency>
     </dependencies>
     <build>
