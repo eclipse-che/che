@@ -127,7 +127,7 @@ public class ApiModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
-        bind(WorkspaceConfigValidator.class).to(org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigValidatorImpl.class);
+        bind(WorkspaceConfigValidator.class).to(org.eclipse.che.api.workspace.server.DefaultWorkspaceConfigValidator.class);
         bind(MachineStateListener.class).asEagerSingleton();
         bind(org.eclipse.che.api.machine.server.WsAgentLauncher.class).to(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.class);
     }
