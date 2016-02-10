@@ -60,7 +60,7 @@
             <unpack>true</unpack>
             <outputDirectory>lib</outputDirectory>
             <includes>
-                <include>org.eclipse.che.terminal:che-websocket-terminal</include>
+                <include>org.eclipse.che.lib:che-websocket-terminal</include>
             </includes>
             <unpackOptions>
                 <excludes>
