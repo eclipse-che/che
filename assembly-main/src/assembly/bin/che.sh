@@ -72,6 +72,7 @@ Usage:
      -s:client, --skip:client        Do not print browser client connection information
      -s:java,   --skip:java          Do not enforce Java version checks
      -s:uid,    --skip:uid           Do not enforce UID=1000 for Docker
+     -t,        --stop-container     If stopping Che, will also stop Che container if Che ran with -i
      -h,        --help               Show this help
      -d,        --debug              Use debug mode (prints command line options + app server debug)
      run                             Starts Che application server in current console
@@ -168,6 +169,9 @@ parse_command_line () {
         esac
       fi
     ;;
+    -t|--stop-container)
+      STOP_CONTAINER=true
+    ;;
     -h|--help)
       USE_HELP=true
       usage
@@ -196,6 +200,7 @@ parse_command_line () {
     echo "SKIP_PRINT_CLIENT: ${SKIP_PRINT_CLIENT}"
     echo "SKIP_DOCKER_UID: ${SKIP_DOCKER_UID}"
     echo "SKIP_JAVA_VERSION: ${SKIP_JAVA_VERSION}"
+    echo "STOP_CONTAINER: ${STOP_CONTAINER}"
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -397,8 +402,6 @@ get_docker_ready () {
 
   if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
     echo -e "${BLUE}Docker${NC} is configured to use vbox docker-machine named ${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
-  else
-    echo "Docker is natively installed and reachable..."
   fi
 }
 
@@ -496,16 +499,22 @@ call_catalina () {
 
 stop_che_server () {
 
-  if ! ${USE_DOCKER}; then
-    echo -e "Stopping Che server running on localhost:${CHE_PORT}"
-    call_catalina >/dev/null 2>&1
-  else
+echo $CATALINA_PID
+
+  if [[ "${USE_DOCKER}" == true ]]; then
+    # Determined that we need to stop Che that is running in a container
+    # Docker exec the command
     echo -e "Stopping Che server running in docker container named ${GREEN}${CONTAINER}${NC}..."
     DOCKER_EXEC="//home/user/che/bin/che.sh stop"
     "${DOCKER}" exec ${CONTAINER} ${DOCKER_EXEC} || DOCKER_EXIT=$? || true
 
-    echo -e "Stopping docker container named ${GREEN}${CONTAINER}${NC}...."
-    "${DOCKER}" stop --time=10 ${CONTAINER} &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
+    if [[ "${STOP_CONTAINER}" == true ]]; then
+      echo -e "Stopping docker container named ${GREEN}${CONTAINER}${NC}...."
+      "${DOCKER}" stop --time=10 ${CONTAINER} &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
+    fi
+  else
+    echo -e "Stopping Che server running on localhost:${CHE_PORT}"
+    call_catalina >/dev/null 2>&1
   fi
   return
 }
@@ -617,9 +626,9 @@ launch_che_server () {
     # Launch Che natively as a tomcat server
     call_catalina
 
-  # Launch Che as a docker image
   else
 
+    # Launch Che as a docker image
     echo -e "Starting Che server in docker container named ${GREEN}${CONTAINER}${NC}."
 
     CREATE_NEW_CONTAINER=false
@@ -676,26 +685,24 @@ launch_che_server () {
     # because main process of container exits after starting Che as child process
 
     if [[ "${USE_DEBUG}" == true ]]; then
-   	  DEBUG_PRINT_VALUE=--debug
-	else
-	  DEBUG_PRINT_VALUE=
-	fi
+      DEBUG_PRINT_VALUE=--debug
+	  else
+	    DEBUG_PRINT_VALUE=
+	  fi
 
-	if ${USE_DEBUG}; then
-	  set -x
-	fi
+	  if ${USE_DEBUG}; then
+	    set -x
+	  fi
 
     "${DOCKER}" exec -i ${CONTAINER} bash -c "sudo rm -rf /home/user/che/lib-copy/* && "`
                                             `"mkdir -p /home/user/che/lib-copy/ && "`
                                             `"sudo chown -R user:user /home/user && "`
                                             `"cp -rf /home/user/che/lib/* /home/user/che/lib-copy && "`
-                                            `"sudo sed -i 's/random/urandom/g' /opt/jre1.8.0_65/lib/security/java.security && "`
+                                            #`"sudo sed -i 's/random/urandom/g' /opt/jre1.8.0_65/lib/security/java.security && "`
                                             `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" "`
                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
-	if ${USE_DEBUG}; then
 	  set +x
-	fi
-	return
+	  return
   fi
 }
 
