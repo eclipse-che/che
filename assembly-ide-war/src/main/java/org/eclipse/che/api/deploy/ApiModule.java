@@ -78,8 +78,10 @@ public class ApiModule extends AbstractModule {
         bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
         bind(RecipeService.class);
-        bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);
+
+        bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
+        bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
 
 //        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
 //
@@ -118,9 +120,6 @@ public class ApiModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
                    .addBinding()
                    .toInstance("predefined-recipes.json");
-
-        bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
-        bind(org.eclipse.che.api.workspace.server.stack.StackIconLoader.class);
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
