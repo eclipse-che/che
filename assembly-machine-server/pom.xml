@@ -16,21 +16,21 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC3-SNAPSHOT</version>
+        <version>4.0.0-RC4-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-machine-server</artifactId>
     <packaging>pom</packaging>
     <name>Che Assembly Machine Plugins :: Server</name>
     <dependencies>
         <dependency>
-            <groupId>com.codenvy.resources</groupId>
-            <artifactId>che-tomcat8-slf4j-logback</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-machine-war</artifactId>
             <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <type>zip</type>
         </dependency>
     </dependencies>
     <build>

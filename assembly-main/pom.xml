@@ -16,17 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC3-SNAPSHOT</version>
+        <version>4.0.0-RC4-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
     <name>Che IDE :: Assemblies Tomcat</name>
     <dependencies>
-        <dependency>
-            <groupId>com.codenvy.resources</groupId>
-            <artifactId>che-tomcat8-slf4j-logback</artifactId>
-            <type>zip</type>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-ide-war</artifactId>
@@ -54,6 +49,16 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-tomcat8-slf4j-logback</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-websocket-terminal</artifactId>
+            <type>zip</type>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-tools</artifactId>
             <type>jar</type>
@@ -63,11 +68,6 @@
             <groupId>org.eclipse.che.swagger</groupId>
             <artifactId>che-swagger-war</artifactId>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.terminal</groupId>
-            <artifactId>che-websocket-terminal</artifactId>
-            <type>zip</type>
         </dependency>
     </dependencies>
     <build>
@@ -104,9 +104,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.codenvy.resources</groupId>
+                                    <groupId>org.eclipse.che.lib</groupId>
                                     <artifactId>che-tomcat8-slf4j-logback</artifactId>
-                                    <version>${version.resource-bundle}</version>
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/dependency</outputDirectory>
