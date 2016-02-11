@@ -65,6 +65,8 @@ public class PerspectiveManagerTest {
 
         manager.setPerspectiveId("Machine Perspective");
 
+        verify(projectPerspective).storeState();
+
         verify(typeListener).onPerspectiveChanged();
 
         assertThat(manager.getActivePerspective(), equalTo(machinePerspective));

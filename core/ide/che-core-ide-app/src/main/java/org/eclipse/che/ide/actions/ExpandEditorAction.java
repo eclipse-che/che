@@ -34,7 +34,8 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.ui.FontAwesome;
 
 /**
- * @author Codenvy crowd
+ * @author Evgen Vidolob
+ * @author Dmitry Shnurenko
  */
 @Singleton
 public class ExpandEditorAction extends Action implements CustomComponentAction {
@@ -44,10 +45,9 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
     private final AnalyticsEventLogger     eventLogger;
     private final PerspectiveManager       perspectiveManager;
 
-    private FlowPanel                      buttonPanel;
-    private FlowPanel                      button;
-
-    private boolean                        expanded;
+    private FlowPanel buttonPanel;
+    private FlowPanel button;
+    private boolean   expanded;
 
     @Inject
     public ExpandEditorAction(Resources resources,
@@ -59,7 +59,6 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
         this.perspectiveManager = perspectiveManager;
         this.constant = constant;
         this.eventLogger = eventLogger;
-        this.expanded = false;
     }
 
     @Override
@@ -114,12 +113,12 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
             expanded = !expanded;
 
             if (expanded) {
-                activePerspective.expandEditorPart();
+                activePerspective.collapseParts();
                 if (button != null) {
                     button.getElement().setInnerHTML(FontAwesome.COMPRESS);
                 }
             } else {
-                activePerspective.restoreEditorPart();
+                activePerspective.expandParts();
                 if (button != null) {
                     button.getElement().setInnerHTML(FontAwesome.EXPAND);
                 }

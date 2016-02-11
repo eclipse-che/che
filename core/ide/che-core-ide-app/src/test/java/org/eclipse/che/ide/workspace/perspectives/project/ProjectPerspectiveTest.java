@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -58,6 +59,8 @@ public class ProjectPerspectiveTest {
     private ProjectExplorerPart        projectExplorerPart;
     @Mock
     private NotificationManager        notificationManager;
+    @Mock
+    private EventBus                   eventBus;
 
     //additional mocks
     @Mock
@@ -108,7 +111,8 @@ public class ProjectPerspectiveTest {
                                              partViewFactory,
                                              controllerFactory,
                                              projectExplorerPart,
-                                             notificationManager);
+                                             notificationManager,
+                                             eventBus);
     }
 
     @Test
@@ -121,7 +125,8 @@ public class ProjectPerspectiveTest {
                                              partViewFactory,
                                              controllerFactory,
                                              projectExplorerPart,
-                                             notificationManager);
+                                             notificationManager,
+                                             eventBus);
 
         verify(partStackPresenter, times(2)).addPart(notificationManager, null);
         verify(partStackPresenter).addPart(projectExplorerPart, null);

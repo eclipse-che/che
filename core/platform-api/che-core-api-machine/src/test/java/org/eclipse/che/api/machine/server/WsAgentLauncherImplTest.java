@@ -78,7 +78,7 @@ public class WsAgentLauncherImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        wsAgentLauncher = new WsAgentLauncherImpl(machineManager,
+        wsAgentLauncher = new WsAgentLauncherImpl(() -> machineManager,
                                                   requestFactory,
                                                   WS_AGENT_START_CMD_LINE,
                                                   new URI("http://localhost:8080" + API_ENDPOINT_PATH),

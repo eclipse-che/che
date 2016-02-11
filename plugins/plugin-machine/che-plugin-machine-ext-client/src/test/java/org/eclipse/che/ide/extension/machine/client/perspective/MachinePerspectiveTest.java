@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -70,6 +71,8 @@ public class MachinePerspectiveTest {
     private OutputsContainerPresenter  outputsContainer;
     @Mock
     private RecipePartPresenter        recipePanel;
+    @Mock
+    private EventBus                   eventBus;
 
     //additional mocks
     @Mock
@@ -121,7 +124,8 @@ public class MachinePerspectiveTest {
                                              recipePanel,
                                              notificationManager,
                                              outputsContainer,
-                                             infoContainer);
+                                             infoContainer,
+                                             eventBus);
     }
 
     @Test

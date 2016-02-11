@@ -15,6 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEventHandler;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
@@ -25,7 +27,6 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.ide.websocket.rest.StringUnmarshallerWS;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 
@@ -40,12 +41,15 @@ import java.util.Map;
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class LogsOutputHandler implements DependencyUpdatedEventHandler {
+public class LogsOutputHandler implements DependencyUpdatedEventHandler, ExtServerStateHandler {
 
     private final CommandConsoleFactory          consoleFactory;
     private final OutputsContainerPresenter      outputsContainerPresenter;
-    private final MessageBus                     messageBus;
     private final Map<String, ChannelParameters> channelParameters;
+    private final MessageBusProvider             messageBusProvider;
+
+    private MessageBus                  messageBus;
+    private SubscriptionHandler<String> outputHandler;
 
     @Inject
     public LogsOutputHandler(CommandConsoleFactory consoleFactory,
@@ -56,8 +60,19 @@ public class LogsOutputHandler implements DependencyUpdatedEventHandler {
         this.outputsContainerPresenter = outputsContainerPresenter;
         this.messageBus = messageBusProvider.getMachineMessageBus();
         this.channelParameters = new HashMap<>();
+        this.messageBusProvider = messageBusProvider;
 
         eventBus.addHandler(DependencyUpdatedEvent.TYPE, this);
+        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+    }
+
+    @Override
+    public void onExtServerStarted(ExtServerStateEvent event) {
+        messageBus = messageBusProvider.getMachineMessageBus();
+    }
+
+    @Override
+    public void onExtServerStopped(ExtServerStateEvent event) {
     }
 
     @Override
@@ -69,12 +84,11 @@ public class LogsOutputHandler implements DependencyUpdatedEventHandler {
         flushBuffer(updatedChannel);
 
         try {
-            messageBus.unsubscribe(updatedChannel, new MessageHandler() {
-                @Override
-                public void onMessage(String message) {
-                    Log.info(getClass(), message);
-                }
-            });
+            if (outputHandler == null) {
+                return;
+            }
+
+            messageBus.unsubscribe(updatedChannel, outputHandler);
         } catch (WebSocketException exception) {
             Log.error(getClass(), exception);
         }
@@ -94,28 +108,30 @@ public class LogsOutputHandler implements DependencyUpdatedEventHandler {
 
         channelParameters.put(channel, ChannelParameters.of(console, new LinkedList<String>()));
 
+        outputHandler = new SubscriptionHandler<String>(new StringUnmarshallerWS()) {
+            @Override
+            protected void onMessageReceived(String logs) {
+                List<String> lines = StringUtils.split(logs, "\n");
+
+                channelParameters.get(channel).addAllLines(lines);
+
+                if (channelParameters.get(channel).isOutputEnded()) {
+                    flushBuffer(channel);
+
+                    return;
+                }
+
+                printOutput(channel);
+            }
+
+            @Override
+            protected void onErrorReceived(Throwable exception) {
+                Log.error(getClass(), exception);
+            }
+        };
+
         try {
-            messageBus.subscribe(channel, new SubscriptionHandler<String>(new StringUnmarshallerWS()) {
-                @Override
-                protected void onMessageReceived(String logs) {
-                    List<String> lines = StringUtils.split(logs, "\n");
-
-                    channelParameters.get(channel).addAllLines(lines);
-
-                    if (channelParameters.get(channel).isOutputEnded()) {
-                        flushBuffer(channel);
-
-                        return;
-                    }
-
-                    printOutput(channel);
-                }
-
-                @Override
-                protected void onErrorReceived(Throwable exception) {
-                    Log.error(getClass(), exception);
-                }
-            });
+            messageBus.subscribe(channel, outputHandler);
         } catch (WebSocketException e) {
             e.printStackTrace();
         }

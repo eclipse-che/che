@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.commons.lang.NameGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -297,6 +298,11 @@ public class UsersWorkspaceImpl implements UsersWorkspace {
             workspace.setStatus(status);
             workspace.setTemporary(isTemporary);
             return workspace;
+        }
+
+        public UsersWorkspaceImplBuilder generateId() {
+            id = NameGenerator.generate("workspace", 16);
+            return this;
         }
 
         public UsersWorkspaceImplBuilder fromConfig(WorkspaceConfig workspaceConfig) {

@@ -13,6 +13,7 @@ package org.eclipse.che.ide.workspace.perspectives.project;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
@@ -54,8 +55,9 @@ public class ProjectPerspective extends AbstractPerspective {
                               PartStackViewFactory partViewFactory,
                               WorkBenchControllerFactory controllerFactory,
                               ProjectExplorerPart projectExplorerPart,
-                              NotificationManager notificationManager) {
-        super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory);
+                              NotificationManager notificationManager,
+                              EventBus eventBus) {
+        super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
 
         notificationManager.addRule(PROJECT_PERSPECTIVE_ID);
 
@@ -89,5 +91,7 @@ public class ProjectPerspective extends AbstractPerspective {
         container.setWidget(view);
 
         openActivePart(NAVIGATION);
+
+        restoreState();
     }
 }

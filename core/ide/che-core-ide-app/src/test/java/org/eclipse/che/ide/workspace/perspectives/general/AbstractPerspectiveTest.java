@@ -16,8 +16,11 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
+import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackView;
@@ -65,6 +68,8 @@ public class AbstractPerspectiveTest {
     private PartStackViewFactory       partStackViewFactory;
     @Mock
     private WorkBenchControllerFactory controllerFactory;
+    @Mock
+    private EventBus                   eventBus;
 
     //additional mocks
     @Mock
@@ -87,6 +92,8 @@ public class AbstractPerspectiveTest {
     private Constraints             constraints;
     @Mock
     private PartPresenter           activePart;
+    @Mock
+    private AbstractEditorPresenter editorPart;
 
     private AbstractPerspective perspective;
 
@@ -111,7 +118,7 @@ public class AbstractPerspectiveTest {
         when(stackPresenterFactory.create(Matchers.<PartStackView>anyObject(),
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
 
-        perspective = new DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory);
+        perspective = new DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus);
     }
 
     @Test
@@ -136,6 +143,8 @@ public class AbstractPerspectiveTest {
         verify(controllerFactory, times(2)).createController(layoutPanel, simplePanel);
         verify(controllerFactory).createController(layoutPanel, simpleLayoutPanel);
         verify(stackPresenterFactory, times(3)).create(partStackView, workBenchController);
+
+        verify(eventBus).addHandler(ActivePartChangedEvent.TYPE, perspective);
     }
 
     @Test
@@ -148,6 +157,25 @@ public class AbstractPerspectiveTest {
     }
 
     @Test
+    public void perspectiveStateShouldBeStored() {
+        perspective.onActivePartChanged(new ActivePartChangedEvent(editorPart));
+
+        perspective.storeState();
+
+        verify(editorPart).storeState();
+    }
+
+    @Test
+    public void perspectiveStateShouldBeRestored() {
+        perspective.onActivePartChanged(new ActivePartChangedEvent(editorPart));
+        perspective.storeState();
+
+        perspective.restoreState();
+
+        verify(editorPart).restoreState();
+    }
+
+    @Test
     public void partShouldBeHided() {
         when(partStackPresenter.containsPart(partPresenter)).thenReturn(true);
 
@@ -157,16 +185,16 @@ public class AbstractPerspectiveTest {
     }
 
     @Test
-    public void partShouldBeExpanded() {
-        perspective.expandEditorPart();
+    public void partsShouldBeCollapsed() {
+        perspective.collapseParts();
 
         verify(workBenchController, times(3)).getSize();
         verify(workBenchController, times(3)).setHidden(true);
     }
 
     @Test
-    public void editorPartShouldBeRestored() {
-        perspective.restoreEditorPart();
+    public void partsShouldBeRestored() {
+        perspective.expandParts();
 
         verify(workBenchController, times(3)).setSize(anyDouble());
     }
@@ -241,8 +269,9 @@ public class AbstractPerspectiveTest {
         private DummyPerspective(@NotNull PerspectiveViewImpl view,
                                  @NotNull PartStackPresenterFactory stackPresenterFactory,
                                  @NotNull PartStackViewFactory partViewFactory,
-                                 @NotNull WorkBenchControllerFactory controllerFactory) {
-            super(SOME_TEXT, view, stackPresenterFactory, partViewFactory, controllerFactory);
+                                 @NotNull WorkBenchControllerFactory controllerFactory,
+                                 @NotNull EventBus eventBus) {
+            super(SOME_TEXT, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
 
             partStacks.put(EDITING, partStackPresenter);
         }

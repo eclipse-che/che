@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriBuilder;
@@ -38,30 +39,30 @@ import java.net.URI;
  */
 @Singleton
 public class WsAgentLauncherImpl implements WsAgentLauncher {
-    public static final String WS_AGENT_PROCESS_START_COMMAND  = "machine.ws_agent.run_command";
-    public static final String WS_AGENT_PROCESS_NAME           = "CheWsAgent";
-    public static final int    WS_AGENT_PORT                   = 4401;
+    public static final String WS_AGENT_PROCESS_START_COMMAND = "machine.ws_agent.run_command";
+    public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
+    public static final int    WS_AGENT_PORT                  = 4401;
 
     private static final Logger LOG                             = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
 
-    private final MachineManager         machineManager;
-    private final HttpJsonRequestFactory httpJsonRequestFactory;
-    private final String                 wsAgentStartCommandLine;
-    private final long                   wsAgentMaxStartTimeMs;
-    private final long                   wsAgentPingDelayMs;
-    private final int                    wsAgentPingConnectionTimeoutMs;
-    private final String                 wsAgentPingPath;
+    private final Provider<MachineManager> machineManagerProvider;
+    private final HttpJsonRequestFactory   httpJsonRequestFactory;
+    private final String                   wsAgentStartCommandLine;
+    private final long                     wsAgentMaxStartTimeMs;
+    private final long                     wsAgentPingDelayMs;
+    private final int                      wsAgentPingConnectionTimeoutMs;
+    private final String                   wsAgentPingPath;
 
     @Inject
-    public WsAgentLauncherImpl(MachineManager machineManager,
+    public WsAgentLauncherImpl(Provider<MachineManager> machineManagerProvider,
                                HttpJsonRequestFactory httpJsonRequestFactory,
                                @Named(WS_AGENT_PROCESS_START_COMMAND) String wsAgentStartCommandLine,
                                @Named("api.endpoint") URI apiEndpoint,
                                @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
                                @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs) {
-        this.machineManager = machineManager;
+        this.machineManagerProvider = machineManagerProvider;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.wsAgentStartCommandLine = wsAgentStartCommandLine;
         this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;
@@ -77,11 +78,11 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
 
     @Override
     public void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException {
-        final Instance devMachine = machineManager.getDevMachine(workspaceId);
+        final Instance devMachine = getMachineManager().getDevMachine(workspaceId);
         try {
-            machineManager.exec(devMachine.getId(),
-                                new CommandImpl(WS_AGENT_PROCESS_NAME, wsAgentStartCommandLine, "Arbitrary"),
-                                getWsAgentProcessOutputChannel(workspaceId));
+            getMachineManager().exec(devMachine.getId(),
+                                     new CommandImpl(WS_AGENT_PROCESS_NAME, wsAgentStartCommandLine, "Arbitrary"),
+                                     getWsAgentProcessOutputChannel(workspaceId));
 
             final HttpJsonRequest wsAgentPingRequest = createPingRequest(devMachine);
 
@@ -126,5 +127,9 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
         } catch (ApiException | IOException ignored) {
         }
         return false;
+    }
+
+    private MachineManager getMachineManager() {
+        return machineManagerProvider.get();
     }
 }

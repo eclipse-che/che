@@ -81,6 +81,16 @@ public class ExtServerStateController implements ConnectionOpenedHandler, Connec
 
         initialLoadingInfo.setOperationStatus(EXTENSION_SERVER_BOOTING.getValue(), IN_PROGRESS);
         connect();
+
+        messageBus = messageBusProvider.createMachineMessageBus(wsUrl);
+        messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
+            @Override
+            public void onOpen() {
+                messageBus.removeOnOpenHandler(this);
+                eventBus.fireEvent(ExtServerStateEvent.createExtServerStartedEvent());
+            }
+        });
+
     }
 
     @Override
@@ -107,15 +117,6 @@ public class ExtServerStateController implements ConnectionOpenedHandler, Connec
         state = ExtServerState.STARTED;
         initialLoadingInfo.setOperationStatus(EXTENSION_SERVER_BOOTING.getValue(), SUCCESS);
         loader.hide();
-
-        messageBus = messageBusProvider.createMachineMessageBus(wsUrl);
-        messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
-            @Override
-            public void onOpen() {
-                messageBus.removeOnOpenHandler(this);
-                eventBus.fireEvent(ExtServerStateEvent.createExtServerStartedEvent());
-            }
-        });
 
         if (messageBusCallback != null) {
             messageBusCallback.onSuccess(messageBus);

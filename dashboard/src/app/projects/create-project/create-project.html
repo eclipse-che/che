@@ -12,7 +12,7 @@
 -->
 <che-toolbar che-title="New Project"
               class="create-project-page-toolbar">
-    <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
+    <div ng-show="createProjectCtrl.isCreateProjectInProgress() && createProjectCtrl.getCurrentProgressStep() !== (createProjectCtrl.getCreationSteps().length - 1)">
         <a class="create-project-minimize-icon material-design icon-ic_picture_in_picture_24px"
                              ng-href="#/projects"
                              ng-click="createProjectCtrl.hideCreateProjectPanel()"></a>
@@ -114,7 +114,7 @@
 
 
             <div ng-show="createProjectCtrl.selectSourceOption === 'select-source-existing'">
-                <md-tabs md-stretch-tabs="always" md-dynamic-height md-swipe-content md-selected="createProjectCtrl.selectedTabIndex">
+                <md-tabs md-stretch-tabs="always" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
                     <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')" che-event-logger="new.project/git">
                         <md-tab-label>
                             <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>

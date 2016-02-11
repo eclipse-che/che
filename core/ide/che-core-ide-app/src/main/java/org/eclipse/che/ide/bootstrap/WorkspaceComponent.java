@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
+import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceEvent;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentStateDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -35,6 +36,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.core.Component;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -51,9 +53,7 @@ import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceEvent;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
 
@@ -87,9 +87,9 @@ public abstract class WorkspaceComponent implements Component, ExtServerStateHan
     protected final DialogFactory             dialogFactory;
     protected final PreferencesManager        preferencesManager;
     protected final DtoFactory                dtoFactory;
-    protected final NotificationManager      notificationManager;
+    protected final NotificationManager       notificationManager;
+    protected final StartWorkspacePresenter   startWorkspacePresenter;
 
-    protected final StartWorkspacePresenter  startWorkspacePresenter;
     private final EventBus                 eventBus;
     private final LoaderPresenter          loader;
     private final Provider<MachineManager> machineManagerProvider;
@@ -150,25 +150,10 @@ public abstract class WorkspaceComponent implements Component, ExtServerStateHan
     /** {@inheritDoc} */
     @Override
     public void onExtServerStopped(ExtServerStateEvent event) {
-        notificationManager.notify(locale.extServerStopped());
     }
 
 
     abstract void tryStartWorkspace();
-
-    protected void showWorkspaceDialog() {
-        workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(new Operation<List<UsersWorkspaceDto>>() {
-            @Override
-            public void apply(List<UsersWorkspaceDto> workspaces) throws OperationException {
-                if (workspaces.isEmpty()) {
-                    createWorkspacePresenter.show(workspaces, callback);
-                    return;
-                }
-
-                startWorkspacePresenter.show(workspaces, callback);
-            }
-        });
-    }
 
     /**
      * Sets workspace to app context as current.
@@ -302,20 +287,22 @@ public abstract class WorkspaceComponent implements Component, ExtServerStateHan
                             eventBus.fireEvent(new StartWorkspaceEvent(workspace));
                             break;
                         case ERROR:
+                            eventBus.fireEvent(new StopWorkspaceEvent(workspace));
+                            unSubscribeWorkspace(statusEvent.getWorkspaceId(), this);
                             notificationManager.notify(locale.workspaceStartFailed(), FAIL, true);
                             initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), ERROR);
                             showErrorDialog(workspaceName, statusEvent.getError());
                             break;
                         case STOPPED:
-                            unSubscribeWorkspace(statusEvent.getWorkspaceId());
-                            eventBus.fireEvent(new StopWorkspaceEvent(workspace));
                             workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(new Operation<List<UsersWorkspaceDto>>() {
                                 @Override
                                 public void apply(List<UsersWorkspaceDto> workspaces) throws OperationException {
                                     startWorkspacePresenter.show(workspaces, callback);
                                 }
                             });
-
+                            eventBus.fireEvent(new StopWorkspaceEvent(workspace));
+                            unSubscribeWorkspace(statusEvent.getWorkspaceId(), this);
+                            notificationManager.notify(locale.extServerStopped(), StatusNotification.Status.SUCCESS, true);
                             break;
                         case SNAPSHOT_CREATED:
                             snapshotCreator.successfullyCreated();
@@ -357,14 +344,9 @@ public abstract class WorkspaceComponent implements Component, ExtServerStateHan
 
     }
 
-    private void unSubscribeWorkspace(String workspaceId) {
+    private void unSubscribeWorkspace(String workspaceId, MessageHandler handler) {
         try {
-            messageBus.unsubscribe("workspace:" + workspaceId, new MessageHandler() {
-                @Override
-                public void onMessage(String message) {
-                    Log.info(getClass(), message);
-                }
-            });
+            messageBus.unsubscribe("workspace:" + workspaceId, handler);
         } catch (WebSocketException exception) {
             Log.error(getClass(), exception);
         }
@@ -377,7 +359,6 @@ public abstract class WorkspaceComponent implements Component, ExtServerStateHan
         return new Operation<UsersWorkspaceDto>() {
             @Override
             public void apply(UsersWorkspaceDto workspaceToStart) throws OperationException {
-                WorkspaceStatus wsFromReferenceStatus = workspaceToStart.getStatus();
                 startWorkspaceById(workspaceToStart);
             }
         };

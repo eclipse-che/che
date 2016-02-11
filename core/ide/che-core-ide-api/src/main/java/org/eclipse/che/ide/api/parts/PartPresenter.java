@@ -14,13 +14,13 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -34,6 +34,12 @@ public interface PartPresenter extends Presenter {
     int TITLE_PROPERTY     = 0x001;
     /** The property id for <code>getSelection</code>. */
     int SELECTION_PROPERTY = 0x002;
+
+    /** Store part state before changing perspective. */
+    void storeState();
+
+    /** Restore part state after changing perspective. */
+    void restoreState();
 
     /** @return Title of the Part */
     @NotNull
@@ -50,7 +56,7 @@ public interface PartPresenter extends Presenter {
     /**
      * Returns the title image of this part.  If this value changes the part must fire a property listener event with
      * <code>PROP_TITLE</code>.
-     * <p/>
+     * <p>
      * The title image is usually used to populate the title bar of this part's visual container.
      *
      * @return the title image
@@ -61,7 +67,7 @@ public interface PartPresenter extends Presenter {
     /**
      * Returns the title SVG image resource of this part.  If this value changes the part must fire a property listener event with
      * <code>PROP_TITLE</code>.
-     * <p/>
+     * <p>
      * The title image is usually used to populate the title bar of this part's visual container.
      *
      * @return the title SVG image resource
@@ -84,7 +90,7 @@ public interface PartPresenter extends Presenter {
      * Returns the widget to be displayed in the title of this part. If this value changes the part must fire a property listener event
      * with
      * <code>PROP_TITLE</code>.
-     * <p/>
+     * <p>
      * The title widget is usually used to populate the title bar of this part's visual container.
      *
      * @return the title widget

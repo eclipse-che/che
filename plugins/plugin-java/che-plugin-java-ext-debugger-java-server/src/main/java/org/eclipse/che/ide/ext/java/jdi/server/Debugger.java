@@ -31,6 +31,7 @@ import com.sun.jdi.request.StepRequest;
 
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.jdi.server.expression.Evaluator;
+import org.eclipse.che.ide.ext.java.jdi.server.expression.ExpressionException;
 import org.eclipse.che.ide.ext.java.jdi.server.expression.ExpressionParser;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPointEvent;
@@ -781,6 +782,8 @@ public class Debugger implements EventsHandler {
         final long startTime = System.currentTimeMillis();
         try {
             return parser.evaluate(new Evaluator(vm, getCurrentThread()));
+        } catch (ExpressionException e) {
+            throw new DebuggerStateException(e.getMessage());
         } finally {
             final long endTime = System.currentTimeMillis();
             LOG.debug("==>> Evaluate time: {} ms", (endTime - startTime));

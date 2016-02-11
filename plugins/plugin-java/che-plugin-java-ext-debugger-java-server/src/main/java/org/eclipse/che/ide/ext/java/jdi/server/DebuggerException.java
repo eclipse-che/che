@@ -10,13 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.server;
 
+import org.eclipse.che.api.core.ServerException;
+
 /**
  * Main exception to throw my Debugger. Used as wrapper for JDI (Java Debug Interface) exceptions.
  *
  * @author andrew00x
  */
 @SuppressWarnings("serial")
-public class DebuggerException extends Exception {
+public class DebuggerException extends ServerException {
     public DebuggerException(String message) {
         super(message);
     }

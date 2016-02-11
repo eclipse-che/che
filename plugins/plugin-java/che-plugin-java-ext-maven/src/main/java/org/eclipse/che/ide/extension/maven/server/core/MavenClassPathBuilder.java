@@ -17,9 +17,11 @@ import org.eclipse.che.api.core.util.CancellableProcessWrapper;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.StreamPump;
 import org.eclipse.che.api.core.util.Watchdog;
-import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.api.project.server.Project;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
+import org.eclipse.che.ide.extension.maven.server.projecttype.MavenClassPathConfigurator;
 import org.eclipse.che.ide.maven.tools.MavenUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -51,11 +53,13 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(MavenClassPathBuilder.class);
 
     private final ExecutorService executorService;
+    private final ProjectManager  projectManager;
 
     private String workspaceId;
 
     @Inject
-    public MavenClassPathBuilder(ResourcesPlugin resourcesPlugin) {
+    public MavenClassPathBuilder(ResourcesPlugin resourcesPlugin, ProjectManager projectManager) {
+        this.projectManager = projectManager;
         JavaModelManager.getJavaModelManager().containerInitializersCache.put(MavenClasspathContainer.CONTAINER_ID,
                                                                               new MavenClasspathContainerInitializer());
 
@@ -68,6 +72,16 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
     @Override
     public ClassPathBuilderResult buildClassPath(String workspaceId, String projectPath) throws ExecutionException, InterruptedException {
         this.workspaceId = workspaceId;
+
+        //TODO Temporary solution for IDEX-4270
+        try {
+            Project project = projectManager.getProject(workspaceId, projectPath);
+            if (project != null) {
+                MavenClassPathConfigurator.configure(project.getBaseFolder());
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
 
         Callable<ClassPathBuilderResult> callable = () -> {
 
@@ -83,7 +97,6 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
                                                    null);
                 } catch (JavaModelException e) {
                     LOG.error(e.getMessage(), e);
-                    e.printStackTrace();
                 }
             }
 

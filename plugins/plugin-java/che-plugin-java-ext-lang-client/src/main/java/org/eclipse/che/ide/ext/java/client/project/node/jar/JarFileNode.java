@@ -33,12 +33,13 @@ import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
-import org.eclipse.che.ide.util.Pair;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JAVA_CLASS;
 
 /**
  * It might be used for any jar content.
@@ -115,7 +116,7 @@ public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, Ha
     @Nullable
     @Override
     public String getMediaType() {
-        return isClassFile() ? "application/java-class" : null;
+        return isClassFile() ? APPLICATION_JAVA_CLASS : null;
     }
 
     /** {@inheritDoc} */

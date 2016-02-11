@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.perspectives.general;
 
+import com.google.web.bindery.event.shared.EventBus;
+
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStack;
@@ -23,7 +28,6 @@ import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +44,7 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
  *
  * @author Dmitry Shnurenko
  */
-public abstract class AbstractPerspective implements Presenter, Perspective {
+public abstract class AbstractPerspective implements Presenter, Perspective, ActivePartChangedHandler {
 
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
@@ -50,15 +54,18 @@ public abstract class AbstractPerspective implements Presenter, Perspective {
     private final WorkBenchPartController rightPartController;
     private final WorkBenchPartController belowPartController;
 
-    private double leftPartSize;
-    private double rightPartSize;
-    private double belowPartSize;
+    private double        leftPartSize;
+    private double        rightPartSize;
+    private double        belowPartSize;
+    private PartPresenter activePart;
+    private PartPresenter activePartBeforeChangePerspective;
 
     protected AbstractPerspective(@NotNull String perspectiveId,
                                   @NotNull PerspectiveViewImpl view,
                                   @NotNull PartStackPresenterFactory stackPresenterFactory,
                                   @NotNull PartStackViewFactory partViewFactory,
-                                  @NotNull WorkBenchControllerFactory controllerFactory) {
+                                  @NotNull WorkBenchControllerFactory controllerFactory,
+                                  @NotNull EventBus eventBus) {
         this.view = view;
         this.perspectiveId = perspectiveId;
         this.partStacks = new HashMap<>();
@@ -83,6 +90,8 @@ public abstract class AbstractPerspective implements Presenter, Perspective {
 
         /* Makes splitters much better */
         view.tuneSplitters();
+
+        eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
     /**
@@ -95,6 +104,29 @@ public abstract class AbstractPerspective implements Presenter, Perspective {
         PartStack partStack = partStacks.get(partStackType);
 
         partStack.openPreviousActivePart();
+    }
+
+    @Override
+    public void storeState() {
+        activePartBeforeChangePerspective = activePart;
+
+        if (activePartBeforeChangePerspective != null) {
+            activePartBeforeChangePerspective.storeState();
+        }
+    }
+
+    @Override
+    public void restoreState() {
+        if (activePartBeforeChangePerspective != null) {
+            setActivePart(activePartBeforeChangePerspective);
+
+            activePartBeforeChangePerspective.restoreState();
+        }
+    }
+
+    @Override
+    public void onActivePartChanged(ActivePartChangedEvent event) {
+        activePart = event.getActivePart();
     }
 
     /** {@inheritDoc} */
@@ -116,7 +148,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective {
     }
 
     /** Expands all editors parts. */
-    public void expandEditorPart() {
+    public void collapseParts() {
         leftPartSize = leftPartController.getSize();
         rightPartSize = rightPartController.getSize();
         belowPartSize = belowPartController.getSize();
@@ -127,7 +159,7 @@ public abstract class AbstractPerspective implements Presenter, Perspective {
     }
 
     /** Restores editor parts. */
-    public void restoreEditorPart() {
+    public void expandParts() {
         leftPartController.setSize(leftPartSize);
         rightPartController.setSize(rightPartSize);
         belowPartController.setSize(belowPartSize);

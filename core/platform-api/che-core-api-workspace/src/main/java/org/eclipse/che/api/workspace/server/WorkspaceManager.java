@@ -11,7 +11,6 @@
 package org.eclipse.che.api.workspace.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
@@ -58,7 +57,6 @@ import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEven
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATION_ERROR;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STARTING;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.STOPPING;
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -569,20 +567,17 @@ public class WorkspaceManager {
         }
     }
 
-    private UsersWorkspaceImpl fromConfig(WorkspaceConfig config, String owner) throws BadRequestException, ForbiddenException, ServerException {
+    private UsersWorkspaceImpl fromConfig(WorkspaceConfig config, String owner) throws BadRequestException,
+                                                                                       ForbiddenException,
+                                                                                       ServerException {
         requiredNotNull(config, "Required non-null workspace configuration");
         requiredNotNull(owner, "Required non-null workspace owner");
-        configValidator.validateWithoutWorkspaceName(config);
-
-        final UsersWorkspaceImpl workspace = new UsersWorkspaceImpl(config, generateWorkspaceId(), owner);
-
-        if (Strings.isNullOrEmpty(workspace.getName())) {
-            workspace.setName(generateWorkspaceName());
-        } else {
-            configValidator.validateWorkspaceName(config.getName());
-        }
-
-        return workspace;
+        configValidator.validate(config);
+        return UsersWorkspaceImpl.builder()
+                                 .generateId()
+                                 .fromConfig(config)
+                                 .setOwner(owner)
+                                 .build();
     }
 
     /**
@@ -698,43 +693,6 @@ public class WorkspaceManager {
         if (object == null) {
             throw new BadRequestException(message);
         }
-    }
-
-    /**
-     * Generates workspace name based on current user email.
-     * Generating process is simple, assuming we have user with email user@codenvy.com,
-     * then first time we will check for workspace with name equal to "user" and if it is free
-     * it will be returned, but if it is reserved then  number suffix will be added to the end of "user" name
-     * and it will be checked again until free workspace name is not found.
-     */
-    private String generateWorkspaceName() throws ServerException {
-        //should be email
-        String userName = EnvironmentContext.getCurrent().getUser().getName();
-        int atIdx = userName.indexOf('@');
-        //if username contains email then fetch part before '@'
-        if (atIdx != -1) {
-            userName = userName.substring(0, atIdx);
-        }
-        //search first workspace name which is free
-        int suffix = 2;
-        String workspaceName = userName;
-        while (workspaceExists(workspaceName)) {
-            workspaceName = userName + suffix++;
-        }
-        return workspaceName;
-    }
-
-    private String generateWorkspaceId() {
-        return generate("workspace", Constants.ID_LENGTH);
-    }
-
-    private boolean workspaceExists(String name) throws ServerException {
-        try {
-            workspaceDao.get(name);
-        } catch (NotFoundException nfEx) {
-            return false;
-        }
-        return true;
     }
 
     /**

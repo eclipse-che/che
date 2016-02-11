@@ -30,7 +30,7 @@ public class DockerTerminalModule extends AbstractModule {
 
         bindConstant().annotatedWith(Names.named(DockerMachineTerminalLauncher.START_TERMINAL_COMMAND))
                       .to("mkdir -p ~/che " +
-                          "&& cp /mnt/che/terminal -nR ~/che" +
+                          "&& cp /mnt/che/terminal -R ~/che" +
                           "&& ~/che/terminal/terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
 
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),

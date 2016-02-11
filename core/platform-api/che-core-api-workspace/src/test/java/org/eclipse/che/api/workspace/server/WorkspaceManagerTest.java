@@ -121,16 +121,6 @@ public class WorkspaceManagerTest {
     }
 
     @Test
-    public void shouldGenerateWorkspaceNameIfItIsNotPresentInConfiguration() throws Exception {
-        final WorkspaceConfigDto config = createConfig().withName(null);
-        when(workspaceDao.get(any())).thenThrow(new NotFoundException("Not found"));
-
-        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(config, "user123", "account");
-
-        assertNotNull(workspace.getName());
-    }
-
-    @Test
     public void shouldBeAbleToGetWorkspaceById() throws Exception {
         final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);

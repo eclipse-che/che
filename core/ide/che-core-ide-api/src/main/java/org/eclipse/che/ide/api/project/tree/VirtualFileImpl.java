@@ -55,7 +55,8 @@ public class VirtualFileImpl implements VirtualFile {
 
     @Override
     public String getMediaType() {
-        return null;
+        // It will be required to use file extension instead of MimeType in future
+        return fileInfo.getMediaType();
     }
 
     @Override

@@ -11,60 +11,25 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 /**
- * Interface for validations of workspace config.
+ * Interface for workspace config validations.
  *
- * @author Alexander Reshetnyak
+ * <p>This interface doesn't declare any validation constrains
+ * because the validation itself is implementation specific.
+ *
+ * @author Yevhenii Voevodin
  */
 public interface WorkspaceConfigValidator {
 
     /**
-     * Checks that {@link WorkspaceConfig cfg} contains valid values, if it is not throws {@link BadRequestException}.
+     * Checks that workspace is valid.
      *
-     * Validation rules:
-     * <ul>
-     * <li>{@link WorkspaceConfig#getName()} must not be empty or null</li>
-     * <li>{@link WorkspaceConfig#getDefaultEnv()} must not be empty or null</li>
-     * <li>{@link WorkspaceConfig#getEnvironments()} must contain {@link WorkspaceConfig#getDefaultEnv() default environment}
-     * which is declared in the same configuration</li>
-     * <li>{@link Environment#getName()} must not be null</li>
-     * <li>{@link Environment#getMachineConfigs()} must contain at least 1 machine(which is dev),
-     * also it must contain exactly one dev machine</li>
-     * </ul>
-     *
+     * @param config
+     *         workspace configuration for validation
      * @throws BadRequestException
-     *         when any constrain violation
+     *         in the case of constrain violation
      */
-    void validate(WorkspaceConfig cfg) throws BadRequestException;
-
-    /**
-     * Checks that {@link WorkspaceConfig cfg} contains valid values, if it is not throws {@link BadRequestException}.
-     *
-     * Validation rules:
-     * <ul>
-     * <li>{@link WorkspaceConfig#getName()} does not check</li>
-     * <li>{@link WorkspaceConfig#getDefaultEnv()} must not be empty or null</li>
-     * <li>{@link WorkspaceConfig#getEnvironments()} must contain {@link WorkspaceConfig#getDefaultEnv() default environment}
-     * which is declared in the same configuration</li>
-     * <li>{@link Environment#getName()} must not be null</li>
-     * <li>{@link Environment#getMachineConfigs()} must contain at least 1 machine(which is dev),
-     * also it must contain exactly one dev machine</li>
-     * </ul>
-     *
-     * @throws BadRequestException
-     *         when any constrain violation
-     */
-    void validateWithoutWorkspaceName(WorkspaceConfig cfg) throws BadRequestException;
-
-    /**
-     * Checks workspace name. It must contain valid value, if it is not throws {@link BadRequestException}.
-     * @param workspace
-     *
-     * @throws BadRequestException
-     *         when constrain violation
-     */
-    void validateWorkspaceName(String workspace) throws BadRequestException;
+    void validate(WorkspaceConfig config) throws BadRequestException;
 }
