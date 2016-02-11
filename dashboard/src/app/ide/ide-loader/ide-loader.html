@@ -1,0 +1,34 @@
+<div flex style="height: 100%" class="ide-loader">
+    <div layout="column" layout-align="start center">
+        <div class="ide-loader-logo" ng-if="branding.logoURL">
+            <img ng-src="{{branding.logoURL}}">
+        </div>
+    </div>
+    <div class="create-project-progress-panel-bottom">
+        <div ng-repeat="step in ideLoaderCtrl.getSteps()">
+            <div ng-if="$index < (ideLoaderCtrl.getSteps().length -1)"
+                 class="create-project-panel-progress-items"
+                 ng-class="{'create-project-panel-progress-items-enabled' : (ideLoaderCtrl.getCurrentStep() >= $index), 'create-project-panel-progress-items-error' : ideLoaderCtrl.getSteps()[$index].hasError}"
+                    >
+                <div  layout="row" layout-align="start center">
+                    <div class="create-project-panel-progress-item-number" ng-class="{'create-project-panel-progress-item-number-in-progress' : (ideLoaderCtrl.getCurrentStep() === $index && !ideLoaderCtrl.getSteps()[$index].hasError)}">{{$index + 1}}</div>
+                    <div flex>{{ideLoaderCtrl.getStepText($index)}}</div>
+                    <che-button-danger ng-show="ideLoaderCtrl.getSteps()[$index].hasError"
+                                        che-button-title="Retry" ng-click="ideLoaderCtrl.resetCreateProgress()" ></che-button-danger>
+                </div>
+            </div>
+            <div ng-if="$index < (ideLoaderCtrl.getSteps().length - 1)" layout="row">
+                <div ng-class="{'create-project-panel-progress-item-link-enabled' : (ideLoaderCtrl.getCurrentStep() > $index), 'create-project-panel-progress-item-link-error' : ideLoaderCtrl.getSteps()[$index].hasError}"
+                     class="create-project-panel-progress-item-link">&nbsp;</div>
+
+                <textarea che-auto-scroll ng-show="ideLoaderCtrl.getSteps()[$index].logs.length > 0" flex class="create-project-panel-progress-item-output" rows="5" ng-model="ideLoaderCtrl.getSteps()[$index].logs"></textarea>
+            </div>
+        </div>
+        <div ng-class="{'create-project-panel-progress-lastitem-enabled' : (ideLoaderCtrl.getCurrentStep() === (ideLoaderCtrl.getSteps().length - 1)), 'create-project-panel-progress-lastitem-error' : createProjectCtrl.getSteps()[$index].hasError}"
+             class="create-project-panel-progress-lastitem" layout="row" layout-align="end start">
+            &nbsp;
+        </div>
+        <div ng-click="ideLoaderCtrl.cancelLoad()" class="ide-loader-cancel-item">Workspace does not load propertly ? Return to dashboard</div>
+
+    </div>
+</div>

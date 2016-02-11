@@ -1,0 +1,89 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field="locale" type="org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant"/>
+
+    <ui:style>
+        .fullSize {
+            height: 100%;
+            width: 100%;
+        }
+
+        .main {
+            width: 600px;
+            height: 200px;
+            float: left;
+            margin-top: 12px;
+            margin-left: 12px;
+            -moz-user-select: text;
+            -webkit-user-select: auto;
+            user-select: text;
+        }
+
+        .block {
+            height: 25px;
+            width: 350px;
+            float: left;
+        }
+
+        .label {
+            float: left;
+            cursor: default !important;
+        }
+
+        .value {
+            float: right;
+            cursor: default !important;
+        }
+    </ui:style>
+    <g:FlowPanel addStyleNames="{style.fullSize}">
+        <g:FlowPanel addStyleNames="{style.main}">
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoName}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="name" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoMachineId}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="machineId" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoOwner}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="owner" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoStatus}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="status" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoType}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="type" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoDev}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="dev" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="{style.block}">
+                <g:Label text="{locale.infoWsId}" addStyleNames="{style.label}"/>
+                <g:Label ui:field="workspaceId" addStyleNames="{style.value}"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

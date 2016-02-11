@@ -1,0 +1,32 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
+
+    <g:DockLayoutPanel ui:field="dockPanel">
+        <g:north size="15">
+            <g:HorizontalPanel width="100%">
+                <g:cell width="50%" horizontalAlignment="ALIGN_CENTER">
+                    <g:Label text="{locale.compareYourVersionTitle}"/>
+                </g:cell>
+                <g:cell width="50%" horizontalAlignment="ALIGN_CENTER">
+                    <g:Label ui:field="revision"/>
+                </g:cell>
+            </g:HorizontalPanel>
+        </g:north>
+        <g:center>
+            <g:SimplePanel ui:field="comparePanel"/>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

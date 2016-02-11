@@ -1,0 +1,95 @@
+
+###################################################################################################
+###
+### Eclipse Che Plug-Ins and Extensions - Packaging Web Apps & Creating Distributable Assemblies
+###
+###################################################################################################
+
+This is the staging directory for Eclipse Che plug-ins. Che packages extensions and plug-ins into 
+Web application packages that are then deployed by Che. The location of your plug-ins determines
+how your plug-ins will be packaged and deployed. This program can also be used to generate new
+Che assemblies that can be installed and distributed by others.
+
+Copy plug-in JARs & ZIPs into a staging directory and then run `bin/che-intsall-plugin` to create 
+new Che packages and assemblies with your plug-ins.
+
+###################################################################################################
+###
+### UTILITY USAGE - IN ${CHE_HOME}/BIN
+###
+###################################################################################################
+
+  che-install-plugin [OPTIONS]
+     -a            --assembly          Creates new distributable Che assembly with your plugins
+     -s:deps,      --skip:deps         Skips automatic injection of POM dependencies of your plugins
+     -s:maven,     --skip:maven        Skips running maven to inject your plugins into local repository
+     -s:update,    --skip:update       Skips updating this assembly with new packages; leaves them in /temp build dir
+     -s:wsagent,   --skip:wsagent      Skips creating new ws agent
+     -s:wsmaster,  --skip:wsmaster     Skips creating new ws master, which contains IDE & ws manager
+     -d,           --debug             Additional verbose logging for this program
+     -h,           --help              This help message
+
+###################################################################################################
+###
+### WHERE TO PLACE YOUR PLUG-INS
+###
+###################################################################################################
+
+  /plugins/ide        -> IDE extension, compiled with GWT & packaged into new ws-master Web
+                         application.
+
+  /plugins/ws-master  -> Server-side extension & packaged into new ws-master Web application with 
+                         the IDE.
+
+  /plugins/ws-agent   -> Server-side extension that runs in workspace machine & packaged into new 
+                         ws-agent Web application.
+
+  /plugins/           -> Packaged in both ws-master and ws-agent Web applications. (Not Recommended)
+
+
+You extension is compiled into one of two web applications:
+  1. Workspace master 
+  2. Workspace agent
+
+The workspace master is deployed into the core Che server. The workspace agent is deployed into the 
+machine powering each workspace created by your users. Each workspace agent is unique to the 
+workspace that created it. While you can deploy plug-ins into both locations, this is costly at 
+compile and runtime.
+
+###################################################################################################
+###
+### HOW CHE CONSTRUCTS NEW PACKAGES & ASSEMBLIES
+###
+###################################################################################################
+
+  1. Che installs your plug-in JARs into a local maven repository.
+
+  2. Che creates staging modules in temporary directories to build new Web applications:
+
+       /sdk/assembly-ide-war/temp 
+       /sdk/assembly-machine-war/temp 
+
+  3. Your plug-ins are added as dependencies to the maven pom.xml in each staging module. 
+
+  4. The new Web applications are compiled and packaged into WARs:
+
+       $ mvn sortpom:sort
+       $ mvn -Denforcer.skip=true clean package install -Dskip-validate-sources=true
+
+  5. If your plug-ins are added into the workspace agent, Che packages the agent web app with 
+     Tomcat to create a new ws-agent.zip package:
+
+       /sdk/assembly-machine-server
+       $ mvn -Denforcer.skip=true clean package install 
+
+  6. The packages are copied into your core Che assembly, overwriting any old version. The
+     `--skip:update` option will leave the new apps in their /temp directory without
+     overriding existing applications. 
+
+       /sdk/assembly-ide-war/temp/target/*.war  --> /tomcat/webapps
+       /sdk/assembly-machine-server/target/*.zip --> /lib/ws-agent.zip
+     
+  7. If `--assembly` flag, then Che also creates a new distributable package of Che:
+
+       /sdk/assembly-main
+       $ mvn clean package

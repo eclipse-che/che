@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32px"
+	 height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<g id="_x31_5_1_">
+	<path id="_x3C_Path_x3E__28_" fill-rule="evenodd" clip-rule="evenodd" fill="#808080" d="M9.146,15.005
+		c-0.044-0.006-0.09-0.009-0.137-0.009c-0.553,0-1,0.447-1,1c0,0.552,0.447,1,1,1v0.009h4.163C13.587,18.168,14.696,19,16.001,19
+		c1.304,0,2.413-0.832,2.827-1.995h4.163v-0.009c0.553,0,1-0.448,1-1c0-0.553-0.447-1-1-1c-0.047,0-0.093,0.003-0.137,0.009h-4.023
+		C18.42,13.837,17.309,13,16.001,13c-1.309,0-2.42,0.837-2.831,2.004H9.146L9.146,15.005z M16.001,15c0.553,0,1,0.447,1,1
+		s-0.447,1-1,1C15.447,17,15,16.553,15,16S15.447,15,16.001,15z"/>
+</g>
+</svg>

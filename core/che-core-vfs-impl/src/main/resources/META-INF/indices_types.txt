@@ -1,0 +1,26 @@
+application/xml
+application/xhtml+xml
+application/json
+text/plain
+text/xml
+text/html
+text/css
+application/x-jaxrs+groovy
+application/x-groovy
+application/javascript
+application/x-javascript
+text/javascript
+application/x-google-gadget
+application/x-uwa-widget
+application/x-groovy+html
+application/x-chromattic+groovy
+application/java
+application/jsp
+application/x-ruby
+application/php
+application/x-php
+application/x-httpd-php
+text/x-python
+text/yaml
+text/directory                # all folders have this media type
+text/vnd.ideproject+directory # all projects have this media type

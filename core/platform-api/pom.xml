@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-core-parent</artifactId>
+        <groupId>org.eclipse.che.core</groupId>
+        <version>4.0.0-RC2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>che-core-api-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Che Core :: API :: Parent</name>
+    <modules>
+        <module>che-core-api-dto</module>
+        <module>che-core-api-dto-maven-plugin</module>
+        <module>che-core-api-core</module>
+        <module>che-core-api-vfs</module>
+        <module>che-core-api-workspace</module>
+        <module>che-core-api-user</module>
+        <module>che-core-api-project</module>
+        <module>che-core-api-account</module>
+        <module>che-core-api-factory</module>
+        <module>che-core-api-machine</module>
+        <module>che-core-api-analytics</module>
+        <module>che-core-api-auth</module>
+        <module>che-core-api-git</module>
+        <module>che-core-api-ssh</module>
+        <module>che-core-api-infrastructure-local</module>
+    </modules>
+    <properties>
+        <specification.version>1.0-beta2</specification.version>
+    </properties>
+</project>

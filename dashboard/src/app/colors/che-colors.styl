@@ -1,0 +1,66 @@
+json('che-colors.json')
+
+$primary-color = $che-medium-blue-color
+$default-dark-color = $che-navy-color
+$default-color = $clear-foggy-sky-color
+$secondary-color = $che-green-color
+$secondary-light = $che-purple-color
+$menu-bg-color = $dark-menu-color
+$label-primary-color = $night-foggy-sky-color
+$label-secondary-color = $dark-menacing-sky-color
+$label-info-color = $clear-foggy-sky-color
+$error-color = $red-lipstick-color
+$list-separator-color = $cat-gray-color
+$form-element-border-color = $mouse-gray-color
+$white-color = $che-white-color
+$link-color = $che-medium-blue-color
+$frame-notlogged-color = $che-green-color
+$frame-notlogged-bg-color = alpha($che-green-color, 0.2)
+$frame-nosubscription-color = $che-medium-blue-color
+$frame-nosubscription-bg-color = alpha($che-medium-blue-color, 0.2)
+$frame-subscription-color = $che-medium-blue-color
+$frame-subscription-bg-color = alpha($che-medium-blue-color, 0.2)
+$auth-error-color = $che-orange-color
+$auth-ok-color = $che-green-color
+
+$config-syntax-help-color = $night-foggy-sky-color
+$config-frame-warning-bg-color = alpha($che-orange-color, 0.2)
+$config-frame-warning-color = $che-orange-color
+
+$frame-available-bg-color = alpha($che-medium-blue-color, 0.2)
+
+// change alpha on existing colors
+$hover-on-list-color = rgba($default-color, 0.13)
+$focus-on-list-color = rgba($primary-color, 0.13)
+
+// tooltip border color
+$tooltip-border-color = rgba(51, 51, 51, 1)
+// tooltip background color
+$tooltip-background-color = rgba(0, 0, 0, 0.8)
+// disabled widget color
+$disabled-color = rgba(0, 0, 0, 0.26)
+//radio button's checked color
+$radio-button-checked-color = $che-medium-blue-color
+$background-color = $white-color
+$default-border-color = $list-separator-color
+
+$background-site-color = darken($dark-menu-color, 15%)
+
+$valid-color = alpha($che-medium-blue-color, 0.2)
+$invalid-color = alpha($che-orange-color, 0.2)
+
+$table-header-color = $light-gray-color;
+
+
+// box shadows
+box-shadow-simple()
+  box-shadow 0 2px 5px 0 rgba(0, 0, 0, 0.26)
+
+box-shadow-bigger()
+  box-shadow 0 2px 6px 0 rgba(0, 0, 0, 0.40)
+
+che-border-radius(n)
+  border-radius n !important
+
+che-brightness(n)
+  filter brightness(n)

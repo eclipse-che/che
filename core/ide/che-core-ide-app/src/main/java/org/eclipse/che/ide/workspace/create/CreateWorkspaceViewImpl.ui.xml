@@ -1,0 +1,86 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field="locale" type="org.eclipse.che.ide.CoreLocalizationConstant"/>
+
+    <ui:style>
+        @eval errorColor org.eclipse.che.ide.api.theme.Style.getErrorColor();
+
+        .emptyBorder {
+            margin: 6px;
+        }
+
+        .inputField {
+            width: 380px;
+            padding-left: 8px;
+            height: 20px;
+        }
+
+        .label {
+            line-height: 25px;
+        }
+
+        .floatLeft {
+            float: left;
+        }
+
+        .floatRight {
+            float: right;
+        }
+
+        .errorHint {
+            color: errorColor;
+            height: 12px;
+            margin: 10px;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="500px" height="220px" addStyleNames="{style.emptyBorder}">
+        <g:north size="55">
+            <g:FlowPanel>
+                <g:Label text="{locale.createWsName}" addStyleNames="{style.label} {style.floatLeft}"/>
+                <g:TextBox ui:field="wsName" debugId="createMachineView-machineName" addStyleNames="{style.inputField}
+                                                                                                    {style.floatRight}"/>
+                <g:Label visible="false" ui:field="nameError" text="{locale.createWsNameIsNotCorrect}" addStyleNames="{style.errorHint}
+                                                                                                                       {style.floatRight}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:north size="55">
+            <g:FlowPanel>
+                <g:Label text="{locale.createWsRecipeUrl}" addStyleNames="{style.label} {style.floatLeft}"/>
+                <g:TextBox ui:field="recipeURL" debugId="createMachineView-recipeURL" addStyleNames="{style.inputField}
+                                                                                                     {style.floatRight}"/>
+                <g:Label visible="false" ui:field="recipeUrlError" text="{locale.createWsUrlNotValid}" addStyleNames="{style.errorHint}
+                                                                                                                      {style.floatRight}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:north size="55">
+            <g:FlowPanel>
+                <g:Label text="{locale.createWsPredefinedRecipe}" addStyleNames="{style.label} {style.floatLeft}"/>
+                <g:TextBox ui:field="predefinedRecipes" debugId="createMachineView-recipeURL" addStyleNames="{style.inputField}
+                                                                                                             {style.floatRight}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:south size="55">
+            <g:FlowPanel>
+                <g:Label text="{locale.createWsFindByTags}" addStyleNames="{style.label} {style.floatLeft}"/>
+                <g:TextBox ui:field="tags" debugId="createMachineView-tags" addStyleNames="{style.inputField}
+                                                                                           {style.floatRight}"/>
+                <g:Label visible="false" ui:field="tagsError" text="{locale.createWsRecipeNotFound}" addStyleNames="{style.errorHint}
+                                                                                                                    {style.floatRight}"/>
+            </g:FlowPanel>
+        </g:south>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

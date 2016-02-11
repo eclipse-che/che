@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <path id="path-machine-icon-1" d="M0,0 L6,3 L6,11 L0,8 L0,0 L0,0 Z"></path>
+        <path id="path-machine-icon-3" d="M11.7204925,3.13975375 L5.888195,0.223605 L6.111805,0.223605 L0.279506722,3.13975336 L0.1118034,3.0559017 L0.1118034,2.9440983 L0.279506722,2.86024664 L6.111805,5.776395 L5.888195,5.776395 L11.7204925,2.86024625 L11.888195,2.9440975 L11.888195,3.0559025 L11.7204925,3.13975375 L11.7204925,3.13975375 L11.7204925,3.13975375 Z"></path>
+        <path id="path-machine-icon-5" d="M6,0 L12,3 L6,6 L0,3 L6,0 L6,0 Z"></path>
+        <path id="path-machine-icon-7" d="M0,0 L6,3 L6,11 L0,8 L0,0 L0,0 Z"></path>
+        <path id="path-machine-icon-9" d="M6,0 L0,3 L0,3.5 L6,0.5 L6,0 L6,0 Z"></path>
+        <path id="path-machine-icon-11" d="M6,0 L0,3 L0,3.5 L6,0.5 L6,0 L6,0 Z"></path>
+        <path id="path-machine-icon-13" d="M0,0 L0.5,0 L0.5,7.5 L0,7.5 L0,0 L0,0 Z"></path>
+        <path id="path-machine-icon-15" d="M0,0.5 L0.5,0 L0.5,7.5 L0,7.5 L0,0.5 L0,0.5 Z"></path>
+    </defs>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g>
+            <g transform="translate(2.000000, 1.000000)">
+                <g transform="translate(0.000000, 3.000000)">
+                    <mask id="mask-machine-icon-2" fill="white">
+                        <use xlink:href="#path-machine-icon-1"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M-2.5,-2.5 L8.5,-2.5 L8.5,13.5 L-2.5,13.5 L-2.5,-2.5 Z" id="Fill-1" fill="#4A4A4A" mask="url(#mask-machine-icon-2)"></path>
+                </g>
+                <g id="Group-6">
+                    <mask id="mask-machine-icon-4" fill="white">
+                        <use xlink:href="#path-machine-icon-3"></use>
+                    </mask>
+                    <g id="Clip-5"></g>
+                    <path d="M6,0 L12,3 L6,6 L0,3 L6,0 L6,0 Z" id="Fill-4" fill="#D8D8D8" mask="url(#mask-machine-icon-4)"></path>
+                </g>
+                <g>
+                    <mask id="mask-machine-icon-6" fill="white">
+                        <use xlink:href="#path-machine-icon-5"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M6,0 L12,3 L6,6 L0,3 L6,0 L6,0 Z" id="Stroke-7" stroke="#D8D8D8" stroke-width="2" mask="url(#mask-machine-icon-6)"></path>
+                </g>
+                <g transform="translate(0.000000, 3.000000)">
+                    <mask id="mask-machine-icon-8" fill="white">
+                        <use xlink:href="#path-machine-icon-7"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M-2.5,-2.5 L8.5,-2.5 L8.5,13.5 L-2.5,13.5 L-2.5,-2.5 Z" fill="#D8D8D8" mask="url(#mask-machine-icon-8)"></path>
+                </g>
+                <g transform="translate(6.000000, 10.500000)">
+                    <mask id="mask-machine-icon-10" fill="white">
+                        <use xlink:href="#path-machine-icon-9"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M-2.5,6 L8.5,6 L8.5,-2.5 L-2.5,-2.5 L-2.5,6 Z" fill="#D8D8D8" mask="url(#mask-machine-icon-10)"></path>
+                </g>
+                <g transform="translate(6.000000, 3.000000)">
+                    <mask id="mask-machine-icon-12" fill="white">
+                        <use xlink:href="#path-machine-icon-11"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M-2.5,6 L8.5,6 L8.5,-2.5 L-2.5,-2.5 L-2.5,6 Z" fill="#D8D8D8" mask="url(#mask-machine-icon-12)"></path>
+                </g>
+                <g transform="translate(11.500000, 3.500000)">
+                    <mask id="mask-machine-icon-14" fill="white">
+                        <use xlink:href="#path-machine-icon-13"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M-2.5,-2.5 L3,-2.5 L3,10 L-2.5,10 L-2.5,-2.5 Z" fill="#D8D8D8" mask="url(#mask-machine-icon-14)"></path>
+                </g>
+                <g transform="translate(6.000000, 6.000000)">
+                    <mask id="mask-machine-icon-16" fill="white">
+                        <use xlink:href="#path-machine-icon-15"></use>
+                    </mask>
+                    <g></g>
+                    <path d="M-2.5,-2.5 L3,-2.5 L3,10 L-2.5,10 L-2.5,-2.5 Z" fill="#D8D8D8" mask="url(#mask-machine-icon-16)"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

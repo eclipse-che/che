@@ -1,0 +1,142 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@eval projectExplorerJointContainerFill org.eclipse.che.ide.api.theme.Style.theme.projectExplorerJointContainerFill();
+@eval projectExplorerJointContainerShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerJointContainerShadow();
+@eval projectExplorerPresentableTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerPresentableTextShadow();
+@eval projectExplorerInfoTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerInfoTextShadow();
+@eval projectExplorerSelectedRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBackground();
+@eval projectExplorerSelectedRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBorder();
+@eval projectExplorerHoverRowBackground org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBackground();
+@eval projectExplorerHoverRowBorder org.eclipse.che.ide.api.theme.Style.theme.projectExplorerHoverRowBorder();
+
+
+.noFocusOutline {
+    outline: none;
+}
+
+.noFocusOutline:focus {
+    outline: none;
+}
+
+.rootContainer {
+    cursor: default;
+}
+
+.jointContainer {
+    width: 16px;
+    height: 16px;
+    padding-top: 2px;
+    fill: projectExplorerJointContainerFill;
+    -webkit-filter: projectExplorerJointContainerShadow;
+}
+
+.iconContainer {
+}
+
+.presentableTextContainer {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-size: 1em;
+    padding-left: 2px;
+    text-shadow: projectExplorerPresentableTextShadow;
+}
+
+.infoTextContainer {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -9px;
+    margin-left: 5px;
+    padding-right: 10px;
+    font-size: 0.8em;
+    text-shadow: projectExplorerInfoTextShadow;
+}
+
+.nodeContainer {
+    white-space: nowrap;
+    height: 20px;
+}
+
+.descendantsContainer {
+    display: block;
+}
+
+.selected {
+    background-color: projectExplorerSelectedRowBackground !important;
+    /* Set default text color to selected item */
+    color: projectExplorerJointContainerFill !important;
+}
+
+/* Set default text color to nested elements of selected item */
+.selected * {
+    color: projectExplorerJointContainerFill !important;
+}
+
+.hover {
+    background-color: projectExplorerHoverRowBackground !important;
+}
+
+.hover::after {
+    background: projectExplorerHoverRowBorder;
+}
+
+.selected::after {
+    background: projectExplorerSelectedRowBorder;
+}
+
+.selected::after,
+.hover::after {
+    content: "";
+    width: 1px;
+    height: 20px;
+    position: absolute;
+    left: 0;
+}
+
+.joint {
+
+}
+
+.dragOver {
+    background-image: none !important;
+    background-color: #defadc !important;
+}
+
+.tree {
+    display: inline-block;
+    min-width: 100%;
+    font-size: 0.85em;
+    outline: none;
+    overflow-y: auto;
+}
+
+.tree:focus {
+    outline: none;
+}
+
+.loading {
+    background-size: 30px 30px;
+    background-image: linear-gradient(135deg,
+    rgba(255, 255, 255, .05) 25%, transparent 25%, transparent 50%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, .05) 75%, transparent 75%, transparent);
+    -webkit-animation: animate-stripes 1s linear infinite;
+}
+
+@-webkit-keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}
+
+@-moz-keyframes animate-stripes {
+    0% {background-position: 0 0;} 100% {background-position: 60px 0;}
+}

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2015-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>maven-depmgt-pom</artifactId>
+        <groupId>org.eclipse.che.depmgt</groupId>
+        <version>4.0.0-RC3-SNAPSHOT</version>
+    </parent>
+    <groupId>org.eclipse.che.dashboard</groupId>
+    <artifactId>che-dashboard-war</artifactId>
+    <version>4.0.0-RC3-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <name>Eclipse Che Dashboard :: Web App</name>
+    <scm>
+        <connection>scm:git:git@github.com:codenvy/che-dashboard.git</connection>
+        <developerConnection>scm:git:git@github.com:codenvy/che-dashboard.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/codenvy/che-dashboard</url>
+    </scm>
+    <properties>
+      <license_years>2015-2016</license_years>
+    </properties>
+    <repositories>
+        <repository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <build>
+        <finalName>dashboard-war</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/bower_components</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/node_modules</directory>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- Download NPM dependencies -->
+                                <exec dir="${basedir}" executable="npm" failonerror="true">
+                                    <arg value="install" />
+                                </exec>
+                                <!-- Download Bower dependencies -->
+                                <exec dir="${basedir}" executable="bower" failonerror="true">
+                                    <arg value="install" />
+                                </exec>
+                                <!-- Run unit tests -->
+                                <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                    <arg value="test" />
+                                </exec>
+                                <!-- Disable development mode -->
+                                <replace file="${basedir}/src/app/index.module.js">
+                                    <replacetoken><![CDATA[var DEV = true;]]></replacetoken>
+                                    <replacevalue><![CDATA[var DEV = false;]]></replacevalue>
+                                </replace>
+                                <!-- Build the application -->
+                                <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                    <arg value="build" />
+                                </exec>
+                                <!-- Change base HREF of the application that will be hosted on /dashboard -->
+                                <replace file="${basedir}/dist/index.html">
+                                    <replacetoken><![CDATA[<base href="/">]]></replacetoken>
+                                    <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
+                                </replace>
+                                <!-- Enable back development mode -->
+                                <replace file="${basedir}/src/app/index.module.js">
+                                    <replacetoken><![CDATA[var DEV = false;]]></replacetoken>
+                                    <replacevalue><![CDATA[var DEV = true;]]></replacevalue>
+                                </replace>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>dist</directory>
+                        </resource>
+                    </webResources>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <useDefaultExcludes>false</useDefaultExcludes>
+                    <excludes>
+                        <exclude>**/.idea/**</exclude>
+                        <exclude>**/*.styl</exclude>
+                        <exclude>**/*.html</exclude>
+                        <exclude>**/*.ico</exclude>
+                        <exclude>**/*.ttf</exclude>
+                        <exclude>**/*.eot</exclude>
+                        <exclude>**/*.svg</exclude>
+                        <exclude>**/*.css</exclude>
+                        <exclude>**/*.woff</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>qa</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compilation</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Run unit tests -->
+                                        <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                            <arg value="test" />
+                                        </exec>
+                                        <!-- Run e2e tests in dist mode-->
+                                        <exec dir="${basedir}" executable="gulp" failonerror="true">
+                                            <arg value="protractor:dist" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <enable-tests>true</enable-tests>
+            </properties>
+        </profile>
+    </profiles>
+</project>

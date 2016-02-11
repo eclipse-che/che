@@ -1,0 +1,42 @@
+<che-panel id="create-project-source-stack" che-title="Select Stack"
+            che-tooltip="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
+  <md-tabs md-dynamic-height md-stretch-tabs="always" md-swipe-content>
+    <md-tab che-event-logger="new.project/select-ready-to-go-stack"
+            md-on-select="workspaceSelectStackCtrl.setStackTab('ready-to-go'); workspaceSelectStackCtrl.onStackChange()">
+      <md-tab-label>
+        <md-icon md-font-icon="fa-magic" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Ready-to-go Stacks</span>
+      </md-tab-label>
+      <md-tab-body>
+        <ready-to-go-stacks class="projects-create-project-tab"
+                            layout="row"
+                            layout-wrap
+                            che-stack="workspaceSelectStackCtrl.stack"
+                            che-on-change="workspaceSelectStackCtrl.onStackChange()"
+          ></ready-to-go-stacks>
+      </md-tab-body>
+    </md-tab>
+    <md-tab che-event-logger="new.project/stack-library"
+            md-on-select="workspaceSelectStackCtrl.setStackTab('stack-library'); workspaceSelectStackCtrl.onStackChange()">
+      <md-tab-label>
+        <md-icon md-font-icon="fa-sliders" class="fa che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Stack library</span>
+      </md-tab-label>
+      <md-tab-body>
+        <create-project-stack-library che-is-workspaces="{{workspaceSelectStackCtrl.isWorkspaces}}"
+                                      che-stacks="workspaceSelectStackCtrl.stacks"
+                                      che-workspaces="workspaceSelectStackCtrl.workspaces"></create-project-stack-library>
+      </md-tab-body>
+    </md-tab>
+    <md-tab che-event-logger="new.project/custom-stack" md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
+      <md-tab-label>
+        <md-icon md-font-icon="material-design icon-ic_input_24px" class="che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Custom stack</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-workspace-recipe che-recipe-script="workspaceSelectStackCtrl.recipeScript"
+                               che-recipe-url="workspaceSelectStackCtrl.recipeUrl"></che-workspace-recipe>
+      </md-tab-body>
+    </md-tab>
+  </md-tabs>
+</che-panel>

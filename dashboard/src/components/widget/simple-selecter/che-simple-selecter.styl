@@ -1,0 +1,104 @@
+$che-simple-selecter-color = $label-info-color
+
+.che-simple-selecter
+  height 90px
+  width 260px
+  border-color $form-element-border-color
+  background-color $background-color
+  border-width 2px
+  border-style solid
+  che-border-radius(3px)
+  -webkit-box-shadow 0 1px 1px rgba(0, 0, 0, 0.05)
+  box-shadow 0 1px 1px rgba(0, 0, 0, 0.05)
+  padding-top 16px
+  margin 0px
+  cursor pointer
+
+  &:hover
+    background-color $che-simple-selecter-color
+    color $background-color
+
+.che-simple-selecter .title
+  position relative
+  border 1px solid $che-simple-selecter-color
+  border-right none
+  border-left none
+  line-height 22px
+
+.che-simple-selecter:hover .title
+  border-color $background-color
+
+.che-simple-selecter .title:before
+  position absolute
+  border-top 24px solid transparent
+  border-right 24px solid $che-simple-selecter-color
+  content ""
+  left -24px
+  bottom -1px
+
+.che-simple-selecter:hover .title:before
+  border-right-color $background-color
+
+.che-simple-selecter .title:after
+  position absolute
+  border-top 23px solid transparent
+  border-right 23px solid $background-color
+  content ""
+  left -22px
+  bottom 0px
+
+.che-simple-selecter:hover .title:after
+  border-right-color $che-simple-selecter-color
+
+.che-simple-selecter md-icon
+  font-size 24px
+  text-align center
+  margin-right 22px
+  padding 0px
+  height 24px
+  width 24px
+
+.che-simple-selecter .title
+  font-size 12px
+  line-height 22px
+  text-align center
+  text-transform uppercase
+
+.che-simple-selecter .description, .che-simple-selecter-active .description
+  padding 5px 10px
+  font-size 12px
+  color $label-primary-color
+
+.che-simple-selecter-active
+  border-color $primary-color
+  color $primary-color
+
+  &:hover
+    background-color $background-color
+
+
+.che-simple-selecter-active .title, .che-simple-selecter-active:hover .title
+  background-color $primary-color
+  color $background-color
+  border-color $primary-color
+  font-weight bold
+
+.che-simple-selecter-active .title:before, .che-simple-selecter-active:hover .title:before
+  border-right-color $primary-color
+
+.che-simple-selecter-active .title:after, .che-simple-selecter-active:hover .title:after
+  border-right-color $primary-color
+
+.che-simple-selecter-active:hover md-icon
+  color $primary-color
+
+.che-simple-selecter-active md-icon
+  color $primary-color
+
+che-simple-selecter md-card:focus
+  outline none
+
+che-simple-selecter
+  outline none
+  margin-bottom 20px
+  margin-right auto

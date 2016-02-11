@@ -1,0 +1,76 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+        @eval bgColor org.eclipse.che.ide.api.theme.Style.getMainMenuBkgColor();
+        @eval conColor org.eclipse.che.ide.api.theme.Style.theme.consolePanelColor();
+        @eval statusPanelColor org.eclipse.che.ide.api.theme.Style.getStatusPanelColor();
+
+        .toolbarPanel {
+            margin-top: 0;
+            z-index: 6;
+        }
+
+        .noToolbarPanel {
+            background-color: tabBorderColor;
+        }
+
+        .actionsPanel {
+            box-sizing: border-box;
+            background-color: conColor;
+            border-top: #2f2f2f 1px solid;
+            overflow: hidden;
+        }
+
+        .statusPanel {
+            box-sizing: border-box;
+            background-color: statusPanelColor;
+            border-top: #232323 1px solid;
+            overflow: hidden;
+        }
+
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="100%" height="100%" debugId="ideMainDockPanel" ui:field="ideMainDockPanel">
+
+        <g:north size="24">
+            <g:DockLayoutPanel ui:field="topMenuLayoutPanel">
+                <g:center>
+                    <g:SimplePanel width="100%" ui:field="menuPanel" debugId="mainMenuPanel"/>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+
+        <g:north size="34">
+            <g:SimplePanel width="100%" ui:field="toolbarPanel" addStyleNames="{style.toolbarPanel}"/>
+        </g:north>
+
+        <g:north size="1">
+            <g:SimplePanel width="100%" height="1" ui:field="noToolbarPanel" addStyleNames="{style.noToolbarPanel}"/>
+        </g:north>
+
+        <g:south size="18">
+            <g:SimplePanel width="100%" ui:field="statusPanel" addStyleNames="{style.statusPanel}"/>
+        </g:south>
+
+        <g:south size="41"> <!-- the valid size is 41, was 22 -->
+            <g:SimplePanel width="100%" ui:field="actionsPanel" addStyleNames="{style.actionsPanel}"/>
+        </g:south>
+
+        <g:center>
+            <g:SimpleLayoutPanel debugId="perspectivePanel" ui:field="perspectivePanel" width="100%" height="100%"/>
+        </g:center>
+
+    </g:DockLayoutPanel>
+</ui:UiBinder>

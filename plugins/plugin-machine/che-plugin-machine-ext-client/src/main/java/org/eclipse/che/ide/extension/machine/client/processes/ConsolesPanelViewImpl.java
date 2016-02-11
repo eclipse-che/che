@@ -1,0 +1,365 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.extension.machine.client.processes;
+
+import elemental.events.KeyboardEvent;
+import elemental.events.MouseEvent;
+
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.DeckLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.eclipse.che.ide.api.parts.base.BaseView;
+import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.ui.tree.SelectionModel;
+import org.eclipse.che.ide.ui.tree.Tree;
+import org.eclipse.che.ide.ui.tree.TreeNodeElement;
+import org.eclipse.che.ide.util.input.SignalEvent;
+
+import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Implementation of {@link ConsolesPanelView}.
+ *
+ * @author Anna Shumilova
+ * @author Roman Nikitenko
+ */
+@Singleton
+public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDelegate> implements ConsolesPanelView, RequiresResize {
+
+    @UiField(provided = true)
+    MachineResources machineResources;
+
+    @UiField(provided = true)
+    Tree<ProcessTreeNode> processTree;
+
+    @UiField(provided = true)
+    SplitLayoutPanel splitLayoutPanel;
+
+    @UiField
+    DeckLayoutPanel outputPanel;
+
+    @UiField
+    FlowPanel navigationPanel;
+
+    private Map<String, IsWidget> processWidgets;
+    private List<ProcessTreeNode> processNodes;
+
+    @Inject
+    public ConsolesPanelViewImpl(org.eclipse.che.ide.Resources resources,
+                                 MachineResources machineResources,
+                                 PartStackUIResources partStackUIResources,
+                                 ProcessesViewImplUiBinder uiBinder,
+                                 ProcessTreeRenderer renderer,
+                                 ProcessDataAdapter adapter) {
+        super(partStackUIResources);
+
+        this.machineResources = machineResources;
+        this.processWidgets = new HashMap<>();
+        this.processNodes = new ArrayList<>();
+
+        splitLayoutPanel = new SplitLayoutPanel(1);
+
+        renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
+            @Override
+            public void onAddTerminalClick(@NotNull String machineId) {
+                delegate.onAddTerminal(machineId);
+            }
+        });
+
+        renderer.setPreviewSshClickHandler(new PreviewSshClickHandler() {
+            @Override
+            public void onPreviewSshClick(@NotNull String machineId) {
+                delegate.onPreviewSsh(machineId);
+            }
+        });
+
+        renderer.setStopProcessHandler(new StopProcessHandler() {
+            @Override
+            public void onStopProcessClick(@NotNull ProcessTreeNode node) {
+                delegate.onStopCommandProcess(node);
+            }
+
+            @Override
+            public void onCloseProcessOutputClick(@NotNull ProcessTreeNode node) {
+                ProcessTreeNode.ProcessNodeType type = node.getType();
+                switch (type) {
+                    case COMMAND_NODE:
+                        delegate.onCloseCommandOutputClick(node);
+                        break;
+                    case TERMINAL_NODE:
+                        delegate.onCloseTerminal(node);
+                        break;
+                }
+            }
+        });
+
+        processTree = Tree.create(resources, adapter, renderer);
+        processTree.asWidget().addStyleName(this.machineResources.getCss().processTree());
+
+        processTree.setTreeEventHandler(new Tree.Listener<ProcessTreeNode>() {
+            @Override
+            public void onNodeAction(TreeNodeElement<ProcessTreeNode> node) {
+
+            }
+
+            @Override
+            public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {
+
+            }
+
+            @Override
+            public void onNodeContextMenu(int mouseX, int mouseY, TreeNodeElement<ProcessTreeNode> node) {
+
+            }
+
+            @Override
+            public void onNodeDragStart(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
+
+            }
+
+            @Override
+            public void onNodeDragDrop(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
+
+            }
+
+            @Override
+            public void onNodeExpanded(TreeNodeElement<ProcessTreeNode> node) {
+
+            }
+
+            @Override
+            public void onNodeSelected(TreeNodeElement<ProcessTreeNode> node, SignalEvent event) {
+                ProcessTreeNode.ProcessNodeType type = node.getData().getType();
+                switch (type) {
+                    case COMMAND_NODE:
+                        delegate.onCommandSelected(node.getData().getId());
+                        break;
+                    case TERMINAL_NODE:
+                        delegate.onTerminalSelected(node.getData().getId());
+                        break;
+                }
+            }
+
+            @Override
+            public void onRootContextMenu(int mouseX, int mouseY) {
+
+            }
+
+            @Override
+            public void onRootDragDrop(MouseEvent event) {
+
+            }
+
+            @Override
+            public void onKeyboard(KeyboardEvent event) {
+
+            }
+        });
+
+        setContentWidget(uiBinder.createAndBindUi(this));
+        navigationPanel.getElement().setTabIndex(0);
+        minimizeButton.ensureDebugId("consoles-minimizeButton");
+
+        tuneSplitter();
+    }
+
+    /**
+     * Improves splitter visibility.
+     */
+    private void tuneSplitter() {
+        NodeList<Node> nodes = splitLayoutPanel.getElement().getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.getItem(i);
+            if (node.hasChildNodes()) {
+                com.google.gwt.dom.client.Element el = node.getFirstChild().cast();
+                if ("gwt-SplitLayoutPanel-HDragger".equals(el.getClassName())) {
+                    tuneSplitter(el);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Tunes splitter. Makes it wider and adds double border to seem rich.
+     *
+     * @param el
+     *         element to tune
+     */
+    private void tuneSplitter(Element el) {
+        /** Add Z-Index to move the splitter on the top and make content visible */
+        el.getParentElement().getStyle().setProperty("zIndex", "1000");
+        el.getParentElement().getStyle().setProperty("overflow", "visible");
+
+        /** Tune splitter catch panel */
+        el.getStyle().setProperty("boxSizing", "border-box");
+        el.getStyle().setProperty("width", "5px");
+        el.getStyle().setProperty("overflow", "hidden");
+        el.getStyle().setProperty("marginLeft", "-3px");
+        el.getStyle().setProperty("backgroundColor", "transparent");
+
+        /** Add small border */
+        DivElement smallBorder = Document.get().createDivElement();
+        smallBorder.getStyle().setProperty("position", "absolute");
+        smallBorder.getStyle().setProperty("width", "1px");
+        smallBorder.getStyle().setProperty("height", "100%");
+        smallBorder.getStyle().setProperty("left", "3px");
+        smallBorder.getStyle().setProperty("top", "0px");
+        smallBorder.getStyle().setProperty("backgroundColor", Style.getSplitterSmallBorderColor());
+        el.appendChild(smallBorder);
+
+        /** Add large border */
+        DivElement largeBorder = Document.get().createDivElement();
+        largeBorder.getStyle().setProperty("position", "absolute");
+        largeBorder.getStyle().setProperty("width", "2px");
+        largeBorder.getStyle().setProperty("height", "100%");
+        largeBorder.getStyle().setProperty("left", "1px");
+        largeBorder.getStyle().setProperty("top", "0px");
+        largeBorder.getStyle().setProperty("opacity", "0.4");
+        largeBorder.getStyle().setProperty("backgroundColor", Style.getSplitterLargeBorderColor());
+        el.appendChild(largeBorder);
+    }
+
+    @Override
+    protected void focusView() {
+        getElement().focus();
+    }
+
+    @Override
+    public void addProcessWidget(String processId, IsWidget widget) {
+        processWidgets.put(processId, widget);
+        outputPanel.add(widget);
+        showProcessOutput(processId);
+    }
+
+    @Override
+    public void addProcessNode(@NotNull ProcessTreeNode node) {
+        processNodes.add(node);
+    }
+
+    @Override
+    public void removeProcessNode(@NotNull ProcessTreeNode node) {
+        processNodes.remove(node);
+    }
+
+    @Override
+    public void setProcessesData(@NotNull ProcessTreeNode root) {
+        processTree.asWidget().setVisible(true);
+        processTree.getModel().setRoot(root);
+        processTree.renderTree(-1);
+    }
+
+    @Override
+    public void selectNode(@NotNull ProcessTreeNode node) {
+        SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
+
+        selectionModel.setTreeActive(true);
+        selectionModel.clearSelections();
+        selectionModel.selectSingleNode(node);
+
+        node.getTreeNodeElement().scrollIntoView();
+    }
+
+    @Override
+    public void showProcessOutput(String processId) {
+        if (processWidgets.containsKey(processId)) {
+            onResize();
+            outputPanel.showWidget(processWidgets.get(processId).asWidget());
+        }
+    }
+
+    @Override
+    public void hideProcessOutput(String processId) {
+        IsWidget widget = processWidgets.get(processId);
+        outputPanel.remove(widget);
+        processWidgets.remove(processId);
+    }
+
+    @Override
+    public int getNodeIndex(String processId) {
+        for (ProcessTreeNode node : processNodes) {
+            if (processId.equals(node.getId())) {
+                return processNodes.indexOf(node);
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    @Nullable
+    public ProcessTreeNode getNodeByIndex(@NotNull int index) {
+        if (index < 0 || index >= processNodes.size()) {
+            return null;
+        }
+        return processNodes.get(index);
+    }
+
+    @Override
+    @Nullable
+    public ProcessTreeNode getNodeById(@NotNull String nodeId) {
+        for (ProcessTreeNode node : processNodes) {
+            if (nodeId.equals(node.getId())) {
+                return node;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public void setStopButtonVisibility(String nodeId, boolean visible) {
+        for (ProcessTreeNode node : processNodes) {
+            if (!nodeId.equals(node.getId())) {
+                continue;
+            } 
+            
+            if (visible) {
+                node.getTreeNodeElement().getClassList().remove(machineResources.getCss().hideStopButton());
+            } else {
+                node.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
+            }
+        }
+    }
+
+    @Override
+    public void onResize() {
+        for (int i = 0; i < outputPanel.getWidgetCount(); i++) {
+            Widget widget = outputPanel.getWidget(i);
+            if (widget instanceof RequiresResize) {
+                ((RequiresResize)widget).onResize();
+            }
+        }
+    }
+
+    interface ProcessesViewImplUiBinder extends UiBinder<Widget, ConsolesPanelViewImpl> {
+    }
+
+}

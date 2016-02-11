@@ -1,0 +1,126 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant'/>
+    <ui:with field='coreRes' type='org.eclipse.che.ide.Resources'/>
+    <ui:style>
+        .alignRight {
+            float: right;
+        }
+
+        .alignLeft {
+            float: left;
+        }
+
+        .debuggerButton {
+            width: 20px;
+            height: 20px;
+            min-width: initial;
+            float: left;
+            margin-left: 1px;
+            padding: 1px;
+        }
+
+        .debuggerButton > svg {
+            width: 14px;
+            height: 14px;
+            margin: auto;
+            display: block;
+            padding: inherit;
+        }
+
+        .buttonBorder {
+            margin-left: 6px;
+            margin-top: 6px;
+        }
+
+        .labelBorder {
+            margin-right: 6px;
+            margin-top: 6px;
+        }
+
+        .emptyBorder {
+            margin: 6px;
+        }
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+        <g:north size="26.0">
+            <g:FlowPanel width="100%" height="100%">
+                <g:FlowPanel addStyleNames="{style.alignLeft} {style.buttonBorder}">
+                    <g:Button ui:field="btnResume" title="{locale.resumeButton}"
+                                  addStyleNames="{style.debuggerButton}" debugId="debugger-btnResume">
+                    </g:Button>
+
+                    <g:Button ui:field="btnStepInto" title="{locale.stepInto}"
+                                    addStyleNames="{style.debuggerButton}" debugId="debugger-btnStepInto">
+                    </g:Button>
+
+                    <g:Button ui:field="btnStepOver" title="{locale.stepOver}"
+                                    addStyleNames="{style.debuggerButton}" debugId="debugger-btnStepOver">
+                    </g:Button>
+                    <g:Button ui:field="btnStepReturn" title="{locale.stepReturn}"
+                                    addStyleNames="{style.debuggerButton}" debugId="debugger-btnStepReturn">
+                    </g:Button>
+                    <g:Button ui:field="btnDisconnect" title="{locale.disconnectButton}"
+                                  addStyleNames="{style.debuggerButton}" debugId="debugger-btnDisconnect">
+                    </g:Button>
+                    <g:Button ui:field="btnRemoveAllBreakpoints" title="{locale.removeBreakpointsButton}"
+                                  addStyleNames="{style.debuggerButton}" debugId="debugger-btnRemoveAllBreakpoints">
+                    </g:Button>
+                    <g:Button ui:field="btnChangeValue" title="{locale.changeValue}"
+                                  addStyleNames="{style.debuggerButton}" debugId="debugger-btnChangeValue">
+                    </g:Button>
+                    <g:Button ui:field="btnEvaluateExpression" title="{locale.evaluateExpression}"
+                                  addStyleNames="{style.debuggerButton}" debugId="debugger-btnEvaluateExpression">
+                    </g:Button>
+                </g:FlowPanel>
+                <g:Label ui:field="vmName" addStyleNames="{style.alignRight} {style.labelBorder}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:center>
+            <g:SplitLayoutPanel ui:field="splitPanel" width="100%" height="100%">
+                <g:west size="450">
+                    <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                        <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                            <g:north size="20">
+                                <g:Label text="{locale.breakpoints}" addStyleNames="{style.alignLeft}"/>
+                            </g:north>
+                            <g:center>
+                                <g:ScrollPanel ui:field="breakpointsPanel" addStyleNames="{coreRes.coreCss.simpleListContainer}"
+                                               debugId="debugger-breakpointsPanel"/>
+                            </g:center>
+                        </g:DockLayoutPanel>
+                    </g:FlowPanel>
+                </g:west>
+                <g:center>
+                    <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                        <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                            <g:north size="20">
+                                <g:Label text="{locale.variables}" addStyleNames="{style.alignLeft}"/>
+                            </g:north>
+                            <g:north size="20">
+                                <g:Label ui:field="executionPoint"/>
+                            </g:north>
+                            <g:center>
+                                <g:ScrollPanel ui:field="variablesPanel" addStyleNames="{coreRes.coreCss.simpleListContainer}"
+                                               debugId="debugger-variablesPanel"/>
+                            </g:center>
+                        </g:DockLayoutPanel>
+                    </g:FlowPanel>
+                </g:center>
+            </g:SplitLayoutPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

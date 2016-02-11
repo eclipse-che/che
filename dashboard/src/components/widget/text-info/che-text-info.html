@@ -1,0 +1,20 @@
+<div class="che-text-info">
+  <!-- Mobile version -->
+  <div class="che-text-info-mobile" hide-gt-md>
+    <div ng-if="labelName">{{labelName}}</div>
+    <span ng-class="{ 'che-text-info-copy-clipboard': copyClipboard }">
+      <a ng-if="hrefValue" ng-href="{{hrefValue}}" target="_blank">{{textValue}}</a>
+      <label ng-if="!hrefValue">{{textValue}}</label>
+    </span>
+    <che-clipboard ng-if="copyClipboard" class="copy-clipboard" che-value="textValue"></che-clipboard>
+  </div>
+  <!-- Desktop version -->
+  <div layout="row" flex layout-align="space-around start" class="che-text-info-desktop" hide-sm hide-md>
+    <label flex="15" ng-if="labelName">{{labelName}}:</label>
+    <span ng-class="{ 'che-text-info-copy-clipboard': copyClipboard }">
+      <a ng-if="hrefValue" ng-href="{{hrefValue}}" target="_blank">{{textValue}}</a>
+      <label ng-if="!hrefValue">{{textValue}}</label>
+    </span>
+    <che-clipboard ng-if="copyClipboard" class="copy-clipboard" che-value="textValue"></che-clipboard>
+  </div>
+</div>

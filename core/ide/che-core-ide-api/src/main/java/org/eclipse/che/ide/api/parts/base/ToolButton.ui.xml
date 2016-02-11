@@ -1,0 +1,86 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:style>
+
+        @eval toolButtonColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonColor();
+        @eval toolButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverColor();
+        @eval toolButtonBorder org.eclipse.che.ide.api.theme.Style.theme.toolButtonBorder();
+        @eval toolButtonActiveBorder org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBorder();
+        @eval toolButtonHoverBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverBackgroundColor();
+        @eval toolButtonActiveBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBackgroundColor();
+        @eval toolButtonHoverBoxShadow org.eclipse.che.ide.api.theme.Style.theme.toolButtonHoverBoxShadow();
+        @eval toolButtonActiveBoxShadow org.eclipse.che.ide.api.theme.Style.theme.toolButtonActiveBoxShadow();
+
+        .button {
+            width: 22px;
+            height: 22px;
+        }
+
+        .button * {
+            transition: all 0.1s ease-in-out;
+        }
+
+        .button > svg,
+        .button > div {
+            display: block;
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            padding: 3px;
+            box-sizing: content-box;
+            border: toolButtonBorder;
+            border-radius: 3px;
+            fill: toolButtonColor;
+            font-size: 8px;
+            line-height: 8px;
+            text-align: center;
+            color: toolButtonColor;
+        }
+
+        .button:hover > svg,
+        .button:hover > div {
+            border: toolButtonActiveBorder;
+            background-color: toolButtonHoverBackgroundColor;
+            box-shadow: toolButtonHoverBoxShadow;
+            fill: toolButtonHoverColor;
+            color: toolButtonHoverColor;
+        }
+
+        .button:active > svg,
+        .button:active > div {
+            border: toolButtonActiveBorder;
+            background-color: toolButtonActiveBackgroundColor;
+            box-shadow: toolButtonActiveBoxShadow;
+            fill: toolButtonHoverColor;
+            color: toolButtonHoverColor;
+        }
+
+        .button:active > svg > *,
+        .button:active > div > * {
+            opacity: 0.8;
+        }
+
+    </ui:style>
+
+    <g:FlowPanel ui:field="iconPanel" stylePrimaryName="{style.button}"/>
+
+</ui:UiBinder>

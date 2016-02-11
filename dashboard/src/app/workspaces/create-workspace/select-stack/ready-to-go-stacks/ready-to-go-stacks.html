@@ -1,0 +1,32 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ng-form name="workspaceInformationForm">
+
+    <div class="stack-label-info">Create a new workspace with a ready-to-go stack.</div>
+    <div layout="column" flex>
+        <div layout="row" flex layout-align="space-around start">
+            <label flex="15" hide-sm hide-md>Commonly used stacks: </label>
+
+            <div layout="row" flex="85"  layout-wrap ng-if="readyToGoStacksCtrl.stacks.length > 0">
+                <che-simple-selecter ng-repeat="stack in readyToGoStacksCtrl.stacks | filter:{ scope: 'general' }"
+                                      che-value="stack"
+                                      che-is-first="$first"
+                                      che-name="StackSelectWidget"
+                                      che-title="{{stack.name}}"
+                                      che-description="{{readyToGoStacksCtrl.tagsToString(stack.tags)}}"
+                                      che-icon="chefont cheico-type-{{stack.iconName}} cheico-type-blank"
+                                      che-callback-controller="readyToGoStacksCtrl" />
+            </div>
+        </div>
+    </div>
+</ng-form>

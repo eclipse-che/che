@@ -1,0 +1,34 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:svgui='urn:import:org.vectomatic.dom.svg.ui'>
+    <ui:with field='resources' type='org.eclipse.che.ide.ui.window.Window.Resources'/>
+    <ui:with field="css" type="org.eclipse.che.ide.ui.window.Window.Css"/>
+    <g:FlowPanel ui:field="popup" styleName="{css.popup}">
+        <g:FocusPanel styleName="{css.positioner}" ui:field="focusPanel">
+            <g:FlowPanel ui:field="contentContainer" styleName="{css.content}">
+                <g:FlowPanel ui:field="header" styleName="{css.header}">
+                    <g:FlowPanel styleName="{css.headerTitleWrapper}">
+                        <g:Label ui:field="headerLabel" addStyleNames="{css.headerTitleLabel}"></g:Label>
+                    </g:FlowPanel>
+                    <g:FlowPanel ui:field="closeButton" styleName="{css.closeButton}">
+                        <svgui:SVGImage resource='{resources.closeButton}'/>
+                    </g:FlowPanel>
+                </g:FlowPanel>
+                <g:FlowPanel ui:field="content" styleName="{css.center}"></g:FlowPanel>
+            </g:FlowPanel>
+        </g:FocusPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

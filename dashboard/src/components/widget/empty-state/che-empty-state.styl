@@ -1,0 +1,46 @@
+$empty-state-background-color = #F7F7F7
+$empty-state-border-color = #CBCBCB
+$empty-state-label-color = #9B9B9B
+
+.che-empty-state
+  position relative
+
+.che-empty-state .che-mobile,
+.che-empty-state .che-desktop
+  margin auto
+  width 320px
+  height 320px
+  border-radius 160px
+  background $empty-state-background-color
+  border 6px solid $empty-state-border-color
+
+.che-empty-state .che-mobile > div,
+.che-empty-state .che-desktop > div
+  height 100%
+  text-align center
+
+.che-empty-state label
+  position absolute
+  margin auto
+  left 0
+  right 0
+  font-size 13px
+  line-height 25px
+  color $empty-state-label-color
+
+.che-empty-state .che-mobile label:first-child,
+.che-empty-state .che-desktop label:first-child
+  top 20%
+  width 80%
+
+.che-empty-state .che-mobile div:before,
+.che-empty-state .che-desktop div:before
+  color $empty-state-border-color
+  font-size 85px
+
+.che-empty-state .che-mobile label:last-child,
+.che-empty-state .che-desktop label:last-child
+  width 70%
+  height 20%
+  bottom 10%
+  line-height 20px

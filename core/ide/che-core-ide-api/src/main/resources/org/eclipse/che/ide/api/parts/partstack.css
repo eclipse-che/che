@@ -1,0 +1,169 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.ide-PartStack-Tab {
+    display: inline-block;
+    position: relative;
+    height: 23px;
+    cursor: default;
+    color: tabTextColor;
+    padding: 3px 10px 0 10px;
+    vertical-align: middle;
+    font-size: 11px;
+    border-left: 1px solid tabsPanelBackground;
+    border-right: 1px solid tabsPanelBackground;
+
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+
+    -webkit-transition: color 0.1s ease-in-out,
+        fill 0.1s ease-in-out,
+        stroke 0.1s ease-in-out;
+    transition: color 0.1s ease-in-out,
+        fill 0.1s ease-in-out,
+        stroke 0.1s ease-in-out;
+}
+
+.ide-PartStack-Tab svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+}
+
+.ide-PartStack-Tab svg,
+.ide-PartStack-Tab svg rect,
+.ide-PartStack-Tab svg path {
+    fill: tabTextColor;
+    -webkit-transition: color 0.1s ease-in-out,
+    fill 0.1s ease-in-out,
+    stroke 0.1s ease-in-out;
+    transition: color 0.1s ease-in-out,
+    fill 0.1s ease-in-out,
+    stroke 0.1s ease-in-out;
+}
+
+.ide-PartStack-Tab:hover {
+    color: hoveredTabTextColor;
+}
+
+.ide-PartStack-Tab:hover svg,
+.ide-PartStack-Tab:hover svg rect,
+.ide-PartStack-Tab:hover svg path {
+    fill: hoveredTabTextColor;
+}
+
+.leftTabs {
+    transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+}
+
+.leftTabs:first-of-type {
+    margin-left: 22px;
+}
+
+.rightTabs {
+}
+
+.rightTabs:first-of-type {
+    margin-left: 22px;
+}
+
+.bottomTabs {
+}
+
+.selectedBottomTab,
+.selectedRightOrLeftTab {
+    color: activeTabTextColor;
+    text-shadow: activeTabTextShadow;
+    background-color: activeTabBackground;
+    border-left: 1px solid activeTabBorderColor;
+    border-right: 1px solid activeTabBorderColor;
+}
+
+.selectedBottomTab svg,
+.selectedBottomTab svg rect,
+.selectedBottomTab svg path,
+.selectedRightOrLeftTab svg,
+.selectedRightOrLeftTab svg rect,
+.selectedRightOrLeftTab svg path {
+    fill: activeTabIconColor;
+}
+
+/* This style removes double border from left tab on the bottom panel. */
+.selectedBottomTab:first-child {
+    border-left-color: transparent;
+}
+
+.listItemPanel {
+    background-color: openedFilesDropdownListBackgroundColor;
+    border: 1px solid openedFilesDropdownListBorderColor;
+    box-shadow: 0 2px 2px 0 openedFilesDropdownListShadowColor;
+    border-radius: 0 0 3px 3px;
+}
+
+.ide-PartStack-Content {
+    background-color: partBackground;
+    width: 100%;
+    height: 100%;
+}
+
+.ide-PartStack-Content div[role="part"] div[role="toolbar"] div[role="toolbar-header"] {
+    border-bottom: 1px solid transparent;
+}
+
+.ide-PartStack-Content div[role="part"][focused] div[role="toolbar"] div[role="toolbar-header"] {
+    border-bottom-color: tabUnderlineColor;
+}
+
+.ide-Base-Part-Title-Label {
+    display: inline-block;
+    line-height: 20px;
+    margin-left: 10px;
+    cursor: default;
+}
+
+.ide-Base-Part-Toolbar {
+    background-color: partToolbar;
+    border-bottom: 1px solid tabBorderColor;
+    font-size: 11px;
+    color: mainFontColor;
+}
+
+/*@sprite .ide-PartStack-Tab-Line-Error {*/
+.ide-PartStack-Tab-Line-Error {
+    /*gwt-image: "squiggle";*/
+    /*background-position: bottom;*/
+    /*background-repeat: repeat-x;*/
+    margin: 0;
+    padding: 0;
+    height: auto;
+    width: auto;
+    overflow: visible;
+
+    text-decoration: underline;
+    color: red;
+}
+
+/*@sprite .ide-PartStack-Tab-Line-Warning {*/
+.ide-PartStack-Tab-Line-Warning {
+    /*gwt-image: "squiggleWarning";*/
+    /*background-position: bottom;*/
+    /*background-repeat: repeat-x;*/
+    margin: 0;
+    padding: 0;
+    height: auto;
+    width: auto;
+    overflow: visible;
+
+    text-decoration: underline;
+    color: #FFD31E;
+}

@@ -1,0 +1,150 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@def selectionBorderWidth 2px;
+.cellTableWidget {
+}
+
+.cellTableFirstColumn {
+
+}
+
+.cellTableLastColumn {
+
+}
+
+.cellTableFooter {
+    border-top: 2px solid #6f7277;
+    padding: 3px 15px;
+    text-align: left;
+    color: mainFontColor;
+    overflow: hidden;
+    font-size: fontSize;
+}
+
+.cellTableHeader {
+    border-bottom: 2px solid #6f7277;
+    padding: 3px 15px;
+    text-align: left;
+    color: mainFontColor;
+    font-size: fontSize;
+    overflow: hidden;
+}
+
+.cellTableCell {
+    padding: 1px 5px;
+    overflow: hidden;
+    color: mainFontColor;
+    font-size: fontSize;
+    font-family: mainFontFamily;
+}
+
+.cellTableCell input {
+    outline: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: start;
+    color: textFieldColor;
+    background-color: textFieldBackgroundColor;
+    border: 1px solid textFieldBorderColor;
+    font-size: textFieldFontSize;
+    font-family: textFieldFontFamily;
+    min-height: 22px;
+    padding: 0 5px 0 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cellTableFirstColumnFooter {
+
+}
+
+.cellTableFirstColumnHeader {
+
+}
+
+.cellTableLastColumnFooter {
+
+}
+
+.cellTableLastColumnHeader {
+
+}
+
+.cellTableSortableHeader {
+    cursor: pointer;
+    cursor: hand;
+}
+
+.cellTableSortableHeader:hover {
+    color: welcomeFontColor;
+}
+
+.cellTableSortedHeaderAscending {
+
+}
+
+.cellTableSortedHeaderDescending {
+
+}
+
+.cellTableEvenRow {
+    background: cellEvenRow;
+}
+
+.cellTableEvenRowCell {
+    border: 1px solid cellEvenRow;
+}
+
+.cellTableOddRow {
+    background: cellOddRow;
+}
+
+.cellTableOddRowCell {
+    border: 1px solid cellOddRow;
+}
+
+.cellTableHoveredRow {
+    /*background: cellHoveredRow;*/
+}
+
+.cellTableHoveredRowCell {
+    /*border: selectionBorderWidth solid cellHoveredRow;*/
+}
+
+.cellTableKeyboardSelectedRow {
+    background: cellKeyboardSelectedRow;
+}
+
+.cellTableKeyboardSelectedRowCell {
+    border: selectionBorderWidth solid cellKeyboardSelectedRow;
+}
+
+.cellTableSelectedRow {
+    background: selectionBackground;
+    color: white;
+    height: auto;
+    overflow: auto;
+}
+
+.cellTableSelectedRowCell {
+    border: selectionBorderWidth solid selectionBackground;
+}
+
+/**
+ * The keyboard selected cell is visible over selection.
+ */
+.cellTableKeyboardSelectedCell {
+    border: selectionBorderWidth solid cellKeyboardSelectedRow;
+}
+
+.cellTableLoading {
+    margin: 30px;
+}

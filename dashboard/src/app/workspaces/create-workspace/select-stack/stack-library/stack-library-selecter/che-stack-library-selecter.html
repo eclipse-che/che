@@ -1,0 +1,14 @@
+<md-card class="che-stack-library-selecter"
+         ng-click="select()"
+         ng-class="{'che-stack-library-selecter-active' : (isSelect && isActive)}">
+  <md-card-content layout="column" layout-fill>
+    <div class="body">
+      <div class="title">{{title}}</div>
+    </div>
+    <div class="che-stack-library-selecter-text">{{text}}</div>
+    <div layout="row" layout-align="end end" flex>
+      <div class="che-stack-library-selecter-extra-text" tooltip="{{extraText}}">...</div>
+    </div>
+  </md-card-content>
+
+</md-card>

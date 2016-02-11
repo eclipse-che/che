@@ -1,0 +1,35 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-toolbar che-title="Opening IDE">
+
+</che-toolbar>
+<md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
+                    ng-hide="ideCtrl.hasData"></md-progress-linear>
+
+<md-content id="open-ide-page" md-scroll-y flex class="open-ide-page" md-theme="maincontent-theme">
+
+    <div ng-hide="ideCtrl.selectedWorkspace">
+        No workspace selected. Unable to open IDE
+    </div>
+
+    <div ng-show="loadingIDE && ideCtrl.selectedWorkspace" layout="column" layout-align="center center">
+        Redirecting to the IDE for workspace {{ideCtrl.selectedWorkspace.name}}... Please Wait.
+        <img style="width: 300px" src="assets/images/loader.svg" />
+    </div>
+    <div ng-hide="loadingIDE">
+        <che-button-primary che-button-title="Restore IDE window"
+                             ng-click="ideCtrl.displayIDE()"></che-button-primary>
+    </div>
+
+
+</md-content>

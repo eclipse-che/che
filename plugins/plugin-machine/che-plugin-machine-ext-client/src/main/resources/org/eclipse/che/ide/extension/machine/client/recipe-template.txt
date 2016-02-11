@@ -1,0 +1,19 @@
+# This is a template for your machine recipe.
+# Uncomment instructions that you want to use and replace them with yours.
+
+# Inherit from a base image. This can be a Codenvy verified image or any base image you can find at Docker Hub
+# FROM dockerHubUser/yourImage
+
+# Expose ports. All processes running in a Docker container should be access from outside.
+# EXPOSE 8080
+
+# Run instructions are identical to commands in your local Unix terminal
+# RUN echo 'hello world'
+
+# Map application port to the IDE client
+# ENV CODENVY_APP_PORT_8080_HTTP 8080
+
+# CMD instructions actually launch a container.
+# Usually processes and services are started in CMD
+
+# CMD ./catalina.sh run

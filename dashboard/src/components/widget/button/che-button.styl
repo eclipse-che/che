@@ -1,0 +1,43 @@
+che-button-style()
+  che-border-radius(5px)
+  box-shadow-simple()
+  font-size 1em
+  font-weight bold
+  width auto
+  height 30px
+  padding-left 20px
+  padding-right 20px
+
+che-button-danger .md-button.md-danger-theme.md-hue-3.md-accent.md-raised, che-button-danger .md-button.md-danger-theme.md-hue-3.md-accent.md-raised
+  che-button-style()
+
+che-button-warning .md-button.md-warning-theme.md-hue-3.md-accent.md-raised
+  che-button-style()
+
+che-button-default button.md-accent.md-raised.md-hue-2.md-button.md-chedefault-theme
+  che-button-style()
+
+che-button-default .md-button.md-accent.md-raised.md-hue-2.md-button.md-chedefault-theme
+  che-button-style()
+
+che-button-notice .md-button.md-accent.md-raised.md-hue-2.md-button.md-chenotice-theme
+  che-button-style()
+
+che-button-primary .md-button.md-default-theme.md-hue-2.md-accent.md-raised, che-button-primary .md-button.md-maincontent-theme-theme.md-hue-2.md-accent.md-raised
+  che-button-style()
+
+.che-button md-icon
+  display inherit
+  font-size 26px
+  margin-top -6px
+  margin-right 10px
+
+che-button-primary button.md-button.che-button.md-accent.md-default-theme.md-hue-2[disabled]
+  background-color transparent
+
+che-button-danger .md-button:hover,
+che-button-notice .md-button:hover,
+che-button-warning .md-button:hover,
+che-button-default .md-button:hover,
+che-button-primary .md-button:hover
+  che-brightness(90%)

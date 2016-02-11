@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<svg viewBox="-100 -100 750 750" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g class="blueColored">
+        <g class="changeOnHover greenColored">
+            <path d="M485.0,220.0L122.0,12.0c-52.0-30.0-95.0-5.0-96.0,56.0v415.0c0,60.0,43.0,85.0,95.0,55.0  l365.0-205.0C540.0,300.0,540.0,250.0,485.0,220.0z"/>
+        </g>
+    </g>
+</svg>

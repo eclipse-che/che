@@ -1,0 +1,115 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@def selectionBorderWidth 2px;
+.cellTableWidget {
+    border-collapse: collapse;
+}
+
+.cellTableFirstColumn {
+}
+
+.cellTableLastColumn {
+}
+
+.cellTableHeader, .cellTableFooter {
+}
+
+.cellTableCell {
+    padding: 2px 15px;
+    text-align: left;
+    overflow: hidden;
+    font-family: mainFontFamily;
+    font-size: secondaryTextFontSize;
+    text-shadow: 0px 1px 0px rgba(46, 46, 46, 0.5);
+    border-width: 0px;
+    border-style: solid;
+    border-color: #2f2f2f;
+    background-color: cellEvenRow;
+    font-weight: normal;
+    color: mainFontColor;
+}
+
+.cellTableHeader, .cellTableCell {
+    max-width: 190px;
+    word-wrap: normal;
+    white-space: nowrap;
+}
+
+.cellTableFirstColumnFooter {
+}
+
+.cellTableFirstColumnHeader {
+}
+
+.cellTableLastColumnFooter {
+}
+
+.cellTableLastColumnHeader {
+}
+
+.cellTableSortableHeader {
+    cursor: pointer;
+    cursor: hand;
+}
+
+.cellTableSortableHeader:hover {
+    color: cellHoveredRow;
+}
+
+.cellTableSortedHeaderAscending {
+
+}
+
+.cellTableSortedHeaderDescending {
+
+}
+
+.cellTableEvenRow {
+}
+
+.cellTableEvenRowCell {
+}
+
+.cellTableOddRow {
+}
+
+.cellTableOddRowCell {
+}
+
+.cellTableHoveredRow {
+}
+
+.cellTableHoveredRowCell {
+}
+
+.cellTableKeyboardSelectedRow {
+}
+
+.cellTableKeyboardSelectedRowCell {
+}
+
+.cellTableSelectedRow {
+}
+
+.cellTableSelectedRowCell {
+}
+
+/**
+ * The keyboard selected cell is visible over selection.
+ */
+.cellTableKeyboardSelectedCell {
+    background-color: cellKeyboardSelectedRow;
+}
+
+.cellTableLoading {
+    margin: 30px;
+}
+

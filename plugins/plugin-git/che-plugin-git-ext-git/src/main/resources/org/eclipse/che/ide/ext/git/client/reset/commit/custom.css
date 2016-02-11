@@ -1,0 +1,53 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.cellTableHeader {
+    border-bottom: 2px solid #6f7277;
+    padding: 10px 15px;
+    text-align: left;
+    color: #dbdbdb;
+    overflow: hidden;
+    text-shadow: none;
+}
+
+.cellTableCell {
+    padding: 7px 15px;
+    overflow: hidden;
+    font-size: 11px;
+}
+
+.cellTableEvenRow {
+    background: #414141;
+}
+
+.cellTableOddRow {
+    /*background: transparent;*/
+    background: #313131;
+}
+
+.cellTableEvenRowCell {
+    border: none;
+}
+
+.cellTableOddRowCell {
+    border: none;
+}
+
+.cellTableHoveredRow {
+    background: rgba(37, 108, 159, 0.1);
+}
+
+.cellTableHoveredRowCell {
+    border: none;
+}
+
+.cellTableSelectedRow {
+    background: #256c9f;
+}

@@ -1,0 +1,69 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
+    <ui:with field="importerStyle" type="org.eclipse.che.ide.projectimport.local.LocalZipImporterPageViewImpl.Style"/>
+    <ui:style>
+        .emptyBorder {
+            margin: 12px;
+            font-weight: lighter;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .title {
+            font-weight: bold;
+            font-size: 12px;
+            text-align: left;
+        }
+
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="390px" height="270px" addStyleNames="{style.emptyBorder}">
+        <g:north size="270">
+            <g:FormPanel ui:field="submitForm" debugId="file-importProject-submitForm">
+                <g:FlowPanel ui:field="importerPanel">
+                    <g:FlowPanel height="20px">
+                        <g:Label text="{locale.importLocalProjectOpenZipTitle}" addStyleNames="{style.title}"/>
+                    </g:FlowPanel>
+                    <g:FlowPanel ui:field="uploadPanel" debugId="file-importProject-uploadForm"/>
+                    <g:FlowPanel height="20px" addStyleNames="{importerStyle.namePanel} {importerStyle.marginTop}">
+                        <g:HTMLPanel addStyleNames="{importerStyle.horizontalLine}"/>
+                        <g:Label text="{locale.importProjectInfo}" addStyleNames="{style.title}"/>
+                    </g:FlowPanel>
+                    <g:FlowPanel height="25px" addStyleNames="{importerStyle.namePanel}">
+                        <g:Label text="{locale.createProjectFromTemplateName}"
+                                 addStyleNames="{importerStyle.labelPosition}"/>
+                        <g:TextBox width="290px" height="14px" ui:field="projectName" name="name"
+                                   addStyleNames="{importerStyle.inputField} {importerStyle.alignRight}" tabIndex="1"
+                                   debugId="file-importProject-projectName" title="{locale.importProjectNamePrompt}"/>
+                    </g:FlowPanel>
+                    <g:FlowPanel height="50px" addStyleNames="{importerStyle.namePanel}">
+                        <g:Label text="{locale.createProjectFromTemplateDescription}"
+                                 addStyleNames="{importerStyle.labelPosition}"/>
+                        <g:TextArea width="290px" height="42px" ui:field="projectDescription" name="description"
+                                    addStyleNames="{importerStyle.inputField} {importerStyle.alignRight}"
+                                    debugId="file-importProject-projectDescription" title="{locale.importProjectDescriptionPrompt}"
+                                    tabIndex="2"/>
+                    </g:FlowPanel>
+                    <g:FlowPanel height="30px">
+                        <g:Label text="{locale.importProjectZipImporterSkipFirstLevel}" addStyleNames="{importerStyle.labelPosition}"/>
+                        <g:CheckBox ui:field="skipFirstLevel" name="skipFirstLevel" debugId="zipImporter-skipFirstLevel"
+                                    addStyleNames="{importerStyle.checkBoxPosition}"
+                                    tabIndex="5"/>
+                    </g:FlowPanel>
+                </g:FlowPanel>
+            </g:FormPanel>
+        </g:north>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

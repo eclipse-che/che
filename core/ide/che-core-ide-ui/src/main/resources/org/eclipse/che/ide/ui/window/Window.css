@@ -1,0 +1,231 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@def animationDuration 300ms;
+
+.popup {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.popup {
+    z-index: popupZIndex;
+    -webkit-user-select: text; /* Chrome all / Safari all */
+    -moz-user-select: text; /* Firefox all */
+    -ms-user-select: text; /* IE 10+ */
+    user-select: text;
+}
+
+.glassVisible {
+    opacity: 0.4;
+}
+
+.positioner {
+    position: relative;
+    height: 100%;
+    width: 100%;
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-box-pack: center;
+    -webkit-box-align: center;
+
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-box-pack: center;
+    -moz-box-align: center;
+
+    display: box;
+    box-orient: vertical;
+    box-pack: center;
+    box-align: center;
+}
+
+.positioner:focus {
+    outline: none;
+}
+
+.content {
+    display: inline-block;
+    background: windowContentBackground;
+    border: 1px solid windowSeparatorColor;
+    -moz-box-shadow: 0 2px 4px 0px windowShadowColor;
+    -webkit-box-shadow: 0 2px 4px 0px windowShadowColor;
+    box-shadow: 0 2px 4px 0px windowShadowColor;
+    transition: all animationDuration;
+    opacity: 0.0;
+}
+
+.contentVisible {
+    -moz-transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+    -webkit-user-select: text; /* Chrome all / Safari all */
+    -moz-user-select: text; /* Firefox all */
+    -ms-user-select: text; /* IE 10+ */
+    user-select: text;
+    opacity: 1.0;
+}
+
+.center {
+    padding: 8px;
+}
+
+.header {
+    background: windowHeaderBackground;
+    border-bottom: 1px solid windowHeaderBorderColor;
+    height: 22px;
+    padding: 0px 16px 0px 12px;
+    user-select: none;
+    cursor: default;
+}
+
+.footer {
+    background: windowFooterBackground;
+    border-top: 1px solid windowFooterBorderColor;
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 0 16px;
+    width: 100%;
+    user-select: none;
+    float: left;
+    height: 33px;
+}
+
+.footer > button {
+    margin-top: 5px;
+}
+
+.separator {
+    width: 100%;
+    height: 1px;
+    background-color: windowSeparatorColor;
+}
+
+.alignBtn {
+    float: right;
+    margin-left: buttonSpacing;
+}
+
+.headerTitleWrapper {
+    display: table;
+    height: 100%;
+    cursor: default;
+}
+
+.headerTitleLabel {
+    vertical-align: middle;
+    display: table-cell;
+    cursor: default;
+    font-family: mainFontFamily;
+    font-size: windowTitleFontSize;
+    color: windowTitleFontColor;
+}
+
+.closeButton {
+    position: absolute;
+    right: 16px;
+    top: 0px;
+    line-height: 22px;
+    padding: 0px 0px 0px 5px;
+    cursor: pointer;
+}
+
+.closeButton svg {
+    fill: windowTitleFontColor;
+}
+
+.closeButton:hover svg {
+    filter: brightness(130%);
+    -webkit-filter: brightness(130%);
+}
+
+.button, .primaryButton {
+    float: right;
+    height: buttonHeight;
+    min-width: buttonMinWidth;
+    padding: 0px buttonPadding;
+    outline: none;
+    font-size: buttonFontSize;
+    font-family: mainFontFamily;
+}
+
+/* button styles */
+.button {
+    background: buttonBackground;
+    border: 1px solid buttonBorderColor;
+    color: buttonFontColor;
+}
+
+.button:hover,
+.button:focus {
+    background: buttonHoverBackground;
+    border: 1px solid buttonHoverBorderColor;
+    color: buttonHoverFontColor;
+}
+
+.button:active {
+    background: buttonClickedBackground;
+    border: 1px solid buttonClickedBorderColor;
+    color: buttonClickedFontColor;
+    outline: none;
+}
+
+.button[disabled], .button[disabled]:HOVER {
+    background: buttonDisabledBackground;
+    border: 1px solid buttonDisabledBorderColor;
+    color: buttonDisabledFontColor;
+}
+
+.button[disabled] svg, .button[disabled]:HOVER svg {
+    opacity: 0.5;
+}
+
+/* Blue button styles */
+.primaryButton {
+    background: primaryButtonBackground;
+    border: 1px solid primaryButtonBorderColor;
+    color: primaryButtonFontColor;
+}
+
+.primaryButton:hover,
+.primaryButton:focus {
+    background-color: primaryButtonHoverBackground;
+    border: 1px solid primaryButtonHoverBorderColor;
+    color: primaryButtonHoverFontColor;
+}
+
+.primaryButton:active {
+    background-color: primaryButtonClickedBackground;
+    border: 1px solid primaryButtonClickedBorderColor;
+    color: primaryButtonFontClickedColor;
+    outline: none;
+}
+
+.primaryButton[disabled], .primaryButton[disabled]:HOVER {
+    background: primaryButtonDisabledBackground;
+    border: 1px solid primaryButtonDisabledBorderColor;
+    color: primaryButtonDisabledFontColor;
+}
+
+.label {
+    font-family: mainFontFamily;
+    font-size: fontSize;
+    color: mainFontColor;
+}
+
+svg.image {
+    fill: mainFontColor;
+    width: 56px;
+    height: 56px;
+}

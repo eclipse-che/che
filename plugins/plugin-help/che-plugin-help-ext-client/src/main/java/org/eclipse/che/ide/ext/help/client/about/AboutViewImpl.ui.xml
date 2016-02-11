@@ -1,0 +1,34 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field='res' type='org.eclipse.che.ide.ext.help.client.AboutResources'/>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.help.client.about.AboutLocalizationConstant'/>
+
+    <g:DockLayoutPanel unit="PX" width="270px" height="165px" addStyleNames="{res.aboutCss.emptyBorder}">
+        <g:north size="70">
+            <g:FlowPanel ui:field="logoPanel" addStyleNames="{res.aboutCss.logo}"/>
+        </g:north>
+        <g:center>
+            <g:FlowPanel addStyleNames="{res.aboutCss.spacing} {res.aboutCss.mainText}">
+                <g:Label addStyleNames="{res.aboutCss.label}" text="{locale.aboutVersion}"/>
+                <g:Label ui:field="version" addStyleNames="{res.aboutCss.value}"/>
+                <g:Label addStyleNames="{res.aboutCss.label}" text="{locale.aboutRevision}"/>
+                <g:Label ui:field="revision" addStyleNames="{res.aboutCss.value}"/>
+                <g:Label addStyleNames="{res.aboutCss.label}" text="{locale.aboutBuildTime}"/>
+                <g:Label ui:field="buildTime" addStyleNames="{res.aboutCss.value}"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder> 
