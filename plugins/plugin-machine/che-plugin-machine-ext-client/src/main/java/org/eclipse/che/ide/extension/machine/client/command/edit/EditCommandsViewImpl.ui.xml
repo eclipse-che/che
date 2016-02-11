@@ -1,0 +1,153 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='machineLocale' type='org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant'/>
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+        .commandPanel > div:first-child + div {
+            border-right: 1px solid popupBorderColor;
+        }
+
+        .commandDefinitionHeader input,
+        .commandDefinitionBody input,
+        .commandDefinitionBody textarea {
+            font-size: 12px;
+            box-shadow: none;
+            border-radius: 0;
+            padding-left: 5px;
+            padding-right: 5px;
+            border-color: textFieldBorderColor !important;
+            width: literal("calc(100% - 12px)") !important;
+        }
+
+        .commandDefinitionHeader input,
+        .commandDefinitionBody input {
+            margin-bottom: 15px;
+            height: 20px;
+        }
+
+        .commandDefinitionHeader {
+            min-height: 60px;
+            width: 100%;
+        }
+
+        .commandDefinitionBody > div {
+            margin: 0;
+        }
+
+        .commandDefinitionBody > div div {
+            display: inline-block;
+            line-height: inherit;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .title,
+        .label {
+            margin-top: 0;
+            margin-left: 0;
+        }
+
+        .leftPart {
+            border: 1px solid popupBorderColor;
+            margin: 12px 10px 10px 10px;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .rightPart {
+            margin: 10px;
+        }
+
+        .categories {
+            border-top: 1px solid popupBorderColor;
+        }
+
+        .categories div > span {
+            float: none;
+        }
+
+        .categories div > span + div {
+            float: left;
+            width: inherit;
+        }
+
+        .categories div > span + div svg {
+            height: 9px;
+            width: 9px;
+        }
+
+        .filter {
+            line-height: 29px;
+            text-align: end;
+        }
+
+        .filter input {
+            border-color: textFieldBorderColor !important;
+            min-height: 20px;
+            margin: 0 3px 0 3px;
+            width: literal("calc(100% - 18px)");
+            -moz-user-select: text;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .overFooter {
+            float: right;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .overFooter button {
+            margin-right: 6px;
+        }
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.commandPanel}">
+        <g:west size="380">
+            <g:DockLayoutPanel unit="PX" addStyleNames="{style.leftPart}">
+                <g:north size="30">
+                    <g:FlowPanel addStyleNames="{style.filter}">
+                        <g:TextBox ui:field="filterInputField"/>
+                    </g:FlowPanel>
+                </g:north>
+                <g:center>
+                    <g:SimplePanel ui:field="categoriesPanel" addStyleNames="{style.categories}" debugId="commandWizard"/>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:west>
+        <g:center>
+            <g:FlowPanel addStyleNames="{style.rightPart}">
+                <g:FlowPanel>
+                    <g:Label width="200px" text="Command Definition" addStyleNames="{style.title}"/>
+                </g:FlowPanel>
+                <g:FlowPanel ui:field="savePanel" addStyleNames="{style.commandDefinitionHeader}">
+                        <g:Label width="50px" text="{machineLocale.editCommandsViewNameText}" addStyleNames="{style.label}"/>
+                        <g:TextBox width="100%" height="14px" ui:field="configurationName"/>
+                </g:FlowPanel>
+                <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.commandDefinitionBody}"/>
+                <g:FlowPanel ui:field="previewUrlPanel" addStyleNames="{style.commandDefinitionHeader}">
+                    <g:Label width="auto" text="Preview URL" addStyleNames="{style.label}"/>
+                    <g:TextBox width="100%" height="14px" ui:field="configurationPreviewUrl"/>
+                </g:FlowPanel>
+                <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

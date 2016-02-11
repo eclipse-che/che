@@ -1,0 +1,9 @@
+my
+my.
+my.subpack
+my.pack2
+my.pack2.subpack
+not.my.pack.subpack
+notmy.pack.subpack
+notmy.pack2.subpack
+My.pack

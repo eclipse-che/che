@@ -1,0 +1,74 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
+    <ui:with field="style" type="org.eclipse.che.ide.ext.git.client.importer.page.GitImporterPageViewImpl.Style"/>
+    <g:DockLayoutPanel unit="PX" addStyleNames="{style.mainPanel}">
+        <g:north size="400">
+            <g:FlowPanel ui:field="importerPanel">
+                <g:FlowPanel height="65px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.gitImporterPageProjectUrl}"
+                             addStyleNames="{style.labelPosition}"/>
+                    <g:TextBox ui:field="projectUrl" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="3"
+                               debugId="file-importProject-projectUrl"/>
+                    <g:Label ui:field="labelUrlError" width="100%" wordWrap="true" addStyleNames="{style.labelErrorPosition}"/>
+                </g:FlowPanel>
+                <g:FlowPanel height="0" addStyleNames="{style.horizontalLine}"/>
+                <g:FlowPanel height="35px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.gitImporterPageProjectInfo}" addStyleNames="{style.label}"/>
+                </g:FlowPanel>
+                <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.gitImporterPageProjectName}"
+                             addStyleNames="{style.labelPosition}"/>
+                    <g:TextBox ui:field="projectName" addStyleNames="{style.inputField} {style.alignRight}"
+                               tabIndex="4"
+                               debugId="file-importProject-projectName" title="{locale.gitImporterPageProjectNamePrompt}"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel height="87px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.gitImporterPageProjectDescription}"
+                             addStyleNames="{style.labelPosition}"/>
+                    <g:TextArea height="42px" ui:field="projectDescription" addStyleNames="{style.inputField} {style.alignRight}"
+                                debugId="file-importProject-projectDescription" title="{locale.gitImporterPageProjectDescriptionPrompt}"
+                                tabIndex="5"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+                        <g:CheckBox ui:field="keepDirectory" text="{locale.gitImporterPageKeepDirectory}"
+                                    debugId="file-importProject-keepDirectory" addStyleNames="{style.alignLeft}" />
+                </g:FlowPanel>
+
+                <g:FlowPanel height="55px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.gitImporterPageKeepDirectoryField}" addStyleNames="{style.labelPosition}"/>
+                    <g:TextBox ui:field="directoryName" addStyleNames="{style.inputField} {style.alignRight}"
+                               tabIndex="9" debugId="file-importProject-keepDirectoryName" title="{locale.gitImporterPageBranchField}"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+                    <g:CheckBox ui:field="branchSelection" text="{locale.gitImporterPageBranch}"
+                                debugId="file-importProject-branch" addStyleNames="{style.alignLeft}" />
+                </g:FlowPanel>
+
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.gitImporterPageBranchField}" addStyleNames="{style.labelPosition}"/>
+                    <g:TextBox ui:field="branch" addStyleNames="{style.inputField} {style.alignRight}"
+                               tabIndex="10" debugId="file-importProject-branchName" title="{locale.gitImporterPageBranchField}"/>
+                </g:FlowPanel>
+
+            </g:FlowPanel>
+
+        </g:north>
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

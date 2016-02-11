@@ -1,0 +1,48 @@
+
+/* There are two kinds of elements here:
+   md-tab-item Those are the items you see in the tab header
+   md-dummy-tab Those are used for pagination size calculations so need to have the same layout as md-tab-item
+*/
+
+md-tabs md-tabs-canvas.md-center-tabs
+  & md-tab-item.md-tab,
+  & md-dummy-tab.md-tab
+    min-width max-content /* at least as wide as the content */
+    flex-basis 0          /* all tab headers should have same width _when possible_ */
+    display flex
+    /* same as angular-md layout="row" layout-align="center center" */
+    flex-direction row
+    justify-content center
+    align-items center
+
+md-tab-item.md-tab, md-dummy-tab.md-tab
+  & .che-tab-label-icon
+    flex-grow 0
+    margin-left 0
+    margin-right 20px
+
+/* set font-size and line height for both <md-icon> and <i> tab icons */
+md-tab-item.md-tab, md-dummy-tab.md-tab
+  & .che-tab-label-icon span.md-font.che-tab-label-icon,
+  & md-icon.che-tab-label-icon::before,
+  & i.che-tab-label-icon, & i.che-tab-label-icon::before
+    font-size 20px
+    line-height 24px
+
+/* add a separator before each tab item except the first one */
+md-tab-item.md-tab + md-tab-item.md-tab::before, md-dummy-tab.md-tab + md-dummy-tab.md-tab::before
+  che-separator()
+  left 1px               /* che-separator() creates a 1px border at absolute top=0, add right 0 to position horozontally */
+
+/* ensure background for tab header */
+md-tabs-canvas
+  background-color $background-color
+
+/* selected tab color changes */
+md-tabs-canvas md-tab-item.md-tab.md-active,
+md-tabs-canvas md-tab-item.md-tab.md-active md-icon.che-tab-label-icon::before
+  color $primary-color !important /* either !important or preprend md-tabs.md-maincontent-theme-theme  to selector */
+
+md-tabs md-tab-item:not(.md-active)
+  border-bottom 1px solid $disabled-color
+

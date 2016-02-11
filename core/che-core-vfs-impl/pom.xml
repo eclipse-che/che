@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-core-parent</artifactId>
+        <groupId>org.eclipse.che.core</groupId>
+        <version>4.0.0-RC2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>che-core-vfs-impl</artifactId>
+    <packaging>jar</packaging>
+    <name>Che Core :: Virtual File System (Deprecated)</name>
+    <properties>
+        <findbugs.failonerror>false</findbugs.failonerror>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-dto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-vfs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-env</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-common</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

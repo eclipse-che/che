@@ -1,0 +1,32 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-list-item flex-gt-sm="100" ng-mouseover="hover=true" ng-mouseout="hover=false">
+    <div layout-gt-md="row" layout="column" flex="100" layout-align="start center"
+         class="workspace-item-row"
+         ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
+        <div class="workspace-item-name" flex="20" >
+            <span>{{workspaceItemCtrl.workspace.name}}</span>
+            <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
+        </div>
+        <div class="workspace-item-details" flex="10">
+          <workspace-status-indicator che-status="workspaceItemCtrl.workspace.status"></workspace-status-indicator>
+        </div>
+        <div class="workspace-consumed-value" flex="10">{{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB</div>
+        <a ng-href="#/ide/{{workspaceItemCtrl.workspace.name}}">
+            <che-button-default class="che-hover workspace-list-details-arrow"
+                                 che-button-icon="fa fa fa-chevron-circle-right"
+                                 che-button-title="Open in IDE"></che-button-default>
+        </a>
+
+    </div>
+</che-list-item>

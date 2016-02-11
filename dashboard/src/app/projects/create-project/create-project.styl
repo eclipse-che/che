@@ -1,0 +1,210 @@
+//TODO change colors
+$item-enabled-color-bg = $default-dark-color
+$item-enabled-color-fg = $white-color
+$item-disabled-color-bg = $clear-foggy-sky-color
+$item-disabled-color-fg = $stroke-color
+$item-error-color-bg = $auth-error-color
+$item-output-bg = $cat-gray-color
+$item-output-fg = $dark-menacing-sky-color
+
+
+
+che-button-primary#create-project-button-import button
+  margin-top 30px
+  margin-left 24px
+  margin-bottom 100px
+  font-size 1.5em
+  width calc(100% - 48px) !important
+
+.create-project-box md-icon
+  font-size 24px
+
+md-select.create-project-select
+  width 100%
+  margin-top 0px
+  margin-bottom 0px
+
+.projects-create-project > md-card:first-child .che-panel-content
+  padding 0
+
+.projects-create-project > md-card:first-child md-tabs-content-wrapper
+  padding-left 24px
+  padding-right 24px
+  padding-bottom 25px
+
+
+.create-project-progress-panel li
+  list-style-type none
+
+.create-project-progress-panel .create-project-progress-done
+  color white
+
+.create-project-progress-panel .create-project-progress-wait
+  color $label-info-color
+
+
+.create-project-progress-panel .che-panel-title.ng-binding
+  color white
+
+.create-project-progress-panel
+  margin-left 24px
+  margin-top 32px
+  margin-bottom 10px
+  margin-right 24px
+  background-color #fff
+  box-shadow 0 2px 6px 0 rgba(0,0,0,0.4)
+
+.create-project-progress-panel-top
+  background-position center
+  background-size cover
+  background-repeat no-repeat
+  background-position-x 0
+  background-position-y bottom
+  height 220px
+  padding-left 40px
+  padding-right 40px
+
+.create-project-progress-panel-top md-progress-linear
+  height 5px
+
+.create-project-progress-panel-bottom
+  padding 20px
+
+.create-project-panel-progress-items
+  height 50px
+  line-height 50px
+  color white
+  border-radius 25px
+
+.create-project-panel-progress-item-number
+  background-color white
+  color black
+  margin-left 5px
+  margin-right 20px
+  border-radius 20px
+  width 40px
+  height 40px
+  text-align center
+  line-height 40px
+
+.create-project-panel-progress-item-number-in-progress
+  animation pulse 5s infinite
+
+@keyframes pulse {
+  0% {
+    background-color white
+    color black
+  }
+  50% {
+    background-color $item-enabled-color-bg
+    color white
+  }
+  100% {
+    background-color white
+    color black
+  }
+}
+
+.create-project-panel-progress-title
+  font-size 1.5em
+  font-weight 800
+  color $item-enabled-color-fg
+
+.create-project-panel-progress-item-link
+  width 8px
+  margin-left 20px
+
+
+.create-project-panel-progress-items,.create-project-panel-progress-item-link, .create-project-panel-progress-lastitem
+  margin-top -1px
+  background $item-disabled-color-bg
+
+.create-project-panel-progress-items-enabled,.create-project-panel-progress-item-link-enabled, .create-project-panel-progress-lastitem-enabled
+  background $item-enabled-color-bg
+
+.create-project-panel-progress-lastitem
+  color white
+
+.create-project-panel-progress-item-output
+  margin 10px
+  margin-right 20px
+  background-color $background-color
+  color $item-output-fg
+  border none
+  font-family "Open Sans", sans-serif
+
+.create-project-panel-progress-items-error, .create-project-panel-progress-item-link-error, .create-project-panel-progress-lastitem-error
+  background $item-error-color-bg
+
+.create-project-panel-progress-items che-button-danger
+  margin-right 20px
+
+
+.create-project-header-steps-step
+  width 120px
+  height 30px
+  border-color $form-element-border-color
+  background-color $background-color
+  border-width 2px
+  border-style solid
+  che-border-radius(3px)
+
+
+.create-project-header-steps-step-active
+  border-color $primary-color
+  color $primary-color
+
+.create-project-header-steps
+  box-shadow-simple()
+  background-color $default-dark-color
+  padding-left 24px
+  padding-right 24px
+  padding-bottom 0px
+  min-height 95px !important
+  z-index 4
+
+.create-project-header-steps  che-button-primary .md-button.md-default-theme.md-hue-2.md-accent.md-raised
+  box-shadow 0 0 0 0 rgba(0, 0, 0, 0.26)
+
+.create-project-header-steps-button
+  min-width 120px
+
+.create-project-header-steps-panel
+  che-border-radius(3px)
+  padding-top 10px
+  padding-bottom 10px
+  padding-left 15px
+  padding-right 15px
+  background-color $white-color
+
+.create-project-header-steps-link
+  height 10px
+  width 60px
+  background-color $form-element-border-color
+
+.create-project-header-steps-step-title
+  text-transform uppercase
+
+.create-project-header-steps-link-active
+  background-color $primary-color
+
+.create-project-page-toolbar md-toolbar.md-toolbar-theme-theme
+  min-height 38px
+
+.create-project-progress-loader-icon
+  fill $background-color
+  width 120px
+  height 120px
+
+.create-project-progress-widget-progress
+  height 120px
+
+.create-project-minimize-icon
+  font-size 40px
+  cursor pointer
+  outline none
+
+.stack-label-info
+  color $label-info-color
+  margin-bottom 12px
+  margin-top 7px

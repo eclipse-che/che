@@ -1,0 +1,10 @@
+<md-card layout="column" class="che-simple-selecter"
+         ng-init="cheSimpleSelecterCtrl.initValue()"
+         ng-click="cheSimpleSelecterCtrl.select(cheSimpleSelecterCtrl.name, cheSimpleSelecterCtrl.title, cheSimpleSelecterCtrl.value)"
+         ng-class="{'che-simple-selecter-active' : '{{cheSimpleSelecterCtrl.title}}' == cheSimpleSelecterCtrl.getSelected()}">
+  <div layout="row">
+    <md-icon md-font-icon="{{cheSimpleSelecterCtrl.icon}}" flex layout="column" layout-align="start center"></md-icon>
+    <div flex="70" class="title">{{cheSimpleSelecterCtrl.title}}</div>
+  </div>
+  <div class="description">{{cheSimpleSelecterCtrl.description}}</div>
+</md-card>

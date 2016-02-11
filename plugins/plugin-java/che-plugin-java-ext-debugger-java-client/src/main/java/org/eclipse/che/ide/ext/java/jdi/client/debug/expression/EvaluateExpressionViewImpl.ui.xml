@@ -1,0 +1,69 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant'/>
+    <ui:with field='res' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources'/>
+    <ui:style>
+        .alignBtn {
+            float: right;
+        }
+
+        .alignLeft {
+            float: left;
+        }
+
+        .emptyBorder {
+            margin: 6px;
+        }
+
+        .space {
+            margin-right: 5px;
+        }
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="320px" height="320px" addStyleNames="{style.emptyBorder}">
+        <g:south size="26">
+            <g:FlowPanel>
+                <g:Button addStyleNames="{style.alignBtn}" width="60px" ui:field="btnCancel"
+                          text="{locale.evaluateExpressionViewCloseButtonTitle}"/>
+                <g:Button addStyleNames="{style.alignBtn} {style.space}" width="70px" ui:field="btnEvaluate"
+                          text="{locale.evaluateExpressionViewEvaluateButtonTitle}"/>
+            </g:FlowPanel>
+        </g:south>
+        <g:north size="55">
+            <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                    <g:north size="20">
+                        <g:Label text="{locale.evaluateExpressionViewExpressionFieldTitle}" addStyleNames="{style.alignLeft}"/>
+                    </g:north>
+                    <g:center>
+                        <g:TextBox ui:field="expression" width="100%" height="22px"/>
+                    </g:center>
+                </g:DockLayoutPanel>
+            </g:FlowPanel>
+        </g:north>
+        <g:center>
+            <g:FlowPanel addStyleNames="{style.emptyBorder}">
+                <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                    <g:north size="20">
+                        <g:Label text="{locale.evaluateExpressionViewResultFieldTitle}" addStyleNames="{style.alignLeft}"/>
+                    </g:north>
+                    <g:center>
+                        <g:TextArea ui:field="result" readOnly="true" width="100%"/>
+                    </g:center>
+                </g:DockLayoutPanel>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

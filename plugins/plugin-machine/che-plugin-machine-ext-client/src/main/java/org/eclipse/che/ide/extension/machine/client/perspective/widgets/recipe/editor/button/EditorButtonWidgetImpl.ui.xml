@@ -1,0 +1,47 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field="locale" type="org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant"/>
+    <ui:with field="resources" type="org.eclipse.che.ide.extension.machine.client.MachineResources"/>
+
+    <ui:style>
+        .button {
+            width: 125px;
+            height: 25px;
+            float: left;
+            cursor: pointer;
+            box-shadow: 0 0 0 1px #191c1e;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .button:active {
+            background: #256c9f !important;
+            opacity: 0.4;
+        }
+
+        .buttonLabel {
+            margin-top: 5px;
+            text-shadow: 0 .4px 0 rgba(0, 0, 0, 0.5);
+            font-weight: bold;
+        }
+    </ui:style>
+
+    <g:FlowPanel addStyleNames="{style.button}">
+
+        <g:Label ui:field="button" addStyleNames="{style.buttonLabel}"/>
+
+    </g:FlowPanel>
+</ui:UiBinder>

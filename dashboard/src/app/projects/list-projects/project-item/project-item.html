@@ -1,0 +1,42 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-list-item flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
+  <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row">
+    <div class="project-list-static-icon" layout-align="center center">
+      <che-list-item-checked class="project-type-icon"
+                              ng-model="projectItemCtrl.isSelect"
+                              ng-show="projectItemCtrl.isSelectable"
+                              che-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"
+                              che-aria-label-checkbox="Project {{projectItemCtrl.project.name}}"></che-list-item-checked>
+      <md-icon ng-hide="projectItemCtrl.isSelectable" md-font-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"></md-icon>
+    </div>
+    <div flex="40" layout="column" layout-align-gt="start center" layout-align-md="start center" layout-align-sm="center center" ng-click="projectItemCtrl.redirectToProjectDetails()">
+      <div class="project-name"><a class="che-hover">{{projectItemCtrl.project.name}}</a>
+      </div>
+      <div class="project-details" ng-show="projectItemCtrl.isDisplayWorkspace">{{projectItemCtrl.project.workspaceName}}</span></div>
+      <div class="project-details">{{projectItemCtrl.project.description}}</div>
+    </div>
+    <div flex="15" class="project-details" layout-align="center center" ng-click="projectItemCtrl.redirectToProjectDetails()">
+        <span class="che-hover"
+              tooltip="Last modified: {{projectItemCtrl.getProjectModificationDate() | amDateFormat:'dddd, MMMM Do, YYYY'}}"
+              am-time-ago="projectItemCtrl.getProjectModificationDate()"></span>
+    </div>
+    <p ng-show="hover">
+      <a ng-href="#/ide/{{projectItemCtrl.workspaceName}}">
+        <che-button-default class="che-hover project-list-details-arrow"
+                             che-button-icon="fa fa fa-chevron-circle-right"
+                             che-button-title="Open in IDE"></che-button-default>
+      </a>
+    </p>
+  </div>
+</che-list-item>

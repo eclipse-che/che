@@ -1,0 +1,95 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="project-repositories">
+
+  <!-- Mobile version -->
+  <che-panel ng-if="projectRepositoryCtrl.localGitRepository || projectRepositoryCtrl.remoteSvnRepository"
+              che-title="Local Clone" hide-gt-md>
+    <div ng-if="projectRepositoryCtrl.localGitRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
+      <div class="label-name">GIT&nbsp;URL:</div>
+      <div>
+        <label class="url-label"><span>{{projectRepositoryCtrl.localGitRepository}}</span></label>
+
+        <che-clipboard che-value="projectRepositoryCtrl.localGitRepository" class="copy-clipboard"></che-clipboard>
+      </div>
+    </div>
+    <div ng-if="projectRepositoryCtrl.remoteSvnRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
+      <div class="label-name">SVN&nbsp;URL:</div>
+      <div>
+        <label class="url-label"><span>{{projectRepositoryCtrl.localSvnRepository}}</span></label>
+
+        <che-clipboard che-value="projectRepositoryCtrl.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
+      </div>
+    </div>
+  </che-panel>
+  <!-- Desktop version -->
+  <che-panel ng-if="projectRepositoryCtrl.localGitRepository || projectRepositoryCtrl.remoteSvnRepository"
+              che-title="Local Clone" hide-sm hide-md>
+    <div ng-if="projectRepositoryCtrl.localGitRepository">
+      <div class="repository-desktop" layout="row" flex layout-align="space-around start">
+        <div class="label-name" flex="20">GIT&nbsp;URL:</div>
+        <div layout="column" flex="80">
+          <div>
+            <label class="url-label"><span>{{projectRepositoryCtrl.localGitRepository}}</span></label>
+
+            <che-clipboard che-value="projectRepositoryCtrl.localGitRepository" class="copy-clipboard"></che-clipboard>
+          </div>
+        </div>
+      </div>
+      <label class="prompt">Clone repository with command <span>git clone &lt;url&gt;</span></label>
+    </div>
+    <div ng-if="projectRepositoryCtrl.remoteSvnRepository">
+      <div class="repository-desktop" layout="row" flex layout-align="space-around start">
+        <div class="label-name" flex="20">SVN&nbsp;URL:</div>
+        <div layout="column" flex="80">
+          <div>
+            <label class="url-label"><span>{{projectRepositoryCtrl.remoteSvnRepository}}</span></label>
+
+            <che-clipboard che-value="projectRepositoryCtrl.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
+          </div>
+        </div>
+      </div>
+      <label class="prompt">Checkout repository with command <span>svn checkout &lt;url&gt;</span></label>
+    </div>
+  </che-panel>
+
+  <!-- Mobile version -->
+  <che-panel ng-if="projectRepositoryCtrl.remoteGitRepositories.length" che-title="Remote Repository" hide-gt-md>
+    <div class="repository-mobile" ng-repeat="remoteRepository in projectRepositoryCtrl.remoteGitRepositories" layout="row" flex>
+      <div class="label-name"><span>{{remoteRepository.name}}</span>GIT&nbsp;URL:</div>
+      <div>
+        <label class="url-label"><span>{{remoteRepository.url}}</span></label>
+
+        <che-clipboard che-value="remoteRepository.url" class="copy-clipboard"></che-clipboard>
+      </div>
+    </div>
+  </che-panel>
+  <!-- Desktop version -->
+  <che-panel ng-if="projectRepositoryCtrl.remoteGitRepositories.length" che-title="Remote Repository" hide-sm hide-md>
+    <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryCtrl.remoteGitRepositories" layout="row" flex>
+      <div flex="20" class="label-name"><span>{{remoteRepository.name}}</span>GIT&nbsp;URL:</div>
+      <div layout="column" flex="80">
+        <label class="url-label"><span>{{remoteRepository.url}}</span></label>
+
+        <che-clipboard che-value="remoteRepository.url" class="copy-clipboard"></che-clipboard>
+      </div>
+    </div>
+  </che-panel>
+
+  <div layout="row" layout-align="center center" class="empty-repository" ng-if="projectRepositoryCtrl.isEmptyState">
+    <che-empty-state che-value="There are no repositories yet."
+                     che-prompt="You can add a GIT or SVN repository in the menu."
+                     che-icon-class="fa fa-code-fork"></che-empty-state>
+  </div>
+
+</div>

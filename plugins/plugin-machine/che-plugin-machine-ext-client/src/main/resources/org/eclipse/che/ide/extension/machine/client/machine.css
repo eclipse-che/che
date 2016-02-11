@@ -1,0 +1,385 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@eval partBackground org.eclipse.che.ide.api.theme.Style.theme.partBackground();
+@eval outputFontColor org.eclipse.che.ide.api.theme.Style.theme.getOutputFontColor();
+@eval successColor org.eclipse.che.ide.api.theme.Style.getSuccessColor();
+@eval categoryHeaderButtonColor org.eclipse.che.ide.api.theme.Style.theme.categoryHeaderButtonColor();
+@eval categoryElementButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.categoryElementButtonHoverColor();
+@eval processTreeBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.processTreeBackgroundColor();
+@eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
+@eval outputFontColor org.eclipse.che.ide.api.theme.Style.theme.getOutputFontColor();
+@eval editorTabIconColor org.eclipse.che.ide.api.theme.Style.getEditorTabIconColor();
+@eval outputBoxShadow org.eclipse.che.ide.api.theme.Style.theme.outputBoxShadow();
+@eval processTreeDevLabel org.eclipse.che.ide.api.theme.Style.theme.processTreeDevLabel();
+
+@external .terminal, .terminal-cursor;
+
+.terminal {
+    border-color: transparent;
+    background-color: outputBackgroundColor;
+    border-width: 0px;
+    margin-left: 0px;
+    margin-top: 0px;
+
+    color: outputFontColor;
+    line-height: 13px;
+    padding: 3px;
+}
+
+.terminal-cursor {
+    background: #4EABFF;
+}
+
+.fullSize {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.machineConsole,
+.commandConsole {
+    background-color: outputBackgroundColor;
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    user-select: text;
+    color: outputFontColor;
+    outline: none;
+    border-top: 1px solid separatorColor;
+    -webkit-box-shadow: outputBoxShadow;
+    -moz-box-shadow: outputBoxShadow;
+    box-shadow: outputBoxShadow;
+    padding: 3px;
+    margin-bottom: 3px;
+}
+
+.machineConsole pre,
+.commandConsole pre {
+    font-family: outputFontFamily;
+    font-size: fontSize;
+}
+
+.commandConsoleLines {
+    width: 100%;
+}
+
+.commandConsoleLines > pre {
+    width: 100%;
+    word-wrap: break-word;
+    padding: 0;
+    margin: 0;
+}
+
+.consoleToolbar {
+    box-shadow: 0 2px 5px 0 rgba(50, 50, 50, 0.75);
+}
+
+.outputsConsoleTabsPanel {
+    box-shadow: 0 2px 5px 0 rgba(50, 50, 50, 0.75);
+}
+
+.outputsContainerConsoleTab {
+    border-right: 1px solid tabBorderColor;
+    cursor: pointer;
+    height: 17px;
+    font-size: 11px;
+    display: inline-block;
+}
+
+.outputsContainerConsoleTab:hover {
+    color: buttonHoverTextColor;
+}
+
+.outputsContainerConsoleTabSelected {
+}
+
+.outputsContainerConsoleTabSelected:before {
+    position: absolute;
+    height: 0;
+    content: "";
+}
+
+.outputsContainerConsoleTabPanel {
+    border-right: 1px solid tabBorderColor;
+    box-shadow: 1px 0 0 0 tabBorderShadow;
+    position: relative;
+    top: -2px;
+    padding-left: 15px;
+}
+
+.outputsContainerConsoleTabPanel.outputsContainerConsoleTabSelected:before {
+    left: 0;
+    width: 100%;
+    border-top: 1px solid #47afdd !important;
+}
+
+.outputsContainerConsoleTabLabel {
+    position: relative;
+    top: 2px;
+    color: outputFontColor;
+}
+
+.outputsContainerConsoleTabCloseButton {
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 5px 10px;
+    float: right;
+}
+
+.activeTab {
+    border-left: 1px solid #000000;
+    border-top: 1px solid #000000;
+    border-right: 1px solid #000000;
+    box-shadow: inset 0 1px 0 0 #4d4d4d, 0 2px 0 0 #474747;
+}
+
+.activeTabText {
+    color: #ffffff;
+}
+
+.disableTab {
+    color: #929292;
+}
+
+.opacityButton {
+    opacity: 0.4;
+}
+
+.selectRecipe {
+    background-color: #132d41;
+}
+
+.unSelectRecipe {
+    background-color: #373737;
+}
+
+.unavailableLabel {
+    width: 100%;
+    height: 100%;
+    left: 0;
+    cursor: default;
+    text-align: center;
+    top: 50% !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 1);
+}
+
+.selectCommandBox:first-child > .selectCommandBoxIconPanel:first-child {
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+.selectCommandBox:first-child > .selectCommandBoxIconPanel:first-child + div {
+    font-family: textFieldFontFamily;
+    color: selectCommandActionColor;
+    font-size: textFieldFontSize;
+}
+
+.selectCommandBox:first-child > .selectCommandBoxIconPanel:first-child + div:hover {
+    color: selectCommandActionHoverColor;
+}
+
+.selectCommandBox {
+    height: 100%;
+    min-width: 336px;
+    white-space: nowrap;
+    margin: 0 !important;
+    display: inline-block;
+}
+
+.selectCommandBoxIconPanel {
+    float: left;
+    width: 40px;
+    height: 100%;
+    margin-top: auto;
+    line-height: 24px;
+    background-color: selectCommandActionIconBackgroundColor;
+}
+
+.selectCommandBox .selectCommandBoxIconPanel + div {
+    float: left;
+    text-align: left;
+    min-width: 138px;
+    padding: 0 5px 0 5px;
+    display: inline-block;
+}
+
+.selectCommandBoxIconPanel svg {
+    max-width: 22px;
+    max-height: 22px;
+    fill: selectCommandActionIconColor;
+}
+
+.selectCommandBoxIconPanel svg path {
+    fill: selectCommandActionIconColor !important;
+}
+
+.processTree {
+    font-family: mainFontFamily;
+    font-size: fontSize;
+    color: mainFontColor;
+    text-shadow: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.processTree .devMachineLabel {
+    background-color: primaryHighlightColor;
+    color: processTreeDevLabel;
+    text-transform: uppercase;
+    line-height: smallFontSize;
+    font-size: 9px;
+    padding: 1px 2px;
+    margin: 0px 5px;
+    font-weight: bold;
+    border-radius: 1.5px;
+}
+
+.processTree span {
+    line-height: 18px;
+}
+
+.processTree .machineLabel {
+    font-weight: bold;
+}
+
+.processTree .machineStatus {
+    float: right;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    margin: 4px 5px;
+
+    background-color: #46AF00;
+    border: 1px solid #7ED321;
+    box-sizing: border-box;
+}
+
+.sshButton {
+    font-size: 10px;
+    float: right;
+    margin-right: 2px;
+    color: categoryHeaderButtonColor;
+    cursor: pointer;
+}
+
+.processTree .processButton {
+    float: right;
+    color: categoryHeaderButtonColor;
+    border: 1px solid categoryHeaderButtonColor;
+    margin: 3px 6px 0 5px;
+    width: 14px;
+    height: 13px;
+    opacity: 0.5;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 2px;
+    line-height: 10px;
+    box-sizing: border-box;
+    text-align: center;
+    cursor: pointer;
+}
+
+.processButton span:hover {
+    fill: categoryHeaderButtonHoverColor;
+    stroke: categoryHeaderButtonHoverColor;
+}
+
+.processButton:hover,
+.sshButton:hover {
+    filter: brightness(120%);
+    -webkit-filter: brightness(120%);
+}
+
+.processTree .processIcon {
+    margin: 0px 5px;
+    height: 100%;
+}
+
+.processIcon svg {
+    fill: iconColor;
+    width: 12px;
+    height: 12px;
+    vertical-align: middle;
+    padding: 0 1px 2px 0;
+}
+
+.processIcon svg path {
+    fill: iconColor;
+}
+
+.processTree div[selected="true"] .processIcon svg path {
+    fill: activeIconColor;
+}
+
+.processNavigation {
+    outline: none;
+}
+
+.processOutputPanel {
+    -moz-user-select: text;
+    -webkit-user-select: auto;
+    user-select: text;
+    background-color: outputBackgroundColor;
+}
+
+div.processHeaderTitle {
+    font-size: fontSize;
+    font-family: outputFontFamily;
+    color: mainFontColor;
+}
+
+.processCommandValue {
+    color: successColor !important;
+}
+
+.processesPanelStopButtonForProcess {
+    float: right;
+    background-color: editorTabIconColor;
+    opacity: 0.3;
+    margin: 4px 5px 0 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.processesPanelStopButtonForProcess:hover {
+    opacity: 0.5;
+}
+
+.processesPanelCloseButtonForProcess {
+    float: right;
+}
+
+.processesPanelCloseButtonForProcess svg {
+    cursor: pointer;
+    opacity: 0.5;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 9px;
+    float: right;
+    fill: editorTabIconColor;
+}
+
+.processesPanelCloseButtonForProcess svg g,
+.processesPanelCloseButtonForProcess svg path {
+    fill: editorTabIconColor;
+}
+
+.processTree div[selected="true"] .processesPanelCloseButtonForProcess svg,
+.processesPanelCloseButtonForProcess:HOVER svg {
+    opacity: 1;
+}
+
+.hideStopButton .processesPanelStopButtonForProcess {
+    display: none;
+}

@@ -1,0 +1,47 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+        .main {
+            background: #000000;
+            height: 12px;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .label {
+            float: left;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border: 8px solid transparent;
+            border-bottom-color: #000000;
+            left: 6px;
+            bottom: 100%;
+        }
+    </ui:style>
+
+
+    <g:FlowPanel addStyleNames="{style.main}">
+        <g:Label ui:field="description" addStyleNames="{style.label}"/>
+
+        <g:FlowPanel addStyleNames="{style.arrow}"/>
+    </g:FlowPanel>
+
+</ui:UiBinder>

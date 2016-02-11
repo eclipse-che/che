@@ -1,0 +1,19 @@
+<md-card class="che-stack-library-workspace-selecter"
+         ng-click="select()"
+         ng-class="{'che-stack-library-workspace-selecter-active' : (isSelect && isActive)}">
+  <md-card-content layout="column" layout-fill>
+        <div class="body">
+            <div class="title">Custom</div>
+        </div>
+        <div class="che-stack-library-workspace-selecter-workspace-name" layout="row" layout-align="start center">
+            <div class="chefont cheico-icon-wkps icon"></div>
+            <div>{{workspace.name}}</div>
+        </div>
+        <div class="che-stack-library-workspace-selecter-text"
+             ng-if="workspace">{{getWorkspaceStackDetails()}}</div>
+        <div layout="row" layout-align="end end" flex>
+            <div class="che-stack-library-workspace-selecter-extra-text" tooltip="{{getWorkspaceTooltip()}}">...</div>
+        </div>
+    </md-card-content>
+
+</md-card>

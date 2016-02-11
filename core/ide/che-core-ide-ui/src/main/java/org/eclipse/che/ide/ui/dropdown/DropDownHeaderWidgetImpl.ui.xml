@@ -1,0 +1,45 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+
+        .widget {
+            display: inline-block;
+        }
+
+        .selectedElementName {
+            margin-height: none;
+            color: inherit;
+            font-size: inherit;
+        }
+
+        .imagePanel {
+            float: right;
+        }
+
+        .container {
+            float: left;
+        }
+    </ui:style>
+
+    <g:FlowPanel ui:field="listHeader" debugId="dropDownHeader" styleName="{style.widget}">
+        <g:FlowPanel ui:field="selectedElement" addStyleNames="{style.container}">
+            <g:Label ui:field="selectedElementName" addStyleNames="{style.selectedElementName}"/>
+        </g:FlowPanel>
+        <g:FlowPanel addStyleNames="{style.imagePanel}">
+            <g:FlowPanel ui:field="marker"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

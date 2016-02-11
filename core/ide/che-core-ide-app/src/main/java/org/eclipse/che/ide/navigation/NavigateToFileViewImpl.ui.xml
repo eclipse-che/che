@@ -1,0 +1,47 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
+    <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
+    <ui:style>
+        .emptyBorder {
+            margin: 6px;
+        }
+
+        .spacingTop {
+            margin-top: 5px;
+        }
+
+        .labelMargin {
+            margin: 5px 0;
+        }
+
+        .box {
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+        }
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="400px" height="100px" addStyleNames="{style.emptyBorder}" debugId="file-navigateToFile-mainPanel">
+        <g:center>
+            <g:FlowPanel addStyleNames="{style.emptyBorder} {style.spacingTop}">
+                <g:Label width="100%" addStyleNames="{style.labelMargin}" text="{locale.navigateToFileViewFileFieldTitle}"/>
+                <g:SuggestBox ui:field="files" width="100%" addStyleNames="{style.box}" debugId="file-navigateToFile-fileName"/>
+                <g:Label width="100%" addStyleNames="{style.labelMargin} {res.coreCss.greyFontColor}" text="{locale.navigateToFileViewFileFieldPrompt}"/>
+                <g:Label ui:field="errLabel" width="100%" addStyleNames="{style.labelMargin} {res.coreCss.errorFont}"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

@@ -1,0 +1,338 @@
+[
+  {
+    "name": "web-java-spring",
+    "displayName": "web-java-spring",
+    "path": "/web-java-spring",
+    "description": "A basic example using Spring servlets. The app returns values entered into a submit form.",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-java-spring.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run tomcat",
+        "type": "custom",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      },
+      {
+        "name": "stop tomcat",
+        "type": "custom",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh stop",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "build and run",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      },
+      {
+        "name": "debug",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "maven",
+      "spring",
+      "java"
+    ]
+  },
+  {
+    "name": "console-cpp-simple",
+    "displayName": "console-cpp-simple",
+    "path": "/console-cpp-simple",
+    "description": "The app will print Hello World to the console.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "cpp"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/console-cpp-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "build and run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && make && ./a.out",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "cpp",
+      "gcc"
+    ]
+  },
+  {
+    "name": "web-nodejs-simple",
+    "displayName": "web-nodejs-simple",
+    "path": "/web-nodejs-simple",
+    "description": "Yeoman Starter project.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "javascript"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-nodejs-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "install dependencies",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && npm install --no-bin-links && bower install",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && grunt serve",
+        "attributes": {
+          "previewUrl": "http://${server.port.9000}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "nodejs",
+      "yeoman",
+      "javascript"
+    ]
+  },
+  {
+    "name": "web-php-simple",
+    "displayName": "web-php-simple",
+    "path": "/web-php-simple",
+    "description": "A hello world PHP script.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-php-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "start apache",
+        "type": "custom",
+        "commandLine": "sudo service apache2 start && sudo tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
+        "attributes": {
+          "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+        }
+      },
+      {
+        "name": "stop apache",
+        "type": "custom",
+        "commandLine": "sudo service apache2 stop",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "restart apache",
+        "type": "custom",
+        "commandLine": "sudo service apache2 restart",
+        "attributes": {
+          "previewUrl": "http://${server.port.80}/${current.project.relpath}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "apache",
+      "php"
+    ]
+  },
+  {
+    "name": "console-java-simple",
+    "displayName": "console-java-simple",
+    "path": "/console-java-simple",
+    "description": "A hello world Java application.",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/console-java-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && java -jar ${current.project.path}/target/*.jar",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "java",
+      "maven"
+    ]
+  },
+  {
+    "name": "console-dotnet-simple",
+    "displayName": "console-dotnet-simple",
+    "path": "/console-dotnet-simple",
+    "description": "The app will print current date to the console.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "dotnet"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/console-dotnet-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "update dependencies",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && dnu restore",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "dnx -p ${current.project.path}/project.json run",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "dotnet",
+      "dnx",
+      "mono"
+    ]
+  },
+  {
+    "name": "web-aspnet-simple",
+    "displayName": "web-aspnet-simple",
+    "path": "/web-aspnet-simple",
+    "description": "Sample web application with asp.net.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "aspnet"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-aspnet-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "update dependencies",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && dnu restore",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "dnx -p ${current.project.path}/project.json web",
+        "attributes": {
+          "previewUrl": "http://${server.port.5004}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "aspnet",
+      "dnx",
+      "mono"
+    ]
+  }
+]

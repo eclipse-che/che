@@ -1,0 +1,8 @@
+{
+  "title": "Eclipse Che - Dashboard",
+  "name": "Eclipse Che",
+  "logoFile": "che-logo.svg",
+  "favicon": "favicon.ico",
+  "ideResources": "/ide/_app/",
+  "helpPath": "https://www.eclipse.org/che/"
+}

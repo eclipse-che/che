@@ -1,0 +1,59 @@
+.che-select .che-select-container
+  outline none
+  border none
+  border-bottom 1px solid $default-border-color
+
+.che-select md-input-container .che-select-container
+  border-bottom 1px solid $default-border-color
+  margin-left -4px
+  width calc(100% + 4px)
+
+.che-select .che-select-desktop .che-select-container
+  position relative
+  min-height 20px
+
+.che-select md-input-container
+  margin-top 30px
+
+.che-select md-input-container label
+  margin-top -47px
+
+.che-select select
+  background inherit
+  outline none
+
+.che-select .che-select-desktop select
+  position absolute
+  z-index 1000
+
+.che-select .che-select-desktop select:not(.che-select-border)
+  margin-left -4px
+  width calc(100% + 4px)
+  border none
+
+.che-select .che-select-desktop .che-select-border
+  background $white-color
+  border-style solid
+  border-width 1.5px
+  border-color $primary-color
+
+.che-select .che-select-desktop select.che-select-border
+  width 100%
+
+.che-select select.disabled
+  color $disabled-color
+
+.che-select select option:first-child
+  display none
+
+.che-select select.disabled option:not(:first-child)
+  color $label-primary-color
+
+.che-select-desktop select:focus
+  border-color $primary-color
+
+.che-select-desktop
+  margin 0
+
+.che-select-overflow-hidden
+  overflow hidden

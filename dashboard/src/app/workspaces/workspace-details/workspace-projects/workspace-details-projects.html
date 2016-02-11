@@ -1,0 +1,34 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="workspace-projects-title">
+  {{(workspaceDetailsProjectsCtrl.projects && workspaceDetailsProjectsCtrl.projects.length > 0) ? workspaceDetailsProjectsCtrl.projects.length : 'No'}}
+  Project{{(workspaceDetailsProjectsCtrl.projects && workspaceDetailsProjectsCtrl.projects.length === 1) ? '' : 's'}} in the workspace</div>
+<md-content class="workspace-projects-content">
+  <div flex layout="row" layout-align="end center">
+    <che-list flex ng-if="workspaceDetailsProjectsCtrl.projects && workspaceDetailsProjectsCtrl.projects.length > 0"
+               ng-class="{ 'projects-small': !workspaceDetailsProjectsCtrl.widthGtSm() }">
+      <che-project-item ng-repeat="project in workspaceDetailsProjectsCtrl.projects" flex-gt-sm="100" flex="33"
+                         che-project-item-workspace-id="workspaceDetailsProjectsCtrl.workspaceId"
+                         che-project-item-project="project"
+                         che-profile-creation-date="workspaceDetailsProjectsCtrl.profileCreationDate"></che-project-item>
+    </che-list>
+    <div class="workspace-projects-list-side" ng-class="{ 'workspace-projects-list-side-big': workspaceDetailsProjectsCtrl.widthGtSm() }"
+          layout-gt-sm="column" layout-align="end center">
+      <a ng-href="#/create-project" href="#/create-project">
+        <md-button class="md-fab" ng-class="{ 'md-fab-bottom-right': !workspaceDetailsProjectsCtrl.widthGtSm() }"
+                 aria-label="add project">
+        <span class="fa fa-plus"></span>
+      </md-button></a>
+    </div>
+  </div>
+</md-content>

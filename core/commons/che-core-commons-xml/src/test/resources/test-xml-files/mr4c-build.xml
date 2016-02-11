@@ -1,0 +1,305 @@
+<?xml version="1.0"?>
+<project name="mr4c" default="build" xmlns:ac="antlib:net.sf.antcontrib"
+	xmlns:jacoco="antlib:org.jacoco.ant" 
+xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<description>Build, test and package the MR4C project.</description>
+
+	<property file="build.local.properties" />
+
+	<property file="build.properties" />
+
+
+
+	<propertyset id="mr4c.properties">
+		<propertyref prefix="mr4c" />
+	</propertyset>
+
+	<path id="compile.classpath">
+		<fileset dir="${lib.dir}" />
+	</path>
+
+	<path id="compile.classpath.test">
+		<fileset dir="${lib.dir.test}" />
+	</path>
+
+	<path id="run.classpath" >
+		<pathelement location="${conf.dir}" />
+		<pathelement location="${src.classes.dir}" />
+		<path refid="compile.classpath" />
+	</path>
+
+	<path id="test.classpath" >
+		<pathelement location="${test.classes.dir}" />
+		<path refid="compile.classpath.test" />
+		<path refid="run.classpath" />
+	</path>
+
+	<!-- Validate hadoop binding -->
+	<fail message="Property hadoop.binding = [${hadoop.binding}]; must be 'mrv1' or 'yarn'" >
+		<condition><not><or>
+			<equals arg1="${hadoop.binding}" arg2="mrv1" />
+			<equals arg1="${hadoop.binding}" arg2="yarn" />
+		</or></not></condition>
+	</fail>
+
+	<!-- Specifying which Hadoop binding classes not to compile -->
+	<condition property="hadoop.binding.excludes" value="${hadoop.pkg.path}/yarn/**" >
+		<equals arg1="${hadoop.binding}" arg2="mrv1" />
+	</condition>
+	<condition property="hadoop.binding.excludes" value="${hadoop.pkg.path}/mrv1/**" >
+		<equals arg1="${hadoop.binding}" arg2="yarn" />
+	</condition>
+
+	<!--
+		 NOTE: All targets with dependencies and tasks should follow the following pattern:
+			Target do-XXX has no dependencies and all the tasks
+			Target XXX has all the dependencies and no tasks, and also depends on do-XXX
+		This allows externally calling pieces of the build without continuously executing dependent targets
+	-->
+
+	<!-- TARGET: build -->
+	<target name="build" depends="clean, test, dist" />
+
+	<!-- TARGET: clean -->
+	<target name="clean" >
+		<delete dir="${dist.dir}" />
+		<delete dir="${lib.dir}" />
+		<delete dir="${lib.dir.test}" />
+		<delete dir="${src.classes.dir}" />
+		<delete dir="${test.classes.dir}" />
+		<delete dir="${reports.dir}" />
+		<delete dir="${output.dir}" />
+		<delete dir="${jna.gen.dir}" />
+		<delete file="${hadoop.static.binder}" />
+		<delete file="${hadoop.static.test.binder}" />
+		<delete file="${hadoop.ivy}" />
+	</target>
+
+	<!-- TARGET: init -->
+	<target name="init" depends="make-dirs, select-hadoop-ivy, select-hadoop-binding" />
+
+	<!-- TARGET: make-dirs -->
+	<target name="make-dirs" >
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${lib.dir}" />
+		<mkdir dir="${lib.dir.test}" />
+		<mkdir dir="${src.classes.dir}" />
+		<mkdir dir="${test.classes.dir}" />
+		<mkdir dir="${reports.dir}" />
+		<mkdir dir="${output.dir}" />
+	</target>
+
+	<!-- TARGET: select-hadoop-ivy -->
+	<target name="select-hadoop-ivy" >
+		<copy file="${hadoop.ivy.src}" tofile="${hadoop.ivy}" />	
+	</target>
+
+	<!-- TARGET: select-hadoop-binding -->
+	<target name="select-hadoop-binding" >
+		<copy file="${hadoop.static.binder.src}" tofile="${hadoop.static.binder}" />
+		<copy file="${hadoop.static.test.binder.src}" tofile="${hadoop.static.test.binder}" />
+	</target>
+
+
+	<!-- TARGET: resolve -->
+	<target name="resolve" depends = "init, do-resolve" />
+	
+	<!-- TARGET: do-resolve -->
+	<target name="do-resolve" depends= "select-hadoop-ivy, retrieve" />
+
+	<!-- TARGET: retrieve -->
+	<target name="retrieve" >
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar}" />
+		<ivy:retrieve/>
+	</target>
+
+	<!-- TARGET: compile -->
+	<target name="compile" depends="init, resolve, do-compile" />
+
+	<!-- TARGET: do-compile -->
+	<target name="do-compile" depends="jnaerate, comp-src, comp-test" />
+
+	<!-- TARGET: jnaerate -->
+	<target name="jnaerate" description="--> run JNAerator on native lib">
+		<java classname="com.ochafik.lang.jnaerator.JNAerator" fork="false" failonerror="true" >
+			<arg value="-library" />
+			<arg value="mr4c" />
+			<arg value="-o" />
+			<arg value="${src.dir}" />
+			<arg value="-package" />
+			<arg value="com.google.mr4c.nativec.jna.lib" />
+			<arg value="-f" />
+			<arg value="-mode" />
+			<arg value="Directory" />
+			<arg value="-runtime" />
+			<arg value="JNAerator" />
+			<arg value="-I${mr4c.api.dir}" />
+			<!--arg value="-I/usr/lib/gcc/x86_64-linux-gnu/4.4/include" /--> <!-- for stdbool.h -->
+			<arg value="${mr4c.api.dir}/external_capi.h" />
+			<classpath refid="compile.classpath" />
+		</java>
+		<fail message="Jnaerator failed to produce a java file" >
+			<condition>
+				<not>
+					<available file="${jna.gen.dir}/Mr4cLibrary.java" />
+				</not>
+			</condition>
+		</fail>
+	</target>
+
+	<!-- TARGET: fix-library-load -->
+	<target name="fix-library-load" description="--> fix the arguments to getLibraryPath">
+
+		<exec executable="sed" dir="${jna.gen.dir}" output="${jna.gen.dir}/Mr4cLibrary.java" logError="true" input="${jna.gen.dir}/Mr4cLibrary.java" failonerror="true" >
+			<arg value="-e" />
+			<arg value="s/\(getLibraryPath.*\)true\(.*\)/\1false\2/" />
+		</exec>
+		<fail message="Couldn't fix the Mr4cLibrary file" >
+			<condition>
+				<not>
+						<available file="${jna.gen.dir}/Mr4cLibrary.java" />
+				</not>
+			</condition>
+		</fail>
+	</target>
+    
+	<!-- TARGET: comp-src -->
+	<target name="comp-src" >
+		<copy todir="${src.classes.dir}">
+			<fileset dir="${basedir}/src/resources" />
+		</copy>
+		<javac
+			destdir="${src.classes.dir}"
+			failonerror="true"
+			source="1.6"
+			target="1.6"
+			debug="on"
+			includeantruntime="false"
+			excludes="${hadoop.binding.excludes}"
+		>
+			<src path="${src.dir}" />
+			<src path="${third.dir}/etsy/src/java" />
+			<src path="${third.dir}/stack_overflow/src/java" />
+			<classpath refid="compile.classpath" />
+		</javac>
+	</target>
+
+	<!-- TARGET: comp-test -->
+	<target name="comp-test" >
+		<copy todir="${test.classes.dir}">
+			<fileset dir="${basedir}/test/resources" />
+		</copy>
+		<javac
+			destdir="${test.classes.dir}"
+			failonerror="true"
+			source="1.6"
+			target="1.6"
+			debug="on"
+			includeantruntime="false"
+			excludes="${hadoop.binding.excludes}"
+		>
+			<src path="${test.dir}" />
+			<src path="${third.dir}/hadoop/test/java" />
+			<classpath location="${src.classes.dir}" />
+			<classpath refid="compile.classpath" />
+			<classpath refid="compile.classpath.test" />
+		</javac>
+	</target>
+
+	<!-- TARGET: test -->
+	<target name="test" depends="init, compile, do-test" />
+
+	<!-- TARGET: do-test -->
+	<target name="do-test" >
+		<junit fork="true" printsummary="no" haltonfailure="no" forkmode="perBatch" dir="${basedir}">
+			<syspropertyset refid="mr4c.properties"/>
+			<classpath refid="test.classpath" />
+
+			<formatter type="xml" />
+			<!--formatter type="plain" usefile="false" /-->
+
+			<batchtest failureproperty="test.failed" todir="${reports.dir}">
+				<fileset dir="${test.dir}">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+			<env key="LD_LIBRARY_PATH" path="${jna.library.path}" />
+			<env key="MR4C_LOG4CXX_CONFIG" path="${mr4c.log4cxx}" />
+			<env key="MR4C_UNIT_TEST" path="${mr4c.unit.test}" />
+		</junit>
+		<fail if="${test.failed}" />
+	</target>
+
+	<!-- TARGET: test-class -->
+	<target name="test-class" >
+		<junit fork="true" printsummary="no" haltonfailure="no" forkmode="perTest" dir="${basedir}">
+			<syspropertyset refid="mr4c.properties"/>
+			<classpath refid="test.classpath" />
+			<formatter type="plain" usefile="false" />
+			<test name="${test-class.base}${test-class.class}" failureproperty="test.failed" />
+			<env key="LD_LIBRARY_PATH" path="${jna.library.path}" />
+			<env key="MR4C_LOG4CXX_CONFIG" path="${mr4c.log4cxx}" />
+			<env key="MR4C_UNIT_TEST" path="${mr4c.unit.test}" />
+		</junit>
+		<fail if="${test.failed}" />
+	</target>
+
+	<!-- TARGET: dist -->
+	<target name="dist" depends="init, compile, do-dist" />
+
+	<!-- TARGET: do-dist -->
+	<target name="do-dist" depends="jar, jar-test, jar-with-libs" />
+
+	<!-- TARGET: jar -->
+	<target name="jar" >
+		<jar destfile="${dist.dir}/${product.name}.jar">
+			<fileset dir="${src.classes.dir}" />
+		</jar>
+	</target>
+
+	<!-- TARGET: jar-test -->
+	<target name="jar-test" >
+		<jar destfile="${dist.dir}/${product.name}-test.jar">
+			<fileset dir="${test.classes.dir}" />
+		</jar>
+	</target>
+
+	<target name="jar-with-libs" >
+		<echo>${lib.dir}</echo>
+		<jar destfile="${dist.dir}/${product.name}-with-libs.jar">
+			<fileset dir="${src.classes.dir}" />
+			<fileset dir="${basedir}" includes="lib/**" />
+		</jar>
+	</target>
+
+	<!-- TARGET: deploy -->
+	<target name="deploy" >
+		<mkdir dir="${deploy.dir}" />
+		<copy todir="${deploy.dir}/bin" >
+			<fileset dir="${bin.dir}" includes="**/*" />
+		</copy>
+		<chmod perm="+x" >
+			<fileset dir="${deploy.dir}/bin" includes="**/*" />
+		</chmod>
+		<copy todir="${deploy.dir}/conf" >
+			<fileset dir="${conf.dir}" includes="**/*" />
+		</copy>
+		<copy todir="${deploy.dir}/dist" >
+			<fileset dir="${dist.dir}" includes="**/*" />
+		</copy>
+		<copy todir="${deploy.dir}/lib" >
+			<fileset dir="${lib.dir}" includes="**/*" />
+		</copy>
+	</target>
+
+	<!-- TARGET: remove -->
+	<target name="remove" >
+		<delete dir="${deploy.dir}" />
+	</target>
+
+
+
+
+
+</project>

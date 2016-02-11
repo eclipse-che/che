@@ -1,0 +1,73 @@
+@font-face {
+	font-family: "che";
+	src: url('../fonts/che.eot');
+	src: url('../fonts/che.eot?#iefix') format('eot'),
+		url('../fonts/che.woff') format('woff'),
+		url('../fonts/che.ttf') format('truetype'),
+		url('../fonts/che.svg#che') format('svg');
+}
+
+.chefont:before {
+	font-family: "che";
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	/* speak: none; only necessary if not using the private unicode range (firstGlyph option) */
+	text-decoration: none;
+	text-transform: none;
+}
+
+
+.cheico-type-blank:before {
+	content: "\E001";
+}
+
+.cheico-administration:before {
+	content: "\E002";
+}
+
+.cheico-icon-wkps:before {
+	content: "\E003";
+}
+
+.cheico-rocket-chefont:before {
+	content: "\E004";
+}
+
+.cheico-type-aspnet:before {
+	content: "\E005";
+}
+
+.cheico-type-cpp:before {
+	content: "\E006";
+}
+
+.cheico-type-go:before {
+	content: "\E007";
+}
+
+.cheico-type-java:before {
+	content: "\E008";
+}
+
+.cheico-type-javascript:before {
+	content: "\E009";
+}
+
+.cheico-type-node:before {
+	content: "\E00A";
+}
+
+.cheico-type-php:before {
+	content: "\E00B";
+}
+
+.cheico-type-python:before {
+	content: "\E00C";
+}
+
+.cheico-type-ruby:before {
+	content: "\E00D";
+}

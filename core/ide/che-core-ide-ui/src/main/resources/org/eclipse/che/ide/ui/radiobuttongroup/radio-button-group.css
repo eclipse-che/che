@@ -1,0 +1,64 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+.mainPanel {
+    position: relative;
+}
+
+.mx-button {
+    float: left;
+}
+
+.mx-button input {
+    display: none;
+}
+
+.mx-button label {
+    width: 18px;
+    height: 16px;
+    cursor: pointer;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    text-align: center;
+    background: inherit;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.mx-button label svg {
+    width: 12px;
+    margin: auto;
+    height: 100%;
+    display: block;
+    fill: toolbarIconColor;
+    -webkit-filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.3));
+}
+
+.mx-button label:hover svg {
+    fill: toolbarHoverIconColor;
+}
+
+.mx-button input:checked + label svg {
+    fill: #fff !important;
+}
+
+.mx-button input:checked + label {
+    background: perspectiveSwitcherBackgroundColor;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.mx-button:first-child label {
+    margin-right: 4px;
+}
+
+.mx-button:last-child label {
+    margin-left: 4px;
+}

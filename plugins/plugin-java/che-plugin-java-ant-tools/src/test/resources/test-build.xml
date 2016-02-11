@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build" name="test">
+    <property name="name" value="test"/>
+    <property location="${basedir}/build" name="build"/>
+    <property location="${build}/classes" name="build.classes"/>
+    <property location="${basedir}/src" name="src.dir"/>
+    <!--Application build-->
+    <target depends="clean" description="Builds the application" name="build">
+        <!--Create directory-->
+        <mkdir dir="${build.classes}"/>
+        <!--Compile source code-->
+        <javac debug="false" deprecation="true" destdir="${build.classes}" includeantruntime="true" optimize="true" srcdir="${src.dir}"/>
+        <!--Copy necessary files-->
+        <copy todir="${build.classes}">
+            <fileset dir="${src.dir}" excludes="**/*.java" includes="**/*.*"/>
+        </copy>
+        <!--Create JAR-file-->
+        <jar jarfile="${build}/${name}.jar">
+            <fileset dir="${build.classes}"/>
+        </jar>
+    </target>
+    <!--Clean up-->
+    <target description="Remove all temporary files" name="clean">
+        <!--Delete files-->
+        <delete dir="${build.classes}"/>
+    </target>
+</project>

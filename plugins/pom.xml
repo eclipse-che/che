@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>maven-depmgt-pom</artifactId>
+        <groupId>org.eclipse.che.depmgt</groupId>
+        <version>4.0.0-RC2</version>
+    </parent>
+    <groupId>org.eclipse.che.plugin</groupId>
+    <artifactId>che-plugin-parent</artifactId>
+    <version>4.0.0-RC2</version>
+    <packaging>pom</packaging>
+    <name>Che Plugin :: Parent</name>
+    <modules>
+        <module>plugin-help</module>
+        <module>plugin-docker</module>
+        <module>plugin-web</module>
+        <module>plugin-machine</module>
+        <module>plugin-java</module>
+        <module>plugin-sdk</module>
+        <module>plugin-orion</module>
+        <module>plugin-git</module>
+        <module>plugin-github</module>
+        <module>plugin-dashboard</module>
+        <module>plugin-gwt</module>
+    </modules>
+    <scm>
+        <connection>scm:git:git@github.com:codenvy/che-plugins.git</connection>
+        <developerConnection>scm:git:git@github.com:codenvy/che-plugins.git</developerConnection>
+        <tag>4.0.0-RC2</tag>
+        <url>https://github.com/codenvy/che-plugins</url>
+    </scm>
+    <properties>
+        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
+        <specification.version>1.0-beta2</specification.version>
+    </properties>
+    <repositories>
+        <repository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>codenvy-public-snapshots-repo</id>
+            <name>codenvy public snapshots</name>
+            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>codenvy-public-snapshots-repo</id>
+            <name>codenvy public snapshots</name>
+            <url>https://maven.codenvycorp.com/content/repositories/codenvy-public-snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>

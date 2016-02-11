@@ -1,0 +1,246 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+/* Font definitions */
+html {
+    font-family: 'Andale Mono', monospace;
+    font-size: 9pt;
+    font-style: normal;
+    font-weight: normal;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, table, td, caption, th, ul, ol, dl, li, dd, dt {
+    font-size: 1em;
+}
+
+pre {
+    font-family: monospace;
+}
+
+/* Margins */
+body {
+    overflow: auto;
+    margin-top: 0px;
+    margin-bottom: 0.5em;
+    margin-left: 0.3em;
+    margin-right: 0px;
+}
+
+h1 {
+    margin-top: 0.3em;
+    margin-bottom: 0.04em;
+}
+
+h2 {
+    margin-top: 2em;
+    margin-bottom: 0.25em;
+}
+
+h3 {
+    margin-top: 1.7em;
+    margin-bottom: 0.25em;
+}
+
+h4 {
+    margin-top: 2em;
+    margin-bottom: 0.3em;
+}
+
+h5 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+p {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+pre {
+    margin-left: 0.6em;
+}
+
+ul {
+    margin-top: 0px;
+    margin-bottom: 1em;
+    margin-left: 1em;
+    padding-left: 1em;
+}
+
+li {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+li p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+ol {
+    margin-top: 0px;
+    margin-bottom: 1em;
+    margin-left: 1em;
+    padding-left: 1em;
+}
+
+dl {
+    margin-top: 0px;
+    margin-bottom: 1em;
+}
+
+dt {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-weight: bold;
+}
+
+dd {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+/* Styles and colors */
+a:link {
+    color: #629755;
+}
+
+a:hover {
+    /*color: #000080;*/
+    color: #629755;
+}
+
+a:visited {
+    text-decoration: underline;
+    color: #629755;
+}
+
+a.header:link {
+    text-decoration: none;
+    color: #ff0000;
+}
+
+a.header:visited {
+    text-decoration: none;
+    color: #ff0000;
+}
+
+a.header:hover {
+    text-decoration: underline;
+    color: #629755;
+}
+
+h4 {
+    font-style: italic;
+}
+
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic;
+}
+
+var {
+    font-style: italic;
+}
+
+th {
+    font-weight: bold;
+}
+
+/* Workarounds for new Javadoc stylesheet (1.7) */
+ul.blockList li.blockList, ul.blockListLast li.blockList {
+    list-style: none;
+}
+
+ul.blockList ul.blockList ul.blockList ul.blockList li.blockListLast {
+    list-style: none;
+}
+
+/* We tweaked so that the default styles will be
+the inline scroller style. There's a separate "documentScrollable"
+class for the document-level scrollbars. */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-button {
+    height: 0px;
+    width: 0px;
+}
+
+::-webkit-scrollbar-button:start:decrement, ::-webkit-scrollbar-button:end:increment {
+    display: block;
+}
+
+::-webkit-scrollbar-button:vertical:start:increment, ::-webkit-scrollbar-button:vertical:end:decrement {
+    display: none;
+}
+
+::-webkit-scrollbar-track:vertical {
+    border-right: 1px solid transparent;
+    background-clip: padding-box;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-track:horizontal {
+    border-bottom: 1px solid transparent;
+    background-clip: padding-box;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-track:hover {
+    background-color: rgba(178, 178, 178, 0.05);
+    -webkit-box-shadow: inset 1px 0px 0px rgba(178, 178, 178, 0.10);
+}
+
+::-webkit-scrollbar-track:active {
+    background-color: rgba(178, 178, 178, 0.05);
+    -webkit-box-shadow: inset 1px 0px 0px rgba(178, 178, 178, 0.14),
+    inset -1px -1px 0px rgba(178, 178, 178, 0.07);
+}
+
+::-webkit-scrollbar-thumb {
+    min-height: 28px;
+    padding-top: 100px;
+    background-clip: padding-box;
+    background-color: rgba(178, 178, 178, 0.2);
+    -webkit-box-shadow: inset 1px 1px 0px rgba(178, 178, 178, 0.10),
+    inset 0px -1px 0px rgba(178, 178, 178, 0.07);
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(178, 178, 178, 0.4);
+    -webkit-box-shadow: inset 1px 1px 1px rgba(178, 178, 178, 0.25);
+}
+
+::-webkit-scrollbar-thumb:active {
+    -webkit-box-shadow: inset 1px 1px 3px rgba(178, 178, 178, 0.35);
+    background-color: rgba(178, 178, 178, 0.5);
+}
+
+::-webkit-scrollbar-thumb:vertical {
+    border-right: 1px solid transparent;
+    border-top: 0px solid transparent;
+    border-bottom: 0px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+    border-left: 0px solid transparent;
+    border-right: 0px solid transparent;
+    border-bottom: 1px solid transparent;
+}

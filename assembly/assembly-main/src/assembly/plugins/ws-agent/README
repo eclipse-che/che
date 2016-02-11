@@ -1,0 +1,1 @@
+Place extension JARs that you want packaged into the workspace-agent here. These are server-side extensions that run within the workspace machine and have access to project files.

@@ -1,0 +1,60 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+
+<md-content flex class="projects-create-project-samples">
+
+    <!--
+        <div layout="column">
+            <div flex="50" class="projects-create-project-samples-search-component">
+                <md-icon flex-gt-sm="5" md-font-icon="fa fa-search"></md-icon>
+                <input id="nameFilter" class="github-create-project-search-input" flex ng-model="createProjectSamplesCtrl.projectNameFilter" type="text" placeholder="Search sample">
+            </div>
+
+            <che-label-container  che-label-name="Filter project type">
+                <md-select flex class="create-project-select" ng-model="createProjectSamplesCtrl.filterProjectType" placeholder="Filter">
+                    <md-option ng-value="All">All</md-option>
+                    <md-option ng-value="templates[0].projectType" ng-repeat="templates in createProjectSamplesCtrl.templates | groupBy:'projectType' ">{{templates[0].projectType}}</md-option>
+                </md-select>
+            </che-label-container>
+
+        </div>
+    -->
+
+        <div ng-repeat="templatesByCategory in filteredItems = (createProjectSamplesCtrl.templates | sampleTagFilter:createProjectCtrl.currentStackTags | sampleFilterProjectType:createProjectSamplesCtrl.filterProjectType | sampleNameFilter:createProjectSamplesCtrl.projectNameFilter | orderBy:'projectType' | groupBy:'category') ">
+            <div ng-repeat="lstTemplate in templatesByCategory | orderBy:'displayName' | groupBy:'projectType'">
+                <!--
+                <che-list-title che-icon="fa fa-folder">
+                    {{lstTemplate[0].category}} <span class="projects-create-project-samples-header-projecttype">({{lstTemplate[0].projectType}})</span>
+                </che-list-title>
+                -->
+                <che-list class="projects-create-project-samples-list">
+                    <che-list-item  ng-repeat="template in lstTemplate" flex>
+                        <div layout-gt-sm="row" flex layout-align="start center" class="projects-create-project-samples-list-row">
+                            <div class="projects-create-project-samples-list-item" ng-class="{'projects-create-project-samples-list-item-active' : template.name === createProjectSamplesCtrl.selectedTemplateName}" ng-click="createProjectSamplesCtrl.selectTemplate(template, createProjectCtrl)" ng-init="createProjectSamplesCtrl.initItem($first, template, createProjectCtrl)" layout="column" flex>
+                                <div class="projects-create-project-samples-list-samplename">{{template.displayName}}</div>
+                                <div class="projects-create-project-samples-list-sampledescription">{{template.description}}</div>
+                            </div>
+                        </div>
+                    </che-list-item>
+                </che-list>
+
+            </div>
+        </div>
+        <div ng-show="createProjectSamplesCtrl.getItemsSize(filteredItems) === 0">
+            No matching sample.
+        </div>
+
+
+
+    </md-content>
+

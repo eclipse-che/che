@@ -1,0 +1,122 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@def selectionBorderWidth 0px;
+.cellTableWidget {
+}
+
+.cellTableFirstColumn {
+
+}
+
+.cellTableLastColumn {
+
+}
+
+.cellTableFooter {
+    padding: 3px 15px;
+    text-align: center;
+    color: #4b4a4a;
+    overflow: hidden;
+}
+
+.cellTableHeader {
+    padding: 3px 15px;
+    text-align: center;
+    color: #ffffff;
+    border-bottom: 1px solid #000000;
+}
+
+.cellTableCell {
+    padding: 5px 15px;
+    text-align: center;
+    overflow: hidden;
+    -moz-user-select: all;
+    -webkit-user-select: auto;
+}
+
+.cellTableFirstColumnFooter {
+
+}
+
+.cellTableFirstColumnHeader {
+
+}
+
+.cellTableLastColumnFooter {
+
+}
+
+.cellTableLastColumnHeader {
+
+}
+
+.cellTableSortableHeader {
+    cursor: pointer;
+}
+
+.cellTableSortableHeader:hover {
+    color: #6c6b6b;
+}
+
+.cellTableSortedHeaderAscending {
+
+}
+
+.cellTableSortedHeaderDescending {
+
+}
+
+.cellTableEvenRow {
+}
+
+.cellTableEvenRowCell {
+}
+
+.cellTableOddRow {
+}
+
+.cellTableOddRowCell {
+}
+
+.cellTableHoveredRow {
+}
+
+.cellTableHoveredRowCell {
+}
+
+.cellTableKeyboardSelectedRow {
+}
+
+.cellTableKeyboardSelectedRowCell {
+}
+
+.cellTableSelectedRow {
+    background: #365a73;
+    color: white;
+    height: auto;
+    overflow: auto;
+    cursor: pointer;
+}
+
+.cellTableSelectedRowCell {
+}
+
+/**
+ * The keyboard selected cell is visible over selection.
+ */
+.cellTableKeyboardSelectedCell {
+}
+
+/*@sprite .cellTableLoading {*/
+.cellTableLoading {
+    /*gwt-image: 'cellTableLoading';*/
+    margin: 30px;
+}

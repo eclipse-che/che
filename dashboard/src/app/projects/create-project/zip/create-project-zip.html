@@ -1,0 +1,23 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<form name="createProjectZipForm">
+  <div layout="row" flex ng-init="createProjectCtrl.setForm(createProjectZipForm, 'zip');"></div>
+  <che-input che-form="createProjectZipForm"
+              che-name="remotezipURL"
+              che-label-name="Zip URL"
+              che-place-holder="Url of the zip file"
+              ng-model="createProjectCtrl.importProjectData.source.location"
+              required>
+    <div ng-message="required">A zip URL is required.</div>
+  </che-input>
+</form>

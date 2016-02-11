@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-plugin-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
+        <version>4.0.0-RC2</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>che-plugin-java-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Che Plugin :: Java :: Parent</name>
+    <modules>
+        <module>che-plugin-java-maven-tools</module>
+        <module>che-plugin-java-generator-archetype</module>
+        <module>che-plugin-java-ext-maven</module>
+        <module>che-plugin-java-ext-jdt</module>
+        <module>che-plugin-java-ext-lang-shared</module>
+        <module>che-plugin-java-ext-lang-server</module>
+        <module>che-plugin-java-ext-lang-client</module>
+        <module>che-plugin-java-ext-debugger-java-server</module>
+        <module>che-plugin-java-ext-debugger-java-client</module>
+        <module>che-plugin-java-ext-debugger-java-shared</module>
+    </modules>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                    <version>${che.core.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+    <!-- skip tests on Windows -->
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
+        </profile>
+    </profiles>
+</project>

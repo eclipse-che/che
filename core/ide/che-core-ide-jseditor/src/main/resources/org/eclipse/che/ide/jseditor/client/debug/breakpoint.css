@@ -1,0 +1,62 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+@external *;
+
+.breakpoint:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -16px;
+    right: -5px;
+    height: 15px;
+}
+
+.breakpoint:after {
+    content: "";
+    position: absolute;
+    right: -12px;
+    z-index: 1;
+    width: 0;
+    height: 0;
+    border-bottom: 7px solid transparent;
+    border-top: 8px solid transparent;
+}
+
+.breakpoint {
+    position: relative;
+    font-family: "DejaVu Sans Mono", alternativeFontFamily;
+    font-size: 11px;
+    color: editorGutterLineNumberColor;
+    line-height: 15px;
+}
+
+.breakpoint.inactive:before {
+    background-color: rgba(144, 144, 144, 0.4);
+}
+
+.breakpoint.inactive:after {
+    border-left: 8px solid rgba(144, 144, 144, 0.4);
+}
+
+.breakpoint.inactive {
+}
+
+.breakpoint.active:before {
+    background-color: rgba(78, 171, 255, 0.4);
+}
+
+.breakpoint.active:after {
+    border-left: 8px solid rgba(78, 171, 255, 0.4);
+}
+
+.breakpoint.active {
+}
+

@@ -1,0 +1,42 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+        .main {
+            width: 100%;
+            height: 100%;
+        }
+
+        .tabs {
+            margin-top: 2px;
+            box-shadow: inset 0 -1px 0 0 #000000;
+        }
+
+        .content {
+            width: 100%;
+            height: 100%;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel addStyleNames="{style.main}">
+        <g:north size="22">
+            <g:FlowPanel ui:field="tabs" addStyleNames="{style.tabs}"/>
+        </g:north>
+
+        <g:center>
+            <g:FlowPanel ui:field="content" addStyleNames="{style.content}"/>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>
