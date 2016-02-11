@@ -14,6 +14,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.util.ListenerManager;
 import org.eclipse.che.ide.util.ListenerManager.Dispatcher;
@@ -21,7 +22,6 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +43,18 @@ public abstract class AbstractPartPresenter implements PartPresenter {
         manager = ListenerManager.create();
         rules = new ArrayList<>();
         selection = new Selection.NoSelectionProvided();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void storeState() {
+        //default implementation is empty. Add some logic for particular part to store it's state
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void restoreState() {
+        //default implementation is empty. Add some logic for particular part to restore it's state
     }
 
     /** {@inheritDoc} */

@@ -21,7 +21,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -36,7 +36,6 @@ import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
-import org.eclipse.che.api.user.shared.dto.NewUser;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.api.user.shared.dto.UserInRoleDescriptor;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -84,6 +83,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * Provides REST API for user management
  *
  * @author Eugene Voevodin
+ * @author Anton Korneta
  */
 @Api(value = "/user", description = "User manager")
 @Path("/user")
@@ -113,7 +113,7 @@ public class UserService extends Service {
     /**
      * Creates new user and profile.
      * <p/>
-     * When current user is in 'system/admin' role then {@code newUser} parameter
+     * When current user is in 'system/admin' role then {@code userDescriptor} parameter
      * will be used for user creation, otherwise method uses {@code token} and {@link #tokenValidator}.
      *
      * @param token
@@ -121,47 +121,64 @@ public class UserService extends Service {
      * @param isTemporary
      *         if it is {@code true} creates temporary user
      * @return entity of created user
+     * @throws ForbiddenException
+     *         when the user is not the system admin, or self creation is disabled
+     * @throws BadRequestException
+     *         when {@code userDescriptor} is invalid
      * @throws UnauthorizedException
-     *         when token is {@code null}
+     *         when token is null
      * @throws ConflictException
      *         when token is not valid
      * @throws ServerException
      *         when some error occurred while persisting user or user profile
      * @see UserDescriptor
-     * @see #getCurrent(SecurityContext)
+     * @see #getCurrent()
      * @see #updatePassword(String)
-     * @see #getById(String, SecurityContext)
-     * @see #getByAlias(String, SecurityContext)
+     * @see #getById(String)
+     * @see #getByAlias(String)
      * @see #remove(String)
      */
-    @ApiOperation(value = "Create a new user",
-                  notes = "Create a new user in the system. There are two ways to create a user: through a regular registration workflow " +
-                          "and by system/admin. In the former case, auth token is sent to user's mailbox, while system/admin can create a user directly " +
-                          "with predefined name and password",
-                  response = UserDescriptor.class)
-    @ApiResponses({@ApiResponse(code = 201, message = "Created"),
-                   @ApiResponse(code = 401, message = "Missed token parameter"),
-                   @ApiResponse(code = 409, message = "Invalid token"),
-                   @ApiResponse(code = 403, message = "Invalid or missing request parameters"),
-                   @ApiResponse(code = 500, message = "Internal Server Error")})
     @POST
     @Path("/create")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_CREATE_USER)
-    public Response create(@ApiParam(value = "New user") NewUser newUser,
-                           @ApiParam(value = "Authentication token") @QueryParam("token") String token,
-                           @ApiParam(value = "User type") @QueryParam("temporary") @DefaultValue("false") Boolean isTemporary,
-                           @Context SecurityContext context) throws ApiException {
+    @ApiOperation(value = "Create a new user",
+                  notes = "Create a new user in the system. There are two ways to create a user: " +
+                          "through a regular registration workflow and by system/admin. In the former case, " +
+                          "auth token is sent to user's mailbox, while system/admin can create a user directly " +
+                          "with predefined name and password",
+                  response = UserDescriptor.class)
+    @ApiResponses({@ApiResponse(code = 201, message = "Created"),
+                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
+                   @ApiResponse(code = 401, message = "Missed token parameter"),
+                   @ApiResponse(code = 403, message = "Invalid or missing request parameters"),
+                   @ApiResponse(code = 409, message = "Invalid token"),
+                   @ApiResponse(code = 500, message = "Internal Server Error")})
+    public Response create(@ApiParam(value = "New user")
+                           UserDescriptor userDescriptor,
+                           @ApiParam(value = "Authentication token")
+                           @QueryParam("token")
+                           String token,
+                           @ApiParam(value = "User type")
+                           @QueryParam("temporary")
+                           @DefaultValue("false")
+                           Boolean isTemporary,
+                           @Context
+                           SecurityContext context) throws ForbiddenException,
+                                                           BadRequestException,
+                                                           UnauthorizedException,
+                                                           ConflictException,
+                                                           ServerException,
+                                                           NotFoundException {
         if (!context.isUserInRole("system/admin") && !userSelfCreationAllowed) {
             throw new ForbiddenException("Currently only admins can create accounts. Please contact our Admin Team for further info.");
         }
 
-        final User user = context.isUserInRole("system/admin") ? fromEntity(newUser) : fromToken(token);
+        final User user = context.isUserInRole("system/admin") ? fromEntity(userDescriptor) : fromToken(token);
 
         userDao.create(user.withId(generate("user", ID_LENGTH))
                            .withPassword(firstNonNull(user.getPassword(), generate("", PASSWORD_LENGTH))));
-
         profileDao.create(new Profile(user.getId()));
 
         final Map<String, String> preferences = new HashMap<>(4);
@@ -173,12 +190,18 @@ public class UserService extends Service {
     }
 
     /**
-     * Returns {@link UserDescriptor} of current user
+     * Returns {@link UserDescriptor} of current user.
      *
      * @return entity of current user.
+     * @throws NotFoundException
+     *         when current user not found
      * @throws ServerException
      *         when some error occurred while retrieving current user
      */
+    @GET
+    @GenerateLink(rel = LINK_REL_GET_CURRENT_USER)
+    @RolesAllowed({"user", "temp_user"})
+    @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get current user",
                   notes = "Get user currently logged in the system",
                   response = UserDescriptor.class,
@@ -186,11 +209,7 @@ public class UserService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 404, message = "Not Found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    @GET
-    @GenerateLink(rel = LINK_REL_GET_CURRENT_USER)
-    @RolesAllowed({"user", "temp_user"})
-    @Produces(APPLICATION_JSON)
-    public UserDescriptor getCurrent(@Context SecurityContext context) throws NotFoundException, ServerException {
+    public UserDescriptor getCurrent() throws NotFoundException, ServerException {
         final User user = userDao.getById(currentUser().getId());
         return injectLinks(toDescriptor(user), getServiceContext());
     }
@@ -200,26 +219,31 @@ public class UserService extends Service {
      *
      * @param password
      *         new user password
-     * @throws ForbiddenException
-     *         when given password is {@code null}
+     * @throws NotFoundException
+     *         when current user not found
+     * @throws BadRequestException
+     *         when given password is invalid
      * @throws ServerException
      *         when some error occurred while updating profile
      * @see UserDescriptor
      */
-    @ApiOperation(value = "Update password",
-                  notes = "Update current password")
-    @ApiResponses({@ApiResponse(code = 204, message = "OK"),
-                   @ApiResponse(code = 404, message = "Not Found"),
-                   @ApiResponse(code = 403, message = "Invalid password"),
-                   @ApiResponse(code = 500, message = "Internal Server Error")})
     @POST
     @Path("/password")
     @GenerateLink(rel = LINK_REL_UPDATE_PASSWORD)
     @RolesAllowed("user")
     @Consumes(APPLICATION_FORM_URLENCODED)
+    @ApiOperation(value = "Update password",
+                  notes = "Update current password")
+    @ApiResponses({@ApiResponse(code = 204, message = "OK"),
+                   @ApiResponse(code = 400, message = "Invalid password"),
+                   @ApiResponse(code = 404, message = "Not Found"),
+                   @ApiResponse(code = 500, message = "Internal Server Error")})
     public void updatePassword(@ApiParam(value = "New password", required = true)
                                @FormParam("password")
-                               String password) throws NotFoundException, ServerException, ForbiddenException, ConflictException {
+                               String password) throws NotFoundException,
+                                                       BadRequestException,
+                                                       ServerException,
+                                                       ConflictException {
         checkPassword(password);
 
         final User user = userDao.getById(currentUser().getId());
@@ -230,7 +254,7 @@ public class UserService extends Service {
 
     /**
      * Returns status <b>200</b> and {@link UserDescriptor} built from user with given {@code id}
-     * or status <b>404</b> when user with given {@code id} was not found
+     * or status <b>404</b> when user with given {@code id} was not found.
      *
      * @param id
      *         identifier to search user
@@ -240,28 +264,28 @@ public class UserService extends Service {
      * @throws ServerException
      *         when some error occurred while retrieving user
      * @see UserDescriptor
-     * @see #getByAlias(String, SecurityContext)
+     * @see #getByAlias(String)
      */
+    @GET
+    @Path("/{id}")
+    @GenerateLink(rel = LINK_REL_GET_USER_BY_ID)
+    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get user by ID",
                   notes = "Get user by its ID in the system. Roles allowed: system/admin, system/manager.",
                   response = UserDescriptor.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 404, message = "Not Found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    @GET
-    @Path("/{id}")
-    @GenerateLink(rel = LINK_REL_GET_USER_BY_ID)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
-    @Produces(APPLICATION_JSON)
-    public UserDescriptor getById(@ApiParam(value = "User ID") @PathParam("id") String id,
-                                  @Context SecurityContext context) throws NotFoundException, ServerException {
+    public UserDescriptor getById(@ApiParam(value = "User ID") @PathParam("id") String id) throws NotFoundException,
+                                                                                                  ServerException {
         final User user = userDao.getById(id);
         return injectLinks(toDescriptor(user), getServiceContext());
     }
 
     /**
      * Returns status <b>200</b> and {@link UserDescriptor} built from user with given {@code alias}
-     * or status <b>404</b> when user with given {@code alias} was not found
+     * or status <b>404</b> when user with given {@code alias} was not found.
      *
      * @param alias
      *         alias to search user
@@ -270,26 +294,31 @@ public class UserService extends Service {
      *         when user with given alias doesn't exist
      * @throws ServerException
      *         when some error occurred while retrieving user
+     * @throws BadRequestException
+     *         when alias parameter is missing
      * @see UserDescriptor
-     * @see #getById(String, SecurityContext)
+     * @see #getById(String)
      * @see #remove(String)
      */
-    @ApiOperation(value = "Get user by alias",
-                  notes = "Get user by alias. Roles allowed: system/admin, system/manager.",
-                  response = UserDescriptor.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 403, message = "Missed parameter alias"),
-                   @ApiResponse(code = 404, message = "Not Found"),
-                   @ApiResponse(code = 500, message = "Internal Server Error")})
     @GET
     @Path("/find")
     @GenerateLink(rel = LINK_REL_GET_USER_BY_EMAIL)
     @RolesAllowed({"user", "system/admin", "system/manager"})
     @Produces(APPLICATION_JSON)
-    public UserDescriptor getByAlias(@ApiParam(value = "User alias", required = true) @QueryParam("alias") @Required String alias,
-                                     @Context SecurityContext context) throws NotFoundException, ServerException, ConflictException {
+    @ApiOperation(value = "Get user by alias",
+                  notes = "Get user by alias. Roles allowed: system/admin, system/manager.",
+                  response = UserDescriptor.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+                   @ApiResponse(code = 400, message = "Missed alias parameter"),
+                   @ApiResponse(code = 404, message = "Not Found"),
+                   @ApiResponse(code = 500, message = "Internal Server Error")})
+    public UserDescriptor getByAlias(@ApiParam(value = "User alias", required = true)
+                                     @QueryParam("alias")
+                                     @Required String alias) throws NotFoundException,
+                                                                    ServerException,
+                                                                    BadRequestException {
         if (alias == null) {
-            throw new ConflictException("Missed parameter alias");
+            throw new BadRequestException("Missed parameter alias");
         }
         final User user = userDao.getByAlias(alias);
         return injectLinks(toDescriptor(user), getServiceContext());
@@ -307,24 +336,26 @@ public class UserService extends Service {
      * @throws ConflictException
      *         when some error occurred while removing user
      */
+    @DELETE
+    @Path("/{id}")
+    @GenerateLink(rel = LINK_REL_REMOVE_USER_BY_ID)
+    @RolesAllowed("system/admin")
     @ApiOperation(value = "Delete user",
                   notes = "Delete a user from the system. Roles allowed: system/admin")
     @ApiResponses({@ApiResponse(code = 204, message = "Deleted"),
                    @ApiResponse(code = 404, message = "Not Found"),
                    @ApiResponse(code = 409, message = "Impossible to remove user"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    @DELETE
-    @Path("/{id}")
-    @GenerateLink(rel = LINK_REL_REMOVE_USER_BY_ID)
-    @RolesAllowed("system/admin")
-    public void remove(@ApiParam(value = "User ID")
-                       @PathParam("id") String id) throws NotFoundException, ServerException, ConflictException {
+    public void remove(@ApiParam(value = "User ID") @PathParam("id") String id) throws NotFoundException,
+                                                                                       ServerException,
+                                                                                       ConflictException {
         userDao.remove(id);
     }
 
 
     /**
-     * Allow to check if current user has a given role or not. status <b>200</b> and {@link UserInRoleDescriptor} is returned by indicating if role is granted or not
+     * Allow to check if current user has a given role or not. status <b>200</b>
+     * and {@link UserInRoleDescriptor} is returned by indicating if role is granted or not.
      *
      * @param role
      *         role to search (like admin or manager)
@@ -334,27 +365,34 @@ public class UserService extends Service {
      *         an optional scopeID used by the scope like the workspace ID if scope is workspace.
      * @return {UserInRoleDescriptor} which indicates if role is granted or not
      * @throws org.eclipse.che.api.core.ForbiddenException
-     *         with an uknown scope
-     * @throws ServerException
-     *         when unable to perform the check
      */
-    @ApiOperation(value = "Check role for the authenticated user",
-                  notes = "Check if user has a role in given scope (default is system) and with an optional scope id. Roles allowed: user, system/admin, system/manager.",
-                  response = UserInRoleDescriptor.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 403, message = "Unable to check for the given scope"),
-                   @ApiResponse(code = 500, message = "Internal Server Error")})
     @GET
     @Path("/inrole")
     @GenerateLink(rel = LINK_REL_INROLE)
     @RolesAllowed({"temp_user", "user", "system/admin", "system/manager"})
     @Produces(APPLICATION_JSON)
     @Beta
-    public UserInRoleDescriptor inRole(@Required @Description("role inside a scope") @QueryParam("role") String role,
-                                       @DefaultValue("system") @Description("scope of the role (like system, workspace)") @QueryParam("scope") String scope,
-                                       @DefaultValue("") @Description("id used by the scope, like workspaceId for workspace scope") @QueryParam("scopeId") String scopeId,
-                                       @Context SecurityContext context) throws NotFoundException, ServerException, ForbiddenException {
-
+    @ApiOperation(value = "Check role for the authenticated user",
+                  notes = "Check if user has a role in given scope (default is system) and with an optional scope id. " +
+                          "Roles allowed: user, system/admin, system/manager.",
+                  response = UserInRoleDescriptor.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+                   @ApiResponse(code = 403, message = "Unable to check for the given scope"),
+                   @ApiResponse(code = 500, message = "Internal Server Error")})
+    public UserInRoleDescriptor inRole(@Required @Description("role inside a scope")
+                                       @QueryParam("role")
+                                       String role,
+                                       @DefaultValue("system")
+                                       @Description("scope of the role (like system, workspace)")
+                                       @QueryParam("scope")
+                                       String scope,
+                                       @DefaultValue("")
+                                       @Description("id used by the scope, like workspaceId for workspace scope")
+                                       @QueryParam("scopeId")
+                                       String scopeId,
+                                       @Context
+                                       SecurityContext context) throws NotFoundException,
+                                                                       ForbiddenException {
         // handle scope
         boolean isInRole;
         if ("system".equals(scope)) {
@@ -400,9 +438,7 @@ public class UserService extends Service {
                    @ApiResponse(code = 500, message = "Internal Server Error")})
     public UserDescriptor getByName(@ApiParam(value = "User email")
                                     @PathParam("name")
-                                    String name,
-                                    @Context
-                                    SecurityContext context) throws NotFoundException, ServerException {
+                                    String name) throws NotFoundException, ServerException {
         final User user = userDao.getByName(name);
         return injectLinks(toDescriptor(user), getServiceContext());
     }
@@ -417,17 +453,20 @@ public class UserService extends Service {
         return ImmutableMap.of(USER_SELF_CREATION_ALLOWED, Boolean.toString(userSelfCreationAllowed));
     }
 
-    private User fromEntity(NewUser newUser) throws ForbiddenException {
-        if (newUser == null) {
-            throw new ForbiddenException("New user required");
+    private User fromEntity(UserDescriptor userDescriptor) throws BadRequestException {
+        if (userDescriptor == null) {
+            throw new BadRequestException("User Descriptor required");
         }
-        if (isNullOrEmpty(newUser.getName())) {
-            throw new ForbiddenException("User name required");
+        if (isNullOrEmpty(userDescriptor.getName())) {
+            throw new BadRequestException("User name required");
         }
-        final User user = new User().withName(newUser.getName());
-        if (newUser.getPassword() != null) {
-            checkPassword(newUser.getPassword());
-            user.setPassword(newUser.getPassword());
+        if (isNullOrEmpty(userDescriptor.getEmail())) {
+            throw new BadRequestException("User email required");
+        }
+        final User user = new User().withName(userDescriptor.getName());
+        if (userDescriptor.getPassword() != null) {
+            checkPassword(userDescriptor.getPassword());
+            user.setPassword(userDescriptor.getPassword());
         }
         return user;
     }
@@ -439,12 +478,12 @@ public class UserService extends Service {
         return new User().withEmail(tokenValidator.validateToken(token));
     }
 
-    private void checkPassword(String password) throws ForbiddenException {
+    private void checkPassword(String password) throws BadRequestException {
         if (password == null) {
-            throw new ForbiddenException("Password required");
+            throw new BadRequestException("Password required");
         }
         if (password.length() < 8) {
-            throw new ForbiddenException("Password should contain at least 8 characters");
+            throw new BadRequestException("Password should contain at least 8 characters");
         }
         int numOfLetters = 0;
         int numOfDigits = 0;
@@ -457,7 +496,7 @@ public class UserService extends Service {
             }
         }
         if (numOfDigits == 0 || numOfLetters == 0) {
-            throw new ForbiddenException("Password should contain letters and digits");
+            throw new BadRequestException("Password should contain letters and digits");
         }
     }
 

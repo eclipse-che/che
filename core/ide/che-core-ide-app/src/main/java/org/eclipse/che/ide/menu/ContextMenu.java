@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.menu;
 
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,6 +31,8 @@ import org.eclipse.che.ide.ui.toolbar.CloseMenuHandler;
 import org.eclipse.che.ide.ui.toolbar.MenuLockLayer;
 import org.eclipse.che.ide.ui.toolbar.PopupMenu;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
+
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Manages the Content menu.
@@ -51,7 +54,7 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
     private PopupMenu     popupMenu;
     private MenuLockLayer lockLayer;
 
-    protected final PresentationFactory          presentationFactory;
+    protected final PresentationFactory presentationFactory;
 
     @Inject
     public ContextMenu(ActionManager actionManager, KeyBindingAgent keyBindingAgent, Provider<PerspectiveManager> managerProvider) {
@@ -76,7 +79,6 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
                 if (com.google.gwt.user.client.Event.ONCONTEXTMENU == event.getTypeInt()) {
                     event.stopPropagation();
                     event.preventDefault();
-                    return;
                 }
             }
         });
@@ -86,7 +88,9 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
      * Shows a content menu and moves it to specified position.
      *
      * @param x
+     *         x coordinate
      * @param y
+     *         y coordinate
      */
     public void show(int x, int y) {
         hide();
@@ -103,8 +107,17 @@ public class ContextMenu implements CloseMenuHandler, ActionSelectedHandler {
                                   "contextMenu");
         lockLayer.add(popupMenu);
 
-        popupMenu.getElement().getStyle().setTop(y, com.google.gwt.dom.client.Style.Unit.PX);
-        popupMenu.getElement().getStyle().setLeft(x, com.google.gwt.dom.client.Style.Unit.PX);
+        calculatePosition(popupMenu, x, y);
+    }
+
+    private void calculatePosition(PopupMenu popupMenu, int x, int y) {
+        int windowHeight = Window.getClientHeight();
+        int popupHeight = popupMenu.getOffsetHeight();
+
+        boolean isMenuWithinWindow = popupHeight + y < windowHeight;
+
+        popupMenu.getElement().getStyle().setTop(isMenuWithinWindow ? y : y - popupHeight, PX);
+        popupMenu.getElement().getStyle().setLeft(x, PX);
     }
 
     /**

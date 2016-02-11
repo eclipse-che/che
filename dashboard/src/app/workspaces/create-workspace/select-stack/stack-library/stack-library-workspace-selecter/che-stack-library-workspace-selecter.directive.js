@@ -22,9 +22,11 @@ export class CheStackLibraryWorkspaceSelecter {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
+  constructor (lodash) {
     this.restrict='E';
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/stack-library/stack-library-workspace-selecter/che-stack-library-workspace-selecter.html';
+
+    this.lodash = lodash;
 
     // scope values
     this.scope = {

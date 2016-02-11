@@ -13,8 +13,9 @@ package org.eclipse.che.ide.api.parts;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
+
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,10 @@ public class PerspectiveManager {
      *         type which need set
      */
     public void setPerspectiveId(@NotNull String perspectiveId) {
+        Perspective currentPerspective = perspectives.get(currentPerspectiveId);
+
+        currentPerspective.storeState();
+
         currentPerspectiveId = perspectiveId;
 
         for (PerspectiveTypeListener container : listeners) {

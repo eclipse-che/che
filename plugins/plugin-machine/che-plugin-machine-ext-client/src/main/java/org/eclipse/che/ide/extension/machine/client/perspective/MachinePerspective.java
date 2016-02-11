@@ -13,6 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.perspective;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
@@ -55,8 +56,9 @@ public class MachinePerspective extends AbstractPerspective {
                               RecipePartPresenter recipePanel,
                               NotificationManager notificationManager,
                               OutputsContainerPresenter outputsContainer,
-                              MachineAppliancePresenter infoContainer) {
-        super(MACHINE_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory);
+                              MachineAppliancePresenter infoContainer,
+                              EventBus eventBus) {
+        super(MACHINE_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
 
         notificationManager.addRule(MACHINE_PERSPECTIVE_ID);
 

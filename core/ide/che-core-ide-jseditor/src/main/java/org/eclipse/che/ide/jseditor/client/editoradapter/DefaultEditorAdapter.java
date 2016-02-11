@@ -191,6 +191,16 @@ public class DefaultEditorAdapter extends Composite implements EditorAdapter, Fi
     }
 
     @Override
+    public void storeState() {
+        //to do nothing
+    }
+
+    @Override
+    public void restoreState() {
+        //to do nothing
+    }
+
+    @Override
     public String getTitle() {
         return this.textEditor.getTitle();
     }

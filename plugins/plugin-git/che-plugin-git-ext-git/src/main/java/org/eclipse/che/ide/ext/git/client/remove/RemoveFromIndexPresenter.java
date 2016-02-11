@@ -194,7 +194,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     protected ResourceBasedNode<?> getResourceBasedNode() {
         List<?> selection = projectExplorer.getSelection().getAllElements();
         //we should be sure that user selected single element to work with it
-        if (selection != null && selection.size() > 1) {
+        if (selection != null && !selection.isEmpty()) {
 
             Object o = selection.get(0);
 

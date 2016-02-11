@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-machine-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-RC2</version>
+        <version>4.0.0-RC4-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-machine-ext-client</artifactId>
     <packaging>jar</packaging>
@@ -114,13 +114,13 @@
             <artifactId>che-core-ide-ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-orion-editor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.terminal</groupId>
+            <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-websocket-terminal</artifactId>
             <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-orion-editor</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -192,7 +192,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che.terminal:che-websocket-terminal:zip</ignoredDependency>
+                                <ignoredDependency>org.eclipse.che.lib:che-websocket-terminal:zip</ignoredDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
@@ -205,7 +205,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.terminal</groupId>
+                                    <groupId>org.eclipse.che.lib</groupId>
                                     <artifactId>che-websocket-terminal</artifactId>
                                     <version>${che.websocket.terminal.version}</version>
                                     <type>zip</type>

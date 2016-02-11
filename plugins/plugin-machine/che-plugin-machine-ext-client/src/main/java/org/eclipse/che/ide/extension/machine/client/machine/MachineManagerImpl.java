@@ -19,7 +19,6 @@ import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateHandler;
 import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
 import org.eclipse.che.api.machine.shared.dto.ChannelsDto;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
@@ -32,8 +31,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
@@ -51,6 +48,8 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
+import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
+import org.eclipse.che.ide.workspace.start.StopWorkspaceHandler;
 
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.DESTROY;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.RESTART;
@@ -67,7 +66,7 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class MachineManagerImpl implements MachineManager {
+public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler {
 
     private final ExtServerStateController extServerStateController;
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
@@ -85,6 +84,12 @@ public class MachineManagerImpl implements MachineManager {
     private MessageBus messageBus;
     private Machine    devMachine;
     private boolean    isMachineRestarting;
+
+    private String                                  wsAgentLogChannel;
+    private String                                  statusChannel;
+    private String                                  outputChannel;
+    private SubscriptionHandler<MachineStatusEvent> statusHandler;
+    private SubscriptionHandler<String>             outputHandler;
 
     @Inject
     public MachineManagerImpl(ExtServerStateController extServerStateController,
@@ -115,24 +120,70 @@ public class MachineManagerImpl implements MachineManager {
 
         this.messageBus = messageBusProvider.getMessageBus();
 
-        eventBus.addHandler(StartWorkspaceEvent.TYPE, new StartWorkspaceHandler() {
-            @Override
-            public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
-                messageBus = messageBusProvider.getMessageBus();
-            }
-        });
+        eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
 
-        eventBus.addHandler(DevMachineStateEvent.TYPE, new DevMachineStateHandler() {
+        initializeHandlers();
+    }
+
+    private void initializeHandlers() {
+        final Unmarshallable<MachineStatusEvent> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(MachineStatusEvent.class);
+
+        statusHandler = new SubscriptionHandler<MachineStatusEvent>(unmarshaller) {
             @Override
-            public void onMachineStarted(DevMachineStateEvent event) {
-                onMachineRunning(event.getMachineId());
+            protected void onMessageReceived(MachineStatusEvent event) {
+                switch (event.getEventType()) {
+                    case RUNNING:
+                        initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), SUCCESS);
+
+                        String machineId = event.getMachineId();
+                        appContext.setDevMachineId(machineId);
+                        onMachineRunning(machineId);
+
+                        eventBus.fireEvent(new DevMachineStateEvent(event));
+                        break;
+                    case ERROR:
+                        initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), ERROR);
+                        break;
+                    default:
+                }
             }
 
             @Override
-            public void onMachineDestroyed(DevMachineStateEvent event) {
-
+            protected void onErrorReceived(Throwable exception) {
+                Log.error(MachineManagerImpl.class, exception);
             }
-        });
+        };
+
+        outputHandler = new SubscriptionHandler<String>(new OutputMessageUnmarshaller()) {
+            @Override
+            protected void onMessageReceived(String result) {
+                machineConsolePresenter.print(result);
+            }
+
+            @Override
+            protected void onErrorReceived(Throwable exception) {
+                Log.error(MachineManagerImpl.class, exception);
+            }
+        };
+    }
+
+    @Override
+    public void onWorkspaceStopped(UsersWorkspaceDto workspace) {
+        boolean statusChannelNotNull = statusChannel != null;
+        boolean outputChannelNotNull = outputChannel != null;
+        boolean wsLogChannelNotNull = wsAgentLogChannel != null;
+
+        if (statusChannelNotNull && messageBus.isHandlerSubscribed(statusHandler, statusChannel)) {
+            unsubscribeChannel(statusChannel, statusHandler);
+        }
+
+        if (outputChannelNotNull && messageBus.isHandlerSubscribed(outputHandler, outputChannel)) {
+            unsubscribeChannel(outputChannel, outputHandler);
+        }
+
+        if (wsLogChannelNotNull && messageBus.isHandlerSubscribed(outputHandler, wsAgentLogChannel)) {
+            unsubscribeChannel(wsAgentLogChannel, outputHandler);
+        }
     }
 
     @Override
@@ -201,7 +252,7 @@ public class MachineManagerImpl implements MachineManager {
             public void apply(final MachineStateDto machineStateDto) throws OperationException {
                 eventBus.fireEvent(new MachineStartingEvent(machineStateDto));
 
-                subscribeToOutput(machineStateDto.getChannels().getOutput());
+                subscribeToChannel(machineStateDto.getChannels().getOutput(), outputHandler);
 
                 RunningListener runningListener = null;
 
@@ -227,7 +278,7 @@ public class MachineManagerImpl implements MachineManager {
                 appContext.setDevMachineId(machineId);
                 appContext.setProjectsRoot(machineDto.getMetadata().projectsRoot());
                 devMachine = entityFactory.createMachine(machineDto);
-                extServerStateController.initialize(devMachine.getWsServerExtensionsUrl() + "/" + appContext.getWorkspace().getId());
+                extServerStateController.initialize(devMachine.getWsServerExtensionsUrl() + "/" + appContext.getWorkspaceId());
             }
         });
     }
@@ -247,72 +298,37 @@ public class MachineManagerImpl implements MachineManager {
         });
     }
 
-    private void subscribeToOutput(final String channel) {
-        try {
-            messageBus.subscribe(
-                    channel,
-                    new SubscriptionHandler<String>(new OutputMessageUnmarshaller()) {
-                        @Override
-                        protected void onMessageReceived(String result) {
-                            machineConsolePresenter.print(result);
-                        }
-
-                        @Override
-                        protected void onErrorReceived(Throwable exception) {
-                            Log.error(MachineManagerImpl.class, exception);
-                        }
-                    });
-        } catch (WebSocketException e) {
-            Log.error(MachineManagerImpl.class, e);
-        }
-    }
-
-    private void subscribeToMachineStatus(String machineStatusChanel) {
-        final Unmarshallable<MachineStatusEvent> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(MachineStatusEvent.class);
-        try {
-            messageBus.subscribe(machineStatusChanel, new SubscriptionHandler<MachineStatusEvent>(unmarshaller) {
-                @Override
-                protected void onMessageReceived(MachineStatusEvent event) {
-                    onMachineStatusChanged(event);
-                }
-
-                @Override
-                protected void onErrorReceived(Throwable exception) {
-                    Log.error(MachineManagerImpl.class, exception);
-                }
-            });
-        } catch (WebSocketException exception) {
-            Log.error(getClass(), exception);
-        }
-    }
-
-    private void onMachineStatusChanged(MachineStatusEvent event) {
-        switch (event.getEventType()) {
-            case RUNNING:
-                initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), SUCCESS);
-
-                String machineId = event.getMachineId();
-                appContext.setDevMachineId(machineId);
-                onMachineRunning(machineId);
-
-                eventBus.fireEvent(new DevMachineStateEvent(event));
-                break;
-            case ERROR:
-                initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), ERROR);
-                break;
-            default:
-        }
-    }
-
     @Override
     public void onDevMachineCreating(MachineStateDto machineState) {
         perspectiveManager.setPerspectiveId(MACHINE_PERSPECTIVE_ID);
         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
 
         ChannelsDto channels = machineState.getChannels();
-        subscribeToOutput(channels.getOutput());
-        subscribeToMachineStatus(channels.getStatus());
-        //ws agent logs
-        subscribeToOutput("workspace:" + appContext.getWorkspaceId() + ":ext-server:output");
+
+        wsAgentLogChannel = "workspace:" + appContext.getWorkspaceId() + ":ext-server:output";
+        outputChannel = channels.getOutput();
+        statusChannel = channels.getStatus();
+
+        subscribeToChannel(wsAgentLogChannel, outputHandler);
+        subscribeToChannel(outputChannel, outputHandler);
+        subscribeToChannel(statusChannel, statusHandler);
     }
+
+    private void subscribeToChannel(String chanel, SubscriptionHandler handler) {
+        try {
+            messageBus.subscribe(chanel, handler);
+        } catch (WebSocketException exception) {
+            Log.error(getClass(), exception);
+        }
+    }
+
+    private void unsubscribeChannel(String chanel, SubscriptionHandler handler) {
+        try {
+            messageBus.unsubscribe(chanel, handler);
+        } catch (WebSocketException exception) {
+            Log.error(getClass(), exception);
+        }
+    }
+
+
 }

@@ -451,14 +451,11 @@ export class CreateProjectCtrl {
       // add commands if there are some that have been defined
       let commands = projectData.project.commands;
       if (commands && commands.length > 0) {
-        commands.forEach((command) => {
-          let newCommand = angular.copy(command);
-          newCommand.name = projectName + ': ' + newCommand.name;
-          promise = promise.then(this.cheAPI.getWorkspace().addCommand(workspaceId, newCommand));
-        });
-
+        let deferred = this.$q.defer();
+        let deferredPromise = deferred.promise;
+        this.addCommand(workspaceId, projectName, commands, 0, deferred);
+        promise = deferredPromise;
       }
-
     }
 
     promise.then(() => {
@@ -488,6 +485,27 @@ export class CreateProjectCtrl {
   }
 
 
+  /**
+   * Add commands sequentially by iterating on the number of the commands.
+   * Wait the ack of remote addCommand before adding a new command to avoid concurrent access
+   * @param workspaceId the ID of the workspace to use for adding commands
+   * @param projectName the name that will be used to prefix the commands inserted
+   * @param commands the array to follow
+   * @param index the index of the array of commands to register
+   */
+  addCommand(workspaceId, projectName, commands, index, deferred) {
+    if (index < commands.length) {
+      let newCommand = angular.copy(commands[index]);
+      newCommand.name = projectName + ': ' + newCommand.name;
+      var addPromise = this.cheAPI.getWorkspace().addCommand(workspaceId, newCommand);
+      addPromise.then(() => {
+        // call the method again
+        this.addCommand(workspaceId, projectName, commands, ++index, deferred);
+      }, (error) => {deferred.reject(error);});
+    } else {
+      deferred.resolve('All commands added');
+    }
+  }
 
   connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, bus) {
 

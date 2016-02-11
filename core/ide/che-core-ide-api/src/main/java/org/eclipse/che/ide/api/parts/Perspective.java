@@ -12,10 +12,10 @@ package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.constraints.Constraints;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * This interface is a general type for all perspectives. You must implement the interface when you add new perspective.
@@ -25,23 +25,25 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public interface Perspective {
 
-    /**
-     * Restores editor default state.
-     */
-    void restoreEditorPart();
+    /** Restores editor parts state with saving of parts sizes. */
+    void expandParts();
+
+    /** Hides editor parts. */
+    void collapseParts();
+
+    /** Store perspective state before changing. */
+    void storeState();
+
+    /** Restores perspective state after changing. */
+    void restoreState();
 
     /**
-     * Expands editor to fullscreen.
-     */
-    void expandEditorPart();
-
-    /**
-     * Changes the active part.
+     * Sets passed part as active. Sets focus to part and open it.
      *
      * @param part
-     *         part to be activated
+     *         part which will be active
      * @param type
-     *         part type
+     *         type of part stack
      */
     void setActivePart(@NotNull PartPresenter part, @NotNull PartStackType type);
 

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC1-SNAPSHOT</version>
+        <version>4.0.0-RC4-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
@@ -284,6 +284,11 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-catalina</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

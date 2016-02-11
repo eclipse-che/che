@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -18,7 +19,6 @@ import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
-import org.eclipse.che.api.user.shared.dto.NewUser;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.api.user.shared.dto.UserInRoleDescriptor;
 import org.eclipse.che.commons.json.JsonHelper;
@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
@@ -174,10 +175,11 @@ public class UserServiceTest {
 
     @Test
     public void shouldBeAbleToCreateNewUserForSystemAdmin() throws Exception {
-        final NewUser newUser = DtoFactory.getInstance()
-                                          .createDto(NewUser.class)
-                                          .withName("test")
-                                          .withPassword("password123");
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName("test")
+                                                 .withPassword("password123")
+                                                 .withEmail("test@mail.com");
         when(securityContext.isUserInRole("system/admin")).thenReturn(true);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
@@ -217,9 +219,10 @@ public class UserServiceTest {
         uriField.setAccessible(true);
         uriField.set(userService, false);
 
-        final NewUser newUser = DtoFactory.getInstance()
-                                          .createDto(NewUser.class)
-                                          .withName("test");
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName("test")
+                                                 .withEmail("test@mail.com");
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
 
@@ -233,24 +236,25 @@ public class UserServiceTest {
 
     @Test
     public void shouldThrowForbiddenExceptionWhenCreatingUserWithInvalidPassword() throws Exception {
-        final NewUser newUser = DtoFactory.getInstance()
-                                          .createDto(NewUser.class)
-                                          .withName("test")
-                                          .withPassword("password");
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName("test")
+                                                 .withPassword("password");
         when(securityContext.isUserInRole("system/admin")).thenReturn(true);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
 
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
         verify(userDao, never()).create(any(User.class));
         verify(profileDao, never()).create(any(Profile.class));
     }
 
     @Test
     public void shouldGeneratedPasswordWhenCreatingUserAndItIsMissing() throws Exception {
-        final NewUser newUser = DtoFactory.getInstance()
-                                          .createDto(NewUser.class)
-                                          .withName("test");
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName("test")
+                                                 .withEmail("test@mail.com");
         when(securityContext.isUserInRole("system/admin")).thenReturn(true);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
@@ -277,19 +281,19 @@ public class UserServiceTest {
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", null);
 
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
         verify(userDao, never()).create(any(User.class));
         verify(profileDao, never()).create(any(Profile.class));
     }
 
     @Test
     public void shouldThrowForbiddenExceptionWhenCreatingUserBasedOnEntityWhichContainsNullEmail() throws Exception {
-        final NewUser newUser = DtoFactory.getInstance().createDto(NewUser.class);
+        final UserDescriptor newUser = DtoFactory.getInstance().createDto(UserDescriptor.class);
         when(securityContext.isUserInRole("system/admin")).thenReturn(true);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
 
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
         verify(userDao, never()).create(any(User.class));
         verify(profileDao, never()).create(any(Profile.class));
     }
@@ -367,7 +371,7 @@ public class UserServiceTest {
                                                             null,
                                                             environmentContext);
 
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
         verify(userDao, never()).update(user.withPassword(newPassword));
     }
 
@@ -386,7 +390,7 @@ public class UserServiceTest {
                                                             null,
                                                             environmentContext);
 
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
         verify(userDao, never()).update(user.withPassword(newPassword));
     }
 
@@ -405,7 +409,7 @@ public class UserServiceTest {
                                                             null,
                                                             environmentContext);
 
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
         verify(userDao, never()).update(user.withPassword(newPassword));
     }
 
@@ -537,6 +541,19 @@ public class UserServiceTest {
         assertEquals(userInRoleDescriptor.getIsInRole(), true);
         assertEquals(userInRoleDescriptor.getScope(), "system");
         assertEquals(userInRoleDescriptor.getScopeId(), "");
+    }
+
+    @Test
+    public void shouldNotBeAbleToCreateUserWithoutEmailBySystemAdmin() throws Exception {
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName("user")
+                                                 .withPassword("password");
+        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+
+        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
+
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
     }
 
     @Test
