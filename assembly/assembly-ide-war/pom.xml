@@ -14,7 +14,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
+        <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
         <version>4.0.0-RC4-SNAPSHOT</version>
     </parent>
@@ -173,6 +173,10 @@
             <artifactId>che-core-vfs-impl</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-swagger-module</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-docker-client</artifactId>
         </dependency>
@@ -259,10 +263,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.swagger</groupId>
-            <artifactId>che-swagger-module</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>

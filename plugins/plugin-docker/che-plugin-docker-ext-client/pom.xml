@@ -53,7 +53,7 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-user</artifactId>
-            <version>${che.core.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-ui</artifactId>
-            <version>${che.core.version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
