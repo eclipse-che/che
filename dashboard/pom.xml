@@ -14,44 +14,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>maven-depmgt-pom</artifactId>
-        <groupId>org.eclipse.che.depmgt</groupId>
+        <artifactId>che-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
         <version>4.0.0-RC4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.dashboard</groupId>
     <artifactId>che-dashboard-war</artifactId>
     <version>4.0.0-RC4-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Eclipse Che Dashboard :: Web App</name>
-    <scm>
-        <connection>scm:git:git@github.com:codenvy/che-dashboard.git</connection>
-        <developerConnection>scm:git:git@github.com:codenvy/che-dashboard.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/codenvy/che-dashboard</url>
-    </scm>
     <properties>
-      <license_years>2015-2016</license_years>
+        <license_years>2015-2016</license_years>
     </properties>
-    <repositories>
-        <repository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </pluginRepository>
-    </pluginRepositories>
     <build>
         <finalName>dashboard-war</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.5</version>
                 <configuration>
                     <filesets>
                         <fileset>

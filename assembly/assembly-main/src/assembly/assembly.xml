@@ -43,7 +43,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>swagger.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.swagger:che-swagger-war</include>
+                <include>org.eclipse.che.lib:che-swagger-war</include>
             </includes>
         </dependencySet>
         <dependencySet>

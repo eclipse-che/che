@@ -33,7 +33,7 @@
                 <!-- required until api/core cleanup! -->
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-app</artifactId>
-                <version>${che.core.version}</version>
+                <version>${project.version}</version>
                 <scope>compile</scope>
             </dependency>
         </dependencies>
