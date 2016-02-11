@@ -5,8 +5,8 @@
 .project
 .settings/
 target/
-bin/
 test-output/
+bin/
 
 # Idea #
 ##################
@@ -23,7 +23,6 @@ test-output/
 *.exe
 *.o
 *.so
-*.sh
 
 # Packages #
 ############
