@@ -33,6 +33,7 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -110,6 +111,8 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     private String                                       filterTextValue;
 
     @UiField
+    FocusPanel                  focusPanel;
+    @UiField(provided = true)
     MachineLocalizationConstant machineLocale;
     @UiField
     SimplePanel                 categoriesPanel;
@@ -127,7 +130,6 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     FlowPanel                   previewUrlPanel;
     @UiField
     FlowPanel                   overFooter;
-
 
     @Inject
     protected EditCommandsViewImpl(org.eclipse.che.ide.Resources resources,
@@ -393,7 +395,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
 
     @Override
     public void show() {
-        super.show();
+        super.show(focusPanel);
         configurationName.setText("");
         configurationPreviewUrl.setText("");
     }
