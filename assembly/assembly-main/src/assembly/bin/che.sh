@@ -441,9 +441,9 @@ strip_url () {
 
 print_client_connect () {
   if [ "${USE_DOCKER}" == "false" ]; then
-  	HOST_PRINT_VALUE="localhost"
+    HOST_PRINT_VALUE="localhost"
   else
-  	HOST_PRINT_VALUE=${host}
+    HOST_PRINT_VALUE=${host}
   fi
       echo "
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
@@ -477,11 +477,11 @@ call_catalina () {
 
   if [[ "${SKIP_JAVA_VERSION}" == false ]]; then
     # Che requires Java version 1.8 or higher.
-	JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-	if [[  -z "${JAVA_VERSION}" || "${JAVA_VERSION}" < "1.8" ]]; then
-	  error_exit "Che requires Java version 1.8 or higher. We found a ${JAVA_VERSION}."
-	  return
-	fi
+  JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  if [[  -z "${JAVA_VERSION}" || "${JAVA_VERSION}" < "1.8" ]]; then
+    error_exit "Che requires Java version 1.8 or higher. We found a ${JAVA_VERSION}."
+    return
+  fi
   fi
 
   ### Cannot add this in setenv.sh.
@@ -535,11 +535,15 @@ kill_and_launch_docker_che () {
   if ${WIN} || ${MAC} ; then
     DOCKER_PRINT_VALUE=${host}
   else
-    DOCKER_PRINT_VALUE=${DOCKER_MACHINE_HOST}
+      if [[ "${CHE_IP}" != "" ]]; then
+        DOCKER_PRINT_VALUE="${CHE_IP}"
+      else
+      DOCKER_PRINT_VALUE="${host}"
+    fi
   fi
 
   if ${USE_DEBUG}; then
-	  set -x
+    set -x
   fi
 
   # IDEX-4266 - Change launching of docker to avoid using dind
@@ -661,7 +665,7 @@ launch_che_server () {
 
       else 
 
-      	# Existing container found, and it was started properly.
+        # Existing container found, and it was started properly.
         echo -e "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
         "${DOCKER}" exec ${CONTAINER} bash -c "//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
                                              `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
@@ -686,13 +690,13 @@ launch_che_server () {
 
     if [[ "${USE_DEBUG}" == true ]]; then
       DEBUG_PRINT_VALUE=--debug
-	  else
-	    DEBUG_PRINT_VALUE=
-	  fi
+    else
+      DEBUG_PRINT_VALUE=
+    fi
 
-	  if ${USE_DEBUG}; then
-	    set -x
-	  fi
+    if ${USE_DEBUG}; then
+      set -x
+    fi
 
     "${DOCKER}" exec -i ${CONTAINER} bash -c "sudo rm -rf /home/user/che/lib-copy/* && "`
                                             `"mkdir -p /home/user/che/lib-copy/ && "`
@@ -701,8 +705,8 @@ launch_che_server () {
                                             #`"sudo sed -i 's/random/urandom/g' /opt/jre1.8.0_65/lib/security/java.security && "`
                                             `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" "`
                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
-	  set +x
-	  return
+    set +x
+    return
   fi
 }
 
