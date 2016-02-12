@@ -551,7 +551,7 @@ kill_and_launch_docker_che () {
   -v //home/user/che/lib:/home/user/che/lib-copy \
   -v //home/user/che/workspaces:/home/user/che/workspaces \
   -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
-  -e DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} \
+  -e DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d--net=host codenvy/che:${CHE_DOCKER_TAG} \
   bash -c "tail -f /dev/null" || DOCKER_EXIT=$? || true 
   set +x
 }
