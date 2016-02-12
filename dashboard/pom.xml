@@ -23,7 +23,7 @@
     <artifactId>che-dashboard-war</artifactId>
     <version>4.0.0-RC4-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>Eclipse Che Dashboard :: Web App</name>
+    <name>Che Dashboard :: Web App</name>
     <inceptionYear>2015</inceptionYear>
     <build>
         <finalName>dashboard-war</finalName>
