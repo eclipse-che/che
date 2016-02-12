@@ -104,15 +104,7 @@ export class ListWorkspacesCtrl {
       promises.push(promiseRuntimeConfig);
     }
 
-    let projectsPerWorkspace = this.cheAPI.getProject().getProjectsByWorkspace();
-    if (!projectsPerWorkspace || !projectsPerWorkspace[workspace.id]) {
-      let promiseProjectsNumber = this.cheAPI.getProject().fetchProjectsForWorkspaceId(workspace.id);
-      promises.push(promiseProjectsNumber);
-    }
-
     this.$q.all(promises).then(() => {
-      projectsPerWorkspace = this.cheAPI.getProject().getProjectsByWorkspace();
-      workspace.projects = projectsPerWorkspace[workspace.id] ? projectsPerWorkspace[workspace.id].length : undefined;
       this.isInfoLoading = false;
     }, (error) => {
       console.log(error);
