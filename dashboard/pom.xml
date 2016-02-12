@@ -24,9 +24,7 @@
     <version>4.0.0-RC4-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Eclipse Che Dashboard :: Web App</name>
-    <properties>
-        <license_years>2015-2016</license_years>
-    </properties>
+    <inceptionYear>2015</inceptionYear>
     <build>
         <finalName>dashboard-war</finalName>
         <plugins>
