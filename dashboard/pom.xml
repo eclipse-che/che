@@ -66,11 +66,6 @@
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
                                     <arg value="test" />
                                 </exec>
-                                <!-- Disable development mode -->
-                                <replace file="${basedir}/src/app/index.module.js">
-                                    <replacetoken><![CDATA[var DEV = true;]]></replacetoken>
-                                    <replacevalue><![CDATA[var DEV = false;]]></replacevalue>
-                                </replace>
                                 <!-- Build the application -->
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
                                     <arg value="build" />
@@ -79,11 +74,6 @@
                                 <replace file="${basedir}/dist/index.html">
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
                                     <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
-                                </replace>
-                                <!-- Enable back development mode -->
-                                <replace file="${basedir}/src/app/index.module.js">
-                                    <replacetoken><![CDATA[var DEV = false;]]></replacetoken>
-                                    <replacevalue><![CDATA[var DEV = true;]]></replacevalue>
                                 </replace>
                             </target>
                         </configuration>
