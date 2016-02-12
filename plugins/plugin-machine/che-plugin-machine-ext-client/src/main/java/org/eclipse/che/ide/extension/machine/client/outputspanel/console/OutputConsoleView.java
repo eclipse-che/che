@@ -36,9 +36,6 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
      */
     void print(String message, boolean cr);
 
-    /** Scrolls console to bottom. */
-    void scrollBottom();
-
     /** Hides command title and command label */
     void hideCommand();
 

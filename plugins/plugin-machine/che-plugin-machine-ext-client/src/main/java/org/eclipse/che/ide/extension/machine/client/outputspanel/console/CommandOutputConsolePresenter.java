@@ -113,7 +113,6 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
             @Override
             protected void onMessageReceived(String result) {
                 view.print(result, result.endsWith("\r"));
-                view.scrollBottom();
             }
 
             @Override
@@ -159,7 +158,6 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                             return;
                         }
                         view.print(error, false);
-                        view.scrollBottom();
                 }
             }
 

@@ -49,7 +49,6 @@ public class DefaultOutputConsole implements OutputConsole {
      */
     public void printText(String text) {
         view.print(text, text.endsWith("\r"));
-        view.scrollBottom();
     }
 
     /**
@@ -68,7 +67,6 @@ public class DefaultOutputConsole implements OutputConsole {
         }
 
         view.print(text, isRepeat);
-        view.scrollBottom();
     }
 
     /** {@inheritDoc} */

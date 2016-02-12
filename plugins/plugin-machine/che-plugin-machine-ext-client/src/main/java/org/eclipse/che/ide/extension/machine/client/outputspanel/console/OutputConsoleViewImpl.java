@@ -12,13 +12,14 @@ package org.eclipse.che.ide.extension.machine.client.outputspanel.console;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -28,7 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 /**
- * View for {@link OutputConsole}.
+ * View representation of output console.
  *
  * @author Artem Zatsarynnyi
  */
@@ -37,48 +38,58 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     interface OutputConsoleViewUiBinder extends UiBinder<Widget, OutputConsoleViewImpl> {
     }
 
-    private static final OutputConsoleViewUiBinder UI_BINDER = GWT.create(OutputConsoleViewUiBinder.class);
-
-    private ActionDelegate delegate;
+    private static final OutputConsoleViewUiBinder UI_BINDER   = GWT.create(OutputConsoleViewUiBinder.class);
+    private static final int                       SCROLL_STEP = 3;
 
     @UiField
     DockLayoutPanel consolePanel;
-
     @UiField
-    FlowPanel   commandPanel;
-
+    FlowPanel       commandPanel;
     @UiField
-    FlowPanel   previewPanel;
-
+    FlowPanel       previewPanel;
     @UiField
-    Label       commandTitle;
-
+    Label           commandTitle;
     @UiField
-    Label       commandLabel;
-
+    Label           commandLabel;
     @UiField
-    ScrollPanel scrollPanel;
-    
+    ScrollPanel     scrollPanel;
     @UiField
-    FlowPanel   consoleLines;
-
+    FlowPanel       consoleLines;
     @UiField
-    Anchor      previewUrlLabel;
-    
-    /** scroll events to the bottom if view is visible */
-    private boolean scrollBottomRequired = false;
+    Anchor          previewUrlLabel;
 
     /** If true - next printed line should replace the previous one. */
     private boolean carriageReturn;
+    private int     mouseDelta;
+    private int     scrollLinesCount;
+    private boolean scrolled;
 
     @Inject
     public OutputConsoleViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
+
+        MouseWheelHandler mouseWheelHandler = new MouseWheelHandler() {
+            @Override
+            public void onMouseWheel(MouseWheelEvent event) {
+                if (event.isNorth() && !scrolled) {
+                    scrolled = true;
+
+                    mouseDelta = scrollLinesCount;
+                }
+
+                mouseDelta += event.isSouth() ? SCROLL_STEP : -SCROLL_STEP;
+
+                if (mouseDelta < 0) {
+                    mouseDelta = 0;
+                }
+            }
+        };
+
+        consoleLines.addDomHandler(mouseWheelHandler, MouseWheelEvent.getType());
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
     }
 
     @Override
@@ -121,33 +132,22 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         PreElement pre = DOM.createElement("pre").cast();
         pre.setInnerText(message.isEmpty() ? " " : message);
         consoleLines.getElement().appendChild(pre);
+
+        scrollBottom();
     }
 
-    @Override
-    public void scrollBottom() {
+    private void scrollBottom() {
         /** scroll bottom immediately if view is visible */
-        if (scrollPanel.getElement().getOffsetParent() != null) {
+        if (mouseDelta >= scrollLinesCount) {
             scrollPanel.scrollToBottom();
-            return;
+
+            scrolled = false;
+
+            mouseDelta = scrollLinesCount + SCROLL_STEP;
         }
 
-        /** otherwise, check the visibility periodically and scroll the view when it's visible */
-        if (!scrollBottomRequired) {
-            scrollBottomRequired = true;
-
-            Scheduler.get().scheduleFixedPeriod(new Scheduler.RepeatingCommand() {
-                @Override
-                public boolean execute() {
-                    if (scrollPanel.getElement().getOffsetParent() != null) {
-                        scrollPanel.scrollToBottom();
-                        scrollBottomRequired = false;
-                        return false;
-                    }
-                    return true;
-                }
-            }, 1000);
+        if (!carriageReturn) {
+            scrollLinesCount++;
         }
     }
-
-
 }
