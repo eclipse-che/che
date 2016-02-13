@@ -477,11 +477,16 @@ call_catalina () {
 
   if [[ "${SKIP_JAVA_VERSION}" == false ]]; then
     # Che requires Java version 1.8 or higher.
-        JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-        if [[  -z "${JAVA_VERSION}" || "${JAVA_VERSION}" < "1.8" ]]; then
-          error_exit "Che requires Java version 1.8 or higher. We found a ${JAVA_VERSION}."
-          return
-        fi
+    JAVA_VERSION=$("${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    if [  -z "${JAVA_VERSION}" ]; then
+      error_exit "Failure running JAVA_HOME/bin/java -version. We received ${JAVA_VERSION}."
+      return
+    fi
+
+    if [[ "${JAVA_VERSION}" < "1.8" ]]; then
+      error_exit "Che requires Java version 1.8 or higher. We found ${JAVA_VERSION}."
+      return
+    fi
   fi
 
   ### Cannot add this in setenv.sh.
@@ -702,7 +707,6 @@ launch_che_server () {
                                             `"mkdir -p /home/user/che/lib-copy/ && "`
                                             `"sudo chown -R user:user /home/user && "`
                                             `"cp -rf /home/user/che/lib/* /home/user/che/lib-copy && "`
-                                            #`"sudo sed -i 's/random/urandom/g' /opt/jre1.8.0_65/lib/security/java.security && "`
                                             `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" "`
                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
     set +x
