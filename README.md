@@ -14,14 +14,21 @@ Next-generation Eclipse IDE. Open source workspace server and cloud IDE.
 
 ![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
 
+### A Better Workspace
+Workspaces are composed of projects and runtime environments. Create portable workspace replicas that run anywhere in the cloud or on your desktop ... [Read More](https://www.eclipse.org/che/features/#new-workspace)
+![Eclipse Che](https://www.eclipse.org/che/images/features/img-features-a-new-kind-of-workspace.png "Che Workspace")
+
 ### Cloud IDE
-Use your browser to program on any machine in any language. Edit, build, debug and deploy projects bound to source repositories.
+A no-installation browser IDE and IOE accessible from any local or remote device. Thin, fast, and beautiful - it's the IDE our own engineers wanted ... [Read More](https://www.eclipse.org/che/features/#cloud-ide)
+![Eclipse Che](https://www.eclipse.org/che/images/features/img-features-cloud-ide.png "Cloud IDE")
 
-### Workspace Server
-Create developer workspaces with APIs. Add your project types, embed custom commands and host on any infrastructure.
+### Collaborative Workspace Server
+Host Eclipse Che as a workspace server. Share tools, runtime and programming services across workspaces and teams. Control workspaces with REST APIs ... [Read More](https://www.eclipse.org/che/features/#collaborative)
+![Eclipse Che](https://www.eclipse.org/che/images/features/img-features-collaborative-workspace-server.png "Che Dashboard")
 
-### Plug-Ins
-Use Che's built-in language plug-ins or write packaged extensions that transform Che's IDE into new tools and assemblies.
+### Docker-Powered Environments
+Workspace runtimes are Docker-powered. Use our all-in-one stacks, pull from any registry, or author your own. Snapshot and embed runtimes into ... [Read More](https://www.eclipse.org/che/features/#docker-powered)
+![Eclipse Che](https://www.eclipse.org/che/images/features/img-features-docker-powered.png "Docker Workspaces")
 
 Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud, and Maven 3.3.1 or higher. It has been tested on Ubuntu, Linux, MacOS and Windows. 
 
@@ -56,7 +63,7 @@ Che will be available at ```localhost:8080```.
 If you want to run Che as a server, please see docs @ eclipse.org/che on additional flags to enable remote clients.
 
 
-### Repositories:
+### Repositories
 These repositories are for the core project hosted at `http://github.com/eclipse`.
 ```
 /che
@@ -84,7 +91,7 @@ These repositories are for the core project hosted at `http://github.com/eclipse
 /che-parent                                                # Maven plugins and profiles
 ```
 
-### Other Repositories:
+### Other Repositories
 These are external repositories that provide additional tools for Eclipse Che.
 ```
 http://github.com/codenvy/che-installer                    # Creates the Windows and JAR installer packages
