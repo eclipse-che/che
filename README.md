@@ -53,14 +53,16 @@ cd che
 mvn clean install
 
 # A new assembly is packaged into:
-cd assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
+cd /assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
 
 # Executable files are:
 bin/che.sh
 bin/che.bat
 ```
 Che will be available at ```localhost:8080```.
-If you want to run Che as a server, please see docs @ eclipse.org/che on additional flags to enable remote clients.
+
+### Run Che as a Server
+If you want to run Che as a server where non-localhost clients connect, there are additional flags that you may need to configure. Please see the [usage documentation](https://dash.readme.io/project/eclipse-che/v4.0/docs/usage).
 
 
 ### Repositories
