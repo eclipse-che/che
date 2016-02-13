@@ -57,21 +57,45 @@ If you want to run Che as a server, please see docs @ eclipse.org/che on additio
 
 
 ### Repositories:
-* **che-parent**:              [Maven parent POM] (http://github.com/codenvy/che-parent)
-* **che-depmgt**:              [Maven dependency management POM] (http://github.com/codenvy/che-depmgt)
-* **che-core**:                [Core components] (http://github.com/codenvy/che-core)
-* **che-plugins**:             [Language & tooling extensions] (http://github.com/codenvy/che-plugins)
-* **che-dashboard**:           [Workspace, project, user mgmt] (http://github.com/codenvy/che-dashboard)
-* **che-websocket-terminal**:  [Embedded terminal for workspaces] (http://github.com/codenvy/che-websocket-terminal)
-* **che-installer**:           [Che installation packages] (http://github.com/codenvy/che-installer)
-* **che-tutorials**:           [SDK examples and tutorials] (http://github.com/codenvy/che-tutorials)
-* **che-samples**:             [Templates and samples loaded into the IDE] (http://github.com/che-samples)
-* **che-site**:                [Che web site content] (http://git.eclipse.org/c/www.eclipse.org/che.git)
-* **che-specifications**:      [Roadmap and technical plans for the future] (http://github.com/codenvy/che-specifications)
-* **cli**:                     [CLI for interacting with Che remotely] (http://github.com/codenvy/cli)
+These repositories are for the core project hosted at `http://github.com/eclipse`.
+```
+/che
+/che/assembly                                             # Generates binary assemblies of Che
+/che/assembly/assembly-main                               # Final packaging phase
+/che/assembly/assembly-ide-war                            # Creates the IDE.war from plug-ins & core
+/che/assembly/assembly-machine-war                        # Creates the agent WAR from plug-ins & core
+/che/assembly/assembly-machine-server                     # Creates the agent server that goes into ws
+/che/core                                                 # Platform APIs
+/che/dashboard                                            # AngularJS app for managing Che
+/che/plugins                                              # IDE & agent plug-ins
+
+/che-lib                                                  # Forked dependencies that require mods
+/che-lib/swagger
+/che-lib/terminal
+/che-lib/websocket
+/che-lib/pty
+/che-lib/che-tomcat8-slf4j-logback
+
+# /che and /che-lib depend upon /che-dependencies
+/che-dependencies                                          # Maven dependencies used by che
+/che-dev                                                   # Code style and license header
+
+# /che-dependencies and /che-dev depend upon /che-parent
+/che-parent                                                # Maven plugins and profiles
+```
+
+### Other Repositories:
+These are external repositories that provide additional tools for Eclipse Che.
+```
+http://github.com/codenvy/che-installer                    # Creates the Windows and JAR installer packages
+http://github.com/codenvy/che-tutorials                    # SDK examples and tutorials (needs updating)
+http://github.com/che-samples                              # GitHub organization with sample repos used in Che
+http://git.eclipse.org/c/www.eclipse.org/che.git           # The content for eclipse.org/che Web site
+http://github.com/codenvy/cli                              # Experimental CLI for managing Che workspaces on the CLI
+```
 
 ### Engage
 * **Contribute:** We accept pull requests. Please see [how to contribute] (https://github.com/codenvy/che/blob/master/CONTRIBUTING.md).
-* **Support:** You can report bugs using GitHub issues
+* **Support:** You can report bugs using GitHub issues.
 * **Developers:** Plug-in developers can get API help at [che-dev@eclipse.org](email:che-dev@eclipse.org). 
-* **Website:** [eclipse.org/che](https://eclipse.org/che)
+* **Website:** [eclipse.org/che](https://eclipse.org/che).
