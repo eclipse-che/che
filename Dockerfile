@@ -20,12 +20,12 @@ RUN mkdir /home/user/.che && \
 ENV JAVA_HOME /opt/jre$JAVA_VERSION_PREFIX
 ENV PATH $JAVA_HOME/bin:$PATH
 
-# expose 8080 port and a range of ports for runners
+EXPOSE 8080
 
-EXPOSE 8080 32768-65535
+ADD /assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che
 
-ADD /assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che
-
-CMD  sudo chown -R user:user /home/user/che && \
-     sudo service docker start && \
-     cd /home/user/che/bin/ && ./che.sh run
+CMD sudo rm -rf /home/user/che/lib-copy/* && \
+    mkdir -p /home/user/che/lib-copy/ && \
+    sudo chown -R user:user /home/user && \
+    cp -rf /home/user/che/lib/* /home/user/che/lib-copy && \
+    /home/user/che/bin/che.sh run
