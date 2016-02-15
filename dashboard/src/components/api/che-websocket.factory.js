@@ -79,7 +79,6 @@ export class CheWebsocket {
       var bus = new MessageBus(dataStream);
       this.sockets.set(workspaceId, bus);
       currentBus = bus;
-      currentBus = bus;
     }
     return currentBus;
   }
