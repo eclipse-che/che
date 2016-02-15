@@ -62,7 +62,7 @@ bin/che.bat
 Che will be available at ```localhost:8080```.
 
 ### Run Che as a Server
-If you want to run Che as a server where non-localhost clients connect, there are additional flags that you may need to configure. Please see the [usage documentation](https://dash.readme.io/project/eclipse-che/v4.0/docs/usage).
+If you want to run Che as a server where non-localhost clients connect, there are additional flags that you may need to configure. Please see the [usage documentation](https://eclipse-che.readme.io/docs/usage).
 
 
 ### Repositories
