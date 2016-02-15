@@ -18,14 +18,11 @@ import org.eclipse.che.ide.websocket.Message;
  * @author Artem Zatsarynnyi
  */
 @SuppressWarnings("serial")
-public class UnauthorizedException extends Exception {
-    private Message message;
+public class UnauthorizedException extends ServerException {
 
     public UnauthorizedException(Message message) {
-        this.message = message;
+        super(message);
     }
 
-    public int getHTTPStatus() {
-        return message.getResponseCode();
-    }
+
 }

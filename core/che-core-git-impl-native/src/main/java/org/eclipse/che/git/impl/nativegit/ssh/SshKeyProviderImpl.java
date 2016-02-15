@@ -59,13 +59,13 @@ public class SshKeyProviderImpl implements SshKeyProvider {
         try {
             pair = sshService.getPair("git", host);
         } catch (ServerException | NotFoundException e) {
-            throw new GitException("Unable get private ssh key");
+            throw new GitException("Unable get private ssh key", 32068);
         }
 
         // check keys existence
         String privateKey = pair.getPrivateKey();
         if (privateKey == null) {
-            throw new GitException("Unable get private ssh key");
+            throw new GitException("Unable get private ssh key", 32068);
         }
 
         final String publicKey = pair.getPublicKey();

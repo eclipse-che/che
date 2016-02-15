@@ -20,20 +20,13 @@ import org.eclipse.che.ide.rest.AsyncRequest;
  * @author Sergii Leschenko
  */
 @SuppressWarnings("serial")
-public class UnauthorizedException extends Exception {
-
-    private Response response;
+public class UnauthorizedException extends ServerException {
 
     private AsyncRequest request;
 
     public UnauthorizedException(Response response, AsyncRequest request) {
-        super(response.getText());
-        this.response = response;
+        super(response);
         this.request = request;
-    }
-
-    public Response getResponse() {
-        return response;
     }
 
     public AsyncRequest getRequest() {
