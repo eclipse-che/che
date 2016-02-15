@@ -12,8 +12,12 @@ package org.eclipse.che.ide.projectimport;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.ide.commons.exception.JobNotFoundException;
+import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * The class contains business logic which allows define type of error.
@@ -39,12 +43,43 @@ public class ErrorMessageUtils {
         if (exception instanceof JobNotFoundException) {
             return "Project import failed";
         } else if (exception instanceof UnauthorizedException) {
-            UnauthorizedException unauthorizedException = (UnauthorizedException)exception;
-            ServiceError serverError = dtoFactory.createDtoFromJson(unauthorizedException.getResponse().getText(),
-                                                                    ServiceError.class);
-            return serverError.getMessage();
+            return ((UnauthorizedException)exception).getMessage();
         } else {
             return dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
+        }
+    }
+
+    /**
+     * Returns error code of the exception if it is of type {@clink ServerException} and has error code set, or -1 otherwise.
+     *
+     * @param exception
+     *         passed exception
+     * @return error code
+     */
+    public static int getErrorCode(Throwable exception) {
+        if (exception instanceof ServerException) {
+            return ((ServerException)exception).getErrorCode();
+        } else if (exception instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
+            return ((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)exception).getErrorCode();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Returns attributes of the exception if it is of type {@clink ServerException} and has attributes set, or empty map otherwise.
+     *
+     * @param exception
+     *         passed exception
+     * @return error code
+     */
+    public static Map<String, String> getAttributes(Throwable exception) {
+        if (exception instanceof ServerException) {
+            return ((ServerException)exception).getAttributes();
+        } else if (exception instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
+            return ((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)exception).getAttributes();
+        } else {
+            return Collections.emptyMap();
         }
     }
 }

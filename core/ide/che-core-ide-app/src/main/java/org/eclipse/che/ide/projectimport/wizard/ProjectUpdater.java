@@ -89,8 +89,7 @@ public class ProjectUpdater {
                                          @Override
                                          protected void onFailure(Throwable exception) {
                                              projectNotificationSubscriber.onFailure(exception.getMessage());
-                                             String errorMessage = ErrorMessageUtils.getErrorMessage(exception);
-                                             callback.onFailure(new Exception(errorMessage));
+                                             callback.onFailure(new Exception(exception.getMessage()));
                                          }
                                      });
     }

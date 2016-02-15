@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscribe
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.eclipse.che.ide.projectimport.ErrorMessageUtils;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 
@@ -99,12 +100,13 @@ public class ProjectImporter extends AbstractImporter {
             @Override
             public void apply(PromiseError exception) throws OperationException {
                 subscriber.onFailure(exception.getMessage());
-                String errorMessage = ErrorMessageUtils.getErrorMessage(exception.getCause());
-                if (errorMessage.equals("Unable get private ssh key")) {
+                int errorCode = ErrorMessageUtils.getErrorCode(exception.getCause());
+                // no ssh key found code. See org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.
+                if (errorCode == 32068) {
                     callback.onFailure(new Exception(localizationConstant.importProjectMessageUnableGetSshKey()));
                     return;
                 }
-                callback.onFailure(new Exception(errorMessage));
+                callback.onFailure(new Exception(exception.getCause().getMessage()));
             }
         });
     }
