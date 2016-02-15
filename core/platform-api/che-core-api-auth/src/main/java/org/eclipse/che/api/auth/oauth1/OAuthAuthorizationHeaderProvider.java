@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.auth.oauth;
+package org.eclipse.che.api.auth.oauth1;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;

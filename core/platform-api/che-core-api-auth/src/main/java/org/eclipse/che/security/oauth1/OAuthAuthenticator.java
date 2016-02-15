@@ -20,6 +20,8 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 
+import org.eclipse.che.api.auth.shared.dto.OAuthCredentials;
+import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.security.oauth1.shared.User;
@@ -41,6 +43,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static java.net.URLDecoder.decode;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Authentication service which allows get access token from OAuth provider site.
@@ -253,9 +256,9 @@ public abstract class OAuthAuthenticator {
                                              @NotNull final String requestUrl,
                                              @NotNull final Map<String, String> requestParameters) throws IOException {
 
-        final OAuthCredentialsResponse credentials = getToken(userId);
-        if (credentials != null && credentials.token != null && credentials.tokenSecret != null) {
-            return computeAuthorizationHeader(requestMethod, requestUrl, requestParameters, credentials.token, credentials.tokenSecret);
+        final OAuthCredentials credentials = getToken(userId);
+        if (credentials != null && credentials.getToken() != null && credentials.getTokenSecret() != null) {
+            return computeAuthorizationHeader(requestMethod, requestUrl, requestParameters, credentials.getToken(), credentials.getTokenSecret());
         }
         return null;
     }
@@ -272,7 +275,7 @@ public abstract class OAuthAuthenticator {
      *         if an IO exception occurs.
      * @see org.eclipse.che.api.auth.oauth.OAuthTokenProvider#getToken(String, String)
      */
-    public OAuthCredentialsResponse getToken(final String userId) throws IOException {
+    public OAuthCredentials getToken(final String userId) throws IOException {
         OAuthCredentialsResponse credentials = null;
         credentialsStoreLock.lock();
         try {
@@ -283,7 +286,9 @@ public abstract class OAuthAuthenticator {
             credentialsStoreLock.unlock();
         }
 
-        if (credentials != null) {
+        if (credentials == null) {
+            return null;
+        } else {
             // Need to check if token which stored is valid for requests, then if valid - we returns it to caller
             HttpURLConnection connection = null;
             try {
@@ -308,7 +313,10 @@ public abstract class OAuthAuthenticator {
                 }
             }
         }
-        return credentials;
+        return newDto(OAuthCredentials.class)
+                .withToken(credentials.token)
+                .withTokenSecret(credentials.tokenSecret)
+                .withCallbackConfirmed(credentials.callbackConfirmed);
     }
 
     /**

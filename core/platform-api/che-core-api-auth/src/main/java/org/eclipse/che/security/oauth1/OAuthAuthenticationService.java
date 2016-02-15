@@ -10,19 +10,34 @@
  *******************************************************************************/
 package org.eclipse.che.security.oauth1;
 
+import com.google.api.client.auth.oauth.OAuthCredentialsResponse;
+
+import org.eclipse.che.api.auth.shared.dto.OAuthCredentials;
+import org.eclipse.che.api.auth.shared.dto.OAuthToken;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.rest.annotations.Required;
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -30,9 +45,12 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 /**
  * RESTful wrapper for OAuth 1.0 {@link OAuthAuthenticator}.
@@ -182,6 +200,78 @@ public class OAuthAuthenticationService {
             return l.get(0);
         }
         return null;
+    }
+
+    /**
+     * Gets authorization header.
+     *
+     *         OAuth provider name
+     * @return OAuthToken
+     * @throws ServerException
+     */
+    @GET
+    @Path("authorize")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"user", "temp_user"})
+    public String authorizationHeader(@Context UriInfo uriInfo)
+            throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
+        org.eclipse.che.security.oauth1.OAuthAuthenticator provider =
+                getAuthenticator(uriInfo.getQueryParameters().getFirst("oauth_provider"));
+        final User user = EnvironmentContext.getCurrent().getUser();
+        final String requestUrl = uriInfo.getQueryParameters().getFirst("request_url");
+        final String requestMethod = uriInfo.getQueryParameters().getFirst("request_method");
+        final Map<String, String> requestParameters = new HashMap<>();
+        for (Map.Entry<String, List<String>> entry : uriInfo.getQueryParameters().entrySet()) {
+            if (!(entry.getKey().equals("request_url")
+                  && entry.getKey().equals("request_url")
+                  && entry.getKey().equals("request_url"))) {
+                requestParameters.put(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+
+        try {
+            String token =
+                    provider.computeAuthorizationHeader(user.getId(), requestMethod, requestUrl, requestParameters);
+            if (token == null) {
+                token = provider.computeAuthorizationHeader(user.getName(), requestMethod, requestUrl, requestParameters);
+            }
+            if (token != null) {
+                return token;
+            }
+            throw new NotFoundException("OAuth token for user " + user.getId() + " was not found");
+        } catch (IOException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
+     * Gets OAuth token for user.
+     *
+     * @param oauthProvider
+     *         OAuth provider name
+     * @return OAuthToken
+     * @throws ServerException
+     */
+    @GET
+    @Path("token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"user", "temp_user"})
+    public OAuthCredentials token(@Required @QueryParam("oauth_provider") String oauthProvider)
+            throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
+        org.eclipse.che.security.oauth1.OAuthAuthenticator provider = getAuthenticator(oauthProvider);
+        final User user = EnvironmentContext.getCurrent().getUser();
+        try {
+            OAuthCredentials token = provider.getToken(user.getId());
+            if (token == null) {
+                token = provider.getToken(user.getName());
+            }
+            if (token != null) {
+                return token;
+            }
+            throw new NotFoundException("OAuth token for user " + user.getId() + " was not found");
+        } catch (IOException e) {
+            throw new ServerException(e.getLocalizedMessage(), e);
+        }
     }
 
     @GET

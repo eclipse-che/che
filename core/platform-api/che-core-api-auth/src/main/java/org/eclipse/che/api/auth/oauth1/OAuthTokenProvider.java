@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.auth.oauth;
+package org.eclipse.che.api.auth.oauth1;
 
 import org.eclipse.che.api.auth.shared.dto.OAuthCredentials;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
@@ -18,7 +18,7 @@ import java.io.IOException;
 /** Retrieves user token from OAuth providers. */
 public interface OAuthTokenProvider {
     /**
-     * Get oauth 2.0 token.
+     * Get oauth 1.0 token.
      *
      * @param oauthProviderName
      *         - name of provider.
@@ -28,5 +28,5 @@ public interface OAuthTokenProvider {
      * @throws IOException
      *         if i/o error occurs when try to refresh expired oauth token
      */
-    OAuthToken getToken(String oauthProviderName, String userId) throws IOException;
+    OAuthCredentials getToken(String oauthProviderName, String userId) throws IOException;
 }
