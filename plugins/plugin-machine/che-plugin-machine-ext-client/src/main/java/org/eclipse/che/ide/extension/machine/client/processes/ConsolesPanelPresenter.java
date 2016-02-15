@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateHandler;
@@ -202,20 +203,20 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     public void fetchMachines() {
         String workspaceId = appContext.getWorkspaceId();
 
-        machineService.getWorkspaceMachines(workspaceId).then(new Operation<List<MachineDto>>() {
+        machineService.getMachines(workspaceId).then(new Operation<List<MachineDto>>() {
             @Override
             public void apply(List<MachineDto> machines) throws OperationException {
                 List<ProcessTreeNode> rootChildren = new ArrayList<>();
 
                 rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootChildren);
-                for (MachineDto descriptor : machines) {
-                    if (descriptor.isDev()) {
+                for (MachineDto machine : machines) {
+                    if (machine.getStatus() == MachineStatus.RUNNING && machine.getConfig().isDev()) {
                         List<ProcessTreeNode> processTreeNodes = new ArrayList<ProcessTreeNode>();
-                        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, descriptor, null, processTreeNodes);
+                        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, processTreeNodes);
                         machineNode.setRunning(true);
                         rootChildren.add(machineNode);
                         view.setProcessesData(rootNode);
-                        restoreState(descriptor.getId());
+                        restoreState(machine.getId());
                     }
                 }
             }
@@ -366,7 +367,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
         addCommandOutput(machineId, defaultConsole);
 
-        String machineName = machine.getName();
+        String machineName = machine.getConfig().getName();
         String sshServiceAddress = getSshServerAddress(machine);
         String machineHost = "";
         String sshPort = SSH_PORT;
@@ -389,8 +390,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
      * @return ssh service address in format host:port
      */
     private String getSshServerAddress(MachineDto machine) {
-        if (machine.getMetadata().getServers().containsKey(SSH_PORT)) {
-            return machine.getMetadata().getServers().get(SSH_PORT).getAddress();
+        if (machine.getRuntime().getServers().containsKey(SSH_PORT)) {
+            return machine.getRuntime().getServers().get(SSH_PORT).getAddress();
         } else {
             return null;
         }

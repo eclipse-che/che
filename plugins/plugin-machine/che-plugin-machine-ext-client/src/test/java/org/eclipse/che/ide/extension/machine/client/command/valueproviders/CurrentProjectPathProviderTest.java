@@ -13,8 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -85,7 +85,7 @@ public class CurrentProjectPathProviderTest {
 
     @Test
     public void shouldReturnPathAfterRunningMachine() throws Exception {
-        MachineStateDto machineMock = mock(MachineStateDto.class);
+        MachineDto machineMock = mock(MachineDto.class);
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         CurrentProject currentProject = mock(CurrentProject.class);
         ProjectConfigDto projectConfig = mock(ProjectConfigDto.class);
@@ -93,9 +93,10 @@ public class CurrentProjectPathProviderTest {
         when(appContext.getCurrentProject()).thenReturn(currentProject);
         when(currentProject.getProjectConfig()).thenReturn(projectConfig);
 
-        when(machineMock.isDev()).thenReturn(Boolean.TRUE);
-        when(machineStateEvent.getMachineState()).thenReturn(machineMock);
-        when(machineMock.isDev()).thenReturn(true);
+        final MachineConfigDto machineConfigMock = mock(MachineConfigDto.class);
+        when(machineConfigMock.isDev()).thenReturn(Boolean.TRUE);
+        when(machineMock.getConfig()).thenReturn(machineConfigMock);
+        when(machineStateEvent.getMachine()).thenReturn(machineMock);
 
         currentProjectPathProvider.onMachineRunning(machineStateEvent);
 
@@ -106,10 +107,12 @@ public class CurrentProjectPathProviderTest {
 
     @Test
     public void shouldReturnEmptyValueAfterDestroyingMachine() throws Exception {
-        final MachineStateDto machineMock = mock(MachineStateDto.class);
-        when(machineMock.isDev()).thenReturn(Boolean.FALSE);
+        final MachineDto machineMock = mock(MachineDto.class);
+        final MachineConfigDto machineConfigMock = mock(MachineConfigDto.class);
+        when(machineConfigMock.isDev()).thenReturn(Boolean.FALSE);
+        when(machineMock.getConfig()).thenReturn(machineConfigMock);
         final MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
-        when(machineStateEvent.getMachineState()).thenReturn(machineMock);
+        when(machineStateEvent.getMachine()).thenReturn(machineMock);
 
         currentProjectPathProvider.onMachineDestroyed(machineStateEvent);
 

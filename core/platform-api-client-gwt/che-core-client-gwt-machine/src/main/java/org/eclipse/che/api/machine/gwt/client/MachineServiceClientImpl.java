@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -63,27 +62,11 @@ public class MachineServiceClientImpl implements MachineServiceClient {
     }
 
     @Override
-    public Promise<MachineStateDto> getMachineState(@NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + machineId + "/state")
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting info about machine..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(MachineStateDto.class));
-    }
-
-    @Override
-    public Promise<List<MachineDto>> getWorkspaceMachines(@NotNull String workspaceId) {
+    public Promise<List<MachineDto>> getMachines(@NotNull String workspaceId) {
         return asyncRequestFactory.createGetRequest(baseHttpUrl + "?workspace=" + workspaceId)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about bound machines..."))
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineDto.class));
-    }
-
-    @Override
-    public Promise<List<MachineStateDto>> getMachinesStates(@NotNull final String workspaceId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/state" + "?workspace=" + workspaceId)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting info about bound machines..."))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineStateDto.class));
     }
 
     @Override

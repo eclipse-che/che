@@ -13,7 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.machine;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -75,7 +76,9 @@ public class MachineStateNotifierTest {
     @Mock
     private Unmarshallable<MachineStatusEvent> unmarshaller;
     @Mock
-    private MachineStateDto                    machineState;
+    private MachineDto                         machine;
+    @Mock
+    private MachineConfigDto                   machineConfig;
     @Mock
     private MessageBus                         messageBus;
     @Mock
@@ -100,6 +103,8 @@ public class MachineStateNotifierTest {
 
         when(messageBusProvider.getMessageBus()).thenReturn(messageBus);
 
+        when(machine.getConfig()).thenReturn(machineConfig);
+
         verify(eventBus).addHandler(eq(WorkspaceStartedEvent.TYPE), startWorkspaceHandlerCaptor.capture());
         startWorkspaceHandlerCaptor.getValue().onWorkspaceStarted(workspace);
     }
@@ -109,9 +114,9 @@ public class MachineStateNotifierTest {
         UsersWorkspaceDto workspace = mock(UsersWorkspaceDto.class);
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(SOME_TEXT);
-        when(machineState.getName()).thenReturn(SOME_TEXT);
+        when(machineConfig.getName()).thenReturn(SOME_TEXT);
         when(notificationManager.notify(anyString(), eq(PROGRESS), anyBoolean())).thenReturn(notification);
-        stateNotifier.trackMachine(machineState, MachineManager.MachineOperationType.START);
+        stateNotifier.trackMachine(machine, MachineManager.MachineOperationType.START);
 
         verify(notification).setTitle(eq(SOME_TEXT));
 
@@ -126,9 +131,9 @@ public class MachineStateNotifierTest {
         UsersWorkspaceDto workspace = mock(UsersWorkspaceDto.class);
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(SOME_TEXT);
-        when(machineState.getName()).thenReturn(SOME_TEXT);
+        when(machineConfig.getName()).thenReturn(SOME_TEXT);
         when(notificationManager.notify(anyString(), eq(PROGRESS), anyBoolean())).thenReturn(notification);
-        stateNotifier.trackMachine(machineState, MachineManager.MachineOperationType.DESTROY);
+        stateNotifier.trackMachine(machine, MachineManager.MachineOperationType.DESTROY);
 
         verify(notification).setTitle(eq(SOME_TEXT));
 

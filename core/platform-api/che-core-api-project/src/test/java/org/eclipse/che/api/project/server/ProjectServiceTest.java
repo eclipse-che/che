@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.CodenvyJsonProvider;
@@ -59,6 +59,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
@@ -155,6 +156,8 @@ public class ProjectServiceTest {
     @Mock
     private UsersWorkspaceDto         usersWorkspaceMock;
     @Mock
+    private WorkspaceConfigDto        workspaceConfigMock;
+    @Mock
     private Provider<AttributeFilter> filterProvider;
     @Mock
     private AttributeFilter           filter;
@@ -232,7 +235,8 @@ public class ProjectServiceTest {
         when(httpJsonRequestFactory.fromLink(any())).thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
-        when(usersWorkspaceMock.getProjects()).thenReturn(projects);
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(usersWorkspaceMock.getConfig().getProjects()).thenReturn(projects);
 
         pm.createProject(workspace, "my_project", testProjectConfigMock, null);
         verify(httpJsonRequestFactory).fromLink(eq(newDto(Link.class)

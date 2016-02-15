@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import com.google.gson.JsonSyntaxException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.core.BadRequestException;
@@ -23,22 +24,16 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.EnvironmentState;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.server.snippet.SnippetGenerator;
 import org.eclipse.che.api.factory.shared.dto.Author;
 import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -79,6 +74,7 @@ import static javax.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -566,7 +562,7 @@ public class FactoryService extends Service {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
         }
         validateWorkspace(usersWorkspace, path);
-        final Factory factory = newDto(Factory.class).withWorkspace(asDto(usersWorkspace)).withV("4.0");
+        final Factory factory = newDto(Factory.class).withWorkspace(asDto(usersWorkspace.getConfig())).withV("4.0");
         return Response.ok(factory, APPLICATION_JSON)
                        .header(CONTENT_DISPOSITION, "attachment; filename=factory.json")
                        .build();
@@ -605,7 +601,8 @@ public class FactoryService extends Service {
                                                                   && !isNullOrEmpty(projectConfig.getSource().getType())
                                                                   && !isNullOrEmpty(projectConfig.getSource().getLocation());
         //Filtered out projects by path and source storage presence.
-        final List<ProjectConfigImpl> filtered = usersWorkspace.getProjects()
+        final List<ProjectConfigImpl> filtered = usersWorkspace.getConfig()
+                                                               .getProjects()
                                                                .stream()
                                                                .filter(predicate)
                                                                .collect(toList());
@@ -632,35 +629,5 @@ public class FactoryService extends Service {
         if (creator.getCreated() == null) {
             creator.setCreated(System.currentTimeMillis());
         }
-    }
-
-    public static EnvironmentDto asDto(EnvironmentState environment) {
-        return newDto(EnvironmentDto.class).withName(environment.getName())
-                                           .withMachineConfigs(environment.getMachineConfigs()
-                                                                          .stream()
-                                                                          .map(org.eclipse.che.api.machine.server.DtoConverter::asDto)
-                                                                          .collect(toList()));
-    }
-
-    private static WorkspaceConfigDto asDto(UsersWorkspaceImpl workspace) {
-        final List<CommandDto> commands = workspace.getCommands()
-                                                   .stream()
-                                                   .map(DtoConverter::asDto)
-                                                   .collect(toList());
-        final List<ProjectConfigDto> projects = workspace.getProjects()
-                                                         .stream()
-                                                         .map(DtoConverter::asDto)
-                                                         .collect(toList());
-        final List<EnvironmentDto> environments = workspace.getEnvironments()
-                                                           .stream()
-                                                           .map(FactoryService::asDto)
-                                                           .collect(toList());
-        return newDto(WorkspaceConfigDto.class).withName(workspace.getName())
-                                               .withDefaultEnv(workspace.getDefaultEnv())
-                                               .withCommands(commands)
-                                               .withProjects(projects)
-                                               .withEnvironments(environments)
-                                               .withDescription(workspace.getDescription())
-                                               .withAttributes(workspace.getAttributes());
     }
 }

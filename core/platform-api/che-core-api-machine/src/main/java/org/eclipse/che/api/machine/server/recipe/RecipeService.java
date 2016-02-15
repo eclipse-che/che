@@ -59,12 +59,12 @@ import static java.util.Arrays.asList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
-import static org.eclipse.che.api.machine.server.Constants.LINK_REL_CREATE_RECIPE;
-import static org.eclipse.che.api.machine.server.Constants.LINK_REL_GET_RECIPES_BY_CREATOR;
-import static org.eclipse.che.api.machine.server.Constants.LINK_REL_GET_RECIPE_SCRIPT;
-import static org.eclipse.che.api.machine.server.Constants.LINK_REL_REMOVE_RECIPE;
-import static org.eclipse.che.api.machine.server.Constants.LINK_REL_SEARCH_RECIPES;
-import static org.eclipse.che.api.machine.server.Constants.LINK_REL_UPDATE_RECIPE;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_CREATE_RECIPE;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_RECIPES_BY_CREATOR;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_RECIPE_SCRIPT;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_REMOVE_RECIPE;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_SEARCH_RECIPES;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_UPDATE_RECIPE;
 
 /**
  * Recipe API

@@ -112,7 +112,7 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
                + "&redirect_after_login="
                + Window.Location.getProtocol() + "//"
                + Window.Location.getHost() + "/ws/"
-               + appContext.getWorkspace().getName();
+               + appContext.getWorkspace().getConfig().getName();
     }
 
     private void generateSshKeys(final OAuthStatus authStatus) {

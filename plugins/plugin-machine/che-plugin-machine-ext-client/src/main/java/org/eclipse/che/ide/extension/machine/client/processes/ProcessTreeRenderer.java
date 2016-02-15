@@ -85,7 +85,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createMachineElement(final ProcessTreeNode node, final MachineDto machine) {
         SpanElement root = Elements.createSpanElement();
-        if (machine.isDev()) {
+        if (machine.getConfig().isDev()) {
             SpanElement devLabel = Elements.createSpanElement(resources.getCss().devMachineLabel());
             devLabel.setTextContent(locale.viewProcessesDevTitle());
             root.appendChild(devLabel);
@@ -115,7 +115,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                        MIDDLE,
                        locale.viewNewTerminalTooltip());
 
-        if (machine.getMetadata().getServers().containsKey(SSH_PORT)) {
+        if (machine.getRuntime().getServers().containsKey(SSH_PORT)) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);
@@ -163,7 +163,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
 
         Element nameElement = Elements.createSpanElement(resources.getCss().machineLabel());
-        nameElement.setTextContent(machine.getName());
+        nameElement.setTextContent(machine.getConfig().getName());
         root.appendChild(nameElement);
 
         return root;

@@ -14,18 +14,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
-import org.eclipse.che.api.machine.shared.dto.ChannelsDto;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -186,7 +186,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     }
 
     @Override
-    public void restartMachine(final MachineStateDto machineState) {
+    public void restartMachine(final MachineDto machineState) {
         eventBus.addHandler(MachineStateEvent.TYPE, new MachineStateHandler() {
             @Override
             public void onMachineRunning(MachineStateEvent event) {
@@ -195,9 +195,9 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
             @Override
             public void onMachineDestroyed(MachineStateEvent event) {
                 if (isMachineRestarting) {
-                    final String recipeUrl = machineState.getSource().getLocation();
-                    final String displayName = machineState.getName();
-                    final boolean isDev = machineState.isDev();
+                    final String recipeUrl = machineState.getConfig().getSource().getLocation();
+                    final String displayName = machineState.getConfig().getName();
+                    final boolean isDev = machineState.getConfig().isDev();
 
                     startMachine(recipeUrl, displayName, isDev, RESTART);
 
@@ -244,14 +244,18 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                                                .withLimits(limitsDto)
                                                .withType("docker");
 
-        Promise<MachineStateDto> machineStatePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
+        Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
 
-        machineStatePromise.then(new Operation<MachineStateDto>() {
+        machinePromise.then(new Operation<MachineDto>() {
             @Override
-            public void apply(final MachineStateDto machineStateDto) throws OperationException {
-                eventBus.fireEvent(new MachineStartingEvent(machineStateDto));
+            public void apply(final MachineDto machineDto) throws OperationException {
+                eventBus.fireEvent(new MachineStartingEvent(machineDto));
 
-                subscribeToChannel(machineStateDto.getChannels().getOutput(), outputHandler);
+                subscribeToChannel(machineDto.getConfig()
+                                             .getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL)
+                                             .getParameter("channel")
+                                             .getDefaultValue(),
+                                   outputHandler);
 
                 RunningListener runningListener = null;
 
@@ -259,12 +263,12 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                     runningListener = new RunningListener() {
                         @Override
                         public void onRunning() {
-                            onMachineRunning(machineStateDto.getId());
+                            onMachineRunning(machineDto.getId());
                         }
                     };
                 }
 
-                machineStatusNotifier.trackMachine(machineStateDto, runningListener, operationType);
+                machineStatusNotifier.trackMachine(machineDto, runningListener, operationType);
             }
         });
     }
@@ -275,7 +279,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
             @Override
             public void apply(MachineDto machineDto) throws OperationException {
                 appContext.setDevMachineId(machineId);
-                appContext.setProjectsRoot(machineDto.getMetadata().projectsRoot());
+                appContext.setProjectsRoot(machineDto.getRuntime().projectsRoot());
                 devMachine = entityFactory.createMachine(machineDto);
                 wsAgentStateController.initialize(devMachine.getWsServerExtensionsUrl() + "/" + appContext.getWorkspaceId());
             }
@@ -283,7 +287,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     }
 
     @Override
-    public Promise<Void> destroyMachine(final MachineStateDto machineState) {
+    public Promise<Void> destroyMachine(final MachineDto machineState) {
         return machineServiceClient.destroyMachine(machineState.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
@@ -298,19 +302,31 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     }
 
     @Override
-    public void onDevMachineCreating(MachineStateDto machineState) {
+    public void onDevMachineCreating(MachineConfigDto machineConfig) {
         perspectiveManager.setPerspectiveId(MACHINE_PERSPECTIVE_ID);
         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
 
-        ChannelsDto channels = machineState.getChannels();
-
-        wsAgentLogChannel = "workspace:" + appContext.getWorkspaceId() + ":ext-server:output";
-        outputChannel = channels.getOutput();
-        statusChannel = channels.getStatus();
-
-        subscribeToChannel(wsAgentLogChannel, outputHandler);
-        subscribeToChannel(outputChannel, outputHandler);
-        subscribeToChannel(statusChannel, statusHandler);
+        if (machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL) != null &&
+            machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL) != null) {
+            final LinkParameter logsChannelLinkParameter = machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL)
+                                                                        .getParameter("channel");
+            if (logsChannelLinkParameter != null) {
+                outputChannel = logsChannelLinkParameter.getDefaultValue();
+            }
+            final LinkParameter statusChannelLinkParameter = machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL)
+                                                                          .getParameter("channel");
+            if (statusChannelLinkParameter != null) {
+                statusChannel = statusChannelLinkParameter.getDefaultValue();
+            }
+        }
+        if (outputChannel != null && statusChannel != null) {
+            wsAgentLogChannel = "workspace:" + appContext.getWorkspaceId() + ":ext-server:output";
+            subscribeToChannel(wsAgentLogChannel, outputHandler);
+            subscribeToChannel(outputChannel, outputHandler);
+            subscribeToChannel(statusChannel, statusHandler);
+        } else {
+            initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), ERROR);
+        }
     }
 
     private void subscribeToChannel(String chanel, SubscriptionHandler handler) {

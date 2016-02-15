@@ -95,7 +95,7 @@ public class MachineInfoPresenter implements TabPresenter {
                  .then(new Operation<UsersWorkspaceDto>() {
                      @Override
                      public void apply(UsersWorkspaceDto ws) throws OperationException {
-                         view.setWorkspaceName(ws.getName());
+                         view.setWorkspaceName(ws.getConfig().getName());
                      }
                  }).catchError(new Operation<PromiseError>() {
             @Override

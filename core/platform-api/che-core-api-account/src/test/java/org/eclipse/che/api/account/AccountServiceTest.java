@@ -22,10 +22,15 @@ import org.eclipse.che.api.account.shared.dto.NewMembership;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.impl.ApplicationContextImpl;
@@ -69,6 +74,7 @@ import static javax.ws.rs.HttpMethod.POST;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -443,7 +449,7 @@ public class AccountServiceTest {
 
     @Test
     public void workspaceShouldBeRegistered() throws Exception {
-        UsersWorkspaceImpl workspace = mock(UsersWorkspaceImpl.class);
+        UsersWorkspaceImpl workspace = spy(createUsersWorkspace());
         Account account = new Account("account123");
         when(workspace.getId()).thenReturn("workspace123");
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
@@ -578,5 +584,24 @@ public class AccountServiceTest {
             when(securityContext.isUserInRole("user")).thenReturn(true);
         }
         when(securityContext.isUserInRole(role)).thenReturn(true);
+    }
+
+    private UsersWorkspaceImpl createUsersWorkspace() {
+        final EnvironmentImpl environment = new EnvironmentImpl("name",
+                                                                new RecipeImpl(),
+                                                                singletonList(new MachineConfigImpl(true,
+                                                                                                    "name",
+                                                                                                    "type",
+                                                                                                    new MachineSourceImpl("type",
+                                                                                                                          "location"),
+                                                                                                    null)));
+        return new UsersWorkspaceImpl(new WorkspaceConfigImpl("name",
+                                                              "desc",
+                                                              "defEnv",
+                                                              null,
+                                                              null,
+                                                              singletonList(environment),
+                                                              null)
+                , "id123", "owner1234");
     }
 }

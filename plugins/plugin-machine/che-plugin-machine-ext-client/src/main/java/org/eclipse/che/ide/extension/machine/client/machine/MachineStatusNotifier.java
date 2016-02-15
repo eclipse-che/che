@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -86,23 +86,23 @@ class MachineStatusNotifier {
     /**
      * Start tracking machine state and notify about state changing.
      *
-     * @param machineState
+     * @param machine
      *         machine to track
      */
-    void trackMachine(MachineStateDto machineState, MachineOperationType operationType) {
-        trackMachine(machineState, null, operationType);
+    void trackMachine(MachineDto machine, MachineOperationType operationType) {
+        trackMachine(machine, null, operationType);
     }
 
     /**
      * Start tracking machine state and notify about state changing.
      *
-     * @param machineState
+     * @param machine
      *         machine to track
      * @param runningListener
      *         listener that will be notified when machine is running
      */
-    void trackMachine(final MachineStateDto machineState, final RunningListener runningListener, final MachineOperationType operationType) {
-        final String machineName = machineState.getName();
+    void trackMachine(final MachineDto machine, final RunningListener runningListener, final MachineOperationType operationType) {
+        final String machineName = machine.getConfig().getName();
         final String workspaceId = appContext.getWorkspace().getId();
         final String wsChannel = MACHINE_STATUS_WS_CHANNEL + workspaceId + ":" + machineName;
 
@@ -124,13 +124,13 @@ class MachineStatusNotifier {
                                                                              : locale.notificationMachineIsRunning(machineName);
                         notification.setTitle(message);
                         notification.setStatus(SUCCESS);
-                        eventBus.fireEvent(MachineStateEvent.createMachineRunningEvent(machineState));
+                        eventBus.fireEvent(MachineStateEvent.createMachineRunningEvent(machine));
                         break;
                     case DESTROYED:
                         unsubscribe(wsChannel, this);
                         notification.setStatus(SUCCESS);
                         notification.setTitle(locale.notificationMachineDestroyed(machineName));
-                        eventBus.fireEvent(MachineStateEvent.createMachineDestroyedEvent(machineState));
+                        eventBus.fireEvent(MachineStateEvent.createMachineDestroyedEvent(machine));
                         break;
                     case ERROR:
                         unsubscribe(wsChannel, this);

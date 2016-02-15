@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.RuntimeWorkspace;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -21,7 +18,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
@@ -44,27 +40,17 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
     private List<MachineImpl> machines;
     private String            activeEnvName;
 
-    public RuntimeWorkspaceImpl(String id,
-                                String name,
-                                String owner,
-                                Map<String, String> attributes,
-                                List<? extends Command> commands,
-                                List<? extends ProjectConfig> projects,
-                                List<? extends Environment> environments,
-                                String defaultEnvironment,
-                                String description,
+    public RuntimeWorkspaceImpl(UsersWorkspace workspace,
                                 Machine devMachine,
                                 List<? extends Machine> machines,
                                 String rootFolder,
-                                String currentEnvironment,
-                                WorkspaceStatus status) {
-        super(id, name, owner, attributes, commands, projects, environments, defaultEnvironment, description);
+                                String currentEnvironment) {
+        super(workspace);
         if (devMachine != null) {
             this.devMachine = new MachineImpl(devMachine);
         }
         this.activeEnvName = currentEnvironment;
         this.rootFolder = rootFolder;
-        setStatus(status);
         if (machines != null) {
             this.machines = machines.stream()
                                     .map(MachineImpl::new)
@@ -72,38 +58,12 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
         }
     }
 
-    public RuntimeWorkspaceImpl(UsersWorkspace usersWorkspace, String rootFolder, String activeEnvName) {
-        this(usersWorkspace.getId(),
-             usersWorkspace.getName(),
-             usersWorkspace.getOwner(),
-             usersWorkspace.getAttributes(),
-             usersWorkspace.getCommands(),
-             usersWorkspace.getProjects(),
-             usersWorkspace.getEnvironments(),
-             usersWorkspace.getDefaultEnv(),
-             usersWorkspace.getDescription(),
-             null,
-             null,
-             rootFolder,
-             activeEnvName,
-             usersWorkspace.getStatus());
-    }
-
     public RuntimeWorkspaceImpl(RuntimeWorkspace runtimeWorkspace) {
-        this(runtimeWorkspace.getId(),
-             runtimeWorkspace.getName(),
-             runtimeWorkspace.getOwner(),
-             runtimeWorkspace.getAttributes(),
-             runtimeWorkspace.getCommands(),
-             runtimeWorkspace.getProjects(),
-             runtimeWorkspace.getEnvironments(),
-             runtimeWorkspace.getDefaultEnv(),
-             runtimeWorkspace.getDescription(),
+        this(runtimeWorkspace,
              runtimeWorkspace.getDevMachine(),
              runtimeWorkspace.getMachines(),
              runtimeWorkspace.getRootFolder(),
-             runtimeWorkspace.getActiveEnvName(),
-             runtimeWorkspace.getStatus());
+             runtimeWorkspace.getActiveEnv());
     }
 
     @Override
@@ -125,7 +85,7 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
     }
 
     @Override
-    public String getActiveEnvName() {
+    public String getActiveEnv() {
         return activeEnvName;
     }
 
@@ -141,8 +101,12 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
         this.activeEnvName = activeEnvName;
     }
 
-    public EnvironmentStateImpl getActiveEnvironment() {
-        return getEnvironments().stream().filter(env -> env.getName().equals(activeEnvName)).findAny().get();
+    public EnvironmentImpl getActiveEnvironment() {
+        return getConfig().getEnvironments()
+                          .stream()
+                          .filter(env -> env.getName().equals(activeEnvName))
+                          .findAny()
+                          .get();
     }
 
     @Override
@@ -175,36 +139,19 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
         private List<? extends Machine> machines;
 
         public RuntimeWorkspaceImpl build() {
-            final RuntimeWorkspaceImpl workspace = new RuntimeWorkspaceImpl(id,
-                                                                            name,
-                                                                            owner,
-                                                                            attributes,
-                                                                            commands,
-                                                                            projects,
-                                                                            environments,
-                                                                            defaultEnv,
-                                                                            description,
-                                                                            devMachine,
-                                                                            machines,
-                                                                            rootFolder,
-                                                                            activeEnvName,
-                                                                            status);
-            workspace.setTemporary(isTemporary);
-            return workspace;
+            return new RuntimeWorkspaceImpl(super.build(),
+                                            devMachine,
+                                            machines,
+                                            rootFolder,
+                                            activeEnvName);
         }
 
         public RuntimeWorkspaceBuilder fromWorkspace(UsersWorkspace workspace) {
             this.id = workspace.getId();
-            this.name = workspace.getName();
             this.owner = workspace.getOwner();
-            this.description = workspace.getDescription();
-            this.defaultEnv = workspace.getDefaultEnv();
-            this.commands = workspace.getCommands();
-            this.projects = workspace.getProjects();
-            this.environments = workspace.getEnvironments();
-            this.attributes = workspace.getAttributes();
             this.isTemporary = workspace.isTemporary();
             this.status = workspace.getStatus();
+            this.workspaceConfig = new WorkspaceConfigImpl(workspace.getConfig());
             return this;
         }
 
@@ -215,26 +162,8 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
         }
 
         @Override
-        public RuntimeWorkspaceBuilder setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        @Override
         public RuntimeWorkspaceBuilder setOwner(String owner) {
             this.owner = owner;
-            return this;
-        }
-
-        @Override
-        public RuntimeWorkspaceBuilder setDescription(String description) {
-            this.description = description;
-            return this;
-        }
-
-        @Override
-        public RuntimeWorkspaceBuilder setDefaultEnv(String defaultEnv) {
-            this.defaultEnv = defaultEnv;
             return this;
         }
 
@@ -243,7 +172,7 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
             return this;
         }
 
-        public RuntimeWorkspaceBuilder setActiveEnvName(String activeEnvName) {
+        public RuntimeWorkspaceBuilder setActiveEnv(String activeEnvName) {
             this.activeEnvName = activeEnvName;
             return this;
         }
@@ -255,36 +184,18 @@ public class RuntimeWorkspaceImpl extends UsersWorkspaceImpl implements RuntimeW
 
         @Override
         public RuntimeWorkspaceBuilder setStatus(WorkspaceStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        @Override
-        public RuntimeWorkspaceBuilder setAttributes(Map<String, String> attributes) {
-            this.attributes = attributes;
-            return this;
-        }
-
-        @Override
-        public RuntimeWorkspaceBuilder setCommands(List<? extends Command> commands) {
-            this.commands = commands;
-            return this;
-        }
-
-        @Override
-        public RuntimeWorkspaceBuilder setProjects(List<? extends ProjectConfig> projects) {
-            this.projects = projects;
-            return this;
-        }
-
-        @Override
-        public RuntimeWorkspaceBuilder setEnvironments(List<? extends Environment> environments) {
-            this.environments = environments;
+            super.setStatus(status);
             return this;
         }
 
         public RuntimeWorkspaceBuilder setMachines(List<? extends Machine> machines) {
             this.machines = machines;
+            return this;
+        }
+
+        @Override
+        public RuntimeWorkspaceBuilder setTemporary(boolean isTemporary) {
+            super.setTemporary(isTemporary);
             return this;
         }
     }

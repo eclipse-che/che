@@ -37,6 +37,7 @@ import org.eclipse.che.api.vfs.server.VirtualFileSystemUserContext;
 import org.eclipse.che.api.vfs.server.impl.memory.MemoryFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
@@ -197,7 +198,9 @@ public class MavenProjectImportedTest {
         projectsList.add(module1);
         projectsList.add(module2);
         projectsList.add(module3);
-        when(usersWorkspaceMock.getProjects()).thenReturn(projectsList);
+        WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(workspaceConfigMock.getProjects()).thenReturn(projectsList);
     }
 
     @Test

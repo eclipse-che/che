@@ -108,8 +108,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Com
                         tryStartRecentWorkspaceIfExist(workspaces);
                     } else {
                         for (UsersWorkspaceDto workspace : workspaces) {
-                            if (wsNameFromBrowser.equals(workspace.getName())) {
-                                Log.info(getClass(), "Starting workspace " + workspace.getName());
+                            if (wsNameFromBrowser.equals(workspace.getConfig().getName())) {
+                                Log.info(getClass(), "Starting workspace " + workspace.getConfig().getName());
                                 startWorkspaceById(workspace);
                                 return;
                             }

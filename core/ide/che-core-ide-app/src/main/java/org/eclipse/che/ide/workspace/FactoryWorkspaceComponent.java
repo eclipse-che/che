@@ -163,7 +163,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
                 return getWorkspaceByConditionOrCreateNew(workspaceConfigDto, new Function<UsersWorkspaceDto, Boolean>() {
                     @Override
                     public Boolean apply(UsersWorkspaceDto existWs) throws FunctionException {
-                        return factory.getId().equals(existWs.getAttributes().get(FACTORY_ID_ATTRIBUTE));
+                        return factory.getId().equals(existWs.getConfig().getAttributes().get(FACTORY_ID_ATTRIBUTE));
                     }
                 });
             case "perAccount":
@@ -171,7 +171,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
                     @Override
                     public Boolean apply(UsersWorkspaceDto arg) throws FunctionException {
                         //TODO rework it when account will be ready
-                        return workspaceConfigDto.getName().equals(arg.getName());
+                        return workspaceConfigDto.getName().equals(arg.getConfig().getName());
                     }
                 });
             case "perClick":
@@ -216,7 +216,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
         final Set<String> workspacesNames = new HashSet<>();
         final String wsName = workspaceConfigDto.getName();
         for (UsersWorkspaceDto workspace : workspaces) {
-            workspacesNames.add(workspace.getName());
+            workspacesNames.add(workspace.getConfig().getName());
         }
         if (!workspacesNames.contains(wsName)) {
             return workspaceServiceClient.create(workspaceConfigDto, null);

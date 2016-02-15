@@ -14,7 +14,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
-import org.eclipse.che.plugin.docker.machine.DockerInstanceMetadata;
+import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,7 +29,7 @@ import javax.inject.Named;
  * @author Alexander Garagatyi
  * @see org.eclipse.che.plugin.docker.machine.ServerConf
  */
-public class LocalDockerInstanceMetadata extends DockerInstanceMetadata {
+public class LocalDockerInstanceMetadata extends DockerInstanceRuntimeInfo {
     /**
      * Env variable that shows host (or IP) where docker machines are deployed
      */

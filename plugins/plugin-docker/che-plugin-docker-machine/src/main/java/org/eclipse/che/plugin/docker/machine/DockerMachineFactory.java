@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.MachineState;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -52,14 +52,14 @@ public interface DockerMachineFactory {
     /**
      * Creates docker implementation of {@link Instance}
      *
-     * @param machineState description of machine
+     * @param machine description of machine
      * @param container container that represents {@code Instance}
      * @param image image from what container was created
      * @param node description of server where container is running
      * @param outputConsumer consumer of output from container main process
      * @throws MachineException if error occurs on creation of {@code Instance}
      */
-    Instance createInstance(@Assisted MachineState machineState,
+    Instance createInstance(@Assisted Machine machine,
                             @Assisted("container") String container,
                             @Assisted("image") String image,
                             @Assisted DockerNode node,
@@ -76,11 +76,11 @@ public interface DockerMachineFactory {
                           @Assisted("container") String containerId) throws MachineException;
 
     /**
-     * Creates {@link DockerInstanceMetadata} instance using assisted injection
+     * Creates {@link DockerInstanceRuntimeInfo} instance using assisted injection
      *
      * @param containerInfo description of docker container
      * @param containerHost host where docker container is placed
      */
-    DockerInstanceMetadata createMetadata(@Assisted ContainerInfo containerInfo,
-                                          @Assisted String containerHost);
+    DockerInstanceRuntimeInfo createMetadata(@Assisted ContainerInfo containerInfo,
+                                             @Assisted String containerHost);
 }

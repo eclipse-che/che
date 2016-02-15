@@ -35,6 +35,7 @@ import org.eclipse.che.api.vfs.server.VirtualFileSystemUserContext;
 import org.eclipse.che.api.vfs.server.impl.memory.MemoryFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
@@ -131,6 +132,7 @@ public class MavenProjectTypeTest {
     @Test
     public void testMavenProject() throws Exception {
         UsersWorkspaceDto usersWorkspaceMock = mock(UsersWorkspaceDto.class);
+        WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
         when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
                                                           .withMethod("GET")
                                                           .withHref(API_ENDPOINT + "/workspace/" + workspace))))
@@ -145,7 +147,8 @@ public class MavenProjectTypeTest {
                                                          .withName("project")
                                                          .withPath("/myProject")
                                                          .withType(MavenAttributes.MAVEN_ID);
-        when(usersWorkspaceMock.getProjects()).thenReturn(Collections.singletonList(projectConfig));
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(workspaceConfigMock.getProjects()).thenReturn(Collections.singletonList(projectConfig));
 
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put(MavenAttributes.ARTIFACT_ID, Collections.singletonList("myartifact"));

@@ -8,14 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Channels;
+package org.eclipse.che.api.machine.server;
 
 /**
  * @author Alexander Garagatyi
  */
-public class ChannelsImpl implements Channels {
+public class ChannelsImpl {
     private final String outputChannel;
     private final String statusChannel;
 
@@ -24,22 +23,10 @@ public class ChannelsImpl implements Channels {
         this.statusChannel = statusChannel;
     }
 
-    public ChannelsImpl(Channels channels) {
-        if (channels != null) {
-            this.outputChannel = channels.getOutput();
-            this.statusChannel = channels.getStatus();
-        } else {
-            this.outputChannel = null;
-            this.statusChannel = null;
-        }
-    }
-
-    @Override
     public String getOutput() {
         return outputChannel;
     }
 
-    @Override
     public String getStatus() {
         return statusChannel;
     }

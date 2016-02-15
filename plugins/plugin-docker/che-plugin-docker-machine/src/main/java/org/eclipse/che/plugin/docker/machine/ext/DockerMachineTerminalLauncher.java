@@ -63,8 +63,8 @@ public class DockerMachineTerminalLauncher {
             public void onEvent(MachineStatusEvent event) {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
                     try {
-                        final Instance machine = machineManager.getMachine(event.getMachineId());
-                        final String containerId = machine.getMetadata().getProperties().get("id");
+                        final Instance machine = machineManager.getInstance(event.getMachineId());
+                        final String containerId = machine.getRuntime().getProperties().get("id");
 
                         final Exec exec = docker.createExec(containerId, true, "/bin/bash", "-c", terminalStartCommand);
                         docker.startExec(exec.getId(), logMessage -> {

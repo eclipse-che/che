@@ -14,12 +14,12 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.MachineMetadata;
-import org.eclipse.che.api.core.model.machine.MachineState;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.impl.AbstractInstance;
+import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -83,20 +83,20 @@ public class DockerInstance extends AbstractInstance {
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
 
-    private DockerInstanceMetadata machineMetadata;
+    private MachineRuntimeInfoImpl machineRuntime;
 
     @Inject
     public DockerInstance(DockerConnector docker,
                           @Named("machine.docker.registry") String registry,
                           DockerMachineFactory dockerMachineFactory,
-                          @Assisted MachineState machineState,
+                          @Assisted Machine machine,
                           @Assisted("container") String container,
                           @Assisted("image") String image,
                           @Assisted DockerNode node,
                           @Assisted LineConsumer outputConsumer,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
                           DockerInstanceProcessesCleaner processesCleaner) {
-        super(machineState);
+        super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
         this.docker = docker;
@@ -116,18 +116,17 @@ public class DockerInstance extends AbstractInstance {
     }
 
     @Override
-    public MachineMetadata getMetadata() {
-        try {
-            if (machineMetadata == null) {
+    public MachineRuntimeInfoImpl getRuntime() {
+        if (machineRuntime == null) {
+            try {
                 final ContainerInfo containerInfo = docker.inspectContainer(container);
-                machineMetadata = dockerMachineFactory.createMetadata(containerInfo, node.getHost());
+                machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo, node.getHost()));
+            } catch (IOException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                return null;
             }
-
-            return machineMetadata;
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            return null;
         }
+        return machineRuntime;
     }
 
     @Override
@@ -222,7 +221,7 @@ public class DockerInstance extends AbstractInstance {
         processesCleaner.untrackProcesses(getId());
         dockerInstanceStopDetector.stopDetection(container);
         try {
-            if (isDev()) {
+            if (getConfig().isDev()) {
                 node.unbindWorkspace();
             }
 

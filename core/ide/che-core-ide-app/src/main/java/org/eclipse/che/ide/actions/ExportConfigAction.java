@@ -51,7 +51,7 @@ public class ExportConfigAction extends AbstractPerspectiveAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         eventLogger.log(this);
-        downloadFile(exportConfigURL, appContext.getWorkspace().getName());
+        downloadFile(exportConfigURL, appContext.getWorkspace().getConfig().getName());
     }
 
     /** {@inheritDoc} */

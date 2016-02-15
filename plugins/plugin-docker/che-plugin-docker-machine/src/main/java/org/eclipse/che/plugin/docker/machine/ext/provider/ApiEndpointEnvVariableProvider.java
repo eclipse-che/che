@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
-import org.eclipse.che.plugin.docker.machine.DockerInstanceMetadata;
+import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,6 +30,6 @@ public class ApiEndpointEnvVariableProvider implements Provider<String> {
 
     @Override
     public String get() {
-        return DockerInstanceMetadata.API_ENDPOINT_URL_VARIABLE + '=' + apiEndpoint;
+        return DockerInstanceRuntimeInfo.API_ENDPOINT_URL_VARIABLE + '=' + apiEndpoint;
     }
 }

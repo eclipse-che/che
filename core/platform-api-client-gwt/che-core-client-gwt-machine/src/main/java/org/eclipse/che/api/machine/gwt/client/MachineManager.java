@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.gwt.client;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Promise;
 
 /**
@@ -56,25 +57,25 @@ public interface MachineManager {
     /**
      * Destroy machine.
      *
-     * @param machineState
+     * @param machine
      *         contains information about machine state
      */
-    Promise<Void> destroyMachine(MachineStateDto machineState);
+    Promise<Void> destroyMachine(MachineDto machine);
 
 
     /**
      * Restart machine.
      *
-     * @param machineState
+     * @param machine
      *         contains information about machine state
      */
-    void restartMachine(final MachineStateDto machineState);
+    void restartMachine(final MachineDto machine);
 
     /**
      * Performs some actions when dev machine is creating.
      *
-     * @param machineState
-     *         contains information about dev machine state
+     * @param machineConfig
+     *         contains information about dev machine configuration
      */
-    void onDevMachineCreating(MachineStateDto machineState);
+    void onDevMachineCreating(MachineConfigDto machineConfig);
 }

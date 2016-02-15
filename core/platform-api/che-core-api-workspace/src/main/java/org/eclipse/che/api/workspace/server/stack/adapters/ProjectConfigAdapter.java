@@ -17,7 +17,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 
 import java.lang.reflect.Type;

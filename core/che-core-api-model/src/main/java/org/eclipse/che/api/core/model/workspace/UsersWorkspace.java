@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.workspace;
 
-
-import java.util.List;
-
 /**
  * Defines workspace owned by user.
  *
  * @author gazarenkov
  */
-public interface UsersWorkspace extends WorkspaceConfig {
+public interface UsersWorkspace {
+    /**
+     * Configuration used to create this workspace
+     */
+    WorkspaceConfig getConfig();
 
     /**
      * Returns workspace identifier. It is unique and mandatory.
@@ -34,9 +35,6 @@ public interface UsersWorkspace extends WorkspaceConfig {
      * Returns true if workspace is temporary otherwise returns false.
      */
     boolean isTemporary();
-
-    @Override
-    List<? extends EnvironmentState> getEnvironments();
 
     /**
      * Returns workspace status.

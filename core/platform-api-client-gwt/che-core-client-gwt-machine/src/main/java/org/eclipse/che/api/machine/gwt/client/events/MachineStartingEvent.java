@@ -12,7 +12,7 @@ package org.eclipse.che.api.machine.gwt.client.events;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 
 /**
  * The class represents special event which is fired when machine just start running (click on create machine button). And contains
@@ -24,14 +24,14 @@ public class MachineStartingEvent extends GwtEvent<MachineStartingHandler> {
 
     public static Type<MachineStartingHandler> TYPE = new Type<>();
 
-    private final MachineStateDto machineState;
+    private final MachineDto machine;
 
-    public MachineStartingEvent(MachineStateDto machineState) {
-        this.machineState = machineState;
+    public MachineStartingEvent(MachineDto machine) {
+        this.machine = machine;
     }
 
-    public MachineStateDto getMachineState() {
-        return machineState;
+    public MachineDto getMachine() {
+        return machine;
     }
 
     @Override
