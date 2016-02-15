@@ -22,6 +22,6 @@ public class CoreRestModule extends AbstractModule {
     protected void configure() {
         bind(CodenvyJsonProvider.class);
         bind(ApiExceptionMapper.class);
-        Multibinder.newSetBinder(binder(), Class.class, Names.named("codenvy.json.ignored_classes"));
+        Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"));
     }
 }

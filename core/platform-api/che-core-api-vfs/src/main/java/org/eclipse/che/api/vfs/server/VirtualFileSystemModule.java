@@ -26,7 +26,7 @@ public class VirtualFileSystemModule extends AbstractModule {
         bind(VirtualFileSystemRegistryPlugin.class);
         // Avoid writing ContentStream with common JSON writer.
         // ContentStream should be serialized with dedicated MessageBodyWriter
-        Multibinder.newSetBinder(binder(), Class.class, Names.named("codenvy.json.ignored_classes"))
+        Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"))
                    .addBinding().toInstance(ContentStream.class);
         bind(ContentStreamWriter.class);
         bind(RequestValidator.class).toProvider(Providers.<RequestValidator>of(null));
