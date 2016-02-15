@@ -35,8 +35,8 @@ import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
-import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.everrest.ETagResponseFilter;
+import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
@@ -103,6 +103,7 @@ public class ApiModule extends AbstractModule {
 
         install(new DockerExtServerModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
+        install(new org.eclipse.che.swagger.deploy.DocsModule());
 
         bind(DockerMachineExtServerChecker.class);
         bind(DockerMachineTerminalChecker.class);
