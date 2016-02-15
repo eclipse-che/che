@@ -51,6 +51,7 @@
     "main-bower-files": "~2.9.0",
     "minimist": "^1.2.0",
     "ng-annotate-loader": "0.0.10",
+    "phantomjs": "^2.1.3",
     "proxy-middleware": "^0.15.0",
     "uglify-save-license": "~0.4.1",
     "webpack": "^1.12.11",
