@@ -15,9 +15,9 @@ import com.google.inject.Provider;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-import org.eclipse.che.ide.bootstrap.DefaultWorkspaceComponent;
-import org.eclipse.che.ide.bootstrap.WorkspaceComponent;
-import org.eclipse.che.ide.core.Component;
+import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
+import org.eclipse.che.ide.workspace.WorkspaceComponent;
+import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.ui.loaders.initialization.OperationInfo;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;

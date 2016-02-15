@@ -15,7 +15,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.gwt.client.ExtServerStateController;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -60,11 +60,11 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
     public ProjectNotificationSubscriberImpl(CoreLocalizationConstant locale,
                                              AppContext appContext,
                                              NotificationManager notificationManager,
-                                             ExtServerStateController extServerStateController) {
+                                             WsAgentStateController wsAgentStateController) {
         this.locale = locale;
         this.notificationManager = notificationManager;
         this.workspaceId = appContext.getWorkspace().getId();
-        this.messageBusPromise = extServerStateController.getMessageBus();
+        this.messageBusPromise = wsAgentStateController.getMessageBus();
         this.logErrorHandler = new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {

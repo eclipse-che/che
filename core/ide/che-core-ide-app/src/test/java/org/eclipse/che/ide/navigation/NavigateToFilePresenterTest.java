@@ -12,7 +12,7 @@ package org.eclipse.che.ide.navigation;
 
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -68,7 +68,7 @@ public class NavigateToFilePresenterTest {
     @Mock
     private NotificationManager    notificationManager;
     @Mock
-    private ExtServerStateEvent    extServerStateEvent;
+    private WsAgentStateEvent      wsAgentStateEvent;
     @Mock
     private UsersWorkspaceDto      workspace;
     @Mock
@@ -90,7 +90,7 @@ public class NavigateToFilePresenterTest {
                                                 messageBusProvider,
                                                 dtoFactory);
 
-        presenter.onExtServerStarted(extServerStateEvent);
+        presenter.onWsAgentStarted(wsAgentStateEvent);
     }
 
     @Test

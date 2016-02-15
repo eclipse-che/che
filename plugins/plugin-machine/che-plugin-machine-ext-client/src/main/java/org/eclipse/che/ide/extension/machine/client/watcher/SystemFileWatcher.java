@@ -13,8 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.watcher;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.gwt.client.watcher.WatcherServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -36,7 +36,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-public class SystemFileWatcher implements ExtServerStateHandler {
+public class SystemFileWatcher implements WsAgentStateHandler {
 
     static final String WATCHER_WS_CHANEL = "watcher:chanel:1";
 
@@ -58,18 +58,18 @@ public class SystemFileWatcher implements ExtServerStateHandler {
         this.appContext = appContext;
         this.projectExplorer = projectExplorer;
 
-//        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+//        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
 //        messageBus = messageBusProvider.getMessageBus();
 //
 //        registerWatcher(appContext.getWorkspace().getId());
     }
 
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
 
     }
 

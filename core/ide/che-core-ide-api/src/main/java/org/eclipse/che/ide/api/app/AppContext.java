@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.app;
 
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-import org.eclipse.che.ide.util.StartUpAction;
 
 import java.util.List;
 
@@ -79,7 +78,7 @@ public interface AppContext {
     /**
      * List of action with params that comes from startup URL.
      * Can be processed after IDE initialization as usual after
-     * starting Extension Server and Project API initialization.
+     * starting ws-agent.
      */
     void setStartUpActions(List<StartUpAction> startUpActions);
 

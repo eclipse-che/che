@@ -15,8 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEventHandler;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
@@ -41,7 +41,7 @@ import java.util.Map;
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class LogsOutputHandler implements DependencyUpdatedEventHandler, ExtServerStateHandler {
+public class LogsOutputHandler implements DependencyUpdatedEventHandler, WsAgentStateHandler {
 
     private final CommandConsoleFactory          consoleFactory;
     private final OutputsContainerPresenter      outputsContainerPresenter;
@@ -63,16 +63,16 @@ public class LogsOutputHandler implements DependencyUpdatedEventHandler, ExtServ
         this.messageBusProvider = messageBusProvider;
 
         eventBus.addHandler(DependencyUpdatedEvent.TYPE, this);
-        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
         messageBus = messageBusProvider.getMachineMessageBus();
     }
 
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
     @Override

@@ -14,8 +14,8 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.project.node.ProjectNode;
-import org.eclipse.che.ide.util.StartUpAction;
+import org.eclipse.che.ide.api.app.StartUpAction;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ import java.util.List;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class AppContextImpl implements AppContext, SelectionChangedHandler, ExtServerStateHandler, ProjectUpdatedHandler {
+public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAgentStateHandler, ProjectUpdatedHandler {
 
     private final EventBus                  eventBus;
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
@@ -57,8 +57,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, ExtS
     private String              projectsRoot;
     /**
      * List of actions with parameters which comes from startup URL.
-     * Can be processed after IDE initialization as usual after starting
-     * Extension Server and Project API initialization.
+     * Can be processed after IDE initialization as usual after starting ws-agent.
      */
     private List<StartUpAction> startAppActions;
 
@@ -70,7 +69,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, ExtS
         projectsInImport = new ArrayList<>();
 
         eventBus.addHandler(SelectionChangedEvent.TYPE, this);
-        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(ProjectUpdatedEvent.getType(), this);
     }
 
@@ -84,11 +83,6 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, ExtS
         }
 
         return getRootConfig(parent);
-    }
-
-    @Override
-    public List<StartUpAction> getStartAppActions() {
-        return startAppActions;
     }
 
     @Override
@@ -138,6 +132,11 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, ExtS
     @Override
     public void removeProjectFromImporting(String pathToProject) {
         projectsInImport.remove(pathToProject);
+    }
+
+    @Override
+    public List<StartUpAction> getStartAppActions() {
+        return startAppActions;
     }
 
     @Override
@@ -215,11 +214,11 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, ExtS
     }
 
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
     }
 
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
         currentProject = null;
         browserQueryFieldRenderer.setProjectName("");
     }

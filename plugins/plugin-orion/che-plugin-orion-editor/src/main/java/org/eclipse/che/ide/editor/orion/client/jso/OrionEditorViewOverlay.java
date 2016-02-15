@@ -18,7 +18,7 @@ import org.eclipse.che.api.promises.client.Promise;
 /**
  * JavaScript overlay over Orion EditorView object.
  *
- * @author Artem Zatsarynnyy
+ * @author Artem Zatsarynnyi
  */
 public class OrionEditorViewOverlay extends JavaScriptObject {
 

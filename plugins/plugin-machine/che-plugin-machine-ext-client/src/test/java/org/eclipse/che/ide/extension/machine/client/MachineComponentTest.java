@@ -21,7 +21,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.core.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -54,11 +54,11 @@ public class MachineComponentTest {
     private MachineManager       machineManager;
 
     @Mock
-    private Callback<Component, Exception> componentCallback;
+    private Callback<WsAgentComponent, Exception> componentCallback;
     @Mock
-    private MachineStateDto                machineStateDescriptor;
+    private MachineStateDto                       machineStateDescriptor;
     @Mock
-    private EventBus                       eventBus;
+    private EventBus                              eventBus;
 
     @InjectMocks
     private MachineComponent machineComponent;
