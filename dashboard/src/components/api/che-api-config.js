@@ -30,6 +30,7 @@ import {CheHttpBackendFactory} from './test/che-http-backend.factory';
 import {CheAPIBuilder} from './builder/che-api-builder.factory';
 import {CheAdminPlugins} from './che-admin-plugins.factory';
 import {CheAdminService} from './che-admin-service.factory';
+import {CheRemote} from './remote/che-remote.factory';
 
 export class ApiConfig {
 
@@ -53,5 +54,6 @@ export class ApiConfig {
     register.factory('cheAdminService', CheAdminService);
     register.factory('cheService', CheService);
     register.factory('cheAPI', CheAPI);
+    register.factory('cheRemote', CheRemote);
   }
 }
