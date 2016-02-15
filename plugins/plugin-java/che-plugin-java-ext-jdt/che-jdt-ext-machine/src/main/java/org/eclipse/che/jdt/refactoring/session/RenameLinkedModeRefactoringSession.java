@@ -155,6 +155,9 @@ public class RenameLinkedModeRefactoringSession extends RefactoringSession {
         RefactoringResult refactoringResult = DtoConverter.toRefactoringResultDto(renameSupport.perform());
 
         PerformChangeOperation operation =renameSupport.getfPerformChangeOperation();
+        if (operation == null) {
+            return refactoringResult;
+        }
         CompositeChange operationChange = (CompositeChange)operation.getUndoChange();
         Change[] changes = operationChange.getChildren();
 

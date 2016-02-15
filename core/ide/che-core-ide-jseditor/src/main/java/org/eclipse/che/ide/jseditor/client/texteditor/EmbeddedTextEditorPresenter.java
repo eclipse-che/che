@@ -752,6 +752,8 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
     private class EditorWidgetInitializedCallback implements WidgetInitializedCallback {
         private final String content;
 
+        private boolean isInitialized;
+
         private EditorWidgetInitializedCallback(String content) {
             this.content = content;
         }
@@ -791,10 +793,15 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
             editorWidget.setValue(content, new ContentInitializedHandler() {
                 @Override
                 public void onContentInitialized() {
+                    if (isInitialized) {
+                        return;
+                    }
                     generalEventBus.fireEvent(new DocumentReadyEvent(getEditorHandle(), document));
                     firePropertyChange(PROP_INPUT);
                     setupEventHandlers();
                     setupFileContentUpdateHandler();
+
+                    isInitialized = true;
                 }
 
             });
