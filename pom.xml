@@ -20,7 +20,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>4.0.0-RC4-SNAPSHOT</version>
+    <version>4.0.0-RC4</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -32,7 +32,7 @@
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/che.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>4.0.0-RC4</tag>
         <url>https://github.com/codenvy/che-core</url>
     </scm>
     <properties>

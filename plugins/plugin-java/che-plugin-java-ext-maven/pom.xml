@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC4</version>
     </parent>
     <artifactId>che-plugin-java-ext-maven</artifactId>
     <packaging>jar</packaging>
