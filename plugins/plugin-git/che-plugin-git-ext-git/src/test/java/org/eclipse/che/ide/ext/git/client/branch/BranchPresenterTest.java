@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -104,8 +103,6 @@ public class BranchPresenterTest extends BaseTest {
     @Mock
     private DtoFactory                dtoFactory;
     @Mock
-    private ProjectExplorerPresenter  projectExplorer;
-    @Mock
     private CheckoutRequest           checkoutRequest;
     @Mock
     private ProjectServiceClient      projectService;
@@ -129,7 +126,6 @@ public class BranchPresenterTest extends BaseTest {
                                         gitOutputConsoleFactory,
                                         consolesPanelPresenter,
                                         dialogFactory,
-                                        projectExplorer,
                                         eventBus);
 
         NavigableMap<String, EditorPartPresenter> partPresenterMap = new TreeMap<>();

@@ -16,6 +16,7 @@ import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
+import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -83,7 +85,7 @@ public class ProjectUpdaterTest {
     }
 
     @Test
-    public void projectShouldBeUpdated() {
+    public void projectShouldBeUpdatedWhenConfigurationIsRequired() {
         updater.updateProject(completeCallback, projectConfig, true);
 
         verify(projectConfig).getName();
@@ -96,6 +98,24 @@ public class ProjectUpdaterTest {
         GwtReflectionUtils.callOnSuccess(asyncRequestCallback.getValue(), projectConfig);
 
         verify(eventBus, times(2)).fireEvent(Matchers.<CreateProjectEvent>anyObject());
+        verify(projectNotificationSubscriber).onSuccess();
+        verify(completeCallback).onCompleted();
+    }
+
+    @Test
+    public void projectShouldBeUpdatedWhenConfigurationIsNotRequired() {
+        updater.updateProject(completeCallback, projectConfig, false);
+
+        verify(projectConfig).getName();
+        verify(dtoUnmarshallerFactory).newUnmarshaller(ProjectConfigDto.class);
+
+        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID),
+                                                   eq('/' + PROJECT_NAME),
+                                                   eq(projectConfig),
+                                                   asyncRequestCallback.capture());
+        GwtReflectionUtils.callOnSuccess(asyncRequestCallback.getValue(), projectConfig);
+
+        verify(eventBus).fireEvent(Matchers.<ProjectUpdatedEvent>anyObject());
         verify(projectNotificationSubscriber).onSuccess();
         verify(completeCallback).onCompleted();
     }
