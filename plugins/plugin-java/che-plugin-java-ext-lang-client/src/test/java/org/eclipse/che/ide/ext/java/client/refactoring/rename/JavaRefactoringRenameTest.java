@@ -266,6 +266,7 @@ public class JavaRefactoringRenameTest {
         refactoringRename.refactor(textEditor);
 
         mainCheckRenameRefactoring();
+        verify(result, times(1)).getSeverity();
     }
 
     @Test
@@ -275,6 +276,7 @@ public class JavaRefactoringRenameTest {
         refactoringRename.refactor(textEditor);
 
         mainCheckRenameRefactoring();
+        verify(result, times(1)).getSeverity();
     }
 
     @Test
@@ -284,6 +286,7 @@ public class JavaRefactoringRenameTest {
         refactoringRename.refactor(textEditor);
 
         mainCheckRenameRefactoring();
+        verify(result, times(2)).getSeverity();
     }
 
     @Test
@@ -293,6 +296,7 @@ public class JavaRefactoringRenameTest {
         refactoringRename.refactor(textEditor);
 
         mainCheckRenameRefactoring();
+        verify(result, times(2)).getSeverity();
     }
 
     private void mainCheckRenameRefactoring() throws OperationException {
@@ -324,7 +328,5 @@ public class JavaRefactoringRenameTest {
 
         verify(applyModelPromise).then(refactoringStatusCaptor.capture());
         refactoringStatusCaptor.getValue().apply(result);
-
-        verify(result).getSeverity();
     }
 }

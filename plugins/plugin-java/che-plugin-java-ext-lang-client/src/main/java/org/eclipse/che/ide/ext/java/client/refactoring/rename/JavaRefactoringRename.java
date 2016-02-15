@@ -42,6 +42,7 @@ import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
 import org.eclipse.che.ide.jseditor.client.link.LinkedModel;
 import org.eclipse.che.ide.jseditor.client.link.LinkedModelData;
 import org.eclipse.che.ide.jseditor.client.link.LinkedModelGroup;
+import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -172,8 +173,10 @@ public class JavaRefactoringRename {
         mode.addListener(new LinkedMode.LinkedModeListener() {
             @Override
             public void onLinkedModeExited(boolean successful, int start, int end) {
+                boolean isSuccessful = false;
                 try {
                     if (successful) {
+                        isSuccessful = true;
                         loader.show(locale.renameLoader());
                         String newName = document.getContentRange(start, end - start);
                         performRename(newName, session, linkedEditor);
@@ -181,7 +184,7 @@ public class JavaRefactoringRename {
                 } finally {
                     mode.removeListener(this);
                     isActiveLinkedEditor = false;
-                    if (linkedEditor instanceof EditorWithAutoSave) {
+                    if (!isSuccessful && linkedEditor instanceof EditorWithAutoSave) {
                         ((EditorWithAutoSave)linkedEditor).enableAutoSave();
                     }
                 }
@@ -195,7 +198,16 @@ public class JavaRefactoringRename {
         applyModelPromise.then(new Operation<RefactoringResult>() {
             @Override
             public void apply(RefactoringResult result) throws OperationException {
-                onTargetRenamed(result, linkedEditor);
+                if (result.getSeverity() > WARNING) {
+                    if (linkedEditor instanceof EmbeddedTextEditorPresenter) {
+                        ((EmbeddedTextEditorPresenter)linkedEditor).getUndoRedo().undo();
+                    }
+
+                    loader.hide();
+                    notificationManager.notify(locale.failedToRename(), result.getEntries().get(0).getMessage() , FAIL, true);
+                } else {
+                    onTargetRenamed(result, linkedEditor);
+                }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -203,6 +215,11 @@ public class JavaRefactoringRename {
                 if (linkedEditor instanceof EditorWithAutoSave) {
                     ((EditorWithAutoSave)linkedEditor).enableAutoSave();
                 }
+
+                if (linkedEditor instanceof EmbeddedTextEditorPresenter) {
+                    ((EmbeddedTextEditorPresenter)linkedEditor).getUndoRedo().undo();
+                }
+
                 loader.hide();
                 notificationManager.notify(locale.failedToRename(), arg.getMessage(), FAIL, true);
             }
