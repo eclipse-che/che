@@ -174,6 +174,24 @@ public class UserServiceTest {
     }
 
     @Test
+    public void shouldBeAbleToCreateNewUserWithEmail() throws Exception {
+        final String name = "name";
+        final String email = "test_user@email.com";
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName(name)
+                                                 .withEmail(email);
+        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+
+        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
+
+        assertEquals(response.getStatus(), CREATED.getStatusCode());
+        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
+        assertEquals(descriptor.getName(), name);
+        assertEquals(descriptor.getEmail(), email);
+    }
+
+    @Test
     public void shouldBeAbleToCreateNewUserForSystemAdmin() throws Exception {
         final UserDescriptor newUser = DtoFactory.getInstance()
                                                  .createDto(UserDescriptor.class)
