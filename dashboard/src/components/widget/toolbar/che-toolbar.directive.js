@@ -68,19 +68,24 @@ export class CheToolbar {
    * @param attrs
    * @returns {string} the template
    */
-  template( element, attrs){
+  template( element, attrs) {
     var title = attrs.cheTitle;
     var titleController  = attrs.cheTitleIconsController;
     var buttonHref = attrs.cheButtonHref;
     var buttonHrefTarget = attrs.cheButtonHrefTarget;
     var buttonName = attrs.cheButtonName;
+    var buttonIcon = attrs.cheButtonIcon;
+    var addButtonName = attrs.cheAddButtonName;
+    var addButtonHref = attrs.cheAddButtonHref;
 
     var breadcrumbTitle = attrs.cheBreadcrumbTitle;
     var breadcrumbHref = attrs.cheBreadcrumbHref;
 
-    var subheaderTitle = attrs.cheSubheaderTitle;
-    var subheaderIcon = attrs.cheSubheaderIcon;
+    var searchPlaceholder = attrs.cheSearchPlaceholder;
+    var searchModel = attrs.cheSearchModel;
 
+    var dropdownMenu = attrs.cheDropdownMenu;
+    var id = title.replace(' ', '_');
     var theme = attrs.theme;
 
     if (!theme) {
@@ -88,73 +93,65 @@ export class CheToolbar {
     }
 
     var template = '<div class=\"che-toolbar\"><md-toolbar md-theme=\"' + theme +'\">\n'
-      + '<div layout=\"column\" flex>'
-      + '<div layout=\"row\" flex class=\"che-toolbar-breadcrumb\" layout-align=\"start center\">'
-      + '<button class=\"toolbar-switch\" hide-gt-md ng-click=\"controller.toggleLeftMenu()\" >'
-      + '<md-icon md-font-icon=\"fa fa-bars fa-2x\"></md-icon>'
-      + '</button>';
+      + '<div layout=\"row\" layout-align=\"start center\" flex>';
 
-    // start href link
+    //toggle menu button
+    template += '<div layout=\"row\" class=\"che-toolbar-section\" layout-align=\"start center\" hide-gt-md>'
+      + '<div class=\"che-toolbar-control-button\" ng-click=\"controller.toggleLeftMenu()\" >'
+      + '<md-icon md-font-icon=\"fa fa-bars\"></md-icon>'
+      + '</div></div>';
+
     if (breadcrumbHref) {
-      template = template + '<a href=\"' + breadcrumbHref + '\" layout=\"row\" layout-align=\"start center\">' +
-      '<i class=\"icon-breadcrumb material-design icon-ic_chevron_left_24px\" md-theme=\"default\"></i>';
+      template += '<a class=\"che-toolbar-control-button che-toolbar-breadcrumb\" href=\"' + breadcrumbHref
+      + '\" title=\"' + breadcrumbTitle + '\">'
+      + '<md-icon md-font-icon=\"fa fa-chevron-left\"></md-icon>'
+      + '</a>';
     }
 
-    if (breadcrumbTitle) {
-      template = template + '<span class="che-toolbar-breadcrumb-title">' + breadcrumbTitle + '</span>';
-    }
-
-    // end href link
-    if (breadcrumbHref) {
-      template = template + '</a>';
-    }
-
-    template = template + '</div>'
-    + '<div layout=\"row\" flex class=\"che-toolbar-header\">'
-    + '<div class=\"che-toolbar-title\">'
+    let alignment = breadcrumbHref ? 'center' : 'left';
+    template += '<div layout=\"row\" flex layout-align=\"start center\" class=\"che-toolbar-header\">'
+    + '<div class=\"che-toolbar-title\" id=\"'+ id +'\" flex layout=\"row\" layout-align=\"' + alignment +' center\">'
     + '<span class=\"che-toolbar-title-label\">'
     + title + '</span><span class=\"che-toolbar-title-icons\">';
+
     if (titleController) {
       template = template
       + '<md-icon ng-repeat=\"icon in ' + titleController + '.toolbarIcons\" md-font-icon=\"{{icon.font}}\" ng-click=\"'
       + titleController + '.callbackToolbarClick(icon.name)\"';
     }
+    template += '</span></div>';
 
-    template = template
-    + '</span>'
-    + '</div>'
-    + '<span flex></span>'
-    + '<div class=\"che-toolbar-button\" layout=\"row\">';
+    if (searchModel) {
+      template += '<che-search che-placeholder=\"' + searchPlaceholder+ '\" ng-model=\"' + searchModel + '\" che-replace-element=\"' + id + '\"></che-search>';
+    }
+
+    template += '<div layout=\"row\" layout-align=\"start center\">';
+
+    if (dropdownMenu) {
+      template += '<md-menu>' + '<div class=\"che-toolbar-control-button\" ng-click=\"$mdOpenMenu($event)\">';
+      template += '<md-icon md-font-icon=\"fa fa-ellipsis-v\"></md-icon></div>';
+      template += '<md-menu-content width=\"3\">';
+      template += '<md-menu-item ng-repeat=\"item in ' + dropdownMenu + '" >';
+      template += '<md-button ng-click=\"item.onclick()\">{{item.title}}</md-button>';
+      template += '</md-menu-content></md-menu>';
+    }
 
     if (buttonName) {
-      template = template + '<che-button-primary che-button-title=\"' + buttonName + '\" href=\"' + buttonHref + '\"';
-
+      template = template + '<a class=\"che-toolbar-control-button\" title=\"' + buttonName + '\" href=\"' + buttonHref + '\"';
       if (buttonHrefTarget) {
         template = template + ' target=\"' + buttonHrefTarget + '\"';
       }
-
-      template = template + '></che-button-primary>';
-    }
-    template = template + '<ng-transclude></ng-transclude>';
-
-
-    template = template + '</div>'
-    + '</div>'
-    + '<div layout=\"row\" class=\"che-toolbar-subheader\">';
-    if (subheaderIcon) {
-      template = template + '<i class=\"'
-      + subheaderIcon
-      + '\"></i>';
-    }
-    if (subheaderTitle) {
-      template = template
-      + subheaderTitle
-      + '</div>';
+      template += '><md-icon md-font-icon=\"fa ' + buttonIcon + '\"></md-icon></a>';
     }
 
+    if (addButtonName) {
+      template += '<a class=\"che-toolbar-add-button\" title=\"' + addButtonName + '\" href=\"' + addButtonHref + '\"';
+      template += '><md-icon md-font-icon=\"fa fa-plus\"></md-icon></a>';
+    }
 
-    template = template
-    + '</div>'
+    template += '<ng-transclude></ng-transclude>';
+    template += '</div></div>';
+    template += '</div>'
     + '</md-toolbar></div>';
 
     return template;
