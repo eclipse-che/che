@@ -13,8 +13,9 @@ package org.eclipse.che.ide.ext.git.client.outputconsole;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -25,22 +26,26 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 
 public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelegate, GitOutputConsole {
-    private String title;
-
     private final GitOutputPartView view;
     private final GitResources      resources;
+    private final String            title;
 
     /** Construct empty Part */
     @Inject
     public GitOutputConsolePresenter(GitOutputPartView view,
                                      GitResources resources,
-                                     final EventBus eventBus,
+                                     AppContext appContext,
+                                     GitLocalizationConstant locale,
                                      @Assisted String title) {
         this.view = view;
-        this.title = title;
-        this.resources = resources;
         this.view.setDelegate(this);
 
+        this.title = title;
+        this.resources = resources;
+
+        String projectName = appContext.getCurrentProject().getRootProject().getName();
+
+        view.print(locale.consoleProjectName(projectName) + "\n");
     }
 
     /** {@inheritDoc} */

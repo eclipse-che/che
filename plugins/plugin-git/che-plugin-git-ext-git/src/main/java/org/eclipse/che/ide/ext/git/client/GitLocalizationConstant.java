@@ -661,4 +661,7 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("merge.failed")
     String mergeFailed();
+
+    @Key("console.project.name")
+    String consoleProjectName(String projectName);
 }
