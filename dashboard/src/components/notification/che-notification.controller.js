@@ -10,16 +10,25 @@
  */
 'use strict';
 
-import {CheNotification} from './che-notification.factory';
-import {CheNotificationController} from './che-notification.controller';
+/**
+ * Controller of the toasts
+ * @author Florent Benoit
+ */
+export class CheNotificationController {
 
-export class CheNotificationConfig {
-
-  constructor(register) {
-
-    register.controller('CheNotificationController', CheNotificationController);
-    register.factory('cheNotification', CheNotification);
-
-
+  /**
+   * Default constructor that is using resource injection
+   * @ngInject for Dependency injection
+   */
+  constructor($mdToast) {
+    this.$mdToast = $mdToast;
   }
+
+  /**
+   * Hide the notification.
+   */
+  hideNotification() {
+    this.$mdToast.hide();
+  }
+
 }

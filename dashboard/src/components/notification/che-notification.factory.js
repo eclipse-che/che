@@ -33,12 +33,11 @@ export class CheNotification {
       '<span flex class="che-notification-info-title"><b>Success</b></span>' +
       '<span flex class="che-notification-message">' + text + '</span>' +
       '</div>' +
-      '<i class="che-notification-close-icon fa fa-times" ng-click="hideNotification()"/>' +
+      '<i class="che-notification-close-icon fa fa-times" ng-click="cheNotificationCtrl.hideNotification()"/>' +
       '</md-toast>',
       autoWrap: false,
-      controller: ['$scope', ($scope) => {
-        $scope.hideNotification = this.$mdToast.hide;
-      }],
+      controller: 'CheNotificationController',
+      controllerAs: 'cheNotificationCtrl',
       hideDelay: 3000
     });
   }
@@ -52,12 +51,11 @@ export class CheNotification {
       '<span flex class="che-notification-error-title"><b>Failed</b></span>' +
       '<span flex class="che-notification-message">' + text + '</span>' +
       '</div>' +
-      '<i class="che-notification-close-icon fa fa-times" ng-click="hideNotification()"/>' +
+      '<i class="che-notification-close-icon fa fa-times" ng-click="cheNotificationCtrl.hideNotification()"/>' +
       '</md-toast>',
       autoWrap: false,
-      controller: ['$scope', ($scope) => {
-        $scope.hideNotification = this.$mdToast.hide;
-      }],
+      controller: 'CheNotificationController',
+      controllerAs: 'cheNotificationCtrl',
       hideDelay: 20000
     });
   }
