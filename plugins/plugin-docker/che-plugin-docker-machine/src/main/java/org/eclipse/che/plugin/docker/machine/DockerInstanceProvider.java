@@ -218,7 +218,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         final String machineContainerName = generateContainerName(machineState.getWorkspaceId(), machineState.getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
 
-        buildImage(dockerfile, creationLogsOutput, machineImageName);
+        buildImage(dockerfile, creationLogsOutput, machineImageName, doForcePullOnBuild);
 
         return createInstance(machineContainerName,
                               machineState,
@@ -262,6 +262,9 @@ public class DockerInstanceProvider implements InstanceProvider {
         if (dockerfile.getImages().isEmpty()) {
             throw new InvalidRecipeException("Unable build docker based machine, Dockerfile found but it doesn't contain base image.");
         }
+        if (dockerfile.getImages().size() > 1) {
+            throw new InvalidRecipeException("Unable build docker based machine, Dockerfile found but it contains more than one instruction 'FROM'.");
+        }
         return dockerfile;
     }
 
@@ -278,7 +281,12 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
     }
 
-    private void buildImage(Dockerfile dockerfile, final LineConsumer creationLogsOutput, String imageName) throws MachineException {
+    protected void buildImage(Dockerfile dockerfile,
+                              final LineConsumer creationLogsOutput,
+                              String imageName,
+                              boolean doForcePullOnBuild)
+            throws MachineException {
+
         File workDir = null;
         try {
             // build docker image
