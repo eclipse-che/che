@@ -55,35 +55,7 @@
           </div>
         </div>
         </che-panel>
-          <che-panel che-title="Export Workspace" class="workspace-details-content">
-              <div ng-if="!workspaceDetailsCtrl.exportWorkspaceContent" layout="row" flex layout-align="space-around start">
-                <label flex="15" class="workspace-details-description">
-                    Export your workspace to a JSON file.
-                </label>
-
-                <div layout="column" flex="85">
-                  <che-button-default che-button-title="export" ng-click="workspaceDetailsCtrl.exportWorkspace($event)"/>
-                </div>
-              </div>
-              <div ng-if="workspaceDetailsCtrl.exportWorkspaceContent.length > 0">
-                  <div layout="row" flex>
-                    <div flex="90">
-                      <ui-codemirror class="workspace-editor"
-                                   ui-codemirror="workspaceDetailsCtrl.editorOptions"
-                                   ng-model="workspaceDetailsCtrl.exportWorkspaceContent"></ui-codemirror>
-                    </div>
-                    <div layout="row" layout-align="center center"><che-clipboard class="copy-clipboard" che-value="workspaceDetailsCtrl.exportWorkspaceContent"></che-clipboard></div>
-                  </div>
-                  <div layout="column">
-                    <che-button-default che-button-title="download"
-                                         che-button-icon="fa fa-download"
-                                         ng-href="{{workspaceDetailsCtrl.downloadLink}}"/>
-
-                  </div>
-              </div>
-
-
-          </che-panel>
+          <export-workspace workspace-id="{{workspaceDetailsCtrl.workspaceId}}" workspace-details="workspaceDetailsCtrl.workspaceDetails"></export-workspace>
         <che-panel che-title="Delete Workspace" class="workspace-details-content">
           <div layout="row" flex layout-align="space-around start">
             <label flex="15" class="workspace-details-description">

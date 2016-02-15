@@ -1,0 +1,10 @@
+<che-panel che-title="Export Workspace" class="workspace-details-content">
+  <div ng-if="!exportWorkspaceCtrl.exportWorkspaceContent" layout="row" flex layout-align="space-around start">
+    <label flex="15" class="workspace-details-description">
+      Export your workspace.
+    </label>
+    <div layout="row" flex="85">
+      <che-button-default che-button-title="export" ng-click="exportWorkspaceCtrl.showExport($event)"></che-button-default>
+    </div>
+  </div>
+</che-panel>

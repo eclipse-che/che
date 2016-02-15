@@ -20,23 +20,14 @@ export class WorkspaceDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification, $filter) {
+  constructor($route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification) {
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.cheWorkspace = cheWorkspace;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
-    this.$filter = $filter;
 
     this.workspaceId = $route.current.params.workspaceId;
-
-    this.editorOptions = {
-      lineWrapping : true,
-      lineNumbers: false,
-      matchBrackets: true,
-      readOnly: 'nocursor',
-      mode: 'application/json'
-    };
 
     this.loading = true;
 
@@ -118,15 +109,6 @@ export class WorkspaceDetailsCtrl {
         console.log('error', error);
       });
     });
-  }
-
-  exportWorkspace() {
-    let copyOfWorkspace = angular.copy(this.workspaceDetails);
-    this.downloadLink = '/api/workspace/' + this.workspaceId + '?downloadAsFile=' + this.workspaceDetails.name + '.json';
-
-    //remove links
-    delete copyOfWorkspace.links;
-    this.exportWorkspaceContent = this.$filter('json')(angular.fromJson(copyOfWorkspace), 2);
   }
 
   runWorkspace() {
