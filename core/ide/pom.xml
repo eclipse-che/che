@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC4</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-core-ide-parent</artifactId>
