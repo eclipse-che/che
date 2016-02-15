@@ -463,7 +463,8 @@ public class UserService extends Service {
         if (isNullOrEmpty(userDescriptor.getEmail())) {
             throw new BadRequestException("User email required");
         }
-        final User user = new User().withName(userDescriptor.getName());
+        final User user = new User().withName(userDescriptor.getName())
+                                    .withEmail(userDescriptor.getEmail());
         if (userDescriptor.getPassword() != null) {
             checkPassword(userDescriptor.getPassword());
             user.setPassword(userDescriptor.getPassword());
