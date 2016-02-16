@@ -14,6 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 

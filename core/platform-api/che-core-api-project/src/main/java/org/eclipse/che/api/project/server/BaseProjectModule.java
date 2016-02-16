@@ -15,9 +15,11 @@ import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImportersService;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
-import static org.eclipse.che.inject.Matchers.names;
 
 /**
  * Deploys project API components.

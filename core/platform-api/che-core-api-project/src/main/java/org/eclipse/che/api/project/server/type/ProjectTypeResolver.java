@@ -8,21 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
-
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+package org.eclipse.che.api.project.server.type;
 
 /**
  * @author gazarenkov
  */
-public class ProjectTypeConstraintException extends ConflictException {
+public interface ProjectTypeResolver {
 
-    public ProjectTypeConstraintException(String message) {
-        super(message);
-    }
-
-    public ProjectTypeConstraintException(ServiceError serviceError) {
-        super(serviceError);
-    }
+    boolean resolve();
 }

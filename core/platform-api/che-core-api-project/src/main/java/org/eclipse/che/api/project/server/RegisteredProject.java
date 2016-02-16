@@ -17,17 +17,16 @@ import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.project.server.type.BaseProjectType;
+import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.Variable;
-import org.eclipse.che.api.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Internal Project implementation
@@ -35,15 +34,14 @@ import java.util.Set;
  *
  * @author gazarenkov
  */
-public class ProjectImpl implements ProjectConfig {
+public class RegisteredProject implements ProjectConfig {
 
     private final List<Problem> problems = new ArrayList<>();
     private final FolderEntry   folder;
     private final ProjectConfig config;
     private final ProjectTypes  types;
     private final Map<String, Value> attributes = new HashMap<>();
-    private final Set<String>        modules    = new HashSet<>();
-    private final ProjectManager manager;
+    private final ProjectTypeRegistry projectTypeRegistry;
     private       boolean        updated;
 
 
@@ -51,44 +49,42 @@ public class ProjectImpl implements ProjectConfig {
      * Either root folder or config can be null, in this case Project is configured with problem
      *
      * @param folder
-     *         - root local folder
+     *         - root local folder or null
      * @param config
      *         - project configuration in workspace
      * @param updated
      *         - if this object was updated, i.e. no more synchronized with workspace master
-     * @param manager
+     * @param projectTypeRegistry
      */
-    public ProjectImpl(FolderEntry folder, ProjectConfig config, boolean updated, ProjectManager manager)
+     RegisteredProject(FolderEntry folder, ProjectConfig config, boolean updated, ProjectTypeRegistry projectTypeRegistry)
             throws NotFoundException, ProjectTypeConstraintException, ServerException, InvalidValueException,
                    ValueStorageException {
 
         this.folder = folder;
-        this.config = (config == null) ? new NullConfig(folder.getPath()) : config;
+        this.config = (config == null) ? new NewProjectConfig(folder.getPath()) : config;
         this.updated = updated;
-        this.manager = manager;
+        this.projectTypeRegistry = projectTypeRegistry;
 
         if (folder == null || folder.isFile())
-            problems.add(new Problem(10, "No project locally " + this.config.getPath()));
+            problems.add(new Problem(10, "No project folder on file system " + this.config.getPath()));
+
         if (config == null)
             problems.add(new Problem(11, "No project configured in workspace " + this.config.getPath()));
 
-        this.types = new ProjectTypes(this.config, manager);
+        this.types = new ProjectTypes(this.config.getPath(), this.config.getType(), this.config.getMixins(), projectTypeRegistry);
 
         // init transient (implicit, like git) project types.
         // TODO should we do that in constructor?
-        types.addTransient();
+        types.addTransient(folder);
 
         // initialize attributes
         initAttributes();
 
-        // initialize modules
-        for (ProjectConfig pc : this.config.getModules()) {
-            this.modules.add(pc.getPath());
-        }
 
     }
 
-    private void initAttributes() throws InvalidValueException, ValueStorageException, ProjectTypeConstraintException {
+    private void initAttributes()
+            throws ValueStorageException, ProjectTypeConstraintException, ServerException, NotFoundException {
 
         // we take only defined attributes, others ignored
         for (Map.Entry<String, Attribute> entry : types.getAttributeDefs().entrySet()) {
@@ -107,23 +103,21 @@ public class ProjectImpl implements ProjectConfig {
                 final ValueProviderFactory valueProviderFactory = variable.getValueProviderFactory();
 
                 if (valueProviderFactory != null) {
-                    if (updated) {
 
-                        // to update
-                        valueProviderFactory.newInstance(folder).setValues(name, value.getList());
-
-                    } else {
-
-                        // to get from outside
+                    // read-only. TODO the constants instead?
+                    if(folder != null)
                         value = new AttributeValue(valueProviderFactory.newInstance(folder).getValues(name));
-                    }
+                    else
+                        continue;
+
                 }
 
-                if (value == null && variable.isRequired()) {
-                    throw new ProjectTypeConstraintException("Required attribute value is initialized with null value " + variable.getId());
+                if (value.isEmpty() && variable.isRequired()) {
+                    throw new ProjectTypeConstraintException("Value for required attribute is not initialized " + variable.getId());
                 }
 
-                this.attributes.put(name, value);
+                if(!value.isEmpty())
+                    this.attributes.put(name, value);
 
             }
 
@@ -131,9 +125,6 @@ public class ProjectImpl implements ProjectConfig {
 
     }
 
-    public ProjectManager getManager() {
-        return this.manager;
-    }
 
     public ProjectTypeDef getProjectType() {
         return types.getPrimary();
@@ -151,21 +142,6 @@ public class ProjectImpl implements ProjectConfig {
         return attributes;
     }
 
-    public ProjectImpl getUpperProject() {
-        return manager.getProject(Path.of(getPath()).getParent().toString());
-    }
-
-    public Set<String> getModulePaths() {
-        return this.modules;
-    }
-
-    public void addModule(String modulePath) throws NotFoundException, InvalidValueException {
-
-
-        if(!modules.contains(modulePath))
-            this.modules.add(modulePath);
-
-    }
 
     public boolean isSynced() {
         return !this.updated;
@@ -196,10 +172,10 @@ public class ProjectImpl implements ProjectConfig {
         for(HashMap.Entry<String, Value> entry : getAttributeEntries().entrySet()) {
 
             Attribute def = types.getAttributeDefs().get(entry.getKey());
-            // not provided
+            // not provided, not constants
             if(def != null &&
-               ((def.isVariable() && ((Variable) def).getValueProviderFactory() == null) ||
-               !def.isVariable()))
+               ((def.isVariable() && ((Variable) def).getValueProviderFactory() == null)))
+ //              || !def.isVariable()))
                 attrs.put(entry.getKey(), entry.getValue().getList());
         }
         return attrs;
@@ -211,7 +187,7 @@ public class ProjectImpl implements ProjectConfig {
 
     @Override
     public String getPath() {
-        return manager.absolutizePath(config.getPath());
+        return ProjectRegistry.absolutizePath(config.getPath());
     }
 
     @Override
@@ -249,19 +225,15 @@ public class ProjectImpl implements ProjectConfig {
     @Override
     public Map<String, List<String>> getAttributes() {
 
-        return getPersistableAttributes();
+        Map<String, List<String>> attrs = new HashMap<>();
+        for(Map.Entry<String, Value> entry : getAttributeEntries().entrySet())
+             attrs.put(entry.getKey(), entry.getValue().getList());
+
+        //return getPersistableAttributes();
+        return attrs;
 
     }
 
-    @Override
-    public List<? extends ProjectConfig> getModules() {
-
-        List <ProjectImpl> modules = new ArrayList<>();
-        for(String m : getModulePaths())
-            modules.add(manager.getProject(m));
-
-        return modules;
-    }
 
     /* ----------------------------------- */
 
@@ -275,55 +247,6 @@ public class ProjectImpl implements ProjectConfig {
         String message;
     }
 
-    public static class NullConfig implements ProjectConfig {
 
-        private Path path;
-
-        public NullConfig(Path path) {
-            this.path = path;
-        }
-
-        @Override
-        public String getName() {
-            return path.getName();
-        }
-
-        @Override
-        public String getPath() {
-            return path.toString();
-        }
-
-        @Override
-        public String getDescription() {
-            return "";
-        }
-
-        @Override
-        public String getType() {
-            return BaseProjectType.ID;
-        }
-
-        @Override
-        public List<String> getMixins() {
-            return new ArrayList<>();
-        }
-
-        @Override
-        public Map<String, List<String>> getAttributes() {
-            return new HashMap<>();
-        }
-
-        @Override
-        public List<? extends ProjectConfig> getModules() {
-            return new ArrayList<>();
-        }
-
-        @Override
-        public SourceStorage getSource() {
-            return null;
-        }
-
-
-    }
 
 }

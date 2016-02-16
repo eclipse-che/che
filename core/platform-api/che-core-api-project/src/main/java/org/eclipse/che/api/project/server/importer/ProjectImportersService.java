@@ -8,9 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.importer;
 
 import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.project.server.DtoConverter;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 

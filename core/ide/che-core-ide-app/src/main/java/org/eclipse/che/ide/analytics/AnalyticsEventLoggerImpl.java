@@ -139,7 +139,7 @@ public class AnalyticsEventLoggerImpl implements AnalyticsEventLoggerExt {
                        @Nullable Object action,
                        @Nullable String actionName,
                        @Nullable Map<String, String> additionalParams) {
-        // we can put here additional params depending on action class
+        // we can putProject here additional params depending on action class
         doLog(event, action == null ? null : action.getClass(), actionName, additionalParams);
     }
 

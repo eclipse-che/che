@@ -8,23 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server.handlers;
+package org.eclipse.che.api.project.server.type;
 
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 
-import java.io.IOException;
-import java.util.List;
-
 /**
- * @author Vitaly Parfonov
- * @deprecated
+ * Factory for {@link ValueProvider}.
+ *
+ * @author andrew00x
  */
-public interface GetModulesHandler extends ProjectHandler {
+public interface ValueProviderFactory {
 
-    void onGetModules(FolderEntry parentProjectFolder, List<String> modulesPath)
-            throws ForbiddenException, ServerException, NotFoundException, IOException;
-
+    /**
+     * Create new instance of ValueProvider2. Project is used for access to low-level information about project.
+     *
+     * @param projectFolder
+     */
+    ValueProvider newInstance(FolderEntry projectFolder);
 }

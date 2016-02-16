@@ -11,16 +11,11 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystem;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,37 +33,14 @@ import static org.junit.Assert.fail;
 /**
  * @author gazarenkov
  */
-public class ProjectManagerReadTest {
+public class ProjectManagerReadTest extends WsAgentTestBase {
 
-    protected final static String FS_PATH = "target/fs";
 
-    private WorkspaceHolder workspaceHolder;
-
-    private File root;
-
-    private ProjectManager pm;
-
-//    @BeforeClass
-//    public static void beforeClass() {
-//
-//        File root = new File(FS_PATH);
-//        if (root.exists()) {
-//            IoUtil.deleteRecursive(root);
-//        }
-//        root.mkdir();
-//    }
 
     @Before
     public void setUp() throws Exception {
 
-        root = new File(FS_PATH);
-
-        if (root.exists()) {
-            IoUtil.deleteRecursive(root);
-        }
-        root.mkdir();
-
-        LocalVirtualFileSystem vfs = new LocalVirtualFileSystem(root, null, null, null);
+        super.setUp();
 
 
         new File(root, "/fromFolder").mkdir();
@@ -76,24 +48,23 @@ public class ProjectManagerReadTest {
         new File(root, "/normal/module").mkdir();
 
 
-        List<ProjectConfigDto> modules = new ArrayList<>();
-        modules.add(DtoFactory.newDto(ProjectConfigDto.class)
-                              .withPath("/normal/module")
-                              .withName("project1Name")
-                              .withType("primary1"));
-
-
         List<ProjectConfigDto> projects = new ArrayList<>();
         projects.add(DtoFactory.newDto(ProjectConfigDto.class)
                                .withPath("/normal")
                                .withName("project1Name")
-                               .withType("primary1")
-                               .withModules(modules));
+                               .withType("primary1"));
 
         projects.add(DtoFactory.newDto(ProjectConfigDto.class)
                                .withPath("/fromConfig")
                                .withName("")
                                .withType("primary1"));
+
+
+        projects.add(DtoFactory.newDto(ProjectConfigDto.class)
+                              .withPath("/normal/module")
+                              .withName("project1Name")
+                              .withType("primary1"));
+
 
         workspaceHolder = new TestWorkspaceHolder(projects);
         ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
@@ -101,8 +72,10 @@ public class ProjectManagerReadTest {
 
         ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfs, projectTypeRegistry);
+
         pm = new ProjectManager(vfs, null, projectTypeRegistry, projectHandlerRegistry,
-                                   null, workspaceHolder);
+                                   null, projectRegistry);
     }
 
 //    @AfterClass
@@ -112,11 +85,12 @@ public class ProjectManagerReadTest {
 //    }
 
     @Test
-    public void testInitManager() throws Exception {
+    public void testInit() throws Exception {
 
-        //pm.getSearcher().addIndexFilter()
-
-
+        assertEquals(4, projectRegistry.getProjects().size());
+        assertEquals(0, projectRegistry.getProject("/normal").getProblems().size());
+        assertEquals(1, projectRegistry.getProject("/fromConfig").getProblems().size());
+        assertEquals(1, projectRegistry.getProject("/fromFolder").getProblems().size());
 
     }
 
@@ -153,32 +127,25 @@ public class ProjectManagerReadTest {
     }
 
     @Test
-    public void testModule() throws Exception {
+    public void testInnerProject() throws Exception {
 
         String path = "/normal/module";
         assertNotNull(pm.getProject(path));
         assertEquals(0, pm.getProject(path).getProblems().size());
         assertEquals("primary1", pm.getProject(path).getProjectType().getId());
 
-        ProjectImpl parent = pm.getProject("/normal");
-        assertEquals(1, parent.getModulePaths().size());
-        assertEquals(path, parent.getModulePaths().iterator().next());
-
-        List<String> projects = pm.getProjects("/normal");
-        assertEquals(1, projects.size());
-        assertEquals(path, projects.get(0));
 
     }
 
     @Test
-    public void testOwnerProject() throws Exception {
+    public void testParentProject() throws Exception {
 
-        assertEquals("/normal", pm.getOwnerProject("/normal").getPath());
-        assertEquals("/normal", pm.getOwnerProject("/normal/some/path").getPath());
-        assertEquals("/normal/module", pm.getOwnerProject("/normal/module/some/path").getPath());
+        assertEquals("/normal", projectRegistry.getParentProject("/normal").getPath());
+        assertEquals("/normal", projectRegistry.getParentProject("/normal/some/path").getPath());
+        assertEquals("/normal/module", projectRegistry.getParentProject("/normal/module/some/path").getPath());
 
         try {
-            pm.getOwnerProject("/some/path");
+            projectRegistry.getParentProject("/some/path");
             fail("NotFoundException expected");
         } catch (NotFoundException e) {}
 
@@ -196,10 +163,18 @@ public class ProjectManagerReadTest {
 
     }
 
+
     @Test
-    public void testProvidedAttributesNotSerialized() throws Exception {
+    public void testDoNotReturnNotInitializedAttribute() throws Exception {
+
+        // SPEC:
+        // Not initialized attributes should not be returned
+
+        assertEquals(1, projectRegistry.getProject("/normal").getAttributes().size());
 
     }
+
+
 
     @Test
     public void testEstimateProject() throws Exception {
@@ -218,25 +193,6 @@ public class ProjectManagerReadTest {
 
     }
 
-
-    private static class TestWorkspaceHolder extends WorkspaceHolder {
-
-        private TestWorkspaceHolder(List <ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name")
-                            .withProjects(projects));
-        }
-
-    }
-
-    private static class PT1 extends ProjectTypeDef {
-        private PT1() {
-            super("primary1", "primary1", true, false);
-
-            addVariableDefinition("var1", "", false);
-            addConstantDefinition("const1", "", "my constant");
-        }
-    }
 
 
 }

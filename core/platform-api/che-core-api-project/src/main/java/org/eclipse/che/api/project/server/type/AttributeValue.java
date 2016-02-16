@@ -53,6 +53,11 @@ public class AttributeValue implements Value {
     }
 
     @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
+    @Override
     public boolean equals(Object obj) {
 
         if (obj instanceof AttributeValue) {

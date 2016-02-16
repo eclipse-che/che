@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.template;
 
 import com.google.inject.Inject;
 

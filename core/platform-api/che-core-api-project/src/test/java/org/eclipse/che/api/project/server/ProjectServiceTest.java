@@ -25,9 +25,13 @@ import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
@@ -97,8 +101,6 @@ import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.commons.lang.ws.rs.ExtMediaType.APPLICATION_ZIP;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -145,6 +147,8 @@ public class ProjectServiceTest {
     private LocalVirtualFileSystem vfs;
 
     private ProjectImporterRegistry importerRegistry;
+
+    protected ProjectRegistry projectRegistry;
 
 
     @BeforeMethod
@@ -195,8 +199,10 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
+        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfs, ptRegistry);
+
         pm = new ProjectManager(vfs, null, ptRegistry, phRegistry,
-                                importerRegistry, workspaceHolder);
+                                importerRegistry, projectRegistry);
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 
@@ -304,14 +310,14 @@ public class ProjectServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testGetProjects() throws Exception {
-        List<ProjectImpl> p = pm.getProjects();
+        List<RegisteredProject> p = pm.getProjects();
 
         assertEquals(p.size(), 1);
 
        vfs.getRoot().createFolder("not_project");
 
         // to refresh
-        pm.initProjects();
+        projectRegistry.initProjects();
 
         ContainerResponse response =
                 launcher.service(GET, "http://localhost:8080/api/project/my_ws", "http://localhost:8080/api", null, null, null);
@@ -339,44 +345,6 @@ public class ProjectServiceTest {
         assertNotNull(badProject.getProblems());
     }
 
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testGetModules() throws Exception {
-        ProjectTypeDef pt = new ProjectTypeDef("testGetModules", "my module type", true, false) {
-            {
-                addConstantDefinition("my_module_attribute", "attr description", "attribute value 1");
-            }
-        };
-        pm.getProjectTypeRegistry().registerProjectType(pt);
-
-        final ProjectConfigDto moduleConfig = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                        .withPath("/my_project/my_module")
-                                                        .withName("my_module")
-                                                        .withDescription("my test module")
-                                                        .withType("testGetModules");
-
-        ProjectImpl p = pm.createProject(moduleConfig, null);
-
-        //ProjectImpl parent = pm.getProject(Path.of(p.getPath()).getUpperProject().toString());
-
-        p.getUpperProject().addModule(p.getPath());
-
-//        modules.add(moduleConfig);
-
-        ContainerResponse response = launcher.service(GET,
-                                                      String.format("http://localhost:8080/api/project/%s/modules/my_project", workspace),
-                                                      "http://localhost:8080/api", null, null, null);
-        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        List<ProjectConfigDto> result = (List<ProjectConfigDto>)response.getEntity();
-        assertNotNull(result);
-
-        assertEquals(result.size(), 1);
-        ProjectConfigDto moduleDescriptor = result.get(0);
-        assertEquals(moduleDescriptor.getDescription(), "my test module");
-        assertEquals(moduleDescriptor.getType(), "testGetModules");
-        assertEquals(moduleDescriptor.getName(), "my_module");
-        assertEquals(moduleDescriptor.getPath(), "/my_project/my_module");
-    }
 
     @Test
     public void shouldReturnNotFoundStatusWhenGettingModulesFromProjectWhichDoesNotExist() throws Exception {
@@ -413,7 +381,7 @@ public class ProjectServiceTest {
         //MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
         vfs.getRoot().createFolder("not_project");
         // to refresh
-        pm.initProjects();
+        projectRegistry.initProjects();
         ContainerResponse response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/not_project", workspace),
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
@@ -438,39 +406,6 @@ public class ProjectServiceTest {
         assertNotNull(result);
     }
 
-    @Test
-    public void testGetModule() throws Exception {
-        ProjectTypeDef pt = new ProjectTypeDef("my_module_type", "my module type", true, false) {
-            {
-                addConstantDefinition("my_module_attribute", "attr description", "attribute value 1");
-            }
-        };
-        pm.getProjectTypeRegistry().registerProjectType(pt);
-
-        final ProjectConfigDto moduleConfig = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                        .withPath("/my_project/my_module")
-                                                        .withName("my_module")
-                                                        .withDescription("my test module")
-                                                        .withType("my_module_type");
-
-        pm.createProject(moduleConfig, null, "/my_project");
-        //modules.add(moduleConfig);
-
-        ContainerResponse response =
-                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/my_project/my_module", workspace),
-                                 "http://localhost:8080/api", null, null, null);
-        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        ProjectConfigDto result = (ProjectConfigDto)response.getEntity();
-        assertNotNull(result);
-        assertEquals(result.getDescription(), "my test module");
-        assertEquals(result.getType(), "my_module_type");
-
-        Map<String, List<String>> attributes = result.getAttributes();
-        assertNotNull(attributes);
-        assertEquals(attributes.size(), 1);
-        assertEquals(attributes.get("my_module_attribute"), singletonList("attribute value 1"));
-        validateProjectLinks(result);
-    }
 
     @Test
     public void testGetProjectInvalidPath() throws Exception {
@@ -482,50 +417,6 @@ public class ProjectServiceTest {
 
     @Test
     public void testCreateProject() throws Exception {
-
-
-//        DefaultFileWatcherNotificationHandler watchHandler =
-//                new DefaultFileWatcherNotificationHandler((LocalVirtualFileSystem) vfs);
-
-
-//        FileWatcherNotificationListener l2 = new FileWatcherNotificationListener(new VirtualFileFilter() {
-//            @Override
-//            public boolean accept(VirtualFile file) {
-//                if(file.getName().equals("test.txt"))
-//                    return true;
-//                return false;
-//            }
-//        }) {
-//            @Override
-//            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
-//                System.out.println("IN ADDITIONAL " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
-//            }
-//        };
-//
-//
-//        PathMatcher exc = new PathMatcher() {
-//            @Override
-//            public boolean matches(Path path) {
-//
-//                if(path.getFileName().toString().equals("new_project"))
-//                    return true;
-//
-//                return false;
-//            }
-//        };
-//
-//        pm.addWatchExcludeMatcher(exc);
-//        //pm.addWatchListener(l1);
-//        pm.addWatchListener(l2);
-
-//        FileTreeWatcher watcher = new FileTreeWatcher(vfs.getRoot().toIoFile(), new HashSet<>(), watchHandler);
-//        // GLOBALLY EXCLUDED
-//        watcher.addExcludeMatcher(exc);
-//
-//
-//
-//        watcher.startup();
-
 
 
 
@@ -558,11 +449,6 @@ public class ProjectServiceTest {
         Map<String, List<String>> attributeValues = new LinkedHashMap<>();
         attributeValues.put("new_project_attribute", singletonList("to be or not to be"));
 
-//        ProjectConfigDto descriptor = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-//                                                .withType("testCreateProject")
-//                                                .withDescription("new project")
-//                                                .withAttributes(attributeValues);
-
 
         final ProjectConfigDto newProjectConfig = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                             .withPath("/new_project")
@@ -594,7 +480,7 @@ public class ProjectServiceTest {
         assertEquals(attributes.get("new_project_attribute"), singletonList("to be or not to be"));
         validateProjectLinks(result);
 
-        ProjectImpl project = pm.getProject("new_project");
+        RegisteredProject project = pm.getProject("new_project");
         assertNotNull(project);
 
         //ProjectConfig config = project.getConfig();
@@ -610,131 +496,6 @@ public class ProjectServiceTest {
         assertNotNull(project.getBaseFolder().getChild("test.txt"));
 
 
-    }
-
-    @Test
-    public void testCreateModule() throws Exception {
-        phRegistry.register(new CreateProjectHandler() {
-
-            @Override
-            public String getProjectType() {
-                return "my_project_type";
-            }
-
-            @Override
-            public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
-                    throws ConflictException, ForbiddenException, ServerException {
-                baseFolder.createFolder("a");
-                baseFolder.createFolder("b");
-                baseFolder.createFile("test.txt", "test".getBytes());
-            }
-        });
-
-        Map<String, List<String>> headers = new HashMap<>();
-        headers.put("Content-Type", singletonList(APPLICATION_JSON));
-
-        Map<String, List<String>> attributeValues = new LinkedHashMap<>();
-        attributeValues.put("new module attribute", singletonList("attribute value 1"));
-
-//        ProjectConfigDto descriptor = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-//                                                .withName("new_module")
-//                                                .withType("my_project_type")
-//                                                .withDescription("new module")
-//                                                .withAttributes(attributeValues);
-
-        final ProjectConfigDto moduleConfig = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                        .withPath("/my_project/new_module")
-                                                        .withName("new_module")
-                                                        .withDescription("new module")
-                                                        .withType("my_project_type")
-                                                        .withSource(DtoFactory.getInstance().createDto(SourceStorageDto.class));
-        //projects.add(moduleConfig);
-
-        ContainerResponse response = launcher.service(POST,
-                                                      String.format("http://localhost:8080/api/project/%s?parent=%s",
-                                                                    workspace,
-                                                                    "my_project"),
-                                                      "http://localhost:8080/api",
-                                                      headers,
-                                                      DtoFactory.getInstance().toJson(moduleConfig).getBytes(),
-                                                      null);
-        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        ProjectConfigDto result = (ProjectConfigDto)response.getEntity();
-        assertNotNull(result);
-        assertEquals(result.getName(), "new_module");
-        assertEquals(result.getPath(), "/my_project/new_module");
-        assertEquals(result.getDescription(), "new module");
-        assertEquals(result.getType(), "my_project_type");
-
-        ProjectImpl project = pm.getProject("/my_project/new_module");
-        assertNotNull(project);
-
-        //ProjectConfig config = project.getConfig();
-
-        assertEquals(project.getDescription(), "new module");
-        assertEquals(project.getProjectType().getId(), "my_project_type");
-
-        assertNotNull(project.getBaseFolder().getChild("a"));
-        assertNotNull(project.getBaseFolder().getChild("b"));
-        assertNotNull(project.getBaseFolder().getChild("test.txt"));
-    }
-
-    @Test
-    public void testRemoveModule() throws Exception {
-
-
-        ProjectImpl root = pm.getProject("/my_project");
-
-
-        final ProjectConfigDto moduleToDelAll = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                        .withPath("/my_project/new_module")
-                                                        .withName("new_module")
-                                                        .withDescription("new module")
-                                                        .withType("my_project_type")
-                                                        .withSource(DtoFactory.getInstance().createDto(SourceStorageDto.class));
-
-
-
-        pm.createProject(moduleToDelAll, null, "/my_project");
-
-        assertTrue(root.getModulePaths().contains("/my_project/new_module"));
-
-        ContainerResponse response = launcher.service(DELETE,
-                                                      String.format("http://localhost:8080/api/project/%s/my_project/new_module",
-                                                                    workspace),
-                                                      "http://localhost:8080/api", null, null, null);
-
-        assertEquals(response.getStatus(), 204, "Error: " + response.getEntity());
-        assertFalse(root.getModulePaths().contains("/my_project/new_module"));
-        assertNull(pm.getProject("/my_project/new_module"));
-
-    }
-
-    @Test
-    public void testRemoveModuleRef() throws Exception {
-
-        ProjectImpl root = pm.getProject("/my_project");
-
-        final ProjectConfigDto moduleToDelModuleRef = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                                .withPath("/my_project/new_module")
-                                                                .withName("new_module")
-                                                                .withDescription("new module")
-                                                                .withType("my_project_type")
-                                                                .withSource(DtoFactory.getInstance().createDto(SourceStorageDto.class));
-
-        pm.createProject(moduleToDelModuleRef, null, "/my_project");
-
-        assertTrue(root.getModulePaths().contains("/my_project/new_module"));
-
-        ContainerResponse response = launcher.service(DELETE,
-                                                      String.format("http://localhost:8080/api/project/%s/module/my_project?" +
-                                                                    "module=/my_project/new_module",
-                                                                    workspace),
-                                                      "http://localhost:8080/api", null, null, null);
-
-        assertEquals(response.getStatus(), 204, "Error: " + response.getEntity());
-        assertFalse(root.getModulePaths().contains("/my_project/new_module"));
-        assertNotNull(pm.getProject("/my_project/new_module"));
     }
 
 
@@ -770,7 +531,7 @@ public class ProjectServiceTest {
 
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
 
-        ProjectImpl project = pm.getProject("/testUpdateProject");
+        RegisteredProject project = pm.getProject("/testUpdateProject");
         assertNotNull(project);
         //ProjectConfig config = project.getConfig();
 
@@ -783,7 +544,7 @@ public class ProjectServiceTest {
         //MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
         //mountPoint.getRoot().createFolder("not_project");
         pm.getProjectsRoot().createFolder("not_project");
-        pm.initProjects();
+        projectRegistry.initProjects();
 
         Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Type", singletonList(APPLICATION_JSON));
@@ -811,7 +572,7 @@ public class ProjectServiceTest {
                                                       null);
 
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        ProjectImpl project = pm.getProject("not_project");
+        RegisteredProject project = pm.getProject("not_project");
         assertNotNull(project);
         //ProjectConfig description = project.getConfig();
 
@@ -864,9 +625,9 @@ public class ProjectServiceTest {
                 return (List <String>)singletonList("checked");
             }
 
-            @Override
-            public void setValues(String attributeName, List<String> value) {
-            }
+//            @Override
+//            public void setValues(String attributeName, List<String> value) {
+//            }
         };
 
         ProjectTypeDef pt = new ProjectTypeDef("testEstimateProjectPT", "my testEstimateProject type", true, false) {
@@ -920,9 +681,9 @@ public class ProjectServiceTest {
                 return (List<String>)singletonList("checked");
             }
 
-            @Override
-            public void setValues(String attributeName, List<String> value) {
-            }
+//            @Override
+//            public void setValues(String attributeName, List<String> value) {
+//            }
         };
 
         ProjectTypeDef pt = new ProjectTypeDef("testEstimateProjectPT", "my testEstimateProject type", true, false) {
@@ -988,7 +749,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api", headers, b, null);
         assertEquals(response.getStatus(), 204);
 
-        ProjectImpl newProject = pm.getProject("new_project");
+        RegisteredProject newProject = pm.getProject("new_project");
         assertNotNull(newProject);
 
         //assertNotNull(newProject.getConfig());
@@ -1072,7 +833,7 @@ public class ProjectServiceTest {
 //        String fileName = "test.txt";
 //        String fileMediaType = TEXT_PLAIN;
 //        Map<String, List<String>> headers = new HashMap<>();
-//        headers.put(CONTENT_TYPE, singletonList("multipart/form-data; boundary=abcdef"));
+//        headers.putProject(CONTENT_TYPE, singletonList("multipart/form-data; boundary=abcdef"));
 //        String uploadBodyPattern =
 //                "--abcdef\r\nContent-Disposition: form-data; name=\"file\"; filename=\"%1$s\"\r\nContent-Type: %2$s\r\n\r\n%3$s"
 //                + "\r\n--abcdef\r\nContent-Disposition: form-data; name=\"mimeType\"\r\n\r\n%4$s"
@@ -1081,7 +842,7 @@ public class ProjectServiceTest {
 //                + "\r\n--abcdef--\r\n";
 //        byte[] formData = String.format(uploadBodyPattern, fileName, fileMediaType, fileContent, fileMediaType, fileName, false).getBytes();
 //        EnvironmentContext env = new EnvironmentContext();
-//        env.put(HttpServletRequest.class, new MockHttpServletRequest("", new ByteArrayInputStream(formData),
+//        env.putProject(HttpServletRequest.class, new MockHttpServletRequest("", new ByteArrayInputStream(formData),
 //                                                                     formData.length, POST, headers));
 //        ContainerResponse response = launcher.service(POST,
 //                                                      String.format("http://localhost:8080/api/project/%s/uploadfile/my_project",
@@ -1105,7 +866,7 @@ public class ProjectServiceTest {
 //        String fileName = "test.txt";
 //        String fileMediaType = TEXT_PLAIN;
 //        Map<String, List<String>> headers = new HashMap<>();
-//        headers.put(CONTENT_TYPE, singletonList("multipart/form-data; boundary=abcdef"));
+//        headers.putProject(CONTENT_TYPE, singletonList("multipart/form-data; boundary=abcdef"));
 //        String uploadBodyPattern =
 //                "--abcdef\r\nContent-Disposition: form-data; name=\"file\"; filename=\"%1$s\"\r\nContent-Type: %2$s\r\n\r\n%3$s"
 //                + "\r\n--abcdef\r\nContent-Disposition: form-data; name=\"mimeType\"\r\n\r\n%4$s"
@@ -1117,7 +878,7 @@ public class ProjectServiceTest {
 //                String.format(uploadBodyPattern, fileName, fileMediaType, newFileContent, fileMediaType, fileName, true).getBytes();
 //
 //        EnvironmentContext env = new EnvironmentContext();
-//        env.put(HttpServletRequest.class, new MockHttpServletRequest("", new ByteArrayInputStream(newFileData),
+//        env.putProject(HttpServletRequest.class, new MockHttpServletRequest("", new ByteArrayInputStream(newFileData),
 //                                                                     newFileData.length, POST, headers));
 //        ContainerResponse response = launcher.service(POST,
 //                                                      String.format("http://localhost:8080/api/project/%s/uploadfile/my_project",
@@ -1141,7 +902,7 @@ public class ProjectServiceTest {
 //        String fileName = "test.txt";
 //        String fileMediaType = TEXT_PLAIN;
 //        Map<String, List<String>> headers = new HashMap<>();
-//        headers.put(CONTENT_TYPE, singletonList("multipart/form-data; boundary=abcdef"));
+//        headers.putProject(CONTENT_TYPE, singletonList("multipart/form-data; boundary=abcdef"));
 //        String uploadBodyPattern =
 //                "--abcdef\r\nContent-Disposition: form-data; name=\"file\"; filename=\"%1$s\"\r\nContent-Type: %2$s\r\n\r\n%3$s"
 //                + "\r\n--abcdef\r\nContent-Disposition: form-data; name=\"mimeType\"\r\n\r\n%4$s"
@@ -1153,7 +914,7 @@ public class ProjectServiceTest {
 //                String.format(uploadBodyPattern, fileName, fileMediaType, newFileContent, fileMediaType, fileName, false).getBytes();
 //
 //        EnvironmentContext env = new EnvironmentContext();
-//        env.put(HttpServletRequest.class, new MockHttpServletRequest("", new ByteArrayInputStream(newFileData),
+//        env.putProject(HttpServletRequest.class, new MockHttpServletRequest("", new ByteArrayInputStream(newFileData),
 //                                                                     newFileData.length, POST, headers));
 //        ContainerResponse response = launcher.service(POST,
 //                                                      String.format("http://localhost:8080/api/project/%s/uploadfile/my_project",
@@ -1271,6 +1032,8 @@ public class ProjectServiceTest {
 
     @Test
     public void testDeleteProject() throws Exception {
+
+
         ContainerResponse response = launcher.service(DELETE,
                                                       String.format("http://localhost:8080/api/project/%s/my_project", workspace),
                                                       "http://localhost:8080/api", null, null, null);
@@ -1284,7 +1047,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testCopyFile() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
         ContainerResponse response = launcher.service(POST,
@@ -1301,7 +1064,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testCopyFileWithRename() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
 
@@ -1327,7 +1090,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testCopyFileWithRenameAndOverwrite() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
 
         // File names
@@ -1382,7 +1145,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testCopyFolder() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
         ContainerResponse response = launcher.service(POST,
@@ -1399,7 +1162,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testCopyFolderWithRename() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
 
@@ -1429,7 +1192,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testCopyFolderWithRenameAndOverwrite() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
 
         // File names
@@ -1471,7 +1234,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testMoveFile() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
         ContainerResponse response = launcher.service(POST,
@@ -1488,7 +1251,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testMoveFileWithRename() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
 
@@ -1518,7 +1281,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testRenameFile() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
 
@@ -1548,7 +1311,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testMoveFileWithRenameAndOverwrite() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
 
         // File names
@@ -1602,7 +1365,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testMoveFolder() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b/c")).createFile("test.txt", "to be or not no be".getBytes());
         ContainerResponse response = launcher.service(POST,
@@ -1620,7 +1383,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testMoveFolderWithRename() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
 
@@ -1649,7 +1412,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testRenameFolder() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b");
         ((FolderEntry)myProject.getBaseFolder().getChild("a/b")).createFile("test.txt", "to be or not no be".getBytes());
 
@@ -1678,7 +1441,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testMoveFolderWithRenameAndOverwrite() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b/c");
 
         // File names
@@ -1717,7 +1480,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testImportZip() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b");
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -1741,7 +1504,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testImportZipWithoutSkipFirstLevel() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b");
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -1781,7 +1544,7 @@ public class ProjectServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testGetChildren() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b");
         a.createFile("test.txt", "test".getBytes());
@@ -1801,7 +1564,7 @@ public class ProjectServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testGetItem() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b");
         a.createFile("test.txt", "test".getBytes());
@@ -1853,9 +1616,9 @@ public class ProjectServiceTest {
 //            @Override
 //            public void onGetItem(VirtualFileEntry virtualFile) {
 //
-//                virtualFile.getAttributeEntries().put("my", "myValue");
+//                virtualFile.getAttributeEntries().putProject("my", "myValue");
 //                if (virtualFile.isFile())
-//                    virtualFile.getAttributeEntries().put("file", "a");
+//                    virtualFile.getAttributeEntries().putProject("file", "a");
 //            }
 //
 //            @Override
@@ -1892,7 +1655,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetTree() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
         a.createFolder("x/y");
@@ -1921,7 +1684,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetTreeWithDepth() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
         a.createFolder("x/y");
@@ -1956,7 +1719,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetTreeWithDepthAndIncludeFiles() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
         a.createFolder("x").createFile("test.txt", "test".getBytes());
@@ -1995,7 +1758,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testGetTreeWithDepthAndIncludeFilesNoFiles() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         FolderEntry a = myProject.getBaseFolder().createFolder("a");
         a.createFolder("b/c");
         a.createFolder("x");
@@ -2032,7 +1795,7 @@ public class ProjectServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSearchByName() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
         myProject.getBaseFolder().createFolder("x/y").createFile("test.txt", "test".getBytes());
         myProject.getBaseFolder().createFolder("c").createFile("exclude", "test".getBytes());
@@ -2055,7 +1818,7 @@ public class ProjectServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSearchByText() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
         myProject.getBaseFolder().createFolder("x/y").createFile("__test.txt", "searchhit".getBytes());
         myProject.getBaseFolder().createFolder("c").createFile("_test", "searchhit".getBytes());
@@ -2075,7 +1838,7 @@ public class ProjectServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSearchByNameAndText() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "test".getBytes());
         myProject.getBaseFolder().createFolder("x/y").createFile("test.txt", "test".getBytes());
         myProject.getBaseFolder().createFolder("c").createFile("test", "test".getBytes());
@@ -2095,7 +1858,7 @@ public class ProjectServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSearchFromWSRoot() throws Exception {
-        ProjectImpl myProject = pm.getProject("my_project");
+        RegisteredProject myProject = pm.getProject("my_project");
         myProject.getBaseFolder().createFolder("a/b").createFile("test", "test".getBytes());
         myProject.getBaseFolder().createFolder("x/y").createFile("test", "test".getBytes());
         myProject.getBaseFolder().createFolder("c").createFile("test.txt", "test".getBytes());
@@ -2155,7 +1918,7 @@ public class ProjectServiceTest {
 //        //modules.add(newModuleConfig);
 //
 //        Map<String, List<String>> headers = new HashMap<>();
-//        headers.put(CONTENT_TYPE, singletonList(APPLICATION_JSON));
+//        headers.putProject(CONTENT_TYPE, singletonList(APPLICATION_JSON));
 //
 //        SourceStorageDto source = DtoFactory.newDto(SourceStorageDto.class)
 //                                            .withParameters(Collections.emptyMap())
@@ -2213,10 +1976,10 @@ public class ProjectServiceTest {
 //        });
 //
 //        Map<String, List<String>> headers = new HashMap<>();
-//        headers.put("Content-Type", Arrays.asList(APPLICATION_JSON));
+//        headers.putProject("Content-Type", Arrays.asList(APPLICATION_JSON));
 //
 //        Map<String, List<String>> attributeValues = new LinkedHashMap<>();
-//        attributeValues.put("new module attribute", Arrays.asList("to be or not to be"));
+//        attributeValues.putProject("new module attribute", Arrays.asList("to be or not to be"));
 //
 //        ProjectConfigDto descriptor = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
 //                                                .withType("my_project_type")
@@ -2357,11 +2120,11 @@ public class ProjectServiceTest {
         assertEquals(link.getHref(), "http://localhost:8080/api/project/" + workspace + "/tree" + item.getPath());
         assertEquals(link.getProduces(), APPLICATION_JSON);
 
-        link = item.getLink("modules");
-        assertNotNull(link);
-        assertEquals(link.getMethod(), GET);
-        assertEquals(link.getHref(), "http://localhost:8080/api/project/" + workspace + "/modules" + item.getPath());
-        assertEquals(link.getProduces(), APPLICATION_JSON);
+//        link = item.getLink("modules");
+//        assertNotNull(link);
+//        assertEquals(link.getMethod(), GET);
+//        assertEquals(link.getHref(), "http://localhost:8080/api/project/" + workspace + "/modules" + item.getPath());
+//        assertEquals(link.getProduces(), APPLICATION_JSON);
 
 //        link = item.getLink("zipball");
 //        assertNotNull(link);

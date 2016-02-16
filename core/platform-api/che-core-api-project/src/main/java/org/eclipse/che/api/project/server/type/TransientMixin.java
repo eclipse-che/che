@@ -29,4 +29,6 @@ public abstract class TransientMixin extends ProjectTypeDef {
     protected TransientMixin(String id, String displayName) {
         super(id, displayName, false, true, false);
     }
+
+
 }

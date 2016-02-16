@@ -8,7 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.type;
+
+import org.eclipse.che.api.project.server.ValueStorageException;
 
 import java.util.List;
 
@@ -28,5 +30,5 @@ public interface ValueProvider {
      * The method should also takes care about creating persistent storage for values if needed.
      * For instance create file for attributes if not found etc.
      */
-    void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException;
+    //void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException;
 }

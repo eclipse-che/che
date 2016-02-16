@@ -8,29 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.project.type;
+package org.eclipse.che.api.project.shared.dto.event;
 
-import java.util.List;
+import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherEventType;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Attribute value
  * @author gazarenkov
  */
-public interface Value {
+@EventOrigin("vfs")
+@DTO
+public interface VfsWatchEvent {
 
-    /**
-     * @return value as String. If attribute has multiple values it returns first one.
-     */
-    String getString();
+    String VFS_CHANNEL = "vfs";
 
-    /**
-     * @return value as list of strings
-     */
-    List<String> getList();
+    String getPath();
 
-    /**
-     * @return whether the value is not initialized
-     */
-    boolean isEmpty();
+    VfsWatchEvent withPath(String path);
+
+
+    FileWatcherEventType getType();
+
+    VfsWatchEvent withType(FileWatcherEventType type);
+
+
+    boolean isFile();
+
+    VfsWatchEvent withFile(boolean isFile);
 
 }

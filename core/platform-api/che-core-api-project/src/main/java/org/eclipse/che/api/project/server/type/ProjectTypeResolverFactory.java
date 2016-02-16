@@ -8,19 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.type;
+
+import org.eclipse.che.api.project.server.FolderEntry;
 
 /**
- * Factory for {@link ValueProvider}.
- *
- * @author andrew00x
+ * @author gazarenkov
  */
-public interface ValueProviderFactory {
+public interface ProjectTypeResolverFactory {
 
-    /**
-     * Create new instance of ValueProvider2. Project is used for access to low-level information about project.
-     *
-     * @param projectFolder
-     */
-    ValueProvider newInstance(FolderEntry projectFolder);
+    ProjectTypeResolver newInstance(FolderEntry projectFolder);
+
+
 }

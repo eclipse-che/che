@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.importer;
 
 import org.eclipse.che.api.core.util.LineConsumer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;

@@ -32,7 +32,7 @@ public interface ProjectConfig {
 
     Map<String, List<String>> getAttributes();
 
-    List<? extends ProjectConfig> getModules();
+    //List<? extends ProjectConfig> getModules();
 
     SourceStorage getSource();
 

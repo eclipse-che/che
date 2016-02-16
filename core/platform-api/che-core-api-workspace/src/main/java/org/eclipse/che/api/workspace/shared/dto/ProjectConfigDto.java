@@ -15,10 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.workspace.shared.dto.util.ProjectConfigUtil;
 import org.eclipse.che.dto.shared.DTO;
-import org.eclipse.che.dto.shared.DelegateRule;
-import org.eclipse.che.dto.shared.DelegateTo;
 
 import java.util.List;
 import java.util.Map;
@@ -79,12 +76,12 @@ public interface ProjectConfigDto extends ProjectConfig {
 
     ProjectConfigDto withAttributes(Map<String, List<String>> attributes);
 
-    @Override
-    List<ProjectConfigDto> getModules();
-
-    void setModules(List<ProjectConfigDto> modules);
-
-    ProjectConfigDto withModules(List<ProjectConfigDto> modules);
+//    @Override
+//    List<ProjectConfigDto> getModules();
+//
+//    void setModules(List<ProjectConfigDto> modules);
+//
+//    ProjectConfigDto withModules(List<ProjectConfigDto> modules);
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
@@ -111,7 +108,7 @@ public interface ProjectConfigDto extends ProjectConfig {
 
     ProjectConfigDto withProblems(List<ProjectProblemDto> problems);
 
-    @DelegateTo(client = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"),
-                server = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"))
-    ProjectConfigDto findModule(String pathToModule);
+//    @DelegateTo(client = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"),
+//                server = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"))
+//    ProjectConfigDto findModule(String pathToModule);
 }

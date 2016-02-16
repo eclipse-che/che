@@ -8,21 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server.handlers;
+package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-
-import java.util.Map;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 
 /**
  * @author gazarenkov
- * @author Dmitry Shnurenko
  */
-public interface CreateModuleHandler extends ProjectHandler {
+public class ProjectTypeConstraintException extends ConflictException {
 
-    void onCreateModule(FolderEntry parentFolder, String modulePath, String moduleType, Map<String, String> options)
-            throws ForbiddenException, ConflictException, ServerException;
+    public ProjectTypeConstraintException(String message) {
+        super(message);
+    }
+
+    public ProjectTypeConstraintException(ServiceError serviceError) {
+        super(serviceError);
+    }
 }

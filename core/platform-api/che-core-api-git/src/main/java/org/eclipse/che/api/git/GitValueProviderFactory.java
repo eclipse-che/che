@@ -18,8 +18,8 @@ import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.InvalidValueException;
-import org.eclipse.che.api.project.server.ValueProvider;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.ValueStorageException;
 
 import javax.inject.Singleton;

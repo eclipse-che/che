@@ -28,7 +28,7 @@ import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.InitRequest;
 import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;

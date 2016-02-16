@@ -12,7 +12,7 @@ package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
+import org.eclipse.che.api.project.server.FolderEntry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -155,5 +155,23 @@ public abstract class ProjectTypeDef implements ProjectType {
     void addAncestor(String ancestor) {
         this.ancestors.add(ancestor);
     }
+
+    public ProjectTypeResolverFactory getResolverFactory() {
+        // TODO rework default behaviour
+        return DEFAULT_RESOLVER_FACTORY;
+    }
+
+
+    protected static final ProjectTypeResolverFactory DEFAULT_RESOLVER_FACTORY = new ProjectTypeResolverFactory() {
+        @Override
+        public ProjectTypeResolver newInstance(FolderEntry projectFolder) {
+            return new ProjectTypeResolver() {
+                @Override
+                public boolean resolve() {
+                    return false;
+                }
+            };
+        }
+    };
 
 }

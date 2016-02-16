@@ -45,7 +45,7 @@ public class WorkspaceHolder {
 
     private String apiEndpoint;
 
-    private final UsersWorkspaceImpl workspace;
+    protected final UsersWorkspaceImpl workspace;
 
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
@@ -86,7 +86,7 @@ public class WorkspaceHolder {
      * @param projects
      * @throws ServerException
      */
-    public void updateProjects(Collection<ProjectImpl> projects) throws ServerException {
+    public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
 
 
         workspace.setProjects(new ArrayList<>(projects));
@@ -105,12 +105,13 @@ public class WorkspaceHolder {
         }
 
         // sync local projects
-        for (ProjectImpl project : projects) {
+        for (RegisteredProject project : projects) {
             if(!project.isSynced())
                 project.setSync();
         }
 
     }
+
 
     /**
      * @param wsId
@@ -132,7 +133,7 @@ public class WorkspaceHolder {
     }
 
 
-    private static class UsersWorkspaceImpl implements UsersWorkspace {
+    protected static class UsersWorkspaceImpl implements UsersWorkspace {
 
         private final UsersWorkspaceDto dto;
 
@@ -199,8 +200,17 @@ public class WorkspaceHolder {
             return dto.getAttributes();
         }
 
-        public void setProjects(List<ProjectImpl> projects) {
-            this.projects = projects;
+        public void setProjects(final List<RegisteredProject> projects) {
+
+            List<ProjectConfig> p = new ArrayList<>();
+            for(RegisteredProject project : projects) {
+                ProjectConfig config = new NewProjectConfig(project.getPath(), project.getType(), project.getMixins(),
+                        project.getName(), project.getDescription(), project.getPersistableAttributes(),
+                        project.getSource());
+                p.add(config);
+            }
+            this.projects = p;
+
         }
     }
 

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.server.template;
 
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;

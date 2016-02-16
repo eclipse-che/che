@@ -13,13 +13,12 @@ package org.eclipse.che.api.project.server;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.shared.dto.SourceEstimation;
+import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -29,26 +28,27 @@ import java.util.Map;
  */
 public class ProjectTypes {
 
-    private final ProjectConfig  projectConfig;
-    private final ProjectManager manager;
+    //private final ProjectConfig  projectConfig;
+
+    private final String projectPath;
+    private final ProjectTypeRegistry projectTypeRegistry;
     private final ProjectTypeDef primary;
     private final Map<String, ProjectTypeDef> mixins        = new HashMap<>();
     private final Map<String, ProjectTypeDef> all           = new HashMap<>();
     private final Map<String, Attribute>      attributeDefs = new HashMap<>();
 
-    public ProjectTypes(ProjectConfig projectConfig, ProjectManager manager) throws ProjectTypeConstraintException,
-                                                                                    NotFoundException {
-        this.manager = manager;
-        this.projectConfig = projectConfig;
+    public ProjectTypes(String projectPath, String type, List<String> mixinTypes, ProjectTypeRegistry projectTypeRegistry) throws
+                                                                                                                           ProjectTypeConstraintException,
+                                                                                                                           NotFoundException {
+        this.projectTypeRegistry = projectTypeRegistry;
+        this.projectPath = projectPath;
 
-        String projectType = projectConfig.getType();
 
-
-        if (projectType == null) {
-            throw new ProjectTypeConstraintException("No primary type defined for " + projectConfig.getPath());
+        if (type == null) {
+            throw new ProjectTypeConstraintException("No primary type defined for " + projectPath);
         }
 
-        primary = manager.getProjectTypeRegistry().getProjectType(projectType);
+        primary = projectTypeRegistry.getProjectType(type);
 
         if (!primary.isPrimaryable()) {
             throw new ProjectTypeConstraintException("Project type " + primary.getId() + " is not allowable to be primary type");
@@ -56,7 +56,8 @@ public class ProjectTypes {
 
         all.put(primary.getId(), primary);
 
-        List<String> mixinsFromConfig = projectConfig.getMixins();
+        List<String> mixinsFromConfig = mixinTypes;
+                //projectConfig.getMixins();
 
         if (mixinsFromConfig == null) {
             mixinsFromConfig = new ArrayList<>();
@@ -71,7 +72,7 @@ public class ProjectTypes {
 
         for (String mixinFromConfig : mixinsFromConfig) {
             if (!mixinFromConfig.equals(primary.getId())) {
-                ProjectTypeDef mixin = manager.getProjectTypeRegistry().getProjectType(mixinFromConfig);
+                ProjectTypeDef mixin = projectTypeRegistry.getProjectType(mixinFromConfig);
 //                if (mixin == null) {
 //                    throw new ProjectTypeConstraintException("No project type registered for " + mixinFromConfig);
 //                }
@@ -83,7 +84,7 @@ public class ProjectTypes {
                 for (Attribute attr : mixin.getAttributes()) {
                     if (attributeDefs.containsKey(attr.getName())) {
                         throw new ProjectTypeConstraintException(
-                                "Attribute name conflict. Duplicated attributes detected " + projectConfig.getPath() +
+                                "Attribute name conflict. Duplicated attributes detected " + projectPath +
                                 " Attribute " + attr.getName() + " declared in " + mixin.getId() + " already declared in " +
                                 attributeDefs.get(attr.getName()).getProjectType()
                         );
@@ -115,39 +116,22 @@ public class ProjectTypes {
         return all;
     }
 
-    void removeTransient() {
-        HashSet<String> toRemove = new HashSet<>();
-        for (ProjectTypeDef mt : all.values()) {
-            if (!mt.isPersisted())
-                toRemove.add(mt.getId());
-        }
 
-        for (String id : toRemove) {
-            all.remove(id);
-            mixins.remove(id);
-        }
-    }
+    void addTransient(FolderEntry projectFolder) throws ServerException, NotFoundException, ProjectTypeConstraintException {
 
-    void addTransient() throws ServerException, NotFoundException, ProjectTypeConstraintException {
-        List<SourceEstimation> estimations;
-        try {
-            estimations = manager.resolveSources(projectConfig.getPath(), true);
-        } catch (Exception e) {
-            throw new ServerException(e);
-        }
-        for (SourceEstimation est : estimations) {
-            ProjectTypeDef type = manager.getProjectTypeRegistry().getProjectType(est.getType());
 
+        for (ProjectTypeDef pt : projectTypeRegistry.getProjectTypes()) {
             // NOTE: Only mixable types allowed
-            if (type.isMixable()) {
-                all.put(type.getId(), type);
-                mixins.put(type.getId(), type);
+            if (pt.isMixable() && !pt.isPersisted() &&
+                pt.getResolverFactory().newInstance(projectFolder).resolve()) {
 
-                for (Attribute attr : type.getAttributes()) {
+                all.put(pt.getId(), pt);
+                mixins.put(pt.getId(), pt);
+                for (Attribute attr : pt.getAttributes()) {
                     if (attributeDefs.containsKey(attr.getName())) {
                         throw new ProjectTypeConstraintException(
-                                "Attribute name conflict. Duplicated attributes detected " + projectConfig.getPath() +
-                                " Attribute " + attr.getName() + " declared in " + type.getId() + " already declared in " +
+                                "Attribute name conflict. Duplicated attributes detected " + projectPath +
+                                " Attribute " + attr.getName() + " declared in " + pt.getId() + " already declared in " +
                                 attributeDefs.get(attr.getName()).getProjectType()
                         );
                     }
@@ -159,7 +143,38 @@ public class ProjectTypes {
         }
     }
 
-    List<String> mixinIds() {
-        return new ArrayList<>(mixins.keySet());
-    }
+
+//        List<SourceEstimation> estimations;
+//        try {
+//            estimations = manager.resolveSources(projectConfig.getPath(), true);
+//        } catch (Exception e) {
+//            throw new ServerException(e);
+//        }
+//        for (SourceEstimation est : estimations) {
+//            ProjectTypeDef type = projectTypeRegistry.getProjectType(est.getType());
+//
+//            // NOTE: Only mixable types allowed
+//            if (type.isMixable()) {
+//                all.putProject(type.getId(), type);
+//                mixins.putProject(type.getId(), type);
+//
+//                for (Attribute attr : type.getAttributes()) {
+//                    if (attributeDefs.containsKey(attr.getName())) {
+//                        throw new ProjectTypeConstraintException(
+//                                "Attribute name conflict. Duplicated attributes detected " + projectConfig.getPath() +
+//                                " Attribute " + attr.getName() + " declared in " + type.getId() + " already declared in " +
+//                                attributeDefs.get(attr.getName()).getProjectType()
+//                        );
+//                    }
+//
+//                    attributeDefs.putProject(attr.getName(), attr);
+//                }
+//
+//            }
+//        }
+//    }
+
+//    List<String> mixinIds() {
+//        return new ArrayList<>(mixins.keySet());
+//    }
 }

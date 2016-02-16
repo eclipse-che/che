@@ -85,6 +85,25 @@ public class FolderEntry extends VirtualFileEntry {
             return new FolderEntry(child, project);
     }
 
+
+    /**
+     * Get child by relative path.
+     *
+     * @param path
+     *         relative path
+     * @return child folder if found
+     * @throws ServerException
+     *         if other error occurs
+     */
+    public FolderEntry getChildFolder(String path) throws ServerException {
+        final VirtualFile child = getVirtualFile().getChild(Path.of(path));
+
+        if (child == null || child.isFile())
+            return null;
+        else
+            return new FolderEntry(child, project);
+    }
+
     /**
      * Get children of this folder. If current user doesn't have read access to some child they aren't added in result list.
      *

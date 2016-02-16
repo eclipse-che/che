@@ -11,12 +11,12 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -41,7 +41,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_CHILDREN;
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_DELETE;
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_GET_CONTENT;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_MODULES;
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_TREE;
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_CONTENT;
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_PROJECT;
@@ -125,10 +124,9 @@ public class DtoConverter {
      * @return an instance of {@link ProjectConfigDto}
      * @throws InvalidValueException
      */
-    public static ProjectConfigDto toProjectConfig(ProjectImpl project, String workspace,
+    public static ProjectConfigDto toProjectConfig(RegisteredProject project, String workspace,
                                                    UriBuilder serviceUriBuilder) throws ForbiddenException,
                                                                                         ServerException,
-                                                                                        NotFoundException,
                                                                                         ValueStorageException {
         ProjectConfigDto projectConfigDto = newDto(ProjectConfigDto.class);
 
@@ -140,19 +138,19 @@ public class DtoConverter {
         List <String> mixins = project.getMixinTypes().keySet().stream().collect(Collectors.toList());
         projectConfigDto.withMixins(mixins);
 
-        projectConfigDto.withAttributes(project.getPersistableAttributes());
+        projectConfigDto.withAttributes(project.getAttributes());
 
-        List<ProjectConfigDto> modules = new ArrayList<>();
-        for(String projPath : project.getModulePaths()) {
-            modules.add(toProjectConfig(project.getManager().getProject(projPath), workspace, serviceUriBuilder));
-        }
-        projectConfigDto.withModules(modules);
+//        List<ProjectConfigDto> modules = new ArrayList<>();
+//        for(String projPath : project.getModulePaths()) {
+//            modules.add(toProjectConfig(project.getRegistry().getProject(projPath), workspace, serviceUriBuilder));
+//        }
+//        projectConfigDto.withModules(modules);
 
         projectConfigDto.withType(project.getProjectType().getId());
         projectConfigDto.withSource(toSourceDto(project.getSource()));
 
 
-        for (ProjectImpl.Problem p : project.getProblems()) {
+        for (RegisteredProject.Problem p : project.getProblems()) {
             ProjectProblemDto projectProblem = newDto(ProjectProblemDto.class).withCode(p.code).withMessage(p.message);
             projectConfigDto.getProblems().add(projectProblem);
         }
@@ -178,7 +176,7 @@ public class DtoConverter {
         return storageDto;
     }
 
-    private static List<Link> generateProjectLinks(ProjectImpl project, String workspace, UriBuilder uriBuilder) {
+    private static List<Link> generateProjectLinks(RegisteredProject project, String workspace, UriBuilder uriBuilder) {
         final List<Link> links = generateFolderLinks(project.getBaseFolder(), workspace, uriBuilder);
         final String relPath = project.getPath().substring(1);
         links.add(LinksHelper.createLink(PUT,
@@ -207,9 +205,9 @@ public class DtoConverter {
                 LinksHelper.createLink(GET, uriBuilder.clone().path(ProjectService.class, "getTree").build(workspace, relPath).toString(),
                                        null, APPLICATION_JSON, LINK_REL_TREE)
         );
-        links.add(LinksHelper.createLink(GET,
-                                         uriBuilder.clone().path(ProjectService.class, "getModules").build(workspace, relPath).toString(),
-                                         APPLICATION_JSON, LINK_REL_MODULES));
+//        links.add(LinksHelper.createLink(GET,
+//                                         uriBuilder.clone().path(ProjectService.class, "getModules").build(workspace, relPath).toString(),
+//                                         APPLICATION_JSON, LINK_REL_MODULES));
         links.add(LinksHelper.createLink(DELETE,
                                          uriBuilder.clone().path(ProjectService.class, "delete").build(workspace, relPath).toString(),
                                          LINK_REL_DELETE));
