@@ -37,7 +37,7 @@ public class CustomSerializersTest {
 
     @Test(expectedExceptions = JsonParseException.class)
     public void deserializeGroupsWithInvalidJson() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(Group.class, new GroupSerializer()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Group.class, new GroupAdapter()).create();
 
         gson.fromJson("\\/*=invalid.", Group.class);
     }
@@ -46,7 +46,7 @@ public class CustomSerializersTest {
     public void deserializeGroupsWithValidJson() {
         String name = "group";
         String unit = "test";
-        Gson gson = new GsonBuilder().registerTypeAdapter(Group.class, new GroupSerializer()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Group.class, new GroupAdapter()).create();
         Group group = new GroupImpl(name, unit, Collections.emptyList());
 
         GroupImpl res = (GroupImpl)gson.fromJson(gson.toJson(group), Group.class);
@@ -57,7 +57,7 @@ public class CustomSerializersTest {
 
     @Test(expectedExceptions = JsonParseException.class)
     public void deserializePermissionsWithInvalidJson() {
-        Gson gson = new GsonBuilder().registerTypeAdapter(Permissions.class, new PermissionsSerializer()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Permissions.class, new PermissionsAdapter()).create();
 
         gson.fromJson("\\/*=invalid.", Group.class);
     }
@@ -69,8 +69,8 @@ public class CustomSerializersTest {
         groups.add(new GroupImpl("public", null, asList("read", "search")));
         PermissionsImpl permissions = new PermissionsImpl(null, groups);
         Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Group.class, new GroupSerializer())
-                .registerTypeAdapter(Permissions.class, new PermissionsSerializer())
+                .registerTypeAdapter(Group.class, new GroupAdapter())
+                .registerTypeAdapter(Permissions.class, new PermissionsAdapter())
                 .create();
 
         Permissions res = gson.fromJson(gson.toJson(permissions, Permissions.class), Permissions.class);

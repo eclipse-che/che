@@ -1,0 +1,700 @@
+[
+  {
+    "id": "java-default",
+    "creator": "ide",
+    "name": "Java",
+    "description": "Default Java Stack with JDK 8, Maven and Tomcat.",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "Subversion",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "newMaven",
+          "type": "mvn"
+        }
+      ]
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "node-default",
+    "creator": "ide",
+    "name": "Node",
+    "description": "Default Node Stack with Node 0.12.",
+    "scope": "general",
+    "tags": [
+      "Ubuntu",
+      "Git",
+      "Node.JS",
+      "NPM",
+      "Gulp",
+      "Bower",
+      "Grunt",
+      "Yeoman",
+      "Angular",
+      "Karma"
+    ],
+    "components": [
+      {
+        "name": "Node.JS",
+        "version": "0.12.9"
+      },
+      {
+        "name": "NPM",
+        "version": "---"
+      },
+      {
+        "name": "Gulp",
+        "version": "---"
+      },
+      {
+        "name": "Bower",
+        "version": "---"
+      },
+      {
+        "name": "Grunt",
+        "version": "---"
+      },
+      {
+        "name": "Yeoman",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/node"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-node.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "php-default",
+    "creator": "ide",
+    "name": "PHP",
+    "description": "Default PHP Stack with PHP 5.5, most popular extensions and composer.",
+    "scope": "general",
+    "tags": [
+      "Ubuntu",
+      "Git",
+      "PHP",
+      "mysql",
+      "sqlite",
+      "Apaide",
+      "Composer"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "5.5.9"
+      },
+      {
+        "name": "Apaide",
+        "version": "2"
+      },
+      {
+        "name": "MySQL",
+        "version": "---"
+      },
+      {
+        "name": "Sqlite",
+        "version": "---"
+      },
+      {
+        "name": "Composer",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/php"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-php.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "aspnet-default",
+    "creator": "ide",
+    "name": "ASP.net",
+    "description": "Default ASP.net Stack with DNX and libuv.",
+    "scope": "general",
+    "tags": [
+      "Debian",
+      "ASP",
+      "Git",
+      "mono",
+      "libc6",
+      "dnx",
+      "libuv"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "7.9"
+      },
+      {
+        "name": "Mono",
+        "version": "4.0.5.1"
+      },
+      {
+        "name": "DNX",
+        "version": "1.0.0-rc1-final"
+      },
+      {
+        "name": "libuv",
+        "version": "1.4.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/aspnet"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-aspnet.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "java-debian",
+    "creator": "ide",
+    "name": "Java Debian",
+    "description": "Java JDK Stack on Debian.",
+    "scope": "advanced",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "Debian",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "jessie"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/debian_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "newMaven",
+          "type": "mvn"
+        }
+      ]
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "selenium",
+    "creator": "ide",
+    "name": "Selenium",
+    "description": "Stack with Selenium and Chrome on Ubuntu.",
+    "scope": "advanced",
+    "tags": [
+      "Selenium",
+      "Ubuntu",
+      "Chrome",
+      "noVNC",
+      "xserver",
+      "blackbox",
+      "webdriver",
+      "x11vnc"
+    ],
+    "components": [
+      {
+        "name": "noVNC",
+        "version": "---"
+      },
+      {
+        "name": "Selenium webdriver",
+        "version": "---"
+      },
+      {
+        "name": "Google Chrome",
+        "version": "---"
+      },
+      {
+        "name": "Blackbox",
+        "version": "---"
+      },
+      {
+        "name": "Supervisor",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/selenium"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    }
+  },
+  {
+    "id": "debian",
+    "creator": "ide",
+    "name": "Debian",
+    "description": "Simple stack with Debian (Jessie).",
+    "scope": "advanced",
+    "tags": [
+      "Debian"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "Jessie"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/debian_jre"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    }
+  },
+  {
+    "id": "ubuntu",
+    "creator": "ide",
+    "name": "Ubuntu",
+    "description": "Simple stack with Ubuntu (latest).",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu"
+    ],
+    "components": [
+      {
+        "name": "Ubuntu",
+        "version": "---"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jre"
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    }
+  },
+  {
+    "id": "java-centos",
+    "creator": "ide",
+    "name": "Java CentOS",
+    "description": "Java JDK Stack on CentOS.",
+    "scope": "advanced",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "CentOS",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "CentOS",
+        "version": "---"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/centos_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "newMaven",
+          "type": "mvn"
+        }
+      ]
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  }
+]
