@@ -13,6 +13,7 @@ package org.eclipse.che.ide.projectimport.wizard.presenter;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
@@ -48,6 +49,7 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
     private final ImportWizardFactory                          importWizardFactory;
     private final ImportProjectWizardView                      view;
     private final Provider<MainPagePresenter>                  mainPageProvider;
+    private final CoreLocalizationConstant                     locale;
     private final ImportWizardRegistry                         wizardRegistry;
     private final Map<ProjectImporterDescriptor, ImportWizard> wizardsCache;
 
@@ -58,12 +60,14 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
     @Inject
     public ImportProjectWizardPresenter(ImportProjectWizardView view,
                                         MainPagePresenter mainPage,
+                                        CoreLocalizationConstant locale,
                                         Provider<MainPagePresenter> mainPageProvider,
                                         ImportWizardRegistry wizardRegistry,
                                         DialogFactory dialogFactory,
                                         DtoFactory dtoFactory,
                                         ImportWizardFactory importWizardFactory) {
         this.view = view;
+        this.locale = locale;
         this.wizardRegistry = wizardRegistry;
         this.mainPage = mainPage;
         this.mainPageProvider = mainPageProvider;
@@ -102,7 +106,7 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
             @Override
             public void onFailure(Throwable e) {
                 view.setLoaderVisibility(false);
-                dialogFactory.createMessageDialog("", e.getMessage(), null).show();
+                dialogFactory.createMessageDialog(locale.importProjectViewTitle(), e.getMessage(), null).show();
             }
         });
     }
