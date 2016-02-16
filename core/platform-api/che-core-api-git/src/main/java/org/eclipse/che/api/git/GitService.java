@@ -184,19 +184,7 @@ public class GitService {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     public Revision commit(CommitRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            Revision revision = gitConnection.commit(request);
-            if (revision.isFake()) {
-                Status status = status(StatusFormat.LONG);
-
-                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                    ((InfoPage)status).writeTo(bos);
-                    revision.setMessage(new String(bos.toByteArray()));
-                } catch (IOException e) {
-                    LOG.error("Cant write to revision", e);
-                    throw new GitException("Cant execute status");
-                }
-            }
-            return revision;
+            return gitConnection.commit(request);
         }
     }
 

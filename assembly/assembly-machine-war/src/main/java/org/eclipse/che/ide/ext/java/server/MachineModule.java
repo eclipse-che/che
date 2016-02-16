@@ -70,6 +70,7 @@ public class MachineModule extends AbstractModule {
 //        install(new MavenModule());
 //        install(new ArchetypeGeneratorModule());
 //        install(new GitHubModule());
+        install(new org.eclipse.che.swagger.deploy.DocsModule());
 
 //        bind(ArchetypeGenerator.class);
 //        bind(DebuggerService.class);

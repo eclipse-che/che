@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit.commands;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.Tag;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Create tag
@@ -40,7 +39,13 @@ public class TagCreateCommand extends GitCommand<Tag> {
     @Override
     public Tag execute() throws GitException {
         if (name == null) {
-            throw new GitException("Name wasn't set.");
+            throw new GitException("Name wasn't set");
+        }
+        if (committer == null) {
+            throw new GitException("Committer can't be null");
+        }
+        if (committer.getName() == null || committer.getEmail() == null) {
+            throw new GitException("Git user name and (or) email wasn't set", ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED);
         }
         reset();
         commandLine.add("tag", name);
@@ -54,12 +59,8 @@ public class TagCreateCommand extends GitCommand<Tag> {
             commandLine.add("--force");
         }
 
-        if (committer != null) {
-            setCommandEnvironment("GIT_COMMITTER_NAME", committer.getName());
-            setCommandEnvironment("GIT_COMMITTER_EMAIL", committer.getEmail());
-        } else {
-            throw new GitException("Committer can't be null");
-        }
+        setCommandEnvironment("GIT_COMMITTER_NAME", committer.getName());
+        setCommandEnvironment("GIT_COMMITTER_EMAIL", committer.getEmail());
 
         start();
         return DtoFactory.getInstance().createDto(Tag.class).withName(name);
