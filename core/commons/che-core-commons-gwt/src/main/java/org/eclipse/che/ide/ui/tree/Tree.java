@@ -443,20 +443,6 @@ public class Tree<D> extends UiComponent<Tree.View<D>> implements IsWidget {
                 }
             }, false);
 
-            EventListener dragDropEventListener = new EventListener() {
-                @Override
-                public void handleEvent(Event event) {
-                    if (getDelegate() != null) {
-                        getDelegate().onDragDropEvent((MouseEvent)event);
-                    }
-                }
-            };
-            getElement().addEventListener(Event.DROP, dragDropEventListener, false);
-            getElement().addEventListener(Event.DRAGOVER, dragDropEventListener, false);
-            getElement().addEventListener(Event.DRAGENTER, dragDropEventListener, false);
-            getElement().addEventListener(Event.DRAGLEAVE, dragDropEventListener, false);
-            getElement().addEventListener(Event.DRAGSTART, dragDropEventListener, false);
-
             getElement().addEventListener(Event.FOCUS, new EventListener() {
                 @Override
                 public void handleEvent(Event event) {

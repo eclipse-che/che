@@ -223,11 +223,6 @@ public class HoverController {
     private void hover() {
         cancelUnhoverTimer();
 
-        // Early exit if already hovering.
-        if (isHovering) {
-            return;
-        }
-
         isHovering = true;
         if (hoverListener != null) {
             hoverListener.onHover();

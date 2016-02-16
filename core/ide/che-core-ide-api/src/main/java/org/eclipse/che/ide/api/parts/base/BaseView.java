@@ -28,6 +28,8 @@ import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.Focusable;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.eclipse.che.ide.ui.Tooltip;
+import org.eclipse.che.ide.ui.menu.PositionController;
 import org.eclipse.che.ide.util.UIUtil;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -90,14 +92,15 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
 
         toolbarHeader = new DockLayoutPanel(Style.Unit.PX);
         toolbarHeader.getElement().setAttribute("role", "toolbar-header");
+        toolBar.addNorth(toolbarHeader, 22);
 
         titleLabel = new Label();
         titleLabel.setStyleName(resources.partStackCss().ideBasePartTitleLabel());
+        toolbarHeader.addWest(titleLabel, 200);
 
         SVGImage minimize = new SVGImage(resources.collapseExpandIcon());
         minimize.getElement().setAttribute("name", "workBenchIconMinimize");
         minimizeButton = new ToolButton(minimize);
-        minimizeButton.setTitle("Hide");
 
         minimizeButton.addClickHandler(new ClickHandler() {
             @Override
@@ -105,11 +108,13 @@ public abstract class BaseView<T extends BaseActionDelegate> extends Composite i
                 minimize();
             }
         });
-        toolbarHeader.addWest(titleLabel, 200);
 
         addToolButton(minimizeButton);
 
-        toolBar.addNorth(toolbarHeader, 22);
+        if (minimizeButton.getElement() instanceof elemental.dom.Element) {
+            Tooltip.create((elemental.dom.Element) minimizeButton.getElement(),
+                PositionController.VerticalAlign.BOTTOM, PositionController.HorizontalAlign.MIDDLE, "Hide");
+        }
     }
 
     /**
