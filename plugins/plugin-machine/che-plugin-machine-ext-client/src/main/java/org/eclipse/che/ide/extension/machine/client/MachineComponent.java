@@ -22,16 +22,16 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.core.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 
 import java.util.List;
 
-import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
+import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 
 /** @author Artem Zatsarynnyi */
 @Singleton
-public class MachineComponent implements Component {
+public class MachineComponent implements WsAgentComponent {
 
     private final MachineServiceClient machineServiceClient;
     private final AppContext           appContext;
@@ -47,7 +47,7 @@ public class MachineComponent implements Component {
     }
 
     @Override
-    public void start(final Callback<Component, Exception> callback) {
+    public void start(final Callback<WsAgentComponent, Exception> callback) {
         machineServiceClient.getMachinesStates(appContext.getWorkspace().getId()).then(new Operation<List<MachineStateDto>>() {
             @Override
             public void apply(List<MachineStateDto> arg) throws OperationException {

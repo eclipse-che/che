@@ -13,7 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.watcher;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.project.gwt.client.watcher.WatcherServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -71,7 +71,7 @@ public class SystemFileWatcherTest {
     @Mock
     private UsersWorkspaceDto        workspace;
     @Mock
-    private ExtServerStateEvent      extServerStateEvent;
+    private WsAgentStateEvent        wsAgentStateEvent;
 
     @Captor
     private ArgumentCaptor<Operation<Void>>             operationCaptor;
@@ -79,7 +79,7 @@ public class SystemFileWatcherTest {
     private ArgumentCaptor<SubscriptionHandler<String>> subscriptionCaptor;
 
     @Captor
-    private ArgumentCaptor<ExtServerStateEvent> extServerStateEventCaptor;
+    private ArgumentCaptor<WsAgentStateEvent> extServerStateEventCaptor;
 
 
     private SystemFileWatcher systemFileWatcher;
@@ -92,7 +92,7 @@ public class SystemFileWatcherTest {
 
         systemFileWatcher = new SystemFileWatcher(watcherService, eventBus, appContext, messageBusProvider, projectExplorer);
 
-        verify(eventBus).addHandler(eq(ExtServerStateEvent.TYPE), eq(systemFileWatcher));
+        verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), eq(systemFileWatcher));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class SystemFileWatcherTest {
 
         when(watcherService.registerRecursiveWatcher(SOME_TEXT)).thenReturn(registerPromise);
 
-        systemFileWatcher.onExtServerStarted(extServerStateEvent);
+        systemFileWatcher.onWsAgentStarted(wsAgentStateEvent);
 
         verify(watcherService).registerRecursiveWatcher(SOME_TEXT);
 

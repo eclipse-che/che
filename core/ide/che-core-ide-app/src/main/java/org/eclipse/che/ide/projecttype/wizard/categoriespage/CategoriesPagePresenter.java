@@ -32,7 +32,7 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar
  * Main page for project wizard.
  *
  * @author Evgen Vidolob
- * @author Artem Zatsarynnyy
+ * @author Artem Zatsarynnyi
  * @author Dmitry Shnurenko
  */
 public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements CategoriesPageView.ActionDelegate {

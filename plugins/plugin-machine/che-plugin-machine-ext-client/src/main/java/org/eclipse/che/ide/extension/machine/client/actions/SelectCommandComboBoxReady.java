@@ -18,8 +18,8 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Function;
@@ -69,7 +69,7 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implements CustomComponentAction,
                                                                                      EditCommandsPresenter.ConfigurationChangedListener,
                                                                                      CloseCurrentProjectHandler,
-                                                                                     ExtServerStateHandler,
+                                                                                     WsAgentStateHandler,
                                                                                      DropDownHeaderWidget.ActionDelegate {
 
     public static final  String                           GROUP_COMMANDS     = "CommandsGroup";
@@ -121,7 +121,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
 
         commands = new LinkedList<>();
 
-        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         editCommandsPresenter.addConfigurationsChangedListener(this);
 
         commandActions = new DefaultActionGroup(GROUP_COMMANDS, false, actionManager);
@@ -331,12 +331,12 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
     }
 
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
         loadCommands(null);
     }
 
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
 
     }
 

@@ -14,7 +14,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.action.Action;
@@ -122,7 +122,7 @@ public class AppStateManagerTest {
     public void shouldSubscribeOnEventBus() {
         verify(eventBus).addHandler(StopWorkspaceEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(WindowActionEvent.TYPE, appStateManager);
-        verify(eventBus).addHandler(ExtServerStateEvent.TYPE, appStateManager);
+        verify(eventBus).addHandler(WsAgentStateEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(ProjectExplorerLoadedEvent.getType(), appStateManager);
     }
 

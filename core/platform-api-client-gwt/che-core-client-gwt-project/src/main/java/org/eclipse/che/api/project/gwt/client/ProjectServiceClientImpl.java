@@ -14,7 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.gwt.client.ExtServerStateController;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
@@ -62,23 +62,23 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  * @author Valeriy Svydenko
  */
 public class ProjectServiceClientImpl implements ProjectServiceClient {
-    private final ExtServerStateController extServerStateController;
-    private final LoaderFactory            loaderFactory;
-    private final AsyncRequestFactory      asyncRequestFactory;
-    private final DtoFactory               dtoFactory;
-    private final DtoUnmarshallerFactory   dtoUnmarshaller;
+    private final WsAgentStateController wsAgentStateController;
+    private final LoaderFactory          loaderFactory;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final DtoFactory             dtoFactory;
+    private final DtoUnmarshallerFactory dtoUnmarshaller;
 
     private final String extPath;
 
     @Inject
-    protected ProjectServiceClientImpl(ExtServerStateController extServerStateController,
+    protected ProjectServiceClientImpl(WsAgentStateController wsAgentStateController,
                                        LoaderFactory loaderFactory,
                                        AsyncRequestFactory asyncRequestFactory,
                                        DtoFactory dtoFactory,
                                        DtoUnmarshallerFactory dtoUnmarshaller,
                                        @Named("cheExtensionPath") String extPath) {
         this.extPath = extPath;
-        this.extServerStateController = extServerStateController;
+        this.wsAgentStateController = wsAgentStateController;
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoFactory = dtoFactory;
@@ -372,7 +372,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
                 MessageBuilder builder = new MessageBuilder(POST, requestUrl.toString());
                 builder.data(dtoFactory.toJson(sourceStorage)).header(CONTENTTYPE, APPLICATION_JSON);
                 final Message message = builder.build();
-                extServerStateController.getMessageBus().then(new Operation<MessageBus>() {
+                wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
                     @Override
                     public void apply(MessageBus messageBus) throws OperationException {
                         try {
@@ -402,7 +402,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     }
 
     private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
-        extServerStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 try {

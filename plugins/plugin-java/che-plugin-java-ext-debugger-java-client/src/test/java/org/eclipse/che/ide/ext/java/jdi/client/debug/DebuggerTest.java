@@ -13,8 +13,8 @@ package org.eclipse.che.ide.ext.java.jdi.client.debug;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.googlecode.gwt.test.utils.GwtReflectionUtils;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
@@ -111,7 +111,7 @@ public class DebuggerTest extends BaseTest {
     private DebuggerInfo                        debuggerInfo;
 
     @Captor
-    private ArgumentCaptor<ExtServerStateHandler> extServerStateHandlerCaptor;
+    private ArgumentCaptor<WsAgentStateHandler> extServerStateHandlerCaptor;
 
     @InjectMocks
     private DebuggerPresenter presenter;
@@ -133,8 +133,8 @@ public class DebuggerTest extends BaseTest {
         when(localStorage.getItem(DebuggerPresenter.LOCAL_STORAGE_DEBUGGER_KEY)).thenReturn(DEBUG_INFO);
         when(dtoFactory.createDtoFromJson(DEBUG_INFO, DebuggerInfo.class)).thenReturn(debuggerInfo);
 
-        verify(eventBus).addHandler(eq(ExtServerStateEvent.TYPE), extServerStateHandlerCaptor.capture());
-        extServerStateHandlerCaptor.getValue().onExtServerStarted(ExtServerStateEvent.createExtServerStartedEvent());
+        verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
+        extServerStateHandlerCaptor.getValue().onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
     }
 
     @Test
