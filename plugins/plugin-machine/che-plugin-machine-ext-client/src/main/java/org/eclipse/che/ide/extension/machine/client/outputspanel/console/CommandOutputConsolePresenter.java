@@ -36,6 +36,9 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter.PREVIEW_URL_ATTR;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Console for command output.
  *
@@ -51,11 +54,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final EventBus               eventBus;
     private final String                 machineId;
 
-    private MessageBus     messageBus;
-    private int            pid;
-    private String         outputChannel;
-    private MessageHandler outputHandler;
-    private boolean        isFinished;
+    private MessageBus                   messageBus;
+    private int                          pid;
+    private String                       outputChannel;
+    private MessageHandler               outputHandler;
+    private boolean                      finished;
+
+    private List<ConsoleOutputListener>  outputListenes = new ArrayList<>();
 
     @Inject
     public CommandOutputConsolePresenter(OutputConsoleView view,
@@ -113,6 +118,10 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
             @Override
             protected void onMessageReceived(String result) {
                 view.print(result, result.endsWith("\r"));
+
+                for (ConsoleOutputListener listener : outputListenes) {
+                    listener.onConsoleOutput(CommandOutputConsolePresenter.this);
+                }
             }
 
             @Override
@@ -143,12 +152,14 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
                 switch (result.getEventType()) {
                     case STOPPED:
-                        isFinished = true;
-                        eventBus.fireEvent(new ProcessFinishedEvent());
-                    case ERROR:
-                        isFinished = true;
+                        finished = true;
+                        eventBus.fireEvent(new ProcessFinishedEvent(null));
+                        break;
 
-                        eventBus.fireEvent(new ProcessFinishedEvent());
+                    case ERROR:
+                        finished = true;
+
+                        eventBus.fireEvent(new ProcessFinishedEvent(null));
 
                         wsUnsubscribe(processStateChannel, this);
                         wsUnsubscribe(outputChannel, outputHandler);
@@ -158,12 +169,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                             return;
                         }
                         view.print(error, false);
+                        break;
                 }
             }
 
             @Override
             protected void onErrorReceived(Throwable exception) {
-                isFinished = true;
+                finished = true;
                 wsUnsubscribe(processStateChannel, this);
                 wsUnsubscribe(outputChannel, outputHandler);
             }
@@ -190,12 +202,22 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public boolean isFinished() {
-        return isFinished;
+        return finished;
     }
 
     @Override
-    public void onClose() {
+    public void stop() {
         machineServiceClient.stopProcess(machineId, pid);
+    }
+
+    @Override
+    public void close() {
+        outputListenes.clear();
+    }
+
+    @Override
+    public void addOutputListener(ConsoleOutputListener listener) {
+        outputListenes.add(listener);
     }
 
 }

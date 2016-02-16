@@ -846,6 +846,11 @@ public class DarkTheme implements Theme {
         return "white";
     }
 
+    @Override
+    public String processBadgeBorderColor() {
+        return "#292C2F";
+    }
+
     public String getPopupBkgColor() {
         return "#292c2f";
     }

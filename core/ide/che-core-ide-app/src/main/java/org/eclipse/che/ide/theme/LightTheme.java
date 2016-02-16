@@ -823,6 +823,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String processBadgeBorderColor() {
+        return "white";
+    }
+
+    @Override
     public String getPopupBkgColor() {
         return "#ececec";
     }

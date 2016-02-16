@@ -49,6 +49,8 @@ public class ProcessTreeNode {
     private final Collection<ProcessTreeNode>      children;
     private       TreeNodeElement<ProcessTreeNode> treeNodeElement;
 
+    private boolean                                hasUnreadContent;
+
     @Inject
     public ProcessTreeNode(@Assisted ProcessNodeType type,
                            @Assisted ProcessTreeNode parent,
@@ -123,4 +125,13 @@ public class ProcessTreeNode {
     public void setTreeNodeElement(@NotNull TreeNodeElement<ProcessTreeNode> treeNodeElement) {
         this.treeNodeElement = treeNodeElement;
     }
+
+    public boolean hasUnreadContent() {
+        return hasUnreadContent;
+    }
+
+    public void setHasUnreadContent(boolean hasUnreadContent) {
+        this.hasUnreadContent = hasUnreadContent;
+    }
+
 }

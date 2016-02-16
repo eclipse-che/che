@@ -19,6 +19,7 @@
 @eval editorTabIconColor org.eclipse.che.ide.api.theme.Style.getEditorTabIconColor();
 @eval outputBoxShadow org.eclipse.che.ide.api.theme.Style.theme.outputBoxShadow();
 @eval processTreeDevLabel org.eclipse.che.ide.api.theme.Style.theme.processTreeDevLabel();
+@eval processBadgeBorderColor org.eclipse.che.ide.api.theme.Style.theme.processBadgeBorderColor();
 
 @external .terminal, .terminal-cursor;
 
@@ -229,6 +230,9 @@
     height: 100%;
 }
 
+.processTree .processTreeNode {
+}
+
 .processTree .devMachineLabel {
     background-color: primaryHighlightColor;
     color: processTreeDevLabel;
@@ -236,9 +240,13 @@
     line-height: smallFontSize;
     font-size: 9px;
     padding: 1px 2px;
-    margin: 0px 5px;
     font-weight: bold;
     border-radius: 1.5px;
+    padding-bottom: 0px;
+    margin-right: 5px;
+    margin-left: 3px;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .processTree span {
@@ -255,7 +263,6 @@
     height: 10px;
     border-radius: 5px;
     margin: 4px 5px;
-
     background-color: #46AF00;
     border: 1px solid #7ED321;
     box-sizing: border-box;
@@ -298,8 +305,38 @@
 }
 
 .processTree .processIcon {
-    margin: 0px 5px;
-    height: 100%;
+    height: 16px;
+    margin-top: 1px;
+    margin-left: 5px;
+    margin-right: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.processTree .processIconPanel {
+    display: inline-block;
+    width: 16px;
+    height: 14px;
+    position: relative;
+    left: 0px;
+    top: 2px;
+}
+
+.processTree .processBadge {
+    position: absolute;
+    left: 9px;
+    top: 1px;
+    width: 7px;
+    height: 7px;
+    border-radius: 3px;
+    background-color: #4EABFF;
+    border: 1px solid processBadgeBorderColor;
+    box-sizing: border-box;
+    display: none;
+ }
+
+.processTree .badgeVisible .processBadge {
+    display: block;
 }
 
 .processIcon svg {
@@ -307,7 +344,9 @@
     width: 12px;
     height: 12px;
     vertical-align: middle;
-    padding: 0 1px 2px 0;
+    position: absolute;
+    left: 2px;
+    top: 2px;
 }
 
 .processIcon svg path {
@@ -363,7 +402,7 @@ div.processHeaderTitle {
     cursor: pointer;
     opacity: 0.5;
     padding-top: 6px;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
     padding-left: 8px;
     padding-right: 9px;
     float: right;

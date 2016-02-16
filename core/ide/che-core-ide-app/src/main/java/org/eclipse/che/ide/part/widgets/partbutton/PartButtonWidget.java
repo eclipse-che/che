@@ -150,8 +150,9 @@ public class PartButtonWidget extends Composite implements PartButton {
 
         s.setProperty("color", org.eclipse.che.ide.api.theme.Style.getBadgeFontColor());
 
-        s.setProperty("left", "13px");
+        s.setProperty("left", "15px");
         s.setProperty("top", "3px");
+
         s.setProperty("borderWidth", "1.5px");
         s.setProperty("borderStyle", "solid");
 

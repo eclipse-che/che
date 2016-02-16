@@ -16,7 +16,18 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author Dmitry Shnurenko
  */
 public class ProcessFinishedEvent extends GwtEvent<ProcessFinishedHandler> {
+
     public static final Type<ProcessFinishedHandler> TYPE = new Type<>();
+
+    private final String processID;
+
+    public ProcessFinishedEvent(String processID) {
+        this.processID = processID;
+    }
+
+    public String getProcessID() {
+        return processID;
+    }
 
     @Override
     public Type<ProcessFinishedHandler> getAssociatedType() {
@@ -25,6 +36,7 @@ public class ProcessFinishedEvent extends GwtEvent<ProcessFinishedHandler> {
 
     @Override
     protected void dispatch(ProcessFinishedHandler handler) {
-        handler.onProcessFinished();
+        handler.onProcessFinished(this);
     }
+
 }

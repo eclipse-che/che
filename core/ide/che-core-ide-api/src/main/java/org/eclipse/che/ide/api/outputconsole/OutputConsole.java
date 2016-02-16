@@ -28,11 +28,29 @@ public interface OutputConsole extends Presenter {
      *
      * @return the title SVG image resource
      */
-    public SVGResource getTitleIcon();
+    SVGResource getTitleIcon();
 
     /** Checks whether the console is finished outputting or not. */
     boolean isFinished();
 
-    /** Called when console is going to close. */
-    void onClose();
+    /** Stop process. */
+    void stop();
+
+    /** Called when console is closed. */
+    void close();
+
+    /**
+     * Listener for new output in the console.
+     */
+    interface ConsoleOutputListener {
+
+        void onConsoleOutput(OutputConsole console);
+
+    }
+
+    /**
+     * Adds an output listener.
+     */
+    void addOutputListener(ConsoleOutputListener listener);
+
 }

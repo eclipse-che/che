@@ -43,6 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFac
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.event.ProcessFinishedEvent;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
 import org.junit.Before;
@@ -266,7 +267,7 @@ public class ConsolesPanelPresenterTest {
 
         when(outputConsole.isFinished()).thenReturn(false);
 
-        presenter.commandConsoles.clear();
+        presenter.consoles.clear();
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
 
@@ -297,7 +298,7 @@ public class ConsolesPanelPresenterTest {
 
         when(outputConsole.isFinished()).thenReturn(true);
 
-        presenter.commandConsoles.clear();
+        presenter.consoles.clear();
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
 
@@ -366,7 +367,7 @@ public class ConsolesPanelPresenterTest {
 
         String commandId = commandNode.getId();
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
-        presenter.commandConsoles.put(commandId, outputConsole);
+        presenter.consoles.put(commandId, outputConsole);
 
         when(outputConsole.isFinished()).thenReturn(true);
         when(outputConsole.getTitle()).thenReturn(PROCESS_NAME);
@@ -423,7 +424,7 @@ public class ConsolesPanelPresenterTest {
 
     @Test
     public void shouldShowCommanOutputWhenCommandSelected() throws Exception {
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
 
         presenter.onCommandSelected(PROCESS_ID);
 
@@ -434,7 +435,7 @@ public class ConsolesPanelPresenterTest {
     @Test
     public void stopButtonShouldBeHiddenWhenConsoleHasFinishedProcess() {
         when(outputConsole.isFinished()).thenReturn(true);
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
 
         presenter.onCommandSelected(PROCESS_ID);
 
@@ -444,7 +445,7 @@ public class ConsolesPanelPresenterTest {
     @Test
     public void stopButtonStateShouldBeRefreshedWhenConsoleHasRunningProcess() {
         when(outputConsole.isFinished()).thenReturn(false);
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
 
         presenter.onCommandSelected(PROCESS_ID);
 
@@ -454,9 +455,9 @@ public class ConsolesPanelPresenterTest {
     @Test
     public void stopButtonShouldBeHiddenWhenProcessFinished() {
         when(outputConsole.isFinished()).thenReturn(true);
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onProcessFinished();
+        presenter.onProcessFinished(new ProcessFinishedEvent(null));
 
         verify(view).setStopButtonVisibility(PROCESS_ID, false);
     }
@@ -471,7 +472,7 @@ public class ConsolesPanelPresenterTest {
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
 
         when(outputConsole.isFinished()).thenReturn(false);
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
         //noinspection ConstantConditions
         machineNode.getChildren().add(commandNode);
 
@@ -482,7 +483,7 @@ public class ConsolesPanelPresenterTest {
 
         presenter.onStopCommandProcess(commandNode);
 
-        verify(outputConsole).onClose();
+        verify(outputConsole).stop();
         verify(view, never()).hideProcessOutput(eq(PROCESS_ID));
         verify(view, never()).removeProcessNode(eq(commandNode));
     }
@@ -497,7 +498,7 @@ public class ConsolesPanelPresenterTest {
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
 
         when(outputConsole.isFinished()).thenReturn(true);
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
         machineNode.getChildren().add(commandNode);
 
         when(commandNode.getId()).thenReturn(PROCESS_ID);
@@ -521,7 +522,7 @@ public class ConsolesPanelPresenterTest {
         ProcessTreeNode commandNode = mock(ProcessTreeNode.class);
 
         when(outputConsole.isFinished()).thenReturn(false);
-        presenter.commandConsoles.put(PROCESS_ID, outputConsole);
+        presenter.consoles.put(PROCESS_ID, outputConsole);
 
         when(commandNode.getId()).thenReturn(PROCESS_ID);
         when(dialogFactory.createConfirmDialog(anyString(), anyString(), anyObject(), anyObject())).thenReturn(confirmDialog);
@@ -609,4 +610,5 @@ public class ConsolesPanelPresenterTest {
 
         verify(container).setWidget(eq(view));
     }
+
 }

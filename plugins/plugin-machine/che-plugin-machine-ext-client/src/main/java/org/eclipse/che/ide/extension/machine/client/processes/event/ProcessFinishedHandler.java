@@ -16,6 +16,8 @@ import com.google.gwt.event.shared.EventHandler;
  * @author Dmitry Shnurenko
  */
 public interface ProcessFinishedHandler extends EventHandler {
+
     /**Performs some actions when process finished or cancelled by reason of error.*/
-    void onProcessFinished();
+    void onProcessFinished(ProcessFinishedEvent event);
+
 }

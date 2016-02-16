@@ -176,7 +176,8 @@ public class OutputsContainerPresenter extends BasePresenter implements OutputsC
     }
 
     private void closeConsole(OutputConsole console) {
-        console.onClose();
+        console.stop();
+        console.close();
 
         final int index = consoles.indexOf(console);
         consoles.remove(index);
@@ -201,4 +202,5 @@ public class OutputsContainerPresenter extends BasePresenter implements OutputsC
         view.removeAllConsoles();
         firePropertyChange(TITLE_PROPERTY);
     }
+
 }
