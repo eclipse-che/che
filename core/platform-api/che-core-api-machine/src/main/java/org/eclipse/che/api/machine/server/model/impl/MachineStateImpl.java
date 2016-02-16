@@ -34,8 +34,8 @@ public class MachineStateImpl extends MachineConfigImpl implements MachineState 
     private MachineStatus machineStatus;
 
     public MachineStateImpl(boolean isDev,
-                            String type,
                             String name,
+                            String type,
                             MachineSource source,
                             Limits limits,
                             String id,
@@ -69,8 +69,8 @@ public class MachineStateImpl extends MachineConfigImpl implements MachineState 
 
     public MachineStateImpl(MachineConfig machine) {
         this(machine.isDev(),
-             machine.getType(),
              machine.getName(),
+             machine.getType(),
              machine.getSource(),
              machine.getLimits(),
              null,
