@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager.ImportChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameSubpackages;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
@@ -102,8 +103,12 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class RenamePackageProcessor extends JavaRenameProcessor implements
-		IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IResourceMapper, IJavaElementMapper {
+public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating,
+                                                                           ITextUpdating,
+                                                                           IRenameSubpackages,
+                                                                           IQualifiedNameUpdating,
+                                                                           IResourceMapper,
+                                                                           IJavaElementMapper {
 
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$

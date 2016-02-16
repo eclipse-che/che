@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameSubpackages;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,6 +49,11 @@ public class RenameSession extends RefactoringSession {
         IReferenceUpdating referenceUpdating = (IReferenceUpdating)refactoring.getAdapter(IReferenceUpdating.class);
         if(referenceUpdating != null){
             referenceUpdating.setUpdateReferences(settings.isUpdateReferences());
+        }
+
+        IRenameSubpackages renameSubpackages = (IRenameSubpackages)refactoring.getAdapter(IRenameSubpackages.class);
+        if (renameSubpackages!=null){
+            renameSubpackages.setRenameSubpackages(settings.isUpdateSubpackages());
         }
 
         ISimilarDeclarationUpdating similarDeclarationUpdating =
