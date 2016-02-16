@@ -24,8 +24,8 @@ EXPOSE 8080
 
 ADD /assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che
 
-CMD sudo rm -rf /home/user/che/lib-copy/* && \
+CMD sudo chown -R user:user /home/user && \
+    rm -rf /home/user/che/lib-copy/* && \
     mkdir -p /home/user/che/lib-copy/ && \
-    sudo chown -R user:user /home/user && \
     cp -rf /home/user/che/lib/* /home/user/che/lib-copy && \
     /home/user/che/bin/che.sh run
