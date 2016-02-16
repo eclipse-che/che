@@ -119,6 +119,9 @@ public interface GitLocalizationConstant extends Messages {
     @Key("messages.commit_failed")
     String commitFailed();
 
+    @Key("messages.committer_identity_info_empty")
+    String committerIdentityInfoEmpty();
+
     @Key("messages.diff.failed")
     String diffFailed();
 

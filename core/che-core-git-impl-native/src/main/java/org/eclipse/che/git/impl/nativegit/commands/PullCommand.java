@@ -51,7 +51,7 @@ public class PullCommand extends RemoteOperationCommand<Void> {
         if (refSpec != null) {
             commandLine.add(refSpec);
         }
-        if (author != null) {
+        if (author != null && author.getName() != null && author.getEmail() != null) {
             setCommandEnvironment("GIT_AUTHOR_NAME", author.getName());
             setCommandEnvironment("GIT_AUTHOR_EMAIL", author.getEmail());
             setCommandEnvironment("GIT_COMMITTER_NAME", author.getName());

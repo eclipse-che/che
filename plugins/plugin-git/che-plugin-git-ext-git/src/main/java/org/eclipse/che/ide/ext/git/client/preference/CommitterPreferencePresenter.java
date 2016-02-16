@@ -18,8 +18,6 @@ import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
-
 /**
  * Preference page presenter for the information about git committer.
  *
@@ -29,9 +27,6 @@ public class CommitterPreferencePresenter extends AbstractPreferencePagePresente
 
     public static final String COMMITTER_NAME  = "git.committer.name";
     public static final String COMMITTER_EMAIL = "git.committer.email";
-
-    public static final String DEFAULT_COMMITTER_NAME  = "Anonymous";
-    public static final String DEFAULT_COMMITTER_EMAIL = "anonymous@noemail.com";
 
     private CommitterPreferenceView view;
     private PreferencesManager      preferencesManager;
@@ -48,8 +43,8 @@ public class CommitterPreferencePresenter extends AbstractPreferencePagePresente
         this.view = view;
         this.preferencesManager = preferencesManager;
 
-        name = firstNonNull(preferencesManager.getValue(COMMITTER_NAME), DEFAULT_COMMITTER_NAME);
-        email = firstNonNull(preferencesManager.getValue(COMMITTER_EMAIL), DEFAULT_COMMITTER_EMAIL);
+        name = preferencesManager.getValue(COMMITTER_NAME);
+        email = preferencesManager.getValue(COMMITTER_EMAIL);
 
         view.setDelegate(this);
     }
@@ -97,8 +92,8 @@ public class CommitterPreferencePresenter extends AbstractPreferencePagePresente
     /** {@inheritDoc} */
     @Override
     public void revertChanges() {
-        name = firstNonNull(preferencesManager.getValue(COMMITTER_NAME), DEFAULT_COMMITTER_NAME);
-        email = firstNonNull(preferencesManager.getValue(COMMITTER_EMAIL), DEFAULT_COMMITTER_EMAIL);
+        name = preferencesManager.getValue(COMMITTER_NAME);
+        email = preferencesManager.getValue(COMMITTER_EMAIL);
 
         view.setName(name);
         view.setEmail(email);

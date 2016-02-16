@@ -51,7 +51,6 @@ import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
-import org.eclipse.che.api.project.server.DefaultProjectManager;
 import org.eclipse.che.api.vfs.server.MountPoint;
 import org.eclipse.che.api.vfs.server.VirtualFile;
 import org.eclipse.che.api.vfs.server.VirtualFileSystem;
@@ -98,8 +97,6 @@ public class GitService {
     private VirtualFileSystemRegistry vfsRegistry;
     @Inject
     private GitConnectionFactory      gitConnectionFactory;
-    @Inject
-    private DefaultProjectManager     projectManager;
 
     @PathParam("ws-id")
     private String vfsId;
@@ -191,19 +188,7 @@ public class GitService {
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     public Revision commit(CommitRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            Revision revision = gitConnection.commit(request);
-            if (revision.isFake()) {
-                Status status = status(StatusFormat.LONG);
-
-                try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-                    ((InfoPage)status).writeTo(bos);
-                    revision.setMessage(new String(bos.toByteArray()));
-                } catch (IOException e) {
-                    LOG.error("Cant write to revision", e);
-                    throw new GitException("Cant execute status");
-                }
-            }
-            return revision;
+            return gitConnection.commit(request);
         }
     }
 
