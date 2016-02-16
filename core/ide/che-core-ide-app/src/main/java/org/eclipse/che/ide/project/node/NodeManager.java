@@ -186,13 +186,13 @@ public class NodeManager {
         if ("module".equals(itemType)) {
             moduleNode = null;
 
-            for (ProjectConfigDto moduleConfigDto : configDto.getModules()) {
-                createModuleNode(itemReference, moduleConfigDto, settings);
-
-                if (moduleNode != null) {
-                    return moduleNode;
-                }
-            }
+//            for (ProjectConfigDto moduleConfigDto : configDto.getModules()) {
+//                createModuleNode(itemReference, moduleConfigDto, settings);
+//
+//                if (moduleNode != null) {
+//                    return moduleNode;
+//                }
+//            }
         }
 
         return null;
@@ -208,9 +208,9 @@ public class NodeManager {
             return;
         }
 
-        for (ProjectConfigDto configDto : moduleConfig.getModules()) {
-            createModuleNode(itemReference, configDto, settings);
-        }
+//        for (ProjectConfigDto configDto : moduleConfig.getModules()) {
+//            createModuleNode(itemReference, configDto, settings);
+//        }
     }
 
     @NotNull

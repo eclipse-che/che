@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.server.projecttype;
 
-import org.eclipse.che.api.project.server.*;
+import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 
 import java.util.Collections;
@@ -34,11 +37,6 @@ public class JavaPropertiesValueProviderFactory implements ValueProviderFactory 
             if (attributeName.equals(Constants.LANGUAGE_VERSION))
                 return Collections.singletonList(System.getProperty("java.version"));
             return null;
-        }
-
-        @Override
-        public void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException {
-
         }
     }
 }

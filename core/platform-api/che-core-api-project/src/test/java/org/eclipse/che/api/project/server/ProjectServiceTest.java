@@ -213,9 +213,9 @@ public class ProjectServiceTest {
         when(testProjectConfigMock.getName()).thenReturn("my_project");
         when(testProjectConfigMock.getDescription()).thenReturn("my test project");
         when(testProjectConfigMock.getType()).thenReturn("my_project_type");
-        when(testProjectConfigMock.getModules()).thenReturn(modules);
+//        when(testProjectConfigMock.getModules()).thenReturn(modules);
         when(testProjectConfigMock.getSource()).thenReturn(DtoFactory.getInstance().createDto(SourceStorageDto.class));
-        when(testProjectConfigMock.findModule(anyString())).thenReturn(testProjectConfigMock);
+//        when(testProjectConfigMock.findModule(anyString())).thenReturn(testProjectConfigMock);
 
         Map<String, List<String>> attr = new HashMap<>();
         for (Attribute attribute : myProjectType.getAttributes()) {

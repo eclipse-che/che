@@ -17,10 +17,10 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectTypeConstraintException;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.vfs.server.VirtualFile;
 import org.eclipse.che.api.vfs.server.VirtualFileFilter;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
@@ -63,15 +63,15 @@ public class MavenTargetFilter implements VirtualFileFilter {
                                                                  ValueStorageException,
                                                                  ServerException {
         String projectPath = rootFolder.getPath().subPath(0, 1).toString();
-        ProjectImpl project = projectManager.getProject(projectPath);
+        RegisteredProject project = projectManager.getProject(projectPath);
         if (rootFolder.getName().equals(project.getName())) {
             return MavenAttributes.MAVEN_ID.equals(project.getType());
         } else {
-            for (ProjectConfig projectConfig : project.getModules()) {
-                if (rootFolder.getPath().toString().equals(projectConfig.getPath())) {
-                    return MavenAttributes.MAVEN_ID.equals(projectConfig.getType());
-                }
-            }
+//            for (ProjectConfig projectConfig : project.getModules()) {
+//                if (rootFolder.getPath().toString().equals(projectConfig.getPath())) {
+//                    return MavenAttributes.MAVEN_ID.equals(projectConfig.getType());
+//                }
+//            }
             return false;
         }
     }

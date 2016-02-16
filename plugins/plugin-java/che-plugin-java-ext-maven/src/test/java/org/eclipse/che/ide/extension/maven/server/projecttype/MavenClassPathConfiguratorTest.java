@@ -19,8 +19,8 @@ import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -156,7 +156,7 @@ public class MavenClassPathConfiguratorTest {
     @Test
     public void testConfigureWhenPomNotContainsSourceDirectory() throws Exception {
         String classPath = String.format(CLASS_PATH_CONTENT, DEFAULT_SOURCE_DIRECTORY, DEFAULT_TEST_SOURCE_DIRECTORY);
-        ProjectImpl testProject =
+        RegisteredProject testProject =
                 projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                        .withName("projectName")
                                                        .withPath("/projectName")
@@ -173,7 +173,7 @@ public class MavenClassPathConfiguratorTest {
 
     @Test
     public void testConfigureWhenPomContainsDefaultSourceDirectory() throws Exception {
-        ProjectImpl testProject =
+        RegisteredProject testProject =
                 projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                        .withName("projectName")
                                                        .withPath("/projectName")
@@ -192,7 +192,7 @@ public class MavenClassPathConfiguratorTest {
 
     @Test
     public void testConfigureWhenPomContainsNotDefaultSourceDirectory() throws Exception {
-        ProjectImpl testProject =
+        RegisteredProject testProject =
                 projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                        .withName("projectName")
                                                        .withPath("/projectName")

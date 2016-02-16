@@ -14,8 +14,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
@@ -141,12 +141,12 @@ public class MavenProjectTypeTest {
         attributes.put(MavenAttributes.VERSION, Collections.singletonList("1.0"));
         attributes.put(MavenAttributes.PACKAGING, Collections.singletonList("jar"));
 
-        ProjectImpl project = pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                         .withType("maven")
-                                                         .withAttributes(attributes)
-                                                         .withPath("/myProject")
-                                                         .withName("myProject"),
-                                               new HashMap<>(0));
+        RegisteredProject project = pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+                                                               .withType("maven")
+                                                               .withAttributes(attributes)
+                                                               .withPath("/myProject")
+                                                               .withName("myProject"),
+                                                     new HashMap<>(0));
 
         for (VirtualFileEntry file : project.getBaseFolder().getChildren()) {
             if (file.getName().equals("pom.xml")) {

@@ -17,8 +17,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -68,7 +68,7 @@ public class MavenProjectResolver {
 
         String packaging = model.getPackaging();
         if (packaging != null && packaging.equals("pom")) {
-            ProjectImpl project = projectManager.getProject(projectFolder.getPath().toString());
+            RegisteredProject project = projectManager.getProject(projectFolder.getPath().toString());
 
             ProjectConfigImpl projectConfig = createConfig(projectFolder);
 
@@ -80,7 +80,7 @@ public class MavenProjectResolver {
                 defineModules(folderEntry, modules);
             }
 
-            projectConfig.setModules(modules);
+//            projectConfig.setModules(modules);
             projectConfig.setSource(getSourceStorage(project));
 
             projectManager.updateProject(projectConfig);
@@ -126,7 +126,7 @@ public class MavenProjectResolver {
             defineModules(internalModule, internalModules);
         }
 
-        moduleConfig.setModules(internalModules);
+//        moduleConfig.setModules(internalModules);
 
         modules.add(moduleConfig);
     }

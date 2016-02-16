@@ -20,8 +20,8 @@ import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -171,10 +171,10 @@ public class MavenProjectImportedTest {
 
     @Test
     public void shouldNotChangeParentProjectType() throws Exception {
-        ProjectImpl test = projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                                                 .withPath("/test/module1")
-                                                                                 .withName("module1")
-                                                                                 .withType("maven"), null);
+        RegisteredProject test = projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+                                                                        .withPath("/test/module1")
+                                                                        .withName("module1")
+                                                                        .withType("maven"), null);
         test.getBaseFolder().createFile("pom.xml", pomJar.getBytes());
         test.getBaseFolder().createFolder("module1");
         mavenProjectImportedHandler.onProjectImported(test.getBaseFolder());
@@ -183,7 +183,7 @@ public class MavenProjectImportedTest {
 
     @Test
     public void withPomXmlWithFolders() throws Exception {
-        ProjectImpl test = projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+        RegisteredProject test = projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                                   .withType("maven")
                                                                   .withType("maven")
                                                                   .withName("test"),
@@ -203,7 +203,7 @@ public class MavenProjectImportedTest {
 
     @Test
     public void withPomXmlMultiModule() throws Exception {
-        ProjectImpl test = projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+        RegisteredProject test = projectManager.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                                   .withType("maven")
                                                                   .withName("test")
                                                                   .withPath("/test"),

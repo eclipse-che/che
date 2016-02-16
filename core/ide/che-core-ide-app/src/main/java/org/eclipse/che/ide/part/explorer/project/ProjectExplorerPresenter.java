@@ -393,13 +393,13 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
 
-        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
-
-        if (parentModule == null) {
-            projectConfig.getModules().add(createdModule);
-        } else {
-            parentModule.getModules().add(createdModule);
-        }
+//        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
+//
+//        if (parentModule == null) {
+//            projectConfig.getModules().add(createdModule);
+//        } else {
+//            parentModule.getModules().add(createdModule);
+//        }
 
         reloadChildren();
     }

@@ -58,9 +58,9 @@ public class ProjectConfigAdapter implements JsonDeserializer<ProjectConfig>, Js
     private JsonElement serializeModules(ProjectConfig moduleConfig, JsonSerializationContext context) {
         JsonArray modules = new JsonArray();
 
-        for (ProjectConfig config : moduleConfig.getModules()) {
-            modules.add(serializeModule(config, context));
-        }
+//        for (ProjectConfig config : moduleConfig.getModules()) {
+//            modules.add(serializeModule(config, context));
+//        }
 
         return modules;
     }

@@ -16,10 +16,10 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.InvalidValueException;
-import org.eclipse.che.api.project.server.ValueProvider;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
 import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.xml.XMLTreeException;
@@ -147,40 +147,40 @@ public class MavenValueProviderFactory implements ValueProviderFactory {
             return null;
         }
 
-        @Override
-        public void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException {
-            try {
-                VirtualFile pom = getPom(projectFolder);
-                if (pom == null) {
-                    Model model = Model.createModel();
-                    model.setModelVersion("4.0.0");
-                    pom = projectFolder.createFile("pom.xml", new byte[0]).getVirtualFile();
-                    model.writeTo(pom);
-                }
-
-                switch (attributeName) {
-                    case ARTIFACT_ID:
-                        Model.readFrom(pom).setArtifactId(value.get(0)).writeTo(pom);
-                        break;
-                    case GROUP_ID:
-                        Model.readFrom(pom).setGroupId(value.get(0)).writeTo(pom);
-                        break;
-                    case PACKAGING:
-                        String packaging = value.get(0);
-                        if (packaging.isEmpty()) {
-                            packaging = null;
-                        }
-                        Model.readFrom(pom).setPackaging(packaging).writeTo(pom);
-                        break;
-                    case VERSION:
-                        Model.readFrom(pom).setVersion(value.get(0)).writeTo(pom);
-                        break;
-                }
-            } catch (ForbiddenException | ServerException | IOException | ConflictException e) {
-                throwWriteException(e);
-            } catch (XMLTreeException e) {
-                throw new ValueStorageException("Error parsing pom.xml : " + e.getMessage());
-            }
-        }
+//        @Override
+//        public void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException {
+//            try {
+//                VirtualFile pom = getPom(projectFolder);
+//                if (pom == null) {
+//                    Model model = Model.createModel();
+//                    model.setModelVersion("4.0.0");
+//                    pom = projectFolder.createFile("pom.xml", new byte[0]).getVirtualFile();
+//                    model.writeTo(pom);
+//                }
+//
+//                switch (attributeName) {
+//                    case ARTIFACT_ID:
+//                        Model.readFrom(pom).setArtifactId(value.get(0)).writeTo(pom);
+//                        break;
+//                    case GROUP_ID:
+//                        Model.readFrom(pom).setGroupId(value.get(0)).writeTo(pom);
+//                        break;
+//                    case PACKAGING:
+//                        String packaging = value.get(0);
+//                        if (packaging.isEmpty()) {
+//                            packaging = null;
+//                        }
+//                        Model.readFrom(pom).setPackaging(packaging).writeTo(pom);
+//                        break;
+//                    case VERSION:
+//                        Model.readFrom(pom).setVersion(value.get(0)).writeTo(pom);
+//                        break;
+//                }
+//            } catch (ForbiddenException | ServerException | IOException | ConflictException e) {
+//                throwWriteException(e);
+//            } catch (XMLTreeException e) {
+//                throw new ValueStorageException("Error parsing pom.xml : " + e.getMessage());
+//            }
+//        }
     }
 }

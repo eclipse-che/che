@@ -155,14 +155,14 @@ public class CreateMavenModulePresenter implements CreateMavenModuleView.ActionD
 
                                             ProjectConfigDto projectConfigDto = appContext.getCurrentProject().getProjectConfig();
 
-                                            ProjectConfigDto parentConfig =
-                                                    projectConfigDto.findModule(parentFolder.getStorablePath());
+//                                            ProjectConfigDto parentConfig =
+//                                                    projectConfigDto.findModule(parentFolder.getStorablePath());
 
-                                            if (parentConfig == null) {
-                                                throw new IllegalArgumentException("Parent folder not found for " + addedModule.getPath());
-                                            }
+//                                            if (parentConfig == null) {
+//                                                throw new IllegalArgumentException("Parent folder not found for " + addedModule.getPath());
+//                                            }
 
-                                            parentConfig.getModules().add(addedModule);
+//                                            parentConfig.getModules().add(addedModule);
 
                                             if (isModule) {
                                                 projectExplorer.reloadChildren((ModuleNode)parentFolder);
