@@ -15,7 +15,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * JavaScript overlay over Orion ContentAssist object.
  *
- * @author Artem Zatsarynnyy
+ * @author Artem Zatsarynnyi
  */
 public class OrionContentAssistOverlay extends JavaScriptObject {
 

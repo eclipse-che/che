@@ -12,15 +12,12 @@ package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.gwt.client.ExtServerStateController;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -30,10 +27,8 @@ import org.eclipse.che.ide.websocket.rest.RequestCallback;
 import javax.validation.constraints.NotNull;
 
 import static com.google.gwt.http.client.RequestBuilder.GET;
-import static com.google.gwt.http.client.RequestBuilder.POST;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
 
 /**
  * Implementation of {@link JavaClasspathServiceClient}.
@@ -43,13 +38,13 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
 @Singleton
 public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClient {
 
-    private final ExtServerStateController extServerStateController;
-    private final String baseHttpUrl;
+    private final WsAgentStateController wsAgentStateController;
+    private final String                 baseHttpUrl;
 
     @Inject
     protected JavaClasspathServiceClientImpl(AppContext appContext,
-                                             ExtServerStateController extServerStateController) {
-        this.extServerStateController = extServerStateController;
+                                             WsAgentStateController wsAgentStateController) {
+        this.wsAgentStateController = wsAgentStateController;
         this.baseHttpUrl = "/jdt/" + appContext.getWorkspace().getId();
     }
 
@@ -66,7 +61,7 @@ public class JavaClasspathServiceClientImpl implements JavaClasspathServiceClien
 
 
     private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
-        extServerStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 try {

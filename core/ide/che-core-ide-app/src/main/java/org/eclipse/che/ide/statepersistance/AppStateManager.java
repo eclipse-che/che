@@ -16,8 +16,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -55,7 +55,7 @@ import java.util.Set;
 @Singleton
 public class AppStateManager implements WindowActionHandler,
                                         StopWorkspaceHandler,
-                                        ExtServerStateHandler,
+                                        WsAgentStateHandler,
                                         ProjectExplorerLoadedEvent.ProjectExplorerLoadedHandler {
 
     /** The name of the property for the mappings in user preferences. */
@@ -90,7 +90,7 @@ public class AppStateManager implements WindowActionHandler,
 
         eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
-        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(ProjectExplorerLoadedEvent.getType(), this);
 
         readStateFromPreferences();
@@ -120,11 +120,11 @@ public class AppStateManager implements WindowActionHandler,
     }
 
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
     }
 
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
         persistWorkspaceState();
     }
 

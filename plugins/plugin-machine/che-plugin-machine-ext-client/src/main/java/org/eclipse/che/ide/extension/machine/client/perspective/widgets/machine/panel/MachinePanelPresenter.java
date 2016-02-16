@@ -39,8 +39,8 @@ import org.eclipse.che.api.machine.gwt.client.events.MachineStartingHandler;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceHandler;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
 import org.eclipse.che.ide.workspace.start.StopWorkspaceHandler;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -60,7 +60,7 @@ import java.util.Map;
 @Singleton
 public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate,
                                                                     MachineStateHandler,
-                                                                    StartWorkspaceHandler,
+                                                                    WorkspaceStartedHandler,
                                                                     StopWorkspaceHandler,
                                                                     MachineStartingHandler,
                                                                     ActivePartChangedHandler {
@@ -104,7 +104,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         this.cachedMachines = new HashMap<>();
 
         eventBus.addHandler(MachineStateEvent.TYPE, this);
-        eventBus.addHandler(StartWorkspaceEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
         eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);

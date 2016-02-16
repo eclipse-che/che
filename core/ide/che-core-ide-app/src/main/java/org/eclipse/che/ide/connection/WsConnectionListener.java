@@ -22,8 +22,8 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.ConnectionClosedHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceHandler;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 
 /**
  * @author Evgen Vidolob
@@ -42,7 +42,7 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
         this.eventBus = eventBus;
         this.connectionClosedInformer = connectionClosedInformer;
 
-        eventBus.addHandler(StartWorkspaceEvent.TYPE, new StartWorkspaceHandler() {
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
             @Override
             public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
                 messageBus = messageBusProvider.getMessageBus();

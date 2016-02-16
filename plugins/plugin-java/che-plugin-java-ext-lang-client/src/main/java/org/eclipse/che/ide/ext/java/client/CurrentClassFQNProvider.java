@@ -29,7 +29,7 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 /**
  * Provides FQN of the Java-class which is opened in active editor.
  *
- * @author Artem Zatsarynnyy
+ * @author Artem Zatsarynnyi
  */
 @Singleton
 public class CurrentClassFQNProvider implements CommandPropertyValueProvider, FileEventHandler, SelectionChangedHandler {

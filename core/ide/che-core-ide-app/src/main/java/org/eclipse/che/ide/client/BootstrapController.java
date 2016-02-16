@@ -29,13 +29,18 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
+import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.ide.analytics.AnalyticsEventLoggerExt;
+import org.eclipse.che.ide.analytics.AnalyticsSessions;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
-import org.eclipse.che.ide.core.Component;
-import org.eclipse.che.ide.logger.AnalyticsEventLoggerExt;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
-import org.eclipse.che.ide.util.StartUpActionsParser;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
@@ -52,10 +57,10 @@ import java.util.Map;
 @Singleton
 public class BootstrapController {
 
-    private final AnalyticsEventLoggerExt      analyticsEventLoggerExt;
     private final Provider<WorkspacePresenter> workspaceProvider;
     private final ExtensionInitializer         extensionInitializer;
     private final EventBus                     eventBus;
+    private final AnalyticsEventLoggerExt      analyticsEventLoggerExt;
     private final ProductInfoDataProvider      productInfoDataProvider;
     private final Provider<AppStateManager>    appStateManagerProvider;
     private final AppContext                   appContext;
@@ -63,12 +68,12 @@ public class BootstrapController {
     @Inject
     public BootstrapController(Provider<WorkspacePresenter> workspaceProvider,
                                ExtensionInitializer extensionInitializer,
-                               DtoRegistrar dtoRegistrar,
-                               AnalyticsEventLoggerExt analyticsEventLoggerExt,
                                EventBus eventBus,
+                               AnalyticsEventLoggerExt analyticsEventLoggerExt,
                                ProductInfoDataProvider productInfoDataProvider,
                                Provider<AppStateManager> appStateManagerProvider,
-                               AppContext appContext) {
+                               AppContext appContext,
+                               DtoRegistrar dtoRegistrar) {
         this.workspaceProvider = workspaceProvider;
         this.extensionInitializer = extensionInitializer;
         this.eventBus = eventBus;
@@ -77,44 +82,74 @@ public class BootstrapController {
         this.appStateManagerProvider = appStateManagerProvider;
         this.appContext = appContext;
 
+        appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
         dtoRegistrar.registerDtoProviders();
     }
 
     @Inject
-    void startComponents(final Map<String, Provider<Component>> components) {
-        processStartupActionUrl();
+    private void startComponents(Map<String, Provider<Component>> components) {
         startComponents(components.values().iterator());
+    }
+
+    @Inject
+    private void startWsAgentComponents(EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
+            @Override
+            public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+                startWsAgentComponents(components.values().iterator());
+            }
+        });
     }
 
     private void startComponents(final Iterator<Provider<Component>> componentProviderIterator) {
         if (componentProviderIterator.hasNext()) {
             Provider<Component> componentProvider = componentProviderIterator.next();
 
-            componentProvider.get().start(new Callback<Component, Exception>() {
+            final Component component = componentProvider.get();
+            Log.info(component.getClass(), "starting...");
+            component.start(new Callback<Component, Exception>() {
                 @Override
                 public void onSuccess(Component result) {
-                    Log.info(getClass(), result.getClass());
+                    Log.info(result.getClass(), "started");
                     startComponents(componentProviderIterator);
-                    Log.info(getClass(), "components started");
                 }
 
                 @Override
                 public void onFailure(Exception reason) {
-                    componentStartFail(reason);
+                    Log.error(component.getClass(), reason);
+                    initializationFailed(reason.getMessage());
                 }
             });
         } else {
-            startExtensions();
+            startExtensionsAndDisplayUI();
         }
     }
 
-    private void componentStartFail(Exception reason) {
-        Log.error(BootstrapController.class, reason);
-        initializationFailed(reason.getMessage());
+    private void startWsAgentComponents(final Iterator<Provider<WsAgentComponent>> componentProviderIterator) {
+        if (componentProviderIterator.hasNext()) {
+            Provider<WsAgentComponent> componentProvider = componentProviderIterator.next();
+
+            final WsAgentComponent component = componentProvider.get();
+            Log.info(component.getClass(), "starting...");
+            component.start(new Callback<WsAgentComponent, Exception>() {
+                @Override
+                public void onSuccess(WsAgentComponent result) {
+                    Log.info(result.getClass(), "started");
+                    startWsAgentComponents(componentProviderIterator);
+                }
+
+                @Override
+                public void onFailure(Exception reason) {
+                    Log.error(component.getClass(), reason);
+                    initializationFailed(reason.getMessage());
+                }
+            });
+        } else {
+            eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
+        }
     }
 
-    /** Start extensions */
-    private void startExtensions() {
+    private void startExtensionsAndDisplayUI() {
         appStateManagerProvider.get();
 
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -133,7 +168,6 @@ public class BootstrapController {
         });
     }
 
-    /** Displays the IDE */
     private void displayIDE() {
         // Start UI
         SimpleLayoutPanel mainPanel = new SimpleLayoutPanel();
@@ -222,11 +256,6 @@ public class BootstrapController {
         }
     }
 
-
-    private void processStartupActionUrl(){
-        appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
-    }
-
     /**
      * Handles any of initialization errors.
      * Tries to call predefined IDE.eventHandlers.ideInitializationFailed function.
@@ -241,5 +270,4 @@ public class BootstrapController {
             console.log(e.message);
         }
     }-*/;
-
 }

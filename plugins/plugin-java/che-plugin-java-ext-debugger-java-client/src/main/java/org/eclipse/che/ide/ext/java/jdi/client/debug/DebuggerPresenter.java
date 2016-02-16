@@ -19,8 +19,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -195,9 +196,9 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         this.localStorageProvider = localStorageProvider;
         this.debuggerInfo = EmptyDebuggerInfo.INSTANCE;
 
-        eventBus.addHandler(ExtServerStateEvent.TYPE, new ExtServerStateHandler() {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
-            public void onExtServerStarted(ExtServerStateEvent event) {
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 messageBus = messageBusProvider.getMachineMessageBus();
                 debuggerInfo = loadDebugInfo();
 
@@ -218,7 +219,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
             }
 
             @Override
-            public void onExtServerStopped(ExtServerStateEvent event) {
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
 
