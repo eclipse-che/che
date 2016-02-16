@@ -315,8 +315,8 @@ public class MachineManager {
         }
 
         final MachineStateImpl machineState = new MachineStateImpl(machineConfig.isDev(),
-                                                                   machineConfig.getType(),
                                                                    machineConfig.getName(),
+                                                                   machineConfig.getType(),
                                                                    machineConfig.getSource(),
                                                                    machineConfig.getLimits(),
                                                                    machineId,
