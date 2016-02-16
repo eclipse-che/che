@@ -864,7 +864,12 @@ public class ProjectService extends Service {
         filesBuffer.addToBufferRecursive(virtualFile.getVirtualFile());
 
         final FolderEntry baseProjectFolder = (FolderEntry)virtualFile;
-        importer.importSources(baseProjectFolder, sourceStorage, outputOutputConsumerFactory);
+        try {
+            importer.importSources(baseProjectFolder, sourceStorage, outputOutputConsumerFactory);
+        } catch (Exception exception) {
+            projectManager.delete(workspace, path);
+            throw exception;
+        }
     }
 
     private VirtualFileEntry getVirtualFile(String workspace, String path, boolean force)
