@@ -44,13 +44,6 @@ public class PermissionsCheckerTest {
     PermissionsCheckerImpl permissionsChecker;
 
     @Test
-    public void recipeCreatorShouldHaveAccessToRecipeWithAnyPermission() throws ServerException {
-        final ManagedRecipe recipe = new RecipeImpl().withCreator("user-id");
-
-        assertTrue(permissionsChecker.hasAccess(recipe, "user-id", "write"));
-    }
-
-    @Test
     public void userShouldHaveAccessToRecipeWhenHeIsListedInRecipeUsersPermissions() throws ServerException {
         final Map<String, List<String>> users = singletonMap("user-id", asList("read", "write"));
         final ManagedRecipe recipe = new RecipeImpl().withCreator("someone")

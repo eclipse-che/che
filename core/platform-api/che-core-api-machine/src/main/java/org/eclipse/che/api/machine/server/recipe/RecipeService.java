@@ -101,15 +101,18 @@ public class RecipeService extends Service {
         if (isNullOrEmpty(newRecipe.getName())) {
             throw new BadRequestException("Recipe name required");
         }
+        String userId = EnvironmentContext.getCurrent().getUser().getId();
         Permissions permissions = null;
         if (newRecipe.getPermissions() != null) {
-            checkPublicPermission(newRecipe.getPermissions());
+            if (!isSystemUser() && permissionsChecker.hasPublicSearchPermission(newRecipe.getPermissions())) {
+                throw new ForbiddenException(format("User %s doesn't have access to use 'public: search' permission", userId));
+            }
             permissions = PermissionsImpl.fromDescriptor(newRecipe.getPermissions());
         }
 
         final ManagedRecipe recipe = new RecipeImpl().withId(NameGenerator.generate("recipe", 16))
                                                      .withName(newRecipe.getName())
-                                                     .withCreator(EnvironmentContext.getCurrent().getUser().getId())
+                                                     .withCreator(userId)
                                                      .withType(newRecipe.getType())
                                                      .withScript(newRecipe.getScript())
                                                      .withTags(newRecipe.getTags())
@@ -129,7 +132,8 @@ public class RecipeService extends Service {
         final ManagedRecipe recipe = recipeDao.getById(id);
 
         final User user = EnvironmentContext.getCurrent().getUser();
-        if (!user.isMemberOf("system/admin") &&
+        if (!user.getId().equals(recipe.getCreator()) &&
+            !user.isMemberOf("system/admin") &&
             !user.isMemberOf("system/manager") &&
             !permissionsChecker.hasAccess(recipe, user.getId(), "read")) {
             throw new ForbiddenException(format("User %s doesn't have access to recipe %s", user.getId(), id));
@@ -146,7 +150,8 @@ public class RecipeService extends Service {
         final ManagedRecipe recipe = recipeDao.getById(id);
 
         final User user = EnvironmentContext.getCurrent().getUser();
-        if (!user.isMemberOf("system/admin") &&
+        if (!user.getId().equals(recipe.getCreator()) &&
+            !user.isMemberOf("system/admin") &&
             !user.isMemberOf("system/manager") &&
             !permissionsChecker.hasAccess(recipe, user.getId(), "read")) {
             throw new ForbiddenException(format("User %s doesn't have access to recipe %s", user.getId(), id));
@@ -210,17 +215,24 @@ public class RecipeService extends Service {
         final ManagedRecipe recipe = recipeDao.getById(update.getId());
 
         final User user = EnvironmentContext.getCurrent().getUser();
-        if (!user.isMemberOf("system/admin") && !permissionsChecker.hasAccess(recipe, user.getId(), "write")) {
-            throw new ForbiddenException(format("User %s doesn't have access to update recipe %s", user.getId(), update.getId()));
+        final String userId = user.getId();
+        if (!userId.equals(recipe.getCreator()) &&
+            !user.isMemberOf("system/admin") &&
+            !permissionsChecker.hasAccess(recipe, userId, "write")) {
+            throw new ForbiddenException(format("User %s doesn't have access to update recipe %s", userId, update.getId()));
         }
         if (update.getPermissions() != null) {
             //ensure that user has access to update recipe permissions
-            if (!user.isMemberOf("system/admin") && !permissionsChecker.hasAccess(recipe, user.getId(), "update_acl")) {
+            if (!userId.equals(recipe.getCreator()) &&
+                !user.isMemberOf("system/admin") &&
+                !permissionsChecker.hasAccess(recipe, userId, "update_acl")) {
                 throw new ForbiddenException(format("User %s doesn't have access to update recipe %s permissions",
-                                                    user.getId(),
+                                                    userId,
                                                     update.getId()));
             }
-            checkPublicPermission(update.getPermissions());
+            if (!isSystemUser() && permissionsChecker.hasPublicSearchPermission(update.getPermissions())) {
+                throw new ForbiddenException(format("User %s doesn't have access to use 'public: search' permission", userId));
+            }
         }
 
         recipeDao.update(update);
@@ -235,7 +247,9 @@ public class RecipeService extends Service {
         final ManagedRecipe recipe = recipeDao.getById(id);
 
         final User user = EnvironmentContext.getCurrent().getUser();
-        if (!user.isMemberOf("system/admin") && !permissionsChecker.hasAccess(recipe, user.getId(), "write")) {
+        if (!user.getId().equals(recipe.getCreator()) &&
+            !user.isMemberOf("system/admin") &&
+            !permissionsChecker.hasAccess(recipe, user.getId(), "write")) {
             throw new ForbiddenException(format("User %s doesn't have access to recipe %s", user.getId(), id));
         }
 
@@ -243,19 +257,11 @@ public class RecipeService extends Service {
     }
 
     /**
-     * User who is neither 'workspace/admin' no 'workspace/developer' can't create or
-     * update recipe permissions to 'public: search', this operation allowed only
-     * for 'system/admin' or 'system/manager'
+     * Returns true if user has role "system/admin" or "system/manager", otherwise returns false
      */
-    private void checkPublicPermission(PermissionsDescriptor permissions) throws ForbiddenException {
+    private boolean isSystemUser() {
         final User user = EnvironmentContext.getCurrent().getUser();
-        if (!user.isMemberOf("system/admin") && !user.isMemberOf("system/manager")) {
-            for (GroupDescriptor group : permissions.getGroups()) {
-                if ("public".equalsIgnoreCase(group.getName()) && group.getAcl().contains("search")) {
-                    throw new ForbiddenException("User " + user.getId() + " doesn't have access to use 'public: search' permission");
-                }
-            }
-        }
+        return user.isMemberOf("system/admin") || user.isMemberOf("system/manager");
     }
 
     /**

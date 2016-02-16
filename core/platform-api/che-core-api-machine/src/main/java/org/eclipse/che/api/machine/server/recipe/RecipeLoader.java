@@ -21,8 +21,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
-import org.eclipse.che.api.machine.server.recipe.adapters.GroupSerializer;
-import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsSerializer;
+import org.eclipse.che.api.machine.server.recipe.adapters.GroupAdapter;
+import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsAdapter;
 import org.eclipse.che.api.machine.shared.Group;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 import org.eclipse.che.api.machine.shared.Permissions;
@@ -53,8 +53,8 @@ import static java.util.Collections.emptyList;
  */
 @Singleton
 public class RecipeLoader {
-    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(Permissions.class, new PermissionsSerializer())
-                                                      .registerTypeAdapter(Group.class, new GroupSerializer())
+    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(Permissions.class, new PermissionsAdapter())
+                                                      .registerTypeAdapter(Group.class, new GroupAdapter())
                                                       .create();
 
     private final Set<String> recipesPaths;

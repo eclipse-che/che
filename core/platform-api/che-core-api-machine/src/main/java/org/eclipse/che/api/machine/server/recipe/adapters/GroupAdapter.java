@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author Anton Korneta
  */
-public class GroupSerializer implements JsonDeserializer<Group>, JsonSerializer<Group> {
+public class GroupAdapter implements JsonDeserializer<Group>, JsonSerializer<Group> {
 
     @Override
     public Group deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {

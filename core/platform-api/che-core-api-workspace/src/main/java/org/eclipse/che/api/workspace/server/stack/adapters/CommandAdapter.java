@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.recipe.adapters;
+package org.eclipse.che.api.workspace.server.stack.adapters;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -17,25 +17,25 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import org.eclipse.che.api.machine.server.recipe.PermissionsImpl;
-import org.eclipse.che.api.machine.shared.Permissions;
+import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 
 import java.lang.reflect.Type;
 
 /**
- * Custom implementation of deserialize Permission objects
+ * Type adapter for {@link Command} objects
  *
- * @author Anton Korneta
+ * @author Alexander Andrienko
  */
-public class PermissionsSerializer implements JsonDeserializer<Permissions>, JsonSerializer<Permissions> {
+public class CommandAdapter implements JsonSerializer<Command>, JsonDeserializer<Command> {
 
     @Override
-    public Permissions deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return context.deserialize(json, PermissionsImpl.class);
+    public Command deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+        return context.deserialize(jsonElement, CommandImpl.class);
     }
 
     @Override
-    public JsonElement serialize(Permissions src, Type typeOfSrc, JsonSerializationContext context) {
-        return context.serialize(src, PermissionsImpl.class);
+    public JsonElement serialize(Command command, Type type, JsonSerializationContext context) {
+        return context.serialize(command, CommandImpl.class);
     }
 }

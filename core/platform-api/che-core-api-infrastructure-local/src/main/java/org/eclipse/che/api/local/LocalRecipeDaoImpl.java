@@ -21,8 +21,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.machine.server.recipe.adapters.GroupSerializer;
-import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsSerializer;
+import org.eclipse.che.api.machine.server.recipe.adapters.GroupAdapter;
+import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsAdapter;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.shared.Group;
@@ -56,8 +56,7 @@ public class LocalRecipeDaoImpl implements RecipeDao {
 
     @Inject
     public LocalRecipeDaoImpl(LocalStorageFactory storageFactory) throws IOException {
-        Map<Class<?>, Object> adapters = ImmutableMap.of(Permissions.class, new PermissionsSerializer(),
-                                                         Group.class, new GroupSerializer());
+        Map<Class<?>, Object> adapters = ImmutableMap.of(Permissions.class, new PermissionsAdapter(), Group.class, new GroupAdapter());
         this.recipeStorage = storageFactory.create("recipes.json", adapters);
         this.recipes = new HashMap<>();
         lock = new ReentrantReadWriteLock();
