@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit.commands;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.git.impl.nativegit.NativeGitMergeResult;
 import org.eclipse.che.api.git.shared.GitUser;
@@ -18,10 +19,8 @@ import org.eclipse.che.api.git.shared.MergeResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Join two development histories together
@@ -41,7 +40,13 @@ public class MergeCommand extends GitCommand<MergeResult> {
     @Override
     public MergeResult execute() throws GitException {
         if (commit == null) {
-            throw new GitException("Commit wasn't set.");
+            throw new GitException("Commit wasn't set");
+        }
+        if (committer == null) {
+            throw new GitException("Committer can't be null");
+        }
+        if (committer.getName() == null || committer.getEmail() == null) {
+            throw new GitException("Git user name and (or) email wasn't set", ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED);
         }
         reset();
         commandLine.add("merge", commit);
@@ -53,12 +58,8 @@ public class MergeCommand extends GitCommand<MergeResult> {
         mergedCommits.add(new LogCommand(getRepository()).setBranch(commit).setCount(1).execute().get(0).getId());
         mergeResult.setMergedCommits(mergedCommits);
 
-        if (committer != null) {
-            setCommandEnvironment("GIT_COMMITTER_NAME", committer.getName());
-            setCommandEnvironment("GIT_COMMITTER_EMAIL", committer.getEmail());
-        } else {
-            throw new GitException("Committer can't be null");
-        }
+        setCommandEnvironment("GIT_COMMITTER_NAME", committer.getName());
+        setCommandEnvironment("GIT_COMMITTER_EMAIL", committer.getEmail());
 
         try {
             start();

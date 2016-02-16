@@ -13,6 +13,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -30,7 +31,6 @@ import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscribe
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.eclipse.che.ide.projectimport.ErrorMessageUtils;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 
@@ -102,7 +102,7 @@ public class ProjectImporter extends AbstractImporter {
                 subscriber.onFailure(exception.getMessage());
                 int errorCode = ErrorMessageUtils.getErrorCode(exception.getCause());
                 // no ssh key found code. See org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.
-                if (errorCode == 32068) {
+                if (errorCode == ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY) {
                     callback.onFailure(new Exception(localizationConstant.importProjectMessageUnableGetSshKey()));
                     return;
                 }

@@ -70,14 +70,13 @@ public class CommitPresenterTest extends BaseTest {
                                         service,
                                         constant,
                                         notificationManager,
+                                        dialogFactory,
                                         dtoUnmarshallerFactory,
                                         appContext,
                                         dateTimeFormatter,
                                         projectExplorer,
                                         gitOutputConsoleFactory,
                                         consolesPanelPresenter);
-
-        when(revision.isFake()).thenReturn(false);
     }
 
     @Test

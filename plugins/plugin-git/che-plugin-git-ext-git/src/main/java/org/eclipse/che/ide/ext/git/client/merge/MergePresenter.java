@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
@@ -24,6 +25,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
@@ -31,6 +33,8 @@ import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPrese
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -56,6 +60,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
 
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     private final MergeView                view;
+    private final DialogFactory            dialogFactory;
     private final ProjectExplorerPresenter projectExplorer;
     private final GitOutputConsoleFactory  gitOutputConsoleFactory;
     private final ConsolesPanelPresenter   consolesPanelPresenter;
@@ -77,11 +82,13 @@ public class MergePresenter implements MergeView.ActionDelegate {
                           GitLocalizationConstant constant,
                           AppContext appContext,
                           NotificationManager notificationManager,
+                          DialogFactory dialogFactory,
                           DtoUnmarshallerFactory dtoUnmarshallerFactory,
                           ProjectExplorerPresenter projectExplorer,
                           GitOutputConsoleFactory gitOutputConsoleFactory,
                           ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
+        this.dialogFactory = dialogFactory;
         this.projectExplorer = projectExplorer;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
@@ -180,6 +187,17 @@ public class MergePresenter implements MergeView.ActionDelegate {
 
                           @Override
                           protected void onFailure(Throwable exception) {
+                              if (exception instanceof ServerException &&
+                                  ((ServerException)exception).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
+                                  dialogFactory.createMessageDialog(constant.mergeTitle(), constant.committerIdentityInfoEmpty(),
+                                                                    new ConfirmCallback() {
+                                                                        @Override
+                                                                        public void accepted() {
+                                                                            //do nothing
+                                                                        }
+                                                                    }).show();
+                                  return;
+                              }
                               console.printError(exception.getMessage());
                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                               notificationManager

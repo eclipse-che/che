@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit.commands;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.shared.GitUser;
@@ -21,9 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Commit changes
@@ -49,7 +48,13 @@ public class CommitCommand extends GitCommand<Void> {
     @Override
     public Void execute() throws GitException {
         if (message == null) {
-            throw new GitException("Message wasn't set.");
+            throw new GitException("Message wasn't set");
+        }
+        if (committer == null) {
+            throw new GitException("Committer can't be null");
+        }
+        if (committer.getName() == null || committer.getEmail() == null) {
+            throw new GitException("Git user name and (or) email wasn't set", ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED);
         }
         reset();
         commandLine.add("commit");
@@ -75,12 +80,8 @@ public class CommitCommand extends GitCommand<Void> {
             commandLine.add("-m", message);
         }
 
-        if (committer != null) {
-            setCommandEnvironment("GIT_COMMITTER_NAME", committer.getName());
-            setCommandEnvironment("GIT_COMMITTER_EMAIL", committer.getEmail());
-        } else {
-            throw new GitException("Committer can't be null");
-        }
+        setCommandEnvironment("GIT_COMMITTER_NAME", committer.getName());
+        setCommandEnvironment("GIT_COMMITTER_EMAIL", committer.getEmail());
 
         String name;
         String email;

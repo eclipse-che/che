@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.client.commit;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
@@ -20,6 +21,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -29,6 +31,8 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
@@ -49,6 +53,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class CommitPresenter implements CommitView.ActionDelegate {
     public static final String COMMIT_COMMAND_NAME = "Git commit";
 
+    private final DialogFactory            dialogFactory;
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     private final AppContext               appContext;
     private final CommitView               view;
@@ -66,6 +71,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                            GitServiceClient service,
                            GitLocalizationConstant constant,
                            NotificationManager notificationManager,
+                           DialogFactory dialogFactory,
                            DtoUnmarshallerFactory dtoUnmarshallerFactory,
                            AppContext appContext,
                            DateTimeFormatter dateTimeFormatter,
@@ -73,6 +79,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                            GitOutputConsoleFactory gitOutputConsoleFactory,
                            ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
+        this.dialogFactory = dialogFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.appContext = appContext;
         this.dateTimeFormatter = dateTimeFormatter;
@@ -164,15 +171,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                            new AsyncRequestCallback<Revision>(dtoUnmarshallerFactory.newUnmarshaller(Revision.class)) {
                                @Override
                                protected void onSuccess(final Revision result) {
-                                   if (!result.isFake()) {
-                                       onCommitSuccess(result);
-                                   } else {
-                                       GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
-                                       console.printError(result.getMessage());
-                                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-                                       notificationManager.notify(constant.commited(), result.getMessage(),
-                                                                  appContext.getCurrentProject().getRootProject());
-                                   }
+                                   onCommitSuccess(result);
                                }
 
                                @Override
@@ -190,15 +189,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
                        new AsyncRequestCallback<Revision>(dtoUnmarshallerFactory.newUnmarshaller(Revision.class)) {
                            @Override
                            protected void onSuccess(final Revision result) {
-                               if (!result.isFake()) {
-                                   onCommitSuccess(result);
-                               } else {
-                                   GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
-                                   console.printError(result.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-                                   notificationManager.notify(constant.commitFailed(), result.getMessage(), FAIL, true,
-                                                              appContext.getCurrentProject().getRootProject());
-                               }
+                               onCommitSuccess(result);
                            }
 
                            @Override
@@ -248,11 +239,21 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     /**
      * Handler some action whether some exception happened.
      *
-     * @param e
-     *         exception what happened
+     * @param exception
+     *         exception that happened
      */
-    private void handleError(@NotNull Throwable e) {
-        String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.commitFailed();
+    private void handleError(@NotNull Throwable exception) {
+        if (exception instanceof ServerException &&
+            ((ServerException)exception).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
+            dialogFactory.createMessageDialog(constant.commitTitle(), constant.committerIdentityInfoEmpty(), new ConfirmCallback() {
+                @Override
+                public void accepted() {
+                    //do nothing
+                }
+            }).show();
+            return;
+        }
+        String errorMessage = (exception.getMessage() != null && !exception.getMessage().isEmpty()) ? exception.getMessage() : constant.commitFailed();
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);

@@ -19,14 +19,6 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface Revision {
-    /**
-     * Parameter which shows that this revision is a fake revision (i.e. TO for Exception)
-     *
-     * @return
-     */
-    boolean isFake();
-
-    void setFake(boolean fake);
 
     /** @return branch name */
     String getBranch();

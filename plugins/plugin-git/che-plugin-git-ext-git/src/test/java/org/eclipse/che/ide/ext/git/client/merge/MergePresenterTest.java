@@ -79,6 +79,7 @@ public class MergePresenterTest extends BaseTest {
                                        constant,
                                        appContext,
                                        notificationManager,
+                                       dialogFactory,
                                        dtoUnmarshallerFactory,
                                        projectExplorer,
                                        gitOutputConsoleFactory,
