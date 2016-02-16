@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.server;
 
-import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.GitProjectImporter;
-import org.eclipse.che.vfs.impl.fs.LocalPathResolver;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.eclipse.che.api.git.GitConnectionFactory;
+import org.eclipse.che.api.git.GitProjectImporter;
 
 /**
  * @author Roman Nikitenko
@@ -23,9 +23,8 @@ import com.google.inject.Singleton;
 public class GitHubProjectImporter extends GitProjectImporter {
 
     @Inject
-    public GitHubProjectImporter(GitConnectionFactory gitConnectionFactory,
-                                 LocalPathResolver localPathResolver) {
-        super(gitConnectionFactory, localPathResolver);
+    public GitHubProjectImporter(GitConnectionFactory gitConnectionFactory) {
+        super(gitConnectionFactory);
     }
 
     @Override

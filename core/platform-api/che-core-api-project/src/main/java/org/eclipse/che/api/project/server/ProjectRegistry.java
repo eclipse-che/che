@@ -158,7 +158,7 @@ public class ProjectRegistry {
             throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
                    NotFoundException, ServerException {
 
-        // it hrows NFE if not here
+        // it throws NFE if not here
         RegisteredProject config = getParentProject(absolutizePath(ofPath));
 
         RegisteredProject project = new RegisteredProject(config.getBaseFolder(), config, true, this.projectTypeRegistry);

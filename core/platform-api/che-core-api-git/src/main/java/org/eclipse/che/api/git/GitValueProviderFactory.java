@@ -17,10 +17,9 @@ import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.InvalidValueException;
+import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
-import org.eclipse.che.api.project.server.ValueStorageException;
 
 import javax.inject.Singleton;
 import java.util.Collections;
@@ -39,15 +38,14 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class GitValueProviderFactory implements ValueProviderFactory {
 
     @Inject
-    private GitConnectionFactory      gitConnectionFactory;
+    private GitConnectionFactory gitConnectionFactory;
 
     @Override
     public ValueProvider newInstance(final FolderEntry folder) {
         return new ValueProvider() {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
-                try (GitConnection gitConnection =
-                             gitConnectionFactory.getConnection(resolveLocalPathByPath(folder))) {
+                try (GitConnection gitConnection = gitConnectionFactory.getConnection(resolveLocalPathByPath(folder))) {
                     //check whether the folder belongs to git repository
                     if (!gitConnection.isInsideWorkTree()) {
                         return Collections.EMPTY_LIST;
@@ -66,13 +64,6 @@ public class GitValueProviderFactory implements ValueProviderFactory {
                 } catch (ApiException e) {
                     throw new ValueStorageException(e.getMessage());
                 }
-            }
-
-            @Override
-            public void setValues(String attributeName, List<String> value) throws InvalidValueException {
-                throw new InvalidValueException(
-                        String.format("It is not possible to set value for attribute %s on project %s .git project values are read only",
-                                      attributeName, folder.getPath()));
             }
         };
     }
