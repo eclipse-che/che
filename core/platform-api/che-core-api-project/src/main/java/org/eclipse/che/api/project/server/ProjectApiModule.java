@@ -12,6 +12,8 @@ package org.eclipse.che.api.project.server;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+
+import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 
@@ -22,6 +24,12 @@ public class ProjectApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(ProjectService.class);
+        bind(ProjectTypeService.class);
+
+        Multibinder.newSetBinder(binder(), ProjectImporter.class).addBinding().to(ZipProjectImporter.class);
+        Multibinder.newSetBinder(binder(), ProjectHandler.class);
+
         Multibinder<ProjectTypeDef> projectTypesMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
         projectTypesMultibinder.addBinding().to(BaseProjectType.class);
     }

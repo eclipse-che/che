@@ -14,10 +14,10 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.BranchCreateRequest;
 import org.eclipse.che.api.git.shared.BranchDeleteRequest;
 import org.eclipse.che.api.git.shared.BranchListRequest;
+import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.Commiters;
@@ -33,12 +33,12 @@ import org.eclipse.che.api.git.shared.PullRequest;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushRequest;
 import org.eclipse.che.api.git.shared.PushResponse;
+import org.eclipse.che.api.git.shared.RebaseRequest;
+import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
-import org.eclipse.che.api.git.shared.RebaseRequest;
-import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.RepoInfo;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
@@ -51,7 +51,6 @@ import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
-import org.eclipse.che.api.project.server.DefaultProjectManager;
 import org.eclipse.che.api.vfs.server.MountPoint;
 import org.eclipse.che.api.vfs.server.VirtualFile;
 import org.eclipse.che.api.vfs.server.VirtualFileSystem;
@@ -91,15 +90,9 @@ import java.util.Map;
 public class GitService {
     private static final Logger LOG = LoggerFactory.getLogger(GitService.class);
     @Inject
-    private LocalPathResolver         localPathResolver;
-    @Inject
     private GitUrlResolver            gitUrlResolver;
     @Inject
-    private VirtualFileSystemRegistry vfsRegistry;
-    @Inject
     private GitConnectionFactory      gitConnectionFactory;
-    @Inject
-    private DefaultProjectManager     projectManager;
 
     @PathParam("ws-id")
     private String vfsId;

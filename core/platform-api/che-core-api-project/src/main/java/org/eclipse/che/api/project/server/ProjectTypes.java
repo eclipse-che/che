@@ -29,21 +29,23 @@ import java.util.Map;
  */
 public class ProjectTypes {
 
-    private final Project        project;
+    private final ProjectConfig  projectConfig;
     private final ProjectManager manager;
     private final ProjectTypeDef primary;
-    private final Map<String, ProjectTypeDef> mixins = new HashMap<>();
-    private final Map<String, ProjectTypeDef> all    = new HashMap<>();
+    private final Map<String, ProjectTypeDef> mixins        = new HashMap<>();
+    private final Map<String, ProjectTypeDef> all           = new HashMap<>();
+    private final Map<String, Attribute>      attributeDefs = new HashMap<>();
 
-    public ProjectTypes(Project project, ProjectConfig projectConfig, ProjectManager manager) throws ProjectTypeConstraintException,
-                                                                                                     NotFoundException {
-        this.project = project;
+    public ProjectTypes(ProjectConfig projectConfig, ProjectManager manager) throws ProjectTypeConstraintException,
+                                                                                    NotFoundException {
         this.manager = manager;
+        this.projectConfig = projectConfig;
 
         String projectType = projectConfig.getType();
 
+
         if (projectType == null) {
-            throw new ProjectTypeConstraintException("No primary type defined for " + project.getWorkspace() + " : " + project.getPath());
+            throw new ProjectTypeConstraintException("No primary type defined for " + projectConfig.getPath());
         }
 
         primary = manager.getProjectTypeRegistry().getProjectType(projectType);
@@ -61,32 +63,33 @@ public class ProjectTypes {
         }
 
         // temporary storage to detect duplicated attributes
-        HashMap<String, Attribute> tmpAttrs = new HashMap<>();
+        //HashMap<String, Attribute> tmpAttrs = new HashMap<>();
+
         for (Attribute attr : primary.getAttributes()) {
-            tmpAttrs.put(attr.getName(), attr);
+            attributeDefs.put(attr.getName(), attr);
         }
 
         for (String mixinFromConfig : mixinsFromConfig) {
             if (!mixinFromConfig.equals(primary.getId())) {
                 ProjectTypeDef mixin = manager.getProjectTypeRegistry().getProjectType(mixinFromConfig);
-                if (mixin == null) {
-                    throw new ProjectTypeConstraintException("No project type registered for " + mixinFromConfig);
-                }
+//                if (mixin == null) {
+//                    throw new ProjectTypeConstraintException("No project type registered for " + mixinFromConfig);
+//                }
                 if (!mixin.isMixable()) {
                     throw new ProjectTypeConstraintException("Project type " + mixin + " is not allowable to be mixin");
                 }
 
                 // detect duplicated attributes
                 for (Attribute attr : mixin.getAttributes()) {
-                    if (tmpAttrs.containsKey(attr.getName())) {
+                    if (attributeDefs.containsKey(attr.getName())) {
                         throw new ProjectTypeConstraintException(
-                                "Attribute name conflict. Duplicated attributes detected " + project.getPath() +
+                                "Attribute name conflict. Duplicated attributes detected " + projectConfig.getPath() +
                                 " Attribute " + attr.getName() + " declared in " + mixin.getId() + " already declared in " +
-                                tmpAttrs.get(attr.getName()).getProjectType()
+                                attributeDefs.get(attr.getName()).getProjectType()
                         );
                     }
 
-                    tmpAttrs.put(attr.getName(), attr);
+                    attributeDefs.put(attr.getName(), attr);
                 }
 
                 // Silently remove repeated items from mixins if any
@@ -94,6 +97,10 @@ public class ProjectTypes {
                 all.put(mixinFromConfig, mixin);
             }
         }
+    }
+
+    public Map<String, Attribute> getAttributeDefs() {
+        return attributeDefs;
     }
 
     public ProjectTypeDef getPrimary() {
@@ -121,10 +128,10 @@ public class ProjectTypes {
         }
     }
 
-    void addTransient() throws ServerException, NotFoundException {
+    void addTransient() throws ServerException, NotFoundException, ProjectTypeConstraintException {
         List<SourceEstimation> estimations;
         try {
-            estimations = manager.resolveSources(project.getWorkspace(), project.getPath(), true);
+            estimations = manager.resolveSources(projectConfig.getPath(), true);
         } catch (Exception e) {
             throw new ServerException(e);
         }
@@ -135,6 +142,19 @@ public class ProjectTypes {
             if (type.isMixable()) {
                 all.put(type.getId(), type);
                 mixins.put(type.getId(), type);
+
+                for (Attribute attr : type.getAttributes()) {
+                    if (attributeDefs.containsKey(attr.getName())) {
+                        throw new ProjectTypeConstraintException(
+                                "Attribute name conflict. Duplicated attributes detected " + projectConfig.getPath() +
+                                " Attribute " + attr.getName() + " declared in " + type.getId() + " already declared in " +
+                                attributeDefs.get(attr.getName()).getProjectType()
+                        );
+                    }
+
+                    attributeDefs.put(attr.getName(), attr);
+                }
+
             }
         }
     }

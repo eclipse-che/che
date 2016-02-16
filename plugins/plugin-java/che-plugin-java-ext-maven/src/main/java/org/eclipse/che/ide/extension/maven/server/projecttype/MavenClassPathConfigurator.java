@@ -57,7 +57,7 @@ public class MavenClassPathConfigurator {
             cheFolder = projectFolder.createFolder(CODENVY_DIR);
         }
 
-        if (cheFolder != null && cheFolder.getVirtualFile().getChild("classpath") == null) {
+        if (cheFolder != null && cheFolder.getChild("classpath") == null) {
             String sourceDirectory = null;
             String testDirectory = null;
             Build build = model.getBuild();

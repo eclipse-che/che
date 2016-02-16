@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.server.ValueProvider;
 import org.eclipse.che.api.project.server.ValueProviderFactory;
 import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.api.vfs.server.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.xml.XMLTreeException;
 import org.eclipse.che.ide.maven.tools.Build;

@@ -78,7 +78,7 @@ public class DirtyRegion implements TypedRegion {
     }
 
     /*
-     * @see ITypedRegion#getType
+     * @see ITypedRegion#getProjectType
      */
     public String getType() {
         return fType;

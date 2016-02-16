@@ -21,24 +21,15 @@ import org.eclipse.che.api.project.server.InvalidValueException;
 import org.eclipse.che.api.project.server.ValueProvider;
 import org.eclipse.che.api.project.server.ValueProviderFactory;
 import org.eclipse.che.api.project.server.ValueStorageException;
-import org.eclipse.che.api.vfs.server.MountPoint;
-import org.eclipse.che.api.vfs.server.VirtualFile;
-import org.eclipse.che.api.vfs.server.VirtualFileSystem;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
-import org.eclipse.che.api.vfs.shared.PropertyFilter;
-import org.eclipse.che.api.vfs.shared.dto.Item;
-import org.eclipse.che.vfs.impl.fs.LocalPathResolver;
-import org.eclipse.che.vfs.impl.fs.VirtualFileImpl;
 
 import javax.inject.Singleton;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.git.GitProjectType.VCS_PROVIDER_NAME;
 import static org.eclipse.che.api.git.GitProjectType.GIT_CURRENT_BRANCH_NAME;
 import static org.eclipse.che.api.git.GitProjectType.GIT_REPOSITORY_REMOTES;
+import static org.eclipse.che.api.git.GitProjectType.VCS_PROVIDER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -49,11 +40,6 @@ public class GitValueProviderFactory implements ValueProviderFactory {
 
     @Inject
     private GitConnectionFactory      gitConnectionFactory;
-    @Inject
-    private VirtualFileSystemRegistry vfsRegistry;
-    @Inject
-    private LocalPathResolver         localPathResolver;
-
 
     @Override
     public ValueProvider newInstance(final FolderEntry folder) {
@@ -61,7 +47,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
                 try (GitConnection gitConnection =
-                             gitConnectionFactory.getConnection(resolveLocalPathByPath(folder.getPath(), folder.getWorkspace()))) {
+                             gitConnectionFactory.getConnection(resolveLocalPathByPath(folder))) {
                     //check whether the folder belongs to git repository
                     if (!gitConnection.isInsideWorkTree()) {
                         return Collections.EMPTY_LIST;
@@ -91,11 +77,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
         };
     }
 
-    private String resolveLocalPathByPath(String folderPath, String wsId) throws ApiException {
-        VirtualFileSystem vfs = vfsRegistry.getProvider(wsId).newInstance(null);
-        Item gitProject = vfs.getItemByPath(folderPath, null, false, PropertyFilter.ALL_FILTER);
-        final MountPoint mountPoint = vfs.getMountPoint();
-        final VirtualFile virtualFile = mountPoint.getVirtualFile(gitProject.getPath());
-        return localPathResolver.resolve((VirtualFileImpl)virtualFile);
+    private String resolveLocalPathByPath(FolderEntry folder) throws ApiException {
+        return folder.getVirtualFile().toIoFile().getAbsolutePath();
     }
 }

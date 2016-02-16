@@ -48,7 +48,6 @@ public class ProjectConfigAdapter implements JsonDeserializer<ProjectConfig>, Js
         object.addProperty("name", moduleConfig.getName());
         object.addProperty("path", moduleConfig.getPath());
         object.addProperty("type", moduleConfig.getType());
-        object.addProperty("content_root", moduleConfig.getContentRoot());
         object.add("attributes", context.serialize(moduleConfig.getAttributes()));
         object.add("modules", serializeModules(moduleConfig, context));
         object.add("source", context.serialize(moduleConfig.getSource()));

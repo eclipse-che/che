@@ -27,7 +27,6 @@ import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProvider
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.AddMavenModuleHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.ArchetypeGenerationStrategy;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.GeneratorStrategy;
-import org.eclipse.che.ide.extension.maven.server.projecttype.handler.GetMavenModulesHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectCreatedHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectImportedHandler;
@@ -50,7 +49,6 @@ public class MavenModule extends AbstractModule {
         projectHandlerMultibinder.addBinding().to(RemoveMavenModuleHandler.class);
         projectHandlerMultibinder.addBinding().to(MavenProjectImportedHandler.class);
         projectHandlerMultibinder.addBinding().to(ProjectHasBecomeMaven.class);
-        projectHandlerMultibinder.addBinding().to(GetMavenModulesHandler.class);
         projectHandlerMultibinder.addBinding().to(MavenProjectCreatedHandler.class);
 
         newSetBinder(binder(), GeneratorStrategy.class).addBinding().to(ArchetypeGenerationStrategy.class);

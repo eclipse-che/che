@@ -36,5 +36,4 @@ public interface ProjectConfig {
 
     SourceStorage getSource();
 
-    String getContentRoot();
 }

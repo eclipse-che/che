@@ -39,8 +39,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JAVA_CLASS;
-
 /**
  * It might be used for any jar content.
  *
@@ -110,13 +108,6 @@ public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, Ha
         } else {
             return getData().getName();
         }
-    }
-
-    /** {@inheritDoc} */
-    @Nullable
-    @Override
-    public String getMediaType() {
-        return isClassFile() ? APPLICATION_JAVA_CLASS : null;
     }
 
     /** {@inheritDoc} */

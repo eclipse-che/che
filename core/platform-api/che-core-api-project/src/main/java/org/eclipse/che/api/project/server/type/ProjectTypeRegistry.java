@@ -92,7 +92,11 @@ public class ProjectTypeRegistry {
      * @return project type by id
      */
     public ProjectTypeDef getProjectType(String id) throws NotFoundException {
-        return projectTypes.get(id);
+
+        ProjectTypeDef pt = projectTypes.get(id);
+        if(pt == null)
+            throw new NotFoundException("Project Type not found: "+id);
+        return pt;
     }
 
     /**

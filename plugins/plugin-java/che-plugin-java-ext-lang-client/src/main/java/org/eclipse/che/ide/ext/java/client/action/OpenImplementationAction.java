@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.openimplementation.OpenImplementationPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
@@ -32,8 +33,13 @@ public class OpenImplementationAction extends JavaEditorAction {
     @Inject
     public OpenImplementationAction(JavaLocalizationConstant constant,
                                     EditorAgent editorAgent,
-                                    OpenImplementationPresenter openImplementationPresenter) {
-        super(constant.openImplementationActionName(), constant.openImplementationDescription(), null, editorAgent);
+                                    OpenImplementationPresenter openImplementationPresenter,
+                                    FileTypeRegistry fileTypeRegistry) {
+        super(constant.openImplementationActionName(),
+              constant.openImplementationDescription(),
+              null,
+              editorAgent,
+              fileTypeRegistry);
         this.openImplementationPresenter = openImplementationPresenter;
     }
 

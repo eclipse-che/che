@@ -20,7 +20,6 @@ import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.project.tree.TreeNode;
@@ -144,12 +143,6 @@ public class FileNode extends ItemNode implements VirtualFile {
                 callback.onFailure(caught);
             }
         });
-    }
-
-    @Nullable
-    @Override
-    public String getMediaType() {
-        return getData().getMediaType();
     }
 
     @Override

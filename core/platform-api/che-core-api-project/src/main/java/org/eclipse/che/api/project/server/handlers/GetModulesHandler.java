@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * @author Vitaly Parfonov
+ * @deprecated
  */
 public interface GetModulesHandler extends ProjectHandler {
 

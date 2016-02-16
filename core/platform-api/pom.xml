@@ -26,7 +26,7 @@
         <module>che-core-api-dto</module>
         <module>che-core-api-dto-maven-plugin</module>
         <module>che-core-api-core</module>
-        <module>che-core-api-vfs</module>
+        <!-- module>che-core-api-vfs</module -->
         <module>che-core-api-workspace</module>
         <module>che-core-api-user</module>
         <module>che-core-api-project</module>
@@ -35,7 +35,7 @@
         <module>che-core-api-machine</module>
         <module>che-core-api-analytics</module>
         <module>che-core-api-auth</module>
-        <module>che-core-api-git</module>
+        <!--<module>che-core-api-git</module>-->
         <module>che-core-api-ssh</module>
         <module>che-core-api-infrastructure-local</module>
     </modules>

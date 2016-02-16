@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.Project;
+import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
@@ -68,7 +68,7 @@ public class MavenProjectResolver {
 
         String packaging = model.getPackaging();
         if (packaging != null && packaging.equals("pom")) {
-            Project project = new Project(projectFolder, projectManager);
+            ProjectImpl project = projectManager.getProject(projectFolder.getPath().toString());
 
             ProjectConfigImpl projectConfig = createConfig(projectFolder);
 
@@ -81,16 +81,16 @@ public class MavenProjectResolver {
             }
 
             projectConfig.setModules(modules);
-            projectConfig.setSource(getSourceStorage(project.getConfig()));
+            projectConfig.setSource(getSourceStorage(project));
 
-            project.updateConfig(projectConfig);
+            projectManager.updateProject(projectConfig);
         }
     }
 
     private static ProjectConfigImpl createConfig(FolderEntry folderEntry) throws ValueStorageException {
         ProjectConfigImpl projectConfig = new ProjectConfigImpl();
         projectConfig.setName(folderEntry.getName());
-        projectConfig.setPath(folderEntry.getPath());
+        projectConfig.setPath(folderEntry.getPath().toString());
         projectConfig.setType(MAVEN_ID);
 
         return projectConfig;

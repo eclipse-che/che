@@ -30,7 +30,6 @@
         <module>platform-api</module>
         <module>platform-api-client-gwt</module>
         <module>ide</module>
-        <module>che-core-vfs-impl</module>
-        <module>che-core-git-impl-native</module>
+        <!--<module>che-core-git-impl-native</module>-->
     </modules>
 </project>

@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -119,13 +120,13 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         ProjectManager manager = workspace.getProjectManager();
         List<IProject> projects = new ArrayList<>();
         try {
-            List<org.eclipse.che.api.project.server.Project> rootProjects = manager.getProjects(workspace.getWsId());
-            for (org.eclipse.che.api.project.server.Project rootProject : rootProjects) {
+            List<ProjectImpl> rootProjects = manager.getProjects();
+            for (ProjectImpl rootProject : rootProjects) {
                 Project project = new Project(new Path(rootProject.getPath()), workspace);
 
                 projects.add(project);
 
-                addAllModules(projects, rootProject, manager);
+                addAllModules(projects, rootProject);
             }
         } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
             LOG.error(e.getMessage(), e);
@@ -135,13 +136,12 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
     }
 
     private void addAllModules(List<IProject> projects,
-                               org.eclipse.che.api.project.server.Project rootProject,
-                               ProjectManager manager) throws IOException,
+                               ProjectImpl rootProject) throws IOException,
                                                               ForbiddenException,
                                                               ConflictException,
                                                               NotFoundException,
                                                               ServerException {
-        List<? extends ProjectConfig> modules = manager.getProjectModules(rootProject);
+        List<? extends ProjectConfig> modules = rootProject.getModules();
 
 
         for (ProjectConfig module : modules) {

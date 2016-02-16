@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.util.CancellableProcessWrapper;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.StreamPump;
 import org.eclipse.che.api.core.util.Watchdog;
-import org.eclipse.che.api.project.server.Project;
+import org.eclipse.che.api.project.server.ProjectImpl;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
@@ -75,7 +75,7 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
 
         //TODO Temporary solution for IDEX-4270
         try {
-            Project project = projectManager.getProject(workspaceId, projectPath);
+            ProjectImpl project = projectManager.getProject(projectPath);
             if (project != null) {
                 MavenClassPathConfigurator.configure(project.getBaseFolder());
             }

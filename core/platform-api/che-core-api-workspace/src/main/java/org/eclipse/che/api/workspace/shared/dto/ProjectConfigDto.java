@@ -111,14 +111,6 @@ public interface ProjectConfigDto extends ProjectConfig {
 
     ProjectConfigDto withProblems(List<ProjectProblemDto> problems);
 
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    String getContentRoot();
-
-    void setContentRoot(String contentRoot);
-
-    ProjectConfigDto withContentRoot(String contentRoot);
-
     @DelegateTo(client = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"),
                 server = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"))
     ProjectConfigDto findModule(String pathToModule);
