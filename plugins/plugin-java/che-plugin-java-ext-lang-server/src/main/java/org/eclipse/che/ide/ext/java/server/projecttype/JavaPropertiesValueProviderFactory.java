@@ -11,20 +11,30 @@
 package org.eclipse.che.ide.ext.java.server.projecttype;
 
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Value
+ * {@link ValueProviderFactory} for Java project type.
  *
  * @author gazarenkov
+ * @author Artem Zatsarynnyi
  */
 public class JavaPropertiesValueProviderFactory implements ValueProviderFactory {
+
+    private final String javaVersion;
+
+    @Inject
+    public JavaPropertiesValueProviderFactory(@Named("sys.java.version") String javaVersion) {
+        this.javaVersion = javaVersion;
+    }
 
     @Override
     public ValueProvider newInstance(FolderEntry projectFolder) {
@@ -35,7 +45,7 @@ public class JavaPropertiesValueProviderFactory implements ValueProviderFactory 
         @Override
         public List<String> getValues(String attributeName) throws ValueStorageException {
             if (attributeName.equals(Constants.LANGUAGE_VERSION))
-                return Collections.singletonList(System.getProperty("java.version"));
+                return Collections.singletonList(javaVersion);
             return null;
         }
     }
