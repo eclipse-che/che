@@ -12,7 +12,6 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
-import org.eclipse.che.ide.api.text.Region;
 import org.eclipse.che.ide.editor.orion.client.jso.ModelChangedEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
@@ -35,6 +34,9 @@ import org.eclipse.che.ide.jseditor.client.text.TextRange;
  * @author "Mickaël Leduque"
  */
 public class OrionDocument extends AbstractEmbeddedDocument {
+
+    /** The maximum number of lines that may be visible at the top of the text view after setting selection range. */
+    private final static int MARGIN_TOP = 15;
 
     private final OrionTextViewOverlay      textViewOverlay;
     private final OrionPositionConverter    positionConverter;
@@ -243,5 +245,12 @@ public class OrionDocument extends AbstractEmbeddedDocument {
     public void setSelectedRange(LinearRange range, boolean show) {
         int startOffset = range.getStartOffset();
         editorOverlay.setSelection(startOffset, startOffset + range.getLength(), show);
+
+        TextPosition position = getPositionFromIndex(startOffset);
+        if (show && position != null) {
+            int lineNumber = position.getLine();
+            int topIndex = lineNumber - MARGIN_TOP;
+            editorOverlay.getTextView().setTopIndex(topIndex > 0 ? topIndex : 0);
+        }
     }
 }
