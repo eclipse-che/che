@@ -10,21 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
- * Thrown when source of persisted value is invalid. For instance file not found or can not be read when expected.
- *
- * @author gazarenkov
+ *  @author gazarenkov
  */
-public class ValueStorageException extends ConflictException {
+public class ExtensionCasesTest extends WsAgentTestBase {
 
-    public ValueStorageException(String message) {
-        super(message);
+    @BeforeMethod
+    public void setUp() throws Exception {
+        super.setUp();
     }
 
-    public ValueStorageException(ServiceError serviceError) {
-        super(serviceError);
+    @Test
+    public void testWatcher() throws Exception {
+
+
+
     }
+
+
 }

@@ -11,7 +11,6 @@
 package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ValueStorageException;
 
 
 /**

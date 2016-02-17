@@ -16,11 +16,13 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
@@ -68,9 +70,15 @@ public class WsAgentTestBase {
 
     protected ProjectHandlerRegistry projectHandlerRegistry;
 
+    protected ProjectImporterRegistry importerRegistry;
+
     public void setUp() throws Exception {
 
-        root = new File(FS_PATH);
+        if(workspaceHolder == null)
+            workspaceHolder = new TestWorkspaceHolder();
+
+        if(root == null)
+            root = new File(FS_PATH);
 
         if (root.exists()) {
             IoUtil.deleteRecursive(root);
@@ -90,7 +98,7 @@ public class WsAgentTestBase {
 
         vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
 
-        workspaceHolder = new TestWorkspaceHolder();
+
         projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new PT1());
 
@@ -100,11 +108,13 @@ public class WsAgentTestBase {
 
         this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry);
 
+        this.importerRegistry = new ProjectImporterRegistry(new HashSet<>());
+
         fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
-                                null, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+                                importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
     }
 
 
