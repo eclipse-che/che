@@ -11,26 +11,19 @@
 
 -->
 <che-toolbar che-title="All projects"
-             che-button-name="New Project"
-             che-button-href="#/create-project" che-event-logger="projects/new.project"></che-toolbar>
-
-<md-toolbar class="projects-list-header md-toolbar-tools" md-theme="toolbar-theme">
-  <che-search flex che-placeholder="Search for projects" ng-model="listProjectsCtrl.projectFilter.name"></che-search>
-  <span flex></span>
-
-  <div class="md-toolbar-item md-tools" layout="row">
-    <i class="projects-list-projects-cog material-design icon-ic_filter_list_24px" dropdown-menu="listProjectsCtrl.dropDownOptionsList"
-       dropdown-model="listProjectsCtrl.dropDownValue" dropdown-onchange="listProjectsCtrl.dropDownSelected(selected)"
-       dropdown-item-label='name' che-event-logger="projects/filter"></i>
-  </div>
-</md-toolbar>
+             che-add-button-name="New Project"
+             che-add-button-href="#/create-project"
+             che-dropdown-menu="listProjectsCtrl.menuOptions"
+             che-search-placeholder="Search for projects"
+             che-search-model="listProjectsCtrl.projectFilter.name"
+             che-event-logger="projects/new.project"></che-toolbar>
 <div ng-if="listProjectsCtrl.displayWorkspaceFilter" class="projects-filter-animation projects-filter-panel" layout="row"
      layout-align="start center">
   <div class="projects-list-projects-filter-workspace-label">Filter workspaces:</div>
   <div flex="60" layout="row" layout-align="start center" layout-wrap>
     <div class="projects-list-projects-select-workspace" ng-repeat="workspace in listProjectsCtrl.workspaces">
-      <md-checkbox ng-model="listProjectsCtrl.filtersWorkspaceSelected[workspace.workspaceReference.id]"
-                   aria-label="Workspace {{workspace.workspaceReference.name}}">{{workspace.workspaceReference.name}}
+      <md-checkbox ng-model="listProjectsCtrl.filtersWorkspaceSelected[workspace.id]"
+                   aria-label="Workspace {{workspace.name}}">{{workspace.name}}
       </md-checkbox>
     </div>
   </div>
