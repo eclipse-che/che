@@ -158,7 +158,6 @@ public class StackLoaderTest {
                                                                           .withPath("somePath")
                                                                           .withAttributes(projectMap)
                                                                           .withType("maven type")
-                                                                          .withContentRoot("contentRoot")
                                                                           .withDescription("some project description")
                                                                           .withLinks(Collections.singletonList(link))
                                                                           .withMixins(Collections.singletonList("mixin time"))
@@ -169,13 +168,11 @@ public class StackLoaderTest {
                                                                           .withPath("somePath")
                                                                           .withAttributes(projectMap)
                                                                           .withType("maven type")
-                                                                          .withContentRoot("contentRoot")
                                                                           .withDescription("some project description")
                                                                           .withLinks(Collections.singletonList(link))
                                                                           .withMixins(Collections.singletonList("mixin time"))
                                                                           .withProblems(Collections.singletonList(projectProblem))
-                                                                          .withSource(sourceStorageDto)
-                                                                          .withModules(Collections.singletonList(moduleConfigDto));
+                                                                          .withSource(sourceStorageDto);
 
 
         RecipeDto recipeDto = newDto(RecipeDto.class).withType("type").withScript("script");
