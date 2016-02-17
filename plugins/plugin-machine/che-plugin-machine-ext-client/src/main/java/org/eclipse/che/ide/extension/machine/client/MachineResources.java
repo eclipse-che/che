@@ -55,6 +55,9 @@ public interface MachineResources extends ClientBundle {
     @Source("images/process/terminal-icon.svg")
     SVGResource terminal();
 
+    @Source("images/process/terminal-tree-icon.svg")
+    SVGResource terminalTreeIcon();
+
     /** Returns the icon for 'Custom' command type. */
     @Source("command/arbitrary/custom-command-type.svg")
     SVGResource customCommandType();
@@ -134,13 +137,21 @@ public interface MachineResources extends ClientBundle {
 
         String processTree();
 
+        String processTreeNode();
+
         String devMachineLabel();
 
         String machineStatus();
 
         String machineLabel();
 
+        String processIconPanel();
+
         String processIcon();
+
+        String processBadge();
+
+        String badgeVisible();
 
         String processButton();
 

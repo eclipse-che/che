@@ -46,34 +46,37 @@ import java.util.List;
  * get a list of requirements and start from the top... especially if we need
  * some coach marks as well for the landing page.
  */
-public class Tooltip extends AutoHideComponent<AutoHideView<Void>,
-        AutoHideComponent.AutoHideModel> {
+public class Tooltip extends AutoHideComponent<AutoHideView<Void>, AutoHideComponent.AutoHideModel> {
 
     private static final Resources RESOURCES  = GWT.create(Resources.class);
+
     private static final int       SHOW_DELAY = 600;
     private static final int       HIDE_DELAY = 600;
+
     /** The singleton view instance that all tooltips use. */
     private static AutoHideView<Void>            tooltipViewInstance;
+
     /** The currently active tooltip that is bound to the view. */
     private static Tooltip                       activeTooltip;
+
     /** Holds a reference to the css. */
     private final  Css                           css;
-    private final  List<Element>                targetElements;
+
+    private final  List<Element>                 targetElements;
     private final  Timer                         showTimer;
     private final  TooltipRenderer               renderer;
     private final  PositionController            positionController;
-    private final  List<EventRemover>           eventRemovers;
+    private final  List<EventRemover>            eventRemovers;
     private final  PositionController.Positioner positioner;
     private        Element                       contentElement;
     private        String                        title;
     private        String                        maxWidth;
-    private boolean isEnabled = true;
-    private boolean isShowDelayDisabled;
+    private        boolean                       isEnabled = true;
+    private        boolean                       isShowDelayDisabled;
 
     static {
         RESOURCES.tooltipCss().ensureInjected();
     }
-
 
     private Tooltip(AutoHideView<Void> view,
                     Resources res,
@@ -133,20 +136,17 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>,
 
     @Override
     public void show() {
-
         // Nothing to do if it is showing.
         if (isShowing()) {
             return;
         }
 
-    /*
-     * Hide the old Tooltip. This will not actually hide the View because we set
-     * activeTooltip to null.
-     */
-        Tooltip oldTooltip = activeTooltip;
-        activeTooltip = null;
-        if (oldTooltip != null) {
-            oldTooltip.hide();
+        /*
+         * Hide the old Tooltip. This will not actually hide the View because we set
+         * activeTooltip to null.
+         */
+        if (activeTooltip != null) {
+            activeTooltip.hide();
         }
 
         ensureContent();
@@ -292,7 +292,6 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>,
             contentElement = renderer.renderDom();
 
             if (contentElement == null) {
-
                 // Guard against malformed renderers.
                 Log.warn(getClass(), "Renderer for tooltip returned a null content element");
                 contentElement = Elements.createDivElement();
@@ -300,7 +299,6 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>,
             }
 
             if (title != null) {
-
                 // Insert a title if one is set.
                 Element titleElem = Elements.createElement("b");
                 titleElem.setTextContent(title);
@@ -315,6 +313,7 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>,
             Elements.addClassName(css.tooltip(), contentElement);
             Element triangle = Elements.createDivElement(css.triangle());
             contentElement.appendChild(triangle);
+
             setPositionStyle();
         }
     }
@@ -430,11 +429,11 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>,
     }
 
     /**
-     * A {@link com.codenvy.ide.ui.menu.PositionController.PositionerBuilder} which uses some more convenient defaults for tooltips. This
+     * A {@link org.eclipse.che.ide.ui.menu.PositionController.PositionerBuilder} which uses some more convenient defaults for tooltips. This
      * builder
-     * defaults to {@link com.codenvy.ide.ui.menu.PositionController.VerticalAlign#BOTTOM} {@link
-     * com.codenvy.ide.ui.menu.PositionController.HorizontalAlign#MIDDLE} and
-     * {@link com.codenvy.ide.ui.menu.PositionController.Position#NO_OVERLAP}.
+     * defaults to {@link org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign#BOTTOM} {@link
+     * org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign#MIDDLE} and
+     * {@link org.eclipse.che.ide.ui.menu.PositionController.Position#NO_OVERLAP}.
      */
     public static class TooltipPositionerBuilder extends PositionController.PositionerBuilder {
         public TooltipPositionerBuilder() {

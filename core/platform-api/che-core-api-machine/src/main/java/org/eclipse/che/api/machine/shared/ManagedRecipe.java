@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Eugene Voevodin
  */
-public interface ManagedRecipe extends Recipe {
+public interface ManagedRecipe extends Recipe, Permissible {
 
     /**
      * Returns recipe identifier.
@@ -41,11 +41,6 @@ public interface ManagedRecipe extends Recipe {
      * Returns recipe tags (i.e. 'java'). Tags used for recipes search.
      */
     List<String> getTags();
-
-    /**
-     * Returns recipe permissions.
-     */
-    Permissions getPermissions();
 
     /**
      * Returns recipe description.

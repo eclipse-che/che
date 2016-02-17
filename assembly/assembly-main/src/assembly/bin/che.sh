@@ -240,7 +240,8 @@ set_environment_variables () {
   # The base directory of Che
   if [ -z "${CHE_HOME}" ]; then
     if [ "${WIN}" == "true" ]; then
-      export CHE_HOME="${CHE_WINDOWS_SHORT_DIR}"
+      # che-497: Determine windows short directory name in bash
+      export CHE_HOME=`(cmd //C 'FOR %i in (%~dp0\..\..) do @echo %~Si')`
     else 
       export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
     fi
@@ -250,14 +251,27 @@ set_environment_variables () {
     export DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
+  # che-497: Convert JAVA_HOME to short directory name for Windows
+  if [ -z "${CHE_HOME}" ]; then
+    if [ "${WIN}" == "true" ]; then
+      # che-497: Determine windows short directory name in bash
+      export CHE_HOME=`(cmd //C 'FOR %i in (%~dp0\..\..) do @echo %~Si')`
+    else 
+      export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
+    fi
+  fi
+
+   if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
+    # che-497: Determine windows short directory name in bash
+    export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
+  fi
+
   # Convert Tomcat environment variables to POSIX format.
-  if [[ "${JAVA_HOME}" == *":"* ]]
-  then
+  if [[ "${JAVA_HOME}" == *":"* ]]; then
     JAVA_HOME=$(echo /"${JAVA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
-  if [[ "${CHE_HOME}" == *":"* ]]
-  then
+  if [[ "${CHE_HOME}" == *":"* ]]; then
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
@@ -477,7 +491,7 @@ call_catalina () {
 
   if [[ "${SKIP_JAVA_VERSION}" == false ]]; then
     # Che requires Java version 1.8 or higher.
-    JAVA_VERSION=$("${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
     if [  -z "${JAVA_VERSION}" ]; then
       error_exit "Failure running JAVA_HOME/bin/java -version. We received ${JAVA_VERSION}."
       return

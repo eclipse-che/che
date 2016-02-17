@@ -11,15 +11,11 @@
 
 -->
 <che-toolbar che-title="All Workspaces"
-              che-button-name="New Workspace"
-              che-button-href="#/create-workspace" che-event-logger="workspaces/new.workspace"></che-toolbar>
-
-<md-toolbar class="workspaces-list-header md-toolbar-tools" md-theme="toolbar-theme">
-  <che-search flex che-placeholder="Search for workspaces..."
-               ng-model="listWorkspacesCtrl.workspaceFilter.name"></che-search>
-  <span flex></span>
-</md-toolbar>
-
+              che-add-button-name="New Workspace"
+              che-add-button-href="#/create-workspace"
+              che-search-placeholder="Search for workspaces..."
+              che-search-model="listWorkspacesCtrl.workspaceFilter.name"
+              che-event-logger="workspaces/new.workspace"></che-toolbar>
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
   <md-progress-linear md-mode="indeterminate" class="workspaces-list-progress"
                       ng-show="listWorkspacesCtrl.isInfoLoading"></md-progress-linear>

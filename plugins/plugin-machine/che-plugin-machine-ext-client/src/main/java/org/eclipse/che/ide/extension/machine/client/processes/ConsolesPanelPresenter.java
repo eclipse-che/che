@@ -76,7 +76,8 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPanelView.ActionDelegate, HasView, ProcessFinishedHandler {
+public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPanelView.ActionDelegate,
+        HasView, ProcessFinishedHandler, OutputConsole.ConsoleOutputListener {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
@@ -97,8 +98,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     private final CommandTypeRegistry         commandTypeRegistry;
 
     ProcessTreeNode                rootNode;
-    Map<String, TerminalPresenter> terminals;
-    Map<String, OutputConsole>     commandConsoles;
+    Map<String, TerminalPresenter> terminals = new HashMap<>();
+
+    Map<String, OutputConsole>     consoles = new HashMap<>();
+    Map<OutputConsole, String>     consoleCommands = new HashMap<>();
 
     @Inject
     public ConsolesPanelPresenter(ConsolesPanelView view,
@@ -128,8 +131,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.entityFactory = entityFactory;
         this.appContext = appContext;
         this.machineService = machineService;
-        this.terminals = new HashMap<>();
-        this.commandConsoles = new HashMap<>();
 
         this.fetchMachines();
         this.view.setDelegate(this);
@@ -151,8 +152,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     }
 
     @Override
-    public void onProcessFinished() {
-        for (Map.Entry<String, OutputConsole> entry : commandConsoles.entrySet()) {
+    public void onProcessFinished(ProcessFinishedEvent event) {
+        for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
             if (entry.getValue().isFinished()) {
                 view.setStopButtonVisibility(entry.getKey(), false);
             }
@@ -280,8 +281,24 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         }
         
         updateCommandOutput(commandId, outputConsole);
+
         resfreshStopButtonState(commandId);
         workspaceAgent.setActivePart(this);
+    }
+
+    private void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
+        consoles.put(command, outputConsole);
+        consoleCommands.put(outputConsole, command);
+
+        outputConsole.go(new AcceptsOneWidget() {
+            @Override
+            public void setWidget(IsWidget widget) {
+                view.addProcessWidget(command, widget);
+                view.selectNode(view.getNodeById(command));
+            }
+        });
+
+        outputConsole.addOutputListener(this);
     }
 
     /**
@@ -309,7 +326,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                 final IsWidget terminalWidget = newTerminal.getView();
                 final String terminalName = getUniqueTerminalName(machineTreeNode);
                 final ProcessTreeNode terminalNode =
-                        new ProcessTreeNode(TERMINAL_NODE, machineTreeNode, terminalName, resources.terminal(), null);
+                        new ProcessTreeNode(TERMINAL_NODE, machineTreeNode, terminalName, resources.terminalTreeIcon(), null);
                 addChildToMachineNode(terminalNode, machineTreeNode);
 
                 final String terminalId = terminalNode.getId();
@@ -404,37 +421,43 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     @Override
     public void onStopCommandProcess(@NotNull ProcessTreeNode node) {
         String commandId = node.getId();
-        if (commandConsoles.containsKey(commandId) && !commandConsoles.get(commandId).isFinished()) {
-            commandConsoles.get(commandId).onClose();
+        if (consoles.containsKey(commandId) && !consoles.get(commandId).isFinished()) {
+            consoles.get(commandId).stop();
         }
     }
 
     @Override
     public void onCloseCommandOutputClick(@NotNull ProcessTreeNode node) {
         String commandId = node.getId();
-        if (!commandConsoles.containsKey(commandId)) {
+        OutputConsole console = consoles.get(commandId);
+
+        if (console == null) {
             return;
         }
 
-        OutputConsole outputConsole = commandConsoles.get(commandId);
-        if (outputConsole.isFinished()) {
+        if (console.isFinished()) {
+            console.close();
             onStopProcess(node);
-            commandConsoles.remove(commandId);
+            consoles.remove(commandId);
+            consoleCommands.remove(console);
             return;
         }
-        dialogFactory.createConfirmDialog("", localizationConstant.outputsConsoleViewStopProcessConfirmation(outputConsole.getTitle()),
-                                          getConfirmCloseConsoleCallback(outputConsole, node), null)
-                     .show();
 
+        dialogFactory.createConfirmDialog("", localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
+                                          getConfirmCloseConsoleCallback(console, node), null)
+                     .show();
     }
 
-    private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole outputConsole, final ProcessTreeNode node) {
+    private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole console, final ProcessTreeNode node) {
         return new ConfirmCallback() {
             @Override
             public void accepted() {
-                outputConsole.onClose();
+                console.stop();
                 onStopProcess(node);
-                commandConsoles.remove(node.getId());
+
+                console.close();
+                consoles.remove(node.getId());
+                consoleCommands.remove(console);
             }
         };
     }
@@ -444,11 +467,11 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         ProcessTreeNode parentNode = node.getParent();
 
         int processIndex = view.getNodeIndex(processId);
-        if (processIndex == -1) {
+        if (processIndex < 0) {
             return;
         }
 
-        int countWidgets = terminals.size() + commandConsoles.size();
+        int countWidgets = terminals.size() + consoles.size();
         if (countWidgets == 1) {
             view.hideProcessOutput(processId);
             removeChildFromMachineNode(node, parentNode);
@@ -467,7 +490,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     }
     
     private void resfreshStopButtonState(String selectedNodeId) {
-        for (Map.Entry<String, OutputConsole> entry : commandConsoles.entrySet()) {
+        for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
             String nodeId = entry.getKey();
             if (selectedNodeId.equals(nodeId) && !entry.getValue().isFinished()) {
                 view.setStopButtonVisibility(selectedNodeId, true);
@@ -531,17 +554,15 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     }
 
     private boolean isCommandStopped(String commandId) {
-        return commandConsoles.containsKey(commandId) && commandConsoles.get(commandId).isFinished();
+        return consoles.containsKey(commandId) && consoles.get(commandId).isFinished();
     }
 
-    private void updateCommandOutput(@NotNull final String commandId, @NotNull OutputConsole outputConsole) {
-        commandConsoles.put(commandId, outputConsole);
-        outputConsole.go(new AcceptsOneWidget() {
-            @Override
-            public void setWidget(IsWidget widget) {
-                view.addProcessWidget(commandId, widget);
-                view.selectNode(view.getNodeById(commandId));
-            }
-        });
+    @Override
+    public void onConsoleOutput(OutputConsole console) {
+        String command = consoleCommands.get(console);
+        if (command != null) {
+            view.markProcessHasOutput(command);
+        }
     }
+
 }

@@ -1,0 +1,177 @@
+[
+    {
+        "id": "java-default",
+        "creator": "ide",
+        "name": "Java",
+        "description": "Default Java Stack with JDK 8, Maven and Tomcat.",
+        "scope": "general",
+        "tags": [
+            "Java",
+            "JDK",
+            "Maven",
+            "Tomcat",
+            "Subversion",
+            "Ubuntu",
+            "Git"
+        ],
+        "components": [
+            {
+                "name": "JDK",
+                "version": "1.8.0_45"
+            },
+            {
+                "name": "Maven",
+                "version": "3.2.2"
+            },
+            {
+                "name": "Tomcat",
+                "version": "8.0.24"
+            }
+        ],
+        "source": {
+            "type": "image",
+            "origin": "codenvy/ubuntu_jdk8"
+        },
+        "workspaceConfig": {
+            "environments": [
+                {
+                    "name": "default",
+                    "recipe": null,
+                    "machineConfigs": [
+                        {
+                            "name": "default",
+                            "limits": {
+                                "ram": 1000
+                            },
+                            "source": {
+                                "location": "stub",
+                                "type": "recipe"
+                            },
+                            "type": "docker",
+                            "dev": true
+                        }
+                    ]
+                }
+            ],
+            "name": "default",
+            "defaultEnv": "default",
+            "description": null,
+            "commands": [
+                {
+                    "commandLine": "mvn clean install -f ${current.project.path}",
+                    "name": "newMaven",
+                    "type": "mvn"
+                }
+            ]
+        },
+        "permissions": {
+            "groups": [
+                {
+                    "acl": [
+                        "read",
+                        "search"
+                    ],
+                    "name": "public"
+                }
+            ],
+            "users": {}
+        },
+        "stackIcon" : {
+            "name": "type-java.svg",
+            "mediaType": "image/svg+xml"
+        }
+    },
+    {
+        "id": "node-default",
+        "creator": "ide",
+        "name": "Node",
+        "description": "Default Node Stack with Node 0.12.",
+        "scope": "general",
+        "tags": [
+            "Ubuntu",
+            "Git",
+            "Node.JS",
+            "NPM",
+            "Gulp",
+            "Bower",
+            "Grunt",
+            "Yeoman",
+            "Angular",
+            "Karma"
+        ],
+        "components": [
+            {
+                "name": "Node.JS",
+                "version": "0.12.9"
+            },
+            {
+                "name": "NPM",
+                "version": "---"
+            },
+            {
+                "name": "Gulp",
+                "version": "---"
+            },
+            {
+                "name": "Bower",
+                "version": "---"
+            },
+            {
+                "name": "Grunt",
+                "version": "---"
+            },
+            {
+                "name": "Yeoman",
+                "version": "---"
+            }
+        ],
+        "source": {
+            "type": "image",
+            "origin": "codenvy/node"
+        },
+        "workspaceConfig": {
+            "environments": [
+                {
+                    "name": "default",
+                    "recipe": null,
+                    "machineConfigs": [
+                        {
+                            "name": "default",
+                            "limits": {
+                                "ram": 1000
+                            },
+                            "source": {
+                                "location": "stub",
+                                "type": "recipe"
+                            },
+                            "type": "docker",
+                            "dev": true
+                        }
+                    ]
+                }
+            ],
+            "name": "default",
+            "defaultEnv": "default",
+            "description": null,
+            "commands": [
+                {
+                    "commandLine": "mvn clean install -f ${current.project.path}",
+                    "name": "newMaven",
+                    "type": "mvn"
+                }
+            ]
+        },
+        "permissions": {
+            "groups": [
+                {
+                    "acl": [
+                        "read",
+                        "search"
+                    ],
+                    "name": "public"
+                }
+            ],
+            "users": {}
+        }
+    }
+]

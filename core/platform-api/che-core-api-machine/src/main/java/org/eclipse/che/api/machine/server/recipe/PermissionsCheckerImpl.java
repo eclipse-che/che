@@ -12,7 +12,7 @@ package org.eclipse.che.api.machine.server.recipe;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.shared.Group;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
+import org.eclipse.che.api.machine.shared.Permissible;
 import org.eclipse.che.api.machine.shared.Permissions;
 //import org.eclipse.che.api.workspace.server.dao.Member;
 //import org.eclipse.che.api.workspace.server.dao.MemberDao;
@@ -38,15 +38,11 @@ public class PermissionsCheckerImpl implements PermissionsChecker {
 //    }
 
     @Override
-    public boolean hasAccess(ManagedRecipe recipe, String userId, String permission) throws ServerException {
+    public boolean hasAccess(Permissible permissible, String userId, String permission) throws ServerException {
         //TODO consider logic when creator has 'read', 'write' and 'update_acl' permissions
-        //if user is recipe creator he has access to it
-        if (recipe.getCreator().equals(userId)) {
-            return true;
-        }
 
-        //if recipe doesn't have any permissions it may be accessed only by its creator
-        final Permissions permissions = recipe.getPermissions();
+        //if data object doesn't have any permissions it may be accessed only by its creator
+        final Permissions permissions = permissible.getPermissions();
         if (permissions == null) {
             return false;
         }

@@ -1080,6 +1080,10 @@ public interface Theme {
      */
     String getBadgeFontColor();
 
+    /**
+     * Process badge border color.
+     */
+    String processBadgeBorderColor();
 
     /**
      * @return the blue color for icon.

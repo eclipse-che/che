@@ -19,6 +19,9 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Git output View Part.
  *
@@ -29,6 +32,8 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
     private final GitOutputPartView view;
     private final GitResources      resources;
     private final String            title;
+
+    private final List<ConsoleOutputListener> outputListeners = new ArrayList<>();
 
     /** Construct empty Part */
     @Inject
@@ -66,6 +71,10 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
             view.print(line.isEmpty() ? " " : line);
         }
         view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
     }
 
     /** {@inheritDoc} */
@@ -87,16 +96,28 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
     public void printInfo(String text) {
         view.printInfo(text);
         view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
     }
 
     public void printWarn(String text) {
         view.printWarn(text);
         view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
     }
 
     public void printError(String text) {
         view.printError(text);
         view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
     }
 
     @Override
@@ -115,7 +136,17 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
     }
 
     @Override
-    public void onClose() {
-
+    public void stop() {
     }
+
+    @Override
+    public void close() {
+        outputListeners.clear();
+    }
+
+    @Override
+    public void addOutputListener(ConsoleOutputListener listener) {
+        outputListeners.add(listener);
+    }
+
 }

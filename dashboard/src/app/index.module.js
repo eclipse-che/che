@@ -265,8 +265,8 @@ initModule.config(function($mdThemingProvider, jsonColors) {
 
 
   var toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
-    '500' : getColor('$che-navy-color'),
-    'contrastDefaultColor': 'light'
+    '500' : getColor('$che-white-color'),
+    'contrastDefaultColor': 'dark'
   });
   $mdThemingProvider.definePalette('toolbarPrimaryPalette', toolbarPrimaryPalette);
 

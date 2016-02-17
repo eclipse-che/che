@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.projectimport.wizard;
 
 import com.google.gwt.event.shared.EventBus;
+import com.google.web.bindery.event.shared.Event;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
@@ -91,6 +92,7 @@ public class ProjectImporterTest {
                                        localizationConstant,
                                        subscriberFactory,
                                        appContext,
+                                       eventBus,
                                        resolver);
     }
 
@@ -109,6 +111,7 @@ public class ProjectImporterTest {
         verify(importPromise, times(2)).then(voidOperationCaptor.capture());
         voidOperationCaptor.getAllValues().get(0).apply(null);
 
+        verify(eventBus).fireEvent(Matchers.<Event>anyObject());
         verify(resolver).resolveProject(completeCallback, projectConfig);
         verify(subscriber).onSuccess();
     }

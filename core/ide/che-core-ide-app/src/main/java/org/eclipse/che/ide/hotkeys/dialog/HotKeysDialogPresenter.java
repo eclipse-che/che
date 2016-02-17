@@ -100,9 +100,12 @@ public class HotKeysDialogPresenter implements HotKeysDialogView.ActionDelegate 
             if (charCodeWithModifiers != null) {
                 String hotKey = KeyMapUtil.getShortcutText(keyBindingAgent.getKeyBinding(actionId));
                 String description = actionManager.getAction(actionId).getTemplatePresentation().getDescription();
-                ideHotKeys.add(new HotKeyItem(description, hotKey));
+                if (description != null && !description.isEmpty()) {
+                    ideHotKeys.add(new HotKeyItem(description, hotKey));
+                }
             }
         }
+
         return ideHotKeys;
     }
 

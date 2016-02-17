@@ -53,14 +53,15 @@
 md-progress-linear.projects-list-projects-progress
   height 10px
 
+.projects-filter-panel
+  background-color $background-color
+
 .projects-filter-animation
   background-color $background-color
   height max-content
   min-height 43px
 
 .projects-filter-animation.ng-enter
-  -webkit-transition 0.3s
-  -moz-transition 0.3s
   transition 0.3s
   opacity 0
   height 0
@@ -71,8 +72,6 @@ md-progress-linear.projects-list-projects-progress
   height 43px
 
 .projects-filter-animation.ng-leave
-  -webkit-transition: 0.3s
-  -moz-transition: 0.3s
   transition 0.3s
   opacity 1
   height max-content
@@ -81,6 +80,7 @@ md-progress-linear.projects-list-projects-progress
   opacity 0
   height 0
   min-height 0
+  background-color $background-color
 
 .projects-list-projects-filter-workspace-label
   color $label-primary-color
@@ -94,6 +94,9 @@ md-progress-linear.projects-list-projects-progress
 
 .projects-list-projects-filter-action-icon
   margin-right 20px
+
+.projects-list-projects-select-workspace
+  height 20px
 
 .projects-list-projects-select-workspace md-checkbox
   margin-left 10px
