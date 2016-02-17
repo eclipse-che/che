@@ -19,18 +19,15 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.vfs.gwt.client.VfsServiceClient;
-import org.eclipse.che.api.vfs.shared.dto.Item;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.importer.AbstractImporter;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
+import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.eclipse.che.ide.projectimport.ErrorMessageUtils;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.validation.constraints.NotNull;
 
@@ -40,7 +37,6 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class ProjectImporter extends AbstractImporter {
 
-    private final VfsServiceClient         vfsServiceClient;
     private final CoreLocalizationConstant localizationConstant;
     private final ProjectResolver          projectResolver;
 
@@ -49,13 +45,11 @@ public class ProjectImporter extends AbstractImporter {
 
     @Inject
     public ProjectImporter(ProjectServiceClient projectService,
-                           VfsServiceClient vfsServiceClient,
                            CoreLocalizationConstant localizationConstant,
                            ImportProjectNotificationSubscriberFactory subscriberFactory,
                            AppContext appContext,
                            ProjectResolver projectResolver) {
         super(appContext, projectService, subscriberFactory);
-        this.vfsServiceClient = vfsServiceClient;
         this.localizationConstant = localizationConstant;
         this.projectResolver = projectResolver;
     }
@@ -65,19 +59,19 @@ public class ProjectImporter extends AbstractImporter {
         this.callback = callback;
         // check on VFS because need to check whether the folder with the same name already exists in the root of workspace
         final String projectName = projectConfig.getName();
-        vfsServiceClient.getItemByPath(workspaceId, projectName, new AsyncRequestCallback<Item>() {
-            @Override
-            protected void onSuccess(Item result) {
-                callback.onFailure(new Exception(localizationConstant.createProjectFromTemplateProjectExists(projectName)));
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                String pathToProject = '/' + projectName;
-
-                startImport(pathToProject, projectName, projectConfig.getSource());
-            }
-        });
+//        vfsServiceClient.getItemByPath(workspaceId, projectName, new AsyncRequestCallback<Item>() {
+//            @Override
+//            protected void onSuccess(Item result) {
+//                callback.onFailure(new Exception(localizationConstant.createProjectFromTemplateProjectExists(projectName)));
+//            }
+//
+//            @Override
+//            protected void onFailure(Throwable exception) {
+//                String pathToProject = '/' + projectName;
+//
+//                startImport(pathToProject, projectName, projectConfig.getSource());
+//            }
+//        });
     }
 
     @Override

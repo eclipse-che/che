@@ -13,21 +13,26 @@ package org.eclipse.che.api.vfs.impl.file;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Singleton
 public class DefaultFileWatcherNotificationHandler implements FileWatcherNotificationHandler {
     private static final Logger LOG = LoggerFactory.getLogger(DefaultFileWatcherNotificationHandler.class);
 
-    private final LocalVirtualFileSystem             virtualFileSystem;
+    private final VirtualFileSystemProvider             virtualFileSystemProvider;
     private final List<FileWatcherNotificationListener> fileWatcherNotificationListeners;
 
-    public DefaultFileWatcherNotificationHandler(LocalVirtualFileSystem virtualFileSystem) {
-        this.virtualFileSystem = virtualFileSystem;
+    @Inject
+    public DefaultFileWatcherNotificationHandler(VirtualFileSystemProvider virtualFileSystemProvider) {
+        this.virtualFileSystemProvider = virtualFileSystemProvider;
         fileWatcherNotificationListeners = new CopyOnWriteArrayList<>();
     }
 
@@ -64,7 +69,7 @@ public class DefaultFileWatcherNotificationHandler implements FileWatcherNotific
 
     private VirtualFile convertToVirtualFile(File root, String subPath, boolean isDir) {
         try {
-            //LocalVirtualFileSystem virtualFileSystem = (LocalVirtualFileSystem)virtualFileSystemProvider.getVirtualFileSystem(true);
+            LocalVirtualFileSystem virtualFileSystem = (LocalVirtualFileSystem)virtualFileSystemProvider.getVirtualFileSystem(true);
             Path vfsPath = Path.of(subPath);
             VirtualFile virtualFile = virtualFileSystem.getRoot().getChild(vfsPath);
             if (virtualFile == null) {

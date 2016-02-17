@@ -37,8 +37,7 @@ public class FSLuceneSearcherProvider extends AbstractLuceneSearcherProvider {
      */
     @Inject
     public FSLuceneSearcherProvider(@Named("vfs.local.fs_index_root_dir") File indexRootDirectory,
-                                    // todo: rename value of @Named annotation to avoid type conflicts
-                                    @Named("vfs.index_filter") Set<PathMatcher> excludePatterns) throws IOException {
+                                    @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns) throws IOException {
         super(newHashSet(transform(excludePatterns, VirtualFileFilters::wrap)));
         this.indexRootDirectory = indexRootDirectory;
         Files.createDirectories(indexRootDirectory.toPath());

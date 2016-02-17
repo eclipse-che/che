@@ -38,11 +38,12 @@ import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
-import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherEventType;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystem;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -56,7 +57,6 @@ import java.io.IOException;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -73,7 +73,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public final class ProjectManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
 
-    private final LocalVirtualFileSystem vfs;
+    private final VirtualFileSystem vfs;
 
     private final EventService           eventService;
     private final ProjectTypeRegistry    projectTypeRegistry;
@@ -83,9 +83,8 @@ public final class ProjectManager {
 
     private final ProjectImporterRegistry importers;
 
-    private final FileTreeWatcher                       fileWatcher;
-    private final DefaultFileWatcherNotificationHandler fileWatchNotifier;
-
+    private final FileTreeWatcher                fileWatcher;
+    private final FileWatcherNotificationHandler fileWatchNotifier;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
                                                                           new ThreadFactoryBuilder()
@@ -93,33 +92,32 @@ public final class ProjectManager {
                                                                                   .setDaemon(true).build()
                                                                          );
 
-
     @Inject
     @SuppressWarnings("unchecked")
-    public ProjectManager(LocalVirtualFileSystem vfs,
+    public ProjectManager(VirtualFileSystemProvider vfsProvider,
                           EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
                           ProjectHandlerRegistry handlers,
                           ProjectImporterRegistry importers,
-                          ProjectRegistry projectRegistry
+                          ProjectRegistry projectRegistry,
+                          FileWatcherNotificationHandler fileWatcherNotificationHandler,
+                          FileTreeWatcher fileTreeWatcher
                           //WorkspaceHolder workspaceHolder
                          )
             throws ServerException, NotFoundException, ProjectTypeConstraintException, InvalidValueException,
                    ValueStorageException, IOException, InterruptedException {
 
-        this.vfs = vfs;
+        this.vfs = vfsProvider.getVirtualFileSystem();
         this.eventService = eventService;
         this.projectTypeRegistry = projectTypeRegistry;
         this.handlers = handlers;
         this.importers = importers;
         this.projectRegistry = projectRegistry;
 
-        this.fileWatchNotifier = new DefaultFileWatcherNotificationHandler(vfs);
-        this.fileWatcher = new FileTreeWatcher(vfs.getRoot().toIoFile(), new HashSet<>(), fileWatchNotifier);
-
+        this.fileWatchNotifier = fileWatcherNotificationHandler;
+        this.fileWatcher = fileTreeWatcher;
 
         initWatcher();
-
     }
 
     @PreDestroy

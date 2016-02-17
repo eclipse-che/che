@@ -18,7 +18,8 @@ import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -36,18 +37,18 @@ public class ProjectRegistry {
 
     private final WorkspaceHolder        workspaceHolder;
 
-    private final LocalVirtualFileSystem vfs;
+    private final VirtualFileSystem   vfs;
 
     private final ProjectTypeRegistry projectTypeRegistry;
 
     @Inject
-    public ProjectRegistry(WorkspaceHolder  workspaceHolder, LocalVirtualFileSystem vfs,
+    public ProjectRegistry(WorkspaceHolder  workspaceHolder, VirtualFileSystemProvider vfsProvider,
                            ProjectTypeRegistry projectTypeRegistry)
             throws ProjectTypeConstraintException, InvalidValueException, NotFoundException,
                    ValueStorageException, ServerException {
         this.projects = new HashMap<>();
         this.workspaceHolder = workspaceHolder;
-        this.vfs = vfs;
+        this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
 
         initProjects();

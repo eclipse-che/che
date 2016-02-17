@@ -18,14 +18,13 @@ import org.eclipse.che.api.vfs.search.SearcherProvider;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
 @Singleton
-public class LocalVirtualFileSystemProvider extends AbstractVirtualFileSystemProvider implements Provider<VirtualFileSystem> {
+public class LocalVirtualFileSystemProvider extends AbstractVirtualFileSystemProvider {
     private final File             rootDirectory;
     private final SearcherProvider searcherProvider;
 
@@ -40,14 +39,5 @@ public class LocalVirtualFileSystemProvider extends AbstractVirtualFileSystemPro
     @Override
     protected VirtualFileSystem createVirtualFileSystem(CloseCallback closeCallback) throws ServerException {
         return new LocalVirtualFileSystem(rootDirectory, new ArchiverFactory(), searcherProvider, closeCallback);
-    }
-
-    @Override
-    public VirtualFileSystem get() {
-        try {
-            return getVirtualFileSystem();
-        } catch (ServerException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

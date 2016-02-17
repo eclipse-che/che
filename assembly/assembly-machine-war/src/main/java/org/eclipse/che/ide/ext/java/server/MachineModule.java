@@ -57,14 +57,10 @@ public class MachineModule extends AbstractModule {
     protected void configure() {
         bind(ApiInfoService.class);
 
-//        bind(LocalFileSystemRegistryPlugin.class);
-
         //TODO it's temporary solution. Ext war should not have binding for DAO.
         bind(UserDao.class).to(LocalUserDaoImpl.class);
         bind(PreferenceDao.class).to(org.eclipse.che.api.local.RemotePreferenceDao.class);
 
-//        bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
-//        bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
         bind(SshServiceClient.class).to(HttpSshServiceClient.class);
 
@@ -72,10 +68,8 @@ public class MachineModule extends AbstractModule {
                 .to(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.class);
 
         install(new CoreRestModule());
-//        install(new BaseProjectModule());
-        install(new ProjectApiModule());
         install(new VirtualFileSystemModule());
-//        install(new VirtualFileSystemFSModule());
+        install(new ProjectApiModule());
         install(new MavenModule());
         install(new ArchetypeGeneratorModule());
         install(new GitHubModule());

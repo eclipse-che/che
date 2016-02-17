@@ -13,25 +13,34 @@ package org.eclipse.che.api.project.server;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
+import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImportersService;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 
 /**
+ * Guice module contains configuration of Project API components.
+ *
  * @author gazarenkov
+ * @author Artem Zatsarynnyi
  */
 public class ProjectApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(ProjectService.class);
-        bind(ProjectTypeService.class);
-
-        Multibinder.newSetBinder(binder(), ProjectImporter.class).addBinding().to(ZipProjectImporter.class);
-        Multibinder.newSetBinder(binder(), ProjectHandler.class);
+        Multibinder<ProjectImporter> projectImportersMultibinder = Multibinder.newSetBinder(binder(), ProjectImporter.class);
+        projectImportersMultibinder.addBinding().to(ZipProjectImporter.class);
 
         Multibinder<ProjectTypeDef> projectTypesMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
         projectTypesMultibinder.addBinding().to(BaseProjectType.class);
+
+        Multibinder<ProjectHandler> projectHandlersMultibinder = Multibinder.newSetBinder(binder(), ProjectHandler.class);
+        projectHandlersMultibinder.addBinding().to(CreateBaseProjectTypeHandler.class);
+
+        bind(ProjectService.class);
+        bind(ProjectTypeService.class);
+        bind(ProjectImportersService.class);
     }
 }

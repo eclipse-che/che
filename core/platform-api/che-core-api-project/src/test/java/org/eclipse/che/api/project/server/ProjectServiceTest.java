@@ -37,10 +37,12 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.vfs.ArchiverFactory;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystem;
+import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
+import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
+import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -92,7 +94,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
@@ -103,7 +104,6 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.commons.lang.ws.rs.ExtMediaType.APPLICATION_ZIP;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -120,9 +120,7 @@ public class ProjectServiceTest {
     private static final String CONTENT_TYPE = "Content-Type";
 
     private static final String      vfsUser       = "dev";
-    private static final Set<String> vfsUserGroups = singleton("workspace/developer");
     private static final String      workspace     = "my_ws";
-    private static final String      apiEndpoint   = "http://localhost:8080/che/api";
 
     protected final static String FS_PATH    = "target/fss";
     protected final static String INDEX_PATH = "target/fss_index";
@@ -144,7 +142,7 @@ public class ProjectServiceTest {
     @Mock
     private HttpJsonResponse       httpJsonResponse;
 
-    private LocalVirtualFileSystem vfs;
+    protected LocalVirtualFileSystemProvider vfsProvider;
 
     private ProjectImporterRegistry importerRegistry;
 
@@ -175,8 +173,7 @@ public class ProjectServiceTest {
         filters.add(path -> true);
         FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
 
-        vfs = new LocalVirtualFileSystem(root, new ArchiverFactory(), sProvider, null);
-
+        vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
 
         final EventService eventService = new EventService();
 
@@ -199,10 +196,13 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfs, ptRegistry);
+        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry);
 
-        pm = new ProjectManager(vfs, null, ptRegistry, phRegistry,
-                                importerRegistry, projectRegistry);
+        FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
+        FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
+
+        pm = new ProjectManager(vfsProvider, null, ptRegistry, phRegistry,
+                                importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 
@@ -314,7 +314,7 @@ public class ProjectServiceTest {
 
         assertEquals(p.size(), 1);
 
-       vfs.getRoot().createFolder("not_project");
+        vfsProvider.getVirtualFileSystem().getRoot().createFolder("not_project");
 
         // to refresh
         projectRegistry.initProjects();
@@ -379,7 +379,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetNotValidProject() throws Exception {
         //MountPoint mountPoint = pm.getProjectsRoot(workspace).getVirtualFile().getMountPoint();
-        vfs.getRoot().createFolder("not_project");
+        vfsProvider.getVirtualFileSystem().getRoot().createFolder("not_project");
         // to refresh
         projectRegistry.initProjects();
         ContainerResponse response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/not_project", workspace),

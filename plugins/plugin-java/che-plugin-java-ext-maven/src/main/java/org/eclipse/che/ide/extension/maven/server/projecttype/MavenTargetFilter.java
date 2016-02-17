@@ -15,14 +15,13 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.ValueStorageException;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
-import org.eclipse.che.api.vfs.server.VirtualFile;
-import org.eclipse.che.api.vfs.server.VirtualFileFilter;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileFilter;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 
 /**
@@ -43,12 +42,12 @@ public class MavenTargetFilter implements VirtualFileFilter {
 
     @Override
     public boolean accept(VirtualFile file) {
-        return !file.getPath().contains(TARGET_FRAGMENT) || !isMavenTargetFolder(file);
+        return !file.getPath().toString().contains(TARGET_FRAGMENT) || !isMavenTargetFolder(file);
     }
 
     // TODO: need to rework in according to the new Project API
     private boolean isMavenTargetFolder(VirtualFile virtualFile) {
-        String path = virtualFile.getPath();
+        String path = virtualFile.getPath().toString();
         String rootPath = path.substring(0, path.indexOf(TARGET_FRAGMENT));
 //        try {
 //            FolderEntry rootFolder = (FolderEntry)projectManager.getProjectsRoot().getChild(rootPath);

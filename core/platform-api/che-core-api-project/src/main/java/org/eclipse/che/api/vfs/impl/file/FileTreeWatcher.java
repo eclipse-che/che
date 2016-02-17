@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
@@ -74,8 +75,8 @@ public class FileTreeWatcher {
     private       WatchEvent.Modifier[]          watchEventModifiers;
 
     @Inject
-    public FileTreeWatcher(File watchRoot,
-                           Set<PathMatcher> excludePatterns,
+    public FileTreeWatcher(@Named("che.user.workspaces.storage") File watchRoot,
+                           @Named("vfs.index_filter_matcher") Set<PathMatcher> excludePatterns,
                            FileWatcherNotificationHandler fileWatcherNotificationHandler) {
         watchEventModifiers = new WatchEvent.Modifier[0];
         this.watchRoot = toCanonicalFile(watchRoot);

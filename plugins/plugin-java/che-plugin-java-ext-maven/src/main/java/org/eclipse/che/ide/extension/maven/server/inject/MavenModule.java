@@ -13,16 +13,13 @@ package org.eclipse.che.ide.extension.maven.server.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
 
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
-import org.eclipse.che.api.vfs.server.VirtualFileFilter;
 import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
 import org.eclipse.che.ide.extension.maven.server.core.MavenClassPathBuilder;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectType;
-import org.eclipse.che.ide.extension.maven.server.projecttype.MavenTargetFilter;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProviderFactory;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.ArchetypeGenerationStrategy;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.GeneratorStrategy;
@@ -51,7 +48,7 @@ public class MavenModule extends AbstractModule {
         newSetBinder(binder(), GeneratorStrategy.class).addBinding().to(ArchetypeGenerationStrategy.class);
         bind(ClassPathBuilder.class).to(MavenClassPathBuilder.class).in(Singleton.class);
 
-        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
-        multibinder.addBinding().to(MavenTargetFilter.class);
+//        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
+//        multibinder.addBinding().to(MavenTargetFilter.class);
     }
 }

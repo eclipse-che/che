@@ -16,8 +16,6 @@ import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.vfs.gwt.client.VfsServiceClient;
-import org.eclipse.che.api.vfs.shared.dto.Item;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -45,7 +43,6 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
     private final String                        workspaceId;
     private final String                        extPath;
     private final EventBus                      eventBus;
-    private final VfsServiceClient              vfsServiceClient;
     private final ProjectServiceClient          projectServiceClient;
     private final DialogFactory                 dialogFactory;
     private final ProjectNotificationSubscriber projectNotificationSubscriber;
@@ -57,7 +54,6 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
                                          AppContext appContext,
                                          @Named("cheExtensionPath") String extPath,
                                          EventBus eventBus,
-                                         VfsServiceClient vfsServiceClient,
                                          ProjectServiceClient projectServiceClient,
                                          DialogFactory dialogFactory,
                                          ProjectNotificationSubscriber projectNotificationSubscriber) {
@@ -67,7 +63,6 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
         this.workspaceId = appContext.getWorkspace().getId();
         this.extPath = extPath;
         this.eventBus = eventBus;
-        this.vfsServiceClient = vfsServiceClient;
         this.appContext = appContext;
         this.projectServiceClient = projectServiceClient;
         this.dialogFactory = dialogFactory;
@@ -132,18 +127,18 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
     public void onImportClicked() {
         // check on VFS because need to check whether the folder with the same name already exists in the root of workspace
         final String projectName = view.getProjectName();
-        vfsServiceClient.getItemByPath(appContext.getWorkspaceId(), projectName, new AsyncRequestCallback<Item>() {
-            @Override
-            protected void onSuccess(Item result) {
-                view.setEnabledImportButton(false);
-                dialogFactory.createMessageDialog("", locale.createProjectFromTemplateProjectExists(projectName), null).show();
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                importProject();
-            }
-        });
+//        vfsServiceClient.getItemByPath(appContext.getWorkspaceId(), projectName, new AsyncRequestCallback<Item>() {
+//            @Override
+//            protected void onSuccess(Item result) {
+//                view.setEnabledImportButton(false);
+//                dialogFactory.createMessageDialog("", locale.createProjectFromTemplateProjectExists(projectName), null).show();
+//            }
+//
+//            @Override
+//            protected void onFailure(Throwable exception) {
+//                importProject();
+//            }
+//        });
     }
 
     private void importProject() {
