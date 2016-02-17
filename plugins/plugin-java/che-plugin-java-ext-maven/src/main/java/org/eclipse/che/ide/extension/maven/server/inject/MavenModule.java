@@ -30,6 +30,7 @@ import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProje
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 /** @author Artem Zatsarynnyi */
+// TODO: rework after new Project API
 public class MavenModule extends AbstractModule {
     @Override
     protected void configure() {

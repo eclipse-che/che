@@ -42,6 +42,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Valeriy Svydenko
  */
+// TODO: rework after new Project API
 public class MavenClassPathBuilder implements ClassPathBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(MavenClassPathBuilder.class);
 

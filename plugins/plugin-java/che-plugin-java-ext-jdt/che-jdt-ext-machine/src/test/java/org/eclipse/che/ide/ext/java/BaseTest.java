@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * @author Evgen Vidolob
  */
-// TODO need to rework in according to the new Project API
+// TODO: rework after new Project API
 public abstract class BaseTest {
 
     protected static final String              wsPath        = BaseTest.class.getResource("/projects").getFile();

@@ -76,13 +76,6 @@ public interface ProjectConfigDto extends ProjectConfig {
 
     ProjectConfigDto withAttributes(Map<String, List<String>> attributes);
 
-//    @Override
-//    List<ProjectConfigDto> getModules();
-//
-//    void setModules(List<ProjectConfigDto> modules);
-//
-//    ProjectConfigDto withModules(List<ProjectConfigDto> modules);
-
     @Override
     @FactoryParameter(obligation = MANDATORY)
     SourceStorageDto getSource();
@@ -107,8 +100,4 @@ public interface ProjectConfigDto extends ProjectConfig {
     void setProblems(List<ProjectProblemDto> problems);
 
     ProjectConfigDto withProblems(List<ProjectProblemDto> problems);
-
-//    @DelegateTo(client = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"),
-//                server = @DelegateRule(type = ProjectConfigUtil.class, method = "findModule"))
-//    ProjectConfigDto findModule(String pathToModule);
 }

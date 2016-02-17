@@ -29,6 +29,7 @@ import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
  *
  * @author Valeriy Svydenko
  */
+// TODO: rework after new Project API
 @Singleton
 public class MavenTargetFilter implements VirtualFileFilter {
     private static final String TARGET_FRAGMENT = "/target/";
@@ -45,7 +46,6 @@ public class MavenTargetFilter implements VirtualFileFilter {
         return !file.getPath().toString().contains(TARGET_FRAGMENT) || !isMavenTargetFolder(file);
     }
 
-    // TODO: need to rework in according to the new Project API
     private boolean isMavenTargetFolder(VirtualFile virtualFile) {
         String path = virtualFile.getPath().toString();
         String rootPath = path.substring(0, path.indexOf(TARGET_FRAGMENT));

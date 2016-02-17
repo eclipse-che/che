@@ -393,6 +393,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
 
+        // TODO: rework after new Project API
 //        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
 //
 //        if (parentModule == null) {

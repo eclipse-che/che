@@ -68,7 +68,6 @@ import static org.mockito.Mockito.when;
  * @author Valeriy Svydenko
  */
 public class DebuggerTest extends BaseTest {
-    private static final String MIME_TYPE  = "application/java";
     private static final String DEBUG_INFO = "debug_info";
 
     @Captor
@@ -121,7 +120,6 @@ public class DebuggerTest extends BaseTest {
         super.setUp();
 
         when(file.getData()).thenReturn(fileReference);
-//        when(fileReference.getMediaType()).thenReturn(MIME_TYPE);
         when(dtoFactory.createDto(Location.class)).thenReturn(mock(Location.class));
         when(dtoFactory.createDto(BreakPoint.class)).thenReturn(mock(BreakPoint.class));
         when(resolverFactory.getResolver(anyString())).thenReturn(mock(FqnResolver.class));

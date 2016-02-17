@@ -118,6 +118,7 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
     public IProject[] getProjects() {
         ProjectManager manager = workspace.getProjectManager();
         List<IProject> projects = new ArrayList<>();
+        // TODO: rework after new Project API
 //        try {
 //            List<ProjectImpl> rootProjects = manager.getProjects();
 //            for (ProjectImpl rootProject : rootProjects) {
@@ -134,6 +135,7 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         return projects.toArray(new IProject[projects.size()]);
     }
 
+    // TODO: rework after new Project API
 //    private void addAllModules(List<IProject> projects,
 //                               ProjectImpl rootProject) throws IOException,
 //                                                              ForbiddenException,
@@ -151,6 +153,7 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
     private void addModules(List<IProject> projects, ProjectConfig moduleConfig) {
         Project mp = new Project(new Path(moduleConfig.getPath()), workspace);
         projects.add(mp);
+        // TODO: rework after new Project API
 //        for (ProjectConfig module : moduleConfig.getModules()) {
 //            addModules(projects, module);
 //        }

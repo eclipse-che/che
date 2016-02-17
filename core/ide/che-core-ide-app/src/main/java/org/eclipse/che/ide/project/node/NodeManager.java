@@ -186,6 +186,7 @@ public class NodeManager {
         if ("module".equals(itemType)) {
             moduleNode = null;
 
+            // TODO: rework after new Project API
 //            for (ProjectConfigDto moduleConfigDto : configDto.getModules()) {
 //                createModuleNode(itemReference, moduleConfigDto, settings);
 //
@@ -208,6 +209,7 @@ public class NodeManager {
             return;
         }
 
+        // TODO: rework after new Project API
 //        for (ProjectConfigDto configDto : moduleConfig.getModules()) {
 //            createModuleNode(itemReference, configDto, settings);
 //        }

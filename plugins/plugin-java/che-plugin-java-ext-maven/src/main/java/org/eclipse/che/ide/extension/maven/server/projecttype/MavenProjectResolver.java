@@ -80,6 +80,7 @@ public class MavenProjectResolver {
                 defineModules(folderEntry, modules);
             }
 
+            // TODO: rework after new Project API
 //            projectConfig.setModules(modules);
             projectConfig.setSource(getSourceStorage(project));
 
@@ -126,6 +127,7 @@ public class MavenProjectResolver {
             defineModules(internalModule, internalModules);
         }
 
+        // TODO: rework after new Project API
 //        moduleConfig.setModules(internalModules);
 
         modules.add(moduleConfig);

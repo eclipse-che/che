@@ -50,7 +50,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Vitaly Parfonov
  */
-// TODO need to rework in according to the new Project API
+// TODO: rework after new Project API
 public class MavenProjectImportedTest {
 
     private String pomJar =

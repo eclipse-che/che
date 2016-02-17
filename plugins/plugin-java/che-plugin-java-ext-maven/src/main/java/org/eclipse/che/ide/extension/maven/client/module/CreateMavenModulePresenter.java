@@ -153,6 +153,7 @@ public class CreateMavenModulePresenter implements CreateMavenModuleView.ActionD
                                             boolean isModule = parentFolder instanceof ModuleNode;
                                             boolean isProject = parentFolder instanceof ProjectNode;
 
+                                            // TODO: rework after new Project API
                                             ProjectConfigDto projectConfigDto = appContext.getCurrentProject().getProjectConfig();
 
 //                                            ProjectConfigDto parentConfig =

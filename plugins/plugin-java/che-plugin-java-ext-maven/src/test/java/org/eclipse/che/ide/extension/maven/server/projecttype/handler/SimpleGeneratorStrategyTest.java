@@ -45,7 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /** @author Artem Zatsarynnyi */
-// TODO need to rework in according to the new Project API
+// TODO: rework after new Project API
 public class SimpleGeneratorStrategyTest {
 
     private ProjectManager    pm;

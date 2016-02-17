@@ -8,6 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+// TODO: rework after new Project API
 //package org.eclipse.che.ide.extension.maven.server.projecttype.handler;
 //
 //import org.eclipse.che.api.core.notification.EventService;
@@ -51,7 +52,6 @@
 ///**
 // * @author Roman Nikitenko
 // */
-//// TODO need to rework in according to the new Project API
 //@RunWith(MockitoJUnitRunner.class)
 //public class RemoveMavenModuleHandlerTest {
 //

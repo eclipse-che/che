@@ -24,6 +24,7 @@ import java.util.Set;
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
  */
+// TODO: rework after new Project API
 public class DummyProjectManager /*implements ProjectManager*/ {
 
 
