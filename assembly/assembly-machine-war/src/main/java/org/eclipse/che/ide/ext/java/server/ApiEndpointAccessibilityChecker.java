@@ -31,6 +31,7 @@ import java.io.File;
  * Checks whether API is accessible from WS agent or not on app start to prevent usage of illegal configuration.
  *
  * @author Alexander Garagatyi
+ * @author Eugene Ivantsov
  */
 @Singleton
 public class ApiEndpointAccessibilityChecker {
@@ -51,9 +52,9 @@ public class ApiEndpointAccessibilityChecker {
     public void start() {
             try {
                 final HttpJsonResponse pingResponse = httpJsonRequestFactory.fromUrl(apiEndpoint)
-                        .setMethod(HttpMethod.GET)
-                        .setTimeout(2000)
-                        .request();
+                                                                            .setMethod(HttpMethod.GET)
+                                                                            .setTimeout(2000)
+                                                                            .request();
                 if (pingResponse.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     return;
                 }
@@ -61,13 +62,12 @@ public class ApiEndpointAccessibilityChecker {
                 LOG.error( e.getLocalizedMessage(), e);
             }
 
-            LOG.error(String.format("The workspace agent has attempted to start, but it is unable to ping the Che server at %s", apiEndpoint));
+            LOG.error("The workspace agent has attempted to start, but it is unable to ping the Che server at " + apiEndpoint);
             LOG.error("The workspace agent has been forcefully stopped. " +
                       "This error happens when the agent cannot resolve the location of the Che server. " +
                       "This error can usually be fixed with additional configuration settings in /conf/che.properties. " +
                       "The Che server will stop this workspace after a short timeout. " +
-                      "You can get help by posting your config, stacktrace and workspace /etc/hosts below as a GitHub issue. "
-                      );
+                      "You can get help by posting your config, stacktrace and workspace /etc/hosts below as a GitHub issue.");
 
             // content of /etc/hosts file may provide clues on why the connection failed, e.g. how che-host is resolved
             try {
