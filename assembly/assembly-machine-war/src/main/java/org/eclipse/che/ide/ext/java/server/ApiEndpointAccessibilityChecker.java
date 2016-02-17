@@ -10,22 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.server;
 
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
+import org.eclipse.che.commons.lang.IoUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.io.File;
 
 /**
  * Checks whether API is accessible from WS agent or not on app start to prevent usage of illegal configuration.
@@ -34,6 +34,8 @@ import java.net.HttpURLConnection;
  */
 @Singleton
 public class ApiEndpointAccessibilityChecker {
+    private static final Logger LOG = LoggerFactory.getLogger(ApiEndpointAccessibilityChecker.class);
+
     private final String                 apiEndpoint;
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
@@ -46,18 +48,34 @@ public class ApiEndpointAccessibilityChecker {
     }
 
     @PostConstruct
-    public void start()
-            throws ForbiddenException, BadRequestException, ConflictException, NotFoundException,
-                   ServerException, UnauthorizedException, IOException {
-        final HttpJsonResponse pingResponse = httpJsonRequestFactory.fromUrl(apiEndpoint)
-                                                                    .setMethod(HttpMethod.GET)
-                                                                    .setTimeout(2000)
-                                                                    .request();
-        if (pingResponse.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            throw new RuntimeException(
-                    "The workspace agent that we inject into your workspace machine has failed to start due to a DNS resolution error. " +
-                    "This error happens when the agent cannot resolve the location of Che due to unusual configuration. " +
-                    "Please post details of your configuration in an issue on Che's GitHub page.");
+    public void start() {
+            try {
+                final HttpJsonResponse pingResponse = httpJsonRequestFactory.fromUrl(apiEndpoint)
+                        .setMethod(HttpMethod.GET)
+                        .setTimeout(2000)
+                        .request();
+                if (pingResponse.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    return;
+                }
+            } catch (ApiException | IOException e) {
+                LOG.error( e.getLocalizedMessage(), e);
+            }
+
+            LOG.error(String.format("The workspace agent has attempted to start, but it is unable to ping the Che server at %s", apiEndpoint));
+            LOG.error("The workspace agent has been forcefully stopped. " +
+                      "This error happens when the agent cannot resolve the location of the Che server. " +
+                      "This error can usually be fixed with additional configuration settings in /conf/che.properties. " +
+                      "The Che server will stop this workspace after a short timeout. " +
+                      "You can get help by posting your config, stacktrace and workspace /etc/hosts below as a GitHub issue. "
+                      );
+
+            // content of /etc/hosts file may provide clues on why the connection failed, e.g. how che-host is resolved
+            try {
+                  LOG.info("Workspace /etc/hosts: " + IoUtil.readAndCloseQuietly(new FileInputStream(new File("/etc/hosts"))));
+            } catch (Exception e) {
+                LOG.info(e.getLocalizedMessage(), e);
+            }
+
+            System.exit(0);
         }
-    }
 }
