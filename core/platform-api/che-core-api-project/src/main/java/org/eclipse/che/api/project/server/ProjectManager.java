@@ -32,6 +32,7 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
@@ -297,7 +298,7 @@ public final class ProjectManager {
 
         final ProjectImporter importer = importers.getImporter(sourceStorage.getType());
         if (importer == null) {
-            throw new ServerException(String.format("Unable import sources project from '%s'. Sources type '%s' is not supported.",
+            throw new NotFoundException(String.format("Unable import sources project from '%s'. Sources type '%s' is not supported.",
                                                     sourceStorage.getLocation(), sourceStorage.getType()));
         }
         // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
@@ -333,10 +334,14 @@ public final class ProjectManager {
             throw new NotFoundException("Project Type " + projectTypeId + " not found.");
         }
 
-        final VirtualFileEntry baseFolder = getProjectsRoot().getChild(path.startsWith("/") ? path.substring(1) : path);
-        if (!baseFolder.isFolder()) {
-            throw new NotFoundException("Not a folder: " + path);
-        }
+        final VirtualFileEntry baseFolder = getProjectsRoot().getChildFolder(path);
+                                                             //.getChild(path.startsWith("/") ? path.substring(1) : path);
+
+        if(baseFolder == null)
+            throw new NotFoundException("Folder not found: "+path);
+//        if (!baseFolder.isFolder()) {
+//            throw new NotFoundException("Not a folder: " + path);
+//        }
 
         Map<String, AttributeValue> attributes = new HashMap<>();
 
@@ -345,7 +350,10 @@ public final class ProjectManager {
 
                 Variable var = (Variable)attr;
                 // getValue throws ValueStorageException if not valid
-                attributes.put(attr.getName(), var.getValue((FolderEntry)baseFolder));
+                AttributeValue val = var.getValue((FolderEntry)baseFolder);
+                if(attr.isRequired() && val.isEmpty())
+                    throw new ProjectTypeConstraintException("Required attribute is not recognized "+attr.getName());
+                attributes.put(attr.getName(), val);
             }
         }
 

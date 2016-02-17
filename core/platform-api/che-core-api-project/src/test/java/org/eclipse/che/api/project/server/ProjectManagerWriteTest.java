@@ -14,20 +14,32 @@ package org.eclipse.che.api.project.server;
 
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.core.util.ValueHolder;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -353,7 +365,47 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
     @Test
     public void testImportProject() throws Exception {
 
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        String fileContent = "to be or not to be";
+        ZipOutputStream zipOut = new ZipOutputStream(bout);
+        zipOut.putNextEntry(new ZipEntry("folder1/"));
+        zipOut.putNextEntry(new ZipEntry("folder1/file1.txt"));
+        zipOut.putNextEntry(new ZipEntry("file1"));
+        zipOut.write(fileContent.getBytes());
+        zipOut.close();
+        final InputStream zip = new ByteArrayInputStream(bout.toByteArray());
+        final String importType = "_123_";
+        registerImporter(importType, zip);
+
+        SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType(importType);
+
+        pm.importProject("/testImportProject", sourceConfig);
+
+        RegisteredProject project = projectRegistry.getProject("/testImportProject");
+
+        assertNotNull(project);
+
+        // BASE
+        //System.out.println(">>> "+project.getProjectType());
+
+        assertNotNull(project.getBaseFolder().getChild("file1"));
+        assertEquals(fileContent, project.getBaseFolder().getChild("file1").getVirtualFile().getContentAsString());
+
     }
+
+    @Test
+    public void testImportProjectWithoutImporterFailed() throws Exception {
+        SourceStorage sourceConfig = DtoFactory.newDto(SourceStorageDto.class).withType("nothing");
+
+        try {
+            pm.importProject("/testImportProject", sourceConfig);
+            fail("NotFoundException: Unable import sources project from 'null'. Sources type 'nothing' is not supported.");
+        } catch (NotFoundException e) {
+        }
+
+
+    }
+
 
 
     @Test
@@ -386,6 +438,54 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
 
     }
+
+
+     /* ---------------------------------- */
+    /* private */
+    /* ---------------------------------- */
+
+    private void registerImporter(String importType, InputStream zip) throws Exception {
+        final ValueHolder<FolderEntry> folderHolder = new ValueHolder<>();
+        importerRegistry.register(new ProjectImporter() {
+            @Override
+            public String getId() {
+                return importType;
+            }
+
+            @Override
+            public boolean isInternal() {
+                return false;
+            }
+
+            @Override
+            public String getDescription() {
+                return "importer";
+            }
+
+            @Override
+            public void importSources(FolderEntry baseFolder, SourceStorage storage) throws ConflictException,
+                                                                                            ServerException,
+                                                                                            ForbiddenException {
+                importSources(baseFolder, storage, LineConsumerFactory.NULL);
+            }
+
+            @Override
+            public void importSources(FolderEntry baseFolder,
+                                      SourceStorage storage,
+                                      LineConsumerFactory importOutputConsumerFactory) throws ConflictException,
+                                                                                              ServerException,
+                                                                                              ForbiddenException {
+                // Don't really use location in this test.
+                baseFolder.getVirtualFile().unzip(zip, true, 0);
+                folderHolder.set(baseFolder);
+            }
+            @Override
+            public ImporterCategory getCategory() {
+                return ProjectImporter.ImporterCategory.ARCHIVE;
+            }
+        });
+    }
+
 
 
 }

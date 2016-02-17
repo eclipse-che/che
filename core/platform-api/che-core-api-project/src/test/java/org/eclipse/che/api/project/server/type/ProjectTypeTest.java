@@ -12,7 +12,6 @@ package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ValueStorageException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;

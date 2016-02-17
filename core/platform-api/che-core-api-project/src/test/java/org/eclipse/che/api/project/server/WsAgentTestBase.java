@@ -16,11 +16,13 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.vfs.ArchiverFactory;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystem;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -62,9 +64,15 @@ public class WsAgentTestBase {
 
     protected ProjectHandlerRegistry projectHandlerRegistry;
 
+    protected ProjectImporterRegistry importerRegistry;
+
     public void setUp() throws Exception {
 
-        root = new File(FS_PATH);
+        if(workspaceHolder == null)
+            workspaceHolder = new TestWorkspaceHolder();
+
+        if(root == null)
+            root = new File(FS_PATH);
 
         if (root.exists()) {
             IoUtil.deleteRecursive(root);
@@ -84,7 +92,7 @@ public class WsAgentTestBase {
 
         vfs = new LocalVirtualFileSystem(root, new ArchiverFactory(), sProvider, null);
 
-        workspaceHolder = new TestWorkspaceHolder();
+
         projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new PT1());
 
@@ -94,9 +102,12 @@ public class WsAgentTestBase {
 
         this.projectRegistry = new ProjectRegistry(workspaceHolder, vfs, projectTypeRegistry);
 
+        this.importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 
         pm = new ProjectManager(vfs, eventService, projectTypeRegistry, projectHandlerRegistry,
-                                null, projectRegistry);
+                                importerRegistry, projectRegistry);
+
+
     }
 
 

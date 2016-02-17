@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.java.server.projecttype;
 
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.ide.ext.java.shared.Constants;

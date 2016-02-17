@@ -69,6 +69,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         workspaceHolder = new TestWorkspaceHolder(projects);
         ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new PT1());
+        projectTypeRegistry.registerProjectType(new PT3());
 
         ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
@@ -78,11 +79,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
                                    null, projectRegistry);
     }
 
-//    @AfterClass
-//    public static void remove() throws Exception {
-//        File root = new File(FS_PATH);
-//        FileUtils.deleteDirectory(root);
-//    }
 
     @Test
     public void testInit() throws Exception {
@@ -174,17 +170,20 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
     }
 
-
-
-    @Test
-    public void testEstimateProject() throws Exception {
-
-    }
+//    @Test
+//    public void testEstimateProject() throws Exception {
+//
+//        //pm.getProject("/normal").getBaseFolder().createFolder("file1");
+//
+//        System.out.println (">>>> "+pm.estimateProject("/normal", "pt3").get("pt2-provided1").getString());
+//
+//    }
 
     @Test
     public void testResolveSources() throws Exception {
 
     }
+
 
     @Test
     public void testIfConstantAttrIsAccessible() throws Exception {
