@@ -11,7 +11,7 @@
 package org.eclipse.che.security.oauth1;
 
 
-import org.eclipse.che.api.auth.oauth.OAuthAuthorizationHeaderProvider;
+import org.eclipse.che.api.auth.oauth1.OAuthAuthorizationHeaderProvider;
 
 import javax.validation.constraints.NotNull;
 import javax.inject.Inject;
