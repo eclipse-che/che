@@ -31,6 +31,7 @@ import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -47,6 +48,7 @@ import static org.mockito.Mockito.when;
  * @author Roman Nikitenko
  */
 // TODO: rework after new Project API
+@Ignore
 public class MavenClassPathConfiguratorTest {
 
     private static final String      VFS_USER                      = "dev";
