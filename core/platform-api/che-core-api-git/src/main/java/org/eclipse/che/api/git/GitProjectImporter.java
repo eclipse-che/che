@@ -28,11 +28,9 @@ import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.InitRequest;
 import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.vfs.impl.fs.LocalPathResolver;
-import org.eclipse.che.vfs.impl.fs.VirtualFileImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +53,11 @@ import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
 public class GitProjectImporter implements ProjectImporter {
 
     private final GitConnectionFactory gitConnectionFactory;
-    private final LocalPathResolver    localPathResolver;
     private static final Logger LOG = LoggerFactory.getLogger(GitProjectImporter.class);
 
     @Inject
-    public GitProjectImporter(GitConnectionFactory gitConnectionFactory, LocalPathResolver localPathResolver) {
+    public GitProjectImporter(GitConnectionFactory gitConnectionFactory) {
         this.gitConnectionFactory = gitConnectionFactory;
-        this.localPathResolver = localPathResolver;
     }
 
     @Override
@@ -133,7 +129,7 @@ public class GitProjectImporter implements ProjectImporter {
                 branchMerge = parameters.get("branchMerge");
             }
             // Get path to local file. Git works with local filesystem only.
-            final String localPath = localPathResolver.resolve((VirtualFileImpl)baseFolder.getVirtualFile());
+            final String localPath = baseFolder.getVirtualFile().toIoFile().getAbsolutePath();
             final DtoFactory dtoFactory = DtoFactory.getInstance();
             final String location = storage.getLocation();
             // it's needed for extract repository name from repository url e.g https://github.com/codenvy/che-core.git

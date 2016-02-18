@@ -14,8 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.ide.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.actions.StopMachineAction;
 import org.eclipse.che.ide.actions.StopWorkspaceAction;
@@ -44,7 +44,6 @@ import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommand
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.console.ClearConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleToolbar;
-import org.eclipse.che.ide.extension.machine.client.machine.extserver.ProjectApiComponentInitializer;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
@@ -79,8 +78,6 @@ public class MachineExtension {
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
                             final ConsolesPanelPresenter consolesPanelPresenter,
-                            //projectApiComponentInitializer has handler which will work at the right time
-                            final ProjectApiComponentInitializer projectApiComponentInitializer,
                             final ServerPortProvider machinePortProvider,
                             final OutputsContainerPresenter outputsContainerPresenter,
                             final PerspectiveManager perspectiveManager,
@@ -88,16 +85,16 @@ public class MachineExtension {
                             CustomCommandType arbitraryCommandType) {
         machineResources.getCss().ensureInjected();
 
-        eventBus.addHandler(ExtServerStateEvent.TYPE, new ExtServerStateHandler() {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
-            public void onExtServerStarted(ExtServerStateEvent event) {
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
             }
 
             @Override
-            public void onExtServerStopped(ExtServerStateEvent event) {
+            public void onWsAgentStopped(WsAgentStateEvent event) {
             }
         });
 

@@ -17,8 +17,8 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -53,7 +53,7 @@ import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate, ExtServerStateHandler {
+public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegate, WsAgentStateHandler {
 
     private final ProjectExplorerPresenter projectExplorer;
     private final MessageBusProvider       messageBusProvider;
@@ -84,17 +84,17 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
         this.view.setDelegate(this);
 
         resultMap = new HashMap<>();
-        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
         wsMessageBus = messageBusProvider.getMachineMessageBus();
         SEARCH_URL = "/project/" + appContext.getWorkspace().getId() + "/search";
     }
 
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
     /** Show dialog with view for navigation. */

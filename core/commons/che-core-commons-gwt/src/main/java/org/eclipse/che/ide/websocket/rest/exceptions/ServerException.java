@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.websocket.rest.exceptions;
 
+import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.HTTPHeader;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.rest.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Thrown when there was an any exception was received from the server over WebSocket.
@@ -23,20 +25,29 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class ServerException extends Exception {
+
     private Message response;
+
+    private String message;
+
+    private int errorCode;
+
+
+    private Map<String, String> attributes;
 
     private boolean errorMessageProvided;
 
     public ServerException(Message response) {
         this.response = response;
+        this.message = JsonHelper.parseJsonMessage(response.getBody());
+        this.errorCode = JsonHelper.parseErrorCode(response.getBody());
         this.errorMessageProvided = checkErrorMessageProvided();
+        this.attributes = JsonHelper.parseErrorAttributes(response.getBody());
     }
 
     @Override
     public String getMessage() {
-        if (response.getBody() == null || response.getBody().isEmpty())
-            return null;
-        return response.getBody();
+        return message;
     }
 
     public int getHTTPStatus() {
@@ -67,4 +78,13 @@ public class ServerException extends Exception {
     public boolean isErrorMessageProvided() {
         return errorMessageProvided;
     }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
 }

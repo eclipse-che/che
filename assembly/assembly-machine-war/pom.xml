@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-machine-war</artifactId>
     <packaging>war</packaging>
@@ -76,10 +76,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
@@ -89,10 +85,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-git-impl-native</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-vfs-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.lib</groupId>

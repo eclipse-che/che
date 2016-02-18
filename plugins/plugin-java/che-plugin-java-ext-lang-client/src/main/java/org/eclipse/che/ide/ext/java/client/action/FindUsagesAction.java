@@ -17,6 +17,7 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.search.FindUsagesPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
@@ -35,8 +36,13 @@ public class FindUsagesAction extends JavaEditorAction {
     public FindUsagesAction(JavaLocalizationConstant constant,
                             EditorAgent editorAgent,
                             FindUsagesPresenter presenter,
-                            Resources resources) {
-        super(constant.actionFindUsagesTitle(), constant.actionFindUsagesDescription(), resources.find(), editorAgent);
+                            Resources resources,
+                            FileTypeRegistry fileTypeRegistry) {
+        super(constant.actionFindUsagesTitle(),
+              constant.actionFindUsagesDescription(),
+              resources.find(),
+              editorAgent,
+              fileTypeRegistry);
         this.presenter = presenter;
     }
 

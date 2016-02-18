@@ -38,9 +38,9 @@ public class ImportWizardTest {
     private ImportWizard wizard;
 
     @Test
-    public void wizardShouldBeCompleted() {
+    public void shouldCallImporterOnCompletion() {
         wizard.complete(completeCallback);
 
-        verify(importer).checkFolderExistenceAndImport(completeCallback, projectConfig);
+        verify(importer).importProject(completeCallback, projectConfig);
     }
 }

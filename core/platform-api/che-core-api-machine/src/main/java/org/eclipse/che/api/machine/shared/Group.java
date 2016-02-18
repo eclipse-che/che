@@ -13,7 +13,8 @@ package org.eclipse.che.api.machine.shared;
 import java.util.List;
 
 /**
- * Permissions group, allows to manage group access to recipe
+ * Permissions group, allows to manage group access to data object
+ * For example: permission for access to {@link org.eclipse.che.api.core.model.machine.Recipe}
  *
  * @author Eugene Voevodin
  */
@@ -47,7 +48,7 @@ public interface Group {
     String getUnit();
 
     /**
-     * Returns access control list for current group (i.e. 'read', 'write').
+     * Returns access control list for current group (i.e. 'read', 'write', 'search').
      * Returned instance is always updatable list, never {@code null}
      */
     List<String> getAcl();

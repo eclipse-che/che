@@ -12,6 +12,7 @@ package org.eclipse.che.git.impl.nativegit.ssh;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
@@ -59,13 +60,13 @@ public class SshKeyProviderImpl implements SshKeyProvider {
         try {
             pair = sshService.getPair("git", host);
         } catch (ServerException | NotFoundException e) {
-            throw new GitException("Unable get private ssh key");
+            throw new GitException("Unable get private ssh key", ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY);
         }
 
         // check keys existence
         String privateKey = pair.getPrivateKey();
         if (privateKey == null) {
-            throw new GitException("Unable get private ssh key");
+            throw new GitException("Unable get private ssh key", ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY);
         }
 
         final String publicKey = pair.getPublicKey();

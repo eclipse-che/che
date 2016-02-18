@@ -74,9 +74,6 @@ final class CompareViewImpl extends Window implements CompareView {
 
         setWidget(UI_BINDER.createAndBindUi(this));
 
-        dockPanel.setSize(String.valueOf((com.google.gwt.user.client.Window.getClientWidth() / 100) * 95) + "px",
-                          String.valueOf((com.google.gwt.user.client.Window.getClientHeight() / 100) * 90) + "px");
-
         Button closeButton = createButton(locale.buttonClose(), "git-compare-close-btn", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -98,7 +95,8 @@ final class CompareViewImpl extends Window implements CompareView {
     /** {@inheritDoc} */
     @Override
     public void show(String oldContent, String newContent, String revision, String file) {
-        comparePanel.clear();
+        dockPanel.setSize(String.valueOf((com.google.gwt.user.client.Window.getClientWidth() / 100) * 95) + "px",
+                          String.valueOf((com.google.gwt.user.client.Window.getClientHeight() / 100) * 90) + "px");
 
         super.show();
 
@@ -122,6 +120,7 @@ final class CompareViewImpl extends Window implements CompareView {
         compareConfig.setShowLineStatus(false);
 
         CompareWidget compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
+        comparePanel.clear();
         comparePanel.add(compare);
     }
 

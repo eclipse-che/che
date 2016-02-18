@@ -10,29 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.projecttype;
 
-import com.google.inject.Provider;
-
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.project.server.AttributeFilter;
-import org.eclipse.che.api.project.server.DefaultProjectManager;
-import org.eclipse.che.api.project.server.Project;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.vfs.server.SystemPathsFilter;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemUser;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemUserContext;
-import org.eclipse.che.api.vfs.server.impl.memory.MemoryFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
@@ -57,22 +47,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /** @author gazarenkov */
+// TODO: rework after new Project API
 public class MavenProjectTypeTest {
-    private static final String workspace    = "my_ws";
-    private static final String API_ENDPOINT = "http://localhost:8080/che/api";
 
     private ProjectManager  pm;
     private HttpJsonRequest httpJsonRequest;
 
-    @Mock
-    private Provider<AttributeFilter> filterProvider;
-    @Mock
-    private AttributeFilter           filter;
+//    @Mock
+//    private Provider<AttributeFilter> filterProvider;
+//    @Mock
+//    private AttributeFilter           filter;
     @Mock
     private HttpJsonRequestFactory    httpJsonRequestFactory;
     @Mock
@@ -81,21 +69,21 @@ public class MavenProjectTypeTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(filterProvider.get()).thenReturn(filter);
+//        when(filterProvider.get()).thenReturn(filter);
         final String vfsUser = "dev";
         final Set<String> vfsUserGroups = new LinkedHashSet<>(Collections.singletonList("workspace/developer"));
 
         final EventService eventService = new EventService();
 
-        VirtualFileSystemRegistry vfsRegistry = new VirtualFileSystemRegistry();
-        final MemoryFileSystemProvider memoryFileSystemProvider =
-                new MemoryFileSystemProvider(workspace, eventService, new VirtualFileSystemUserContext() {
-                    @Override
-                    public VirtualFileSystemUser getVirtualFileSystemUser() {
-                        return new VirtualFileSystemUser(vfsUser, vfsUserGroups);
-                    }
-                }, vfsRegistry, SystemPathsFilter.ANY);
-        vfsRegistry.registerProvider(workspace, memoryFileSystemProvider);
+//        VirtualFileSystemRegistry vfsRegistry = new VirtualFileSystemRegistry();
+//        final MemoryFileSystemProvider memoryFileSystemProvider =
+//                new MemoryFileSystemProvider(workspace, eventService, new VirtualFileSystemUserContext() {
+//                    @Override
+//                    public VirtualFileSystemUser getVirtualFileSystemUser() {
+//                        return new VirtualFileSystemUser(vfsUser, vfsUserGroups);
+//                    }
+//                }, vfsRegistry, SystemPathsFilter.ANY);
+//        vfsRegistry.registerProvider(workspace, memoryFileSystemProvider);
 
         Set<ProjectTypeDef> projTypes = new HashSet<>();
         projTypes.add(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
@@ -108,13 +96,13 @@ public class MavenProjectTypeTest {
 
         ProjectHandlerRegistry handlerRegistry = new ProjectHandlerRegistry(handlers);
 
-        pm = new DefaultProjectManager(vfsRegistry,
-                                       eventService,
-                                       ptRegistry,
-                                       handlerRegistry,
-                                       filterProvider,
-                                       API_ENDPOINT,
-                                       httpJsonRequestFactory);
+//        pm = new ProjectManager(vfsRegistry,
+//                                       eventService,
+//                                       ptRegistry,
+//                                       handlerRegistry,
+//                                       filterProvider,
+//                                       API_ENDPOINT,
+//                                       httpJsonRequestFactory);
 
         httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
     }
@@ -131,14 +119,14 @@ public class MavenProjectTypeTest {
     @Test
     public void testMavenProject() throws Exception {
         UsersWorkspaceDto usersWorkspaceMock = mock(UsersWorkspaceDto.class);
-        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
-                                                          .withMethod("GET")
-                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace))))
-                .thenReturn(httpJsonRequest);
-        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
-                                                          .withMethod("PUT")
-                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace + "/project"))))
-                .thenReturn(httpJsonRequest);
+//        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
+//                                                          .withMethod("GET")
+//                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace))))
+//                .thenReturn(httpJsonRequest);
+//        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
+//                                                          .withMethod("PUT")
+//                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace + "/project"))))
+//                .thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
         final ProjectConfigDto projectConfig = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
@@ -153,14 +141,16 @@ public class MavenProjectTypeTest {
         attributes.put(MavenAttributes.VERSION, Collections.singletonList("1.0"));
         attributes.put(MavenAttributes.PACKAGING, Collections.singletonList("jar"));
 
-        Project project = pm.createProject(workspace, "myProject",
-                                           DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                                     .withType("maven").withAttributes(attributes),
-                                           null);
+        RegisteredProject project = pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+                                                               .withType("maven")
+                                                               .withAttributes(attributes)
+                                                               .withPath("/myProject")
+                                                               .withName("myProject"),
+                                                     new HashMap<>(0));
 
         for (VirtualFileEntry file : project.getBaseFolder().getChildren()) {
             if (file.getName().equals("pom.xml")) {
-                Model pom = Model.readFrom(file.getVirtualFile().getContent().getStream());
+                Model pom = Model.readFrom(file.getVirtualFile().getContent());
                 Assert.assertEquals(pom.getVersion(), "1.0");
             }
         }
@@ -174,28 +164,31 @@ public class MavenProjectTypeTest {
         attributes.put(MavenAttributes.VERSION, Collections.singletonList("1.0"));
         attributes.put(MavenAttributes.PACKAGING, Collections.singletonList("jar"));
 
-        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
-                                                          .withMethod("PUT")
-                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace + "/project"))))
-                .thenReturn(httpJsonRequest);
+//        when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
+//                                                          .withMethod("PUT")
+//                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace + "/project"))))
+//                .thenReturn(httpJsonRequest);
 
-        pm.createProject(workspace, "testEstimate",
-                         DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                   .withType("maven").withAttributes(attributes),
-                         null);
+        pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+                                   .withType("maven")
+                                   .withAttributes(attributes)
+                                   .withName("testEstimate")
+                                   .withPath("/testEstimate"),
+                         new HashMap<>(0));
 
-        pm.createProject(workspace, "testEstimateBad",
-                         DtoFactory.getInstance().createDto(ProjectConfigDto.class)
-                                   .withType("blank"),
-                         null);
+        pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
+                                   .withType("blank")
+                                   .withName("testEstimateBad")
+                                   .withPath("/testEstimateBad"),
+                         new HashMap<>(0));
 
-        Map<String, AttributeValue> out = pm.estimateProject(workspace, "testEstimate", "maven");
+        Map<String, AttributeValue> out = pm.estimateProject("testEstimate", "maven");
 
         Assert.assertEquals(out.get(MavenAttributes.ARTIFACT_ID).getString(), "myartifact");
         Assert.assertEquals(out.get(MavenAttributes.VERSION).getString(), "1.0");
 
         try {
-            pm.estimateProject(workspace, "testEstimateBad", "maven");
+            pm.estimateProject("testEstimateBad", "maven");
             Assert.fail("ValueStorageException expected");
         } catch (ValueStorageException ignored) {
         }

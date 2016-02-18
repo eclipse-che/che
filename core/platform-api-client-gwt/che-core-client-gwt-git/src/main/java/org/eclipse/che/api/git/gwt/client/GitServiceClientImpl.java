@@ -47,7 +47,7 @@ import org.eclipse.che.api.git.shared.ShowFileContentRequest;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
-import org.eclipse.che.api.machine.gwt.client.ExtServerStateController;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -114,23 +114,23 @@ public class GitServiceClientImpl implements GitServiceClient{
     public static final String DELETE_REPOSITORY = "/delete-repository";
 
     /** Loader to be displayed. */
-    private final AsyncRequestLoader       loader;
-    private final ExtServerStateController extServerStateController;
-    private final DtoFactory               dtoFactory;
-    private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
-    private final AsyncRequestFactory      asyncRequestFactory;
-    private final String                   extPath;
+    private final AsyncRequestLoader     loader;
+    private final WsAgentStateController wsAgentStateController;
+    private final DtoFactory             dtoFactory;
+    private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final String                 extPath;
 
     @Inject
     protected GitServiceClientImpl(@Named("cheExtensionPath") String extPath,
                                    LoaderFactory loaderFactory,
-                                   ExtServerStateController extServerStateController,
+                                   WsAgentStateController wsAgentStateController,
                                    DtoFactory dtoFactory,
                                    AsyncRequestFactory asyncRequestFactory,
                                    DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         this.extPath = extPath;
         this.loader = loaderFactory.newLoader();
-        this.extServerStateController = extServerStateController;
+        this.wsAgentStateController = wsAgentStateController;
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -179,7 +179,7 @@ public class GitServiceClientImpl implements GitServiceClient{
     }
 
     private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
-        extServerStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 try {

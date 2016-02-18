@@ -10,336 +10,552 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import com.google.inject.ImplementedBy;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
+import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
+import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.shared.dto.SourceEstimation;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
+import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileFilter;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherEventType;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
+import org.eclipse.che.api.vfs.search.Searcher;
+import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * A manager for codenvy projects.
+ * Facade for all project related operations
  *
- * @author andrew00x
- * @author Dmitry Shnurenko
+ * @author gazarenkov
  */
-@ImplementedBy(DefaultProjectManager.class)
-public interface ProjectManager {
-    /**
-     * Gets the list of projects in {@code workspace}.
-     *
-     * @param workspace
-     *         id of workspace
-     * @return the list of projects in specified workspace.
-     * @throws ServerException
-     *         if an error occurs
-     */
-    List<Project> getProjects(String workspace) throws ServerException, NotFoundException, ForbiddenException;
+@Singleton
+public final class ProjectManager {
+    private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
+
+    private final VirtualFileSystem vfs;
+
+    private final EventService           eventService;
+    private final ProjectTypeRegistry    projectTypeRegistry;
+    private final ProjectHandlerRegistry handlers;
+
+    private final ProjectRegistry projectRegistry;
+
+    private final ProjectImporterRegistry importers;
+
+    private final FileTreeWatcher                fileWatcher;
+    private final FileWatcherNotificationHandler fileWatchNotifier;
+
+    private final ExecutorService executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
+                                                                          new ThreadFactoryBuilder()
+                                                                                  .setNameFormat("ProjectService-IndexingThread-")
+                                                                                  .setDaemon(true).build()
+                                                                         );
+
+    @Inject
+    @SuppressWarnings("unchecked")
+    public ProjectManager(VirtualFileSystemProvider vfsProvider,
+                          EventService eventService,
+                          ProjectTypeRegistry projectTypeRegistry,
+                          ProjectHandlerRegistry handlers,
+                          ProjectImporterRegistry importers,
+                          ProjectRegistry projectRegistry,
+                          FileWatcherNotificationHandler fileWatcherNotificationHandler,
+                          FileTreeWatcher fileTreeWatcher
+                          //WorkspaceHolder workspaceHolder
+                         )
+            throws ServerException, NotFoundException, ProjectTypeConstraintException,
+                   ValueStorageException, IOException, InterruptedException {
+
+        this.vfs = vfsProvider.getVirtualFileSystem();
+        this.eventService = eventService;
+        this.projectTypeRegistry = projectTypeRegistry;
+        this.handlers = handlers;
+        this.importers = importers;
+        this.projectRegistry = projectRegistry;
+
+        this.fileWatchNotifier = fileWatcherNotificationHandler;
+        this.fileWatcher = fileTreeWatcher;
+
+        initWatcher();
+    }
+
+    @PreDestroy
+    void stop() {
+        executor.shutdownNow();
+    }
+
+
+    public FolderEntry getProjectsRoot() throws ServerException, NotFoundException {
+        return new FolderEntry(vfs.getRoot());
+    }
+
+    public ProjectTypeRegistry getProjectTypeRegistry() {
+        return this.projectTypeRegistry;
+    }
+
+    public ProjectHandlerRegistry getHandlers() {
+        return handlers;
+    }
+
+    public Searcher getSearcher() throws NotFoundException, ServerException {
+
+        SearcherProvider provider = vfs.getSearcherProvider();
+        if (provider == null)
+            throw new NotFoundException("SearcherProvider is not defined in VFS");
+
+        return provider.getSearcher(vfs);
+    }
+
+    public void addWatchListener(FileWatcherNotificationListener listener) {
+        this.fileWatchNotifier.addNotificationListener(listener);
+    }
+
+    public void removeWatchListener(FileWatcherNotificationListener listener) {
+        this.fileWatchNotifier.removeNotificationListener(listener);
+    }
+
+    public void addWatchExcludeMatcher(PathMatcher matcher) {
+        this.fileWatcher.addExcludeMatcher(matcher);
+    }
+
+    public void removeWatchExcludeMatcher(PathMatcher matcher) {
+        this.fileWatcher.removeExcludeMatcher(matcher);
+    }
+
 
     /**
-     * Gets single project by id of workspace and project's path in this workspace.
-     *
-     * @param workspace
-     *         id of workspace
+     * @return all the projects
+     */
+    public List<RegisteredProject> getProjects() {
+
+        return projectRegistry.getProjects();
+    }
+
+
+    /**
      * @param projectPath
-     *         project's path
-     * @return requested project or {@code null} if project was not found
-     * @throws ForbiddenException
-     *         if user which perform operation doesn't have access to the requested project
-     * @throws ServerException
-     *         if other error occurs
+     * @return project or null if not found
      */
-    Project getProject(String workspace, String projectPath) throws ForbiddenException, ServerException, NotFoundException;
+    public RegisteredProject getProject(String projectPath) {
+
+        return projectRegistry.getProject(projectPath);
+
+    }
+
 
     /**
-     * Finds project in workspace via path to project.
+     * create project:
+     * - take project config
      *
-     * @param wsId
-     *         id of workspace to find project
-     * @param projectPath
-     *         path to project in workspace
-     * @return an instance of {@link ProjectConfigDto} or {@code null} if project not found.
-     * @throws ServerException
-     *         if some error occurs
-     * @throws NullPointerException
-     *         if project path will be null
-     * @throws IllegalArgumentException
-     *         if workspace id will be null
-     */
-    ProjectConfigDto getProjectFromWorkspace(@NotNull String wsId, @NotNull String projectPath) throws ServerException;
-
-    /**
-     * Returns all projects which are in workspace.
-     *
-     * @param workspaceId
-     *         id of workspace to get projects
-     * @return list of of {@link ProjectConfigDto}
-     * @throws ServerException
-     *         if some error occurs
-     * @throws IllegalArgumentException
-     *         if workspace id will be null
-     */
-    List<ProjectConfigDto> getAllProjectsFromWorkspace(@NotNull String workspaceId) throws ServerException;
-
-    /**
-     * Creates new project.
-     *
-     * @param workspace
-     *         id of workspace
-     * @param name
-     *         project's name
-     * @return newly created project
-     * @throws ConflictException
-     *         if operation causes conflict, e.g. name conflict if project with specified name already exists
-     * @throws ForbiddenException
-     *         if user which perform operation doesn't have required permissions
-     * @throws ServerException
-     *         if other error occurs
-     */
-    Project createProject(String workspace, String name,
-                          ProjectConfig projectConfig,
-                          Map<String, String> options) throws ConflictException,
-                                                              ForbiddenException,
-                                                              ServerException,
-                                                              NotFoundException;
-
-    /**
-     * Update the given project
-     *
-     * @param workspace
-     *         The workspace that contains the project to update.
-     * @param path
-     *         The path to the project.
-     * @param newConfig
-     *         The new configuration of the project
-     * @return The updated project.
-     */
-    Project updateProject(String workspace, String path, ProjectConfig newConfig)
-            throws ForbiddenException, ServerException, NotFoundException, ConflictException, IOException;
-
-    /**
-     * Gets root folder of project tree.
-     *
-     * @param workspace
-     *         id of workspace
-     * @return root folder
-     * @throws ServerException
-     *         if an error occurs
-     */
-    FolderEntry getProjectsRoot(String workspace) throws ServerException, NotFoundException;
-
-    /**
-     * Gets project meta-information.
-     *
-     * @param project
-     *         project
-     * @return project meta-information
-     * @throws ServerException
-     *         if an error occurs
-     * @see ProjectConfig
-     */
-    ProjectConfig getProjectConfig(Project project)
-            throws ServerException, ProjectTypeConstraintException, ValueStorageException, ForbiddenException, NotFoundException;
-
-    /**
-     * Updates project meta-information making all necessary validations.
-     *
-     * @param project
-     *         project to update
-     * @param config
-     *         project's meta-information
-     * @throws ServerException
-     * @throws ProjectTypeConstraintException
-     * @throws ValueStorageException
-     * @throws InvalidValueException
-     */
-    void updateProjectConfig(Project project, ProjectConfig config) throws ServerException,
-                                                                           ValueStorageException,
-                                                                           ProjectTypeConstraintException,
-                                                                           ForbiddenException, NotFoundException;
-
-    /**
-     * Gets ProjectMisc.
-     *
-     * @param project
-     *         project
-     * @return ProjectMisc
-     * @throws ServerException
-     *         if an error occurs
-     * @see ProjectMisc
-     */
-    ProjectMisc getProjectMisc(Project project) throws ServerException;
-
-    /**
-     * Gets ProjectMisc.
-     *
-     * @param project
-     *         project
-     * @param misc
-     *         ProjectMisc
-     * @throws ServerException
-     *         if an error occurs
-     * @see ProjectMisc
-     */
-    void saveProjectMisc(Project project, ProjectMisc misc) throws ServerException;
-
-    /**
-     * Gets Project modules.
-     *
-     * @param project
-     *         project to get modules of
-     * @return Set<Project> set of modules
-     * @throws ServerException
-     *         if an error occurs
-     * @throws ConflictException
-     *         if operation causes conflict, e.g. name conflict if project with specified name already exists
-     * @throws ForbiddenException
-     *         if user which perform operation doesn't have required permissions
-     */
-    List<? extends ProjectConfig> getProjectModules(Project project) throws ServerException,
-                                                                            ForbiddenException,
-                                                                            ConflictException,
-                                                                            IOException,
-                                                                            NotFoundException;
-
-    /**
-     * @return VirtualFileSystemRegistry
-     */
-    VirtualFileSystemRegistry getVirtualFileSystemRegistry();
-
-    /**
-     * @return ProjectTypeRegistry
-     */
-    ProjectTypeRegistry getProjectTypeRegistry();
-
-    /**
-     * @return ProjectHandlerRegistry
-     */
-    ProjectHandlerRegistry getHandlers();
-
-
-    Map<String, AttributeValue> estimateProject(String workspace, String path, String projectTypeId) throws
-                                                                                                     ValueStorageException, ServerException,
-                                                                                                     ForbiddenException, NotFoundException,
-                                                                                                     ProjectTypeConstraintException;
-
-    /**
-     * Adds module to parent project. If module does not exist creates it before.
-     *
-     * @param workspace
-     * @param projectPath
-     *         - parent project path
-     * @param moduleConfig
-     *         - module configuration (optional, needed only if module does not exist)
-     * @param options
-     *         - options for module creation (optional, same as moduleConfig)
-     * @return
-     * @throws ConflictException
-     * @throws ForbiddenException
-     * @throws ServerException
-     * @throws NotFoundException
-     */
-    ProjectConfigDto addModule(String workspace,
-                               String projectPath,
-                               ProjectConfigDto moduleConfig,
-                               Map<String, String> options) throws ConflictException,
-                                                                   ForbiddenException,
-                                                                   ServerException,
-                                                                   NotFoundException;
-
-
-    List<SourceEstimation> resolveSources(String workspace, String path, boolean transientOnly) throws ServerException, ForbiddenException,
-                                                                                                       NotFoundException,
-                                                                                                       ValueStorageException,
-                                                                                                       ProjectTypeConstraintException;
-
-    /**
-     * Converts existed Folder to Project using projectConfig if it is not null or use internal metainformation (/.codenvy)
-     *
-     * @param workspace
      * @param projectConfig
+     *         - project configuration
+     * @param options
+     *         - options for generator
+     * @return new project
      * @throws ConflictException
      * @throws ForbiddenException
      * @throws ServerException
-     * @throws ProjectTypeConstraintException
-     */
-    Project convertFolderToProject(String workspace, String path, ProjectConfig projectConfig)
-            throws ConflictException, ForbiddenException, ServerException, NotFoundException, IOException;
-
-    /**
-     * Rename the given item.
-     *
-     * @param workspace
-     *         The workspace that contains the item.
-     * @param path
-     *         The current path to the path being renamed
-     * @param newName
-     *         The name name of the item.
-     * @param newMediaType
-     *         A new media type to set
-     * @return The renamed virtual file entry, or null if no entry with the given path was found.
-     */
-    VirtualFileEntry rename(String workspace, String path, String newName, String newMediaType)
-            throws ForbiddenException, ServerException, ConflictException, NotFoundException;
-
-    /**
-     * Delete the given item from the workspace.
-     *
-     * @param workspaceId
-     *         The workspace to delete from.
-     * @param path
-     *         In case a module is being deleted, the module's path relative to the provided path.
-     */
-    void delete(String workspaceId, String path) throws ServerException, ForbiddenException, NotFoundException, ConflictException;
-
-    /**
-     * Deletes module from project and updates project in workspace.
-     *
-     * @param workspaceId
-     *         workspace id to get project from workspace
-     * @param pathToParent
-     *         path to parent of deleted module
-     * @param pathToModule
-     *         path to module which will be deleted
-     * @throws ServerException
-     *         error occurs during we get project from workspace, or update project in workspace after module removing
      * @throws NotFoundException
-     *         when module which we want to delete not found
-     * @throws ConflictException
-     *         if operation causes conflict
+     */
+    public RegisteredProject createProject(ProjectConfig projectConfig,
+                                           Map<String, String> options) throws ConflictException,
+                                                                               ForbiddenException,
+                                                                               ServerException,
+                                                                               NotFoundException,
+                                                                               ProjectTypeConstraintException {
+
+        // path and primary type is mandatory
+        if (projectConfig.getPath() == null)
+            throw new ConflictException("Path for new project should be defined ");
+
+        String path = ProjectRegistry.absolutizePath(projectConfig.getPath());
+
+        if (projectConfig.getType() == null)
+            throw new ConflictException("Project Type is not defined " + path);
+
+        if (getProject(path) != null)
+            throw new ConflictException("Project config already exists " + path);
+
+
+        FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path));
+        CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
+
+        if (generator != null) {
+            Map<String, AttributeValue> valueMap = new HashMap<>();
+
+            Map<String, List<String>> attributes = projectConfig.getAttributes();
+
+            if (attributes != null) {
+                for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
+                    valueMap.put(entry.getKey(), new AttributeValue(entry.getValue()));
+                }
+            }
+
+            if (options == null)
+                options = new HashMap<>();
+
+            generator.onCreateProject(projectFolder, valueMap, options);
+        }
+
+
+        try {
+            return projectRegistry.putProject(projectConfig, projectFolder, true);
+        } catch (Exception e) {
+            // rollback project folder
+            projectFolder.getVirtualFile().delete();
+            throw e;
+        }
+
+    }
+
+    /**
+     * Updating project means:
+     * - getting the project (should exist)
+     * - updating name and description
+     * - changing project types and provided attributes
+     * - refreshing provided (transient) project types and attributes
+     *
+     * @param newConfig
+     *         - new config
+     * @return updated config
      * @throws ForbiddenException
-     *         if user which perform operation doesn't have required permissions
+     * @throws ServerException
+     * @throws NotFoundException
+     * @throws ConflictException
+     * @throws IOException
      */
-    void deleteModule(String workspaceId, String pathToParent, String pathToModule) throws ServerException,
-                                                                                           NotFoundException,
-                                                                                           ForbiddenException,
-                                                                                           ConflictException;
+    public RegisteredProject updateProject(ProjectConfig newConfig) throws ForbiddenException,
+                                                                           ServerException,
+                                                                           NotFoundException,
+                                                                           ConflictException,
+                                                                           IOException {
+
+        String apath = newConfig.getPath();
+
+        if (newConfig.getPath() == null)
+            throw new ConflictException("Project path is not defined");
+
+        RegisteredProject oldProject = projectRegistry.getProject(apath);
+
+        // If a project does not exist in the target path, create a new one
+        if (oldProject == null)
+            throw new NotFoundException(String.format("Project '%s' doesn't exist.", apath));
+
+        RegisteredProject project = projectRegistry.putProject(newConfig, oldProject.getBaseFolder(), true);
+
+        // TODO move to register?
+        reindexProject(project);
+
+        return project;
+    }
+
+    public RegisteredProject importProject(String path, SourceStorage sourceStorage)
+            throws ServerException, IOException, ForbiddenException, UnauthorizedException, ConflictException, NotFoundException {
+
+        final ProjectImporter importer = importers.getImporter(sourceStorage.getType());
+        if (importer == null) {
+            throw new NotFoundException(String.format("Unable import sources project from '%s'. Sources type '%s' is not supported.",
+                                                    sourceStorage.getLocation(), sourceStorage.getType()));
+        }
+        // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
+        final LineConsumerFactory outputOutputConsumerFactory = () -> new ProjectImportOutputWSLineConsumer(path,
+                                                                                                            projectRegistry
+                                                                                                                    .getWorkspaceId(),
+                                                                                                            300);
+
+
+        // Not all importers uses virtual file system API. In this case virtual file system API doesn't get events and isn't able to set
+        // correct creation time. Need do it manually.
+        //VirtualFileEntry vf = getProjectsRoot().getChild(path);
+
+        FolderEntry folder = asFolder(path);
+
+        if (folder == null)
+            folder = getProjectsRoot().createFolder(path);
+
+
+        importer.importSources(folder, sourceStorage, outputOutputConsumerFactory);
+
+        String name = folder.getPath().getName();
+
+        return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true);
+
+    }
+
+
+    public ProjectTypeResolution estimateProject(String path, String projectTypeId)
+            throws ServerException, ForbiddenException, NotFoundException, ValueStorageException, ProjectTypeConstraintException {
+
+
+
+        ProjectTypeDef projectType = projectTypeRegistry.getProjectType(projectTypeId);
+        if (projectType == null) {
+            throw new NotFoundException("Project Type " + projectTypeId + " not found.");
+        }
+
+       FolderEntry baseFolder = asFolder(path);
+
+        if(baseFolder == null)
+            throw new NotFoundException("Folder not found: "+path);
+
+        return projectType.resolveSources(baseFolder);
+
+    }
+
+    // ProjectSuggestion
+    public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly)
+            throws ServerException, ForbiddenException, NotFoundException, ProjectTypeConstraintException {
+
+        final List<ProjectTypeResolution> resolutions = new ArrayList<>();
+//        boolean isPresentPrimaryType = false;
+
+        for (ProjectType type : projectTypeRegistry.getProjectTypes(ProjectTypeRegistry.CHILD_TO_PARENT_COMPARATOR)) {
+            if (transientOnly && type.isPersisted()) {
+                continue;
+            }
+
+
+            try {
+                ProjectTypeResolution resolution = estimateProject(path, type.getId());
+                if(resolution.matched()) {
+                    resolutions.add(resolution);
+                }
+            } catch (ValueStorageException e) {
+                LOG.warn(e.getLocalizedMessage(), e);
+            }
+
+
+        }
+
+//        if (!isPresentPrimaryType) {
+//            estimations.add(newDto(SourceEstimation.class).withType(BaseProjectType.ID));
+//        }
+
+        return resolutions;
+    }
 
     /**
-     * Tests whether the {@code folder} contains project structure.
+     * deletes item including project
      *
+     * @param path
      * @throws ServerException
-     *         if an error occurs
+     * @throws ForbiddenException
+     * @throws NotFoundException
+     * @throws ConflictException
      */
-    boolean isProjectFolder(FolderEntry folder) throws ServerException;
+    public void delete(String path) throws ServerException,
+                                           ForbiddenException,
+                                           NotFoundException,
+                                           ConflictException {
+
+
+        String apath = ProjectRegistry.absolutizePath(path);
+
+        // delete item
+        VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
+        if (item == null)
+            return;
+
+        item.delete();
+
+        // delete child projects
+        projectRegistry.removeProjects(apath);
+
+    }
+
+
+    public VirtualFileEntry copyTo(String itemPath, String newParentPath, String newName, boolean overwrite)
+            throws ServerException, NotFoundException, ConflictException, ForbiddenException {
+
+        VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
+        if (oldItem == null)
+            throw new NotFoundException("Item not found " + itemPath);
+
+        VirtualFile newParent = vfs.getRoot().getChild(Path.of(newParentPath));
+        if (oldItem == null)
+            throw new NotFoundException("New parent not found " + newParentPath);
+
+        VirtualFile newItem = oldItem.copyTo(newParent, newName, overwrite);
+        RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
+
+        VirtualFileEntry copy;
+        if (newItem.isFile())
+            copy = new FileEntry(newItem, owner.getPath());
+        else
+            copy = new FolderEntry(newItem, owner.getPath());
+
+        if (copy.isProject()) {
+            projectRegistry.getProject(copy.getProject()).getTypes();
+            // fire event
+        }
+
+        return copy;
+
+
+    }
+
+
+    public VirtualFileEntry moveTo(String itemPath, String newParentPath, String newName, boolean overwrite)
+            throws ServerException, NotFoundException, ConflictException, ForbiddenException {
+
+        VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
+        if (oldItem == null)
+            throw new NotFoundException("Item not found " + itemPath);
+
+        VirtualFile newParent;
+        if (newParentPath == null)
+            // rename only
+            newParent = oldItem.getParent();
+        else
+            newParent = vfs.getRoot().getChild(Path.of(newParentPath));
+
+        if (newParent == null)
+            throw new NotFoundException("New parent not found " + newParentPath);
+
+        // TODO lock token ?
+        VirtualFile newItem = oldItem.moveTo(newParent, newName, overwrite, null);
+
+        RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
+
+        VirtualFileEntry move;
+        if (newItem.isFile())
+            move = new FileEntry(newItem, owner.getPath());
+        else
+            move = new FolderEntry(newItem, owner.getPath());
+
+        if (move.isProject()) {
+            projectRegistry.getProject(move.getProject()).getTypes();
+            // fire event
+        }
+
+        return move;
+    }
+
+
+    // TODO do we need ForbiddenException
+    FolderEntry asFolder(String path) throws NotFoundException, ServerException, ForbiddenException {
+        final VirtualFileEntry entry = asVirtualFileEntry(path);
+        if (entry == null)
+            return null;
+        if (!entry.isFolder()) {
+            throw new NotFoundException(String.format("Item '%s' isn't a folder. ", path));
+        }
+        return (FolderEntry)entry;
+    }
+
+    // TODO do we need ForbiddenException
+    VirtualFileEntry asVirtualFileEntry(String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        String apath = ProjectRegistry.absolutizePath(path);
+        final FolderEntry root = getProjectsRoot();
+        final VirtualFileEntry entry = root.getChild(apath);
+//        if (entry == null) {
+//            throw new NotFoundException(String.format("Path '%s' doesn't exist.", apath));
+//        }
+        return entry;
+    }
+
+    FileEntry asFile(String path) throws ForbiddenException, NotFoundException, ServerException {
+        final VirtualFileEntry entry = asVirtualFileEntry(path);
+        if (entry == null)
+            return null;
+        if (!entry.isFile()) {
+            throw new ForbiddenException(String.format("Item '%s' isn't a file. ", path));
+        }
+        return (FileEntry)entry;
+    }
+
+
+
+    /* ===================================== */
+    /*  Private methods                      */
+    /* ===================================== */
+
 
     /**
-     * Tests whether the {@code folder} is a project module.
+     * Some importers don't use virtual file system API and changes are not indexed.
+     * Force searcher to reindex project to fix such issues.
      *
+     * @param project
      * @throws ServerException
-     *         if an error occurs
      */
-    boolean isModuleFolder(FolderEntry folder) throws ServerException;
+    private void reindexProject(final RegisteredProject project) throws ServerException {
+        final VirtualFile file = project.getBaseFolder().getVirtualFile();
+        executor.execute(() -> {
+            try {
+
+                Searcher searcher;
+                try {
+                    searcher = getSearcher();
+                } catch (NotFoundException e) {
+                    LOG.warn(e.getLocalizedMessage());
+                    return;
+                }
+                searcher.add(file);
+                //SearcherProvider sp = this.projectManager.getVfs().getSearcherProvider();
+                //if(sp != null)
+                //    sp.getSearcher(projectManager.getVfs(), true).add(file);
+                //searcherProvider.getSearcher(projectManager.getVfs(), true).add(file);
+            } catch (Exception e) {
+                LOG.warn(String.format("Project: %s", project.getPath()), e.getMessage());
+            }
+        });
+    }
+
+
+    private void initWatcher() throws IOException {
+        FileWatcherNotificationListener defaultListener = new FileWatcherNotificationListener(VirtualFileFilter.ACCEPT_ALL) {
+            @Override
+            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
+                LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
+                eventService.publish(DtoFactory.newDto(VfsWatchEvent.class)
+                                               .withPath(virtualFile.getPath().toString())
+                                               .withFile(virtualFile.isFile())
+                                               .withType(eventType));
+            }
+        };
+        fileWatchNotifier.addNotificationListener(defaultListener);
+        fileWatcher.startup();
+    }
+
+
 }

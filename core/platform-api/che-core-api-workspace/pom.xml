@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-api-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-workspace</artifactId>
     <packaging>jar</packaging>
@@ -37,6 +37,10 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -106,8 +110,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Mock testing -->

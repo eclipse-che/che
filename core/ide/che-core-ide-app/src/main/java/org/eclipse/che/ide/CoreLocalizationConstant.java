@@ -17,9 +17,6 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("createProjectFromTemplate.nameField")
     String createProjectFromTemplateName();
 
-    @Key("createProjectFromTemplate.project.exists")
-    String createProjectFromTemplateProjectExists(String projectName);
-
     @Key("extension.title")
     String extensionTitle();
 

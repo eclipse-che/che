@@ -57,7 +57,7 @@ public class CodenvyJsonProvider<T> implements MessageBodyReader<T>, MessageBody
     private final JsonEntityProvider delegate = new JsonEntityProvider<>();
 
     @Inject
-    public CodenvyJsonProvider(@Nullable @Named("codenvy.json.ignored_classes") Set<Class> ignoredClasses) {
+    public CodenvyJsonProvider(@Nullable @Named("che.json.ignored_classes") Set<Class> ignoredClasses) {
         this.ignoredClasses = ignoredClasses == null ? new LinkedHashSet<Class>() : new LinkedHashSet<>(ignoredClasses);
     }
 

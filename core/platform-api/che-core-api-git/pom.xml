@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-api-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-git</artifactId>
     <packaging>jar</packaging>
@@ -68,10 +68,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace</artifactId>
         </dependency>
         <dependency>
@@ -81,10 +77,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-vfs-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

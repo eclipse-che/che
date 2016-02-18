@@ -250,13 +250,6 @@ public class JavaNodeManager extends NodeManager {
     }
 
     public boolean isJavaItemReference(ItemReference itemReference) {
-        final String mimeType = itemReference.getMediaType();
-
-        //first detect by mime type
-        if (!Strings.isNullOrEmpty(mimeType) && JAVA_MIME_TYPE.equals(mimeType)) {
-            return true;
-        }
-
         return itemReference.getName().endsWith(JAVA_EXT);
     }
 

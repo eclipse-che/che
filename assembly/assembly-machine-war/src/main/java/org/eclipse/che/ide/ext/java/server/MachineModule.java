@@ -21,14 +21,13 @@ import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.local.LocalUserDaoImpl;
-import org.eclipse.che.api.project.server.BaseProjectModule;
+import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
+import org.eclipse.che.api.vfs.VirtualFileSystemModule;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.generator.archetype.ArchetypeGenerator;
@@ -40,11 +39,6 @@ import org.eclipse.che.ide.ext.java.jdi.server.DebuggerService;
 import org.eclipse.che.ide.extension.maven.server.inject.MavenModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
-import org.eclipse.che.vfs.impl.fs.AutoMountVirtualFileSystemRegistry;
-import org.eclipse.che.vfs.impl.fs.LocalFSMountStrategy;
-import org.eclipse.che.vfs.impl.fs.LocalFileSystemRegistryPlugin;
-import org.eclipse.che.vfs.impl.fs.MachineFSMountStrategy;
-import org.eclipse.che.vfs.impl.fs.VirtualFileSystemFSModule;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
@@ -63,14 +57,10 @@ public class MachineModule extends AbstractModule {
     protected void configure() {
         bind(ApiInfoService.class);
 
-        bind(LocalFileSystemRegistryPlugin.class);
-
         //TODO it's temporary solution. Ext war should not have binding for DAO.
         bind(UserDao.class).to(LocalUserDaoImpl.class);
         bind(PreferenceDao.class).to(org.eclipse.che.api.local.RemotePreferenceDao.class);
 
-        bind(LocalFSMountStrategy.class).to(MachineFSMountStrategy.class);
-        bind(VirtualFileSystemRegistry.class).to(AutoMountVirtualFileSystemRegistry.class);
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
         bind(SshServiceClient.class).to(HttpSshServiceClient.class);
 
@@ -78,16 +68,16 @@ public class MachineModule extends AbstractModule {
                 .to(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.class);
 
         install(new CoreRestModule());
-        install(new BaseProjectModule());
         install(new VirtualFileSystemModule());
-        install(new VirtualFileSystemFSModule());
+        install(new ProjectApiModule());
         install(new MavenModule());
         install(new ArchetypeGeneratorModule());
         install(new GitHubModule());
+        install(new org.eclipse.che.swagger.deploy.DocsModule());
 
         bind(ArchetypeGenerator.class);
         bind(DebuggerService.class);
-        
+
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 

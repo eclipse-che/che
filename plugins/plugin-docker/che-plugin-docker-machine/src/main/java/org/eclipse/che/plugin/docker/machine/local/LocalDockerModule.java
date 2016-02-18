@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.docker.machine.local;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -19,9 +20,12 @@ import org.eclipse.che.api.machine.server.MachineService;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
+import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.local.provider.CheHostVfsRootDirProvider;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
+
+import static org.eclipse.che.inject.Matchers.names;
 
 /**
  * The Module for Local Docker components
@@ -62,5 +66,10 @@ public class LocalDockerModule extends AbstractModule {
                          .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.DockerApiHostEnvVariableProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
+
+        org.eclipse.che.plugin.docker.machine.local.interceptor.EnableOfflineDockerMachineBuildInterceptor offlineMachineBuildInterceptor =
+                new org.eclipse.che.plugin.docker.machine.local.interceptor.EnableOfflineDockerMachineBuildInterceptor();
+        requestInjection(offlineMachineBuildInterceptor);
+        bindInterceptor(Matchers.subclassesOf(DockerInstanceProvider.class), names("buildImage"), offlineMachineBuildInterceptor);
     }
 }

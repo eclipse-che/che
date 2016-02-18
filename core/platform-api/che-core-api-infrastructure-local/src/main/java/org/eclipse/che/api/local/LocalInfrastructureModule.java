@@ -25,6 +25,7 @@ import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
 import javax.inject.Named;
@@ -45,6 +46,7 @@ public class LocalInfrastructureModule extends AbstractModule {
 //        bind(FactoryStore.class).to(InMemoryFactoryStore.class);
         bind(TokenValidator.class).to(DummyTokenValidator.class);
         bind(RecipeDao.class).to(LocalRecipeDaoImpl.class);
+        bind(StackDao.class).to(LocalStackDaoImpl.class);
         bind(LocalStorageFactory.class);
         bind(PermissionManager.class).annotatedWith(Names.named("service.workspace.permission_manager"))
                                      .to(LocalWorkspacePermissionManager.class);

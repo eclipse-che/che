@@ -28,7 +28,6 @@ import org.eclipse.che.ide.actions.DownloadAsZipAction;
 import org.eclipse.che.ide.actions.DownloadItemAction;
 import org.eclipse.che.ide.actions.ExpandEditorAction;
 import org.eclipse.che.ide.actions.ExpandNodeAction;
-import org.eclipse.che.ide.actions.FindReplaceAction;
 import org.eclipse.che.ide.actions.FoldersAlwaysOnTopAction;
 import org.eclipse.che.ide.actions.FormatterAction;
 import org.eclipse.che.ide.actions.FullTextSearchAction;
@@ -133,8 +132,8 @@ public class StandardComponentInitializer {
     @Inject
     private FindActionAction findActionAction;
 
-    @Inject
-    private FindReplaceAction findReplaceAction;
+//    @Inject
+//    private FindReplaceAction findReplaceAction;
 
     @Inject
     private NavigateToFileAction navigateToFileAction;
@@ -533,7 +532,7 @@ public class StandardComponentInitializer {
 
         actionManager.registerAction("collapseAll", collapseAllAction);
 
-        actionManager.registerAction("findReplace", findReplaceAction);
+//        actionManager.registerAction("findReplace", findReplaceAction);
         actionManager.registerAction("openFile", openFileAction);
         actionManager.registerAction("expandNode", expandNodeAction);
         actionManager.registerAction("switchLeftTab", switchLeftTabAction);

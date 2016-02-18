@@ -66,6 +66,23 @@ export class CheWebsocket {
     return currentBus;
   }
 
+
+  /**
+   * Gets a bus for a remote worksace, by providing the remote URL to this websocket
+   * @param websocketURL the remote host base WS url
+   * @param workspaceId the workspaceID used as suffix for the URL
+   */
+  getRemoteBus(websocketURL, workspaceId) {
+    var currentBus = this.sockets.get(workspaceId);
+    if (!currentBus) {
+      var dataStream = this.$websocket(websocketURL + workspaceId);
+      var bus = new MessageBus(dataStream);
+      this.sockets.set(workspaceId, bus);
+      currentBus = bus;
+    }
+    return currentBus;
+  }
+
 }
 
 

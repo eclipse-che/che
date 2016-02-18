@@ -14,9 +14,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * DynaModule Marker annotation for dynamically created module CodenvyBootstrap
- * automatically finds and loads Guice modules (subclasses of
- * com.google.inject.Module) annotated with &#064DynaModule
+ * Marker annotation for dynamically created modules.
+ * <p>
+ * {@link CheBootstrap} automatically finds and loads Guice modules (subclasses
+ * of {@link com.google.inject.Module}) annotated with &#064DynaModule.
+ * </p>
  *
  * @author gazarenkov
  */

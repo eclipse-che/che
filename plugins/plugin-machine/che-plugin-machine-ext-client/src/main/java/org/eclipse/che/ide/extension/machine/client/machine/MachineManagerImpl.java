@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.ExtServerStateController;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
@@ -68,18 +68,18 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
 @Singleton
 public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler {
 
-    private final ExtServerStateController extServerStateController;
-    private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
-    private final MachineServiceClient     machineServiceClient;
-    private final WorkspaceServiceClient   workspaceServiceClient;
-    private final MachineConsolePresenter  machineConsolePresenter;
-    private final MachineStatusNotifier    machineStatusNotifier;
-    private final InitialLoadingInfo       initialLoadingInfo;
-    private final PerspectiveManager       perspectiveManager;
-    private final EntityFactory            entityFactory;
-    private final AppContext               appContext;
-    private final DtoFactory               dtoFactory;
-    private final EventBus                 eventBus;
+    private final WsAgentStateController  wsAgentStateController;
+    private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
+    private final MachineServiceClient    machineServiceClient;
+    private final WorkspaceServiceClient  workspaceServiceClient;
+    private final MachineConsolePresenter machineConsolePresenter;
+    private final MachineStatusNotifier   machineStatusNotifier;
+    private final InitialLoadingInfo      initialLoadingInfo;
+    private final PerspectiveManager      perspectiveManager;
+    private final EntityFactory           entityFactory;
+    private final AppContext              appContext;
+    private final DtoFactory              dtoFactory;
+    private final EventBus                eventBus;
 
     private MessageBus messageBus;
     private Machine    devMachine;
@@ -92,7 +92,7 @@ public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler 
     private SubscriptionHandler<String>             outputHandler;
 
     @Inject
-    public MachineManagerImpl(ExtServerStateController extServerStateController,
+    public MachineManagerImpl(WsAgentStateController wsAgentStateController,
                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               MachineServiceClient machineServiceClient,
                               WorkspaceServiceClient workspaceServiceClient,
@@ -105,7 +105,7 @@ public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler 
                               EventBus eventBus,
                               final AppContext appContext,
                               DtoFactory dtoFactory) {
-        this.extServerStateController = extServerStateController;
+        this.wsAgentStateController = wsAgentStateController;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.machineServiceClient = machineServiceClient;
         this.workspaceServiceClient = workspaceServiceClient;
@@ -278,7 +278,7 @@ public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler 
                 appContext.setDevMachineId(machineId);
                 appContext.setProjectsRoot(machineDto.getMetadata().projectsRoot());
                 devMachine = entityFactory.createMachine(machineDto);
-                extServerStateController.initialize(devMachine.getWsServerExtensionsUrl() + "/" + appContext.getWorkspaceId());
+                wsAgentStateController.initialize(devMachine.getWsServerExtensionsUrl() + "/" + appContext.getWorkspaceId());
             }
         });
     }

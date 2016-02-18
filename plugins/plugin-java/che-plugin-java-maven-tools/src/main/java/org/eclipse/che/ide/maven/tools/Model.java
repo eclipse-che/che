@@ -12,7 +12,7 @@ package org.eclipse.che.ide.maven.tools;
 
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.vfs.server.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.commons.xml.Element;
 import org.eclipse.che.commons.xml.ElementMapper;
 import org.eclipse.che.commons.xml.NewElement;
@@ -30,15 +30,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.commons.xml.NewElement.createElement;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.after;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.afterAnyOf;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.beforeAnyOf;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.inTheBegin;
 import static org.eclipse.che.commons.xml.XMLTreeLocation.inTheEnd;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Objects.requireNonNull;
 
 /**
  * The {@code <project>} element is the root of the descriptor.
@@ -145,7 +145,7 @@ public final class Model {
      */
     public static Model readFrom(VirtualFile file) throws ServerException, ForbiddenException, IOException {
         requireNonNull(file, "Required not null virtual file");
-        return fetchModel(XMLTree.from(file.getContent().getStream()));
+        return fetchModel(XMLTree.from(file.getContent()));
     }
 
     /**

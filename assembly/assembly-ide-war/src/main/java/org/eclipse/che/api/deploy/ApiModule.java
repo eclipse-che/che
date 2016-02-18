@@ -24,9 +24,9 @@ import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
-import org.eclipse.che.api.project.server.ProjectTemplateDescriptionLoader;
-import org.eclipse.che.api.project.server.ProjectTemplateRegistry;
-import org.eclipse.che.api.project.server.ProjectTemplateService;
+import org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader;
+import org.eclipse.che.api.project.server.template.ProjectTemplateRegistry;
+import org.eclipse.che.api.project.server.template.ProjectTemplateService;
 import org.eclipse.che.api.ssh.server.SshService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
@@ -35,8 +35,8 @@ import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
-import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.everrest.ETagResponseFilter;
+import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
@@ -103,6 +103,7 @@ public class ApiModule extends AbstractModule {
 
         install(new DockerExtServerModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
+        install(new org.eclipse.che.swagger.deploy.DocsModule());
 
         bind(DockerMachineExtServerChecker.class);
         bind(DockerMachineTerminalChecker.class);
@@ -117,6 +118,9 @@ public class ApiModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
                    .addBinding()
                    .toInstance("predefined-recipes.json");
+
+        bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
+        bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +

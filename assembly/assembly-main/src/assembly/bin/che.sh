@@ -240,7 +240,8 @@ set_environment_variables () {
   # The base directory of Che
   if [ -z "${CHE_HOME}" ]; then
     if [ "${WIN}" == "true" ]; then
-      export CHE_HOME="${CHE_WINDOWS_SHORT_DIR}"
+      # che-497: Determine windows short directory name in bash
+      export CHE_HOME=`(cmd //C 'FOR %i in (%~dp0\..\..) do @echo %~Si')`
     else 
       export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
     fi
@@ -250,14 +251,27 @@ set_environment_variables () {
     export DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
+  # che-497: Convert JAVA_HOME to short directory name for Windows
+  if [ -z "${CHE_HOME}" ]; then
+    if [ "${WIN}" == "true" ]; then
+      # che-497: Determine windows short directory name in bash
+      export CHE_HOME=`(cmd //C 'FOR %i in (%~dp0\..\..) do @echo %~Si')`
+    else 
+      export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
+    fi
+  fi
+
+   if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
+    # che-497: Determine windows short directory name in bash
+    export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
+  fi
+
   # Convert Tomcat environment variables to POSIX format.
-  if [[ "${JAVA_HOME}" == *":"* ]]
-  then
+  if [[ "${JAVA_HOME}" == *":"* ]]; then
     JAVA_HOME=$(echo /"${JAVA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
-  if [[ "${CHE_HOME}" == *":"* ]]
-  then
+  if [[ "${CHE_HOME}" == *":"* ]]; then
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
   fi
 
@@ -441,9 +455,9 @@ strip_url () {
 
 print_client_connect () {
   if [ "${USE_DOCKER}" == "false" ]; then
-  	HOST_PRINT_VALUE="localhost"
+    HOST_PRINT_VALUE="localhost"
   else
-  	HOST_PRINT_VALUE=${host}
+    HOST_PRINT_VALUE=${host}
   fi
       echo "
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
@@ -477,11 +491,16 @@ call_catalina () {
 
   if [[ "${SKIP_JAVA_VERSION}" == false ]]; then
     # Che requires Java version 1.8 or higher.
-	JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-	if [[  -z "${JAVA_VERSION}" || "${JAVA_VERSION}" < "1.8" ]]; then
-	  error_exit "Che requires Java version 1.8 or higher. We found a ${JAVA_VERSION}."
-	  return
-	fi
+    JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    if [  -z "${JAVA_VERSION}" ]; then
+      error_exit "Failure running JAVA_HOME/bin/java -version. We received ${JAVA_VERSION}."
+      return
+    fi
+
+    if [[ "${JAVA_VERSION}" < "1.8" ]]; then
+      error_exit "Che requires Java version 1.8 or higher. We found ${JAVA_VERSION}."
+      return
+    fi
   fi
 
   ### Cannot add this in setenv.sh.
@@ -535,11 +554,15 @@ kill_and_launch_docker_che () {
   if ${WIN} || ${MAC} ; then
     DOCKER_PRINT_VALUE=${host}
   else
-    DOCKER_PRINT_VALUE=${DOCKER_MACHINE_HOST}
+    if [[ "${CHE_IP}" != "" ]]; then
+      DOCKER_PRINT_VALUE="${CHE_IP}"
+    else
+      DOCKER_PRINT_VALUE="${host}"
+    fi
   fi
 
   if ${USE_DEBUG}; then
-	  set -x
+    set -x
   fi
 
   # IDEX-4266 - Change launching of docker to avoid using dind
@@ -547,7 +570,7 @@ kill_and_launch_docker_che () {
   -v //home/user/che/lib:/home/user/che/lib-copy \
   -v //home/user/che/workspaces:/home/user/che/workspaces \
   -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
-  -e DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d -p ${CHE_PORT}:${CHE_PORT} --net=host codenvy/che:${CHE_DOCKER_TAG} \
+  -e DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d --net=host codenvy/che:${CHE_DOCKER_TAG} \
   bash -c "tail -f /dev/null" || DOCKER_EXIT=$? || true 
   set +x
 }
@@ -661,7 +684,7 @@ launch_che_server () {
 
       else 
 
-      	# Existing container found, and it was started properly.
+        # Existing container found, and it was started properly.
         echo -e "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
         "${DOCKER}" exec ${CONTAINER} bash -c "//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
                                              `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
@@ -686,23 +709,22 @@ launch_che_server () {
 
     if [[ "${USE_DEBUG}" == true ]]; then
       DEBUG_PRINT_VALUE=--debug
-	  else
-	    DEBUG_PRINT_VALUE=
-	  fi
+    else
+      DEBUG_PRINT_VALUE=
+    fi
 
-	  if ${USE_DEBUG}; then
-	    set -x
-	  fi
+    if ${USE_DEBUG}; then
+      set -x
+    fi
 
     "${DOCKER}" exec -i ${CONTAINER} bash -c "sudo rm -rf /home/user/che/lib-copy/* && "`
                                             `"mkdir -p /home/user/che/lib-copy/ && "`
                                             `"sudo chown -R user:user /home/user && "`
                                             `"cp -rf /home/user/che/lib/* /home/user/che/lib-copy && "`
-                                            #`"sudo sed -i 's/random/urandom/g' /opt/jre1.8.0_65/lib/security/java.security && "`
                                             `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" "`
                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
-	  set +x
-	  return
+    set +x
+    return
   fi
 }
 

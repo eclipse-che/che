@@ -18,8 +18,8 @@
 @eval treeExpandArrowShadow org.eclipse.che.ide.api.theme.Style.theme.treeExpandArrowShadow();
 
 .treeRoot {
-    padding-left: 0;
-    margin: 0 0 0 2px;
+    padding: 0;
+    margin: 0;
     position: absolute;
     top: 0;
     left: 0;
@@ -52,7 +52,7 @@
     min-width: 100%;
     display: inline-block;
     position: relative;
-    white-space: pre;
+    white-space: nowrap;
     height: 18px;
 }
 

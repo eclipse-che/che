@@ -11,9 +11,6 @@
 
 package org.eclipse.che.ide.editor.orion.client;
 
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.CustomEvent;
@@ -29,6 +26,9 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -47,9 +47,9 @@ import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.loging.Log;
 
-import static elemental.css.CSSStyleDeclaration.Unit.PX;
-
 import java.util.List;
+
+import static elemental.css.CSSStyleDeclaration.Unit.PX;
 
 /**
  * @author Evgen Vidolob
@@ -62,11 +62,11 @@ public class ContentAssistWidget implements EventListener {
     private static final String CUSTOM_EVT_TYPE_VALIDATE = "itemvalidate";
     private static final String DOCUMENTATION            = "documentation";
 
-    private final   PopupResources popupResources;
+    private final PopupResources popupResources;
 
     /** The related editor. */
-    private final   OrionEditorWidget   textEditor;
-    private         OrionKeyModeOverlay assistMode;
+    private final OrionEditorWidget   textEditor;
+    private       OrionKeyModeOverlay assistMode;
 
     /** The main element for the popup. */
     private final Element popupElement;
@@ -75,15 +75,15 @@ public class ContentAssistWidget implements EventListener {
     /** The list (ul) element for the popup. */
     private final Element listElement;
 
-    private final EventListener  popupListener;
+    private final EventListener popupListener;
 
     private boolean visible = false;
-    private boolean insert = true;
+    private boolean insert  = true;
 
     /**
      * The previously focused element.
      */
-    private Element    selectedElement;
+    private Element   selectedElement;
     private FlowPanel docPopup;
 
     private OrionTextViewOverlay.EventHandler<OrionModelChangedEventOverlay> handler;
@@ -156,7 +156,6 @@ public class ContentAssistWidget implements EventListener {
     }
 
     /**
-     *
      * @param eventType
      * @return
      */
@@ -195,9 +194,9 @@ public class ContentAssistWidget implements EventListener {
                 CompletionProposal.CompletionCallback callback = new CompletionProposal.CompletionCallback() {
                     @Override
                     public void onCompletion(final Completion completion) {
-                        HandlesUndoRedo undoRedo = null;
+                        textEditor.setFocus();
                         UndoableEditor undoableEditor = ContentAssistWidget.this.textEditor;
-                        undoRedo = undoableEditor.getUndoRedo();
+                        HandlesUndoRedo undoRedo = undoableEditor.getUndoRedo();
 
                         try {
                             if (undoRedo != null) {
@@ -250,7 +249,8 @@ public class ContentAssistWidget implements EventListener {
                         return;
                     }
 
-                    docPopup.getElement().getStyle().setLeft(popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3, Style.Unit.PX);
+                    docPopup.getElement().getStyle()
+                            .setLeft(popupElement.getOffsetLeft() + popupElement.getOffsetWidth() + 3, Style.Unit.PX);
                     docPopup.getElement().getStyle().setTop(popupElement.getOffsetTop(), Style.Unit.PX);
                     RootPanel.get().add(docPopup);
                     docPopup.getElement().getStyle().setOpacity(1);
@@ -399,7 +399,8 @@ public class ContentAssistWidget implements EventListener {
     /**
      * Displays assist popup relative to the current cursor position.
      *
-     * @param proposals proposals to display
+     * @param proposals
+     *         proposals to display
      */
     public void show(final List<CompletionProposal> proposals) {
         OrionTextViewOverlay textView = textEditor.getTextView();

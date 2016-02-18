@@ -11,9 +11,6 @@
 package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.InvalidValueException;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
-import org.eclipse.che.api.project.server.ValueStorageException;
 
 
 /**
@@ -55,12 +52,12 @@ public class Variable extends AbstractAttribute {
         }
     }
 
-    public final void setValue(AttributeValue value, FolderEntry projectFolder) throws InvalidValueException, ValueStorageException {
-        if (valueProviderFactory != null) {
-            this.valueProviderFactory.newInstance(projectFolder).setValues(getName(), value.getList());
-        } else
-            this.value = value;
-    }
+//    public final void setValue(AttributeValue value, FolderEntry projectFolder) throws InvalidValueException, ValueStorageException {
+//        if (valueProviderFactory != null) {
+//            this.valueProviderFactory.newInstance(projectFolder).setValues(getName(), value.getList());
+//        } else
+//            this.value = value;
+//    }
 
     public final ValueProviderFactory getValueProviderFactory() {
         return valueProviderFactory;

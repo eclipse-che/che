@@ -498,7 +498,6 @@ public class BreakpointManagerImpl implements BreakpointManager, LineChangeActio
         for (final BreakpointDto dto : allDtoBreakpoints) {
             VirtualFileInfo virtualFileInfo = VirtualFileInfo.newBuilder()
                                                              .setPath(dto.getPath())
-                                                             .setMediaType(dto.getFileMediaType())
                                                              .setProject(new ProjectConfig(dto.getFileProjectConfig()))
                                                              .build();
 
@@ -633,7 +632,6 @@ public class BreakpointManagerImpl implements BreakpointManager, LineChangeActio
                 dto.setMessage(breakpoint.getMessage());
                 dto.setPath(breakpoint.getPath());
                 dto.setLineNumber(breakpoint.getLineNumber());
-                dto.setFileMediaType(breakpoint.getFile().getMediaType());
                 dto.setFileProjectConfig(breakpoint.getFile().getProject().getProjectConfig());
 
                 allDtoBreakpoints.add(dto);

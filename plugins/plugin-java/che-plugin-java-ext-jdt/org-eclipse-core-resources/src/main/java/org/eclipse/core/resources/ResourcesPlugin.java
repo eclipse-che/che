@@ -218,8 +218,7 @@ public class ResourcesPlugin {
 
     @PostConstruct
     public void start() {
-        String wsId = System.getenv("CHE_WORKSPACE_ID");
-        workspace = new Workspace(workspacePath, projectManager, wsId);
+        workspace = new Workspace(workspacePath, projectManager);
     }
 
     /**

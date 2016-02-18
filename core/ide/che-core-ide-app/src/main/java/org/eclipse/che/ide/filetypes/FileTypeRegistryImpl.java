@@ -53,9 +53,6 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
     public FileType getFileTypeByFile(VirtualFile file) {
         FileType fileType = getFileTypeByNamePattern(file.getName());
         if (fileType == unknownFileType) {
-            fileType = getFileTypeByMimeType(file.getMediaType());
-        }
-        if (fileType == unknownFileType) {
             fileType = getFileTypeByExtension(getFileExtension(file.getName()));
         }
         return fileType != null ? fileType : unknownFileType;

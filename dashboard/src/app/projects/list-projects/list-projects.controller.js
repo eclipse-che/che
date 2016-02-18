@@ -53,14 +53,19 @@ export class ListProjectsCtrl {
 
     this.profileCreationDate = profilePreferences['che:created'];
 
-    this.dropDownOptionsList = [
+    this.menuOptions = [
       {
-        name: 'Filter Workspace', id: 'workspaceFilter'
-      }, {
-        name: 'Delete all selected projects', deleteAll: 'true'
-      }/*, {
-       name: 'Favorited Projects'
-       }*/
+        title: 'Filter Workspace',
+        onclick:  () => {
+          this.displayWorkspaceFilter = true;
+        }
+      },
+      {
+        title: 'Delete selected projects',
+        onclick: () => {
+          this.deleteSelectedProjects();
+        }
+      }
     ];
 
     // by default, the workspace filter is hidden
@@ -90,21 +95,6 @@ export class ListProjectsCtrl {
   }
 
   /**
-   * Callback called when the dropdown on the list projects is called
-   * @param selected the selected element
-   * @param event the $event
-   */
-  dropDownSelected(selected, event) {
-    // hit the workspace filter
-    if (selected.deleteAll) {
-      this.deleteSelectedFactories(event);
-    } else if ('workspaceFilter' === selected.id) {
-      this.displayWorkspaceFilter = true;
-    }
-  }
-
-
-  /**
    * Hide the workspace filter menu
    */
   hideWorkspaceFilter() {
@@ -125,15 +115,14 @@ export class ListProjectsCtrl {
    * Delete all selected projects
    * @param event
    */
-  deleteSelectedFactories(event) {
+  deleteSelectedProjects() {
     let projectsSelectedStatusKeys = Object.keys(this.projectsSelectedStatus);
     let checkedProjectsKeys = [];
 
     if (projectsSelectedStatusKeys.length) {
 
-      var ctrl = this;
-      projectsSelectedStatusKeys.forEach(function (key) {
-        if (ctrl.projectsSelectedStatus[key] === true) {
+      projectsSelectedStatusKeys.forEach((key) => {
+        if (this.projectsSelectedStatus[key] === true) {
           checkedProjectsKeys.push(key);
         }
       });
@@ -151,8 +140,7 @@ export class ListProjectsCtrl {
           .ariaLabel('Remove projects')
           .ok('Delete!')
           .cancel('Cancel')
-          .clickOutsideToClose(true)
-          .targetEvent(event);
+          .clickOutsideToClose(true);
         this.$mdDialog.show(confirm).then(() => {
           var isError = false;
           checkedProjectsKeys.forEach((key) => {

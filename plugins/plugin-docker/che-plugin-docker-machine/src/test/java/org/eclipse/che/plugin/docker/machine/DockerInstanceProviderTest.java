@@ -230,8 +230,8 @@ public class DockerInstanceProviderTest {
 
         final MachineSourceImpl machineSource = new MachineSourceImpl("type", "location");
         final MachineStateImpl machineState = new MachineStateImpl(false,
-                                                                   "machineType",
                                                                    DISPLAY_NAME,
+                                                                   "machineType",
                                                                    machineSource,
                                                                    new LimitsImpl(64),
                                                                    "machineId",
@@ -260,8 +260,8 @@ public class DockerInstanceProviderTest {
         final MachineSourceImpl machineSource = new MachineSourceImpl("type", "location");
         final Recipe recipe = new RecipeImpl().withType("Dockerfile").withScript("FROM busybox");
         final MachineStateImpl machineState = new MachineStateImpl(false,
-                                                                   "machineType",
                                                                    DISPLAY_NAME,
+                                                                   "machineType",
                                                                    machineSource,
                                                                    new LimitsImpl(64),
                                                                    "machineId",
@@ -1445,8 +1445,8 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider.createInstance(recipe,
                                               new MachineStateImpl(isDev,
-                                                                   machineType,
                                                                    displayName,
+                                                                   machineType,
                                                                    machineSource,
                                                                    new LimitsImpl(memorySizeInMB),
                                                                    machineId,
@@ -1530,8 +1530,8 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider.createInstance(new DockerInstanceKey(repo, tag, "imageId", registry),
                                               new MachineStateImpl(isDev,
-                                                                   machineType,
                                                                    displayName,
+                                                                   machineType,
                                                                    machineSource,
                                                                    new LimitsImpl(memorySizeInMB),
                                                                    machineId,

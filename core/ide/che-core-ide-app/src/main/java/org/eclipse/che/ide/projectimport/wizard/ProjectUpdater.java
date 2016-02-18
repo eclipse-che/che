@@ -19,6 +19,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
+import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.eclipse.che.ide.projectimport.ErrorMessageUtils;
@@ -69,7 +70,7 @@ public class ProjectUpdater {
     public void updateProject(@NotNull final CompleteCallback callback,
                               @NotNull ProjectConfigDto projectConfig,
                               final boolean isConfigurationRequired) {
-        String projectPath = projectConfig.getPath();
+        final String projectPath = projectConfig.getPath();
 
         Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
         projectService.updateProject(workspaceId,
@@ -78,19 +79,22 @@ public class ProjectUpdater {
                                      new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
                                          @Override
                                          protected void onSuccess(final ProjectConfigDto result) {
+                                             if (result.getProblems().isEmpty() && !isConfigurationRequired) {
+                                                 eventBus.fireEvent(new ProjectUpdatedEvent(projectPath, result));
+                                                 projectNotificationSubscriber.onSuccess();
+                                                 callback.onCompleted();
+                                                 return;
+                                             }
                                              eventBus.fireEvent(new CreateProjectEvent(result));
+                                             eventBus.fireEvent(new ConfigureProjectEvent(result));
                                              projectNotificationSubscriber.onSuccess();
                                              callback.onCompleted();
-                                             if (!result.getProblems().isEmpty() || isConfigurationRequired) {
-                                                 eventBus.fireEvent(new ConfigureProjectEvent(result));
-                                             }
                                          }
 
                                          @Override
                                          protected void onFailure(Throwable exception) {
                                              projectNotificationSubscriber.onFailure(exception.getMessage());
-                                             String errorMessage = ErrorMessageUtils.getErrorMessage(exception);
-                                             callback.onFailure(new Exception(errorMessage));
+                                             callback.onFailure(new Exception(exception.getMessage()));
                                          }
                                      });
     }

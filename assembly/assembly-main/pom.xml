@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -31,6 +31,11 @@
             <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-machine-server</artifactId>
             <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-stacks</artifactId>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

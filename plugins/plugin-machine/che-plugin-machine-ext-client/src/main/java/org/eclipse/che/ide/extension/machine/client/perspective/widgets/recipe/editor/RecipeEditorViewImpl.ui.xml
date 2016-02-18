@@ -17,8 +17,10 @@
 
     <ui:style>
 
+        @eval editorPanelBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.getWindowContentBackground();
+
         .mainPanel {
-            background: #474747;
+            background: editorPanelBackgroundColor;
             height: 100%;
             width: 100%;
         }

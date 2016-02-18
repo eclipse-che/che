@@ -12,7 +12,6 @@ package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.project.server.ProjectTypeConstraintException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +91,11 @@ public class ProjectTypeRegistry {
      * @return project type by id
      */
     public ProjectTypeDef getProjectType(String id) throws NotFoundException {
-        return projectTypes.get(id);
+
+        ProjectTypeDef pt = projectTypes.get(id);
+        if(pt == null)
+            throw new NotFoundException("Project Type not found: "+id);
+        return pt;
     }
 
     /**

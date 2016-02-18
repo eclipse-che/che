@@ -14,6 +14,7 @@ import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.events.Event;
 import elemental.events.EventListener;
+import elemental.html.DivElement;
 import elemental.html.SpanElement;
 
 import com.google.inject.Inject;
@@ -63,19 +64,24 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     @Override
     public SpanElement renderNodeContents(ProcessTreeNode node) {
-        ProcessTreeNode.ProcessNodeType type = node.getType();
-        switch (type) {
+        SpanElement treeNode;
+        switch (node.getType()) {
             case MACHINE_NODE:
-                return createMachineElement((MachineDto)node.getData());
+                treeNode = createMachineElement((MachineDto)node.getData());
+                break;
             case COMMAND_NODE:
-                return createCommandElement(node);
+                treeNode = createCommandElement(node);
+                break;
             case TERMINAL_NODE:
-                return createTerminalElement(node);
+                treeNode = createTerminalElement(node);
+                break;
             default:
-                return Elements.createSpanElement();
+                treeNode = Elements.createSpanElement();
         }
-    }
 
+        Elements.addClassName(resources.getCss().processTreeNode(), treeNode);
+        return treeNode;
+    }
 
     private SpanElement createMachineElement(final MachineDto machine) {
         SpanElement root = Elements.createSpanElement();
@@ -117,7 +123,6 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                 }
             }, true);
         }
-
 
         newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
             @Override
@@ -166,14 +171,24 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         SVGResource icon = node.getTitleIcon();
         if (icon != null) {
             SpanElement iconElement = Elements.createSpanElement(resources.getCss().processIcon());
-            iconElement.appendChild((Node)new SVGImage(icon).getElement());
-            iconElement.setClassName(resources.getCss().processIcon());
             root.appendChild(iconElement);
+
+            DivElement divElement = Elements.createDivElement(resources.getCss().processIconPanel());
+            iconElement.appendChild(divElement);
+
+            divElement.appendChild((Node)new SVGImage(icon).getElement());
+
+            DivElement badgeElement = Elements.createDivElement(resources.getCss().processBadge());
+            divElement.appendChild(badgeElement);
         }
 
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());
         root.appendChild(nameElement);
+
+        Element spanElement = Elements.createSpanElement();
+        spanElement.setInnerHTML("&nbsp;");
+        root.appendChild(spanElement);
 
         return root;
     }
@@ -183,10 +198,13 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
         SVGResource icon = node.getTitleIcon();
         if (icon != null) {
-            SpanElement iconElement = Elements.createSpanElement();
-            iconElement.appendChild((Node)new SVGImage(icon).getElement());
-            iconElement.setClassName(resources.getCss().processIcon());
+            SpanElement iconElement = Elements.createSpanElement(resources.getCss().processIcon());
             root.appendChild(iconElement);
+
+            DivElement divElement = Elements.createDivElement(resources.getCss().processIconPanel());
+            iconElement.appendChild(divElement);
+
+            divElement.appendChild((Node) new SVGImage(icon).getElement());
         }
 
         root.appendChild(createCloseElement(node));
@@ -194,6 +212,10 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());
         root.appendChild(nameElement);
+
+        Element spanElement = Elements.createSpanElement();
+        spanElement.setInnerHTML("&nbsp;");
+        root.appendChild(spanElement);
 
         return root;
     }
@@ -257,4 +279,5 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     public void setStopProcessHandler(StopProcessHandler stopProcessHandler) {
         this.stopProcessHandler = stopProcessHandler;
     }
+
 }

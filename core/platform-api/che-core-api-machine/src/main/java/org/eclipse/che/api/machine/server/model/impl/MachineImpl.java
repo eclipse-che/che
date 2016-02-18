@@ -45,7 +45,7 @@ public class MachineImpl extends MachineStateImpl implements Machine {
                        String owner,
                        String envName,
                        MachineStatus status) {
-        super(isDev, type, name, source, limits, id, channels, workspace, owner, envName, status);
+        super(isDev, name, type, source, limits, id, channels, workspace, owner, envName, status);
         this.metadata = new MachineMetadataImpl(metadata);
     }
 
@@ -178,7 +178,7 @@ public class MachineImpl extends MachineStateImpl implements Machine {
             return this;
         }
 
-        public MachineImplBuilder setEnvName(String envName){
+        public MachineImplBuilder setEnvName(String envName) {
             this.envName = envName;
             return this;
         }

@@ -1,0 +1,86 @@
+<md-dialog flex="50">
+  <che-panel che-title="Export Workspace">
+    <md-dialog-content>
+      <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex">
+        <md-tab>
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-download" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">As a File</span>
+          </md-tab-label>
+          <md-tab-body>
+            <div layout="row" flex>
+              <ui-codemirror flex class="workspace-editor"
+                             ui-codemirror="exportWorkspaceDialogController.editorOptions"
+                             ng-model="exportWorkspaceDialogController.exportWorkspaceContent"></ui-codemirror>
+            </div>
+            <div layout="row" layout-align="end top">
+              <che-button-default che-button-title="download"
+                                  che-button-icon="fa fa-download"
+                                  ng-href="{{exportWorkspaceDialogController.downloadLink}}" ></che-button-default>
+
+              <che-button-default che-button-title="clipboard"
+                                  che-button-icon="fa fa-clipboard"
+                                  clip-copy="exportWorkspaceDialogController.exportWorkspaceContent"></che-button-default>
+            </div>
+          </md-tab-body>
+        </md-tab>
+        <md-tab>
+          <md-tab-label>
+            <md-icon md-font-icon="fa fa-cloud-upload" class="che-tab-label-icon"></md-icon>
+            <span class="che-tab-label-title">To Private Cloud</span>
+          </md-tab-label>
+          <md-tab-body>
+            <ng-form flex layout="column" name="privateCloudForm">
+              <che-input che-form="privateCloudForm"
+                         che-name="url"
+                         che-label-name="Host"
+                         che-place-holder="URL of the remote cloud"
+                         ng-model="exportWorkspaceDialogController.privateCloudUrl"
+                         required>
+                <div ng-message="required">An URL is required.</div>
+              </che-input>
+              <che-input che-form="privateCloudForm"
+                         che-name="username"
+                         che-label-name="Login"
+                         che-place-holder="Username used to login on the remote cloud"
+                         ng-model="exportWorkspaceDialogController.privateCloudLogin"
+                         required
+                         ng-maxlength="128">
+                <div ng-message="required">A name is required.</div>
+                <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+                <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+              </che-input>
+              <che-input che-form="privateCloudForm"
+                         che-name="password"
+                         che-label-name="Password"
+                         che-place-holder="Password used to login on the remote cloud"
+                         ng-model="exportWorkspaceDialogController.privateCloudPassword"
+                         required
+                         type="password"
+                         ng-maxlength="128">
+                <div ng-message="required">A password is required.</div>
+                <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+                <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+              </che-input>
+            </ng-form>
+            <div layout="row" layout-align="end top">
+              <che-button-default che-button-title="export"
+                                  che-button-icon="fa fa-cloud-upload"
+                                  ng-disabled="privateCloudForm.$invalid || exportWorkspaceDialogController.importInProgress"
+                                  ng-click="exportWorkspaceDialogController.exportToPrivateCloud()"></che-button-default>
+
+            </div>
+            <div layout="row" layout-align="start center" flex ng-if="exportWorkspaceDialogController.importInProgress">
+              <div><md-icon md-svg-src="assets/images/loader.svg" class="export-workspace-progress-icon" aria-label="loader"></md-icon></div>
+              <div ng-bind-html="exportWorkspaceDialogController.exportInCloudSteps"></div>
+            </div>
+          </md-tab-body>
+        </md-tab>
+      </md-tabs>
+    </md-dialog-content>
+  </che-panel>
+
+  <md-dialog-actions>
+    <md-button ng-hide="exportWorkspaceDialogController.importInProgress" ng-click="exportWorkspaceDialogController.hide()" tabindex="0" type="button">HIDE</md-button>
+  </md-dialog-actions>
+</md-dialog>

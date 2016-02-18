@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Recipe permissions, allows access to recipe for certain groups and users
+ * Defines permissions, which allows access by certain groups and users to the data objects
  *
  * @author Eugene Voevodin
  */
@@ -34,7 +34,7 @@ public interface Permissions {
     Map<String, List<String>> getUsers();
 
     /**
-     * Returns list of groups which have access to recipe.
+     * Returns list of groups which have access to the data object.
      * Always returns updatable list, never {@code null}
      */
     List<? extends Group> getGroups();

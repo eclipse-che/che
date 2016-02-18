@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -55,6 +56,7 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
     private final SelectionAgent        selectionAgent;
     private final JavaRefactoringRename javaRefactoringRename;
     private final AppContext            appContext;
+    private final FileTypeRegistry      fileTypeRegistry;
 
     private RefactoredItemType renamedItemType;
     private List<?>            selectedItems;
@@ -67,13 +69,15 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
                                    JavaLocalizationConstant locale,
                                    SelectionAgent selectionAgent,
                                    JavaRefactoringRename javaRefactoringRename,
-                                   AppContext appContext) {
+                                   AppContext appContext,
+                                   FileTypeRegistry fileTypeRegistry) {
         super(locale.renameRefactoringActionName(), locale.renameRefactoringActionDescription());
         this.editorAgent = editorAgent;
         this.renamePresenter = renamePresenter;
         this.selectionAgent = selectionAgent;
         this.javaRefactoringRename = javaRefactoringRename;
         this.appContext = appContext;
+        this.fileTypeRegistry = fileTypeRegistry;
         this.isEditorPartActive = false;
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
@@ -153,7 +157,7 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
         EditorPartPresenter editorPart = editorAgent.getActiveEditor();
         if (editorPart != null && editorPart instanceof TextEditor) {
             VirtualFile virtualFile = editorPart.getEditorInput().getFile();
-            String mediaType = virtualFile.getMediaType();
+            String mediaType = fileTypeRegistry.getFileTypeByFile(virtualFile).getMimeTypes().get(0);
 
             if (mediaType != null && ((mediaType.equals(MimeType.TEXT_X_JAVA) ||
                                        mediaType.equals(MimeType.TEXT_X_JAVA_SOURCE) ||

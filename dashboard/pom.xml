@@ -16,17 +16,15 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.dashboard</groupId>
     <artifactId>che-dashboard-war</artifactId>
-    <version>4.0.0-RC4-SNAPSHOT</version>
+    <version>4.0.0-RC5-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>Eclipse Che Dashboard :: Web App</name>
-    <properties>
-        <license_years>2015-2016</license_years>
-    </properties>
+    <name>Che Dashboard :: Web App</name>
+    <inceptionYear>2015</inceptionYear>
     <build>
         <finalName>dashboard-war</finalName>
         <plugins>
@@ -68,11 +66,6 @@
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
                                     <arg value="test" />
                                 </exec>
-                                <!-- Disable development mode -->
-                                <replace file="${basedir}/src/app/index.module.js">
-                                    <replacetoken><![CDATA[var DEV = true;]]></replacetoken>
-                                    <replacevalue><![CDATA[var DEV = false;]]></replacevalue>
-                                </replace>
                                 <!-- Build the application -->
                                 <exec dir="${basedir}" executable="gulp" failonerror="true">
                                     <arg value="build" />
@@ -81,11 +74,6 @@
                                 <replace file="${basedir}/dist/index.html">
                                     <replacetoken><![CDATA[<base href="/">]]></replacetoken>
                                     <replacevalue><![CDATA[<base href="/dashboard/">]]></replacevalue>
-                                </replace>
-                                <!-- Enable back development mode -->
-                                <replace file="${basedir}/src/app/index.module.js">
-                                    <replacetoken><![CDATA[var DEV = false;]]></replacetoken>
-                                    <replacevalue><![CDATA[var DEV = true;]]></replacevalue>
                                 </replace>
                             </target>
                         </configuration>

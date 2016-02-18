@@ -18,6 +18,9 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceDetailsCtrl} from './workspace-details/workspace-details.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
+import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
+import {ExportWorkspace} from './workspace-details/export-workspace/export-workspace.directive';
+import {ExportWorkspaceDialogController} from  './workspace-details/export-workspace/dialog/export-workspace-dialog.controller';
 import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
 import {ReadyToGoStacksCtrl} from './create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
@@ -61,6 +64,10 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
+
+    register.controller('ExportWorkspaceDialogController', ExportWorkspaceDialogController);
+    register.controller('ExportWorkspaceController', ExportWorkspaceController);
+    register.directive('exportWorkspace', ExportWorkspace);
 
     register.controller('WorkspaceRecipeCtrl', WorkspaceRecipeCtrl);
     register.directive('cheWorkspaceRecipe', WorkspaceRecipe);

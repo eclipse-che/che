@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;
@@ -34,8 +35,13 @@ public class FileStructureAction extends JavaEditorAction {
     public FileStructureAction(FileStructurePresenter fileStructurePresenter,
                                JavaLocalizationConstant locale,
                                EditorAgent editorAgent,
-                               JavaResources resources) {
-        super(locale.fileStructureActionName(), locale.fileStructureActionDescription(), resources.fileNavigation(), editorAgent);
+                               JavaResources resources,
+                               FileTypeRegistry fileTypeRegistry) {
+        super(locale.fileStructureActionName(),
+              locale.fileStructureActionDescription(),
+              resources.fileNavigation(),
+              editorAgent,
+              fileTypeRegistry);
 
         this.fileStructurePresenter = fileStructurePresenter;
         this.editorAgent = editorAgent;

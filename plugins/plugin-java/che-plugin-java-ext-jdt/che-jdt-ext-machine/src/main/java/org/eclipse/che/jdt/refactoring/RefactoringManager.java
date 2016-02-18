@@ -33,7 +33,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSess
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ValidateNewName;
-import org.eclipse.che.ide.util.UUID;
 import org.eclipse.che.jdt.refactoring.session.MoveRefactoringSession;
 import org.eclipse.che.jdt.refactoring.session.RefactoringSession;
 import org.eclipse.che.jdt.refactoring.session.RenameLinkedModeRefactoringSession;
@@ -73,6 +72,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSession.RenameWizard;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination.DestinationType;
@@ -83,7 +83,8 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestinati
  */
 @Singleton
 public class RefactoringManager {
-    private static final Logger LOG = LoggerFactory.getLogger(RefactoringManager.class);
+    private static final Logger        LOG       = LoggerFactory.getLogger(RefactoringManager.class);
+    private static final AtomicInteger sessionId = new AtomicInteger(1);
     private final Cache<String, RefactoringSession> sessions;
 
     public RefactoringManager() {
@@ -138,9 +139,9 @@ public class RefactoringManager {
             processor.setCreateTargetQueries(() -> null);
             Refactoring refactoring = new MoveRefactoring(processor);
             MoveRefactoringSession session = new MoveRefactoringSession(refactoring, processor);
-            String uuid = UUID.uuid();
-            sessions.put(uuid, session);
-            return uuid;
+            final String id = String.format("move-%s", sessionId.getAndIncrement());
+            sessions.put(id, session);
+            return id;
         } else {
             throw new RefactoringException("Can't create move refactoring session.");
         }
@@ -270,8 +271,8 @@ public class RefactoringManager {
 
         //package fragments are always renamed with wizard
         RenameRefactoringSession session = DtoFactory.newDto(RenameRefactoringSession.class);
-        String uuid = UUID.uuid();
-        session.setSessionId(uuid);
+        String id = String.format("rename-%s", sessionId.getAndIncrement());
+        session.setSessionId(id);
         session.setOldName(element.getElementName());
         session.setWizardType(getWizardType(element));
         if (lightweight && !(element instanceof IPackageFragment)) {
@@ -285,7 +286,7 @@ public class RefactoringManager {
                 session.setMastShowWizard(false);
                 session.setLinkedModeModel(model);
             }
-            sessions.put(uuid, refactoringSession);
+            sessions.put(id, refactoringSession);
             return session;
         } else {
             RenameSupport renameSupport = createRenameSupport(element, null, RenameSupport.UPDATE_REFERENCES);
@@ -293,7 +294,7 @@ public class RefactoringManager {
                 RenameRefactoring refactoring = renameSupport.getfRefactoring();
                 RenameSession renameSession = new RenameSession(refactoring);
                 session.setMastShowWizard(true);
-                sessions.put(uuid, renameSession);
+                sessions.put(id, renameSession);
                 return session;
 
             }

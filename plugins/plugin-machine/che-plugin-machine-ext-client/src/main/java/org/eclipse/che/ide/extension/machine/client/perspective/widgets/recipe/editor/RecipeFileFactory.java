@@ -30,7 +30,6 @@ public class RecipeFileFactory {
 
     public static final String NAME = "Dockerfile";
     public static final String PATH = "machine_recipe";
-    public static final String TYPE = "text/x-dockerfile";
 
     @Inject
     public RecipeFileFactory() {
@@ -55,7 +54,6 @@ public class RecipeFileFactory {
         VirtualFileInfo virtualFileInfo = VirtualFileInfo.newBuilder()
                                                          .setName(name)
                                                          .setDisplayName(name)
-                                                         .setMediaType(TYPE)
                                                          .setPath(path)
                                                          .setContent(content)
                                                          .build();

@@ -114,7 +114,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         } else if (mode == UPDATE) {
             updater.updateProject(new UpdateCallback(callback), dataObject, false);
         } else if (mode == IMPORT) {
-            importer.checkFolderExistenceAndImport(callback, dataObject);
+            importer.importProject(callback, dataObject);
         }
     }
 

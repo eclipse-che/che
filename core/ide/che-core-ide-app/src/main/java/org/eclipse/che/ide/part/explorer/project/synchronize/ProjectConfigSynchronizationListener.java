@@ -229,7 +229,7 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
     }
 
     private void importProject() {
-        projectImporter.checkFolderExistenceAndImport(new Wizard.CompleteCallback() {
+        projectImporter.importProject(new Wizard.CompleteCallback() {
             @Override
             public void onCompleted() {
                 Log.info(getClass(), "Project " + projectConfig.getName() + " imported.");

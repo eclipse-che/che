@@ -20,8 +20,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -59,7 +59,6 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.core.problemDialog.ProjectProblemDialog;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronizationListener;
 import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
@@ -101,7 +100,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class ProjectExplorerPresenter extends BasePresenter implements ActionDelegate,
                                                                        ProjectExplorerPart,
                                                                        HasView,
-                                                                       ExtServerStateHandler,
+                                                                       WsAgentStateHandler,
                                                                        ProjectUpdatedHandler,
                                                                        CreateProjectHandler,
                                                                        DeleteProjectHandler,
@@ -159,7 +158,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         eventBus.addHandler(DeleteProjectEvent.TYPE, this);
         eventBus.addHandler(ConfigureProjectEvent.TYPE, this);
         eventBus.addHandler(ProjectUpdatedEvent.getType(), this);
-        eventBus.addHandler(ExtServerStateEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(ResourceNodeRenamedEvent.getType(), this);
         eventBus.addHandler(ResourceNodeDeletedEvent.getType(), this);
         eventBus.addHandler(ModuleCreatedEvent.getType(), this);
@@ -169,7 +168,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     /** {@inheritDoc} */
     @Override
-    public void onExtServerStarted(ExtServerStateEvent event) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
         nodeManager.getProjectNodes().then(new Operation<List<Node>>() {
             @Override
             public void apply(List<Node> nodes) throws OperationException {
@@ -188,7 +187,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
     /** {@inheritDoc} */
     @Override
-    public void onExtServerStopped(ExtServerStateEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
         view.removeAllNodes();
         notificationManager.notify(locale.projectExplorerExtensionServerStopped(),
                                    locale.projectExplorerExtensionServerStoppedDescription(), FAIL, false);
@@ -394,13 +393,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
 
-        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
-
-        if (parentModule == null) {
-            projectConfig.getModules().add(createdModule);
-        } else {
-            parentModule.getModules().add(createdModule);
-        }
+        // TODO: rework after new Project API
+//        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
+//
+//        if (parentModule == null) {
+//            projectConfig.getModules().add(createdModule);
+//        } else {
+//            parentModule.getModules().add(createdModule);
+//        }
 
         reloadChildren();
     }

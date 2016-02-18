@@ -23,29 +23,40 @@ public class AttributeValue implements Value {
     private final List<String> values = new ArrayList<>();
 
     public AttributeValue(List<String> list) {
-        values.addAll(list);
+        if(list != null)
+            values.addAll(list);
     }
 
     public AttributeValue(String str) {
-        values.add(str);
+        if(str != null)
+            values.add(str);
     }
 
+    @Override
     public String getString() {
         return values.isEmpty() ? null : values.get(0);
     }
 
     public void setString(String str) {
         values.clear();
-        values.add(str);
+        if(str != null)
+            values.add(str);
     }
 
+    @Override
     public List<String> getList() {
         return values;
     }
 
     public void setList(List<String> list) {
         values.clear();
-        values.addAll(list);
+        if(list != null)
+            values.addAll(list);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 
     @Override

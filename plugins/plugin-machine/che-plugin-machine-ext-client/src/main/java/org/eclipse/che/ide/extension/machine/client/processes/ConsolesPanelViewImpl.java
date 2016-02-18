@@ -41,9 +41,8 @@ import org.eclipse.che.ide.util.input.SignalEvent;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -54,6 +53,9 @@ import java.util.Map;
  */
 @Singleton
 public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDelegate> implements ConsolesPanelView, RequiresResize {
+
+    interface ProcessesViewImplUiBinder extends UiBinder<Widget, ConsolesPanelViewImpl> {
+    }
 
     @UiField(provided = true)
     MachineResources machineResources;
@@ -71,7 +73,10 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     FlowPanel navigationPanel;
 
     private Map<String, IsWidget> processWidgets;
-    private List<ProcessTreeNode> processNodes;
+
+    private LinkedHashMap<String, ProcessTreeNode> processTreeNodes;
+
+    private String activeProcessId;
 
     @Inject
     public ConsolesPanelViewImpl(org.eclipse.che.ide.Resources resources,
@@ -84,8 +89,7 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
         this.machineResources = machineResources;
         this.processWidgets = new HashMap<>();
-        this.processNodes = new ArrayList<>();
-
+        processTreeNodes = new LinkedHashMap<>();
         splitLayoutPanel = new SplitLayoutPanel(1);
 
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
@@ -258,17 +262,18 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     public void addProcessWidget(String processId, IsWidget widget) {
         processWidgets.put(processId, widget);
         outputPanel.add(widget);
+
         showProcessOutput(processId);
     }
 
     @Override
     public void addProcessNode(@NotNull ProcessTreeNode node) {
-        processNodes.add(node);
+        processTreeNodes.put(node.getId(), node);
     }
 
     @Override
     public void removeProcessNode(@NotNull ProcessTreeNode node) {
-        processNodes.remove(node);
+        processTreeNodes.remove(node.getId());
     }
 
     @Override
@@ -276,6 +281,12 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
         processTree.renderTree(-1);
+
+        for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
+            if (!processTreeNode.getId().equals(activeProcessId) && processTreeNode.hasUnreadContent()) {
+                processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
+            }
+        }
     }
 
     @Override
@@ -294,6 +305,14 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
         if (processWidgets.containsKey(processId)) {
             onResize();
             outputPanel.showWidget(processWidgets.get(processId).asWidget());
+
+            activeProcessId = processId;
+
+            ProcessTreeNode treeNode = processTreeNodes.get(processId);
+            if (treeNode != null) {
+                treeNode.setHasUnreadContent(false);
+                treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
+            }
         }
     }
 
@@ -305,47 +324,55 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     }
 
     @Override
-    public int getNodeIndex(String processId) {
-        for (ProcessTreeNode node : processNodes) {
-            if (processId.equals(node.getId())) {
-                return processNodes.indexOf(node);
-            }
+    public void markProcessHasOutput(String processId) {
+        if (processId.equals(activeProcessId)) {
+            return;
         }
+
+        ProcessTreeNode treeNode = processTreeNodes.get(processId);
+        if (treeNode != null) {
+            treeNode.setHasUnreadContent(true);
+            treeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
+        }
+    }
+
+    @Override
+    public int getNodeIndex(String processId) {
+        int index = 0;
+        for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
+            if (processTreeNode.getId().equals(processId)) {
+                return index;
+            }
+
+            index++;
+        }
+
         return -1;
     }
 
     @Override
     @Nullable
     public ProcessTreeNode getNodeByIndex(@NotNull int index) {
-        if (index < 0 || index >= processNodes.size()) {
-            return null;
-        }
-        return processNodes.get(index);
+        return (ProcessTreeNode)processTreeNodes.values().toArray()[index];
     }
 
     @Override
     @Nullable
     public ProcessTreeNode getNodeById(@NotNull String nodeId) {
-        for (ProcessTreeNode node : processNodes) {
-            if (nodeId.equals(node.getId())) {
-                return node;
-            }
-        }
-        return null;
+        return processTreeNodes.get(nodeId);
     }
-    
+
     @Override
     public void setStopButtonVisibility(String nodeId, boolean visible) {
-        for (ProcessTreeNode node : processNodes) {
-            if (!nodeId.equals(node.getId())) {
-                continue;
-            } 
-            
-            if (visible) {
-                node.getTreeNodeElement().getClassList().remove(machineResources.getCss().hideStopButton());
-            } else {
-                node.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
-            }
+        ProcessTreeNode processTreeNode = processTreeNodes.get(nodeId);
+        if (processTreeNode == null) {
+            return;
+        }
+
+        if (visible) {
+            processTreeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().hideStopButton());
+        } else {
+            processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
         }
     }
 
@@ -357,9 +384,6 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
                 ((RequiresResize)widget).onResize();
             }
         }
-    }
-
-    interface ProcessesViewImplUiBinder extends UiBinder<Widget, ConsolesPanelViewImpl> {
     }
 
 }

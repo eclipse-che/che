@@ -19,6 +19,7 @@ import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.core.internal.utils.Policy;
 import org.eclipse.core.commands.operations.IUndoContext;
@@ -95,7 +96,6 @@ public class Workspace implements IWorkspace {
     protected TeamHook teamHook = null;
     private String               wsPath;
     private ProjectManager       projectManager;
-    private String               wsId;
     /**
      * Scheduling rule factory. This field is null if the factory has not been used
      * yet.  The accessor method should be used rather than accessing this field
@@ -104,15 +104,14 @@ public class Workspace implements IWorkspace {
     private IResourceRuleFactory ruleFactory;
     private IUndoContext undoContext = new UndoContext();
 
-    public Workspace(String path, ProjectManager projectManager, String wsId) {
+    public Workspace(String path, ProjectManager projectManager) {
         this.wsPath = path;
         this.projectManager = projectManager;
         try {
-            projectsRoot = projectManager.getProjectsRoot(wsId);
+            projectsRoot = projectManager.getProjectsRoot();
         } catch (ServerException | NotFoundException e) {
             throw new IllegalStateException(e);
         }
-        this.wsId = wsId;
         _workManager = new WorkManager(this);
         _workManager.startup(null);
         _workManager.postWorkspaceStartup();
@@ -784,7 +783,7 @@ public class Workspace implements IWorkspace {
                     IResource[] resources = new IResource[children.size()];
                     for (int i = 0; i < children.size(); i++) {
                         VirtualFileEntry child = children.get(i);
-                        IPath iPath = new Path(child.getPath());
+                        IPath iPath = new Path(child.getPath().toString());
                         resources[i] = newResource(iPath, getType(child));
                     }
                     resources = Arrays.stream(resources).sorted((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName())).toArray(
@@ -816,7 +815,11 @@ public class Workspace implements IWorkspace {
                     projectsRoot.createFolder(path.toOSString());
                     break;
                 case IResource.PROJECT:
-                    projectManager.createProject(wsId, resource.getName(), new ProjectConfigImpl(), new HashMap<>());
+                    ProjectConfigImpl projectConfig = new ProjectConfigImpl();
+                    projectConfig.setPath(resource.getName());
+                    projectConfig.setName(resource.getName());
+                    projectConfig.setType(BaseProjectType.ID);
+                    projectManager.createProject(projectConfig, new HashMap<>());
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -852,7 +855,7 @@ public class Workspace implements IWorkspace {
 
     public void delete(Resource resource) {
         try {
-            projectManager.delete(wsId, resource.getFullPath().toOSString());
+            projectManager.delete(resource.getFullPath().toOSString());
         } catch (ServerException | ForbiddenException | ConflictException | NotFoundException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -876,11 +879,10 @@ public class Workspace implements IWorkspace {
         VirtualFileEntry child = null;
         try {
             child = projectsRoot.getChild(file.getFullPath().toOSString());
-            if (destination.getName().equals(file.getName())) {
-                child.moveTo(destination.getFullPath().removeLastSegments(1).toOSString());
-            } else {
-                child.moveTo(destination.getFullPath().removeLastSegments(1).toOSString(), destination.getName(), true);
-            }
+            projectManager.moveTo(child.getPath().toString(),
+                                  destination.getFullPath().removeLastSegments(1).toOSString(),
+                                  destination.getName(),
+                                  true);
         } catch (ForbiddenException | ServerException | NotFoundException | ConflictException e) {
             throw new CoreException(
                     new Status(IStatus.ERROR, "", "Can't move file: " + file.getFullPath() + " to: " + destination.getFullPath(), e));
@@ -891,11 +893,10 @@ public class Workspace implements IWorkspace {
         VirtualFileEntry child = null;
         try {
             child = projectsRoot.getChild(folder.getFullPath().toOSString());
-            if (destination.getName().equals(folder.getName())) {
-                child.moveTo(destination.getFullPath().removeLastSegments(1).toOSString());
-            } else {
-                child.moveTo(destination.getFullPath().removeLastSegments(1).toOSString(), destination.getName(), true);
-            }
+            projectManager.moveTo(child.getPath().toString(),
+                                  destination.getFullPath().removeLastSegments(1).toOSString(),
+                                  destination.getName(),
+                                  true);
         } catch (ForbiddenException | NotFoundException | ServerException | ConflictException e) {
             throw new CoreException(
                     new Status(IStatus.ERROR, "", "Can't move folder: " + folder.getFullPath() + " to: " + destination.getFullPath(), e));
@@ -914,10 +915,5 @@ public class Workspace implements IWorkspace {
     /** Returns project manager associated with this workspace */
     public ProjectManager getProjectManager() {
         return projectManager;
-    }
-
-    /** Returns workspace id of this workspace */
-    public String getWsId() {
-        return wsId;
     }
 }

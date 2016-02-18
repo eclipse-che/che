@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.dto.DtoFactoryVisitor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.dto.DtoFactoryVisitor;
 
 import java.util.Map;
 import java.util.Map.Entry;

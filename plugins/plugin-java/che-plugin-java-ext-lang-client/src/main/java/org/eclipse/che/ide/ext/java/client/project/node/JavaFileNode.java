@@ -76,12 +76,6 @@ public class JavaFileNode extends FileReferenceNode implements MutableNode {
         }
     }
 
-    @Nullable
-    @Override
-    public String getMediaType() {
-        return JavaNodeManager.JAVA_MIME_TYPE;
-    }
-
     @Override
     public void setLeaf(boolean leaf) {
         throw new UnsupportedOperationException("Not implemented");

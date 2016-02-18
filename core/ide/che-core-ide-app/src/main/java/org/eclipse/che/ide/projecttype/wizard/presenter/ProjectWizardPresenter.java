@@ -193,6 +193,7 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
         final ProjectConfigDto newProject = wizard.getDataObject();
 
         // some values should be shared between wizards for different project types
+        newProject.setPath(prevData.getPath());
         newProject.setName(prevData.getName());
         newProject.setDescription(prevData.getDescription());
         newProject.setMixins(prevData.getMixins());

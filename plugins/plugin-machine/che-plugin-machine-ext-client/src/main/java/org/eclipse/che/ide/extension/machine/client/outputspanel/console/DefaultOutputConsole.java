@@ -18,6 +18,9 @@ import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Console panel for some text outputs.
  *
@@ -29,6 +32,8 @@ public class DefaultOutputConsole implements OutputConsole {
     private final MachineResources  resources;
     private       String            title;
 
+    private final List<ConsoleOutputListener> outputListeners;
+
     @Inject
     public DefaultOutputConsole(OutputConsoleView view,
                                 MachineResources resources,
@@ -36,9 +41,10 @@ public class DefaultOutputConsole implements OutputConsole {
         this.view = view;
         this.title = title;
         this.resources = resources;
+        outputListeners = new ArrayList<>();
 
-        this.view.hideCommand();
-        this.view.hidePreview();
+        view.hideCommand();
+        view.hidePreview();
     }
 
     /**
@@ -49,7 +55,10 @@ public class DefaultOutputConsole implements OutputConsole {
      */
     public void printText(String text) {
         view.print(text, text.endsWith("\r"));
-        view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
     }
 
     /**
@@ -68,7 +77,10 @@ public class DefaultOutputConsole implements OutputConsole {
         }
 
         view.print(text, isRepeat);
-        view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
     }
 
     /** {@inheritDoc} */
@@ -96,7 +108,17 @@ public class DefaultOutputConsole implements OutputConsole {
 
     /** {@inheritDoc} */
     @Override
-    public void onClose() {
-
+    public void stop() {
     }
+
+    @Override
+    public void close() {
+        outputListeners.clear();
+    }
+
+    @Override
+    public void addOutputListener(ConsoleOutputListener listener) {
+        outputListeners.add(listener);
+    }
+
 }

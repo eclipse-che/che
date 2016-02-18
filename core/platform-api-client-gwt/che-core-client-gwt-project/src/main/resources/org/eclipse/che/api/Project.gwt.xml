@@ -18,4 +18,5 @@
     <inherits name="org.eclipse.che.ide.Commons"/>
     <source path='project/gwt'/>
     <source path='project/shared'/>
+    <source path='vfs/impl/file'/>
 </module>

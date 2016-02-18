@@ -17,6 +17,7 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,8 @@ public class JsonHelper {
         return map;
     }
 
+    //TODO: find a way to avoid those util methods here.
+
     /** Returns message or result of it parse if the message is json. */
     public static String parseJsonMessage(String parsedMessage) {
         try {
@@ -86,6 +89,30 @@ public class JsonHelper {
         } catch (Exception e) {
             //not found json in message
             return parsedMessage;
+        }
+    }
+
+    /** Returns message or result of it parse if the message is json. */
+    public static Map<String, String> parseErrorAttributes(String parsedMessage) {
+        try {
+            //parsed message
+            JSONValue message = JSONParser.parseStrict(parsedMessage).isObject().get("attributes");
+            return toMap(message.isObject().toString());
+        } catch (Exception e) {
+            //not found json in message
+            return Collections.emptyMap();
+        }
+    }
+
+    /** Returns message or result of it parse if the message is json. */
+    public static int parseErrorCode(String parsedMessage) {
+        try {
+            //parsed message
+            JSONValue message = JSONParser.parseStrict(parsedMessage).isObject().get("errorCode");
+            return new Double(message.isNumber().doubleValue()).intValue();
+        } catch (Exception e) {
+            //not found json in message
+            return -1;
         }
     }
 

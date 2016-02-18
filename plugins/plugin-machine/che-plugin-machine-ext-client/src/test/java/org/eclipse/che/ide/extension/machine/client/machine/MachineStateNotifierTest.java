@@ -26,8 +26,8 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.StartWorkspaceHandler;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,9 +84,9 @@ public class MachineStateNotifierTest {
     private StatusNotification                 notification;
 
     @Captor
-    private ArgumentCaptor<StatusNotification>    notificationCaptor;
+    private ArgumentCaptor<StatusNotification>      notificationCaptor;
     @Captor
-    private ArgumentCaptor<StartWorkspaceHandler> startWorkspaceHandlerCaptor;
+    private ArgumentCaptor<WorkspaceStartedHandler> startWorkspaceHandlerCaptor;
 
     @InjectMocks
     private MachineStatusNotifier stateNotifier;
@@ -100,7 +100,7 @@ public class MachineStateNotifierTest {
 
         when(messageBusProvider.getMessageBus()).thenReturn(messageBus);
 
-        verify(eventBus).addHandler(eq(StartWorkspaceEvent.TYPE), startWorkspaceHandlerCaptor.capture());
+        verify(eventBus).addHandler(eq(WorkspaceStartedEvent.TYPE), startWorkspaceHandlerCaptor.capture());
         startWorkspaceHandlerCaptor.getValue().onWorkspaceStarted(workspace);
     }
 

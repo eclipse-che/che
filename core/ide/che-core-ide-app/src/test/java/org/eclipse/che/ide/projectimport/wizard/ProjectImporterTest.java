@@ -11,23 +11,20 @@
 package org.eclipse.che.ide.projectimport.wizard;
 
 import com.google.gwt.event.shared.EventBus;
+import com.google.web.bindery.event.shared.Event;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.vfs.gwt.client.VfsServiceClient;
-import org.eclipse.che.api.vfs.shared.dto.Item;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
+import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.test.GwtReflectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,10 +34,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,8 +49,6 @@ public class ProjectImporterTest {
     //constructors mocks
     @Mock
     private ProjectServiceClient                       projectServiceClient;
-    @Mock
-    private VfsServiceClient                           vfsServiceClient;
     @Mock
     private CoreLocalizationConstant                   localizationConstant;
     @Mock
@@ -82,8 +73,6 @@ public class ProjectImporterTest {
     private Promise<Void>                 importPromise;
 
     @Captor
-    private ArgumentCaptor<AsyncRequestCallback<Item>> callbackCaptorForItem;
-    @Captor
     private ArgumentCaptor<Operation<Void>>            voidOperationCaptor;
 
     private ProjectImporter importer;
@@ -99,38 +88,22 @@ public class ProjectImporterTest {
         when(importPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(importPromise);
 
         importer = new ProjectImporter(projectServiceClient,
-                                       vfsServiceClient,
                                        localizationConstant,
                                        subscriberFactory,
                                        appContext,
+                                       eventBus,
                                        resolver);
     }
 
     @Test
-    public void shouldInvokeCallbackWhenFolderAlreadyExists() throws Exception {
-        importer.checkFolderExistenceAndImport(completeCallback, projectConfig);
-
-        verify(vfsServiceClient).getItemByPath(anyString(), eq(PROJECT_NAME), callbackCaptorForItem.capture());
-
-        AsyncRequestCallback<Item> callback = callbackCaptorForItem.getValue();
-        GwtReflectionUtils.callOnSuccess(callback, mock(Item.class));
-
-        verify(completeCallback).onFailure(any(Throwable.class));
-    }
-
-    @Test
     public void importShouldBeSuccessAndProjectStartsResolving() throws OperationException {
-        importer.checkFolderExistenceAndImport(completeCallback, projectConfig);
-
-        verify(vfsServiceClient).getItemByPath(anyString(), eq(PROJECT_NAME), callbackCaptorForItem.capture());
-
-        AsyncRequestCallback<Item> callback = callbackCaptorForItem.getValue();
-        GwtReflectionUtils.callOnFailure(callback, mock(Throwable.class));
+        importer.importProject(completeCallback, projectConfig);
 
         //first time called in abstract importer
         verify(importPromise, times(2)).then(voidOperationCaptor.capture());
         voidOperationCaptor.getAllValues().get(0).apply(null);
 
+        verify(eventBus).fireEvent(Matchers.<Event>anyObject());
         verify(resolver).resolveProject(completeCallback, projectConfig);
         verify(subscriber).onSuccess();
     }

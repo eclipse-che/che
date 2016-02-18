@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.event.project.CloseCurrentProjectEvent;
 import org.eclipse.che.ide.api.event.project.CloseCurrentProjectHandler;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.client.inject.factories.TabItemFactory;
+import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTab;

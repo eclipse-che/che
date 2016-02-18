@@ -38,13 +38,10 @@ public interface ItemReference extends Hyperlinks {
 
     ItemReference withType(String type);
 
-    /** Get mediatype. */
-    String getMediaType();
+    /** Get project path. */
+    String getProject();
 
-    /** Get mediatype. */
-    void setMediaType(String mediaType);
-
-    ItemReference withMediaType(String mediaType);
+    ItemReference withProject(String project);
 
     /** Get path of item. */
     String getPath();
@@ -66,12 +63,12 @@ public interface ItemReference extends Hyperlinks {
     ItemReference withAttributes(Map<String, String> attributes);
 
 
-    /** creating date. */
-    long getCreated();
-
-    void setCreated(long created);
-
-    ItemReference withCreated(long created);
+//    /** creating date. */
+//    long getCreated();
+//
+//    void setCreated(long created);
+//
+//    ItemReference withCreated(long created);
 
 
     /** last modified date. */

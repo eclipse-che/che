@@ -37,6 +37,6 @@ public class ImportWizard extends AbstractWizard<ProjectConfigDto> {
     /** {@inheritDoc} */
     @Override
     public void complete(@NotNull CompleteCallback callback) {
-        projectImporter.checkFolderExistenceAndImport(callback, dataObject);
+        projectImporter.importProject(callback, dataObject);
     }
 }

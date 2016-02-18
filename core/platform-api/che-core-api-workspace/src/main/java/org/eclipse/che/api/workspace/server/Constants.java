@@ -29,6 +29,17 @@ public final class Constants {
     public static final String    GET_ALL_USER_WORKSPACES       = "get all user workspaces";
     public static final Operation START_WORKSPACE               = new Operation("start-workspace");
 
+    public static final String LINK_REL_CREATE_STACK          = "create stack";
+    public static final String LINK_REL_UPDATE_STACK          = "update stack";
+    public static final String LINK_REL_REMOVE_STACK          = "remove stack";
+    public static final String LINK_REL_GET_STACK_BY_ID       = "get stack by id";
+    public static final String LINK_REL_GET_STACKS_BY_CREATOR = "get stacks by creator";
+    public static final String LINK_REL_SEARCH_STACKS         = "search stacks";
+
+    public static final String LINK_REL_GET_ICON    = "get icon link";
+    public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
+    public static final String LINK_REL_DELETE_ICON = "delete icon link";
+
     private Constants() {
     }
 }

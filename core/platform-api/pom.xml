@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC4-SNAPSHOT</version>
+        <version>4.0.0-RC5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-core-api-parent</artifactId>
@@ -26,7 +26,6 @@
         <module>che-core-api-dto</module>
         <module>che-core-api-dto-maven-plugin</module>
         <module>che-core-api-core</module>
-        <module>che-core-api-vfs</module>
         <module>che-core-api-workspace</module>
         <module>che-core-api-user</module>
         <module>che-core-api-project</module>

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.type;
 
-import org.eclipse.che.api.project.server.ValueProviderFactory;
-
 /**
  * @author gazarenkov
  */

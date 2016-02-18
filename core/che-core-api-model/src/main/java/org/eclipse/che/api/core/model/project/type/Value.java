@@ -28,4 +28,9 @@ public interface Value {
      */
     List<String> getList();
 
+    /**
+     * @return whether the value is not initialized
+     */
+    boolean isEmpty();
+
 }
