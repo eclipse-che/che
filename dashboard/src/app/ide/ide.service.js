@@ -99,29 +99,10 @@ class IdeSvc {
                 // Now that the container is started, wait for the extension server. For this, needs to get runtime details
                 let promiseRuntime = this.cheAPI.getWorkspace().getRuntime(this.selectedWorkspace.id);
                 promiseRuntime.then((runtimeData) => {
-                    // extract the Websocket URL of the runtime
-                    let servers = runtimeData.devMachine.metadata.servers;
-
-                    var extensionServerAddress;
-                    for (var key in servers) {
-                        let server = servers[key];
-                        if ('extensions' === server.ref) {
-                            extensionServerAddress = server.address;
-                        }
-                    }
-
-                    let endpoint = runtimeData.devMachine.metadata.envVariables.CHE_API_ENDPOINT;
-
-                    var contextPath;
-                    if (endpoint.endsWith('/ide/api')) {
-                        contextPath = 'ide';
-                    } else {
-                        contextPath = 'api';
-                    }
-
+                    let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.selectedWorkspace.id);
                     // try to connect
                     this.websocketReconnect = 50;
-                    this.connectToExtensionServer('ws://' + extensionServerAddress + '/' + contextPath + '/ext/ws/' + this.selectedWorkspace.id, this.selectedWorkspace.id);
+                    this.connectToExtensionServer(websocketUrl, this.selectedWorkspace.id);
 
                 });
             }

@@ -291,4 +291,38 @@ export class CheWorkspace {
     return this.runtimeConfig.get(workspaceId);
   }
 
+  /**
+   * Gets websocket for a given workspace. It needs to have fetched first the runtime configuration of the workspace
+   * @param workspaceId the id of the workspace
+   * @returns {string}
+   */
+  getWebsocketUrl(workspaceId) {
+    let runtimeData = this.getRuntimeConfig(workspaceId);
+    if (!runtimeData) {
+      return '';
+    }
+    // extract the Websocket URL of the runtime
+    let servers = runtimeData.devMachine.metadata.servers;
+
+    var extensionServerAddress;
+    for (var key in servers) {
+      let server = servers[key];
+      if ('extensions' === server.ref) {
+        extensionServerAddress = server.address;
+      }
+    }
+
+    let endpoint = runtimeData.devMachine.metadata.envVariables.CHE_API_ENDPOINT;
+
+    var contextPath;
+    if (endpoint.endsWith('/ide/api')) {
+      contextPath = 'ide';
+    } else {
+      contextPath = 'api';
+    }
+
+    return 'ws://' + extensionServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
+
+  }
+
 }
