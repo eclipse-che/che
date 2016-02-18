@@ -425,7 +425,7 @@ export class CreateProjectCtrl {
     if (this.selectSourceOption === 'select-source-new' && this.templatesChoice === 'templates-wizard') {
 
       // we do not create project as it will be done through wizard
-      var deferred = this.$q.defer();
+      let deferred = this.$q.defer();
       promise = deferred.promise;
       deferred.resolve(true);
 
@@ -443,7 +443,7 @@ export class CreateProjectCtrl {
       promise = this.cheAPI.getProject().importProject(workspaceId, projectName, projectData.source);
 
       // needs to update configuration of the project
-      promise = promise.then(() => {
+      promise.then(() => {
         this.cheAPI.getProject().updateProject(workspaceId, projectName, projectData.project).$promise;
       });
 
@@ -454,7 +454,9 @@ export class CreateProjectCtrl {
         let deferred = this.$q.defer();
         let deferredPromise = deferred.promise;
         this.addCommand(workspaceId, projectName, commands, 0, deferred);
-        promise = deferredPromise;
+        promise.then(() => {
+          deferredPromise;
+        });
       }
     }
 
