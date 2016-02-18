@@ -32,6 +32,7 @@ export class CheHttpBackend {
     this.remoteGitUrlArraysMap = new Map();
     this.localGitUrlsMap = new Map();
     this.remoteSvnUrlsMap = new Map();
+    this.projectTypesWorkspaces = new Map();
 
     this.memberships = [];
 
@@ -57,9 +58,12 @@ export class CheHttpBackend {
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
 
-    this.httpBackend.when('GET', '/api/project-type').respond(this.projectTypes);
+    var projectTypeKeys = this.projectTypesWorkspaces.keys();
+    for (let key of projectTypeKeys) {
+      this.httpBackend.when('GET', '/api/ext/project-type/' + key).respond(this.projectTypesWorkspaces.get(key));
+    }
 
-    //memeberships:
+    //memberships:
     this.httpBackend.when('GET', '/api/account').respond(this.memberships);
 
     //users
@@ -168,10 +172,11 @@ export class CheHttpBackend {
 
   /**
    * Add the given project types
+   * @param workspaceId the workspaceId of the project types
    * @param projectTypes
    */
-  addProjectTypes(projectTypes) {
-    this.projectTypes = projectTypes;
+  addProjectTypes(workspaceId, projectTypes) {
+    this.projectTypesWorkspaces.set(workspaceId, projectTypes);
   }
 
   /**

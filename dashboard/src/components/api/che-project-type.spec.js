@@ -69,48 +69,43 @@ describe('CheProjectType', function(){
       var attributeLanguageJava = apiBuilder.getProjectTypeAttributeDescriptorBuilder().withValues(['java']).withRequired(true).withDescription('language').withName('language').build();
       var mavenType = apiBuilder.getProjectTypeBuilder().withId('maven').withDisplayname('Maven project').withAttributeDescriptors([attributeLanguageJava]).build();
       var antType = apiBuilder.getProjectTypeBuilder().withId('ant').withDisplayname('Ant project').withAttributeDescriptors([attributeLanguageJava]).build();
+      let workspaceId = 'florentWorkspace';
 
       // providing request
       // add workspaces on Http backend
-      cheBackend.addProjectTypes([mavenType, antType]);
+      cheBackend.addProjectTypes(workspaceId, [mavenType, antType]);
 
       // setup backend
       cheBackend.setup();
 
-
       // no types now on factory
-      expect(factory.getAllProjectTypes().length).toEqual(0);
+      expect(factory.getAllProjectTypes(workspaceId).length).toEqual(0);
 
       // fetch types
-      factory.fetchTypes();
+      factory.fetchTypes(workspaceId);
 
       // expecting a GET
-      httpBackend.expectGET('/api/project-type');
+      httpBackend.expectGET('/api/ext/project-type/' + workspaceId);
 
       // flush command
       httpBackend.flush();
 
+      expect(factory.getAllProjectTypes(workspaceId).length).toEqual(2);
 
       // now, check types
-      var projectTypes = factory.getAllProjectTypes();
-      var typesByCategory = factory.getTypesByCategory();
-
-
-      // check we have only one type
+      var projectTypes = factory.getAllProjectTypes(workspaceId);
+      // check we have 2 PT
       expect(projectTypes.length).toEqual(2);
 
-      // category is java
-      var javaCategory = typesByCategory['java'];
-      expect(javaCategory).not.toBeNull();
+      var typesIds = factory.getProjectTypesIDs(workspaceId);
+      expect(typesIds.size).toEqual(2);
 
-      expect(javaCategory.length).toEqual(2);
+      var firstType = typesIds.get('maven');
 
-
-      var firstType = javaCategory[0];
       expect(firstType.id).toEqual(mavenType.id);
       expect(firstType.displayName).toEqual(mavenType.displayName);
 
-      var secondType = javaCategory[1];
+      var secondType = typesIds.get('ant');
       expect(secondType.id).toEqual(antType.id);
       expect(secondType.displayName).toEqual(antType.displayName);
 
