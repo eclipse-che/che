@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.projecttype;
 
+import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
@@ -86,7 +86,7 @@ public class MavenProjectTypeTest {
 //        vfsRegistry.registerProvider(workspace, memoryFileSystemProvider);
 
         Set<ProjectTypeDef> projTypes = new HashSet<>();
-        projTypes.add(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
+        projTypes.add(new JavaProjectType(new JavaPropertiesValueProviderFactory("")));
         projTypes.add(new MavenProjectType(new MavenValueProviderFactory()));
 
         ProjectTypeRegistry ptRegistry = new ProjectTypeRegistry(projTypes);
@@ -182,7 +182,7 @@ public class MavenProjectTypeTest {
                                    .withPath("/testEstimateBad"),
                          new HashMap<>(0));
 
-        Map<String, AttributeValue> out = pm.estimateProject("testEstimate", "maven");
+        Map<String, Value> out = pm.estimateProject("testEstimate", "maven").getProvidedAttributes();
 
         Assert.assertEquals(out.get(MavenAttributes.ARTIFACT_ID).getString(), "myartifact");
         Assert.assertEquals(out.get(MavenAttributes.VERSION).getString(), "1.0");

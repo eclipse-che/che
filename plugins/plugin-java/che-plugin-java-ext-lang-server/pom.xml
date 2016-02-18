@@ -45,6 +45,10 @@
             <artifactId>che-plugin-java-ext-lang-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
