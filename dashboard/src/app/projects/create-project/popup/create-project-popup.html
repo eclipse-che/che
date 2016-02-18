@@ -23,7 +23,7 @@
             </div>
             <div layout="column" layout-align="center center" flex="35">
                 <che-button-notice che-button-title="Show More" ng-click="createProjectPopupCtrl.hidePopup()" href="#/create-project"></che-button-notice>
-                <che-button-primary ng-show="createProjectPopupCtrl.getCurrentProgressStep() === (createProjectPopupCtrl.getCreationSteps().length - 1)" ng-click="createProjectPopupCtrl.resetCreateNewProject()" che-button-title="Open in IDE" ng-href="{{createProjectPopupCtrl.getIDELink()}}"></che-button-primary>
+                <che-button-primary ng-show="createProjectPopupCtrl.getCurrentProgressStep() === (createProjectPopupCtrl.getCreationSteps().length - 1)" ng-click="createProjectPopupCtrl.resetCreateNewProject()" che-button-title="Open project in IDE" ng-href="{{createProjectPopupCtrl.getIDELink()}}"></che-button-primary>
             </div>
     </div>
 </div>
