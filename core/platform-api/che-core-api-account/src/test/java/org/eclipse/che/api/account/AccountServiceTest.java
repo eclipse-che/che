@@ -67,10 +67,7 @@ import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.POST;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_MOCKS;
-import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -96,8 +93,8 @@ public class AccountServiceTest {
     private final String USER_ID      = "user123abc456def";
     private final String ACCOUNT_ID   = "account0xffffffffff";
     private final String ACCOUNT_NAME = "codenvy";
-    private final String USER_EMAIL   = "account@mail.com";
-    private final User   user         = new User().withId(USER_ID).withEmail(USER_EMAIL);
+    private final String USER_NAME    = "account";
+    private final User   user         = new User().withId(USER_ID).withName(USER_NAME);
 
     @Mock
     private AccountDao accountDao;
@@ -145,12 +142,12 @@ public class AccountServiceTest {
         memberships.add(ownerMembership);
 
         when(environmentContext.get(SecurityContext.class)).thenReturn(securityContext);
-        when(securityContext.getUserPrincipal()).thenReturn(new SimplePrincipal(USER_EMAIL));
+        when(securityContext.getUserPrincipal()).thenReturn(new SimplePrincipal(USER_NAME));
 
         org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setUser(new org.eclipse.che.commons.user.User() {
             @Override
             public String getName() {
-                return user.getEmail();
+                return user.getName();
             }
 
             @Override
@@ -182,7 +179,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldBeAbleToCreateAccount() throws Exception {
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
+        when(userDao.getByName(USER_NAME)).thenReturn(user);
         when(accountDao.getByName(account.getName())).thenThrow(new NotFoundException("Account not found"));
         when(accountDao.getByOwner(USER_ID)).thenReturn(Collections.<Account>emptyList());
         String role = "user";
@@ -211,7 +208,7 @@ public class AccountServiceTest {
     @Test
     public void shouldNotBeAbleToCreateAccountIfUserAlreadyHasOne() throws Exception {
         prepareSecurityContext("user");
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
+        when(userDao.getByName(USER_NAME)).thenReturn(user);
         when(accountDao.getByOwner(USER_ID)).thenReturn(Arrays.asList(account));
 
         ContainerResponse response = makeRequest(POST, SERVICE_PATH, MediaType.APPLICATION_JSON, account);
@@ -220,7 +217,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldBeAbleToGetMemberships() throws Exception {
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
+        when(userDao.getByName(USER_NAME)).thenReturn(user);
         when(accountDao.getByMember(USER_ID)).thenReturn(memberships);
         when(accountDao.getById(ACCOUNT_ID)).thenReturn(account);
 
