@@ -241,6 +241,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
                             if (arg.getSeverity() == OK) {
                                 view.hide();
                                 refactoringUpdater.updateAfterRefactoring(refactorInfo, arg.getChanges());
+                                refactorService.reindexProject(getPathToProject());
                             } else {
                                 view.showErrorMessage(arg);
                             }
