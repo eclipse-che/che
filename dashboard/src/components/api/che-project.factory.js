@@ -56,15 +56,23 @@ export class CheProject {
     // project details map with key = workspaceId+projectPath
     this.projectDetailsMap = new Map();
 
+    // map of estimate per workspace Id + project + project type: <workspaceID:project:projectType> --> Estimate
+    this.estimateMap = new Map();
+
+    // map of resolve per workspace Id/project  <workspaceID:project:projectType> --> Source Estimation
+    this.resolveMap = new Map();
+
     // remote call
     this.remoteProjectsAPI = this.$resource('/api/ext/project/:workspaceId', {workspaceId: '@id'}, {
       import: {method: 'POST', url: '/api/ext/project/:workspaceId/import/:path'},
       create: {method: 'POST', url: '/api/ext/project/:workspaceId?name=:path'},
       details: {method: 'GET', url: '/api/ext/project/:workspaceId/:path'},
+      estimate: {method: 'GET', url: '/api/ext/project/:workspaceId/estimate/:path?type=:type'},
       getPermissions: {method: 'GET', url: '/api/ext/project/:workspaceId/permissions/:path', isArray: true},
       updatePermissions: {method: 'POST', url: '/api/ext/project/:workspaceId/permissions/:path', isArray: true},
       rename: {method: 'POST', url: '/api/ext/project/:workspaceId/rename/:path?name=:name'},
       remove: {method: 'DELETE', url: '/api/ext/project/:workspaceId/:path'},
+      resolve: {method: 'GET', url: '/api/ext/project/:workspaceId/resolve/:path', isArray: true},
       update: {method: 'PUT', url: '/api/ext/project/:workspaceId/:path'}
     });
   }
@@ -447,6 +455,58 @@ export class CheProject {
 
 
     return promiseUpdateProjects;
+  }
+
+  /**
+   * Fetch estimate and return promise for this estimate
+   * @param workspaceId the workspace ID of the project
+   * @param projectPath the path to the project in the workspace
+   * @param projectType the project type in the list of available types
+   * @returns {Promise}
+   */
+  fetchEstimate(workspaceId, projectPath, projectType) {
+      let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
+      let promise = this.remoteProjectsAPI.estimate({workspaceId: workspaceId, path: projectName, type: projectType}).$promise;
+      let parsedResultPromise = promise.then((estimate) => {
+        if (estimate) {
+          this.estimateMap.set(workspaceId + projectName + projectType, estimate);
+        }
+      });
+    return parsedResultPromise;
+  }
+
+  /**
+   * @return the estimation based on the given 3 inputs : workspace ID, project path and project type
+   */
+  getEstimate(workspaceId, projectPath, projectType) {
+    let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
+    return this.estimateMap.get(workspaceId + projectName + projectType);
+  }
+
+
+  /**
+   * Fetch resolve and return promise for this resolution
+   * @param workspaceId the workspace ID of the project
+   * @param projectPath the path to the project in the workspace
+   * @returns {Promise}
+   */
+  fetchResolve(workspaceId, projectPath) {
+    let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
+    let promise = this.remoteProjectsAPI.resolve({workspaceId: workspaceId, path: projectName}).$promise;
+    let parsedResultPromise = promise.then((resolve) => {
+      if (resolve) {
+        this.resolveMap.set(workspaceId + projectName, resolve);
+      }
+    });
+    return parsedResultPromise;
+  }
+
+  /**
+   * @return the estimation based on the given 2 inputs : workspace ID, project path
+   */
+  getResolve(workspaceId, projectPath) {
+    let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
+    return this.resolveMap.get(workspaceId + projectName);
   }
 
 }
