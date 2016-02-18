@@ -48,7 +48,7 @@ public interface RefactoringServiceClient {
      */
     Promise<String> createMoveRefactoring(CreateMoveRefactoring moveRefactoring);
 
-     /**
+    /**
      * Creates rename refactoring session.
      * @param settings rename settings
      * @return an instance of refactoring session id
@@ -143,4 +143,13 @@ public interface RefactoringServiceClient {
      * @return empty promise result
      */
     Promise<Void> setRenameSettings(RenameSettings settings);
+
+    /**
+     * Make reindex for the project.
+     *
+     * @param projectPath
+     *         path to the project
+     * @return empty promise result
+     */
+    Promise<Void> reindexProject(String projectPath);
 }
