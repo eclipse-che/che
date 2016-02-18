@@ -179,10 +179,12 @@ public class MavenProjectTypeTest {
                                                           .withHref(API_ENDPOINT + "/workspace/" + workspace + "/project"))))
                 .thenReturn(httpJsonRequest);
 
-        pm.createProject(workspace, "testEstimate",
+        Project testProject = pm.createProject(workspace, "testEstimate",
                          DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                    .withType("maven").withAttributes(attributes),
                          null);
+        testProject.getBaseFolder().createFile("helloWorld.java", "".getBytes());
+
 
         pm.createProject(workspace, "testEstimateBad",
                          DtoFactory.getInstance().createDto(ProjectConfigDto.class)
