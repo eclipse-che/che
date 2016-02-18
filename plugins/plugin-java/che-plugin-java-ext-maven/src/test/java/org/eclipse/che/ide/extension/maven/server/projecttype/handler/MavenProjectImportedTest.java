@@ -41,6 +41,7 @@ import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Vitaly Parfonov
  */
+@Ignore
 public class MavenProjectImportedTest {
 
     private static final String workspace   = "my_ws";

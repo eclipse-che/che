@@ -2784,12 +2784,12 @@ public class JavaModelManager {
                 this.writtingRawClasspath = true;
                 if (newReferencedEntries == null) newReferencedEntries = this.referencedEntries;
 
-//                // write .classpath
-//                if (!javaProject.writeFileEntries(newRawClasspath, newReferencedEntries, newOutputLocation)) {
-//                    return false;
-//                }
-//                // store new raw classpath, new output and new status, and null out resolved info
-//                setRawClasspath(newRawClasspath, newReferencedEntries, newOutputLocation, JavaModelStatus.VERIFIED_OK);
+                // write .classpath
+                if (!javaProject.writeFileEntries(newRawClasspath, newReferencedEntries, newOutputLocation)) {
+                    return false;
+                }
+                // store new raw classpath, new output and new status, and null out resolved info
+                setRawClasspath(newRawClasspath, newReferencedEntries, newOutputLocation, JavaModelStatus.VERIFIED_OK);
             } finally {
                 this.writtingRawClasspath = false;
             }

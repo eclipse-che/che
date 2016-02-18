@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.filetypes;
 
 import com.google.gwt.resources.client.ImageResource;
 
-import org.eclipse.che.ide.collections.ListHelper;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.Arrays;
@@ -109,7 +108,7 @@ public class FileType {
         this.mimeTypes = mimeTypes == null ? Collections.<String>emptyList() : mimeTypes;
         this.extension = extension;
         this.namePattern = namePattern;
-        id = contentDescription + (mimeTypes == null ? "noMimeType" : ListHelper.join(mimeTypes, ",") + namePattern);
+        id = "" + hashCode();
     }
 
 

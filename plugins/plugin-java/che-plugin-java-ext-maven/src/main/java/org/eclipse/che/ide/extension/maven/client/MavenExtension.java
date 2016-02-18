@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.project.ProjectReadyEvent;
 import org.eclipse.che.ide.api.event.project.ProjectReadyHandler;
 import org.eclipse.che.ide.api.extension.Extension;
@@ -34,7 +35,10 @@ import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 import org.eclipse.che.ide.extension.maven.client.actions.CreateMavenModuleAction;
+import org.eclipse.che.ide.extension.maven.client.actions.GetEffectivePomAction;
 import org.eclipse.che.ide.extension.maven.client.actions.UpdateDependencyAction;
+import org.eclipse.che.ide.extension.maven.client.comunnication.MavenMessagesHandler;
+import org.eclipse.che.ide.extension.maven.client.editor.PomEditorProvider;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.AbstractProjectBasedNode;
@@ -61,7 +65,7 @@ public class MavenExtension {
     private        ProjectConfigDto     project;
 
     @Inject
-    public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager) {
+    public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager, MavenMessagesHandler messagesHandler) {
 
         preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
 
@@ -147,14 +151,17 @@ public class MavenExtension {
     @Inject
     private void prepareActions(ActionManager actionManager,
                                 UpdateDependencyAction updateDependencyAction,
-                                CreateMavenModuleAction createMavenModuleAction) {
+                                CreateMavenModuleAction createMavenModuleAction,
+                                GetEffectivePomAction getEffectivePomAction) {
         // register actions
         actionManager.registerAction("updateDependency", updateDependencyAction);
         actionManager.registerAction("createMavenModule", createMavenModuleAction);
+        actionManager.registerAction("getEffectivePom", getEffectivePomAction);
 
         // add actions in main menu
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_ASSISTANT);
         assistantGroup.add(updateDependencyAction, Constraints.LAST);
+        assistantGroup.add(getEffectivePomAction, Constraints.LAST);
 
         DefaultActionGroup newGroup = (DefaultActionGroup)actionManager.getAction(GROUP_FILE_NEW);
         newGroup.add(createMavenModuleAction, new Constraints(Anchor.AFTER, "newJavaPackage"));
@@ -166,8 +173,10 @@ public class MavenExtension {
     }
 
     @Inject
-    private void registerFileType(FileTypeRegistry fileTypeRegistry, MavenResources mavenResources) {
-        fileTypeRegistry.registerFileType(new FileType(mavenResources.maven(), "pom.xml"));
+    private void registerFileType(FileTypeRegistry fileTypeRegistry, MavenResources mavenResources, EditorRegistry editorRegistry, PomEditorProvider editorProvider) {
+        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml");
+        fileTypeRegistry.registerFileType(pomFile);
+        editorRegistry.register(pomFile, editorProvider);
     }
 
     private boolean isValidForResolveDependencies(ProjectConfigDto project) {

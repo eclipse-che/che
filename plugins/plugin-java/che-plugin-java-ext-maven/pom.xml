@@ -58,8 +58,20 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.birt.runtime</groupId>
             <artifactId>org.eclipse.equinox.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>maven-server-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>maven-server-rmi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -95,6 +107,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-machine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-project</artifactId>
         </dependency>
         <dependency>
@@ -107,6 +123,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-schedule</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-xml</artifactId>
         </dependency>
         <dependency>
@@ -116,6 +140,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-app</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-jseditor</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -218,11 +246,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-lang</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-test</artifactId>
             <scope>test</scope>
         </dependency>
@@ -255,6 +278,72 @@
             </testResource>
         </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-maven-test-lib</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>maven-server-rmi</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>maven-server-rmi.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>maven-server-impl</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>maven-server-impl.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>maven-server-api</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>maven-server-api.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>log4j</groupId>
+                                    <artifactId>log4j</artifactId>
+                                    <version>1.2.17</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>log4j.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.jdom</groupId>
+                                    <artifactId>jdom</artifactId>
+                                    <version>1.1.3</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>jdom.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.che.core</groupId>
+                                    <artifactId>che-core-commons-lang</artifactId>
+                                    <version>${che.core.version}</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>che-core-commons-lang.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.maven.shared</groupId>
+                                    <artifactId>maven-dependency-tree</artifactId>
+                                    <version>2.2</version>
+                                    <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
+                                    <destFileName>maven-dependency-tree.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -313,11 +402,26 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.extension.maven.server.projecttype.handler.dto</package>
+                                <package>org.eclipse.che.ide.extension.maven.shared.dto</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                             <genClassName>org.eclipse.che.ide.extension.maven.server.dto.DtoServerImpls</genClassName>
                             <impl>server</impl>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>dto-client</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <dtoPackages>
+                                <package>org.eclipse.che.ide.extension.maven.shared.dto</package>
+                            </dtoPackages>
+                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                            <genClassName>org.eclipse.che.ide.extension.maven.client.dto.DtoServerImpls</genClassName>
+                            <impl>client</impl>
                         </configuration>
                     </execution>
                 </executions>
@@ -335,6 +439,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/test-pom.xml</exclude>
+                        <exclude>**/multimoduleProject/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

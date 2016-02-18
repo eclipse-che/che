@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.core.util.JavaElementFinder;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.osgi.service.prefs.BackingStoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,8 +66,12 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -124,6 +129,14 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     public JavaProject(IProject project, JavaElement parent) {
         super(parent);
         this.project = project;
+        IFolder folder = project.getFolder(INNER_DIR);
+        if(!folder.exists()){
+            try {
+                folder.create(true, true, null);
+            } catch (CoreException e) {
+                JavaPlugin.log(e);
+            }
+        }
     }
 
 //    public JavaProject(File root, String projectPath, String tempDir, String ws, Map<String, String> options, JavaElement parent) {
@@ -779,11 +792,6 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
         return classpathEntry;
     }
 
-
-    @Override
-    public String encodeClasspathEntry(IClasspathEntry classpathEntry) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public IJavaElement findElement(IPath path) throws JavaModelException {
@@ -2080,6 +2088,204 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
 //                e.printStackTrace();
 //            }
 //        }
+    }
+
+
+    /**
+     * Writes the classpath in a sharable format (VCM-wise) only when necessary, that is, if  it is semantically different
+     * from the existing one in file. Will never write an identical one.
+     *
+     * @param newClasspath IClasspathEntry[]
+     * @param newOutputLocation IPath
+     * @return boolean Return whether the .classpath file was modified.
+     * @throws JavaModelException
+     */
+    public boolean writeFileEntries(IClasspathEntry[] newClasspath, IClasspathEntry[] referencedEntries, IPath newOutputLocation)
+            throws JavaModelException {
+
+        if (!this.project.isAccessible()) return false;
+
+        Map unknownElements = new HashMap();
+        IClasspathEntry[][] fileEntries = readFileEntries(unknownElements);
+        if (fileEntries[0] != JavaProject.INVALID_CLASSPATH &&
+            areClasspathsEqual(newClasspath, newOutputLocation, fileEntries[0])
+            && (referencedEntries == null || areClasspathsEqual(referencedEntries, fileEntries[1]))) {
+            // no need to save it, it is the same
+            return false;
+        }
+
+        // actual file saving
+        try {
+            setSharedProperty(JavaProject.CLASSPATH_FILENAME,
+                              encodeClasspath(newClasspath, referencedEntries, newOutputLocation, true, unknownElements));
+            return true;
+        } catch (CoreException e) {
+            throw new JavaModelException(e);
+        }
+    }
+
+    /**
+     * Record a shared persistent property onto a project.
+     * Note that it is orthogonal to IResource persistent properties, and client code has to decide
+     * which form of storage to use appropriately. Shared properties produce real resource files which
+     * can be shared through a VCM onto a server. Persistent properties are not shareable.
+     * <p>
+     * Shared properties end up in resource files, and thus cannot be modified during
+     * delta notifications (a CoreException would then be thrown).
+     *
+     * @param key String
+     * @param value String
+     * see JavaProject#getSharedProperty(String key)
+     * @throws CoreException
+     */
+    public void setSharedProperty(String key, String value) throws CoreException {
+
+        IFile rscFile = this.project.getFile(key);
+        byte[] bytes = null;
+        try {
+            bytes = value.getBytes(org.eclipse.jdt.internal.compiler.util.Util.UTF_8); // .classpath always encoded with UTF-8
+        } catch (UnsupportedEncodingException e) {
+            Util.log(e, "Could not write .classpath with UTF-8 encoding "); //$NON-NLS-1$
+            // fallback to default
+            bytes = value.getBytes();
+        }
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+        // update the resource content
+        if (rscFile.exists()) {
+//            if (rscFile.isReadOnly()) {
+//                // provide opportunity to checkout read-only .classpath file (23984)
+//                ResourcesPlugin.getWorkspace().validateEdit(new IFile[]{rscFile}, IWorkspace.VALIDATE_PROMPT);
+//            }
+            rscFile.setContents(inputStream, IResource.FORCE, null);
+        } else {
+            rscFile.create(inputStream, IResource.FORCE, null);
+        }
+    }
+
+    private static boolean areClasspathsEqual(IClasspathEntry[] first, IClasspathEntry[] second) {
+        if (first != second) {
+            if (first == null) return false;
+            int length = first.length;
+            if (second == null || second.length != length)
+                return false;
+            for (int i = 0; i < length; i++) {
+                if (!first[i].equals(second[i]))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+
+    /**
+     * Compare current classpath with given one to see if any different.
+     * Note that the argument classpath contains its binary output.
+     * @param newClasspath IClasspathEntry[]
+     * @param newOutputLocation IPath
+     * @param otherClasspathWithOutput IClasspathEntry[]
+     * @return boolean
+     */
+    private static boolean areClasspathsEqual(IClasspathEntry[] newClasspath, IPath newOutputLocation,
+                                              IClasspathEntry[] otherClasspathWithOutput) {
+
+        if (otherClasspathWithOutput == null || otherClasspathWithOutput.length == 0)
+            return false;
+
+        int length = otherClasspathWithOutput.length;
+        if (length != newClasspath.length + 1)
+            // output is amongst file entries (last one)
+            return false;
+
+
+        // compare classpath entries
+        for (int i = 0; i < length - 1; i++) {
+            if (!otherClasspathWithOutput[i].equals(newClasspath[i]))
+                return false;
+        }
+        // compare binary outputs
+        IClasspathEntry output = otherClasspathWithOutput[length - 1];
+        if (output.getContentKind() != ClasspathEntry.K_OUTPUT
+            || !output.getPath().equals(newOutputLocation))
+            return false;
+        return true;
+    }
+
+    /**
+     * Returns the XML String encoding of the class path.
+     */
+    protected String encodeClasspath(IClasspathEntry[] classpath, IClasspathEntry[] referencedEntries, IPath outputLocation, boolean indent,
+                                     Map unknownElements) throws JavaModelException {
+        try {
+            ByteArrayOutputStream s = new ByteArrayOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+            XMLWriter xmlWriter = new XMLWriter(writer, this, true/*print XML version*/);
+
+            xmlWriter.startTag(ClasspathEntry.TAG_CLASSPATH, indent);
+            for (int i = 0; i < classpath.length; ++i) {
+                ((ClasspathEntry)classpath[i]).elementEncode(xmlWriter, this.project.getFullPath(), indent, true, unknownElements, false);
+            }
+
+            if (outputLocation != null) {
+                outputLocation = outputLocation.removeFirstSegments(1);
+                outputLocation = outputLocation.makeRelative();
+                HashMap parameters = new HashMap();
+                parameters.put(ClasspathEntry.TAG_KIND, ClasspathEntry.kindToString(ClasspathEntry.K_OUTPUT));
+                parameters.put(ClasspathEntry.TAG_PATH, String.valueOf(outputLocation));
+                xmlWriter.printTag(ClasspathEntry.TAG_CLASSPATHENTRY, parameters, indent, true, true);
+            }
+
+            if (referencedEntries != null) {
+                for (int i = 0; i < referencedEntries.length; ++i) {
+                    ((ClasspathEntry)referencedEntries[i])
+                            .elementEncode(xmlWriter, this.project.getFullPath(), indent, true, unknownElements, true);
+                }
+            }
+
+            xmlWriter.endTag(ClasspathEntry.TAG_CLASSPATH, indent, true/*insert new line*/);
+            writer.flush();
+            writer.close();
+            return s.toString("UTF8");//$NON-NLS-1$
+        } catch (IOException e) {
+            throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
+        }
+    }
+
+    public String encodeClasspathEntry(IClasspathEntry classpathEntry) {
+        try {
+            ByteArrayOutputStream s = new ByteArrayOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
+            XMLWriter xmlWriter = new XMLWriter(writer, this, false/*don't print XML version*/);
+
+            ((ClasspathEntry)classpathEntry)
+                    .elementEncode(xmlWriter, this.project.getFullPath(), true/*indent*/, true/*insert new line*/, null/*not interested in unknown elements*/,
+                                   (classpathEntry.getReferencingEntry() != null));
+
+            writer.flush();
+            writer.close();
+            return s.toString("UTF8");//$NON-NLS-1$
+        } catch (IOException e) {
+            return null; // never happens since all is done in memory
+        }
+    }
+
+    /*
+ * Reads the classpath file entries of this project's .classpath file.
+ * This includes the output entry.
+ * As a side effect, unknown elements are stored in the given map (if not null)
+ */
+    private IClasspathEntry[][] readFileEntries(Map unkwownElements) {
+        try {
+            return readFileEntriesWithException(unkwownElements);
+        } catch (CoreException e) {
+            Util.log(e, "Exception while reading " + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
+            return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
+        } catch (IOException e) {
+            Util.log(e, "Exception while reading " + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
+            return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
+        } catch (ClasspathEntry.AssertionFailedException e) {
+            Util.log(e, "Exception while reading " + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
+            return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
+        }
     }
 
     public synchronized void creteNewNameEnvironment() {

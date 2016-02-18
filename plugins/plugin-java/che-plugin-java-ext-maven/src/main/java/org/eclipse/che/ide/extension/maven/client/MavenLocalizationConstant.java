@@ -25,6 +25,12 @@ public interface MavenLocalizationConstant extends Messages {
     @Key("action.createMavenModule.text")
     String actionCreateMavenModuleText();
 
+    @Key("action.effectivePom.title")
+    String actionGetEffectivePomTitle();
+
+    @Key("action.effectivePom.description")
+    String actionGetEffectivePomDescription();
+
     @Key("action.createMavenModule.description")
     String actionCreateMavenModuleDescription();
 

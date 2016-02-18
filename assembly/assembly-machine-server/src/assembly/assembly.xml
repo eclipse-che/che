@@ -26,6 +26,19 @@
             </includes>
         </dependencySet>
         <dependencySet>
+        <unpack>false</unpack>
+        <outputDirectory>maven-server</outputDirectory>
+        <includes>
+            <include>org.eclipse.che:maven-server-rmi</include>
+            <include>org.eclipse.che:maven-server-impl</include>
+            <include>org.eclipse.che:maven-server-api</include>
+            <include>log4j:log4j</include>
+            <include>org.jdom:jdom</include>
+            <include>org.eclipse.che.core:che-core-commons-lang</include>
+            <include>org.apache.maven.shared:maven-dependency-tree</include>
+        </includes>
+    </dependencySet>
+        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>webapps</outputDirectory>

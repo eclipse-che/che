@@ -35,13 +35,16 @@ public class MavenProjectImportedHandler implements PostImportProjectHandler {
     @Inject
     private ProjectManager projectManager;
 
+    @Inject
+    private MavenProjectResolver resolver;
+
     @Override
     public void onProjectImported(FolderEntry projectFolder) throws ForbiddenException,
                                                                     ConflictException,
                                                                     ServerException,
                                                                     IOException,
                                                                     NotFoundException {
-        MavenProjectResolver.resolve(projectFolder, projectManager);
+//        resolver.resolve(projectFolder, projectManager);
     }
 
     @Override

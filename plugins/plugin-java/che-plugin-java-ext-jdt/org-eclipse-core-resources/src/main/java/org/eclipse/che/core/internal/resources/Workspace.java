@@ -805,7 +805,11 @@ public class Workspace implements IWorkspace {
                 case IResource.FILE:
                     String newName = path.lastSegment();
                     VirtualFileEntry child = projectsRoot.getChild(path.removeLastSegments(1).toOSString());
+                    if(child == null){
+                        throw new NotFoundException("Can't find parent folder: "+  path.removeLastSegments(1).toOSString());
+                    }
                     FolderEntry entry = (FolderEntry)child;
+
                     entry.createFile(newName, new byte[0]);
                     break;
                 case IResource.FOLDER:
