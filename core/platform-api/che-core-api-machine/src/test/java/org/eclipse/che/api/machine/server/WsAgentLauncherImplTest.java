@@ -61,6 +61,7 @@ public class WsAgentLauncherImplTest {
     private static final ServerImpl SERVER                        = new ServerImpl("ref",
                                                                                    WS_AGENT_SERVER_LOCATION,
                                                                                    WS_AGENT_SERVER_URL);
+    private static final String     WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
 
     @Mock
     private MachineManager         machineManager;
@@ -84,7 +85,8 @@ public class WsAgentLauncherImplTest {
                                                   new URI("http://localhost:8080" + API_ENDPOINT_PATH),
                                                   WS_AGENT_MAX_START_TIME_MS,
                                                   WS_AGENT_PING_DELAY_MS,
-                                                  WS_AGENT_PING_CONN_TIMEOUT_MS);
+                                                  WS_AGENT_PING_CONN_TIMEOUT_MS,
+                                                  WS_AGENT_TIMED_OUT_MESSAGE);
         pingRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
         when(machineManager.getDevMachine(WS_ID)).thenReturn(machineInstance);
         when(machineInstance.getId()).thenReturn(MACHINE_ID);
@@ -217,7 +219,7 @@ public class WsAgentLauncherImplTest {
     }
 
     @Test(expectedExceptions = ServerException.class,
-          expectedExceptionsMessageRegExp = "Workspace agent is not responding. Workspace " + WS_ID + " will be stopped")
+          expectedExceptionsMessageRegExp = WS_AGENT_TIMED_OUT_MESSAGE)
     public void shouldThrowMachineExceptionIfPingsWereUnsuccessfulTooLong() throws Exception {
         when(pingRequest.request()).thenThrow(new ServerException(""));
 
