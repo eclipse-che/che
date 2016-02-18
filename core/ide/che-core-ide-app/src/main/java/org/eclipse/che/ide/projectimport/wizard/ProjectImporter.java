@@ -59,24 +59,12 @@ public class ProjectImporter extends AbstractImporter {
         this.eventBus = eventBus;
     }
 
-    public void checkFolderExistenceAndImport(final CompleteCallback callback, final ProjectConfigDto projectConfig) {
+    public void importProject(CompleteCallback callback, ProjectConfigDto projectConfig) {
         this.projectConfig = projectConfig;
         this.callback = callback;
-        // check on VFS because need to check whether the folder with the same name already exists in the root of workspace
         final String projectName = projectConfig.getName();
-//        vfsServiceClient.getItemByPath(workspaceId, projectName, new AsyncRequestCallback<Item>() {
-//            @Override
-//            protected void onSuccess(Item result) {
-//                callback.onFailure(new Exception(localizationConstant.createProjectFromTemplateProjectExists(projectName)));
-//            }
-//
-//            @Override
-//            protected void onFailure(Throwable exception) {
-//                String pathToProject = '/' + projectName;
-//
-//                startImport(pathToProject, projectName, projectConfig.getSource());
-//            }
-//        });
+        String pathToProject = '/' + projectName;
+        startImport(pathToProject, projectName, projectConfig.getSource());
     }
 
     @Override

@@ -229,7 +229,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(importer).checkFolderExistenceAndImport(completeCallback, dataObject);
+        verify(importer).importProject(completeCallback, dataObject);
     }
 
     @Test

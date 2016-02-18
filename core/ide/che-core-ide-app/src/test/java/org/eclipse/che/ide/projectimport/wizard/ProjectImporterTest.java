@@ -34,7 +34,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -97,15 +96,8 @@ public class ProjectImporterTest {
     }
 
     @Test
-    public void shouldInvokeCallbackWhenFolderAlreadyExists() throws Exception {
-        importer.checkFolderExistenceAndImport(completeCallback, projectConfig);
-
-        verify(completeCallback).onFailure(any(Throwable.class));
-    }
-
-    @Test
     public void importShouldBeSuccessAndProjectStartsResolving() throws OperationException {
-        importer.checkFolderExistenceAndImport(completeCallback, projectConfig);
+        importer.importProject(completeCallback, projectConfig);
 
         //first time called in abstract importer
         verify(importPromise, times(2)).then(voidOperationCaptor.capture());
