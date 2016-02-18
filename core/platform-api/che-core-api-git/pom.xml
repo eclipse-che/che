@@ -91,8 +91,17 @@
             <artifactId>che-core-vfs-impl</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-websockets</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

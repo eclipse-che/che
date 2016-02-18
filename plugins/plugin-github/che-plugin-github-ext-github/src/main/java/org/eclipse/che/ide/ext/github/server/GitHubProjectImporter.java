@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.server;
 
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitProjectImporter;
 import org.eclipse.che.vfs.impl.fs.LocalPathResolver;
@@ -24,8 +25,9 @@ public class GitHubProjectImporter extends GitProjectImporter {
 
     @Inject
     public GitHubProjectImporter(GitConnectionFactory gitConnectionFactory,
-                                 LocalPathResolver localPathResolver) {
-        super(gitConnectionFactory, localPathResolver);
+                                 LocalPathResolver localPathResolver,
+                                 EventService eventService) {
+        super(gitConnectionFactory, localPathResolver, eventService);
     }
 
     @Override

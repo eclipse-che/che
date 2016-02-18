@@ -30,7 +30,7 @@ import javax.validation.constraints.NotNull;
  */
 public abstract class AbstractImporter {
 
-    private final AppContext appContext;
+    protected final AppContext appContext;
 
     protected final ProjectServiceClient                       projectService;
     protected final String                                     workspaceId;
