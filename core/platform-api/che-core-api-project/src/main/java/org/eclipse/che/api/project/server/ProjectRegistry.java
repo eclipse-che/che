@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.project.server.type.InvalidValueException;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -45,7 +46,7 @@ public class ProjectRegistry {
     @Inject
     public ProjectRegistry(WorkspaceHolder  workspaceHolder, VirtualFileSystemProvider vfsProvider,
                            ProjectTypeRegistry projectTypeRegistry)
-            throws ProjectTypeConstraintException, InvalidValueException, NotFoundException,
+            throws ProjectTypeConstraintException, NotFoundException,
                    ValueStorageException, ServerException {
         this.projects = new HashMap<>();
         this.workspaceHolder = workspaceHolder;
@@ -128,8 +129,8 @@ public class ProjectRegistry {
     }
 
 
-    public RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated)
-            throws ServerException, ProjectTypeConstraintException, InvalidValueException,
+    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated)
+            throws ServerException, ProjectTypeConstraintException,
                    NotFoundException, ValueStorageException {
 
         RegisteredProject project = new RegisteredProject(folder, config, updated, this.projectTypeRegistry);
@@ -138,25 +139,51 @@ public class ProjectRegistry {
         return project;
     }
 
-//    public RegisteredProject initProject(String projectPath, String type, List<String> mixins)
-//            throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
-//                   NotFoundException, ServerException {
-//
-//        // it hrows NFE if not here
-//        //RegisteredProject config = getParentProject(absolutizePath(ofPath));
-//        FolderEntry baseFolder = folder(projectPath);
-//
-//        // imported config
-//        ProjectManager.ImportedProjectConf conf = new ProjectManager.ImportedProjectConf(path, type, mixins, null /*source*/);
-//
-//        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this);
-//        projects.put(project.getPath(), project);
-//
-//        return project;
-//
-//    }
+    /*  ------------------------------------------ */
+    /*   to use from extension                     */
+    /*  ------------------------------------------ */
 
-    public RegisteredProject reinitProject(String ofPath)
+    /**
+     * To init new project from sources
+     * @param projectPath
+     * @param type
+     * @return
+     * @throws ProjectTypeConstraintException
+     * @throws InvalidValueException
+     * @throws ValueStorageException
+     * @throws NotFoundException
+     * @throws ServerException
+     */
+    public RegisteredProject initProject(String projectPath, String type)
+            throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
+                   NotFoundException, ServerException {
+
+        // it hrows NFE if not here
+        //RegisteredProject config = getParentProject(absolutizePath(ofPath));
+        FolderEntry baseFolder = folder(projectPath);
+
+        // new config
+        //(path, type, mixins, name, description, attributes, source);
+        NewProjectConfig conf = new NewProjectConfig(projectPath, type, null, null, null, null, null);
+
+        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
+        projects.put(project.getPath(), project);
+
+        return project;
+
+    }
+
+    /**
+     * To reinit parent project
+     * @param ofPath
+     * @return
+     * @throws ProjectTypeConstraintException
+     * @throws InvalidValueException
+     * @throws ValueStorageException
+     * @throws NotFoundException
+     * @throws ServerException
+     */
+    public RegisteredProject reinitParentProject(String ofPath)
             throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
                    NotFoundException, ServerException {
 
@@ -184,7 +211,7 @@ public class ProjectRegistry {
 
 
      void initProjects()
-            throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
+            throws ProjectTypeConstraintException, ValueStorageException,
                    NotFoundException, ServerException {
 
         UsersWorkspace workspace = workspaceHolder.getWorkspace();

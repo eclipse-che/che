@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
@@ -123,11 +122,9 @@ public class DtoConverter {
      * @param serviceUriBuilder
      *         service for building URI
      * @return an instance of {@link ProjectConfigDto}
-     * @throws InvalidValueException
      */
     public static ProjectConfigDto toProjectConfig(RegisteredProject project, String workspace,
-                                                   UriBuilder serviceUriBuilder) throws ForbiddenException,
-                                                                                        ServerException,
+                                                   UriBuilder serviceUriBuilder) throws ServerException,
                                                                                         ValueStorageException {
         ProjectConfigDto projectConfigDto = newDto(ProjectConfigDto.class);
 

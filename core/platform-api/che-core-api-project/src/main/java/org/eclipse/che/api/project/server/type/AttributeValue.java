@@ -32,6 +32,7 @@ public class AttributeValue implements Value {
             values.add(str);
     }
 
+    @Override
     public String getString() {
         return values.isEmpty() ? null : values.get(0);
     }
@@ -42,6 +43,7 @@ public class AttributeValue implements Value {
             values.add(str);
     }
 
+    @Override
     public List<String> getList() {
         return values;
     }

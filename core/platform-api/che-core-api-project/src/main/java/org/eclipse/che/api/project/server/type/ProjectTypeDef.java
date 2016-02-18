@@ -12,6 +12,7 @@ package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
+import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.project.server.FolderEntry;
 
 import java.util.ArrayList;
@@ -156,22 +157,46 @@ public abstract class ProjectTypeDef implements ProjectType {
         this.ancestors.add(ancestor);
     }
 
-    public ProjectTypeResolverFactory getResolverFactory() {
-        // TODO rework default behaviour
-        return DEFAULT_RESOLVER_FACTORY;
+    public ProjectTypeResolution resolveSources(FolderEntry projectFolder) throws ValueStorageException {
+
+        Map<String, Value> matchAttrs = new HashMap<>();
+        for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
+            Attribute attr = entry.getValue();
+            String name = entry.getKey();
+            if (attr.isVariable()) {
+                Variable var = (Variable)attr;
+                ValueProviderFactory factory = var.getValueProviderFactory();
+                if (factory != null) {
+                    Value value = new AttributeValue(factory.newInstance(projectFolder).getValues(name));
+                    if (value.isEmpty()) {
+                        if (var.isRequired()) {
+                            // this PT is not match
+                            return new DefaultResolution(id, new HashMap<>(), false);
+                        }
+                    } else {
+                        // add one more matched attribute
+                        matchAttrs.put(name, value);
+                    }
+                }
+            }
+        }
+
+        return new DefaultResolution(id, matchAttrs, true);
     }
 
+    public static class DefaultResolution extends ProjectTypeResolution {
 
-    protected static final ProjectTypeResolverFactory DEFAULT_RESOLVER_FACTORY = new ProjectTypeResolverFactory() {
-        @Override
-        public ProjectTypeResolver newInstance(FolderEntry projectFolder) {
-            return new ProjectTypeResolver() {
-                @Override
-                public boolean resolve() {
-                    return false;
-                }
-            };
+        private boolean match;
+
+        public DefaultResolution(String type, Map<String, Value> attributes, boolean match) {
+            super(type, attributes);
+            this.match = match;
         }
-    };
+
+        @Override
+        public boolean matched() {
+            return match;
+        }
+    }
 
 }

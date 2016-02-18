@@ -58,7 +58,7 @@ public class RegisteredProject implements ProjectConfig {
      * @param projectTypeRegistry
      */
      RegisteredProject(FolderEntry folder, ProjectConfig config, boolean updated, ProjectTypeRegistry projectTypeRegistry)
-            throws NotFoundException, ProjectTypeConstraintException, ServerException, InvalidValueException,
+            throws NotFoundException, ProjectTypeConstraintException, ServerException,
                    ValueStorageException {
 
         this.folder = folder;

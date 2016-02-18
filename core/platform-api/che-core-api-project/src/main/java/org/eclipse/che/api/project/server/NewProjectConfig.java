@@ -33,7 +33,17 @@ public class NewProjectConfig implements ProjectConfig {
     private final Map<String, List<String>> attributes;
     private final SourceStorage origin;
 
-    public NewProjectConfig(String path, String type, List<String> mixins, String name, String description,
+    /**
+     * Full qualified constructor
+     * @param path
+     * @param type
+     * @param mixins
+     * @param name
+     * @param description
+     * @param attributes
+     * @param origin
+     */
+     NewProjectConfig(String path, String type, List<String> mixins, String name, String description,
                             Map<String, List<String>> attributes, SourceStorage origin) {
         this.path = path;
         this.type = (type == null)? BaseProjectType.ID:type;
@@ -44,11 +54,22 @@ public class NewProjectConfig implements ProjectConfig {
         this.origin = origin;
     }
 
-    public NewProjectConfig(String path, String name, SourceStorage origin) {
+    /**
+     * Constructor for project import
+     * @param path
+     * @param name
+     * @param type
+     * @param origin
+     */
+    public NewProjectConfig(String path, String name, String type, SourceStorage origin) {
 
-        this(path, null, null, name, null, null, origin);
+        this(path, type, null, name, null, null, origin);
     }
 
+    /**
+     * Constructor for reinit
+     * @param path
+     */
     public NewProjectConfig(Path path) {
 
         this(path.toString(), null, null, path.getName(), null, null, null);

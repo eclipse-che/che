@@ -36,6 +36,7 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
+import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.vfs.VirtualFile;
@@ -647,10 +648,12 @@ public class ProjectServiceTest {
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         //noinspection unchecked
-        Map<String, List<String>> result = (Map<String, List<String>>)response.getEntity();
+        SourceEstimation result = (SourceEstimation)response.getEntity();
+        //Map<String, List<String>> result = (Map<String, List<String>>)response.getEntity();
 
-        assertEquals(result.size(), 1);
-        assertEquals(result.get("calculated_attribute").get(0), "checked");
+        assertTrue(result.isMatched());
+        assertEquals(result.getAttributes().size(), 1);
+        assertEquals(result.getAttributes().get("calculated_attribute").get(0), "checked");
 
         response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/estimate/%s?type=%s",
                                                        workspace, "testEstimateProjectBad", "testEstimateProjectPT"),
@@ -703,10 +706,12 @@ public class ProjectServiceTest {
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         //noinspection unchecked
-        Map<String, List<String>> result = (Map<String, List<String>>)response.getEntity();
+        //Map<String, List<String>> result = (Map<String, List<String>>)response.getEntity();
+        SourceEstimation result = (SourceEstimation) response.getEntity();
 
-        assertEquals(result.size(), 1);
-        assertEquals(result.get("calculated_attribute").get(0), "checked");
+        //assertEquals(1, result.size());
+        assertEquals(1, result.getAttributes().size());
+        assertEquals(result.getAttributes().get("calculated_attribute").get(0), "checked");
 
         response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/estimate/%s?type=%s",
                                                        workspace, "testEstimateProjectBad", "testEstimateProjectPT"),

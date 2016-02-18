@@ -24,16 +24,16 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.model.project.type.ProjectType;
+import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
-import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -292,7 +292,7 @@ public class ProjectService extends Service {
     @GET
     @Path("/estimate/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, List<String>> estimateProject(@ApiParam(value = "ID of workspace to estimate projects", required = true)
+    public SourceEstimation estimateProject(@ApiParam(value = "ID of workspace to estimate projects", required = true)
                                                      @PathParam("ws-id") String workspace,
                                                      @ApiParam(value = "Path to requested project", required = true)
                                                      @PathParam("path") String path,
@@ -300,13 +300,19 @@ public class ProjectService extends Service {
                                                      @QueryParam("type") String projectType)
             throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-        final HashMap<String, List<String>> attributes = new HashMap<>();
 
-        for (Map.Entry<String, AttributeValue> attr : projectManager.estimateProject(path, projectType).entrySet()) {
+        ProjectTypeResolution resolution = projectManager.estimateProject(path, projectType);
+
+        final HashMap<String, List<String>> attributes = new HashMap<>();
+        for (Map.Entry<String, Value> attr : resolution.getProvidedAttributes().entrySet()) {
             attributes.put(attr.getKey(), attr.getValue().getList());
         }
 
-        return attributes;
+        SourceEstimation estimation = DtoFactory.newDto(SourceEstimation.class).withType(projectType)
+                                                .withMatched(resolution.matched()).withAttributes(attributes);
+
+
+        return estimation;
     }
 
     @GET
@@ -318,7 +324,21 @@ public class ProjectService extends Service {
                                                  @PathParam("path") String path)
             throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-        return projectManager.resolveSources(path, false);
+        //List<ProjectTypeResolution> resolutions = projectManager.resolveSources(path,false);
+        List<SourceEstimation> estimations = new ArrayList<>();
+        for(ProjectTypeResolution resolution : projectManager.resolveSources(path,false)) {
+            if(resolution.matched()) {
+                final HashMap<String, List<String>> attributes = new HashMap<>();
+                for (Map.Entry<String, Value> attr : resolution.getProvidedAttributes().entrySet()) {
+                    attributes.put(attr.getKey(), attr.getValue().getList());
+                }
+                estimations.add(DtoFactory.newDto(SourceEstimation.class).withType(resolution.getType())
+                                          .withMatched(resolution.matched()).withAttributes(attributes));
+            }
+
+        }
+
+        return estimations;
     }
 
     @ApiOperation(value = "Import resource",
@@ -693,21 +713,23 @@ public class ProjectService extends Service {
             baseProjectFolder.getVirtualFile().unzip(zip, true, stripNumber);
         }
 
-        ProjectConfigDto projectConfig = DtoFactory.getInstance()
-                                                   .createDto(ProjectConfigDto.class)
-                                                   .withName(projectName)
-                                                   .withDescription(projectDescription);
+//        ProjectConfigDto projectConfig = DtoFactory.getInstance()
+//                                                   .createDto(ProjectConfigDto.class)
+//                                                   .withName(projectName)
+//                                                   .withDescription(projectDescription);
 
-        List<SourceEstimation> sourceEstimations = projectManager.resolveSources(path, false);
+        //List<ProjectTypeResolution> resolutions = projectManager.resolveSources(path, false);
 
-        for (SourceEstimation estimation : sourceEstimations) {
-            ProjectType projectType = typeRegistry.getProjectType(estimation.getType());
+//        for (ProjectTypeResolution resolution : projectManager.resolveSources(path, false)) {
+//            ProjectType projectType = typeRegistry.getProjectType(resolution.getType());
+//
+//            if (projectType.isPersisted()) {
+//                projectConfig.withType(projectType.getId());
+//                projectConfig.withAttributes(estimation.getAttributes());
+//            }
+//        }
 
-            if (projectType.isPersisted()) {
-                projectConfig.withType(projectType.getId());
-                projectConfig.withAttributes(estimation.getAttributes());
-            }
-        }
+        List<SourceEstimation> sourceEstimations = resolveSources(workspace, path);
 
         return sourceEstimations;
 

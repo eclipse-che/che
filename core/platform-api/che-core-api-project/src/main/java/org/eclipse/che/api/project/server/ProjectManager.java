@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
@@ -31,10 +30,10 @@ import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
-import org.eclipse.che.api.project.server.type.Variable;
-import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
@@ -62,8 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Facade for all project related operations
@@ -105,7 +102,7 @@ public final class ProjectManager {
                           FileTreeWatcher fileTreeWatcher
                           //WorkspaceHolder workspaceHolder
                          )
-            throws ServerException, NotFoundException, ProjectTypeConstraintException, InvalidValueException,
+            throws ServerException, NotFoundException, ProjectTypeConstraintException,
                    ValueStorageException, IOException, InterruptedException {
 
         this.vfs = vfsProvider.getVirtualFileSystem();
@@ -320,77 +317,60 @@ public final class ProjectManager {
 
         String name = folder.getPath().getName();
 
-        return projectRegistry.putProject(new NewProjectConfig(path, name, sourceStorage), folder, true);
+        return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true);
 
     }
 
 
-    public Map<String, AttributeValue> estimateProject(String path, String projectTypeId)
+    public ProjectTypeResolution estimateProject(String path, String projectTypeId)
             throws ServerException, ForbiddenException, NotFoundException, ValueStorageException, ProjectTypeConstraintException {
-        ProjectType projectType = projectTypeRegistry.getProjectType(projectTypeId);
+
+
+
+        ProjectTypeDef projectType = projectTypeRegistry.getProjectType(projectTypeId);
         if (projectType == null) {
             throw new NotFoundException("Project Type " + projectTypeId + " not found.");
         }
 
-        final VirtualFileEntry baseFolder = getProjectsRoot().getChildFolder(path);
-                                                             //.getChild(path.startsWith("/") ? path.substring(1) : path);
+       FolderEntry baseFolder = asFolder(path);
 
         if(baseFolder == null)
             throw new NotFoundException("Folder not found: "+path);
-//        if (!baseFolder.isFolder()) {
-//            throw new NotFoundException("Not a folder: " + path);
-//        }
 
-        Map<String, AttributeValue> attributes = new HashMap<>();
+        return projectType.resolveSources(baseFolder);
 
-        for (Attribute attr : projectType.getAttributes()) {
-            if (attr.isVariable() && ((Variable)attr).getValueProviderFactory() != null) {
-
-                Variable var = (Variable)attr;
-                // getValue throws ValueStorageException if not valid
-                AttributeValue val = var.getValue((FolderEntry)baseFolder);
-                if(attr.isRequired() && val.isEmpty())
-                    throw new ProjectTypeConstraintException("Required attribute is not recognized "+attr.getName());
-                attributes.put(attr.getName(), val);
-            }
-        }
-
-        return attributes;
     }
 
     // ProjectSuggestion
-    public List<SourceEstimation> resolveSources(String path, boolean transientOnly)
+    public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly)
             throws ServerException, ForbiddenException, NotFoundException, ProjectTypeConstraintException {
-        final List<SourceEstimation> estimations = new ArrayList<>();
-        boolean isPresentPrimaryType = false;
+
+        final List<ProjectTypeResolution> resolutions = new ArrayList<>();
+//        boolean isPresentPrimaryType = false;
+
         for (ProjectType type : projectTypeRegistry.getProjectTypes(ProjectTypeRegistry.CHILD_TO_PARENT_COMPARATOR)) {
             if (transientOnly && type.isPersisted()) {
                 continue;
             }
 
-            final HashMap<String, List<String>> attributes = new HashMap<>();
 
             try {
-                for (Map.Entry<String, AttributeValue> attr : estimateProject(path, type.getId()).entrySet()) {
-                    attributes.put(attr.getKey(), attr.getValue().getList());
-                }
-
-                if (!attributes.isEmpty()) {
-                    estimations.add(newDto(SourceEstimation.class).withType(type.getId()).withAttributes(attributes));
-                    ProjectType projectType = projectTypeRegistry.getProjectType(type.getId());
-                    if (projectType.isPrimaryable()) {
-                        isPresentPrimaryType = true;
-                    }
+                ProjectTypeResolution resolution = estimateProject(path, type.getId());
+                if(resolution.matched()) {
+                    resolutions.add(resolution);
                 }
             } catch (ValueStorageException e) {
                 LOG.warn(e.getLocalizedMessage(), e);
             }
-        }
-        if (!isPresentPrimaryType) {
-            estimations.add(newDto(SourceEstimation.class).withType(BaseProjectType.ID));
+
+
         }
 
-        return estimations;
+//        if (!isPresentPrimaryType) {
+//            estimations.add(newDto(SourceEstimation.class).withType(BaseProjectType.ID));
+//        }
+
+        return resolutions;
     }
 
     /**
