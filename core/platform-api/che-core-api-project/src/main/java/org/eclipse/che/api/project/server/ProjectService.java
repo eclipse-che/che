@@ -1015,49 +1015,19 @@ public class ProjectService extends Service {
             final FolderEntry root = projectManager.getProjectsRoot();
             final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
             List <SearchResultEntry> entries = result.getResults();
+
             for (int i = skipCount; i < length; i++) {
+
                 VirtualFileEntry child = null;
-                try {
-                    child = root.getChild(entries.get(i).getFilePath());
-                } catch (ForbiddenException ignored) {
-                    // Ignore item that user can't access
-                }
+                child = root.getChild(entries.get(i).getFilePath());
+
                 if (child != null && child.isFile()) {
                     items.add(DtoConverter.toItemReference((FileEntry)child, workspace, uriBuilder.clone()));
                 }
             }
             return items;
-        //}
-        //return Collections.emptyList();
     }
 
-
-
-//    private FileEntry asFile(String path) throws ForbiddenException, NotFoundException, ServerException {
-//        final VirtualFileEntry entry = getVirtualFileEntry(path);
-//        if (!entry.isFile()) {
-//            throw new ForbiddenException(String.format("Item '%s' isn't a file. ", path));
-//        }
-//        return (FileEntry)entry;
-//    }
-
-//    private FolderEntry asFolder(String path) throws ForbiddenException, NotFoundException, ServerException {
-//        final VirtualFileEntry entry = getVirtualFileEntry(path);
-//        if (!entry.isFolder()) {
-//            throw new ForbiddenException(String.format("Item '%s' isn't a folder. ", path));
-//        }
-//        return (FolderEntry)entry;
-//    }
-
-//    private VirtualFileEntry getVirtualFileEntry(String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry root = projectManager.getProjectsRoot();
-//        final VirtualFileEntry entry = root.getChild(path);
-//        if (entry == null) {
-//            throw new NotFoundException(String.format("Path '%s' doesn't exist.", path));
-//        }
-//        return entry;
-//    }
 
     private void logProjectCreatedEvent(@NotNull String projectName, @NotNull String projectType) {
         LOG.info("EVENT#project-created# PROJECT#{}# TYPE#{}# WS#{}# USER#{}# PAAS#default#",

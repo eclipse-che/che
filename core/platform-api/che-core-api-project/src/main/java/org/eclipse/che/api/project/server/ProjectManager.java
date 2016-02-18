@@ -323,7 +323,7 @@ public final class ProjectManager {
 
 
     public ProjectTypeResolution estimateProject(String path, String projectTypeId)
-            throws ServerException, ForbiddenException, NotFoundException, ValueStorageException, ProjectTypeConstraintException {
+            throws ServerException, NotFoundException, ValueStorageException {
 
 
 
@@ -343,7 +343,7 @@ public final class ProjectManager {
 
     // ProjectSuggestion
     public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly)
-            throws ServerException, ForbiddenException, NotFoundException, ProjectTypeConstraintException {
+            throws ServerException, NotFoundException {
 
         final List<ProjectTypeResolution> resolutions = new ArrayList<>();
 //        boolean isPresentPrimaryType = false;
@@ -472,7 +472,7 @@ public final class ProjectManager {
 
 
     // TODO do we need ForbiddenException
-    FolderEntry asFolder(String path) throws NotFoundException, ServerException, ForbiddenException {
+    FolderEntry asFolder(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
         if (entry == null)
             return null;
@@ -484,7 +484,7 @@ public final class ProjectManager {
 
     // TODO do we need ForbiddenException
     VirtualFileEntry asVirtualFileEntry(String path)
-            throws NotFoundException, ForbiddenException, ServerException {
+            throws NotFoundException, ServerException {
         String apath = ProjectRegistry.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
         final VirtualFileEntry entry = root.getChild(apath);
@@ -494,12 +494,12 @@ public final class ProjectManager {
         return entry;
     }
 
-    FileEntry asFile(String path) throws ForbiddenException, NotFoundException, ServerException {
+    FileEntry asFile(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
         if (entry == null)
             return null;
         if (!entry.isFile()) {
-            throw new ForbiddenException(String.format("Item '%s' isn't a file. ", path));
+            throw new NotFoundException(String.format("Item '%s' isn't a file. ", path));
         }
         return (FileEntry)entry;
     }

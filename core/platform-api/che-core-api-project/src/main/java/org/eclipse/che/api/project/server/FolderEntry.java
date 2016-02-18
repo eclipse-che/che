@@ -74,7 +74,7 @@ public class FolderEntry extends VirtualFileEntry {
      * @throws ServerException
      *         if other error occurs
      */
-    public VirtualFileEntry getChild(String path) throws ForbiddenException, ServerException {
+    public VirtualFileEntry getChild(String path) throws ServerException {
         final VirtualFile child = getVirtualFile().getChild(Path.of(path));
         if (child == null) {
             return null;
