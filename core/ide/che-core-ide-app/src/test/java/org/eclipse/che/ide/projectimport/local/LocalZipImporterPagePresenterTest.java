@@ -22,8 +22,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +30,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -71,8 +68,6 @@ public class LocalZipImporterPagePresenterTest {
     @Mock
     private DtoFactory                    dtoFactory;
     @Mock
-    private DialogFactory                 dialogFactory;
-    @Mock
     private AppContext                    appContext;
     @Mock
     private EventBus                      eventBus;
@@ -98,7 +93,6 @@ public class LocalZipImporterPagePresenterTest {
                                                       "extPath",
                                                       eventBus,
                                                       projectServiceClient,
-                                                      dialogFactory,
                                                       projectNotificationSubscriber);
     }
 
@@ -211,30 +205,12 @@ public class LocalZipImporterPagePresenterTest {
     }
 
     @Test
-    public void onImportClickedWhenProjectWithSameNameAlreadyExistsTest() {
-        when(view.getProjectName()).thenReturn(PROJECT_NAME);
-        MessageDialog dialog = mock(MessageDialog.class);
-        when(dialogFactory.createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class))).thenReturn(dialog);
-
-        presenter.onImportClicked();
-
-        verify(view).setEnabledImportButton(eq(false));
-        verify(dialogFactory).createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class));
-        verify(dialog).show();
-        verify(view, never()).submit();
-        verify(view, never()).setLoaderVisibility(anyBoolean());
-        verify(view, never()).setInputsEnableState(anyBoolean());
-    }
-
-    @Test
     public void onImportClickedWhenShouldImportAndOpenProjectTest() {
         when(view.getProjectName()).thenReturn(PROJECT_NAME);
         MessageDialog dialog = mock(MessageDialog.class);
-        when(dialogFactory.createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class))).thenReturn(dialog);
 
         presenter.onImportClicked();
 
-        verify(dialogFactory, never()).createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class));
         verify(dialog, never()).show();
         verify(projectNotificationSubscriber).subscribe(eq(PROJECT_NAME));
         verify(view).setEncoding(eq(FormPanel.ENCODING_MULTIPART));
