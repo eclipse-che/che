@@ -29,6 +29,8 @@ import {CreateProjectSamplesTagFilter} from './create-project/samples/create-pro
 import {CreateProjectPopupCtrl} from './create-project/popup/create-project-popup.controller';
 import {CreateProjectPopup} from './create-project/popup/create-project-popup.directive';
 
+import {CreateProjectLoader} from './create-project/loader/create-project-loader.directive';
+
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
 import {CreateProjectConfFile} from './create-project/config-file/create-project-conf-file.directive';
 import {ProjectDetailsCtrl} from './project-details/project-details.controller';
@@ -48,6 +50,8 @@ export class ProjectsConfig {
     register.controller('ListProjectsCtrl', ListProjectsCtrl);
 
     register.controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
+
+    register.directive('createProjectLoader', CreateProjectLoader);
 
     register.controller('CreateProjectPopupCtrl', CreateProjectPopupCtrl);
     register.directive('createProjectPopup', CreateProjectPopup);
