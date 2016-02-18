@@ -42,7 +42,6 @@ import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.POST;
@@ -171,7 +170,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     public void estimateProject(String workspaceId,
                                 String path,
                                 String projectType,
-                                AsyncRequestCallback<Map<String, List<String>>> callback) {
+                                AsyncRequestCallback<SourceEstimation> callback) {
         final String requestUrl = extPath + "/project/" + workspaceId + "/estimate" + normalizePath(path) + "?type=" + projectType;
         asyncRequestFactory.createGetRequest(requestUrl)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)

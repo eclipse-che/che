@@ -16,6 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
+import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
@@ -24,7 +25,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.maven.client.MavenArchetype;
 import org.eclipse.che.ide.extension.maven.client.MavenExtension;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.StringMapListUnmarshaller;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -59,12 +60,13 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.VERSION
  */
 public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements MavenPageView.ActionDelegate {
 
-    protected final MavenPageView        view;
-    protected final EventBus             eventBus;
-    private final ProjectServiceClient projectServiceClient;
-    private final DtoFactory           dtoFactory;
-    private final DialogFactory        dialogFactory;
-    private final AppContext           appContext;
+    protected final MavenPageView          view;
+    protected final EventBus               eventBus;
+    private final   ProjectServiceClient   projectServiceClient;
+    private final   DtoFactory             dtoFactory;
+    private final   DialogFactory          dialogFactory;
+    private final   DtoUnmarshallerFactory dtoUnmarshallerFactory;
+    private final   AppContext             appContext;
 
     @Inject
     public MavenPagePresenter(MavenPageView view,
@@ -72,13 +74,15 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
                               AppContext appContext,
                               ProjectServiceClient projectServiceClient,
                               DtoFactory dtoFactory,
-                              DialogFactory dialogFactory) {
+                              DialogFactory dialogFactory,
+                              DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         super();
         this.view = view;
         this.eventBus = eventBus;
         this.projectServiceClient = projectServiceClient;
         this.dtoFactory = dtoFactory;
         this.dialogFactory = dialogFactory;
+        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         view.setDelegate(this);
         
         this.appContext = appContext;
@@ -103,31 +107,32 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
     private void estimateAndSetAttributes() {
         projectServiceClient.estimateProject(appContext.getWorkspace().getId(),
                 context.get(PROJECT_PATH_KEY), MAVEN_ID,
-                new AsyncRequestCallback<Map<String, List<String>>>(new StringMapListUnmarshaller()) {
+                new AsyncRequestCallback<SourceEstimation>(dtoUnmarshallerFactory.newUnmarshaller(SourceEstimation.class)) {
                     @Override
-                    protected void onSuccess(Map<String, List<String>> result) {
-                        List<String> artifactIdValues = result.get(ARTIFACT_ID);
+                    protected void onSuccess(SourceEstimation result) {
+                        Map<String, List<String>> estimatedAttributes = result.getAttributes();
+                        List<String> artifactIdValues = estimatedAttributes.get(ARTIFACT_ID);
                         if (artifactIdValues != null && !artifactIdValues.isEmpty()) {
                             setAttribute(ARTIFACT_ID, artifactIdValues.get(0));
                         }
 
-                        List<String> groupIdValues = result.get(GROUP_ID);
-                        List<String> parentGroupIdValues = result.get(PARENT_GROUP_ID);
+                        List<String> groupIdValues = estimatedAttributes.get(GROUP_ID);
+                        List<String> parentGroupIdValues = estimatedAttributes.get(PARENT_GROUP_ID);
                         if (groupIdValues != null && !groupIdValues.isEmpty()) {
                             setAttribute(GROUP_ID, groupIdValues.get(0));
                         } else if (parentGroupIdValues != null && !parentGroupIdValues.isEmpty()) {
                             setAttribute(GROUP_ID, parentGroupIdValues.get(0));
                         }
 
-                        List<String> versionValues = result.get(VERSION);
-                        List<String> parentVersionValues = result.get(PARENT_VERSION);
+                        List<String> versionValues = estimatedAttributes.get(VERSION);
+                        List<String> parentVersionValues = estimatedAttributes.get(PARENT_VERSION);
                         if (versionValues != null && !versionValues.isEmpty()) {
                             setAttribute(VERSION, versionValues.get(0));
                         } else if (parentVersionValues != null && !parentVersionValues.isEmpty()) {
                             setAttribute(VERSION, parentVersionValues.get(0));
                         }
 
-                        List<String> packagingValues = result.get(PACKAGING);
+                        List<String> packagingValues = estimatedAttributes.get(PACKAGING);
                         if (packagingValues != null && !packagingValues.isEmpty()) {
                             setAttribute(PACKAGING, packagingValues.get(0));
                         }
