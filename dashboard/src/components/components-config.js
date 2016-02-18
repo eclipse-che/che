@@ -22,7 +22,6 @@ import {OnBoardingConfig} from './onboarding/onboarding-config';
 import {RoutingConfig} from './routing/routing-config';
 import {ValidatorConfig} from './validator/validator-config';
 import {WidgetConfig} from './widget/widget-config';
-import {CheBodyInjectorConfig} from './body-injector/che-body-injector-config';
 
 export class ComponentsConfig {
 
@@ -38,7 +37,6 @@ export class ComponentsConfig {
     new RoutingConfig(register);
     new ValidatorConfig(register);
     new WidgetConfig(register);
-    new CheBodyInjectorConfig(register);
 
   }
 }
