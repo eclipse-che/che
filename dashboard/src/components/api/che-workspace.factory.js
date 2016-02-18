@@ -218,15 +218,6 @@ export class CheWorkspace {
     return promise;
   }
 
-  /**
-   * Gets the runtime data of the given workspace
-   * @param workspaceId the ID of the workspace
-   * @returns {*} the associated promise
-   */
-  getRuntime(workspaceId) {
-    let promise = this.remoteWorkspaceAPI.getRuntime({workspaceId: workspaceId}, {}).$promise;
-    return promise;
-  }
 
   stopWorkspace(workspaceId) {
     let promise = this.remoteWorkspaceAPI.deleteRuntime({workspaceId: workspaceId}, {}).$promise;
@@ -271,15 +262,19 @@ export class CheWorkspace {
    * @returns {*|promise|n|N}
    */
   fetchRuntimeConfig(workspaceId) {
+    var defer = this.$q.defer();
     let promise = this.remoteWorkspaceAPI.getRuntime({workspaceId: workspaceId}).$promise;
     let updatedPromise = promise.then((data) => {
       this.runtimeConfig.set(workspaceId, data);
+      defer.resolve();
     }, (error) => {
       if (error.status !== 304) {
-        console.log(error);
+        defer.reject(error);
+      } else {
+        defer.resolve();
       }
     });
-    return updatedPromise;
+    return defer.promise;
   }
 
   /**
