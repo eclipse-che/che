@@ -269,18 +269,20 @@ public final class ProjectManager {
                                                                            ConflictException,
                                                                            IOException {
 
-        String apath = newConfig.getPath();
+        String path = newConfig.getPath();
 
-        if (newConfig.getPath() == null)
+        if (path == null)
             throw new ConflictException("Project path is not defined");
 
-        RegisteredProject oldProject = projectRegistry.getProject(apath);
+
+        FolderEntry baseFolder = asFolder(path);
+        //RegisteredProject oldProject = projectRegistry.getProject(apath);
 
         // If a project does not exist in the target path, create a new one
-        if (oldProject == null)
-            throw new NotFoundException(String.format("Project '%s' doesn't exist.", apath));
+        if (baseFolder == null)
+            throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
 
-        RegisteredProject project = projectRegistry.putProject(newConfig, oldProject.getBaseFolder(), true);
+        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true);
 
         // TODO move to register?
         reindexProject(project);
