@@ -46,6 +46,7 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
@@ -207,7 +208,7 @@ public class GitHubAuthenticatorImplTest {
         verify(view).isGenerateKeysSelected();
         verify(registry).getUploader(eq(GITHUB_HOST));
         verify(appContext).getCurrentUser();
-        verify(notificationManager).notify(anyString(), eq(projectConfigDto));
+        verify(notificationManager).notify(anyString(), eq(SUCCESS), eq(true));
     }
 
     @Test

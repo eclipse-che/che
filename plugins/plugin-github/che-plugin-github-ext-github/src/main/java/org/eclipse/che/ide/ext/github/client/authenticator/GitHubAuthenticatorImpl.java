@@ -35,6 +35,8 @@ import org.eclipse.che.security.oauth.OAuthStatus;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+
 /**
  * @author Roman Nikitenko
  */
@@ -121,7 +123,7 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
                 @Override
                 public void onSuccess(Void result) {
                     callback.onSuccess(authStatus);
-                    notificationManager.notify(locale.authMessageKeyUploadSuccess(), appContext.getCurrentProject().getRootProject());
+                    notificationManager.notify(locale.authMessageKeyUploadSuccess(), SUCCESS, true);
                 }
 
                 @Override
