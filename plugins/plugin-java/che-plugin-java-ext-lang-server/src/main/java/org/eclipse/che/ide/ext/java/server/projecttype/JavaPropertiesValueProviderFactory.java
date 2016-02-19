@@ -99,11 +99,7 @@ public class JavaPropertiesValueProviderFactory implements ValueProviderFactory 
             if (attributeName.equals(Constants.LANGUAGE_VERSION)) {
                 return singletonList(System.getProperty("java.version"));
             } else if (CONTAINS_JAVA_FILES.equals(attributeName)) {
-                if (containsJavaFiles) {
-                    return singletonList(valueOf(containsJavaFiles));
-                } else {
-                    throw new ValueStorageException("There are no Java files inside the project");
-                }
+                return singletonList(valueOf(containsJavaFiles));
             }
             return null;
         }
