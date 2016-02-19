@@ -86,17 +86,34 @@
             height: 22px;
             overflow: hidden;
             border-right: 1px solid tabBorderColor;
+            position: relative;
+        }
+
+        .closeTabPanel .closeTabButton {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
         }
 
         .closeTabPanel svg {
-            transform-origin: 0px 0px 0px;
             position: absolute;
-            margin-left: 7px;
-            margin-top: 8px;
             width: 6px;
             height: 6px;
-            opacity: 0.8;
+            left: 4px;
+            top: 4px;
+            transform-origin: 0px 0px 0px;
+            pointer-events: none;
             display: none;
+            opacity: 0.8;
+            -webkit-transition: opacity 0.1s ease-in-out;
+            transition: opacity 0.1s ease-in-out;
+        }
+
+        .closeTabPanel .closeTabButton:HOVER svg {
+            opacity: 1;
         }
 
         .closeTabPanel svg g,
@@ -158,13 +175,21 @@
         }
 
         @-webkit-keyframes pin {
-            from {opacity: 0;}
-            to {opacity: 1;}
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes pin {
-            from {opacity: 0;}
-            to {opacity: 1;}
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         /**
@@ -184,8 +209,10 @@
     <g:FlowPanel addStyleNames="{style.mainPanel}">
         <g:SimplePanel ui:field="iconPanel" styleName="{style.iconPanel}" />
         <g:Label ui:field="title" styleName="{style.titlePanel}" />
-        <g:FlowPanel addStyleNames="{style.closeTabPanel}">
-            <svg:SVGImage ui:field="closeIcon" resource="{resources.closeIcon}"></svg:SVGImage>
+        <g:FlowPanel styleName="{style.closeTabPanel}">
+            <g:FlowPanel ui:field="closeButton" styleName="{style.closeTabButton}">
+                <svg:SVGImage resource="{resources.closeIcon}"></svg:SVGImage>
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 
