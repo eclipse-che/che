@@ -13,7 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.outputspanel.console;
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * View for {@link OutputConsole}.
+ * View for output console.
  *
  * @author Artem Zatsarynnyi
  */
@@ -45,4 +45,5 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
     /** Action handler for the view actions/controls. */
     interface ActionDelegate {
     }
+
 }

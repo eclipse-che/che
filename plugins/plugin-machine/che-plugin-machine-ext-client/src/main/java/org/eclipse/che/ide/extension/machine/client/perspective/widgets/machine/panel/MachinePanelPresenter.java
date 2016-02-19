@@ -24,6 +24,8 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -41,8 +43,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateH
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceHandler;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -61,7 +61,7 @@ import java.util.Map;
 public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate,
                                                                     MachineStateHandler,
                                                                     WorkspaceStartedHandler,
-                                                                    StopWorkspaceHandler,
+                                                                    WorkspaceStoppedHandler,
                                                                     MachineStartingHandler,
                                                                     ActivePartChangedHandler {
     private final MachinePanelView                      view;
@@ -105,7 +105,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
-        eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
@@ -124,7 +124,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
                 machineNodes.clear();
                 if (machineStates.isEmpty()) {
                     appliance.showStub(locale.unavailableMachineInfo());
-
                     return;
                 }
 
@@ -133,7 +132,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
                 }
 
                 view.setData(rootNode);
-
                 selectFirstNode();
             }
         });
@@ -151,9 +149,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     private void selectFirstNode() {
         if (!machineNodes.isEmpty()) {
-            MachineTreeNode firstNode = machineNodes.get(0);
-
-            view.selectNode(firstNode);
+            view.selectNode(machineNodes.get(0));
         }
     }
 
@@ -252,8 +248,8 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     /** {@inheritDoc} */
     @Override
-    public void onWorkspaceStopped(UsersWorkspaceDto workspace) {
-        showMachines(workspace.getId());
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        showMachines(event.getWorkspace().getId());
     }
 
     /** {@inheritDoc} */
@@ -310,4 +306,5 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
             showMachines();
         }
     }
+
 }

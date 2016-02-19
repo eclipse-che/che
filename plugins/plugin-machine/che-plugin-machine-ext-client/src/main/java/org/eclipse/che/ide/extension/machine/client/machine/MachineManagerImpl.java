@@ -31,7 +31,8 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -48,8 +49,6 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceHandler;
 
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.DESTROY;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.RESTART;
@@ -66,7 +65,7 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler {
+public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandler {
 
     private final WsAgentStateController  wsAgentStateController;
     private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
@@ -120,7 +119,7 @@ public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler 
 
         this.messageBus = messageBusProvider.getMessageBus();
 
-        eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
 
         initializeHandlers();
     }
@@ -168,7 +167,7 @@ public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler 
     }
 
     @Override
-    public void onWorkspaceStopped(UsersWorkspaceDto workspace) {
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
         boolean statusChannelNotNull = statusChannel != null;
         boolean outputChannelNotNull = outputChannel != null;
         boolean wsLogChannelNotNull = wsAgentLogChannel != null;
@@ -329,6 +328,5 @@ public class MachineManagerImpl implements MachineManager, StopWorkspaceHandler 
             Log.error(getClass(), exception);
         }
     }
-
 
 }

@@ -8,34 +8,38 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace.start;
+package org.eclipse.che.api.workspace.gwt.client.event;
 
 import com.google.gwt.event.shared.GwtEvent;
-
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 
 /**
- * The class contains business logic which allows fire special event which contains information about stopped workspace via message bus.
+ * Event fired when workspace has been stopped.
  *
- * @author Dmitry Shnurenko
+ * @author Vitaliy Guliy
  */
-public class StopWorkspaceEvent extends GwtEvent<StopWorkspaceHandler> {
+public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedHandler> {
 
-    public static final Type<StopWorkspaceHandler> TYPE = new Type<>();
+    public static final Type<WorkspaceStoppedHandler> TYPE = new Type<>();
 
     private final UsersWorkspaceDto workspace;
 
-    public StopWorkspaceEvent(UsersWorkspaceDto workspace) {
+    public WorkspaceStoppedEvent(UsersWorkspaceDto workspace) {
         this.workspace = workspace;
     }
 
+    public UsersWorkspaceDto getWorkspace() {
+        return workspace;
+    }
+
     @Override
-    public Type<StopWorkspaceHandler> getAssociatedType() {
+    public Type<WorkspaceStoppedHandler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(StopWorkspaceHandler handler) {
-        handler.onWorkspaceStopped(workspace);
+    protected void dispatch(WorkspaceStoppedHandler handler) {
+        handler.onWorkspaceStopped(this);
     }
+
 }

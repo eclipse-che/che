@@ -27,6 +27,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentStateDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -55,7 +56,6 @@ import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -282,18 +282,21 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                     String workspaceName = workspace.getName();
 
                     switch (statusEvent.getEventType()) {
+
                         case RUNNING:
                             setCurrentWorkspace(workspace);
                             notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, true);
                             eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
                             break;
+
                         case ERROR:
-                            eventBus.fireEvent(new StopWorkspaceEvent(workspace));
                             unSubscribeWorkspace(statusEvent.getWorkspaceId(), this);
                             notificationManager.notify(locale.workspaceStartFailed(), FAIL, true);
                             initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), ERROR);
                             showErrorDialog(workspaceName, statusEvent.getError());
+                            eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                             break;
+
                         case STOPPED:
                             workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(new Operation<List<UsersWorkspaceDto>>() {
                                 @Override
@@ -301,19 +304,19 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                                     startWorkspacePresenter.show(workspaces, callback);
                                 }
                             });
-                            eventBus.fireEvent(new StopWorkspaceEvent(workspace));
                             unSubscribeWorkspace(statusEvent.getWorkspaceId(), this);
                             notificationManager.notify(locale.extServerStopped(), StatusNotification.Status.SUCCESS, true);
+                            eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                             break;
+
                         case SNAPSHOT_CREATED:
                             snapshotCreator.successfullyCreated();
                             break;
+
                         case SNAPSHOT_CREATION_ERROR:
                             snapshotCreator.creationError("Snapshot creation error: " + statusEvent.getError());
                             break;
-                        default:
-                            // do nothing
-                            break;
+
                     }
                 }
 

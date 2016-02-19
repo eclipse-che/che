@@ -21,7 +21,8 @@ import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -38,8 +39,6 @@ import org.eclipse.che.ide.statepersistance.dto.WorkspaceState;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +53,7 @@ import java.util.Set;
  */
 @Singleton
 public class AppStateManager implements WindowActionHandler,
-                                        StopWorkspaceHandler,
+                                        WorkspaceStoppedHandler,
                                         WsAgentStateHandler,
                                         ProjectExplorerLoadedEvent.ProjectExplorerLoadedHandler {
 
@@ -88,7 +87,7 @@ public class AppStateManager implements WindowActionHandler,
         this.presentationFactory = presentationFactory;
         this.perspectiveManagerProvider = perspectiveManagerProvider;
 
-        eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(ProjectExplorerLoadedEvent.getType(), this);
@@ -129,7 +128,7 @@ public class AppStateManager implements WindowActionHandler,
     }
 
     @Override
-    public void onWorkspaceStopped(UsersWorkspaceDto workspace) {
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
         persistWorkspaceState();
     }
 

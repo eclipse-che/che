@@ -258,14 +258,43 @@
 }
 
 .processTree .machineStatus {
-    float: right;
     width: 10px;
     height: 10px;
-    border-radius: 5px;
     margin: 4px 5px;
-    background-color: #46AF00;
-    border: 1px solid #7ED321;
+    position: relative;
+    overflow: hidden;
+    margin-left: 0px;
+    margin-right: 4px;
+}
+
+.processTree .machineStatus .machineStatusRunning {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #46af00;
+    border: 1px solid #7ed321;
+    border-radius: 5px;
     box-sizing: border-box;
+    position: relative;
+    top: 1px;
+}
+
+.processTree .machineStatus .machineStatusPausedLeft {
+    margin-left: 2px;
+}
+
+.processTree .machineStatus .machineStatusPausedLeft,
+.processTree .machineStatus .machineStatusPausedRight {
+    display: inline-block;
+    width: 3px;
+    height: 10px;
+    background-color: #A97B32;
+    border: 1px solid rgb(228, 158, 45);
+    border-radius: 5px;
+    box-sizing: border-box;
+    position: relative;
+    top: 1px;
+    margin-right: 1px;
 }
 
 .sshButton {

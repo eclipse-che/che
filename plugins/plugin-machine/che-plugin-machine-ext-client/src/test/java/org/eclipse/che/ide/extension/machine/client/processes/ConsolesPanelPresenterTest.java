@@ -206,7 +206,7 @@ public class ConsolesPanelPresenterTest {
 
         when(appContext.getWorkspace()).thenReturn(workspace);
         DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
-        verify(eventBus, times(2)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
+        verify(eventBus, times(4)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
 
         DevMachineStateHandler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
         devMachineStateHandler.onMachineStarted(devMachineStateEvent);
