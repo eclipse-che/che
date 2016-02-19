@@ -8,24 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.workspace.start;
+package org.eclipse.che.api.workspace.gwt.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-
 /**
- * Provides methods which allows do some actions when workspace is stopped
+ * Is fired when workspace has been stopped.
  *
- * @author Dmitry Shnurenko
+ * @author Vitaliy Guliy
  */
-public interface StopWorkspaceHandler extends EventHandler {
+public interface WorkspaceStoppedHandler extends EventHandler {
 
     /**
-     * Performs some actions when workspace is stopped.
+     * Perform actions when workspace is stopped.
      *
-     * @param workspace
-     *         workspace which was stopped
+     * @param event
+     *         workspace stopped event
      */
-    void onWorkspaceStopped(UsersWorkspaceDto workspace);
+    void onWorkspaceStopped(WorkspaceStoppedEvent event);
+
 }

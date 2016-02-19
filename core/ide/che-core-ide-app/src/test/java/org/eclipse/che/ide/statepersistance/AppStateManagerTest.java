@@ -16,6 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -31,7 +32,6 @@ import org.eclipse.che.ide.statepersistance.dto.AppState;
 import org.eclipse.che.ide.statepersistance.dto.WorkspaceState;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 import org.eclipse.che.ide.util.Pair;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,7 +120,7 @@ public class AppStateManagerTest {
 
     @Test
     public void shouldSubscribeOnEventBus() {
-        verify(eventBus).addHandler(StopWorkspaceEvent.TYPE, appStateManager);
+        verify(eventBus).addHandler(WorkspaceStoppedEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(WindowActionEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(WsAgentStateEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(ProjectExplorerLoadedEvent.getType(), appStateManager);

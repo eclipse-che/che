@@ -21,6 +21,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -36,7 +37,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateE
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.ide.ui.dialogs.InputCallback;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -172,7 +172,7 @@ public class MachinePanelPresenterTest {
 
         verify(eventBus).addHandler(MachineStateEvent.TYPE, presenter);
         verify(eventBus).addHandler(WorkspaceStartedEvent.TYPE, presenter);
-        verify(eventBus).addHandler(StopWorkspaceEvent.TYPE, presenter);
+        verify(eventBus).addHandler(WorkspaceStoppedEvent.TYPE, presenter);
         verify(eventBus).addHandler(MachineStartingEvent.TYPE, presenter);
     }
 
