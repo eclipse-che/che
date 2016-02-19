@@ -199,7 +199,8 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
+        projectRegistry.initProjects();
 
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);

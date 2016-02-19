@@ -59,6 +59,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
 
 
         projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectHandlerRegistry,
                                 null, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);

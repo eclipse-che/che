@@ -106,7 +106,8 @@ public class WsAgentTestBase {
 
         this.eventService = new EventService();
 
-        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry.initProjects();
 
         this.importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 

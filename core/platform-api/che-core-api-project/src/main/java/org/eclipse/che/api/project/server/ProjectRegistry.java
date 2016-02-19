@@ -27,6 +27,7 @@ import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,8 +62,33 @@ public class ProjectRegistry {
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
         this.handlers = handlers;
+    }
 
-        initProjects();
+    @PostConstruct
+    void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
+        UsersWorkspace workspace = workspaceHolder.getWorkspace();
+        List<? extends ProjectConfig> projectConfigs = workspace.getProjects();
+
+        if (projectConfigs == null) {
+            projectConfigs = new ArrayList<>();
+        }
+
+        for (ProjectConfig projectConfig : projectConfigs) {
+            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false);
+
+            ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
+            if (handler != null) {
+                handler.onProjectInitialized(folder(project.getPath()));
+            }
+        }
+
+        // unconfigured folders on root
+        FolderEntry root = new FolderEntry(vfs.getRoot());
+        for (FolderEntry folder : root.getChildFolders()) {
+            if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
+                putProject(null, folder, true);
+            }
+        }
     }
 
     public String getWorkspaceId() {
@@ -225,41 +251,6 @@ public class ProjectRegistry {
         projects.remove(path);
         getProjects(path).forEach(projects::remove);
     }
-
-
-     void initProjects()
-             throws ConflictException,
-                    NotFoundException, ServerException, ForbiddenException {
-
-        UsersWorkspace workspace = workspaceHolder.getWorkspace();
-        List<? extends ProjectConfig> projectConfigs = workspace.getProjects();
-
-        if(projectConfigs == null)
-            projectConfigs = new ArrayList<>();
-
-        for (ProjectConfig projectConfig : projectConfigs) {
-
-            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false);
-
-            ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
-            if(handler != null)
-                handler.onProjectInitialized(folder(project.getPath()));
-
-
-        }
-
-         // unconfigured folders on root
-         FolderEntry root = new FolderEntry(vfs.getRoot());
-         for(FolderEntry folder : root.getChildFolders()) {
-             if(!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-                 putProject(null, folder, true);
-             }
-         }
-
-
-
-    }
-
 
     static String absolutizePath(String path) {
 

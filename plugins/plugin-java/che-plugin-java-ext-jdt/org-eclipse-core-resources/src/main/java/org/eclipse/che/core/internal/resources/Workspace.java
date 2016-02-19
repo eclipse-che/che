@@ -727,7 +727,7 @@ public class Workspace implements IWorkspace {
             }
             return null;
 
-        } catch (ForbiddenException | ServerException e) {
+        } catch (ServerException e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
@@ -744,7 +744,7 @@ public class Workspace implements IWorkspace {
                 } else {
                     return IResource.FOLDER;
                 }
-            } catch (ServerException | ForbiddenException e) {
+            } catch (ServerException e) {
                 LOG.error(e.getMessage(), e);
                 return IResource.FOLDER;
             }
@@ -791,7 +791,7 @@ public class Workspace implements IWorkspace {
                     return resources;
                 }
             }
-        } catch (ForbiddenException | ServerException e) {
+        } catch (ServerException e) {
             LOG.error(e.getMessage(), e);
         }
         return ICoreConstants.EMPTY_RESOURCE_ARRAY;
