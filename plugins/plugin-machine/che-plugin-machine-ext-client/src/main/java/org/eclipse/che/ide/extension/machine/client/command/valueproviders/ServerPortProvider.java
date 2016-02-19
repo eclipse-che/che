@@ -18,18 +18,19 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
+import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Maps.transformEntries;
 
 /**
@@ -38,12 +39,13 @@ import static com.google.common.collect.Maps.transformEntries;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ServerPortProvider implements MachineStateHandler {
+public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceStoppedHandler {
 
     public static final String KEY_TEMPLATE = "${server.port.%}";
 
     private final MachineServiceClient                 machineServiceClient;
     private final CommandPropertyValueProviderRegistry commandPropertyRegistry;
+    private final AppContext                           appContext;
 
     private Collection<CommandPropertyValueProvider> providers;
 
@@ -62,18 +64,18 @@ public class ServerPortProvider implements MachineStateHandler {
                               AppContext appContext) {
         this.machineServiceClient = machineServiceClient;
         this.commandPropertyRegistry = commandPropertyRegistry;
+        this.appContext = appContext;
 
-        eventBus.addHandler(MachineStateEvent.TYPE, this);
-        if (!isNullOrEmpty(appContext.getDevMachineId())) {
-            machineServiceClient.getMachine(appContext.getDevMachineId()).then(registerProviders);
-        }
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+
+        registerProviders();
     }
 
-    @Override
-    public void onMachineRunning(MachineStateEvent event) {
-        final MachineStateDto machineState = event.getMachineState();
-        if (machineState.isDev()) {
-            machineServiceClient.getMachine(machineState.getId()).then(registerProviders);
+    private void registerProviders() {
+        String devMachineId = appContext.getDevMachineId();
+        if (devMachineId != null) {
+            machineServiceClient.getMachine(devMachineId).then(registerProviders);
         }
     }
 
@@ -92,11 +94,17 @@ public class ServerPortProvider implements MachineStateHandler {
     }
 
     @Override
-    public void onMachineDestroyed(MachineStateEvent event) {
-        final MachineStateDto machineState = event.getMachineState();
-        if (machineState.isDev() && providers != null) {
-            commandPropertyRegistry.getProviders().removeAll(providers);
+    public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+        registerProviders();
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        for (CommandPropertyValueProvider provider : providers) {
+            commandPropertyRegistry.unregister(provider);
         }
+
+        providers.clear();
     }
 
     private class AddressProvider implements CommandPropertyValueProvider {

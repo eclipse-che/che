@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -48,7 +47,7 @@ public class CommandPropertyValueProviderRegistryImpl implements CommandProperty
 
     @Override
     public void unregister(CommandPropertyValueProvider valueProvider) {
-        valueProviders.remove(valueProvider);
+        valueProviders.remove(valueProvider.getKey());
     }
 
     @Override
