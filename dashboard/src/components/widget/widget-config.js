@@ -26,6 +26,7 @@ import {CheDropZone} from './dropzone/che-dropzone.directive';
 import {CheEmptyState} from './empty-state/che-empty-state.directive';
 import {CheEventLogger} from './event-logger/che-event-logger.directive';
 import {CheFrame} from './frame/che-frame.directive';
+import {CheFooter} from './footer/che-footer.directive';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
 import {CheLabel} from './label/che-label.directive';
@@ -80,6 +81,7 @@ export class WidgetConfig {
       .directive('cheEmptyState', CheEmptyState)
       .directive('cheEventLogger', CheEventLogger)
       .directive('cheFrame', CheFrame)
+      .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)
       .directive('cheInput', CheInput)
       .directive('cheLabel', CheLabel)

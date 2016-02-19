@@ -43,7 +43,8 @@ export class CheBranding {
                 logoURL: assetPrefix + brandingData.logoFile,
                 favicon : assetPrefix + brandingData.favicon,
                 ideResourcesPath : brandingData.ideResources,
-                helpPath : brandingData.helpPath
+                helpPath : brandingData.helpPath,
+                supportEmail: brandingData.supportEmail
             };
 
             this.productName = this.$rootScope.branding.title;
@@ -52,6 +53,7 @@ export class CheBranding {
             this.productLogo = this.$rootScope.branding.logoURL;
             this.ideResourcesPath = this.$rootScope.branding.ideResourcesPath;
             this.helpPath = this.$rootScope.branding.helpPath;
+            this.supportEmail = this.$rootScope.branding.supportEmail;
             this.deferred.resolve(this.$rootScope.branding);
         });
 
@@ -79,6 +81,10 @@ export class CheBranding {
 
     getProductHelpPath() {
         return this.helpPath;
+    }
+
+    getProductSupportEmail() {
+      return this.supportEmail;
     }
 }
 

@@ -1,9 +1,4 @@
 <div flex style="height: 100%" class="ide-loader">
-    <div layout="column" layout-align="start center">
-        <div class="ide-loader-logo" ng-if="branding.logoURL">
-            <img ng-src="{{branding.logoURL}}">
-        </div>
-    </div>
     <div class="create-project-progress-panel-bottom">
         <div ng-repeat="step in ideLoaderCtrl.getSteps()">
             <div ng-if="$index < (ideLoaderCtrl.getSteps().length -1)"
