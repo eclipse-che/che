@@ -13,13 +13,14 @@ package org.eclipse.che.ide.part.widgets.editortab;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -62,7 +63,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     Label title;
 
     @UiField
-    SVGImage closeIcon;
+    FlowPanel closeButton;
 
     @UiField(provided = true)
     final PartStackUIResources resources;
@@ -94,10 +95,17 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
         iconPanel.add(getIcon());
 
-
         addDomHandler(this, ClickEvent.getType());
         addDomHandler(this, DoubleClickEvent.getType());
         addDomHandler(this, ContextMenuEvent.getType());
+
+        closeButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                EditorTabWidget.this.eventBus.fireEvent(new FileEvent(EditorTabWidget.this.file, FileEvent.FileOperation.CLOSE));
+                delegate.onTabClose(EditorTabWidget.this);
+            }
+        }, ClickEvent.getType());
     }
 
     /** {@inheritDoc} */
@@ -205,12 +213,6 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    @UiHandler("closeIcon")
-    public void onCloseButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        eventBus.fireEvent(new FileEvent(file, FileEvent.FileOperation.CLOSE));
-        delegate.onTabClose(this);
     }
 
     /** {@inheritDoc} */
