@@ -53,6 +53,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     private final long                     wsAgentPingDelayMs;
     private final int                      wsAgentPingConnectionTimeoutMs;
     private final String                   wsAgentPingPath;
+    private final String                   pingTimedOutErrorMessage;
 
     @Inject
     public WsAgentLauncherImpl(Provider<MachineManager> machineManagerProvider,
@@ -61,13 +62,15 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
                                @Named("api.endpoint") URI apiEndpoint,
                                @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
-                               @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs) {
+                               @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
+                               @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage) {
         this.machineManagerProvider = machineManagerProvider;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.wsAgentStartCommandLine = wsAgentStartCommandLine;
         this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;
         this.wsAgentPingDelayMs = wsAgentPingDelayMs;
         this.wsAgentPingConnectionTimeoutMs = wsAgentPingConnectionTimeoutMs;
+        this.pingTimedOutErrorMessage = pingTimedOutErrorMessage;
         // everest respond 404 to path to rest without trailing slash
         this.wsAgentPingPath = apiEndpoint.getPath().endsWith("/") ? apiEndpoint.getPath() : apiEndpoint.getPath() + "/";
     }
@@ -102,7 +105,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
         } catch (BadRequestException wsAgentLaunchingExc) {
             throw new MachineException(wsAgentLaunchingExc.getLocalizedMessage(), wsAgentLaunchingExc);
         }
-        throw new MachineException("Workspace agent is not responding. Workspace " + workspaceId + " will be stopped");
+        throw new MachineException(pingTimedOutErrorMessage);
     }
 
     private HttpJsonRequest createPingRequest(Instance devMachine) {
