@@ -199,7 +199,7 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry);
+        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
 
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
@@ -209,7 +209,7 @@ public class ProjectServiceTest {
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 
-        List<ProjectConfigDto> modules = new ArrayList<>();
+        //List<ProjectConfigDto> modules = new ArrayList<>();
 
         final ProjectConfigDto testProjectConfigMock = mock(ProjectConfigDto.class);
         when(testProjectConfigMock.getPath()).thenReturn("/my_project");

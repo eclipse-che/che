@@ -132,9 +132,9 @@ public final class ProjectManager {
         return this.projectTypeRegistry;
     }
 
-    public ProjectHandlerRegistry getHandlers() {
-        return handlers;
-    }
+//    public ProjectHandlerRegistry getHandlers() {
+//        return handlers;
+//    }
 
     public Searcher getSearcher() throws NotFoundException, ServerException {
 
