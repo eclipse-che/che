@@ -16,14 +16,26 @@ import java.io.IOException;
  * @author andrew00x
  */
 public final class DockerException extends IOException {
-    private final int status;
+    private final int    status;
+    private final String originError;
 
     public DockerException(String message, int status) {
         super(message);
         this.status = status;
+        this.originError = null;
+    }
+
+    public DockerException(String message, String originError, int status) {
+        super(message);
+        this.status = status;
+        this.originError = originError;
     }
 
     public int getStatus() {
         return status;
+    }
+
+    public String getOriginError() {
+        return originError;
     }
 }

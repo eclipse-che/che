@@ -438,7 +438,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                        node,
                                                        outputConsumer);
         } catch (IOException e) {
-            throw new MachineException(e);
+            throw new MachineException(e.getLocalizedMessage(), e);
         }
     }
 
