@@ -36,6 +36,17 @@ public interface WorkBenchPartController {
     void setSize(double size);
 
     /**
+     * Sets the minimum allowable size for the part.
+     * <p/>
+     * The splitter cannot be dragged to a position that would make the part
+     * smaller than this size.
+     *
+     * @param minSize
+     *         the minimum size for the part
+     */
+    void setMinSize(int minSize);
+
+    /**
      * Show/hide part stack.
      *
      * @param hidden

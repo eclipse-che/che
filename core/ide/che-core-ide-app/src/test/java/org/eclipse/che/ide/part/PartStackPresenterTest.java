@@ -41,6 +41,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyDouble;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -54,6 +55,7 @@ import static org.mockito.Mockito.when;
 public class PartStackPresenterTest {
 
     private static final String SOME_TEXT = "someText";
+    private static final double PART_SIZE = 170;
 
     //constructor mocks
     @Mock
@@ -249,11 +251,40 @@ public class PartStackPresenterTest {
 
     @Test
     public void onTabShouldBeClicked() {
+        reset(workBenchPartController);
         presenter.addPart(partPresenter);
 
         presenter.onTabClicked(partButton);
 
         verify(workBenchPartController).setSize(anyDouble());
+        verify(workBenchPartController).setHidden(false);
+
+        verify(view).selectTab(partPresenter);
+    }
+
+    @Test
+    public void shouldSetCurrentSizeForPart() {
+        reset(workBenchPartController);
+        presenter.addPart(partPresenter);
+        when(workBenchPartController.getSize()).thenReturn(0d);
+
+        presenter.onTabClicked(partButton);
+
+        verify(workBenchPartController).setSize(eq(presenter.currentSize));
+        verify(workBenchPartController).setHidden(false);
+
+        verify(view).selectTab(partPresenter);
+    }
+
+    @Test
+    public void shouldSetInitialSizeForPart() {
+        reset(workBenchPartController);
+        presenter.addPart(partPresenter);
+        when(workBenchPartController.getSize()).thenReturn(PART_SIZE);
+
+        presenter.onTabClicked(partButton);
+
+        verify(workBenchPartController).setSize(eq(PART_SIZE));
         verify(workBenchPartController).setHidden(false);
 
         verify(view).selectTab(partPresenter);
