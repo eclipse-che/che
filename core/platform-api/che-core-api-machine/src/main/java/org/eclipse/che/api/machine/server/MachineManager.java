@@ -68,6 +68,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
@@ -973,6 +974,7 @@ public class MachineManager {
 
     Recipe getRecipeByLocation(MachineConfig machineConfig) throws MachineException {
         String recipeContent;
+        URL recipeUrl = null;
         File file = null;
         try {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(machineConfig.getSource().getLocation());
@@ -983,10 +985,13 @@ public class MachineManager {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getUser().getToken());
                 }
             }
-            file = IoUtil.downloadFile(null, "recipe", null, targetUriBuilder.build().toURL());
+            recipeUrl = targetUriBuilder.build().toURL();
+            file = IoUtil.downloadFile(null, "recipe", null, recipeUrl);
             recipeContent = IoUtil.readAndCloseQuietly(new FileInputStream(file));
         } catch (IOException | IllegalArgumentException e) {
-            throw new MachineException("Can't start machine " + machineConfig.getName() + ". " + e.getLocalizedMessage());
+            throw new MachineException("Can't start machine " + machineConfig.getName() +
+                                       ". Machine recipe downloading failed. Recipe url " + recipeUrl + ". "
+                                       + e.getLocalizedMessage());
         } finally {
             if (file != null) {
                 FileCleaner.addFile(file);
