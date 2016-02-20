@@ -114,12 +114,12 @@ class IdeSvc {
 
     startWorkspace(bus, data) {
 
-        let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.defaultEnv);
+        let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
 
         startWorkspacePromise.then((data) => {
             // get channels
-            let environments = data.environments;
-            let defaultEnvName = data.defaultEnv;
+            let environments = data.config.environments;
+            let defaultEnvName = data.config.defaultEnv;
             let defaultEnvironment = this.lodash.find(environments, (environment) => {
               return environment.name === defaultEnvName;
             });
@@ -249,7 +249,7 @@ class IdeSvc {
         }
 
         if (inDevMode) {
-            this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(this.proxySettings + contextPath + this.selectedWorkspace.name + appendUrl);
+            this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(this.proxySettings + contextPath + this.selectedWorkspace.config.name + appendUrl);
         } else {
             this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
         }

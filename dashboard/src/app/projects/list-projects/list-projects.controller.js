@@ -91,7 +91,7 @@ export class ListProjectsCtrl {
    * @returns {CheWorkspace.name|*}
    */
   getWorkspaceName(workspaceId) {
-    return this.workspacesById.get(workspaceId).name;
+    return this.workspacesById.get(workspaceId).config.name;
   }
 
   /**

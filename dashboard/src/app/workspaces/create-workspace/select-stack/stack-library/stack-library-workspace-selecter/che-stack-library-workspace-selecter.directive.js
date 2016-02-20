@@ -41,8 +41,8 @@ export class CheStackLibraryWorkspaceSelecter {
     //get workspace details
     $scope.getWorkspaceStackDetails = (keepFullValue) => {
       // return recipe for now
-      let environments = $scope.workspace.environments;
-      let defaultEnvName = $scope.workspace.defaultEnv;
+      let environments = $scope.workspace.config.environments;
+      let defaultEnvName = $scope.workspace.config.defaultEnv;
       let defaultEnvironment = this.lodash.find(environments, (environment) => {
           return environment.name === defaultEnvName;
       });

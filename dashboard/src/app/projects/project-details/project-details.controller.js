@@ -70,8 +70,8 @@ export class ProjectDetailsCtrl {
    */
   getWorkspaceName(workspaceId) {
     let workspace = this.workspacesById.get(workspaceId);
-    if (workspace) {
-      return workspace.name;
+    if (workspace && workspace.config) {
+      return workspace.config.name;
     }
     return '';
   }

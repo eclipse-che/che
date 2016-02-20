@@ -347,12 +347,12 @@ export class CreateProjectCtrl {
 
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.defaultEnv);
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
 
     startWorkspacePromise.then((data) => {
       // get channels
-      let environments = data.environments;
-      let envName = data.defaultEnv;
+      let environments = data.config.environments;
+      let envName = data.config.defaultEnv;
       let defaultEnvironment = this.lodash.find(environments, (environment) => {
           return environment.name === envName;
       });
@@ -731,7 +731,7 @@ export class CreateProjectCtrl {
 
 
     } else {
-      this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.name);
+      this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
 
       // Now that the container is started, wait for the extension server. For this, needs to get runtime details
       let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(this.workspaceSelected.id);
@@ -959,7 +959,7 @@ export class CreateProjectCtrl {
    */
   cheStackLibraryWorkspaceSelecter(workspace) {
     this.workspaceSelected = workspace;
-    this.workspaceName = workspace.name;
+    this.workspaceName = workspace.config.name;
     this.stackLibraryOption = 'existing-workspace';
 
     this.updateCurrentStack(null);

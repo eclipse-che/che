@@ -174,10 +174,10 @@ export class CheProject {
     var workspaceId = workspace.id;
 
     var remoteProjects = [];
-    if (workspace.projects) {
-      workspace.projects.forEach((projectReference) => {
+    if (workspace.config.projects) {
+      workspace.config.projects.forEach((projectReference) => {
         projectReference.workspaceId = workspace.id;
-        projectReference.workspaceName = workspace.name;
+        projectReference.workspaceName = workspace.config.name;
         remoteProjects.push(projectReference);
       });
     }
@@ -406,6 +406,7 @@ export class CheProject {
     // check if it was OK or not
     let parsedResultPromise = promise.then((projectDetails) => {
       if (projectDetails) {
+        projectDetails.workspaceId = workspaceId;
         this.projectDetailsMap.set(workspaceId + projectPath, projectDetails);
       }
     });
@@ -426,10 +427,14 @@ export class CheProject {
   }
 
   updateProject(workspaceId, path, projectDetails) {
+    let newProjectDetails = angular.copy(projectDetails);
+    if(newProjectDetails.workspaceId){
+      delete(newProjectDetails.workspaceId);
+    }
     let promiseUpdateProjectDetails = this.remoteProjectsAPI.update({
       workspaceId: workspaceId,
       path: path
-    }, projectDetails).$promise;
+    }, newProjectDetails).$promise;
 
 
     // update list of projects
