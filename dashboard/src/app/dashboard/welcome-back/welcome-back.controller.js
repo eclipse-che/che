@@ -69,7 +69,7 @@ export class WelcomeBackCtrl {
     // there are workspaces
     if (workspaces.length > 0) {
       // select the last one
-      this.lastWorkspace = workspaces[0].name;
+      this.lastWorkspace = workspaces[0].config.name;
 
       // user has not make the choice
       if (!preferences.choiceUDtoIDE) {

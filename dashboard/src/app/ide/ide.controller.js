@@ -79,7 +79,7 @@ class IdeCtrl {
 
     this.workspaces = this.cheWorkspace.getWorkspaces();
     for (var i = 0; i < this.workspaces.length; i++) {
-      if (this.workspaces[i].name === this.selectedWorkspaceName) {
+      if (this.workspaces[i].config.name === this.selectedWorkspaceName) {
         this.selectedWorkspace = this.workspaces[i];
         this.ideSvc.setSelectedWorkspace(this.selectedWorkspace);
       }

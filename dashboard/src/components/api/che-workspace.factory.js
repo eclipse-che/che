@@ -101,7 +101,7 @@ export class CheWorkspace {
       // add workspace if not temporary
       data.forEach((workspace) => {
 
-        if (!workspace.temporary) {
+        if (!workspace.config.temporary) {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
           this.workspacesById.set(workspace.id, workspace);

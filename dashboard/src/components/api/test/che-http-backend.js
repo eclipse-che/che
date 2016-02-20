@@ -143,9 +143,9 @@ export class CheHttpBackend {
       workspaceFound = workspace;
     }
 
-    var existingProjects = workspaceFound.projects;
+    var existingProjects = workspaceFound.config.projects;
     if (!existingProjects) {
-      workspaceFound.projects = [];
+      workspaceFound.config.projects = [];
     }
     if (projects) {
       projects.forEach((project) => {
