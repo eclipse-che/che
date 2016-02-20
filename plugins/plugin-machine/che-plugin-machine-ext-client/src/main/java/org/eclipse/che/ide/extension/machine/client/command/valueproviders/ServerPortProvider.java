@@ -88,7 +88,7 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
                     }
                 };
 
-        Map<String, CommandPropertyValueProvider> providers = transformEntries(machine.getMetadata().getServers(), machineToProvider);
+        Map<String, CommandPropertyValueProvider> providers = transformEntries(machine.getRuntime().getServers(), machineToProvider);
 
         return providers.values();
     }

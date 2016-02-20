@@ -8,17 +8,32 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto;
 
-import org.eclipse.che.api.core.model.machine.Channels;
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.api.core.model.project;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * @author Alexander Garagatyi
+ * @author gazarenkov
+ * @author Dmitry Shnurenko
  */
-@DTO
-public interface ChannelsDto extends Channels {
-    ChannelsDto withOutput(String outputChannel);
+public interface ProjectConfig {
+    String getName();
 
-    ChannelsDto withStatus(String statusChannel);
+    String getPath();
+
+    String getDescription();
+
+    String getType();
+
+    List<String> getMixins();
+
+    Map<String, List<String>> getAttributes();
+
+    List<? extends ProjectConfig> getModules();
+
+    SourceStorage getSource();
+
+    String getContentRoot();
 }

@@ -14,11 +14,9 @@ import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author andrew00x
@@ -27,39 +25,9 @@ import java.util.Map;
 public interface UsersWorkspaceDto extends UsersWorkspace, Hyperlinks {
 
     @Override
-    String getName();
+    WorkspaceConfigDto getConfig();
 
-    UsersWorkspaceDto withName(String name);
-
-    @Override
-    String getDefaultEnv();
-
-    UsersWorkspaceDto withDefaultEnv(String defaultEnvironment);
-
-    @Override
-    String getDescription();
-
-    UsersWorkspaceDto withDescription(String description);
-
-    @Override
-    List<CommandDto> getCommands();
-
-    UsersWorkspaceDto withCommands(List<CommandDto> commands);
-
-    @Override
-    List<ProjectConfigDto> getProjects();
-
-    UsersWorkspaceDto withProjects(List<ProjectConfigDto> projects);
-
-    @Override
-    List<EnvironmentStateDto> getEnvironments();
-
-    UsersWorkspaceDto withEnvironments(List<EnvironmentStateDto> environments);
-
-    @Override
-    Map<String, String> getAttributes();
-
-    UsersWorkspaceDto withAttributes(Map<String, String> attributes);
+    UsersWorkspaceDto withConfig(WorkspaceConfigDto config);
 
     UsersWorkspaceDto withId(String id);
 

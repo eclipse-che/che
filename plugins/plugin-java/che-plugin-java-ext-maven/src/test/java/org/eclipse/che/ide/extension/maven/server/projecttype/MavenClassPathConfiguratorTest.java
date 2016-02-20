@@ -36,6 +36,7 @@ import org.eclipse.che.api.vfs.server.VirtualFileSystemUserContext;
 import org.eclipse.che.api.vfs.server.impl.memory.MemoryFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Assert;
@@ -158,8 +159,10 @@ public class MavenClassPathConfiguratorTest {
                 .thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
+        WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
         final ProjectConfigDto projectConfigDto = DtoFactory.getInstance().createDto(ProjectConfigDto.class).withPath("/projectName");
-        when(usersWorkspaceMock.getProjects()).thenReturn(Collections.singletonList(projectConfigDto));
+        when(workspaceConfigMock.getProjects()).thenReturn(Collections.singletonList(projectConfigDto));
     }
 
     @Test

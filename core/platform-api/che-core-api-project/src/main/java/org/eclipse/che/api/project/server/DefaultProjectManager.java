@@ -23,7 +23,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -565,7 +565,7 @@ public final class DefaultProjectManager implements ProjectManager {
     public ProjectConfigDto getProjectFromWorkspace(@NotNull String wsId, @NotNull String projectPath) throws ServerException {
         final UsersWorkspaceDto usersWorkspaceDto = getWorkspace(wsId);
         final String path = projectPath.startsWith("/") ? projectPath : "/" + projectPath;
-        for (ProjectConfigDto projectConfig : usersWorkspaceDto.getProjects()) {
+        for (ProjectConfigDto projectConfig : usersWorkspaceDto.getConfig().getProjects()) {
             if (path.equals(projectConfig.getPath())) {
                 return projectConfig;
             }
@@ -576,7 +576,7 @@ public final class DefaultProjectManager implements ProjectManager {
     public List<ProjectConfigDto> getAllProjectsFromWorkspace(@NotNull String workspaceId) throws ServerException {
         UsersWorkspaceDto usersWorkspaceDto = getWorkspace(workspaceId);
 
-        return usersWorkspaceDto.getProjects();
+        return usersWorkspaceDto.getConfig().getProjects();
     }
 
     private void updateWorkspace(String wsId, WorkspaceConfigDto workspaceConfig) throws ServerException {
@@ -864,7 +864,7 @@ public final class DefaultProjectManager implements ProjectManager {
             String oldProjectPath = path.startsWith("/") ? path : "/" + path;
             String newProjectPath = '/' + newName;
 
-            List<ProjectConfigDto> projects = usersWorkspace.getProjects();
+            List<ProjectConfigDto> projects = usersWorkspace.getConfig().getProjects();
 
             if (projects.isEmpty()) {
                 renameProjectOnFileSystem(workspace, oldProjectPath, newName);

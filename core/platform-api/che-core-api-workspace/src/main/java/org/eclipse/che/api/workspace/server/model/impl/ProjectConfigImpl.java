@@ -12,7 +12,7 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 
 import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -64,7 +64,7 @@ public class KeysInjector {
             public void onEvent(MachineStatusEvent event) {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
                     try {
-                        final Instance machine = machineManager.getMachine(event.getMachineId());
+                        final Instance machine = machineManager.getInstance(event.getMachineId());
                         List<SshPairImpl> sshPairs = sshManager.getPairs(machine.getOwner(), "machine");
                         final List<String> publicKeys = sshPairs.stream()
                                                              .filter(sshPair -> sshPair.getPublicKey() != null)
@@ -75,7 +75,7 @@ public class KeysInjector {
                             return;
                         }
 
-                        final String containerId = machine.getMetadata().getProperties().get("id");
+                        final String containerId = machine.getRuntime().getProperties().get("id");
                         StringBuilder command = new StringBuilder("mkdir ~/.ssh/ -p");
                         for (String publicKey : publicKeys) {
                             command.append("&& echo '")

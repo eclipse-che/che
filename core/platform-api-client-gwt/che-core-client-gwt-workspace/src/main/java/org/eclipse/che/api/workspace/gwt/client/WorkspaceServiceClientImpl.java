@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -159,10 +159,10 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<UsersWorkspaceDto> startTemporary(final WorkspaceConfigDto cfg, final String accountId) {
-        return newPromise(new RequestCall<UsersWorkspaceDto>() {
+    public Promise<RuntimeWorkspaceDto> startTemporary(final WorkspaceConfigDto cfg, final String accountId) {
+        return newPromise(new RequestCall<RuntimeWorkspaceDto>() {
             @Override
-            public void makeCall(AsyncCallback<UsersWorkspaceDto> callback) {
+            public void makeCall(AsyncCallback<RuntimeWorkspaceDto> callback) {
                 startTemporary(cfg, accountId, callback);
             }
         });
@@ -170,12 +170,12 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     private void startTemporary(@NotNull WorkspaceConfigDto cfg,
                                 @NotNull String accountId,
-                                @NotNull AsyncCallback<UsersWorkspaceDto> callback) {
+                                @NotNull AsyncCallback<RuntimeWorkspaceDto> callback) {
         asyncRequestFactory.createPostRequest(baseHttpUrl + "/runtime", cfg)
                            .header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Creating machine from recipe..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(UsersWorkspaceDto.class)));
+                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(RuntimeWorkspaceDto.class)));
     }
 
     @Override
@@ -226,7 +226,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
         return getUsersWorkspace(wsId).then(new Function<UsersWorkspaceDto, List<CommandDto>>() {
             @Override
             public List<CommandDto> apply(UsersWorkspaceDto arg) throws FunctionException {
-                return arg.getCommands();
+                return arg.getConfig().getCommands();
             }
         });
     }
@@ -324,10 +324,10 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<MachineStateDto> createMachine(final String wsId, final MachineConfigDto machineConfig) {
-        return newPromise(new RequestCall<MachineStateDto>() {
+    public Promise<MachineDto> createMachine(final String wsId, final MachineConfigDto machineConfig) {
+        return newPromise(new RequestCall<MachineDto>() {
             @Override
-            public void makeCall(AsyncCallback<MachineStateDto> callback) {
+            public void makeCall(AsyncCallback<MachineDto> callback) {
                 createMachine(wsId, machineConfig, callback);
             }
         });
@@ -335,13 +335,13 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     private void createMachine(@NotNull String wsId,
                                @NotNull MachineConfigDto newMachine,
-                               @NotNull AsyncCallback<MachineStateDto> callback) {
+                               @NotNull AsyncCallback<MachineDto> callback) {
         String url = baseHttpUrl + '/' + wsId + "/machine";
         asyncRequestFactory.createPostRequest(url, newMachine)
                            .header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Creating machine..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(MachineStateDto.class)));
+                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(MachineDto.class)));
     }
 
     @Override

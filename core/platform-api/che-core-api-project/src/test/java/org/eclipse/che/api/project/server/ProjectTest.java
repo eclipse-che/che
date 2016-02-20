@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;

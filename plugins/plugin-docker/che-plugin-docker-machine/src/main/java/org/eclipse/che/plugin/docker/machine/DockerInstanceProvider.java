@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.MachineState;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -153,7 +153,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.devMachineEnvVariables = envVariablesForDevMachine.toArray(new String[envVariablesForDevMachine.size()]);
 
         // always add the docker host
-        String dockerHost = DockerInstanceMetadata.CHE_HOST.concat(":").concat(dockerConnectorConfiguration.getDockerHostIp());
+        String dockerHost = DockerInstanceRuntimeInfo.CHE_HOST.concat(":").concat(dockerConnectorConfiguration.getDockerHostIp());
         if (isNullOrEmpty(allMachinesExtraHosts)) {
             this.allMachinesExtraHosts = new String[] {dockerHost};
         } else {
@@ -211,30 +211,30 @@ public class DockerInstanceProvider implements InstanceProvider {
 
     @Override
     public Instance createInstance(Recipe recipe,
-                                   MachineState machineState,
+                                   Machine machine,
                                    LineConsumer creationLogsOutput) throws MachineException {
         final Dockerfile dockerfile = parseRecipe(recipe);
 
-        final String machineContainerName = generateContainerName(machineState.getWorkspaceId(), machineState.getName());
+        final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
 
         buildImage(dockerfile, creationLogsOutput, machineImageName, doForcePullOnBuild);
 
         return createInstance(machineContainerName,
-                              machineState,
+                              machine,
                               machineImageName,
                               creationLogsOutput);
     }
 
     @Override
     public Instance createInstance(InstanceKey instanceKey,
-                                   MachineState machineState,
+                                   Machine machine,
                                    LineConsumer creationLogsOutput) throws NotFoundException, MachineException {
         final DockerInstanceKey dockerInstanceKey = new DockerInstanceKey(instanceKey);
 
         pullImage(dockerInstanceKey, creationLogsOutput);
 
-        final String machineContainerName = generateContainerName(machineState.getWorkspaceId(), machineState.getName());
+        final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
         final String fullNameOfPulledImage = dockerInstanceKey.getFullName();
         try {
@@ -252,7 +252,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
 
         return createInstance(machineContainerName,
-                              machineState,
+                              machine,
                               machineImageName,
                               creationLogsOutput);
     }
@@ -380,7 +380,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     }
 
     private Instance createInstance(String containerName,
-                                    MachineState machineState,
+                                    Machine machine,
                                     String imageName,
                                     LineConsumer outputConsumer)
             throws MachineException {
@@ -389,18 +389,18 @@ public class DockerInstanceProvider implements InstanceProvider {
             final Map<String, Map<String, String>> portsToExpose;
             final String[] volumes;
             final String[] env;
-            if (machineState.isDev()) {
+            if (machine.getConfig().isDev()) {
                 labels = devMachineContainerLabels;
                 portsToExpose = devMachinePortsToExpose;
 
                 final String projectFolderVolume = String.format("%s:%s",
-                                                                 workspaceFolderPathProvider.getPath(machineState.getWorkspaceId()),
+                                                                 workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
                                                                  projectFolderPath);
                 volumes = ObjectArrays.concat(devMachineSystemVolumes,
                                               SystemInfo.isWindows() ? escapePath(projectFolderVolume) : projectFolderVolume);
 
-                String[] vars = {DockerInstanceMetadata.CHE_WORKSPACE_ID + '=' + machineState.getWorkspaceId(),
-                                 DockerInstanceMetadata.USER_TOKEN + '=' + EnvironmentContext.getCurrent().getUser().getToken()};
+                String[] vars = {DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + '=' + machine.getWorkspaceId(),
+                                 DockerInstanceRuntimeInfo.USER_TOKEN + '=' + EnvironmentContext.getCurrent().getUser().getToken()};
                 env = ObjectArrays.concat(devMachineEnvVariables, vars, String.class);
 
             } else {
@@ -414,7 +414,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                           .withExtraHosts(allMachinesExtraHosts)
                                                           .withPublishAllPorts(true)
                                                           .withMemorySwap(-1)
-                                                          .withMemory((long)machineState.getLimits().getRam() * 1024 * 1024);
+                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024);
             final ContainerConfig config = new ContainerConfig().withImage(imageName)
                                                                 .withLabels(labels)
                                                                 .withExposedPorts(portsToExpose)
@@ -425,14 +425,14 @@ public class DockerInstanceProvider implements InstanceProvider {
 
             docker.startContainer(containerId, null);
 
-            final DockerNode node = dockerMachineFactory.createNode(machineState.getWorkspaceId(), containerId);
-            if (machineState.isDev()) {
+            final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
+            if (machine.getConfig().isDev()) {
                 node.bindWorkspace();
             }
 
-            dockerInstanceStopDetector.startDetection(containerId, machineState.getId());
+            dockerInstanceStopDetector.startDetection(containerId, machine.getId());
 
-            return dockerMachineFactory.createInstance(machineState,
+            return dockerMachineFactory.createInstance(machine,
                                                        containerId,
                                                        imageName,
                                                        node,

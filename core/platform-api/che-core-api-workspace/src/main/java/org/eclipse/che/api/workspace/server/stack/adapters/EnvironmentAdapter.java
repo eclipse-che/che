@@ -17,24 +17,24 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-import org.eclipse.che.api.core.model.workspace.EnvironmentState;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentStateImpl;
+import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 
 import java.lang.reflect.Type;
 
 /**
- * Type adapter for {@link EnvironmentState} objects
+ * Type adapter for {@link Environment} objects
  *
  * @author Alexander Andrienko
  */
-public class EnvironmentStateAdapter implements JsonSerializer<EnvironmentState>, JsonDeserializer<EnvironmentState> {
+public class EnvironmentAdapter implements JsonSerializer<Environment>, JsonDeserializer<Environment> {
     @Override
-    public EnvironmentState deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
-        return context.deserialize(jsonElement, EnvironmentStateImpl.class);
+    public Environment deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
+        return context.deserialize(jsonElement, EnvironmentImpl.class);
     }
 
     @Override
-    public JsonElement serialize(EnvironmentState src, Type type, JsonSerializationContext context) {
-        return context.serialize(src, EnvironmentStateImpl.class);
+    public JsonElement serialize(Environment src, Type type, JsonSerializationContext context) {
+        return context.serialize(src, EnvironmentImpl.class);
     }
 }

@@ -23,8 +23,8 @@ import org.eclipse.che.api.core.model.machine.Limits;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.core.model.workspace.EnvironmentState;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
@@ -37,7 +37,7 @@ import org.eclipse.che.api.workspace.server.model.stack.StackSource;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.adapters.CommandAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.EnvironmentStateAdapter;
+import org.eclipse.che.api.workspace.server.stack.adapters.EnvironmentAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.LimitsAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.MachineSourceAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.ProjectConfigAdapter;
@@ -211,7 +211,7 @@ public class StackLoaderTest {
         Gson GSON = new GsonBuilder().registerTypeAdapter(StackComponent.class, new StackComponentAdapter())
                                      .registerTypeAdapter(WorkspaceConfig.class, new WorkspaceConfigAdapter())
                                      .registerTypeAdapter(ProjectConfig.class, new ProjectConfigAdapter())
-                                     .registerTypeAdapter(EnvironmentState.class, new EnvironmentStateAdapter())
+                                     .registerTypeAdapter(Environment.class, new EnvironmentAdapter())
                                      .registerTypeAdapter(Command.class, new CommandAdapter())
                                      .registerTypeAdapter(Recipe.class, new RecipeTypeAdapter())
                                      .registerTypeAdapter(Limits.class, new LimitsAdapter())

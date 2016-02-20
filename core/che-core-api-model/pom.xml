@@ -21,6 +21,12 @@
     <artifactId>che-core-api-model</artifactId>
     <packaging>jar</packaging>
     <name>Che Core :: API :: Model</name>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+    </dependencies>
     <build>
         <resources>
             <resource>

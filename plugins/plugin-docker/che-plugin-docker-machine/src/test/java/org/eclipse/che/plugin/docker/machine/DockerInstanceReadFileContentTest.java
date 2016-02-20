@@ -13,10 +13,10 @@ package org.eclipse.che.plugin.docker.machine;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.ChannelsImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineStateImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -63,17 +63,17 @@ public class DockerInstanceReadFileContentTest {
         dockerInstance = spy(new DockerInstance(dockerConnector,
                                                 null,
                                                 null,
-                                                new MachineStateImpl(false,
-                                                                     "Display name",
-                                                                     "machineType",
-                                                                     new MachineSourceImpl("type", "location"),
-                                                                     new LimitsImpl(64),
-                                                                     "machineId",
-                                                                     new ChannelsImpl("chan1", "chan2"),
-                                                                     "workspaceId",
-                                                                     "userId",
-                                                                     "envName",
-                                                                     MachineStatus.CREATING),
+                                                new MachineImpl(new MachineConfigImpl(false,
+                                                                                      "Display name",
+                                                                                      "machineType",
+                                                                                      new MachineSourceImpl("type", "location"),
+                                                                                      new LimitsImpl(64)),
+                                                                "machineId",
+                                                                "workspaceId",
+                                                                "envName",
+                                                                "userId",
+                                                                MachineStatus.CREATING,
+                                                                null),
                                                 null,
                                                 null,
                                                 null,

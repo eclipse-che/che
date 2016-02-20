@@ -10,24 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server;
 
-import org.eclipse.che.api.core.model.machine.Channels;
 import org.eclipse.che.api.core.model.machine.Limits;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineMetadata;
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.MachineState;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.machine.MachineProcess;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.machine.Snapshot;
-import org.eclipse.che.api.machine.shared.dto.ChannelsDto;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineMetadataDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
+import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 
@@ -72,56 +68,30 @@ public final class DtoConverter {
     /**
      * Converts {@link Machine} to {@link MachineDto}.
      */
-    public static MachineStateDto asDto(MachineState machine) {
-        return newDto(MachineStateDto.class).withName(machine.getName())
-                                            .withType(machine.getType())
-                                            .withDev(machine.isDev())
-                                            .withLimits(asDto(machine.getLimits()))
-                                            .withSource(asDto(machine.getSource()))
-                                            .withChannels(asDto(machine.getChannels()))
-                                            .withId(machine.getId())
-                                            .withStatus(machine.getStatus())
-                                            .withOwner(machine.getOwner())
-                                            .withWorkspaceId(machine.getWorkspaceId());
-    }
-
-    /**
-     * Converts {@link Machine} to {@link MachineDto}.
-     */
     public static MachineDto asDto(Machine machine) {
-        return newDto(MachineDto.class).withName(machine.getName())
-                                       .withType(machine.getType())
-                                       .withDev(machine.isDev())
-                                       .withLimits(asDto(machine.getLimits()))
-                                       .withSource(asDto(machine.getSource()))
-                                       .withChannels(asDto(machine.getChannels()))
-                                       .withId(machine.getId())
-                                       .withMetadata(asDto(machine.getMetadata()))
-                                       .withStatus(machine.getStatus())
-                                       .withOwner(machine.getOwner())
-                                       .withWorkspaceId(machine.getWorkspaceId());
+        final MachineDto machineDto = newDto(MachineDto.class).withConfig(asDto(machine.getConfig()))
+                                                              .withId(machine.getId())
+                                                              .withStatus(machine.getStatus())
+                                                              .withOwner(machine.getOwner())
+                                                              .withWorkspaceId(machine.getWorkspaceId());
+        if (machine.getRuntime() != null) {
+            machineDto.withRuntime(asDto(machine.getRuntime()));
+        }
+        return machineDto;
     }
 
     /**
-     * Converts {@link Channels} to {@link ChannelsDto}.
+     * Converts {@link MachineRuntimeInfo} to {@link MachineRuntimeInfoDto}.
      */
-    public static ChannelsDto asDto(Channels channels) {
-        return newDto(ChannelsDto.class).withOutput(channels.getOutput())
-                                        .withStatus(channels.getStatus());
-    }
+    private static MachineRuntimeInfoDto asDto(MachineRuntimeInfo runtime) {
+        final Map<String, ServerDto> servers = runtime.getServers()
+                                                      .entrySet()
+                                                      .stream()
+                                                      .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue())));
 
-    /**
-     * Converts {@link Limits} to {@link LimitsDto}.
-     */
-    public static MachineMetadataDto asDto(MachineMetadata metadata) {
-        final Map<String, ServerDto> servers = metadata.getServers()
-                                                       .entrySet()
-                                                       .stream()
-                                                       .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue())));
-
-        return newDto(MachineMetadataDto.class).withEnvVariables(metadata.getEnvVariables())
-                                               .withProperties(metadata.getProperties())
-                                               .withServers(servers);
+        return newDto(MachineRuntimeInfoDto.class).withEnvVariables(runtime.getEnvVariables())
+                                                  .withProperties(runtime.getProperties())
+                                                  .withServers(servers);
     }
 
     /**

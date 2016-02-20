@@ -179,7 +179,7 @@ public class AnalyticsEventLoggerImpl implements AnalyticsEventLoggerExt {
     }
 
     protected String getWorkspace() {
-        return appContext.getWorkspace().getName();
+        return appContext.getWorkspace().getConfig().getName();
     }
 
     private void putIfNotNull(String key,

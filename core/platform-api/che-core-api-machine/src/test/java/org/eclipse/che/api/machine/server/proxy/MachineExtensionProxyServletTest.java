@@ -11,13 +11,11 @@
 package org.eclipse.che.api.machine.server.proxy;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.MachineMetadata;
-import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineMetadataImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -74,7 +72,9 @@ public class MachineExtensionProxyServletTest {
 
     private MachineManager machineManager;
 
-    private Instance machine;
+    private MachineImpl machine;
+
+    private MachineRuntimeInfoImpl machineRuntimeInfo;
 
     private MachineExtensionProxyServlet proxyServlet;
 
@@ -128,16 +128,16 @@ public class MachineExtensionProxyServletTest {
     @BeforeMethod
     public void setUpMethod() throws Exception {
         String serverAddress = "localhost:" + jettyServer.getURI().getPort();
-        Map<String, Server> machineServers = Collections.<String, Server>singletonMap(String.valueOf(EXTENSIONS_API_PORT),
-                                                                                      new ServerImpl(null,
-                                                                                                     serverAddress,
-                                                                                                     "http://" + serverAddress));
-
-        MachineMetadata machineMetadata = new MachineMetadataImpl(null, null, machineServers);
+        Map<String, ServerImpl> machineServers = Collections.singletonMap(String.valueOf(EXTENSIONS_API_PORT),
+                                                                          new ServerImpl(null,
+                                                                                         serverAddress,
+                                                                                         "http://" + serverAddress));
 
         machineManager = mock(MachineManager.class);
 
-        machine = mock(Instance.class);
+        machine = mock(MachineImpl.class);
+
+        machineRuntimeInfo = mock(MachineRuntimeInfoImpl.class);
 
         extensionApiResponse = spy(new ExtensionApiResponse());
 
@@ -146,7 +146,8 @@ public class MachineExtensionProxyServletTest {
         proxyServlet = new MachineExtensionProxyServlet(4301, machineManager);
 
         when(machineManager.getDevMachine(WORKSPACE_ID)).thenReturn(machine);
-        when(machine.getMetadata()).thenReturn(machineMetadata);
+        when(machine.getRuntime()).thenReturn(machineRuntimeInfo);
+        when(machineRuntimeInfo.getServers()).thenReturn(machineServers);
     }
 
     @AfterClass
@@ -255,7 +256,7 @@ public class MachineExtensionProxyServletTest {
 
     @Test
     public void shouldRespondInternalServerErrorIfExtServerIsNotFoundInMachine() throws Exception {
-        when(machine.getMetadata()).thenReturn(new MachineMetadataImpl(null, null, null));
+        when(machineRuntimeInfo.getServers()).thenReturn(Collections.emptyMap());
 
         MockHttpServletRequest mockRequest =
                 new MockHttpServletRequest(DEFAULT_URL,

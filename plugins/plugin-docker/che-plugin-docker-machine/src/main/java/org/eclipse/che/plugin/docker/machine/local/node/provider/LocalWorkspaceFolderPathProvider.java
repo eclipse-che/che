@@ -111,7 +111,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
             try {
                 WorkspaceManager workspaceManager = this.workspaceManager.get();
                 final UsersWorkspace workspace = workspaceManager.getWorkspace(workspaceId);
-                wsName = workspace.getName();
+                wsName = workspace.getConfig().getName();
             } catch (BadRequestException | NotFoundException | ServerException e) {
                 //should never happens
                 LOG.error(e.getMessage());

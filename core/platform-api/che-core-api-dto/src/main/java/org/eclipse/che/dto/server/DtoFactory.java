@@ -127,6 +127,15 @@ public final class DtoFactory {
         return (T)provider.clone(origin);
     }
 
+    /**
+     * Shortcut for {@code DtoFactory.getInstance().clone(T dtoObject)}
+     *
+     * @see #clone(Object)
+     */
+    public static <T> T cloneDto(T origin) {
+        return getInstance().clone(origin);
+    }
+
     public <T> String toJson(T dto) {
         if (dto instanceof JsonSerializable) {
             return ((JsonSerializable)dto).toJson();
