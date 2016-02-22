@@ -722,6 +722,13 @@ public class ProjectService extends Service {
                 logProjectCreatedEvent(name, projectType);
             }
         }
+
+        eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.CREATED,
+                                                          workspace,
+                                                          projectPath(copy.getPath()),
+                                                          copy.getPath(),
+                                                          copy.isFolder()));
+
         return Response.created(location).build();
     }
 

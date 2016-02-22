@@ -18,7 +18,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTree;
-import com.google.gwt.user.cellview.client.TreeNode;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -205,7 +204,6 @@ final class MoveViewImpl extends Window implements MoveView {
         tree.setAnimationEnabled(true);
         treePanel.clear();
         treePanel.add(tree);
-        expandAll(tree.getRootTreeNode());
     }
 
     /** {@inheritDoc} */
@@ -288,13 +286,5 @@ final class MoveViewImpl extends Window implements MoveView {
                 return entry;
         }
         return null;
-    }
-
-    private void expandAll(TreeNode node) {
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (!node.isChildLeaf(i)) {
-                expandAll(node.setChildOpen(i, true));
-            }
-        }
     }
 }
