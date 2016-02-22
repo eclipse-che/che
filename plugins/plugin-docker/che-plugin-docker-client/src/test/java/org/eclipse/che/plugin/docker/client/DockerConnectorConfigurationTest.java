@@ -90,7 +90,7 @@ public class DockerConnectorConfigurationTest {
         env.put(DockerConnectorConfiguration.DOCKER_HOST_PROPERTY, "this is an invalid host");
 
         URI uri = DockerConnectorConfiguration.dockerDaemonUri(true, env);
-        assertEquals(uri, DockerConnectorConfiguration.DEFAULT_DOCKER_MACHINE_URI);
+        assertEquals(uri, DockerConnectorConfiguration.UNIX_SOCKET_URI);
 
     }
 
