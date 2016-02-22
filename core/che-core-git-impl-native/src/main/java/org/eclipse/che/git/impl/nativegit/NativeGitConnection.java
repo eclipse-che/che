@@ -11,8 +11,10 @@
 package org.eclipse.che.git.impl.nativegit;
 
 
+import com.google.common.collect.ImmutableMap;
+
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.rest.shared.dto.ExtendedError;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.Config;
 import org.eclipse.che.api.git.CredentialsLoader;
@@ -21,6 +23,7 @@ import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
@@ -89,6 +92,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 
 /**
  * Native implementation of GitConnection
@@ -575,7 +581,14 @@ public class NativeGitConnection implements GitConnection {
             if (!isOperationNeedAuth(gitEx.getMessage())) {
                 throw gitEx;
             }
-            throw new UnauthorizedException(gitEx.getMessage());
+            ProviderInfo info = credentialsLoader.getProviderInfo(command.getRemoteUri());
+            if (info != null) {
+                throw new UnauthorizedException(gitEx.getMessage(),
+                                                ErrorCodes.UNAUTHORIZED_GIT_OPERATION,
+                                                ImmutableMap.of(PROVIDER_NAME, info.getProviderName(),
+                                                                AUTHENTICATE_URL, info.getAuthenticateUrl()));
+            }
+            throw new UnauthorizedException(gitEx.getMessage(), ErrorCodes.UNAUTHORIZED_GIT_OPERATION);
         }
     }
 

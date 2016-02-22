@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(GitHubAuthenticatorViewImpl.class)
 public interface GitHubAuthenticatorView extends View<GitHubAuthenticatorView.ActionDelegate> {
 
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /** Defines what's done when the user clicks cancel. */
         void onCancelled();
 

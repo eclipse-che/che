@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.github.client.inject;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.ext.github.client.GitHubClientService;
-import org.eclipse.che.ide.ext.github.client.authenticator.GitHubAuthenticator;
+import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.ext.github.client.authenticator.GitHubAuthenticatorImpl;
 import org.eclipse.che.ide.ext.github.client.importer.GitHubImportWizardRegistrar;
 import org.eclipse.che.ide.ext.github.client.GitHubClientServiceImpl;
@@ -29,8 +29,7 @@ public class GitHubGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(GitHubClientService.class).to(GitHubClientServiceImpl.class).in(Singleton.class);
-        bind(GitHubAuthenticator.class).to(GitHubAuthenticatorImpl.class).in(Singleton.class);
-
+        GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class).addBinding().to(GitHubAuthenticatorImpl.class);
         GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding().to(GitHubImportWizardRegistrar.class);
     }
 }

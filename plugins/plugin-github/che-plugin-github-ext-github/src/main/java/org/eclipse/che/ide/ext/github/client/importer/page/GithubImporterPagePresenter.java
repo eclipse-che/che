@@ -10,22 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.client.importer.page;
 
+import com.google.common.collect.Lists;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
+import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.github.client.GitHubClientService;
 import org.eclipse.che.ide.ext.github.client.GitHubLocalizationConstant;
-import org.eclipse.che.ide.ext.github.client.authenticator.GitHubAuthenticator;
+import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.ext.github.client.load.ProjectData;
 import org.eclipse.che.ide.ext.github.client.marshaller.AllRepositoriesUnmarshaller;
 import org.eclipse.che.ide.ext.github.shared.GitHubRepository;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
@@ -60,16 +65,22 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
     private       Map<String, List<GitHubRepository>> repositories;
     private       GitHubLocalizationConstant          locale;
     private       GithubImporterPageView              view;
-    private       GitHubAuthenticator                 gitHubAuthenticator;
+    private final String                              restContext;
+    private final AppContext                          appContext;
+    private       OAuth2Authenticator                 gitHubAuthenticator;
 
     @Inject
     public GithubImporterPagePresenter(GithubImporterPageView view,
-                                       GitHubAuthenticator gitHubAuthenticator,
+                                       OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry,
                                        GitHubClientService gitHubClientService,
                                        DtoFactory dtoFactory,
+                                       @RestContext String restContext,
+                                       AppContext appContext,
                                        GitHubLocalizationConstant locale) {
         this.view = view;
-        this.gitHubAuthenticator = gitHubAuthenticator;
+        this.restContext = restContext;
+        this.appContext = appContext;
+        this.gitHubAuthenticator = gitHubAuthenticatorRegistry.getAuthenticator("github");
         this.gitHubClientService = gitHubClientService;
         this.dtoFactory = dtoFactory;
         this.view.setDelegate(this);
@@ -224,18 +235,21 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
      */
     private void authorize() {
         showProcessing(true);
-        gitHubAuthenticator.authorize(new AsyncCallback<OAuthStatus>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                showProcessing(false);
-            }
+        gitHubAuthenticator.authorize(
+                OAuth2AuthenticatorUrlProvider.get(restContext, "github", appContext.getCurrentUser().getProfile().getUserId(),
+                                                   Lists.asList("user", new String[]{"repo", "write:public_key"})),
+                new AsyncCallback<OAuthStatus>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        showProcessing(false);
+                    }
 
-            @Override
-            public void onSuccess(OAuthStatus result) {
-                showProcessing(false);
-                getUserRepos();
-            }
-        });
+                    @Override
+                    public void onSuccess(OAuthStatus result) {
+                        showProcessing(false);
+                        getUserRepos();
+                    }
+                });
     }
 
     @Override

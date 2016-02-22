@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.client.authenticator;
 
+import com.google.common.collect.Lists;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -21,6 +22,8 @@ import org.eclipse.che.api.ssh.gwt.client.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
+import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.ext.github.client.GitHubLocalizationConstant;
 import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
 import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
@@ -40,8 +43,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 /**
  * @author Roman Nikitenko
  */
-public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallback, GitHubAuthenticatorViewImpl.ActionDelegate {
+public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallback, GitHubAuthenticatorViewImpl.ActionDelegate {
     public static final String GITHUB_HOST = "github.com";
+    public static final String GITHUB      = "github";
 
     AsyncCallback<OAuthStatus> callback;
 
@@ -53,6 +57,7 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
     private final GitHubLocalizationConstant locale;
     private final String                     baseUrl;
     private final AppContext                 appContext;
+    private String authenticationUrl;
 
     @Inject
     public GitHubAuthenticatorImpl(GitSshKeyUploaderRegistry registry,
@@ -75,9 +80,15 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
     }
 
     @Override
-    public void authorize(@NotNull final AsyncCallback<OAuthStatus> callback) {
+    public void authorize(String authenticationUrl, @NotNull final AsyncCallback<OAuthStatus> callback) {
+        this.authenticationUrl = authenticationUrl;
         this.callback = callback;
         view.showDialog();
+    }
+
+    @Override
+    public String getProviderName() {
+        return GITHUB;
     }
 
     @Override
@@ -100,19 +111,18 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
     }
 
     private void showAuthWindow() {
-        JsOAuthWindow authWindow = new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, this);
+        JsOAuthWindow authWindow;
+        if (authenticationUrl == null) {
+            authWindow = new JsOAuthWindow(getAuthUrl(), "error.url", 500, 980, this);
+        } else {
+            authWindow = new JsOAuthWindow(authenticationUrl, "error.url", 500, 980, this);
+        }
         authWindow.loginWithOAuth();
     }
 
     private String getAuthUrl() {
-        String userId = appContext.getCurrentUser().getProfile().getId();
-        return baseUrl
-               + "/oauth/authenticate?oauth_provider=github"
-               + "&scope=user,repo,write:public_key&userId=" + userId
-               + "&redirect_after_login="
-               + Window.Location.getProtocol() + "//"
-               + Window.Location.getHost() + "/ws/"
-               + appContext.getWorkspace().getConfig().getName();
+        return  OAuth2AuthenticatorUrlProvider.get(baseUrl, "github", appContext.getCurrentUser().getProfile().getUserId(), Lists
+                .asList("user", new String[]{"repo", "write:public_key"}));
     }
 
     private void generateSshKeys(final OAuthStatus authStatus) {
@@ -157,7 +167,7 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
                         .catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
-                                Log.error(GitHubAuthenticator.class, arg.getCause());
+                                Log.error(OAuth2Authenticator.class, arg.getCause());
                             }
                         });
     }
@@ -173,7 +183,7 @@ public class GitHubAuthenticatorImpl implements GitHubAuthenticator, OAuthCallba
                         .catchError(new Operation<PromiseError>() {
                             @Override
                             public void apply(PromiseError arg) throws OperationException {
-                                Log.error(GitHubAuthenticator.class, arg.getCause());
+                                Log.error(OAuth2Authenticator.class, arg.getCause());
                             }
                         });
     }

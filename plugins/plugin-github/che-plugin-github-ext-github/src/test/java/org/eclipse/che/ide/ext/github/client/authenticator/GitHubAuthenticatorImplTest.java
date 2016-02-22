@@ -128,7 +128,7 @@ public class GitHubAuthenticatorImplTest {
     @Test
     public void dialogShouldBeShow() throws Exception {
         AsyncCallback<OAuthStatus> callback = getCallBack();
-        gitHubAuthenticator.authorize(callback);
+        gitHubAuthenticator.authorize(null, callback);
 
         verify(view).showDialog();
         assertThat(gitHubAuthenticator.callback, is(callback));
@@ -171,7 +171,7 @@ public class GitHubAuthenticatorImplTest {
         when(user.getProfile()).thenReturn(profile);
         when(profile.getId()).thenReturn(userId);
 
-        gitHubAuthenticator.authorize(getCallBack());
+        gitHubAuthenticator.authorize(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
 
         verify(view).isGenerateKeysSelected();
@@ -198,7 +198,7 @@ public class GitHubAuthenticatorImplTest {
         when(user.getProfile()).thenReturn(profile);
         when(profile.getId()).thenReturn(userId);
 
-        gitHubAuthenticator.authorize(getCallBack());
+        gitHubAuthenticator.authorize(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
 
         verify(keyProvider).uploadKey(eq(userId), generateKeyCallbackCaptor.capture());
@@ -229,7 +229,7 @@ public class GitHubAuthenticatorImplTest {
         when(profile.getId()).thenReturn(userId);
         when(dialogFactory.createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject())).thenReturn(messageDialog);
 
-        gitHubAuthenticator.authorize(getCallBack());
+        gitHubAuthenticator.authorize(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
 
         verify(keyProvider).uploadKey(eq(userId), generateKeyCallbackCaptor.capture());
@@ -266,7 +266,7 @@ public class GitHubAuthenticatorImplTest {
         when(pair.getName()).thenReturn(GITHUB_HOST);
         when(pair.getService()).thenReturn(SshKeyManagerPresenter.GIT_SSH_SERVICE);
 
-        gitHubAuthenticator.authorize(getCallBack());
+        gitHubAuthenticator.authorize(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
 
         verify(keyUploader).uploadKey(eq(userId), generateKeyCallbackCaptor.capture());
