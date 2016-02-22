@@ -9,6 +9,9 @@
             <div class="chefont cheico-icon-wkps icon"></div>
             <div>{{workspace.config.name}}</div>
         </div>
+        <div class="che-stack-library-workspace-selecter-workspace-stack" layout="row" layout-align="start center" ng-if="workspace.attributes && workspace.attributes.stackId">
+          <div>Stack: {{workspace.attributes.stackId}}</div>
+        </div>
         <div class="che-stack-library-workspace-selecter-text"
              ng-if="workspace">{{getWorkspaceStackDetails()}}</div>
         <div layout="row" layout-align="end end" flex>

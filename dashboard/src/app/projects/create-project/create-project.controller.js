@@ -21,8 +21,9 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q) {
     this.cheAPI = cheAPI;
+    this.cheStack = cheStack;
     this.$websocket = $websocket;
     this.$timeout = $timeout;
     this.$location = $location;
@@ -681,26 +682,26 @@ export class CreateProjectCtrl {
 
     // logic to decide if we create workspace based on a stack or reuse existing workspace
     var option;
-    var stack;
+    this.stack = null;
     if (this.stackTab === 'ready-to-go') {
       option = 'create-workspace';
-      stack = this.readyToGoStack;
+      this.stack = this.readyToGoStack;
     } else if (this.stackTab === 'stack-library') {
       if (this.stackLibraryOption === 'existing-workspace') {
         option = 'reuse-workspace';
       } else {
-        stack = this.stackLibraryUser;
+        this.stack = this.stackLibraryUser;
         option = 'create-workspace';
       }
     } else if (this.stackTab === 'custom-stack') {
-      stack = null;
+      this.stack = null;
       option = 'create-workspace';
     }
     // check workspace is selected
     if (option === 'create-workspace') {
-      if (stack) {
+      if (this.stack) {
         // needs to get recipe URL from stack
-        let promise = this.computeRecipeForStack(stack);
+        let promise = this.computeRecipeForStack(this.stack);
         promise.then((recipe) => {
           let findLink = this.lodash.find(recipe.links, function (link) {
             return link.rel === 'get recipe script';
@@ -774,8 +775,10 @@ export class CreateProjectCtrl {
    */
   createWorkspace() {
     this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
+    let attributes = this.stack ? {stackId : this.stack.id} : {};
+
     //TODO: no account in che ? it's null when testing on localhost
-    let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam);
+    let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
     creationPromise.then((data) => {
 
       // init message bus if not there
@@ -961,8 +964,12 @@ export class CreateProjectCtrl {
     this.workspaceSelected = workspace;
     this.workspaceName = workspace.config.name;
     this.stackLibraryOption = 'existing-workspace';
-
-    this.updateCurrentStack(null);
+    let stack = null;
+    if (workspace.attributes && workspace.attributes.stackId) {
+      let stackId = workspace.attributes.stackId;
+      stack = this.cheStack.getStackById(stackId);
+    }
+    this.updateCurrentStack(stack);
     this.generateProjectName(true);
     this.checkDisabledWorkspace();
   }

@@ -154,14 +154,14 @@ export class CheWorkspace {
   }
 
 
-  createWorkspace(accountId, workspaceName, recipeUrl, ram) {
+  createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
     // /api/workspace/config?account=accountId
-
+    let attr = attributes ? attributes : {};
 
     let data = {
       'environments': [],
       'name': workspaceName,
-      'attributes': {},
+      'attributes': attributes,
       'projects': [],
       'defaultEnv': workspaceName,
       'description': null,
