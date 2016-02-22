@@ -241,7 +241,7 @@ set_environment_variables () {
   if [ -z "${CHE_HOME}" ]; then
     if [ "${WIN}" == "true" ]; then
       # che-497: Determine windows short directory name in bash
-      export CHE_HOME=`(cmd //C 'FOR %i in (%~dp0\..\..) do @echo %~Si')`
+      export CHE_HOME=`(cd "$( dirname "${BASH_SOURCE[0]}" )" && cmd //C 'FOR %i in (..) do @echo %~Si')`
     else 
       export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
     fi
@@ -251,17 +251,7 @@ set_environment_variables () {
     export DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
-  # che-497: Convert JAVA_HOME to short directory name for Windows
-  if [ -z "${CHE_HOME}" ]; then
-    if [ "${WIN}" == "true" ]; then
-      # che-497: Determine windows short directory name in bash
-      export CHE_HOME=`(cmd //C 'FOR %i in (%~dp0\..\..) do @echo %~Si')`
-    else 
-      export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
-    fi
-  fi
-
-   if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
+  if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
     # che-497: Determine windows short directory name in bash
     export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
   fi

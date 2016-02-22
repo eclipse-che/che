@@ -18,10 +18,17 @@ import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.StreamPump;
 import org.eclipse.che.api.core.util.Watchdog;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
+import org.eclipse.che.ide.extension.maven.server.projecttype.MavenClassPathConfigurator;
 import org.eclipse.che.ide.maven.tools.MavenUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +49,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Valeriy Svydenko
  */
-// TODO: rework after new Project API
 public class MavenClassPathBuilder implements ClassPathBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(MavenClassPathBuilder.class);
 
@@ -54,8 +60,8 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
     @Inject
     public MavenClassPathBuilder(ResourcesPlugin resourcesPlugin, ProjectManager projectManager) {
         this.projectManager = projectManager;
-//        JavaModelManager.getJavaModelManager().containerInitializersCache.put(MavenClasspathContainer.CONTAINER_ID,
-//                                                                              new MavenClasspathContainerInitializer());
+        JavaModelManager.getJavaModelManager().containerInitializersCache.put(MavenClasspathContainer.CONTAINER_ID,
+                                                                              new MavenClasspathContainerInitializer());
 
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(MavenClassPathBuilder.class.getSimpleName() + "-%d").build();
 
@@ -68,31 +74,31 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
         this.workspaceId = workspaceId;
 
         //TODO Temporary solution for IDEX-4270
-//        try {
-//            ProjectImpl project = projectManager.getProject(projectPath);
-//            if (project != null) {
-//                MavenClassPathConfigurator.configure(project.getBaseFolder());
-//            }
-//        } catch (Exception e) {
-//            LOG.error(e.getMessage(), e);
-//        }
+        try {
+            RegisteredProject project = projectManager.getProject(projectPath);
+            if (project != null) {
+                MavenClassPathConfigurator.configure(project.getBaseFolder());
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
 
         Callable<ClassPathBuilderResult> callable = () -> {
 
             ClassPathBuilderResult result = dependencyUpdateProcessor(projectPath);
 
-//            IJavaProject javaProject = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(projectPath);
-//
-//            if (ClassPathBuilderResult.Status.SUCCESS.equals(result.getStatus())) {
-//                IClasspathContainer container = MavenClasspathUtil.readMavenClasspath(javaProject);
-//                try {
-//                    JavaCore.setClasspathContainer(container.getPath(), new IJavaProject[]{javaProject},
-//                                                   new IClasspathContainer[]{container},
-//                                                   null);
-//                } catch (JavaModelException e) {
-//                    LOG.error(e.getMessage(), e);
-//                }
-//            }
+            IJavaProject javaProject = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(projectPath);
+
+            if (ClassPathBuilderResult.Status.SUCCESS.equals(result.getStatus())) {
+                IClasspathContainer container = MavenClasspathUtil.readMavenClasspath(javaProject);
+                try {
+                    JavaCore.setClasspathContainer(container.getPath(), new IJavaProject[]{javaProject},
+                                                   new IClasspathContainer[]{container},
+                                                   null);
+                } catch (JavaModelException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
 
             return result;
 

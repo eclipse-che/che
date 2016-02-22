@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
 import org.eclipse.che.jdt.CodeAssist;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -20,6 +21,8 @@ import static org.fest.assertions.Assertions.assertThat;
 /**
  * @author Evgen Vidolob
  */
+// TODO: rework after new Project API
+@Ignore
 public class CodeAssistantTest  extends BaseTest{
 
 

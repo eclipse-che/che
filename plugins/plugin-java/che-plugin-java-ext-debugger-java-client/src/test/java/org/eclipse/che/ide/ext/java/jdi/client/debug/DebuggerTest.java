@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.event.project.ProjectReadyHandler;
+import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.tree.generic.FileNode;
 import org.eclipse.che.ide.debug.Breakpoint;
 import org.eclipse.che.ide.debug.BreakpointManager;
@@ -49,6 +51,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyListOf;
@@ -108,6 +111,8 @@ public class DebuggerTest extends BaseTest {
     private LocalStorage                        localStorage;
     @Mock
     private DebuggerInfo                        debuggerInfo;
+    @Mock
+    private FileTypeRegistry                    fileTypeRegistry;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler> extServerStateHandlerCaptor;
@@ -133,6 +138,10 @@ public class DebuggerTest extends BaseTest {
 
         verify(eventBus).addHandler(eq(WsAgentStateEvent.TYPE), extServerStateHandlerCaptor.capture());
         extServerStateHandlerCaptor.getValue().onWsAgentStarted(WsAgentStateEvent.createWsAgentStartedEvent());
+
+        FileType fileType = mock(FileType.class);
+        when(fileType.getMimeTypes()).thenReturn(Collections.singletonList("application/java"));
+        when(fileTypeRegistry.getFileTypeByFile(eq(file))).thenReturn(fileType);
     }
 
     @Test

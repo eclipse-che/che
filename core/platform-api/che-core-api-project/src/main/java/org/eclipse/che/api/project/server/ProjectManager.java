@@ -132,9 +132,9 @@ public final class ProjectManager {
         return this.projectTypeRegistry;
     }
 
-    public ProjectHandlerRegistry getHandlers() {
-        return handlers;
-    }
+//    public ProjectHandlerRegistry getHandlers() {
+//        return handlers;
+//    }
 
     public Searcher getSearcher() throws NotFoundException, ServerException {
 
@@ -269,18 +269,20 @@ public final class ProjectManager {
                                                                            ConflictException,
                                                                            IOException {
 
-        String apath = newConfig.getPath();
+        String path = newConfig.getPath();
 
-        if (newConfig.getPath() == null)
+        if (path == null)
             throw new ConflictException("Project path is not defined");
 
-        RegisteredProject oldProject = projectRegistry.getProject(apath);
+
+        FolderEntry baseFolder = asFolder(path);
+        //RegisteredProject oldProject = projectRegistry.getProject(apath);
 
         // If a project does not exist in the target path, create a new one
-        if (oldProject == null)
-            throw new NotFoundException(String.format("Project '%s' doesn't exist.", apath));
+        if (baseFolder == null)
+            throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
 
-        RegisteredProject project = projectRegistry.putProject(newConfig, oldProject.getBaseFolder(), true);
+        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true);
 
         // TODO move to register?
         reindexProject(project);
@@ -323,7 +325,7 @@ public final class ProjectManager {
 
 
     public ProjectTypeResolution estimateProject(String path, String projectTypeId)
-            throws ServerException, ForbiddenException, NotFoundException, ValueStorageException, ProjectTypeConstraintException {
+            throws ServerException, NotFoundException, ValueStorageException {
 
 
 
@@ -343,7 +345,7 @@ public final class ProjectManager {
 
     // ProjectSuggestion
     public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly)
-            throws ServerException, ForbiddenException, NotFoundException, ProjectTypeConstraintException {
+            throws ServerException, NotFoundException {
 
         final List<ProjectTypeResolution> resolutions = new ArrayList<>();
 //        boolean isPresentPrimaryType = false;
@@ -472,7 +474,7 @@ public final class ProjectManager {
 
 
     // TODO do we need ForbiddenException
-    FolderEntry asFolder(String path) throws NotFoundException, ServerException, ForbiddenException {
+    FolderEntry asFolder(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
         if (entry == null)
             return null;
@@ -484,7 +486,7 @@ public final class ProjectManager {
 
     // TODO do we need ForbiddenException
     VirtualFileEntry asVirtualFileEntry(String path)
-            throws NotFoundException, ForbiddenException, ServerException {
+            throws NotFoundException, ServerException {
         String apath = ProjectRegistry.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
         final VirtualFileEntry entry = root.getChild(apath);
@@ -494,12 +496,12 @@ public final class ProjectManager {
         return entry;
     }
 
-    FileEntry asFile(String path) throws ForbiddenException, NotFoundException, ServerException {
+    FileEntry asFile(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
         if (entry == null)
             return null;
         if (!entry.isFile()) {
-            throw new ForbiddenException(String.format("Item '%s' isn't a file. ", path));
+            throw new NotFoundException(String.format("Item '%s' isn't a file. ", path));
         }
         return (FileEntry)entry;
     }

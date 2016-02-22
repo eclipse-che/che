@@ -73,7 +73,8 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
         ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
-        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectHandlerRegistry,
                                 null, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
@@ -136,7 +137,11 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testParentProject() throws Exception {
 
-        assertEquals("/normal", projectRegistry.getParentProject("/normal").getPath());
+        try {
+            projectRegistry.getParentProject("/normal").getPath();
+            fail("NotFoundException expected");
+        } catch (NotFoundException e) {}
+
         assertEquals("/normal", projectRegistry.getParentProject("/normal/some/path").getPath());
         assertEquals("/normal/module", projectRegistry.getParentProject("/normal/module/some/path").getPath());
 

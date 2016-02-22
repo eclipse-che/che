@@ -20,7 +20,6 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Client for Project service.
@@ -132,7 +131,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void estimateProject(String workspaceId, String path, String projectType, AsyncRequestCallback<Map<String, List<String>>> callback);
+    void estimateProject(String workspaceId, String path, String projectType, AsyncRequestCallback<SourceEstimation> callback);
 
 
     /**

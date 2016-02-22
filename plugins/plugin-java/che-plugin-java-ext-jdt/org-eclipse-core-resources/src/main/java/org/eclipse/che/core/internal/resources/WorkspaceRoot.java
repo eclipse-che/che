@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -47,9 +48,7 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
      * that have been requested from this root.  This maps project
      * name strings to project handles.
      */
-    private final        ConcurrentMap<String, Project>
-                                projectTable              = new ConcurrentHashMap<>(16);
-
+    private final ConcurrentMap<String, Project> projectTable = new ConcurrentHashMap<>(16);
 
     protected WorkspaceRoot(IPath path, Workspace workspace) {
         super(path, workspace);
@@ -114,20 +113,20 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         return result;
     }
 
+    // TODO: rework after new Project API
     @Override
     public IProject[] getProjects() {
         ProjectManager manager = workspace.getProjectManager();
         List<IProject> projects = new ArrayList<>();
-        // TODO: rework after new Project API
 //        try {
-//            List<ProjectImpl> rootProjects = manager.getProjects();
-//            for (ProjectImpl rootProject : rootProjects) {
-//                Project project = new Project(new Path(rootProject.getPath()), workspace);
-//
-//                projects.add(project);
-//
-//                addAllModules(projects, rootProject);
-//            }
+            List<RegisteredProject> rootProjects = manager.getProjects();
+            for (RegisteredProject rootProject : rootProjects) {
+                Project project = new Project(new Path(rootProject.getPath()), workspace);
+
+                projects.add(project);
+
+//                addAllModules(projects, rootProject, manager);
+            }
 //        } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
 //            LOG.error(e.getMessage(), e);
 //        }
@@ -135,14 +134,14 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         return projects.toArray(new IProject[projects.size()]);
     }
 
-    // TODO: rework after new Project API
 //    private void addAllModules(List<IProject> projects,
-//                               ProjectImpl rootProject) throws IOException,
+//                               RegisteredProject rootProject,
+//                               ProjectManager manager) throws IOException,
 //                                                              ForbiddenException,
 //                                                              ConflictException,
 //                                                              NotFoundException,
 //                                                              ServerException {
-//        List<? extends ProjectConfig> modules = rootProject.getModules();
+//        List<? extends ProjectConfig> modules = manager.getProjectModules(rootProject);
 //
 //
 //        for (ProjectConfig module : modules) {
@@ -150,14 +149,13 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
 //        }
 //    }
 
-    private void addModules(List<IProject> projects, ProjectConfig moduleConfig) {
-        Project mp = new Project(new Path(moduleConfig.getPath()), workspace);
-        projects.add(mp);
-        // TODO: rework after new Project API
+//    private void addModules(List<IProject> projects, ProjectConfig moduleConfig) {
+//        Project mp = new Project(new Path(moduleConfig.getPath()), workspace);
+//        projects.add(mp);
 //        for (ProjectConfig module : moduleConfig.getModules()) {
 //            addModules(projects, module);
 //        }
-    }
+//    }
 
     @Override
     public IProject[] getProjects(int i) {

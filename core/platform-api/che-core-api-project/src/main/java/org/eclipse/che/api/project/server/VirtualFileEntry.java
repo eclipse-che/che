@@ -29,7 +29,7 @@ public abstract class VirtualFileEntry {
     private       VirtualFile virtualFile;
     protected Map<String, String> attributes;
 
-    public VirtualFileEntry(VirtualFile virtualFile, String project) {
+    VirtualFileEntry(VirtualFile virtualFile, String project) {
         this.virtualFile = virtualFile;
         this.attributes = new HashMap<>();
         this.project = project;
@@ -47,7 +47,7 @@ public abstract class VirtualFileEntry {
     /**
      * Tests whether this item is a regular file.
      *
-     * @see org.eclipse.che.api.vfs.server.VirtualFile#isFile()
+     * @see org.eclipse.che.api.vfs.VirtualFile#isFile()
      */
     public boolean isFile() {
         return virtualFile.isFile();
@@ -56,7 +56,7 @@ public abstract class VirtualFileEntry {
     /**
      * Tests whether this item is a folder.
      *
-     * @see org.eclipse.che.api.vfs.server.VirtualFile#isFolder()
+     * @see org.eclipse.che.api.vfs.VirtualFile#isFolder()
      */
     public boolean isFolder() {
         return virtualFile.isFolder();
@@ -65,7 +65,7 @@ public abstract class VirtualFileEntry {
     /**
      * Gets name.
      *
-     * @see org.eclipse.che.api.vfs.server.VirtualFile#getName()
+     * @see org.eclipse.che.api.vfs.VirtualFile#getName()
      */
     public String getName() {
         return virtualFile.getName();
@@ -74,16 +74,22 @@ public abstract class VirtualFileEntry {
     /**
      * Gets path.
      *
-     * @see org.eclipse.che.api.vfs.server.VirtualFile#getPath()
+     * @see org.eclipse.che.api.vfs.VirtualFile#getPath()
      */
     public Path getPath() {
         return virtualFile.getPath();
     }
 
+    /**
+     * @return project this item belongs to
+     */
     public String getProject() {
         return project;
     }
 
+    /**
+     * @return whether the item is project
+     */
     public boolean isProject() {
         return project.equals(getPath());
     }

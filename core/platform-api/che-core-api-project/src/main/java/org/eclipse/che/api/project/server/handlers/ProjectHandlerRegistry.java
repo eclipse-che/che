@@ -29,6 +29,7 @@ public class ProjectHandlerRegistry {
     private final Map<String, PostImportProjectHandler>  postImportProjectHandlers  = new HashMap<>();
     private final Map<String, GetItemHandler>            getItemHandlers            = new HashMap<>();
     private final Map<String, ProjectCreatedHandler>     projectCreatedHandlers     = new HashMap<>();
+    private final Map<String, ProjectInitHandler>        projectInitHandlers        = new HashMap<>();
 
     @Inject
     public ProjectHandlerRegistry(Set<ProjectHandler> projectHandlers) {
@@ -46,6 +47,8 @@ public class ProjectHandlerRegistry {
             postImportProjectHandlers.put(handler.getProjectType(), (PostImportProjectHandler)handler);
         } else if (handler instanceof ProjectCreatedHandler) {
             projectCreatedHandlers.put(handler.getProjectType(), (ProjectCreatedHandler)handler);
+        } else if (handler instanceof ProjectInitHandler) {
+            projectInitHandlers.put(handler.getProjectType(), (ProjectInitHandler)handler);
         }
     }
 
@@ -66,6 +69,11 @@ public class ProjectHandlerRegistry {
     @Nullable
     public ProjectCreatedHandler getProjectCreatedHandler(@NotNull String projectType) {
         return projectCreatedHandlers.get(projectType);
+    }
+
+    @Nullable
+    public ProjectInitHandler getProjectInitHandler(@NotNull String projectType) {
+        return projectInitHandlers.get(projectType);
     }
 
 }

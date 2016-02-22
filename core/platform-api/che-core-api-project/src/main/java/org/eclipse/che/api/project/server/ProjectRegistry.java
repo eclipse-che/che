@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.type.InvalidValueException;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -23,6 +27,7 @@ import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,17 +48,47 @@ public class ProjectRegistry {
 
     private final ProjectTypeRegistry projectTypeRegistry;
 
+    private final ProjectHandlerRegistry handlers;
+
     @Inject
-    public ProjectRegistry(WorkspaceHolder  workspaceHolder, VirtualFileSystemProvider vfsProvider,
-                           ProjectTypeRegistry projectTypeRegistry)
-            throws ProjectTypeConstraintException, NotFoundException,
-                   ValueStorageException, ServerException {
+    public ProjectRegistry(WorkspaceHolder  workspaceHolder,
+                           VirtualFileSystemProvider vfsProvider,
+                           ProjectTypeRegistry projectTypeRegistry,
+                           ProjectHandlerRegistry handlers)
+            throws ConflictException, NotFoundException,
+                   ServerException, ForbiddenException {
         this.projects = new HashMap<>();
         this.workspaceHolder = workspaceHolder;
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
+        this.handlers = handlers;
+    }
 
-        initProjects();
+    @PostConstruct
+    void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
+        UsersWorkspace workspace = workspaceHolder.getWorkspace();
+        List<? extends ProjectConfig> projectConfigs = workspace.getProjects();
+
+        if (projectConfigs == null) {
+            projectConfigs = new ArrayList<>();
+        }
+
+        for (ProjectConfig projectConfig : projectConfigs) {
+            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false);
+
+            ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
+            if (handler != null) {
+                handler.onProjectInitialized(folder(project.getPath()));
+            }
+        }
+
+        // unconfigured folders on root
+        FolderEntry root = new FolderEntry(vfs.getRoot());
+        for (FolderEntry folder : root.getChildFolders()) {
+            if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
+                putProject(null, folder, true);
+            }
+        }
     }
 
     public String getWorkspaceId() {
@@ -109,8 +144,8 @@ public class ProjectRegistry {
     public RegisteredProject getParentProject(String path) throws NotFoundException {
 
         // it is a project
-        if (projects.containsKey(path))
-            return projects.get(path);
+//        if (projects.containsKey(path))
+//            return projects.get(path);
 
         // otherwise try to find matched parent
         Path test;
@@ -130,12 +165,11 @@ public class ProjectRegistry {
 
 
     RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated)
-            throws ServerException, ProjectTypeConstraintException,
-                   NotFoundException, ValueStorageException {
+            throws ServerException, ConflictException,
+                   NotFoundException, ForbiddenException {
 
         RegisteredProject project = new RegisteredProject(folder, config, updated, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
-
         return project;
     }
 
@@ -155,19 +189,26 @@ public class ProjectRegistry {
      * @throws ServerException
      */
     public RegisteredProject initProject(String projectPath, String type)
-            throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
+            throws ConflictException, ForbiddenException,
                    NotFoundException, ServerException {
 
         // it hrows NFE if not here
         //RegisteredProject config = getParentProject(absolutizePath(ofPath));
-        FolderEntry baseFolder = folder(projectPath);
+//        FolderEntry baseFolder = folder(projectPath);
 
         // new config
         //(path, type, mixins, name, description, attributes, source);
         NewProjectConfig conf = new NewProjectConfig(projectPath, type, null, null, null, null, null);
 
-        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
-        projects.put(project.getPath(), project);
+//        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
+//        projects.put(project.getPath(), project);
+
+        RegisteredProject project = putProject(conf, folder(projectPath), true);
+
+        ProjectInitHandler handler = handlers.getProjectInitHandler(conf.getType());
+        if(handler != null)
+            handler.onProjectInitialized(folder(project.getPath()));
+
 
         return project;
 
@@ -184,14 +225,16 @@ public class ProjectRegistry {
      * @throws ServerException
      */
     public RegisteredProject reinitParentProject(String ofPath)
-            throws ProjectTypeConstraintException, InvalidValueException, ValueStorageException,
+            throws ConflictException, ForbiddenException,
                    NotFoundException, ServerException {
 
         // it throws NFE if not here
         RegisteredProject config = getParentProject(absolutizePath(ofPath));
 
-        RegisteredProject project = new RegisteredProject(config.getBaseFolder(), config, true, this.projectTypeRegistry);
-        projects.put(project.getPath(), project);
+        RegisteredProject project = putProject(config, config.getBaseFolder(), true);
+
+                //new RegisteredProject(config.getBaseFolder(), config, true, this.projectTypeRegistry);
+        //projects.put(project.getPath(), project);
 
         return project;
 
@@ -208,37 +251,6 @@ public class ProjectRegistry {
         projects.remove(path);
         getProjects(path).forEach(projects::remove);
     }
-
-
-     void initProjects()
-            throws ProjectTypeConstraintException, ValueStorageException,
-                   NotFoundException, ServerException {
-
-        UsersWorkspace workspace = workspaceHolder.getWorkspace();
-        List<? extends ProjectConfig> projectConfigs = workspace.getProjects();
-
-        if(projectConfigs == null)
-            projectConfigs = new ArrayList<>();
-
-        for (ProjectConfig projectConfig : projectConfigs) {
-
-            putProject(projectConfig, folder(projectConfig.getPath()), false);
-            //initSubProjectsRecursively(projectConfig);
-
-        }
-
-         // unconfigured folders on root
-         FolderEntry root = new FolderEntry(vfs.getRoot());
-         for(FolderEntry folder : root.getChildFolders()) {
-             if(!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-                 putProject(null, folder, true);
-             }
-         }
-
-
-
-    }
-
 
     static String absolutizePath(String path) {
 

@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -27,6 +28,8 @@ import static org.fest.assertions.Assertions.assertThat;
 /**
  * @author Evgen Vidolob
  */
+// TODO: rework after new Project API
+@Ignore
 public class DeltaProcessingTest extends BaseTest {
 
 

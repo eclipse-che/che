@@ -51,6 +51,7 @@ import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
@@ -198,7 +199,8 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        this.projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
+        projectRegistry.initProjects();
 
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
@@ -208,7 +210,7 @@ public class ProjectServiceTest {
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 
-        List<ProjectConfigDto> modules = new ArrayList<>();
+        //List<ProjectConfigDto> modules = new ArrayList<>();
 
         final ProjectConfigDto testProjectConfigMock = mock(ProjectConfigDto.class);
         when(testProjectConfigMock.getPath()).thenReturn("/my_project");
@@ -610,6 +612,8 @@ public class ProjectServiceTest {
         root.createFolder("testEstimateProjectGood").createFolder("check");
         root.createFolder("testEstimateProjectBad");
 
+        String errMessage = "File /check not found";
+
         final ValueProviderFactory vpf1 = projectFolder -> new ValueProvider() {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
@@ -617,12 +621,12 @@ public class ProjectServiceTest {
                 VirtualFileEntry file;
                 try {
                     file = projectFolder.getChild("check");
-                } catch (ForbiddenException | ServerException e) {
+                } catch (ServerException e) {
                     throw new ValueStorageException(e.getMessage());
                 }
 
                 if (file == null) {
-                    throw new ValueStorageException("Check not found");
+                    throw new ValueStorageException(errMessage);
                 }
                 return (List <String>)singletonList("checked");
             }
@@ -649,17 +653,22 @@ public class ProjectServiceTest {
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         //noinspection unchecked
         SourceEstimation result = (SourceEstimation)response.getEntity();
-        //Map<String, List<String>> result = (Map<String, List<String>>)response.getEntity();
-
         assertTrue(result.isMatched());
         assertEquals(result.getAttributes().size(), 1);
         assertEquals(result.getAttributes().get("calculated_attribute").get(0), "checked");
 
+        // if project not matched
         response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/estimate/%s?type=%s",
                                                        workspace, "testEstimateProjectBad", "testEstimateProjectPT"),
                                     "http://localhost:8080/api", null, null, null);
+
         assertEquals(response.getStatus(), 409, "Error: " + response.getEntity());
+        String msg = JsonHelper.parseJson(response.getEntity().toString()).getElement("message").getStringValue();
+        assertEquals(errMessage, msg);
+
     }
+
+
 
     @Test
     public void testResolveSources() throws Exception {
@@ -675,7 +684,7 @@ public class ProjectServiceTest {
                 VirtualFileEntry file;
                 try {
                     file = projectFolder.getChild("check");
-                } catch (ForbiddenException | ServerException e) {
+                } catch (ServerException e) {
                     throw new ValueStorageException(e.getMessage());
                 }
 
@@ -685,9 +694,6 @@ public class ProjectServiceTest {
                 return (List<String>)singletonList("checked");
             }
 
-//            @Override
-//            public void setValues(String attributeName, List<String> value) {
-//            }
         };
 
         ProjectTypeDef pt = new ProjectTypeDef("testEstimateProjectPT", "my testEstimateProject type", true, false) {
@@ -701,22 +707,23 @@ public class ProjectServiceTest {
         pm.getProjectTypeRegistry().registerProjectType(pt);
 
         ContainerResponse response =
-                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/estimate/%s?type=%s",
-                                                    workspace, "testEstimateProjectGood", "testEstimateProjectPT"),
+                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/resolve/%s",
+                                                    workspace, "testEstimateProjectGood"),
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-        //noinspection unchecked
-        //Map<String, List<String>> result = (Map<String, List<String>>)response.getEntity();
-        SourceEstimation result = (SourceEstimation) response.getEntity();
+        List<SourceEstimation> result = (List<SourceEstimation>) response.getEntity();
 
-        //assertEquals(1, result.size());
-        assertEquals(1, result.getAttributes().size());
-        assertEquals(result.getAttributes().get("calculated_attribute").get(0), "checked");
+        assertTrue(result.size() > 0);
+        boolean m = false;
+        for(SourceEstimation est : result) {
+            if(est.getType().equals("testEstimateProjectPT")) {
+                assertTrue(est.isMatched());
+                m = true;
+            }
 
-        response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/estimate/%s?type=%s",
-                                                       workspace, "testEstimateProjectBad", "testEstimateProjectPT"),
-                                    "http://localhost:8080/api", null, null, null);
-        assertEquals(response.getStatus(), 409, "Error: " + response.getEntity());
+        }
+        assertTrue(m);
+
     }
 
 

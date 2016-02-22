@@ -53,6 +53,7 @@ import static org.mockito.Mockito.when;
  */
 @Ignore
 // TODO: rework after new Project API
+@Ignore
 public class MavenProjectImportedTest {
 
     private String pomJar =
