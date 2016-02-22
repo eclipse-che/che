@@ -59,7 +59,7 @@ public class Machine {
 
     /** @return current machine's display name */
     public String getDisplayName() {
-        return descriptor.getName();
+        return descriptor.getConfig().getName();
     }
 
     /** @return state of current machine */
@@ -69,12 +69,12 @@ public class Machine {
 
     /** @return type of current machine */
     public String getType() {
-        return descriptor.getType();
+        return descriptor.getConfig().getType();
     }
 
     /** @return script of machine recipe */
     public String getRecipeUrl() {
-        MachineSourceDto machineSource = descriptor.getSource();
+        MachineSourceDto machineSource = descriptor.getConfig().getSource();
 
         String machineSourceType = machineSource.getType();
 
@@ -89,7 +89,7 @@ public class Machine {
     @NotNull
     public String getWsServerExtensionsUrl() {
         String url = "";
-        Map<String, ServerDto> serverDescriptors = descriptor.getMetadata().getServers();
+        Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
         for (ServerDto descriptor : serverDescriptors.values()) {
             if (EXTENSIONS_REF_KEY.equals(descriptor.getRef())) {
                 url = descriptor.getUrl();
@@ -109,12 +109,12 @@ public class Machine {
      * @return <code>true</code> machine is bounded to workspace,<code>false</code> machine isn't bounded to workspace
      */
     public boolean isDev() {
-        return descriptor.isDev();
+        return descriptor.getConfig().isDev();
     }
 
     /** Returns information about machine. */
     public Map<String, String> getProperties() {
-        return descriptor.getMetadata().getProperties();
+        return descriptor.getRuntime().getProperties();
     }
 
     public void setActiveTabName(String activeTabName) {
@@ -126,7 +126,7 @@ public class Machine {
     }
 
     public String getTerminalUrl() {
-        Map<String, ServerDto> serverDescriptors = descriptor.getMetadata().getServers();
+        Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
 
         for (ServerDto descriptor : serverDescriptors.values()) {
 
@@ -151,7 +151,7 @@ public class Machine {
     public List<Server> getServersList() {
         List<Server> serversList = new ArrayList<>();
 
-        Map<String, ServerDto> servers = descriptor.getMetadata().getServers();
+        Map<String, ServerDto> servers = descriptor.getRuntime().getServers();
 
         for (Map.Entry<String, ServerDto> entry : servers.entrySet()) {
             String exposedPort = entry.getKey();

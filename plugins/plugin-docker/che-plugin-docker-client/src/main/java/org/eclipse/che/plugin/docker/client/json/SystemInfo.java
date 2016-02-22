@@ -61,6 +61,8 @@ public class SystemInfo {
     // ]
     // So seems two-dimensional array is simplest solution for model.
     private String[][] driverStatus;
+    // data was moved here from driver status in recent docker-swarm versions
+    private String[][] systemStatus;
     private int        nCPU;
     private long       memTotal;
     private String     name;
@@ -225,6 +227,14 @@ public class SystemInfo {
             }
         }
         return null;
+    }
+
+    public String[][] getSystemStatus() {
+        return systemStatus;
+    }
+
+    public void setSystemStatus(String[][] systemStatus) {
+        this.systemStatus = systemStatus;
     }
 
     /** Gets total space for storing images or {@code -1} if required information is not available from docker API or has unexpected format. */

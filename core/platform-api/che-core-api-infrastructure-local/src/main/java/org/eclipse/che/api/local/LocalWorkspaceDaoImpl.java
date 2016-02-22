@@ -17,11 +17,12 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
 import javax.annotation.PostConstruct;
@@ -30,7 +31,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,9 +80,9 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (workspaces.containsKey(workspace.getId())) {
             throw new ConflictException("Workspace with id " + workspace.getId() + " already exists");
         }
-        if (find(workspace.getName(), workspace.getOwner()).isPresent()) {
+        if (find(workspace.getConfig().getName(), workspace.getOwner()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
-                                               workspace.getName(),
+                                               workspace.getConfig().getName(),
                                                workspace.getOwner()));
         }
         workspace.setStatus(null);
@@ -136,20 +136,14 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     private Optional<UsersWorkspaceImpl> find(String name, String owner) {
         return workspaces.values()
                          .stream()
-                         .filter(ws -> ws.getName().equals(name) && ws.getOwner().equals(owner))
+                         .filter(ws -> ws.getConfig().getName().equals(name) && ws.getOwner().equals(owner))
                          .findFirst();
     }
 
     private UsersWorkspaceImpl doClone(UsersWorkspaceImpl workspace) {
-        UsersWorkspaceImpl copyWorkspace = new UsersWorkspaceImpl(workspace.getId(),
-                                                                  workspace.getName(),
-                                                                  workspace.getOwner(),
-                                                                  new HashMap<>(workspace.getAttributes()),
-                                                                  new ArrayList<>(workspace.getCommands()),
-                                                                  new ArrayList<>(workspace.getProjects()),
-                                                                  new ArrayList<>(workspace.getEnvironments()),
-                                                                  workspace.getDefaultEnv(),
-                                                                  workspace.getDescription());
+        UsersWorkspaceImpl copyWorkspace = new UsersWorkspaceImpl(new WorkspaceConfigImpl(workspace.getConfig()),
+                                                                  workspace.getId(),
+                                                                  workspace.getOwner());
         copyWorkspace.setStatus(workspace.getStatus());
         copyWorkspace.setTemporary(workspace.isTemporary());
         return copyWorkspace;

@@ -14,10 +14,10 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,23 +51,24 @@ public class RestartMachineActionTest {
 
     //additional mocks
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ActionEvent     event;
+    private ActionEvent      event;
     @Mock
-    private MachineStateDto machineState;
+    private MachineDto       machine;
     @Mock
-    private Machine         machine;
+    private MachineConfigDto machineConfig;
 
     @InjectMocks
     private RestartMachineAction action;
 
     @Before
     public void setUp() {
-        when(panelPresenter.getSelectedMachineState()).thenReturn(machineState);
+        when(panelPresenter.getSelectedMachineState()).thenReturn(machine);
+        when(machine.getConfig()).thenReturn(machineConfig);
     }
 
     @Test
     public void actionShouldBeUpdatedWhenSelectedMachineIsNotNull() {
-        when(machineState.getName()).thenReturn(SOME_TEXT);
+        when(machineConfig.getName()).thenReturn(SOME_TEXT);
         when(locale.machineRestartTextByName(SOME_TEXT)).thenReturn(SOME_TEXT);
 
         action.updateInPerspective(event);
@@ -75,7 +76,7 @@ public class RestartMachineActionTest {
         verify(panelPresenter).getSelectedMachineState();
         verify(panelPresenter).isMachineRunning();
 
-        verify(machineState).getName();
+        verify(machineConfig).getName();
         verify(locale).machineRestartTextByName(SOME_TEXT);
 
         verify(event.getPresentation()).setText(SOME_TEXT);
@@ -92,7 +93,7 @@ public class RestartMachineActionTest {
         verify(panelPresenter).getSelectedMachineState();
         verify(event.getPresentation()).setEnabled(false);
 
-        verify(machineState, never()).getName();
+        verify(machineConfig, never()).getName();
         verify(locale, never()).machineRestartTextByName(SOME_TEXT);
 
         verify(locale).controlMachineRestartText();
@@ -107,6 +108,6 @@ public class RestartMachineActionTest {
         action.actionPerformed(event);
 
         verify(eventLogger).log(action);
-        verify(machineManager).restartMachine(machineState);
+        verify(machineManager).restartMachine(machine);
     }
 }

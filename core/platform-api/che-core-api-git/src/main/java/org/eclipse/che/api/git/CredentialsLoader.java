@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
-import org.eclipse.che.api.git.shared.GitUser;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +65,24 @@ public class CredentialsLoader {
             }
         }
 
+        return null;
+    }
+
+
+    /**
+     * Searches for CredentialsProvider instances by url and if needed instance exists, it asks for info,
+     * or return null otherwise.
+     *
+     * @param url
+     *         given URL
+     * @return credentials from provider
+     */
+    public ProviderInfo getProviderInfo(String url) {
+        for (CredentialsProvider cp : credentialsProviders.values()) {
+            if (url != null && cp.canProvideCredentials(url)) {
+                return cp.getProviderInfo();
+            }
+        }
         return null;
     }
 }

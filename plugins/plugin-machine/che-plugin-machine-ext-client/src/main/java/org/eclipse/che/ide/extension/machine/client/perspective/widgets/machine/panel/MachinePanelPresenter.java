@@ -17,13 +17,17 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
+import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
+import org.eclipse.che.api.machine.gwt.client.events.MachineStartingHandler;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -34,15 +38,11 @@ import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
-import org.eclipse.che.api.machine.gwt.client.events.MachineStartingHandler;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceEvent;
-import org.eclipse.che.ide.workspace.start.StopWorkspaceHandler;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -61,22 +61,22 @@ import java.util.Map;
 public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate,
                                                                     MachineStateHandler,
                                                                     WorkspaceStartedHandler,
-                                                                    StopWorkspaceHandler,
+                                                                    WorkspaceStoppedHandler,
                                                                     MachineStartingHandler,
                                                                     ActivePartChangedHandler {
-    private final MachinePanelView                      view;
-    private final MachineServiceClient                  service;
-    private final EntityFactory                         entityFactory;
-    private final MachineLocalizationConstant           locale;
-    private final MachineAppliancePresenter             appliance;
-    private final MachineResources                      resources;
-    private final Map<MachineStateDto, MachineTreeNode> existingMachineNodes;
-    private final Map<MachineStateDto, Machine>         cachedMachines;
-    private final MachineTreeNode                       rootNode;
-    private final List<MachineTreeNode>                 machineNodes;
-    private final AppContext                            appContext;
-    private       MachineStateDto                       selectedMachineState;
-    private       boolean                               isMachineRunning;
+    private final MachinePanelView             view;
+    private final MachineServiceClient         service;
+    private final EntityFactory                entityFactory;
+    private final MachineLocalizationConstant  locale;
+    private final MachineAppliancePresenter    appliance;
+    private final MachineResources             resources;
+    private final Map<String, MachineTreeNode> existingMachineNodes;
+    private final Map<String, Machine>         cachedMachines;
+    private final MachineTreeNode              rootNode;
+    private final List<MachineTreeNode>        machineNodes;
+    private final AppContext                   appContext;
+    private       MachineDto                   selectedMachine;
+    private       boolean                      isMachineRunning;
 
     @Inject
     public MachinePanelPresenter(MachinePanelView view,
@@ -105,44 +105,42 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
-        eventBus.addHandler(StopWorkspaceEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
     /** Gets all machines and adds them to special place on view. */
-    public Promise<List<MachineStateDto>> showMachines() {
+    public Promise<List<MachineDto>> showMachines() {
         return showMachines(appContext.getWorkspace().getId());
     }
 
-    private Promise<List<MachineStateDto>> showMachines(String workspaceId) {
-        Promise<List<MachineStateDto>> machinesPromise = service.getMachinesStates(workspaceId);
+    private Promise<List<MachineDto>> showMachines(String workspaceId) {
+        Promise<List<MachineDto>> machinesPromise = service.getMachines(workspaceId);
 
-        return machinesPromise.then(new Operation<List<MachineStateDto>>() {
+        return machinesPromise.then(new Operation<List<MachineDto>>() {
             @Override
-            public void apply(List<MachineStateDto> machineStates) throws OperationException {
+            public void apply(List<MachineDto> machines) throws OperationException {
                 machineNodes.clear();
-                if (machineStates.isEmpty()) {
+                if (machines.isEmpty()) {
                     appliance.showStub(locale.unavailableMachineInfo());
-
                     return;
                 }
 
-                for (MachineStateDto machineState : machineStates) {
-                    addNodeToTree(machineState);
+                for (MachineDto machine : machines) {
+                    addNodeToTree(machine);
                 }
 
                 view.setData(rootNode);
-
                 selectFirstNode();
             }
         });
     }
 
-    private void addNodeToTree(MachineStateDto machineState) {
-        MachineTreeNode machineNode = entityFactory.createMachineNode(rootNode, machineState, null);
+    private void addNodeToTree(MachineDto machine) {
+        MachineTreeNode machineNode = entityFactory.createMachineNode(rootNode, machine, null);
 
-        existingMachineNodes.put(machineState, machineNode);
+        existingMachineNodes.put(machine.getId(), machineNode);
 
         if (!machineNodes.contains(machineNode)) {
             machineNodes.add(machineNode);
@@ -151,50 +149,53 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     private void selectFirstNode() {
         if (!machineNodes.isEmpty()) {
-            MachineTreeNode firstNode = machineNodes.get(0);
-
-            view.selectNode(firstNode);
+            view.selectNode(machineNodes.get(0));
         }
     }
 
     /**
      * Returns selected machine state.
      */
-    public MachineStateDto getSelectedMachineState() {
-        return selectedMachineState;
+    public MachineDto getSelectedMachineState() {
+        return selectedMachine;
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onMachineSelected(final MachineStateDto selectedMachineState) {
-        this.selectedMachineState = selectedMachineState;
+    public void onMachineSelected(final MachineDto selectedMachine) {
+        this.selectedMachine = selectedMachine;
 
-        isMachineRunning = true;
-
-        if (cachedMachines.containsKey(selectedMachineState)) {
-            appliance.showAppliance(cachedMachines.get(selectedMachineState));
+        if (cachedMachines.containsKey(selectedMachine.getId())) {
+            appliance.showAppliance(cachedMachines.get(selectedMachine.getId()));
 
             return;
         }
 
-        service.getMachine(selectedMachineState.getId()).then(new Operation<MachineDto>() {
+        service.getMachine(selectedMachine.getId()).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machineDto) throws OperationException {
-                Machine machine = entityFactory.createMachine(machineDto);
+                if (machineDto.getStatus() == MachineStatus.RUNNING) {
+                    isMachineRunning = true;
 
-                cachedMachines.put(selectedMachineState, machine);
+                    Machine machine = entityFactory.createMachine(machineDto);
 
-                appliance.showAppliance(machine);
+                    cachedMachines.put(selectedMachine.getId(), machine);
+
+                    appliance.showAppliance(machine);
+                } else {
+                    isMachineRunning = false;
+                    // we show the loader for dev machine so this message isn't necessary for dev machine
+                    if (!selectedMachine.getConfig().isDev()) {
+                        appliance.showStub(locale.unavailableMachineStarting(selectedMachine.getConfig().getName()));
+                    }
+                }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 isMachineRunning = false;
 
-                // we show the loader for dev machine so this message isn't necessary for dev machine
-                if (!selectedMachineState.isDev()) {
-                    appliance.showStub(locale.unavailableMachineStarting(selectedMachineState.getName()));
-                }
+                appliance.showStub(locale.machineNotFound(selectedMachine.getId()));
             }
         });
     }
@@ -252,8 +253,8 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     /** {@inheritDoc} */
     @Override
-    public void onWorkspaceStopped(UsersWorkspaceDto workspace) {
-        showMachines(workspace.getId());
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        showMachines(event.getWorkspace().getId());
     }
 
     /** {@inheritDoc} */
@@ -261,13 +262,13 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
     public void onMachineStarting(final MachineStartingEvent event) {
         isMachineRunning = false;
 
-        selectedMachineState = event.getMachineState();
+        selectedMachine = event.getMachine();
 
-        addNodeToTree(selectedMachineState);
+        addNodeToTree(selectedMachine);
 
         view.setData(rootNode);
 
-        view.selectNode(existingMachineNodes.get(event.getMachineState()));
+        view.selectNode(existingMachineNodes.get(event.getMachine().getId()));
     }
 
     /** {@inheritDoc} */
@@ -275,9 +276,9 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
     public void onMachineRunning(final MachineStateEvent event) {
         isMachineRunning = true;
 
-        selectedMachineState = event.getMachineState();
+        selectedMachine = event.getMachine();
 
-        view.selectNode(existingMachineNodes.get(selectedMachineState));
+        view.selectNode(existingMachineNodes.get(selectedMachine.getId()));
     }
 
     /**
@@ -285,12 +286,12 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
      */
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
-        MachineStateDto machineState = event.getMachineState();
+        MachineDto machine = event.getMachine();
 
-        MachineTreeNode deletedNode = existingMachineNodes.get(machineState);
+        MachineTreeNode deletedNode = existingMachineNodes.get(machine.getId());
 
         machineNodes.remove(deletedNode);
-        existingMachineNodes.remove(machineState);
+        existingMachineNodes.remove(machine.getId());
 
         view.setData(rootNode);
 
@@ -310,4 +311,5 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
             showMachines();
         }
     }
+
 }

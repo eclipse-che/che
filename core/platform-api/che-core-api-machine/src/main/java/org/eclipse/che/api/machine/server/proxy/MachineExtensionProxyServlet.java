@@ -14,9 +14,9 @@ import com.google.common.io.ByteStreams;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +33,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -126,8 +124,8 @@ public class MachineExtensionProxyServlet extends HttpServlet {
             throw new NotFoundException("No workspace id is found in request.");
         }
 
-        final Instance machine = machineManager.getDevMachine(workspaceId);
-        final Server server = machine.getMetadata().getServers().get(Integer.toString(extServicesPort));
+        final Machine machine = machineManager.getDevMachine(workspaceId);
+        final Server server = machine.getRuntime().getServers().get(Integer.toString(extServicesPort));
         if (server == null) {
             throw new ServerException("No extension server found in machine.");
         }
@@ -153,13 +151,15 @@ public class MachineExtensionProxyServlet extends HttpServlet {
             }
 
             // copy headers from proxy response to origin response
-            for (Map.Entry<String, List<String>> header : conn.getHeaderFields().entrySet()) {
-                if (!skipHeader(header.getKey())) {
+            conn.getHeaderFields()
+                .entrySet()
+                .stream()
+                .filter(header -> !skipHeader(header.getKey()))
+                .forEach(header -> {
                     for (String headerValue : header.getValue()) {
                         resp.addHeader(header.getKey(), headerValue);
                     }
-                }
-            }
+                });
 
             if (responseStream != null) {
                 // copy content of input or error stream from destination response to output stream of origin response

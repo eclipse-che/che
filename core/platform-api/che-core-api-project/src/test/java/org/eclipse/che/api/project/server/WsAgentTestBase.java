@@ -30,6 +30,7 @@ import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -126,15 +127,18 @@ public class WsAgentTestBase {
         //ArrayList <RegisteredProject> updatedProjects = new ArrayList<>();
 
         protected TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name"));
+            super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")));
         }
 
 
         protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name")
-                            .withProjects(projects));
+            super(DtoFactory.newDto(UsersWorkspaceDto.class)
+                            .withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")
+                                                  .withProjects(projects)));
         }
 
         @Override

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
@@ -47,14 +47,14 @@ public class DestroyMachineActionTest {
     private DialogFactory               dialogFactory;
 
     @Mock
-    private MachineStateDto machineState;
+    private MachineDto machine;
 
     @InjectMocks
     private DestroyMachineAction action;
 
     @Before
     public void setUp() {
-        when(panelPresenter.getSelectedMachineState()).thenReturn(machineState);
+        when(panelPresenter.getSelectedMachineState()).thenReturn(machine);
     }
 
     @Test
@@ -67,12 +67,12 @@ public class DestroyMachineActionTest {
     public void actionShouldBePerformed() {
         action.actionPerformed(event);
 
-        verify(machineManager).destroyMachine(eq(machineState));
+        verify(machineManager).destroyMachine(eq(machine));
     }
 
 //    @Test
 //    public void devMachineShouldNotBeDestroyed() {
-//        when(machineState.isDev()).thenReturn(true);
+//        when(machine.isDev()).thenReturn(true);
 //        MessageDialog dialog = mock(MessageDialog.class);
 //        when(dialogFactory.createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class))).thenReturn(dialog);
 //
@@ -80,6 +80,6 @@ public class DestroyMachineActionTest {
 //
 //        verify(dialogFactory).createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class));
 //        verify(dialog).show();
-//        verify(machineManager, never()).destroyMachine(eq(machineState));
+//        verify(machineManager, never()).destroyMachine(eq(machine));
 //    }
 }

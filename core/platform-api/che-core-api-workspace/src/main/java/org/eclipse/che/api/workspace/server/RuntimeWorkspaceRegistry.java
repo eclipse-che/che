@@ -20,7 +20,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.EnvironmentState;
 import org.eclipse.che.api.core.model.workspace.RuntimeWorkspace;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -125,7 +124,7 @@ public class RuntimeWorkspaceRegistry {
         // Prepare runtime workspace for start
         final RuntimeWorkspaceImpl newRuntime = RuntimeWorkspaceImpl.builder()
                                                                     .fromWorkspace(usersWorkspace)
-                                                                    .setActiveEnvName(envName)
+                                                                    .setActiveEnv(envName)
                                                                     .setStatus(STARTING)
                                                                     .build();
         // Save workspace with 'STARTING' status
@@ -135,7 +134,7 @@ public class RuntimeWorkspaceRegistry {
             final RuntimeWorkspace running = idToWorkspaces.get(newRuntime.getId());
             if (running != null) {
                 throw new ConflictException(format("Could not start workspace '%s' because its status is '%s'",
-                                                   running.getName(),
+                                                   running.getConfig().getName(),
                                                    running.getStatus()));
             }
             idToWorkspaces.put(newRuntime.getId(), newRuntime);
@@ -212,7 +211,7 @@ public class RuntimeWorkspaceRegistry {
             }
             if (workspace.getStatus() != RUNNING) {
                 throw new ConflictException(format("Couldn't stop '%s' workspace because its status is '%s'",
-                                                   workspace.getName(),
+                                                   workspace.getConfig().getName(),
                                                    workspace.getStatus()));
             }
             workspace.setStatus(STOPPING);
@@ -376,27 +375,31 @@ public class RuntimeWorkspaceRegistry {
             throw new BadRequestException("Required non-null workspace");
         }
         if (envName == null) {
-            throw new BadRequestException(format("Couldn't start workspace '%s', environment name is null", workspace.getName()));
+            throw new BadRequestException(format("Couldn't start workspace '%s', environment name is null",
+                                                 workspace.getConfig().getName()));
         }
-        final Optional<? extends EnvironmentState> environmentOptional =
-                workspace.getEnvironments().stream().filter(env -> env.getName().equals(envName)).findFirst();
+        final Optional<? extends Environment> environmentOptional = workspace.getConfig()
+                                                                             .getEnvironments()
+                                                                             .stream()
+                                                                             .filter(env -> env.getName().equals(envName))
+                                                                             .findFirst();
         if (!environmentOptional.isPresent()) {
             throw new BadRequestException(format("Couldn't start workspace '%s', workspace doesn't have environment '%s'",
-                                                 workspace.getName(),
+                                                 workspace.getConfig().getName(),
                                                  envName));
         }
-        EnvironmentState environment = environmentOptional.get();
+        Environment environment = environmentOptional.get();
         if (environment.getRecipe() != null && !"docker".equals(environment.getRecipe().getType())) {
             throw new BadRequestException(format("Couldn't start workspace '%s' from environment '%s', " +
                                                  "environment recipe has unsupported type '%s'",
-                                                 workspace.getName(),
+                                                 workspace.getConfig().getName(),
                                                  envName,
                                                  environment.getRecipe().getType()));
         }
         if (findDev(environment.getMachineConfigs()) == null) {
             throw new BadRequestException(format("Couldn't start workspace '%s' from environment '%s', " +
                                                  "environment doesn't contain dev-machine",
-                                                 workspace.getName(),
+                                                 workspace.getConfig().getName(),
                                                  envName));
         }
     }
@@ -413,7 +416,7 @@ public class RuntimeWorkspaceRegistry {
         try {
             final RuntimeWorkspaceImpl workspace = idToWorkspaces.get(machine.getWorkspaceId());
             if (workspace != null) {
-                if (machine.isDev()) {
+                if (machine.getConfig().isDev()) {
                     workspace.setDevMachine(machine);
                 }
                 workspace.getMachines().add(machine);
@@ -478,9 +481,11 @@ public class RuntimeWorkspaceRegistry {
      */
     private void stopMachines(RuntimeWorkspaceImpl workspace) throws NotFoundException, ServerException {
         final List<MachineImpl> machines = new ArrayList<>(workspace.getMachines());
-        machines.remove(findDev(machines));
         // destroying all non-dev machines
         for (MachineImpl machine : machines) {
+            if (machine.getConfig().isDev()) {
+                continue;
+            }
             try {
                 machineManager.destroy(machine.getId(), false);
             } catch (NotFoundException | MachineException ex) {

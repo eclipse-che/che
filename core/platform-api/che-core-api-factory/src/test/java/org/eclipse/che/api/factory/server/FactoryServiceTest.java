@@ -25,10 +25,11 @@ import org.eclipse.che.api.factory.shared.dto.Button;
 import org.eclipse.che.api.factory.shared.dto.ButtonAttributes;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.User;
+import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -956,27 +957,30 @@ public class FactoryServiceTest {
     public void shouldGenerateFactoryJsonIncludeAllProjects() throws Exception {
         // given
         final String wsId = "workspace123234";
-        UsersWorkspaceImpl.UsersWorkspaceImplBuilder ws = UsersWorkspaceImpl.builder();
-        ws.setId(wsId);
-        ws.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
-                                        .withSource(dto.createDto(SourceStorageDto.class)
+        UsersWorkspaceImpl.UsersWorkspaceImplBuilder userWs = UsersWorkspaceImpl.builder();
+        WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
+
+        wsConfig.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
+                                              .withSource(dto.createDto(SourceStorageDto.class)
                                                        .withType("git")
                                                        .withLocation("location")),
-                                     dto.createDto(ProjectConfigDto.class)
-                                        .withSource(dto.createDto(SourceStorageDto.class)
+                                           dto.createDto(ProjectConfigDto.class)
+                                              .withSource(dto.createDto(SourceStorageDto.class)
                                                        .withType("git")
                                                        .withLocation("location"))));
-        ws.setName("wsname");
-        ws.setOwner("id-2314");
-        ws.setDefaultEnv("env1");
-        ws.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
-        ws.setStatus(WorkspaceStatus.RUNNING);
-        ws.setCommands(Collections.singletonList(dto.createDto(CommandDto.class)
-                                                    .withName("MCI")
-                                                    .withType("mvn")
-                                                    .withCommandLine("clean install")));
+        wsConfig.setName("wsname");
+        wsConfig.setDefaultEnv("env1");
+        wsConfig.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
+        wsConfig.setCommands(Collections.singletonList(dto.createDto(CommandDto.class)
+                                                          .withName("MCI")
+                                                          .withType("mvn")
+                                                          .withCommandLine("clean install")));
+        userWs.setId(wsId);
+        userWs.setOwner("id-2314");
+        userWs.setStatus(WorkspaceStatus.RUNNING);
+        userWs.setConfig(wsConfig.build());
 
-        UsersWorkspaceImpl usersWorkspace = ws.build();
+        UsersWorkspaceImpl usersWorkspace = userWs.build();
         when(workspaceManager.getWorkspace(eq(wsId))).thenReturn(usersWorkspace);
 
         // when
@@ -989,10 +993,10 @@ public class FactoryServiceTest {
         assertEquals(response.getStatusCode(), 200);
         Factory result = dto.createDtoFromJson(response.getBody().asString(), Factory.class);
         assertEquals(result.getWorkspace().getProjects().size(), 2);
-        assertEquals(result.getWorkspace().getName(), usersWorkspace.getName());
+        assertEquals(result.getWorkspace().getName(), usersWorkspace.getConfig().getName());
         assertEquals(result.getWorkspace().getEnvironments().get(0).toString(),
-                     asDto(usersWorkspace.getEnvironments().get(0)).toString());
-        assertEquals(result.getWorkspace().getCommands().get(0), asDto(usersWorkspace.getCommands().get(0)));
+                     asDto(usersWorkspace.getConfig().getEnvironments().get(0)).toString());
+        assertEquals(result.getWorkspace().getCommands().get(0), asDto(usersWorkspace.getConfig().getCommands().get(0)));
     }
 
     @Test
@@ -1000,8 +1004,9 @@ public class FactoryServiceTest {
         // given
         final String wsId = "workspace123234";
         UsersWorkspaceImpl.UsersWorkspaceImplBuilder ws = UsersWorkspaceImpl.builder();
+        WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
         ws.setId(wsId);
-        ws.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
+        wsConfig.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
                                         .withPath("/proj1")
                                         .withSource(dto.createDto(SourceStorageDto.class)
                                                        .withType("git")
@@ -1011,15 +1016,16 @@ public class FactoryServiceTest {
                                         .withSource(dto.createDto(SourceStorageDto.class)
                                                        .withType("git")
                                                        .withLocation("location"))));
-        ws.setName("wsname");
+        wsConfig.setName("wsname");
         ws.setOwner("id-2314");
-        ws.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
-        ws.setDefaultEnv("env1");
+        wsConfig.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
+        wsConfig.setDefaultEnv("env1");
         ws.setStatus(WorkspaceStatus.RUNNING);
-        ws.setCommands(Collections.singletonList(dto.createDto(CommandDto.class)
+        wsConfig.setCommands(Collections.singletonList(dto.createDto(CommandDto.class)
                                                     .withName("MCI")
                                                     .withType("mvn")
                                                     .withCommandLine("clean install")));
+        ws.setConfig(wsConfig.build());
         UsersWorkspaceImpl usersWorkspace = ws.build();
         when(workspaceManager.getWorkspace(eq(wsId))).thenReturn(usersWorkspace);
 
@@ -1184,18 +1190,20 @@ public class FactoryServiceTest {
         // given
         final String wsId = "workspace123234";
         UsersWorkspaceImpl.UsersWorkspaceImplBuilder ws = UsersWorkspaceImpl.builder();
+        WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
         ws.setId(wsId);
-        ws.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
+        wsConfig.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
                                         .withPath("/proj1"),
                                      dto.createDto(ProjectConfigDto.class)
                                         .withPath("/proj2")));
-        ws.setName("wsname");
+        wsConfig.setName("wsname");
         ws.setOwner("id-2314");
-        ws.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
-        ws.setDefaultEnv("env1");
+        wsConfig.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
+        wsConfig.setDefaultEnv("env1");
         ws.setStatus(WorkspaceStatus.RUNNING);
-        ws.setCommands(Collections.singletonList(
+        wsConfig.setCommands(Collections.singletonList(
                 dto.createDto(CommandDto.class).withName("MCI").withType("mvn").withCommandLine("clean install")));
+        ws.setConfig(wsConfig.build());
 
         UsersWorkspaceImpl usersWorkspace = ws.build();
         when(workspaceManager.getWorkspace(eq(wsId))).thenReturn(usersWorkspace);

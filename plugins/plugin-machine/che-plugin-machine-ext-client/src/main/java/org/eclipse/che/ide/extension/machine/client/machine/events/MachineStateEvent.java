@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.machine.events;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 
 /**
  * Event that describes the fact that machine state has been changed.
@@ -23,40 +23,40 @@ public class MachineStateEvent extends GwtEvent<MachineStateHandler> {
 
     /** Type class used to register this event. */
     public static Type<MachineStateHandler> TYPE = new Type<>();
-    private final MachineStateDto machineState;
-    private final MachineAction   machineAction;
+    private final MachineDto    machine;
+    private final MachineAction machineAction;
 
     /**
      * Create new {@link MachineStateEvent}.
      *
-     * @param machineState
+     * @param machine
      *         machine
      * @param machineAction
      *         the type of action
      */
-    protected MachineStateEvent(MachineStateDto machineState, MachineAction machineAction) {
-        this.machineState = machineState;
+    protected MachineStateEvent(MachineDto machine, MachineAction machineAction) {
+        this.machine = machine;
         this.machineAction = machineAction;
     }
 
     /**
      * Creates a Machine Running event.
      *
-     * @param machineState
+     * @param machine
      *         running machine
      */
-    public static MachineStateEvent createMachineRunningEvent(MachineStateDto machineState) {
-        return new MachineStateEvent(machineState, MachineAction.RUNNING);
+    public static MachineStateEvent createMachineRunningEvent(MachineDto machine) {
+        return new MachineStateEvent(machine, MachineAction.RUNNING);
     }
 
     /**
      * Creates a Machine Destroyed event.
      *
-     * @param machineState
+     * @param machine
      *         destroyed machine
      */
-    public static MachineStateEvent createMachineDestroyedEvent(MachineStateDto machineState) {
-        return new MachineStateEvent(machineState, MachineAction.DESTROYED);
+    public static MachineStateEvent createMachineDestroyedEvent(MachineDto machine) {
+        return new MachineStateEvent(machine, MachineAction.DESTROYED);
     }
 
     @Override
@@ -64,12 +64,12 @@ public class MachineStateEvent extends GwtEvent<MachineStateHandler> {
         return TYPE;
     }
 
-    public MachineStateDto getMachineState() {
-        return machineState;
+    public MachineDto getMachine() {
+        return machine;
     }
 
     public String getMachineId() {
-        return machineState.getId();
+        return machine.getId();
     }
 
     @Override

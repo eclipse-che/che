@@ -8,14 +8,31 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace;
 
-import org.eclipse.che.api.core.model.project.fs.Folder;
+package org.eclipse.che.api.core.model.project;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author gazarenkov
+ * @author Dmitry Shnurenko
  */
-public interface Project extends ProjectConfig {
+public interface ProjectConfig {
+    String getName();
 
-    Folder getRootFolder();
+    String getPath();
+
+    String getDescription();
+
+    String getType();
+
+    List<String> getMixins();
+
+    Map<String, List<String>> getAttributes();
+
+    //List<? extends ProjectConfig> getModules();
+
+    SourceStorage getSource();
+
 }

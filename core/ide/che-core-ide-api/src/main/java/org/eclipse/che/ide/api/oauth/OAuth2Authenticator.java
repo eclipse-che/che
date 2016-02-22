@@ -8,26 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.ide.api.oauth;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import org.eclipse.che.security.oauth.OAuthStatus;
 
 /**
- * Defines state of machine.
- *
- * @author Alexander Garagatyi
+ * @author Roman Nikitenko
  */
-public interface MachineState extends MachineConfig {
-    /**
-     * Returns unique identifier of this machine
-     */
-    String getId();
+public interface OAuth2Authenticator {
 
-    String getWorkspaceId();
+    void authorize(String authenticatorUrl, AsyncCallback<OAuthStatus> callback);
 
-    String getEnvName();
-
-    String getOwner();
-
-    MachineStatus getStatus();
-
-    Channels getChannels();
+    String getProviderName();
 }

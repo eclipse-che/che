@@ -80,6 +80,7 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestinati
 /**
  * Manager for all refactoring sessions. Handles creating caching and applying refactorings.
  * @author Evgen Vidolob
+ * @author Valeriy Svydenko
  */
 @Singleton
 public class RefactoringManager {
@@ -247,7 +248,6 @@ public class RefactoringManager {
         RefactoringSession session = getRefactoringSession(sessionId);
         RefactoringResult result = session.apply();
         deleteRefactoringSession(sessionId);
-
         return result;
     }
 
@@ -266,8 +266,10 @@ public class RefactoringManager {
      * @throws CoreException when impossible to create RenameSupport
      * @throws RefactoringException when we don't support renaming provided element
      */
-    public RenameRefactoringSession createRenameRefactoring(IJavaElement element, ICompilationUnit cu, int offset, boolean lightweight)
-            throws CoreException, RefactoringException {
+    public RenameRefactoringSession createRenameRefactoring(IJavaElement element,
+                                                            ICompilationUnit cu,
+                                                            int offset,
+                                                            boolean lightweight) throws CoreException, RefactoringException {
 
         //package fragments are always renamed with wizard
         RenameRefactoringSession session = DtoFactory.newDto(RenameRefactoringSession.class);
@@ -317,7 +319,7 @@ public class RefactoringManager {
                 else
                     return RenameWizard.METHOD;
             case IJavaElement.FIELD:
-                if(JdtFlags.isEnum((IMember)element)){
+                if (JdtFlags.isEnum((IMember)element)) {
                     return RenameWizard.ENUM_CONSTANT;
                 }
                 return RenameWizard.FIELD;
@@ -416,5 +418,19 @@ public class RefactoringManager {
             throw new RefactoringException(e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Make reindex for the project.
+     *
+     * @param javaProject
+     *         java project
+     * @throws JavaModelException
+     *         when something is wrong
+     */
+    public void reindexProject(IJavaProject javaProject) throws JavaModelException {
+        if (javaProject != null) {
+            JavaModelManager.getIndexManager().indexAll(javaProject.getProject());
+        }
     }
 }

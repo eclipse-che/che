@@ -51,6 +51,8 @@ public class ProcessTreeNode {
 
     private boolean                                hasUnreadContent;
 
+    private boolean                                running;
+
     @Inject
     public ProcessTreeNode(@Assisted ProcessNodeType type,
                            @Assisted ProcessTreeNode parent,
@@ -66,7 +68,7 @@ public class ProcessTreeNode {
         switch (type) {
             case MACHINE_NODE:
                 id = ((MachineDto)data).getId();
-                displayName = ((MachineDto)data).getName();
+                displayName = ((MachineDto)data).getConfig().getName();
                 break;
             case COMMAND_NODE:
                 id = data + UUID.uuid();
@@ -132,6 +134,14 @@ public class ProcessTreeNode {
 
     public void setHasUnreadContent(boolean hasUnreadContent) {
         this.hasUnreadContent = hasUnreadContent;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 
 }

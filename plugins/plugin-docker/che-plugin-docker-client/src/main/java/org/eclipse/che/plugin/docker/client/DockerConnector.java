@@ -116,7 +116,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), org.eclipse.che.plugin.docker.client.json.SystemInfo.class);
         } catch (JsonParseException e) {
@@ -137,7 +137,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), Version.class);
         } catch (JsonParseException e) {
@@ -158,7 +158,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), Image[].class);
         } catch (JsonParseException e) {
@@ -241,7 +241,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
         } catch (JsonParseException e) {
@@ -310,7 +310,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (!(NO_CONTENT.getStatusCode() == status || NOT_MODIFIED.getStatusCode() == status)) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
         }
     }
@@ -337,7 +337,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (NO_CONTENT.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
         }
     }
@@ -373,7 +373,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (NO_CONTENT.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
         }
     }
@@ -398,7 +398,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerExitStatus.class).getStatusCode();
         } catch (JsonParseException e) {
@@ -425,7 +425,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
         } catch (JsonParseException e) {
@@ -461,7 +461,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             try (InputStream responseStream = response.getInputStream()) {
                 new LogMessagePumper(responseStream, containerLogsProcessor).start();
@@ -502,7 +502,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             // TarUtils uses apache commons compress library for working with tar archive and it fails
             // (e.g. doesn't unpack all files from archive in case of coping directory) when we try to use stream from docker remote API.
@@ -538,7 +538,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status / 100 != 2) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return new Exec(cmd, parseResponseStreamAndClose(response.getInputStream(), ExecCreated.class).getId());
         } catch (JsonParseException e) {
@@ -563,7 +563,7 @@ public class DockerConnector {
             // According to last doc (https://docs.docker.com/reference/api/docker_remote_api_v1.15/#exec-start) status must be 201 but
             // in fact docker API returns 200 or 204 status.
             if (status / 100 != 2) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             if (status != NO_CONTENT.getStatusCode() && execOutputProcessor != null) {
                 try (InputStream responseStream = response.getInputStream()) {
@@ -586,7 +586,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ExecInfo.class);
         } catch (Exception e) {
@@ -617,7 +617,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerProcesses.class);
         } catch (JsonParseException e) {
@@ -647,7 +647,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status != OK.getStatusCode()) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
 
             return new CloseConnectionInputStream(response.getInputStream(), connection);
@@ -695,7 +695,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status != OK.getStatusCode()) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
         } finally {
             FileCleaner.addFile(tarFile);
@@ -742,7 +742,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
 
             try (InputStream responseStream = response.getInputStream()) {
@@ -798,7 +798,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
@@ -854,7 +854,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
         }
     }
@@ -876,7 +876,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status / 100 != 2) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
         }
     }
@@ -902,7 +902,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
@@ -981,7 +981,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (CREATED.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerCommited.class).getId();
         } catch (JsonParseException e) {
@@ -1010,7 +1010,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
@@ -1068,7 +1068,7 @@ public class DockerConnector {
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (CREATED.getStatusCode() != status) {
-                throw new DockerException(getDockerExceptionMessage(response), status);
+                throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerCreated.class);
         } catch (JsonParseException e) {
@@ -1093,12 +1093,12 @@ public class DockerConnector {
             final int status = response.getStatus();
             if (!(NO_CONTENT.getStatusCode() == status || NOT_MODIFIED.getStatusCode() == status)) {
 
-                final String errorMessage = getDockerExceptionMessage(response);
+                final DockerException dockerException = getDockerException(response);
                 if (OK.getStatusCode() == status) {
                     // docker API 1.20 returns 200 with warning message about usage of loopback docker backend
-                    LOG.warn(errorMessage);
+                    LOG.warn(dockerException.getLocalizedMessage());
                 } else {
-                    throw new DockerException(errorMessage, status);
+                    throw dockerException;
                 }
             }
         }
@@ -1125,12 +1125,13 @@ public class DockerConnector {
         }
     }
 
-    private String getDockerExceptionMessage(DockerResponse response) throws IOException {
-        try (InputStream is = response.getInputStream()) {
-            return "Error response from docker API, status: " +
-                   response.getStatus() +
-                   ", message: " +
-                   CharStreams.toString(new InputStreamReader(is));
+    protected DockerException getDockerException(DockerResponse response) throws IOException {
+        try (InputStreamReader isr = new InputStreamReader(response.getInputStream())) {
+            String dockerResponseContent = CharStreams.toString(isr);
+            return new DockerException(
+                    "Error response from docker API, status: " + response.getStatus() + ", message: " + dockerResponseContent,
+                    dockerResponseContent,
+                    response.getStatus());
         }
     }
 

@@ -23,6 +23,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -143,14 +144,14 @@ public class LocalWorkspaceDaoTest {
 
         return UsersWorkspaceImpl.builder()
                                  .setId(generate("workspace", 16))
-                                 .setName("test-workspace-name")
-                                 .setDescription("This is test workspace")
+                                 .setConfig(new WorkspaceConfigImpl("test-workspace-name",
+                                                                    "This is test workspace",
+                                                                    env1.getName(),
+                                                                    commands,
+                                                                    projects,
+                                                                    environments,
+                                                                    attributes))
                                  .setOwner("user123")
-                                 .setAttributes(attributes)
-                                 .setCommands(commands)
-                                 .setProjects(projects)
-                                 .setEnvironments(environments)
-                                 .setDefaultEnv(env1.getName())
                                  .build();
     }
 }

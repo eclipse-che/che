@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
@@ -67,7 +67,7 @@ public class ProjectRegistry {
     @PostConstruct
     void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
         UsersWorkspace workspace = workspaceHolder.getWorkspace();
-        List<? extends ProjectConfig> projectConfigs = workspace.getProjects();
+        List<? extends ProjectConfig> projectConfigs = workspace.getConfig().getProjects();
 
         if (projectConfigs == null) {
             projectConfigs = new ArrayList<>();
@@ -100,8 +100,7 @@ public class ProjectRegistry {
      * @return all the projects
      */
     public List<RegisteredProject> getProjects() {
-
-        return new ArrayList(projects.values());
+        return new ArrayList<>(projects.values());
     }
 
 

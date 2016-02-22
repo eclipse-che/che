@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
+import org.eclipse.che.api.git.shared.ProviderInfo;
+
 /**
  * Provides credentials to use with git commands that need it
  *
@@ -34,4 +36,9 @@ public interface CredentialsProvider {
      * @return return true if current provider can provide credentials for the given url.
      */
     boolean canProvideCredentials(String url);
+
+    /**
+     * @return additional information about given provider
+     */
+    ProviderInfo getProviderInfo();
 }

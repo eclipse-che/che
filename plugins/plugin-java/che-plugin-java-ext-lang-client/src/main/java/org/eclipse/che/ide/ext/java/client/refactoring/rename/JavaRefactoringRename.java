@@ -78,6 +78,7 @@ public class JavaRefactoringRename {
     private final MessageLoader            loader;
 
     private boolean    isActiveLinkedEditor;
+    private TextEditor textEditor;
     private LinkedMode mode;
 
     @Inject
@@ -108,7 +109,11 @@ public class JavaRefactoringRename {
      *         editor where user makes refactoring
      */
     public void refactor(final TextEditor textEditorPresenter) {
-        final CreateRenameRefactoring createRenameRefactoring = createRenameRefactoringDto(textEditorPresenter);
+        if (!isActiveLinkedEditor) {
+            textEditor = textEditorPresenter;
+        }
+
+        final CreateRenameRefactoring createRenameRefactoring = createRenameRefactoringDto(textEditor);
 
         textEditorPresenter.setFocus();
 
@@ -121,12 +126,15 @@ public class JavaRefactoringRename {
                     if (mode != null) {
                         mode.exitLinkedMode(false);
                     }
-                } else if (session.getLinkedModeModel() != null && textEditorPresenter instanceof HasLinkedMode) {
+                } else if (session.getLinkedModeModel() != null && textEditor instanceof HasLinkedMode) {
                     isActiveLinkedEditor = true;
-                    activateLinkedModeIntoEditor(session, ((HasLinkedMode)textEditorPresenter), textEditorPresenter.getDocument());
+                    activateLinkedModeIntoEditor(session, ((HasLinkedMode)textEditor), textEditor.getDocument());
                 } else {
-                    notificationManager.notify(locale.failedToRename(), locale.renameErrorEditor(), FAIL, true,
-                                               textEditorPresenter.getEditorInput().getFile().getProject().getProjectConfig());
+                    notificationManager.notify(locale.failedToRename(),
+                                               locale.renameErrorEditor(),
+                                               FAIL,
+                                               true,
+                                               textEditor.getEditorInput().getFile().getProject().getProjectConfig());
                 }
             }
         }).catchError(new Operation<PromiseError>() {
@@ -234,6 +242,7 @@ public class JavaRefactoringRename {
             case OK:
                 RefactorInfo refactorInfo = RefactorInfo.of(RefactoredItemType.JAVA_ELEMENT, null);
                 refactoringUpdater.updateAfterRefactoring(refactorInfo, result.getChanges());
+                refactoringServiceClient.reindexProject(textEditor.getDocument().getFile().getProject().getProjectConfig().getPath());
                 loader.hide();
                 break;
             case INFO:

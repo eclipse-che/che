@@ -12,7 +12,11 @@ package org.eclipse.che.api.machine.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -21,7 +25,7 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Alexander Garagatyi
  */
 @DTO
-public interface MachineConfigDto extends MachineConfig {
+public interface MachineConfigDto extends MachineConfig, Hyperlinks {
     @Override
     @FactoryParameter(obligation = OPTIONAL)
     String getName();
@@ -61,4 +65,7 @@ public interface MachineConfigDto extends MachineConfig {
     void setLimits(LimitsDto limits);
 
     MachineConfigDto withLimits(LimitsDto limits);
+
+    @Override
+    MachineConfigDto withLinks(List<Link> links);
 }

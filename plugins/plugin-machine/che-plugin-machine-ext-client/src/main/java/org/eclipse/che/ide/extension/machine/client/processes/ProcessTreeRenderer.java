@@ -67,7 +67,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         SpanElement treeNode;
         switch (node.getType()) {
             case MACHINE_NODE:
-                treeNode = createMachineElement((MachineDto)node.getData());
+                treeNode = createMachineElement(node, (MachineDto)node.getData());
                 break;
             case COMMAND_NODE:
                 treeNode = createCommandElement(node);
@@ -83,13 +83,28 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         return treeNode;
     }
 
-    private SpanElement createMachineElement(final MachineDto machine) {
+    private SpanElement createMachineElement(final ProcessTreeNode node, final MachineDto machine) {
         SpanElement root = Elements.createSpanElement();
-        if (machine.isDev()) {
+        if (machine.getConfig().isDev()) {
             SpanElement devLabel = Elements.createSpanElement(resources.getCss().devMachineLabel());
             devLabel.setTextContent(locale.viewProcessesDevTitle());
             root.appendChild(devLabel);
         }
+
+        Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
+        root.appendChild(statusElement);
+
+        if (node.isRunning()) {
+            statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusRunning()));
+        } else {
+            statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusPausedLeft()));
+            statusElement.appendChild(Elements.createDivElement(resources.getCss().machineStatusPausedRight()));
+        }
+
+        Tooltip.create((elemental.dom.Element) statusElement,
+                BOTTOM,
+                MIDDLE,
+                locale.viewMachineRunningTooltip());
 
         SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().processButton());
         newTerminalButton.setTextContent("+");
@@ -100,16 +115,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                        MIDDLE,
                        locale.viewNewTerminalTooltip());
 
-
-        Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
-        root.appendChild(statusElement);
-
-        Tooltip.create((elemental.dom.Element) statusElement,
-                BOTTOM,
-                MIDDLE,
-                locale.viewMachineRunningTooltip());
-
-        if (machine.getMetadata().getServers().containsKey(SSH_PORT)) {
+        if (machine.getRuntime().getServers().containsKey(SSH_PORT)) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);
@@ -157,7 +163,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
 
         Element nameElement = Elements.createSpanElement(resources.getCss().machineLabel());
-        nameElement.setTextContent(machine.getName());
+        nameElement.setTextContent(machine.getConfig().getName());
         root.appendChild(nameElement);
 
         return root;

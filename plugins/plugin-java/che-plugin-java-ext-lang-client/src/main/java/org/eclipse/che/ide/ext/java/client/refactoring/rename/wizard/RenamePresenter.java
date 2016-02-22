@@ -197,6 +197,10 @@ public class RenamePresenter implements ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onCancelButtonClicked() {
+        setEditorFocus();
+    }
+
+    private void setEditorFocus() {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor instanceof TextEditor) {
             ((TextEditor)activeEditor).setFocus();
@@ -332,6 +336,8 @@ public class RenamePresenter implements ActionDelegate {
                 if (arg.getSeverity() == OK) {
                     view.hide();
                     refactoringUpdater.updateAfterRefactoring(refactorInfo, arg.getChanges());
+                    refactorService.reindexProject(appContext.getCurrentProject().getProjectConfig().getPath());
+                    setEditorFocus();
                 } else {
                     view.showErrorMessage(arg);
                 }

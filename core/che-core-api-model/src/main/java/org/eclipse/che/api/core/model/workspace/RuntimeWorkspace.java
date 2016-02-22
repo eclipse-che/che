@@ -26,7 +26,7 @@ public interface RuntimeWorkspace extends UsersWorkspace {
      * Returns active environment name, implementation should guarantee that environment
      * with returned name exists for current runtime workspace
      */
-    String getActiveEnvName();
+    String getActiveEnv();
 
     /**
      * Returns development machine.
@@ -35,6 +35,8 @@ public interface RuntimeWorkspace extends UsersWorkspace {
     Machine getDevMachine();
 
     /**
+     * Machines included in this environment.
+     * <p>
      * Returns non empty list which contains at least one dev machine and other machines related to workspace.
      */
     List<? extends Machine> getMachines();

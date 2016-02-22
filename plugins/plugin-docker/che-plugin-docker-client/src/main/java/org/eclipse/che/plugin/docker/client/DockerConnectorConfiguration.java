@@ -212,9 +212,9 @@ public class DockerConnectorConfiguration {
             try {
                 userURI = new URI(host);
             } catch (URISyntaxException e) {
-                LOG.error(String.format("Unable to parse %s property with value %s", DOCKER_HOST_PROPERTY, host), e);
+                LOG.error(String.format("Unable to parse environment variable %s with the following value - %s", DOCKER_HOST_PROPERTY, host), e);
                 // unable to use given property, fallback to default URL
-                return DEFAULT_DOCKER_MACHINE_URI;
+                return isLinux ? UNIX_SOCKET_URI : DEFAULT_DOCKER_MACHINE_URI;
             }
 
             // Secure connection ?
@@ -225,16 +225,16 @@ public class DockerConnectorConfiguration {
             try {
                 return new URI(protocol, null, userURI.getHost(), userURI.getPort(), null, null, null);
             } catch (URISyntaxException e) {
-                LOG.error(String.format("Unable to create URI %s property with value %s and TLS %s", DOCKER_HOST_PROPERTY, host,
-                                        DOCKER_TLS_VERIFY_PROPERTY), e);
+                LOG.error(String.format("Unable to create URI from %s environment variable with value %s " +
+                                        "and TLS environment variable %s with value %s",
+                                        DOCKER_HOST_PROPERTY, host, DOCKER_TLS_VERIFY_PROPERTY, tls),
+                          e);
                 // unable to use given property, fallback to default URL
                 return DEFAULT_DOCKER_MACHINE_URI;
             }
-        } else if (isLinux) {
-            return UNIX_SOCKET_URI;
-        } else {
-            return DEFAULT_DOCKER_MACHINE_URI;
         }
+
+        return isLinux ? UNIX_SOCKET_URI : DEFAULT_DOCKER_MACHINE_URI;
     }
 
     /**

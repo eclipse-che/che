@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.vfs.Path;
 

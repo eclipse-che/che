@@ -13,11 +13,11 @@ package org.eclipse.che.api.core.model.machine;
 import java.util.Map;
 
 /**
- * Describe metadata of machine.
+ * Runtime information about machine.
  *
  * @author Alexander Garagatyi
  */
-public interface MachineMetadata {
+public interface MachineRuntimeInfo {
     /**
      * Returns environment variables of machine.
      */

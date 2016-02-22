@@ -16,19 +16,24 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.user.gwt.client.UserServiceClient;
+import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.github.client.GitHubClientService;
 import org.eclipse.che.ide.ext.github.client.GitHubLocalizationConstant;
-import org.eclipse.che.ide.ext.github.client.authenticator.GitHubAuthenticator;
+import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.ext.github.client.load.ProjectData;
 import org.eclipse.che.ide.ext.github.shared.GitHubRepository;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
 import org.eclipse.che.security.oauth.OAuthStatus;
 import org.eclipse.che.test.GwtReflectionUtils;
 import org.junit.Before;
@@ -93,13 +98,19 @@ public class GithubImporterPagePresenterTest {
     @Mock
     private Map<String, String>         parameters;
     @Mock
-    private GitHubAuthenticator         gitHubAuthenticator;
-    @InjectMocks
+    private OAuth2Authenticator         gitHubAuthenticator;
+    @Mock
+    private OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry;
+    @Mock
+    private AppContext                  appContext;
+
     private GithubImporterPagePresenter presenter;
 
     @Before
     public void setUp() {
         when(dataObject.getSource()).thenReturn(source);
+        when(gitHubAuthenticatorRegistry.getAuthenticator(eq("github"))).thenReturn(gitHubAuthenticator);
+        presenter = new GithubImporterPagePresenter(view, gitHubAuthenticatorRegistry, gitHubClientService, dtoFactory, "", appContext, locale);
         presenter.setUpdateDelegate(updateDelegate);
         presenter.init(dataObject);
     }
@@ -346,6 +357,15 @@ public class GithubImporterPagePresenterTest {
 
     @Test
     public void onLoadRepoClickedWhenAuthorizeIsFailed() throws Exception {
+        String userId = "userId";
+        CurrentUser user = mock(CurrentUser.class);
+        ProfileDescriptor profile = mock(ProfileDescriptor.class);
+
+        when(appContext.getCurrentUser()).thenReturn(user);
+        when(user.getProfile()).thenReturn(profile);
+        when(profile.getId()).thenReturn(userId);
+
+
         final Throwable exception = mock(UnauthorizedException.class);
 
         presenter.onLoadRepoClicked();
@@ -354,7 +374,7 @@ public class GithubImporterPagePresenterTest {
         AsyncRequestCallback<Map<String, List<GitHubRepository>>> asyncRequestCallback = asyncRequestCallbackRepoListCaptor.getValue();
         GwtReflectionUtils.callOnFailure(asyncRequestCallback, exception);
 
-        verify(gitHubAuthenticator).authorize(asyncCallbackCaptor.capture());
+        verify(gitHubAuthenticator).authorize(anyString(), asyncCallbackCaptor.capture());
         AsyncCallback<OAuthStatus> asyncCallback= asyncCallbackCaptor.getValue();
         asyncCallback.onFailure(exception);
 
@@ -370,6 +390,13 @@ public class GithubImporterPagePresenterTest {
     @Test
     public void onLoadRepoClickedWhenAuthorizeIsSuccessful() throws Exception {
         final Throwable exception = mock(UnauthorizedException.class);
+        String userId = "userId";
+        CurrentUser user = mock(CurrentUser.class);
+        ProfileDescriptor profile = mock(ProfileDescriptor.class);
+
+        when(appContext.getCurrentUser()).thenReturn(user);
+        when(user.getProfile()).thenReturn(profile);
+        when(profile.getId()).thenReturn(userId);
 
         presenter.onLoadRepoClicked();
 
@@ -377,7 +404,7 @@ public class GithubImporterPagePresenterTest {
         AsyncRequestCallback<Map<String, List<GitHubRepository>>> asyncRequestCallback = asyncRequestCallbackRepoListCaptor.getValue();
         GwtReflectionUtils.callOnFailure(asyncRequestCallback, exception);
 
-        verify(gitHubAuthenticator).authorize(asyncCallbackCaptor.capture());
+        verify(gitHubAuthenticator).authorize(anyString(), asyncCallbackCaptor.capture());
         AsyncCallback<OAuthStatus> asyncCallback= asyncCallbackCaptor.getValue();
         asyncCallback.onSuccess(null);
 

@@ -145,7 +145,7 @@ public class AccountService extends Service {
         }
         User current = null;
         if (securityContext.isUserInRole("user")) {
-            current = userDao.getByAlias(securityContext.getUserPrincipal().getName());
+            current = userDao.getByName(securityContext.getUserPrincipal().getName());
             //for now account <-One to One-> user
             if (accountDao.getByOwner(current.getId()).size() != 0) {
                 throw new ConflictException(format("Account which owner is %s already exists", current.getId()));
@@ -201,7 +201,7 @@ public class AccountService extends Service {
     @Produces(APPLICATION_JSON)
     public List<MemberDescriptor> getMemberships(@Context SecurityContext securityContext) throws NotFoundException, ServerException {
         final Principal principal = securityContext.getUserPrincipal();
-        final User current = userDao.getByAlias(principal.getName());
+        final User current = userDao.getByName(principal.getName());
         final List<Member> memberships = accountDao.getByMember(current.getId());
         final List<MemberDescriptor> result = new ArrayList<>(memberships.size());
         for (Member membership : memberships) {

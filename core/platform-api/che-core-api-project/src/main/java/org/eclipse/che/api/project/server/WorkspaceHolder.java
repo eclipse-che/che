@@ -13,9 +13,10 @@ package org.eclipse.che.api.project.server;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.workspace.EnvironmentState;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -135,87 +136,116 @@ public class WorkspaceHolder {
 
 
     protected static class UsersWorkspaceImpl implements UsersWorkspace {
-
-        private final UsersWorkspaceDto dto;
-
-        private List<? extends ProjectConfig> projects;
+        private String              id;
+        private String              owner;
+        private boolean             isTemporary;
+        private WorkspaceStatus     status;
+        private WorkspaceConfigImpl workspaceConfig;
 
         UsersWorkspaceImpl(UsersWorkspaceDto dto) {
-            this.dto = dto;
-            this.projects = dto.getProjects();
+            id = dto.getId();
+            owner = dto.getOwner();
+            isTemporary = dto.isTemporary();
+            status = dto.getStatus();
+            workspaceConfig = new WorkspaceConfigImpl(dto.getConfig());
         }
 
+        @Override
+        public WorkspaceConfigImpl getConfig() {
+            return workspaceConfig;
+        }
 
         @Override
         public String getId() {
-            return dto.getId();
+            return id;
         }
 
         @Override
         public String getOwner() {
-            return dto.getOwner();
+            return owner;
         }
 
         @Override
         public boolean isTemporary() {
-            return dto.isTemporary();
-        }
-
-        @Override
-        public List<? extends EnvironmentState> getEnvironments() {
-            return dto.getEnvironments();
+            return isTemporary;
         }
 
         @Override
         public WorkspaceStatus getStatus() {
-            return dto.getStatus();
+            return status;
+        }
+
+        public void setProjects(final List<RegisteredProject> projects) {
+            List<NewProjectConfig> p = new ArrayList<>();
+            for (RegisteredProject project : projects) {
+                NewProjectConfig config = new NewProjectConfig(project.getPath(),
+                                                            project.getType(),
+                                                            project.getMixins(),
+                                                            project.getName(),
+                                                            project.getDescription(),
+                                                            project.getPersistableAttributes(),
+                                                            project.getSource());
+                p.add(config);
+            }
+
+            getConfig().setProjects(p);
+        }
+    }
+
+    protected static class WorkspaceConfigImpl implements WorkspaceConfig {
+        private String                        name;
+        private String                        description;
+        private String                        defaultEnvName;
+        private List<? extends ProjectConfig> projects;
+        private Map<String, String>           attributes;
+
+        WorkspaceConfigImpl(WorkspaceConfig config) {
+            name = config.getName();
+            description = config.getDescription();
+            defaultEnvName = config.getDefaultEnv();
+            projects = config.getProjects();
+            attributes = config.getAttributes();
         }
 
         @Override
         public String getName() {
-            return dto.getName();
+            return name;
         }
 
         @Override
         public String getDescription() {
-            return dto.getDescription();
+            return description;
         }
 
         @Override
         public String getDefaultEnv() {
-            return dto.getDefaultEnv();
+            return defaultEnvName;
         }
 
         @Override
         public List<? extends Command> getCommands() {
-            return dto.getCommands();
+            // TODO
+            return new ArrayList<>(0);
         }
 
         @Override
         public List<? extends ProjectConfig> getProjects() {
-            return this.projects;
+            return projects;
+        }
+
+        public void setProjects(List<NewProjectConfig> projects) {
+            this.projects = projects;
+        }
+
+        @Override
+        public List<? extends Environment> getEnvironments() {
+            // TODO
+            return new ArrayList<>(0);
         }
 
         @Override
         public Map<String, String> getAttributes() {
-            return dto.getAttributes();
-        }
-
-        public void setProjects(final List<RegisteredProject> projects) {
-
-            List<ProjectConfig> p = new ArrayList<>();
-            for(RegisteredProject project : projects) {
-                ProjectConfig config = new NewProjectConfig(project.getPath(), project.getType(), project.getMixins(),
-                        project.getName(), project.getDescription(), project.getPersistableAttributes(),
-                        project.getSource());
-                p.add(config);
-            }
-            this.projects = p;
-
+            return attributes;
         }
     }
-
-
-
-
 }

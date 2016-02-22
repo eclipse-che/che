@@ -16,7 +16,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
@@ -65,12 +64,12 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
-        final MachineStateDto machineState = event.getMachineState();
-        if (machineState.isDev()) {
-            machineServiceClient.getMachine(machineState.getId()).then(new Operation<MachineDto>() {
+        final MachineDto machine = event.getMachine();
+        if (machine.getConfig().isDev()) {
+            machineServiceClient.getMachine(machine.getId()).then(new Operation<MachineDto>() {
                 @Override
                 public void apply(MachineDto machine) throws OperationException {
-                    final String hostName = machine.getMetadata().getProperties().get("config.hostname");
+                    final String hostName = machine.getRuntime().getProperties().get("config.hostname");
 
                     if (hostName != null) {
                         value = hostName;
@@ -82,8 +81,8 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
 
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
-        final MachineStateDto machineState = event.getMachineState();
-        if (machineState.isDev()) {
+        final MachineDto machine = event.getMachine();
+        if (machine.getConfig().isDev()) {
             value = "";
         }
     }
@@ -97,7 +96,7 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
         machineServiceClient.getMachine(devMachineId).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto arg) throws OperationException {
-                final String hostName = arg.getMetadata().getProperties().get("config.hostname");
+                final String hostName = arg.getRuntime().getProperties().get("config.hostname");
                 if (hostName != null) {
                     value = hostName;
                 }

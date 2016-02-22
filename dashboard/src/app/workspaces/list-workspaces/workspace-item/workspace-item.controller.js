@@ -32,8 +32,8 @@ export class WorkspaceItemCtrl {
   }
 
   getDefaultEnvironment(workspace) {
-    let environments = workspace.environments;
-    let envName = workspace.defaultEnv;
+    let environments = workspace.config.environments;
+    let envName = workspace.config.defaultEnv;
     let defaultEnvironment = this.lodash.find(environments, (environment) => {
         return environment.name === envName;
     });

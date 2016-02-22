@@ -17,15 +17,14 @@ import org.eclipse.che.api.machine.gwt.client.RecipeServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentStateDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -102,19 +101,19 @@ public class CreateWorkspacePresenterTest {
 
     //DTOs
     @Mock
-    private MachineStateDto     machineConfigDto;
+    private MachineConfigDto   machineConfigDto;
     @Mock
-    private MachineSourceDto    machineSourceDto;
+    private MachineDto         machineDto;
     @Mock
-    private EnvironmentDto      environmentDto;
+    private MachineSourceDto   machineSourceDto;
     @Mock
-    private EnvironmentStateDto environmentStateDto;
+    private EnvironmentDto     environmentDto;
     @Mock
-    private CommandDto          commandDto;
+    private CommandDto         commandDto;
     @Mock
-    private WorkspaceConfigDto  workspaceConfigDto;
+    private WorkspaceConfigDto workspaceConfigDto;
     @Mock
-    private UsersWorkspaceDto   usersWorkspaceDto;
+    private UsersWorkspaceDto  usersWorkspaceDto;
 
     @Captor
     private ArgumentCaptor<Operation<List<RecipeDescriptor>>> recipeOperation;
@@ -154,9 +153,10 @@ public class CreateWorkspacePresenterTest {
         when(workspaceConfigDto.withAttributes(Matchers.<Map<String, String>>anyObject())).thenReturn(workspaceConfigDto);
 
         when(dtoFactory.createDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceDto);
-        when(usersWorkspaceDto.withName(anyString())).thenReturn(usersWorkspaceDto);
-        when(usersWorkspaceDto.withDefaultEnv(anyString())).thenReturn(usersWorkspaceDto);
-        when(usersWorkspaceDto.withEnvironments(Matchers.<List<EnvironmentStateDto>>anyObject())).thenReturn(usersWorkspaceDto);
+        when(usersWorkspaceDto.getConfig()).thenReturn(workspaceConfigDto);
+        when(workspaceConfigDto.withName(anyString())).thenReturn(workspaceConfigDto);
+        when(workspaceConfigDto.withDefaultEnv(anyString())).thenReturn(workspaceConfigDto);
+        when(workspaceConfigDto.withEnvironments(Matchers.<List<EnvironmentDto>>anyObject())).thenReturn(workspaceConfigDto);
 
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
 
@@ -204,7 +204,7 @@ public class CreateWorkspacePresenterTest {
 
     @Test
     public void errorLabelShouldBeShownWhenWorkspaceNameAlreadyExist() {
-        when(usersWorkspaceDto.getName()).thenReturn("test");
+        when(workspaceConfigDto.getName()).thenReturn("test");
 
         presenter.show(Arrays.asList(usersWorkspaceDto), componentCallback);
         reset(locale);
@@ -353,11 +353,11 @@ public class CreateWorkspacePresenterTest {
     }
 
     private void callApplyCreateWorkspaceMethod() throws Exception {
-        List<EnvironmentStateDto> environments = new ArrayList<>();
-        environments.add(environmentStateDto);
+        List<EnvironmentDto> environments = new ArrayList<>();
+        environments.add(environmentDto);
 
-        when(usersWorkspaceDto.getDefaultEnv()).thenReturn("name");
-        when(usersWorkspaceDto.getEnvironments()).thenReturn(environments);
+        when(workspaceConfigDto.getDefaultEnv()).thenReturn("name");
+        when(workspaceConfigDto.getEnvironments()).thenReturn(environments);
 
         when(environmentDto.getMachineConfigs()).thenReturn(Arrays.<MachineConfigDto>asList(machineConfigDto));
 
@@ -372,8 +372,6 @@ public class CreateWorkspacePresenterTest {
         when(machineConfigDto.isDev()).thenReturn(false);
 
         callApplyCreateWorkspaceMethod();
-
-        verify(machineConfigDto, never()).getChannels();
 
         verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto);
     }

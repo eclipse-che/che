@@ -113,11 +113,11 @@ describe('CheWorkspace', function(){
 
         // check name of the workspace
         var resultWorkspace1 = workspaces[0];
-        expect(resultWorkspace1.name).toEqual(workspace1.name);
+        expect(resultWorkspace1.config.name).toEqual(workspace1.config.name);
 
         // check the callback has been called without temporary workspace
         expect(listener.getWorkspaces().length).toEqual(1);
-        expect(listener.getWorkspaces()[0].name).toEqual(workspace1.name);
+        expect(listener.getWorkspaces()[0].config.name).toEqual(workspace1.config.name);
        }
     );
 

@@ -50,7 +50,11 @@ import java.util.Map;
  */
 public class PartStackPresenter implements Presenter, PartStackView.ActionDelegate, PartButton.ActionDelegate, PartStack {
 
-    private static final double DEFAULT_PART_SIZE = 285;
+    /** The default size for the part. */
+    private static final double DEFAULT_PART_SIZE = 260;
+
+    /** The minimum allowable size for the part. */
+    private static final int MIN_PART_SIZE = 100;
 
     private final WorkBenchPartController         workBenchPartController;
     private final PartsComparator                 partsComparator;
@@ -62,10 +66,9 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     protected final PartStackView               view;
     protected final PropertyListener            propertyListener;
 
-    private TabItem activeTab;
-    private double  partSize;
-
     protected PartPresenter activePart;
+    protected TabItem       activeTab;
+    protected double        currentSize;
 
     @Inject
     public PartStackPresenter(final EventBus eventBus,
@@ -96,7 +99,12 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             }
         };
 
-        partSize = DEFAULT_PART_SIZE;
+        if (workBenchPartController != null) {
+            this.workBenchPartController.setSize(DEFAULT_PART_SIZE);
+            this.workBenchPartController.setMinSize(MIN_PART_SIZE);
+        }
+
+        currentSize = DEFAULT_PART_SIZE;
     }
 
     private void updatePartTab(@NotNull PartPresenter part) {
@@ -240,7 +248,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
     @Override
     public void updateStack() {
-        for (PartPresenter partPresenter: parts.values()) {
+        for (PartPresenter partPresenter : parts.values()) {
             if (partPresenter instanceof BasePresenter) {
                 ((BasePresenter)partPresenter).setPartStack(this);
             }
@@ -266,7 +274,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         if (selectedTab.equals(activeTab)) {
             selectedTab.unSelect();
 
-            partSize = workBenchPartController.getSize();
+            currentSize = workBenchPartController.getSize();
 
             workBenchPartController.setSize(0);
 
@@ -276,8 +284,6 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
             return;
         }
 
-        partSize = DEFAULT_PART_SIZE;
-
         activeTab = selectedTab;
         activePart = parts.get(selectedTab);
         activePart.onOpen();
@@ -285,7 +291,10 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
     }
 
     private void selectActiveTab(@NotNull TabItem selectedTab) {
-        workBenchPartController.setSize(partSize);
+        double partSize = workBenchPartController.getSize();
+        currentSize = partSize >= MIN_PART_SIZE ? partSize : currentSize;
+
+        workBenchPartController.setSize(currentSize);
         workBenchPartController.setHidden(false);
 
         PartPresenter selectedPart = parts.get(selectedTab);

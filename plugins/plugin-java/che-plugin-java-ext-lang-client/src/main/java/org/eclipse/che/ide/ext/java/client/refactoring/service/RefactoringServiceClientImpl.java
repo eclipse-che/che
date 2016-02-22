@@ -281,4 +281,13 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
             }
         });
     }
+
+    @Override
+    public Promise<Void> reindexProject(String projectPath) {
+        final String url = pathToService + "reindex?projectpath=" + projectPath;
+
+        return asyncRequestFactory.createGetRequest(url)
+                                  .loader(loader)
+                                  .send();
+    }
 }

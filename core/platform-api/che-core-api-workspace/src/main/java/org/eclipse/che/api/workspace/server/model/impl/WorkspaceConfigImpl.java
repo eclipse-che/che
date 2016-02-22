@@ -11,8 +11,8 @@
 package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 
@@ -21,44 +21,42 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 /**
- * Implementation of {@link WorkspaceConfig}, contains information about workspace creation
+ * Data object for {@link WorkspaceConfig}.
  *
- * @author Eugene Voevodin
- * @author gazarenkov
- * @author Alexander Andrienko
+ * @author Alexander Garagatyi
  */
 public class WorkspaceConfigImpl implements WorkspaceConfig {
 
-    public static WorkspaceConfigBuilder builder() {
-        return new WorkspaceConfigBuilder();
+    public static WorkspaceConfigImplBuilder builder() {
+        return new WorkspaceConfigImplBuilder();
     }
 
-    protected String                     name;
-    protected String                     description;
-    protected String                     defaultEnv;
-    protected List<CommandImpl>          commands;
-    protected List<ProjectConfigImpl>    projects;
-    protected List<EnvironmentStateImpl> environments;
-    protected Map<String, String>        attributes;
+    private String                       name;
+    private String                       description;
+    private String                       defaultEnvName;
+    private List<CommandImpl>            commands;
+    private List<ProjectConfigImpl>      projects;
+    private List<EnvironmentImpl>        environments;
+    private Map<String, String>          attributes;
 
     public WorkspaceConfigImpl(String name,
                                String description,
-                               String defaultEnvName,
+                               String defaultEnvironment,
                                List<? extends Command> commands,
                                List<? extends ProjectConfig> projects,
                                List<? extends Environment> environments,
                                Map<String, String> attributes) {
         this.name = name;
         this.description = description;
-
         if (environments != null) {
             this.environments = environments.stream()
-                                            .map(EnvironmentStateImpl::new)
-                                            .collect(toList());
+                                            .map(EnvironmentImpl::new)
+                                            .collect(Collectors.toList());
         }
         if (commands != null) {
             this.commands = commands.stream()
@@ -73,7 +71,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         if (attributes != null) {
             this.attributes = new HashMap<>(attributes);
         }
-        setDefaultEnv(defaultEnvName);
+        setDefaultEnv(defaultEnvironment);
     }
 
     public WorkspaceConfigImpl(WorkspaceConfig workspaceConfig) {
@@ -106,7 +104,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public String getDefaultEnv() {
-        return defaultEnv;
+        return defaultEnvName;
     }
 
     /**
@@ -114,10 +112,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
      * Throws NullPointerException if no Env with incoming name configured
      */
     public void setDefaultEnv(String name) {
-        if (!environments.stream().anyMatch(env -> env.getName().equals(name))) {
-            throw new NullPointerException("No Environment named '" + name + "' found");
-        }
-        defaultEnv = name;
+        defaultEnvName = name;
     }
 
     @Override
@@ -145,14 +140,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     @Override
-    public List<EnvironmentStateImpl> getEnvironments() {
+    public List<EnvironmentImpl> getEnvironments() {
         if (environments == null) {
             environments = new ArrayList<>();
         }
         return environments;
     }
 
-    public void setEnvironments(List<EnvironmentStateImpl> environments) {
+    public void setEnvironments(List<EnvironmentImpl> environments) {
         this.environments = environments;
     }
 
@@ -174,7 +169,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         if (!(obj instanceof WorkspaceConfigImpl)) return false;
         final WorkspaceConfigImpl other = (WorkspaceConfigImpl)obj;
         return Objects.equals(name, other.name) &&
-               Objects.equals(defaultEnv, other.defaultEnv) &&
+               Objects.equals(defaultEnvName, other.defaultEnvName) &&
                getCommands().equals(other.getCommands()) &&
                getEnvironments().equals(other.getEnvironments()) &&
                getProjects().equals(other.getProjects()) &&
@@ -186,7 +181,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(name);
-        hash = 31 * hash + Objects.hashCode(defaultEnv);
+        hash = 31 * hash + Objects.hashCode(defaultEnvName);
         hash = 31 * hash + getCommands().hashCode();
         hash = 31 * hash + getEnvironments().hashCode();
         hash = 31 * hash + getProjects().hashCode();
@@ -197,66 +192,89 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public String toString() {
-        return "WorkspaceConfigImpl{" +
-               " name='" + name + '\'' +
-               ", description='" + description + '\'' +
-               ", defaultEnv='" + defaultEnv + '\'' +
+        return "UsersWorkspaceImpl{" +
+               ", name='" + name + '\'' +
+               ", defaultEnvName='" + defaultEnvName + '\'' +
                ", commands=" + commands +
                ", projects=" + projects +
-               ", environments=" + environments +
                ", attributes=" + attributes +
+               ", environments=" + environments +
+               ", description='" + description + '\'' +
                '}';
     }
 
-    public static class WorkspaceConfigBuilder {
-        private String                        name;
-        private String                        description;
-        private String                        defaultEnv;
-        private List<? extends Command>       commands;
-        private List<? extends ProjectConfig> projects;
-        private List<? extends Environment>   environments;
-        private Map<String, String>           attributes;
+    /**
+     * Helps to build complex {@link WorkspaceConfigImpl users workspace instance}.
+     *
+     * @see WorkspaceConfigImpl#builder()
+     */
+    public static class WorkspaceConfigImplBuilder {
 
-        public WorkspaceConfigBuilder() {
+        protected String                             name;
+        protected String                             defaultEnvName;
+        protected List<? extends Command>            commands;
+        protected List<? extends ProjectConfig>      projects;
+        protected Map<String, String>                attributes;
+        protected List<? extends Environment>        environments;
+        protected String                             description;
+
+        WorkspaceConfigImplBuilder() {
         }
 
-        public WorkspaceConfigBuilder setName(String name) {
+        public WorkspaceConfigImpl build() {
+            return new WorkspaceConfigImpl(name,
+                                           description,
+                                           defaultEnvName,
+                                           commands,
+                                           projects,
+                                           environments,
+                                           attributes);
+        }
+
+        public WorkspaceConfigImplBuilder fromConfig(WorkspaceConfig workspaceConfig) {
+            this.name = workspaceConfig.getName();
+            this.description = workspaceConfig.getDescription();
+            this.defaultEnvName = workspaceConfig.getDefaultEnv();
+            this.projects = workspaceConfig.getProjects();
+            this.commands = workspaceConfig.getCommands();
+            this.environments = workspaceConfig.getEnvironments();
+            this.attributes = workspaceConfig.getAttributes();
+            return this;
+        }
+
+        public WorkspaceConfigImplBuilder setName(String name) {
             this.name = name;
             return this;
         }
 
-        public WorkspaceConfigBuilder setDescription(String description) {
-            this.description = description;
+        public WorkspaceConfigImplBuilder setDefaultEnv(String defaultEnvName) {
+            this.defaultEnvName = defaultEnvName;
             return this;
         }
 
-        public WorkspaceConfigBuilder setDefaultEnv(String defaultEnv) {
-            this.defaultEnv = defaultEnv;
-            return this;
-        }
-
-        public WorkspaceConfigBuilder setCommands(List<? extends Command> commands) {
+        public WorkspaceConfigImplBuilder setCommands(List<? extends Command> commands) {
             this.commands = commands;
             return this;
         }
 
-        public WorkspaceConfigBuilder setProjects(List<? extends ProjectConfig> projects) {
+        public WorkspaceConfigImplBuilder setProjects(List<? extends ProjectConfig> projects) {
             this.projects = projects;
             return this;
         }
 
-        public WorkspaceConfigBuilder setEnvironments(List<? extends Environment> environments) {
-            this.environments = environments;
-            return this;
-        }
-
-        public WorkspaceConfigBuilder setAttributes(Map<String, String> attributes) {
+        public WorkspaceConfigImplBuilder setAttributes(Map<String, String> attributes) {
             this.attributes = attributes;
             return this;
         }
 
-        public WorkspaceConfigImpl build() {
-            return new WorkspaceConfigImpl(name, description, defaultEnv, commands, projects, environments, attributes);
+        public WorkspaceConfigImplBuilder setEnvironments(List<? extends Environment> environments) {
+            this.environments = environments;
+            return this;
+        }
+
+        public WorkspaceConfigImplBuilder setDescription(String description) {
+            this.description = description;
+            return this;
         }
     }
 }

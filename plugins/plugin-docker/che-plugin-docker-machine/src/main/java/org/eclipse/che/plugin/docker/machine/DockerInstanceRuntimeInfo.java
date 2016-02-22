@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.core.model.machine.MachineMetadata;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -28,12 +28,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Docker implementation of {@link MachineMetadata}
+ * Docker implementation of {@link MachineRuntimeInfo}
  *
  * @author andrew00x
  * @author Alexander Garagatyi
  */
-public class DockerInstanceMetadata implements MachineMetadata {
+public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     /**
      * Env variable that points to root folder of projects in dev machine
      */
@@ -67,7 +67,7 @@ public class DockerInstanceMetadata implements MachineMetadata {
     private final String        containerHost;
 
     @Inject
-    public DockerInstanceMetadata(@Assisted  ContainerInfo containerInfo, @Assisted String containerHost) {
+    public DockerInstanceRuntimeInfo(@Assisted  ContainerInfo containerInfo, @Assisted String containerHost) {
         this.info = containerInfo;
         this.containerHost = containerHost;
     }

@@ -136,11 +136,4 @@ public class EditorTabWidgetTest {
         verify(delegate).onTabClicked(tab);
     }
 
-    @Test
-    public void onCloseButtonShouldBeClicked() {
-        tab.onCloseButtonClicked(event);
-
-        verify(delegate).onTabClose(tab);
-    }
-
 }

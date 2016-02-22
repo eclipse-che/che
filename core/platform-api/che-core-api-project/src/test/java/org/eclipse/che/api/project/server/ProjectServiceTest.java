@@ -51,6 +51,7 @@ import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -140,6 +141,8 @@ public class ProjectServiceTest {
     private UserDao                userDao;
     @Mock
     private UsersWorkspaceDto      usersWorkspaceMock;
+    @Mock
+    private WorkspaceConfigDto      workspaceConfigMock;
     @Mock
     private HttpJsonRequestFactory httpJsonRequestFactory;
     @Mock
@@ -232,7 +235,8 @@ public class ProjectServiceTest {
         when(httpJsonRequestFactory.fromLink(any())).thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
-        when(usersWorkspaceMock.getProjects()).thenReturn(projects);
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(workspaceConfigMock.getProjects()).thenReturn(projects);
 
         pm.createProject(testProjectConfigMock, null);
 
@@ -280,20 +284,15 @@ public class ProjectServiceTest {
 
 
     private static class TestWorkspaceHolder extends WorkspaceHolder {
-
         private TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name").withProjects(new ArrayList<>()));
-
-
+            super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")
+                                                  .withProjects(new ArrayList<>())));
         }
-
-
-
     }
 
     private static class TestSearcherProvider implements SearcherProvider {
-
 
         @Override
         public Searcher getSearcher(VirtualFileSystem virtualFileSystem, boolean create) throws ServerException {

@@ -23,6 +23,8 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.junit.Assert;
@@ -129,7 +131,9 @@ public class SimpleGeneratorStrategyTest {
 
         UsersWorkspaceDto usersWorkspaceMock = mock(UsersWorkspaceDto.class);
         final ProjectConfigDto projectConfigDto = DtoFactory.getInstance().createDto(ProjectConfigDto.class).withPath("/my_project");
-        when(usersWorkspaceMock.getProjects()).thenReturn(Collections.singletonList(projectConfigDto));
+        WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(workspaceConfigMock.getProjects()).thenReturn(Collections.singletonList(projectConfigDto));
 
         ProjectHandlerRegistry handlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 

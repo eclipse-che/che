@@ -8,17 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto;
-
-import org.eclipse.che.api.core.model.machine.Channels;
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.ide.api.oauth;
 
 /**
- * @author Alexander Garagatyi
+ *  Authenticators registry.
+ *
+ * @author Vitalii Parfonov
  */
-@DTO
-public interface ChannelsDto extends Channels {
-    ChannelsDto withOutput(String outputChannel);
+public interface OAuth2AuthenticatorRegistry {
 
-    ChannelsDto withStatus(String statusChannel);
+    void registerAuthenticator(String providerName, OAuth2Authenticator oAuth2Authenticator);
+
+    OAuth2Authenticator getAuthenticator(String providerName);
 }

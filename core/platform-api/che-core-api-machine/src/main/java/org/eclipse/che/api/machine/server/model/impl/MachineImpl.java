@@ -10,11 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Channels;
-import org.eclipse.che.api.core.model.machine.Limits;
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineMetadata;
-import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 
 import java.util.Objects;
@@ -25,67 +23,103 @@ import java.util.Objects;
  * @author Eugene Voevodin
  * @author Alexander Garagatyi
  */
-public class MachineImpl extends MachineStateImpl implements Machine {
+public class MachineImpl implements Machine {
 
     public static MachineImplBuilder builder() {
         return new MachineImplBuilder();
     }
 
-    private MachineMetadataImpl metadata;
+    private final MachineConfigImpl      machineConfig;
+    private final String                 id;
+    private final MachineRuntimeInfoImpl machineRuntime;
+    private final String                 workspace;
+    private final String                 envName;
+    private final String                 owner;
 
-    public MachineImpl(boolean isDev,
-                       String name,
-                       String type,
-                       MachineSource source,
-                       Limits limits,
+    private MachineStatus status;
+
+    public MachineImpl(MachineConfig machineConfig,
                        String id,
-                       MachineMetadata metadata,
-                       Channels channels,
                        String workspace,
-                       String owner,
                        String envName,
-                       MachineStatus status) {
-        super(isDev, name, type, source, limits, id, channels, workspace, owner, envName, status);
-        this.metadata = new MachineMetadataImpl(metadata);
+                       String owner,
+                       MachineStatus status,
+                       MachineRuntimeInfo machineRuntime) {
+        this.workspace = workspace;
+        this.envName = envName;
+        this.owner = owner;
+        this.machineConfig = new MachineConfigImpl(machineConfig);
+        this.id = id;
+        this.status = status;
+        this.machineRuntime = machineRuntime != null ? new MachineRuntimeInfoImpl(machineRuntime) : null;
     }
 
     public MachineImpl(Machine machine) {
-        this(machine.isDev(),
-             machine.getName(),
-             machine.getType(),
-             machine.getSource(),
-             machine.getLimits(),
+        this(machine.getConfig(),
              machine.getId(),
-             machine.getMetadata(),
-             machine.getChannels(),
              machine.getWorkspaceId(),
-             machine.getOwner(),
              machine.getEnvName(),
-             machine.getStatus());
+             machine.getOwner(),
+             machine.getStatus(),
+             machine.getRuntime());
     }
 
     @Override
-    public MachineMetadataImpl getMetadata() {
-        if (metadata == null) {
-            metadata = new MachineMetadataImpl();
-        }
-        return metadata;
+    public MachineConfigImpl getConfig() {
+        return machineConfig;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getWorkspaceId() {
+        return workspace;
+    }
+
+    @Override
+    public String getEnvName() {
+        return envName;
+    }
+
+    @Override
+    public String getOwner() {
+        return owner;
+    }
+
+    @Override
+    public MachineStatus getStatus() {
+        return status;
+    }
+
+    @Override
+    public MachineRuntimeInfoImpl getRuntime() {
+        return machineRuntime;
+    }
+
+    public void setStatus(MachineStatus status) {
+        this.status = status;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MachineImpl)) return false;
-        if (!super.equals(o)) return false;
-        final MachineImpl other = (MachineImpl)o;
-        return Objects.equals(getMetadata(), other.getMetadata());
+        MachineImpl machine = (MachineImpl)o;
+        return Objects.equals(machineConfig, machine.machineConfig) &&
+               Objects.equals(id, machine.id) &&
+               Objects.equals(machineRuntime, machine.machineRuntime) &&
+               Objects.equals(workspace, machine.workspace) &&
+               Objects.equals(envName, machine.envName) &&
+               Objects.equals(owner, machine.owner) &&
+               status == machine.status;
     }
 
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        hash = hash * 31 + getMetadata().hashCode();
-        return hash;
+        return Objects.hash(machineConfig, id, machineRuntime, workspace, envName, owner, status);
     }
 
     /**
@@ -95,81 +129,31 @@ public class MachineImpl extends MachineStateImpl implements Machine {
      */
     public static class MachineImplBuilder {
 
-        private boolean         isDev;
-        private Limits          limits;
-        private String          name;
-        private String          type;
-        private String          id;
-        private MachineSource   source;
-        private MachineMetadata metadata;
-        private Channels        channels;
-        private String          workspaceId;
-        private String          owner;
-        private String          envName;
-        private MachineStatus   machineStatus;
+        private MachineConfig      machineConfig;
+        private String             id;
+        private String             envName;
+        private String             owner;
+        private String             workspaceId;
+        private MachineStatus      machineStatus;
+        private MachineRuntimeInfo machineRuntime;
 
         public MachineImpl build() {
-            return new MachineImpl(isDev,
-                                   name,
-                                   type,
-                                   source,
-                                   limits,
+            return new MachineImpl(machineConfig,
                                    id,
-                                   metadata,
-                                   channels,
                                    workspaceId,
-                                   owner,
                                    envName,
-                                   machineStatus);
+                                   owner,
+                                   machineStatus,
+                                   machineRuntime);
         }
 
-        public MachineImplBuilder setDev(boolean isDev) {
-            this.isDev = isDev;
-            return this;
-        }
-
-        public MachineImplBuilder setLimits(Limits limits) {
-            this.limits = limits;
-            return this;
-        }
-
-        public MachineImplBuilder setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public MachineImplBuilder setType(String type) {
-            this.type = type;
+        public MachineImplBuilder setConfig(MachineConfig machineConfig) {
+            this.machineConfig = machineConfig;
             return this;
         }
 
         public MachineImplBuilder setId(String id) {
             this.id = id;
-            return this;
-        }
-
-        public MachineImplBuilder setSource(MachineSource source) {
-            this.source = source;
-            return this;
-        }
-
-        public MachineImplBuilder setMetadata(MachineMetadata metadata) {
-            this.metadata = metadata;
-            return this;
-        }
-
-        public MachineImplBuilder setChannels(Channels channels) {
-            this.channels = channels;
-            return this;
-        }
-
-        public MachineImplBuilder setWorkspaceId(String workspaceId) {
-            this.workspaceId = workspaceId;
-            return this;
-        }
-
-        public MachineImplBuilder setOwner(String owner) {
-            this.owner = owner;
             return this;
         }
 
@@ -180,6 +164,21 @@ public class MachineImpl extends MachineStateImpl implements Machine {
 
         public MachineImplBuilder setEnvName(String envName) {
             this.envName = envName;
+            return this;
+        }
+
+        public MachineImplBuilder setOwner(String owner) {
+            this.owner = owner;
+            return this;
+        }
+
+        public MachineImplBuilder setWorkspaceId(String workspaceId) {
+            this.workspaceId = workspaceId;
+            return this;
+        }
+
+        public MachineImplBuilder setRuntime(MachineRuntimeInfo machineRuntime) {
+            this.machineRuntime = machineRuntime;
             return this;
         }
     }

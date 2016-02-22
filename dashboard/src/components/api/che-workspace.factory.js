@@ -101,7 +101,7 @@ export class CheWorkspace {
       // add workspace if not temporary
       data.forEach((workspace) => {
 
-        if (!workspace.temporary) {
+        if (!workspace.config.temporary) {
           remoteWorkspaces.push(workspace);
           this.workspaces.push(workspace);
           this.workspacesById.set(workspace.id, workspace);
@@ -154,14 +154,14 @@ export class CheWorkspace {
   }
 
 
-  createWorkspace(accountId, workspaceName, recipeUrl, ram) {
+  createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
     // /api/workspace/config?account=accountId
-
+    let attr = attributes ? attributes : {};
 
     let data = {
       'environments': [],
       'name': workspaceName,
-      'attributes': {},
+      'attributes': attributes,
       'projects': [],
       'defaultEnv': workspaceName,
       'description': null,
@@ -218,15 +218,6 @@ export class CheWorkspace {
     return promise;
   }
 
-  /**
-   * Gets the runtime data of the given workspace
-   * @param workspaceId the ID of the workspace
-   * @returns {*} the associated promise
-   */
-  getRuntime(workspaceId) {
-    let promise = this.remoteWorkspaceAPI.getRuntime({workspaceId: workspaceId}, {}).$promise;
-    return promise;
-  }
 
   stopWorkspace(workspaceId) {
     let promise = this.remoteWorkspaceAPI.deleteRuntime({workspaceId: workspaceId}, {}).$promise;
@@ -271,15 +262,19 @@ export class CheWorkspace {
    * @returns {*|promise|n|N}
    */
   fetchRuntimeConfig(workspaceId) {
+    var defer = this.$q.defer();
     let promise = this.remoteWorkspaceAPI.getRuntime({workspaceId: workspaceId}).$promise;
     let updatedPromise = promise.then((data) => {
       this.runtimeConfig.set(workspaceId, data);
+      defer.resolve();
     }, (error) => {
       if (error.status !== 304) {
-        console.log(error);
+        defer.reject(error);
+      } else {
+        defer.resolve();
       }
     });
-    return updatedPromise;
+    return defer.promise;
   }
 
   /**
@@ -289,6 +284,40 @@ export class CheWorkspace {
    */
   getRuntimeConfig(workspaceId) {
     return this.runtimeConfig.get(workspaceId);
+  }
+
+  /**
+   * Gets websocket for a given workspace. It needs to have fetched first the runtime configuration of the workspace
+   * @param workspaceId the id of the workspace
+   * @returns {string}
+   */
+  getWebsocketUrl(workspaceId) {
+    let runtimeData = this.getRuntimeConfig(workspaceId);
+    if (!runtimeData) {
+      return '';
+    }
+    // extract the Websocket URL of the runtime
+    let servers = runtimeData.devMachine.metadata.servers;
+
+    var extensionServerAddress;
+    for (var key in servers) {
+      let server = servers[key];
+      if ('extensions' === server.ref) {
+        extensionServerAddress = server.address;
+      }
+    }
+
+    let endpoint = runtimeData.devMachine.metadata.envVariables.CHE_API_ENDPOINT;
+
+    var contextPath;
+    if (endpoint.endsWith('/ide/api')) {
+      contextPath = 'ide';
+    } else {
+      contextPath = 'api';
+    }
+
+    return 'ws://' + extensionServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
+
   }
 
 }

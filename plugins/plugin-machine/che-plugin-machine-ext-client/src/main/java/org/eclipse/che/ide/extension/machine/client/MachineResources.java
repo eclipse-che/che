@@ -143,6 +143,12 @@ public interface MachineResources extends ClientBundle {
 
         String machineStatus();
 
+        String machineStatusRunning();
+
+        String machineStatusPausedLeft();
+
+        String machineStatusPausedRight();
+
         String machineLabel();
 
         String processIconPanel();

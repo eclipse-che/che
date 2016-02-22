@@ -34,7 +34,6 @@ public class WorkBenchPartControllerImpl implements WorkBenchPartController {
         this.widget = widget;
 
         splitLayoutPanel.setWidgetToggleDisplayAllowed(widget, true);
-        splitLayoutPanel.setWidgetMinSize(widget, 100);
         splitLayoutPanel.setWidgetHidden(widget, true);
         splitLayoutPanel.forceLayout();
     }
@@ -61,6 +60,12 @@ public class WorkBenchPartControllerImpl implements WorkBenchPartController {
 
         splitLayoutPanel.setWidgetSize(widget, hidden ? 0 : getSize());
         splitLayoutPanel.animate(DURATION);
+
+    }
+
+    @Override
+    public void setMinSize(int minSize) {
+        splitLayoutPanel.setWidgetMinSize(widget, minSize);
     }
 
 }

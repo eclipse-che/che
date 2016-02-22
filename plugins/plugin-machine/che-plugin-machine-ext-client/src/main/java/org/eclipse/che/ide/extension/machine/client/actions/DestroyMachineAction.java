@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -60,11 +60,11 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final MachineStateDto selectedMachine = panelPresenter.getSelectedMachineState();
+        final MachineDto selectedMachine = panelPresenter.getSelectedMachineState();
         event.getPresentation().setEnabled(selectedMachine != null
-                                           && !selectedMachine.isDev()
+                                           && !selectedMachine.getConfig().isDev()
                                            && panelPresenter.isMachineRunning());
-        event.getPresentation().setText(selectedMachine != null ? locale.machineDestroyTitle(selectedMachine.getName())
+        event.getPresentation().setText(selectedMachine != null ? locale.machineDestroyTitle(selectedMachine.getConfig().getName())
                                                                 : locale.machineDestroyTitle());
     }
 
@@ -73,7 +73,7 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     public void actionPerformed(@NotNull ActionEvent event) {
         eventLogger.log(this);
 
-        final MachineStateDto selectedMachine = panelPresenter.getSelectedMachineState();
+        final MachineDto selectedMachine = panelPresenter.getSelectedMachineState();
         if (selectedMachine == null) {
             return;
         }

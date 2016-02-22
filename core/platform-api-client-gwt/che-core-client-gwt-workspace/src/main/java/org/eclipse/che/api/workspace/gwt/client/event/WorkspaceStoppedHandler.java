@@ -8,21 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.api.workspace.gwt.client.event;
+
+import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Websocket channels that provide information about machine.
+ * Is fired when workspace has been stopped.
  *
- * @author Alexander Garagatyi
+ * @author Vitaliy Guliy
  */
-public interface Channels {
-    /**
-     * Returns channel of websocket where machine logs should be put.
-     */
-    String getOutput();
+public interface WorkspaceStoppedHandler extends EventHandler {
 
     /**
-     * Returns channel of websocket where machine status events should be put.
+     * Perform actions when workspace is stopped.
+     *
+     * @param event
+     *         workspace stopped event
      */
-    String getStatus();
+    void onWorkspaceStopped(WorkspaceStoppedEvent event);
+
 }

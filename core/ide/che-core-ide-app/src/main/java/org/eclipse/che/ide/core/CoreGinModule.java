@@ -69,6 +69,8 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
+import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
@@ -114,6 +116,8 @@ import org.eclipse.che.ide.navigation.NavigateToFileViewImpl;
 import org.eclipse.che.ide.notification.NotificationManagerImpl;
 import org.eclipse.che.ide.notification.NotificationManagerView;
 import org.eclipse.che.ide.notification.NotificationManagerViewImpl;
+import org.eclipse.che.ide.oauth.DefaultOAuthAuthenticatorImpl;
+import org.eclipse.che.ide.oauth.OAuth2AuthenticatorRegistryImpl;
 import org.eclipse.che.ide.part.FocusManager;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
@@ -263,6 +267,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(AnalyticsEventLogger.class).to(DummyAnalyticsLoger.class).in(Singleton.class);
         bind(AnalyticsEventLoggerExt.class).to(DummyAnalyticsLoger.class).in(Singleton.class);
 
+        GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class).addBinding().to(DefaultOAuthAuthenticatorImpl.class);
+
         configureComponents();
         configureProjectWizard();
         configureImportWizard();
@@ -305,6 +311,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ProjectWizardRegistry.class).to(ProjectWizardRegistryImpl.class).in(Singleton.class);
         install(new GinFactoryModuleBuilder().build(ProjectWizardFactory.class));
         bind(PreSelectedProjectTypeManager.class).to(PreSelectedProjectTypeManagerImpl.class).in(Singleton.class);
+        bind(OAuth2AuthenticatorRegistry.class).to(OAuth2AuthenticatorRegistryImpl.class).in(Singleton.class);
     }
 
     private void configureImportWizard() {

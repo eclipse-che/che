@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.core;
 
+import org.eclipse.che.api.core.rest.shared.dto.ExtendedError;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+
+import java.util.Collections;
+import java.util.Map;
+
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * A {@code UnauthorizedException} is thrown when caller isn't authorized to access some resource.
@@ -28,5 +34,13 @@ public class UnauthorizedException extends ApiException {
 
     public UnauthorizedException(ServiceError serviceError) {
         super(serviceError);
+    }
+
+    public UnauthorizedException(String message, int errorCode, Map<String, String> attributes) {
+        super(newDto(ExtendedError.class).withMessage(message).withErrorCode(errorCode).withAttributes(attributes));
+    }
+
+    public UnauthorizedException(String message, int errorCode) {
+        this(message, errorCode, Collections.emptyMap());
     }
 }
