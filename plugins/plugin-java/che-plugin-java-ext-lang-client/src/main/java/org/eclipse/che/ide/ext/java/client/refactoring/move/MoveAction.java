@@ -33,6 +33,7 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
 
 /**
  * @author Dmitry Shnurenko
+ * @author Valeriy Svydenko
  */
 @Singleton
 public class MoveAction extends Action {
@@ -58,7 +59,12 @@ public class MoveAction extends Action {
         actionEvent.getPresentation().setEnabled(isActionEnable());
     }
 
-    private boolean isActionEnable() {
+    /**
+     * Check if action can be applied.
+     *
+     * @return {@code true} if action should be enabled otherwise return {@code false}
+     */
+    public boolean isActionEnable() {
         Selection<?> selection = selectionAgent.getSelection();
 
         if (selection == null || selection.isEmpty()) {

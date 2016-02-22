@@ -182,17 +182,12 @@ public class MovePresenter implements MoveView.ActionDelegate {
         projectsPromise.then(new Operation<List<JavaProject>>() {
             @Override
             public void apply(List<JavaProject> projects) throws OperationException {
+                List<JavaProject> currentProject = new ArrayList<>();
                 for (JavaProject project : projects) {
-                    if (project.getPath().equals(getPathToProject())) {
-                        List<JavaProject> currentProject = new ArrayList<>();
                         currentProject.add(project);
-
-                        view.setTreeOfDestinations(currentProject);
-                        view.show(refactorInfo);
-
-                        return;
-                    }
                 }
+                view.setTreeOfDestinations(currentProject);
+                view.show(refactorInfo);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
