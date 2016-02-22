@@ -27,7 +27,7 @@ import java.util.Set;
 @ImplementedBy(MavenWebSocketCommunication.class)
 public interface MavenCommunication {
 
-    void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> added, List<MavenProject> removed,
+    void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed,
                            List<MavenProjectProblem> mavenProjectProblems);
 
     void sendNotification(NotificationMessage message);

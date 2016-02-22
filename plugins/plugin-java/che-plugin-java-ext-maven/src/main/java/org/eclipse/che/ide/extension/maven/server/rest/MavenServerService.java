@@ -15,8 +15,9 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.vfs.server.VirtualFile;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
+import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
 import org.eclipse.che.ide.extension.maven.server.MavenServerWrapper;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
@@ -40,7 +41,7 @@ import static javax.ws.rs.core.MediaType.TEXT_XML;
 @Path("/maven/{wsId}/server")
 public class MavenServerService {
     private final MavenServerManager        mavenServerManager;
-    private final VirtualFileSystemRegistry fileSystemRegistry;
+    private final ProjectRegistry projectRegistry;
 
     @PathParam("wsId")
     private String workspaceId;
@@ -55,9 +56,9 @@ public class MavenServerService {
     private MavenProjectManager projectManager;
 
     @Inject
-    public MavenServerService(MavenServerManager mavenServerManager, VirtualFileSystemRegistry fileSystemRegistry) {
+    public MavenServerService(MavenServerManager mavenServerManager, ProjectRegistry projectRegistry) {
         this.mavenServerManager = mavenServerManager;
-        this.fileSystemRegistry = fileSystemRegistry;
+        this.projectRegistry = projectRegistry;
     }
 
     /**
@@ -79,20 +80,21 @@ public class MavenServerService {
     public String getEffectivePom(@QueryParam("projectpath") String projectPath) throws ServerException,
                                                                                         NotFoundException,
                                                                                         ForbiddenException {
-        VirtualFile project = fileSystemRegistry.getProvider(workspaceId).getMountPoint(false).getVirtualFile(projectPath);
+        RegisteredProject project = projectRegistry.getProject(projectPath);
         if (project == null) {
             throw new NotFoundException("Project " + projectPath + " doesn't exist");
         }
+
 
         MavenServerWrapper mavenServer = mavenServerManager.createMavenServer();
 
         try {
             mavenServer.customize(projectManager.copyWorkspaceCache(), terminal, notifier, false, false);
-            VirtualFile pomFile = project.getChild("pom.xml");
+            VirtualFileEntry pomFile = project.getBaseFolder().getChild("pom.xml");
             if (pomFile == null) {
                 throw new NotFoundException("pom.xml doesn't exist");
             }
-            return mavenServer.getEffectivePom(pomFile.getIoFile(), Collections.emptyList(), Collections.emptyList());
+            return mavenServer.getEffectivePom(pomFile.getVirtualFile().toIoFile(), Collections.emptyList(), Collections.emptyList());
         } finally {
             mavenServer.reset();
         }

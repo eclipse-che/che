@@ -14,8 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.ExtServerStateHandler;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -70,9 +70,9 @@ public class MavenMessagesHandler {
         this.projectServiceClient = projectServiceClient;
         this.context = context;
         this.pomEditorReconciler = pomEditorReconciler;
-        eventBus.addHandler(ExtServerStateEvent.TYPE, new ExtServerStateHandler() {
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
-            public void onExtServerStarted(ExtServerStateEvent event) {
+            public void onWsAgentStarted(WsAgentStateEvent event) {
                 try {
                     messageBus.getMachineMessageBus().subscribe(MavenAttributes.MAVEN_CHANEL_NAME, new MessageHandler() {
                         @Override
@@ -99,7 +99,7 @@ public class MavenMessagesHandler {
             }
 
             @Override
-            public void onExtServerStopped(ExtServerStateEvent event) {
+            public void onWsAgentStopped(WsAgentStateEvent event) {
 
             }
         });
@@ -121,12 +121,6 @@ public class MavenMessagesHandler {
         for (String path : dto.getDeletedProjects()) {
             if (!updatedProjects.contains(path)) {
                 notificationManager.notify("Maven", "Module was deleted: " + path, StatusNotification.Status.SUCCESS, true);
-            }
-        }
-
-        for (String path : dto.getAddedProjects()) {
-            if (!updatedProjects.contains(path)) {
-                notificationManager.notify("Maven", "Module was added: " + path, StatusNotification.Status.SUCCESS, true);
             }
         }
 

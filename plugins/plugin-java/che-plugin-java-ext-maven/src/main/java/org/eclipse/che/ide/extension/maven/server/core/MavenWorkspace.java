@@ -17,12 +17,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
-import org.eclipse.che.api.project.server.Project;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectTypeConstraintException;
-import org.eclipse.che.api.project.server.ValueStorageException;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathHelper;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
@@ -30,7 +25,6 @@ import org.eclipse.che.ide.extension.maven.server.core.project.MavenProjectModif
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -38,10 +32,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,8 +50,8 @@ public class MavenWorkspace {
     private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
     private final MavenProjectManager manager;
-    private final ProjectManager      projectManager;
     private final String              wsId;
+    private final ProjectRegistry     projectRegistry;
     private final MavenCommunication communication;
 
     private MavenTaskExecutor resolveExecutor;
@@ -70,115 +62,60 @@ public class MavenWorkspace {
     public MavenWorkspace(MavenProjectManager manager,
                           MavenProgressNotifier notifier,
                           MavenExecutorService executorService,
-                          ProjectManager projectManager,
+                          ProjectRegistry projectRegistry,
                           MavenCommunication communication) {
+        this.projectRegistry = projectRegistry;
         this.communication = communication;
         wsId = System.getenv("CHE_WORKSPACE_ID");
         this.manager = manager;
-        this.projectManager = projectManager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
         manager.addListener(new MavenProjectListener() {
             @Override
             public void projectResolved(MavenProject project, MavenProjectModifications modifications) {
-                communication.sendUpdateMassage(Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), project.getProblems());
+                communication.sendUpdateMassage(Collections.emptySet(), Collections.emptyList(), project.getProblems());
             }
 
             @Override
-            public void projectUpdated(Map<MavenProject, MavenProjectModifications> updated, List<MavenProject> added,
+            public void projectUpdated(Map<MavenProject, MavenProjectModifications> updated,
                                        List<MavenProject> removed) {
-                List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
-                Set<MavenProject> rootProjectsToUpdate = importProjects(added, removed);
-                updatedProjects.forEach(MavenWorkspace.this::updateJavaProject);
-
+//                List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
+//                Set<MavenProject> rootProjectsToUpdate = importProjects(added, removed);
+//                updatedProjects.forEach(MavenWorkspace.this::updateJavaProject);
+                removeProjects(removed);
+                createNewProjects(updated.keySet());
                 //TODO schedule resolving tasks
-
-                communication.sendUpdateMassage(rootProjectsToUpdate, added, removed, collectProblems(updatedProjects, added, rootProjectsToUpdate));
+                List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
+                communication.sendUpdateMassage(updated.keySet(), removed, collectProblems(updatedProjects));
             }
         });
     }
 
-    private List<MavenProjectProblem> collectProblems(List<MavenProject> updatedProjects, List<MavenProject> added,
-                                                      Set<MavenProject> rootProjectsToUpdate) {
-        List<MavenProjectProblem> result = new ArrayList<>();
-
-        result.addAll(updatedProjects.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
-        result.addAll(added.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
-        result.addAll(rootProjectsToUpdate.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
-        return result;
+    private void createNewProjects(Set<MavenProject> mavenProjects) {
+        mavenProjects.stream()
+                     .filter(project -> projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null)
+                     .forEach(project -> {
+                         try {
+                             projectRegistry.initProject(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+                         } catch (ConflictException | ForbiddenException | ServerException | NotFoundException e) {
+                             LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
+                         }
+                     });
+        mavenProjects.forEach(this::updateJavaProject);
     }
 
-    private static ProjectConfigImpl createConfig(IPath path) {
-        ProjectConfigImpl projectConfig = new ProjectConfigImpl();
-        projectConfig.setName(path.lastSegment());
-        projectConfig.setPath(path.toOSString());
-        projectConfig.setType(MAVEN_ID);
+    private void removeProjects(List<MavenProject> removed) {
+        removed.forEach(project -> projectRegistry.removeProjects(project.getProject().getFullPath().toOSString()));
+    }
 
-        return projectConfig;
+    private List<MavenProjectProblem> collectProblems(List<MavenProject> updatedProjects) {
+
+        List<MavenProjectProblem> result = new ArrayList<>();
+        result.addAll(updatedProjects.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
+        return result;
     }
 
     public void update(List<IProject> projects) {
         manager.update(projects, true);
-    }
-
-    private Set<MavenProject> importProjects(List<MavenProject> addedProjects, List<MavenProject> removed) {
-        Set<MavenProject> projectsToUpdateConfig = getRootProjects(addedProjects);
-        projectsToUpdateConfig.addAll(getRootProjects(removed));
-        for (MavenProject mavenProject : projectsToUpdateConfig) {
-            try {
-                if (getCheProject(mavenProject.getProject().getFullPath()) == null) {
-                    createCheProject(mavenProject.getProject().getFullPath());
-                }
-                updateMavenProject(mavenProject);
-            } catch (IOException | ForbiddenException | NotFoundException | ServerException | ConflictException e) {
-                LOG.error("Can't convert folder to project: " + mavenProject.getProject().getFullPath().toString(), e);
-            }
-
-        }
-
-        addedProjects.forEach(this::updateJavaProject);
-        return projectsToUpdateConfig;
-    }
-
-    private void updateMavenProject(MavenProject mavenProject)
-            throws ProjectTypeConstraintException, ForbiddenException, NotFoundException, ValueStorageException, ServerException {
-        Project cheProject = getCheProject(mavenProject.getProject().getFullPath());
-        if (cheProject != null) {
-            ProjectConfig config = cheProject.getConfig();
-            ProjectConfigImpl newConfig = new ProjectConfigImpl(config);
-            List<ProjectConfig> modules = new ArrayList<>();
-            addModules(mavenProject, modules);
-            newConfig.setModules(modules);
-            cheProject.updateConfig(newConfig);
-        }
-    }
-
-    private void addModules(MavenProject mavenProject, List<ProjectConfig> modules) {
-        List<MavenProject> mavenProjects = manager.findModules(mavenProject);
-        for (MavenProject project : mavenProjects) {
-            List<ProjectConfig> internalModules = new ArrayList<>();
-            addModules(project, internalModules);
-
-            ProjectConfigImpl config = createConfig(project.getProject().getFullPath());
-            config.setModules(internalModules);
-            modules.add(config);
-        }
-
-    }
-
-    private Set<MavenProject> getRootProjects(List<MavenProject> addedProjects) {
-        Set<MavenProject> rootProjects = new HashSet<>();
-        for (MavenProject project : addedProjects) {
-            MavenProject parentProject = manager.findParentProject(project);
-            MavenProject rootProject = project;
-            while (parentProject != null) {
-                rootProject = parentProject;
-                parentProject = manager.findParentProject(parentProject);
-            }
-
-            rootProjects.add(rootProject);
-        }
-
-        return rootProjects;
     }
 
     private void updateJavaProject(MavenProject project) {
@@ -196,23 +133,6 @@ public class MavenWorkspace {
         } catch (JavaModelException e) {
             LOG.error("Can't update Java project classpath", e);
         }
-    }
-
-    private void createCheProject(IPath path)
-            throws IOException, ForbiddenException, ServerException, NotFoundException, ConflictException {
-        ProjectConfigImpl config = createConfig(path);
-        projectManager.convertFolderToProject(wsId, path.toOSString(), config);
-
-    }
-
-    private Project getCheProject(IPath path) {
-        try {
-            return projectManager.getProject(wsId, path.toOSString());
-
-        } catch (ForbiddenException | ServerException | NotFoundException e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return null;
     }
 
 }

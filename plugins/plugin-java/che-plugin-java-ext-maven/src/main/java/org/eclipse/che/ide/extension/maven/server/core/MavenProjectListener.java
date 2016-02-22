@@ -23,5 +23,5 @@ public interface MavenProjectListener {
 
     void projectResolved(MavenProject project, MavenProjectModifications modifications);
 
-    void projectUpdated(Map<MavenProject, MavenProjectModifications> updated, List<MavenProject> added, List<MavenProject> removed);
+    void projectUpdated(Map<MavenProject, MavenProjectModifications> updated, List<MavenProject> removed);
 }

@@ -49,7 +49,6 @@ import static org.mockito.Mockito.when;
  */
 @Ignore
 // TODO: rework after new Project API
-@Ignore
 public class MavenClassPathConfiguratorTest {
 
     private static final String      VFS_USER                      = "dev";

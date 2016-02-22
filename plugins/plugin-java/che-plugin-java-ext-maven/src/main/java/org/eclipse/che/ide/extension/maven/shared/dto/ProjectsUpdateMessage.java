@@ -25,10 +25,6 @@ public interface ProjectsUpdateMessage {
 
     void setUpdatedProjects(List<String> updatedProjects);
 
-    List<String> getAddedProjects();
-
-    void setAddedProjects(List<String> addedProjects);
-
     List<String> getDeletedProjects();
 
     void setDeletedProjects(List<String> deletedProjects);

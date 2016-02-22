@@ -51,7 +51,6 @@ import static org.mockito.Mockito.when;
 /**
  * @author Vitaly Parfonov
  */
-@Ignore
 // TODO: rework after new Project API
 @Ignore
 public class MavenProjectImportedTest {

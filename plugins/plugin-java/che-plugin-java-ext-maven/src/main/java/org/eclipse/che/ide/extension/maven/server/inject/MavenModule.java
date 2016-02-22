@@ -31,8 +31,6 @@ import org.eclipse.che.ide.extension.maven.server.projecttype.handler.GeneratorS
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectCreatedHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectImportedHandler;
-import org.eclipse.che.ide.extension.maven.server.projecttype.handler.ProjectHasBecomeMaven;
-import org.eclipse.che.ide.extension.maven.server.projecttype.handler.RemoveMavenModuleHandler;
 import org.eclipse.che.ide.extension.maven.server.rest.MavenServerService;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IWorkspace;
@@ -61,8 +59,8 @@ public class MavenModule extends AbstractModule {
 
 //        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
 //        multibinder.addBinding().to(MavenTargetFilter.class);
-        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
-        multibinder.addBinding().to(MavenTargetFilter.class);
+//        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
+//        multibinder.addBinding().to(MavenTargetFilter.class);
 
         bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
         bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);

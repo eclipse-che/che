@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -76,8 +75,6 @@ public class MavenProjectManagerTest {
     @Captor
     private ArgumentCaptor<Map<MavenProject, MavenProjectModifications>> mapArgument;
 
-    @Captor
-    private ArgumentCaptor<List<MavenProject>> addedArgument;
 
     @Before
     public void setUp() throws Exception {
@@ -136,8 +133,7 @@ public class MavenProjectManagerTest {
         assertThat(mavenKey).isNotNull();
 
         projectManager.update(Collections.singletonList(project), true);
-        verify(listener).projectUpdated(mapArgument.capture(), addedArgument.capture(), any());
-        assertThat(addedArgument.getValue()).hasSize(1);
+        verify(listener).projectUpdated(mapArgument.capture(), any());
     }
 
     @Test
@@ -176,7 +172,6 @@ public class MavenProjectManagerTest {
         assertThat(mavenKey).isNotNull();
 
         projectManager.update(Collections.singletonList(project), true);
-        verify(listener).projectUpdated(mapArgument.capture(), addedArgument.capture(), any());
-        assertThat(addedArgument.getValue()).hasSize(3);
+        verify(listener).projectUpdated(mapArgument.capture(), any());
     }
 }

@@ -158,7 +158,6 @@ public class MavenProjectManager {
                 break;
             }
         }
-        state.addNew(mavenProject);
         internalUpdate(mavenProject, potentialParent, true, recursive, state, stack);
     }
 
@@ -225,7 +224,6 @@ public class MavenProjectManager {
             boolean isNewProject = project == null;
             if (isNewProject) {
                 project = new MavenProject(module, workspaceProvider.get());
-                state.addNew(project);
             } else {
                 MavenProject parent = findParentProject(project);
                 if (parent != null && parent != mavenProject) {
@@ -413,7 +411,6 @@ public class MavenProjectManager {
         Map<MavenProject, MavenProjectModifications> projectWithModification = new HashMap<>();
 
         Set<MavenProject> removedProjects = new HashSet<>();
-        Set<MavenProject> addedProjects   = new HashSet<>();
 
         public void addUpdate(MavenProject mavenProject, MavenProjectModifications modifications) {
             removedProjects.remove(mavenProject);
@@ -422,24 +419,17 @@ public class MavenProjectManager {
 
         public void remove(MavenProject mavenProject) {
             projectWithModification.remove(mavenProject);
-            addedProjects.remove(mavenProject);
             removedProjects.add(mavenProject);
         }
 
-        public void addNew(MavenProject project) {
-            removedProjects.remove(project);
-            addedProjects.add(project);
-        }
-
         public void fireUpdate() {
-            if (projectWithModification.isEmpty() && removedProjects.isEmpty() && addedProjects.isEmpty()) {
+            if (projectWithModification.isEmpty() && removedProjects.isEmpty()) {
                 return;
             }
 
             Map<MavenProject, MavenProjectModifications> modified = new HashMap<>(projectWithModification);
             List<MavenProject> removed = new ArrayList<>(removedProjects);
-            List<MavenProject> added = new ArrayList<>(addedProjects);
-            dispatcher.projectUpdated(modified, added, removed);
+            dispatcher.projectUpdated(modified, removed);
         }
     }
 }

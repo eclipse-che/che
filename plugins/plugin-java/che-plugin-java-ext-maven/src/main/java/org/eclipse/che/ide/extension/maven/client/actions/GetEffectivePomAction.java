@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -84,7 +83,6 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
                                                           .setName(NAME)
                                                           .setDisplayName(NAME)
                                                           .setPath(PATH)
-                                                          .setMediaType(MimeType.TEXT_XML)
                                                           .build();
 
                 editorAgent.openEditor(new VirtualFileImpl(fileInfo));

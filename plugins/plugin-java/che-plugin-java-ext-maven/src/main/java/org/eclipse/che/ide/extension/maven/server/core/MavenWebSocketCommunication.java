@@ -42,12 +42,10 @@ public class MavenWebSocketCommunication implements MavenCommunication {
     private static final Logger LOG = LoggerFactory.getLogger(MavenWebSocketCommunication.class);
 
     @Override
-    public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> added, List<MavenProject> removed,
+    public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed,
                                   List<MavenProjectProblem> mavenProjectProblems) {
         ProjectsUpdateMessage dto = DtoFactory.newDto(ProjectsUpdateMessage.class);
-        List<String> addedPaths =
-                updated.stream().map(project -> project.getProject().getFullPath().toOSString()).collect(Collectors.toList());
-        dto.setAddedProjects(addedPaths);
+
         List<String> updatedPaths =
                 updated.stream().map(project -> project.getProject().getFullPath().toOSString()).collect(Collectors.toList());
         dto.setUpdatedProjects(updatedPaths);
