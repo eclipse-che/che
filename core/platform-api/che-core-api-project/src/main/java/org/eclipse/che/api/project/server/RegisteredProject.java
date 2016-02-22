@@ -43,8 +43,8 @@ public class RegisteredProject implements ProjectConfig {
     private final ProjectTypes  types;
     private final Map<String, Value> attributes = new HashMap<>();
     private final ProjectTypeRegistry projectTypeRegistry;
-    private       boolean        updated;
-
+    private       boolean             updated;
+    private       boolean             persisted;
 
     /**
      * Either root folder or config can be null, in this case Project is configured with problem
@@ -55,15 +55,22 @@ public class RegisteredProject implements ProjectConfig {
      *         - project configuration in workspace
      * @param updated
      *         - if this object was updated, i.e. no more synchronized with workspace master
+     * @param persisted
+     *         - if this project was detected, initialized when "parent" project initialized
      * @param projectTypeRegistry
      */
-     RegisteredProject(FolderEntry folder, ProjectConfig config, boolean updated, ProjectTypeRegistry projectTypeRegistry)
-            throws NotFoundException, ProjectTypeConstraintException, ServerException,
-                   ValueStorageException {
-
+    RegisteredProject(FolderEntry folder,
+                      ProjectConfig config,
+                      boolean updated,
+                      boolean persisted,
+                      ProjectTypeRegistry projectTypeRegistry) throws NotFoundException,
+                                                                      ProjectTypeConstraintException,
+                                                                      ServerException,
+                                                                      ValueStorageException {
         this.folder = folder;
         this.config = (config == null) ? new NewProjectConfig(folder.getPath()) : config;
         this.updated = updated;
+        this.persisted = persisted;
         this.projectTypeRegistry = projectTypeRegistry;
 
         if (folder == null || folder.isFile())
@@ -152,6 +159,9 @@ public class RegisteredProject implements ProjectConfig {
         this.updated = false;
     }
 
+    public boolean isDetected() {
+        return !this.persisted;
+    }
 
     /**
      * @return root folder or null

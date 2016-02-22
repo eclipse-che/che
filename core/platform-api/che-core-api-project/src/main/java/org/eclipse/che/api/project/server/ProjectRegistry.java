@@ -74,7 +74,7 @@ public class ProjectRegistry {
         }
 
         for (ProjectConfig projectConfig : projectConfigs) {
-            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false);
+            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false, true);
 
             ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
             if (handler != null) {
@@ -86,7 +86,7 @@ public class ProjectRegistry {
         FolderEntry root = new FolderEntry(vfs.getRoot());
         for (FolderEntry folder : root.getChildFolders()) {
             if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-                putProject(null, folder, true);
+                putProject(null, folder, true, false);
             }
         }
     }
@@ -164,11 +164,10 @@ public class ProjectRegistry {
     }
 
 
-    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated)
+    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean persisted)
             throws ServerException, ConflictException,
                    NotFoundException, ForbiddenException {
-
-        RegisteredProject project = new RegisteredProject(folder, config, updated, this.projectTypeRegistry);
+        RegisteredProject project = new RegisteredProject(folder, config, updated, persisted, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
         return project;
     }
@@ -192,7 +191,7 @@ public class ProjectRegistry {
             throws ConflictException, ForbiddenException,
                    NotFoundException, ServerException {
 
-        // it hrows NFE if not here
+        // it throws NFE if not here
         //RegisteredProject config = getParentProject(absolutizePath(ofPath));
 //        FolderEntry baseFolder = folder(projectPath);
 
@@ -203,7 +202,7 @@ public class ProjectRegistry {
 //        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
 //        projects.put(project.getPath(), project);
 
-        RegisteredProject project = putProject(conf, folder(projectPath), true);
+        RegisteredProject project = putProject(conf, folder(projectPath), true, false);
 
         ProjectInitHandler handler = handlers.getProjectInitHandler(conf.getType());
         if(handler != null)
@@ -231,7 +230,7 @@ public class ProjectRegistry {
         // it throws NFE if not here
         RegisteredProject config = getParentProject(absolutizePath(ofPath));
 
-        RegisteredProject project = putProject(config, config.getBaseFolder(), true);
+        RegisteredProject project = putProject(config, config.getBaseFolder(), true, config.isDetected());
 
                 //new RegisteredProject(config.getBaseFolder(), config, true, this.projectTypeRegistry);
         //projects.put(project.getPath(), project);

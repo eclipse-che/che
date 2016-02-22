@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.model.workspace.EnvironmentState;
 import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -50,11 +50,11 @@ public class WorkspaceHolder {
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint)
+    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory)
             throws ServerException {
 
         this.apiEndpoint = apiEndpoint;
-        this.httpJsonRequestFactory = new DefaultHttpJsonRequestFactory();
+        this.httpJsonRequestFactory = httpJsonRequestFactory;
 
         // TODO - invent mechanism to recognize workspace ID
         // for Docker container name of this property is defined in
@@ -62,8 +62,9 @@ public class WorkspaceHolder {
         // it resides on Workspace Master side so not accessible from agent code
         String workspaceId = System.getenv("CHE_WORKSPACE_ID");
 
-        if (workspaceId == null)
+        if (workspaceId == null) {
             throw new ServerException("Workspace ID is not defined for Workspace Agent");
+        }
 
         this.workspace = new UsersWorkspaceImpl(workspaceDto(workspaceId));
 
@@ -87,9 +88,9 @@ public class WorkspaceHolder {
      * @throws ServerException
      */
     public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
+        List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(Collectors.toList());
 
-
-        workspace.setProjects(new ArrayList<>(projects));
+        workspace.setProjects(persistedProjects);
 
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class).path(WorkspaceService.class, "update")

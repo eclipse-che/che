@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * @author gazarenkov
  */
@@ -137,8 +139,8 @@ public class WsAgentTestBase {
 
         @Override
         public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-
-            workspace.setProjects(new ArrayList<>(projects));
+            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
+            workspace.setProjects(persistedProjects);
             //setProjects(new ArrayList<>(projects));
         }
     }

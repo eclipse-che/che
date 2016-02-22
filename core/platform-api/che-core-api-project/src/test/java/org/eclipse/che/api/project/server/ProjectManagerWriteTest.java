@@ -455,12 +455,30 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
                 assertNull(project.getAttributes().get("pt2-const1"));
                 assertNull(project.getAttributes().get("pt2-provided1"));
             }
-
         }
-
-
     }
 
+    @Test
+    public void testDetectedProjectsNotSerialized() throws Exception {
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("pt2-var2", new AttributeValue("test2").getList());
+        attributes.put("pt2-var1", new AttributeValue("test1").getList());
+        ProjectConfig pc1 = new NewProjectConfig("/testDetectedProjectsNotSerialized1", "pt3", null, "name", "descr", attributes, null);
+        ProjectConfig pc2 = new NewProjectConfig("/testDetectedProjectsNotSerialized2", "pt3", null, "name", "descr", attributes, null);
+
+        projectRegistry.putProject(pc1, null, true, false);
+        projectRegistry.putProject(pc2, null, true, true);
+
+        workspaceHolder.updateProjects(projectRegistry.getProjects());
+
+        // SPECS:
+        // Only persisted projects should be persisted (no detected)
+
+        assertTrue(workspaceHolder.getWorkspace().getProjects().size() == 1);
+
+        ProjectConfig persistedProjectConfig = workspaceHolder.getWorkspace().getProjects().get(0);
+        assertEquals("/testDetectedProjectsNotSerialized2", persistedProjectConfig.getPath());
+    }
 
      /* ---------------------------------- */
     /* private */
