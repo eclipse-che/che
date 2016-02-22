@@ -292,6 +292,19 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("import.project.error")
     String importProjectError();
 
+    /* Authorization */
+    @Key("authorization.dialog.title")
+    String authorizationDialogTitle();
+
+    @Key("authorization.dialog.text")
+    String authorizationDialogText();
+
+    @Key("oauth.failed.to.get.authenticator.title")
+    String oauthFailedToGetAuthenticatorTitle();
+
+    @Key("oauth.failed.to.get.authenticator.text")
+    String oauthFailedToGetAuthenticatorText();
+
     /* Actions */
     @Key("action.newFolder.title")
     String actionNewFolderTitle();

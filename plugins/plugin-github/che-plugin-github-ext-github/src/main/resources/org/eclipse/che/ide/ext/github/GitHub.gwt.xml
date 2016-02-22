@@ -23,6 +23,7 @@
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.security.OAuth"/>
     <inherits name="org.eclipse.che.api.Git"/>
+    <inherits name="com.google.common.base.Base"/>
 
     <source path="client"/>
 </module>

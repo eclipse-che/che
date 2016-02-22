@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.git.server.nativegit;
 
 import org.eclipse.che.api.git.CredentialsProvider;
 import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -60,4 +61,8 @@ public class CheAccessTokenCredentialProvider implements CredentialsProvider {
         return url.contains(cheHostName);
     }
 
+    @Override
+    public ProviderInfo getProviderInfo() {
+        return null;
+    }
 }

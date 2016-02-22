@@ -26,15 +26,15 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 /**
  * @author Roman Nikitenko
  */
-public class GitHubAuthenticatorViewImpl implements GitHubAuthenticatorView{
+public class GitHubAuthenticatorViewImpl implements GitHubAuthenticatorView {
 
     private DialogFactory                         dialogFactory;
     private GitHubLocalizationConstant            locale;
-    private ActionDelegate delegate;
+    private ActionDelegate                        delegate;
 
 
-    private CheckBox isGenerateKeys;
-    private DockLayoutPanel contentPanel;
+    private CheckBox                              isGenerateKeys;
+    private DockLayoutPanel                       contentPanel;
 
     @Inject
     public GitHubAuthenticatorViewImpl(DialogFactory dialogFactory,

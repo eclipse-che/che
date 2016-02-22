@@ -24,6 +24,8 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
+import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.wizard.Wizard;
@@ -37,6 +39,8 @@ import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.Collections;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -81,6 +85,8 @@ public class ProjectImporterTest {
     private Wizard.CompleteCallback       completeCallback;
     @Mock
     private Promise<Void>                 importPromise;
+    @Mock
+    private OAuth2AuthenticatorRegistry   oAuth2AuthenticatorRegistry;
 
     @Captor
     private ArgumentCaptor<AsyncRequestCallback<Item>> callbackCaptorForItem;
@@ -104,8 +110,11 @@ public class ProjectImporterTest {
                                        localizationConstant,
                                        subscriberFactory,
                                        appContext,
-                                       eventBus,
-                                       resolver);
+                                       resolver,
+                                       null,
+                                       null,
+                                       oAuth2AuthenticatorRegistry,
+                                       eventBus);
     }
 
     @Test

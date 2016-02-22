@@ -8,18 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core;
+package org.eclipse.che.ide.api.oauth;
+
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import org.eclipse.che.security.oauth.OAuthStatus;
 
 /**
- * Error codes that are used in exceptions.
- *
- * @author Igor Vinokur
+ * @author Roman Nikitenko
  */
-public class ErrorCodes {
-    private ErrorCodes() {
-    }
+public interface OAuth2Authenticator {
 
-    public static final int NO_COMMITTER_NAME_OR_EMAIL_DEFINED = 15216;
-    public static final int UNABLE_GET_PRIVATE_SSH_KEY         = 32068;
-    public static final int UNAUTHORIZED_GIT_OPERATION         = 32080;
+    void authorize(String authenticatorUrl, AsyncCallback<OAuthStatus> callback);
+
+    String getProviderName();
 }
