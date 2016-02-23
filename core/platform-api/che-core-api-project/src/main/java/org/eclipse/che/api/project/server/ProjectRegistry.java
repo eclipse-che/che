@@ -50,6 +50,8 @@ public class ProjectRegistry {
 
     private final ProjectHandlerRegistry handlers;
 
+    private boolean initialized;
+
     @Inject
     public ProjectRegistry(WorkspaceHolder  workspaceHolder,
                            VirtualFileSystemProvider vfsProvider,
@@ -89,6 +91,8 @@ public class ProjectRegistry {
                 putProject(null, folder, true, false);
             }
         }
+
+        initialized = true;
     }
 
     public String getWorkspaceId() {
@@ -98,29 +102,36 @@ public class ProjectRegistry {
 
     /**
      * @return all the projects
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public List<RegisteredProject> getProjects() {
+    public List<RegisteredProject> getProjects() throws ServerException {
+        checkInitializationState();
+
         return new ArrayList<>(projects.values());
     }
-
-
 
     /**
      * @param projectPath
      * @return project or null if not found
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public RegisteredProject getProject(String projectPath) {
+    public RegisteredProject getProject(String projectPath) throws ServerException {
+        checkInitializationState();
 
         return projects.get(absolutizePath(projectPath));
-
     }
 
     /**
      * @param parentPath
      *         where to find
      * @return child projects
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public List<String> getProjects(String parentPath) {
+    public List<String> getProjects(String parentPath) throws ServerException {
+        checkInitializationState();
 
         Path root = Path.of(absolutizePath(parentPath));
         List<String> children = new ArrayList<>();
@@ -139,8 +150,11 @@ public class ProjectRegistry {
      * @return the project owned this path.
      * @throws NotFoundException
      *         if not such a project found
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public RegisteredProject getParentProject(String path) throws NotFoundException {
+    public RegisteredProject getParentProject(String path) throws NotFoundException, ServerException {
+        checkInitializationState();
 
         // it is a project
 //        if (projects.containsKey(path))
@@ -158,10 +172,7 @@ public class ProjectRegistry {
 
         // path is out of projects
         throw new NotFoundException("Parent project not found " + path);
-
-
     }
-
 
     RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean persisted)
             throws ServerException, ConflictException,
@@ -189,6 +200,7 @@ public class ProjectRegistry {
     public RegisteredProject initProject(String projectPath, String type)
             throws ConflictException, ForbiddenException,
                    NotFoundException, ServerException {
+        checkInitializationState();
 
         // it throws NFE if not here
         //RegisteredProject config = getParentProject(absolutizePath(ofPath));
@@ -225,6 +237,7 @@ public class ProjectRegistry {
     public RegisteredProject reinitParentProject(String ofPath)
             throws ConflictException, ForbiddenException,
                    NotFoundException, ServerException {
+        checkInitializationState();
 
         // it throws NFE if not here
         RegisteredProject config = getParentProject(absolutizePath(ofPath));
@@ -235,17 +248,15 @@ public class ProjectRegistry {
         //projects.put(project.getPath(), project);
 
         return project;
-
     }
-
-
 
     /**
      * removes all projects on and under the incoming path
      * @param path
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public void removeProjects(String path) {
-
+    public void removeProjects(String path) throws ServerException {
         projects.remove(path);
         getProjects(path).forEach(projects::remove);
     }
@@ -261,5 +272,9 @@ public class ProjectRegistry {
         return (vf == null) ? null : new FolderEntry(vf);
     }
 
-
+    private void checkInitializationState() throws ServerException {
+        if (!initialized) {
+            throw new ServerException("Projects are not initialized yet");
+        }
+    }
 }

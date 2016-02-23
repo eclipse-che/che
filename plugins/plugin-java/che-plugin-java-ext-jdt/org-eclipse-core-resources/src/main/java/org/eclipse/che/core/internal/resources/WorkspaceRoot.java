@@ -113,49 +113,48 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         return result;
     }
 
-    // TODO: rework after new Project API
     @Override
     public IProject[] getProjects() {
         ProjectManager manager = workspace.getProjectManager();
         List<IProject> projects = new ArrayList<>();
-//        try {
+        try {
             List<RegisteredProject> rootProjects = manager.getProjects();
             for (RegisteredProject rootProject : rootProjects) {
                 Project project = new Project(new Path(rootProject.getPath()), workspace);
 
                 projects.add(project);
 
-//                addAllModules(projects, rootProject, manager);
+                addAllModules(projects, rootProject, manager);
             }
-//        } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
-//            LOG.error(e.getMessage(), e);
-//        }
+        } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
+            LOG.error(e.getMessage(), e);
+        }
 
         return projects.toArray(new IProject[projects.size()]);
     }
 
-//    private void addAllModules(List<IProject> projects,
-//                               RegisteredProject rootProject,
-//                               ProjectManager manager) throws IOException,
-//                                                              ForbiddenException,
-//                                                              ConflictException,
-//                                                              NotFoundException,
-//                                                              ServerException {
+    // TODO: rework after new Project API
+    private void addAllModules(List<IProject> projects,
+                               RegisteredProject rootProject,
+                               ProjectManager manager) throws IOException,
+                                                              ForbiddenException,
+                                                              ConflictException,
+                                                              NotFoundException,
+                                                              ServerException {
 //        List<? extends ProjectConfig> modules = manager.getProjectModules(rootProject);
-//
-//
+
 //        for (ProjectConfig module : modules) {
 //            addModules(projects, module);
 //        }
-//    }
+    }
 
-//    private void addModules(List<IProject> projects, ProjectConfig moduleConfig) {
-//        Project mp = new Project(new Path(moduleConfig.getPath()), workspace);
-//        projects.add(mp);
+    private void addModules(List<IProject> projects, ProjectConfig moduleConfig) {
+        Project mp = new Project(new Path(moduleConfig.getPath()), workspace);
+        projects.add(mp);
 //        for (ProjectConfig module : moduleConfig.getModules()) {
 //            addModules(projects, module);
 //        }
-//    }
+    }
 
     @Override
     public IProject[] getProjects(int i) {

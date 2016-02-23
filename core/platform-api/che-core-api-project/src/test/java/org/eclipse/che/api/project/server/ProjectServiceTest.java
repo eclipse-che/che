@@ -210,6 +210,7 @@ public class ProjectServiceTest {
 
         pm = new ProjectManager(vfsProvider, null, ptRegistry, phRegistry,
                                 importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 

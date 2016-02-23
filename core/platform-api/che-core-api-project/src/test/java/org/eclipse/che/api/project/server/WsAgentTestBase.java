@@ -119,6 +119,7 @@ public class WsAgentTestBase {
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
                                 importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm.initWatcher();
     }
 
 

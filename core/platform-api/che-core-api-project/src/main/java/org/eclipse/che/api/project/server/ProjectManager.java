@@ -50,6 +50,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -114,8 +115,22 @@ public final class ProjectManager {
 
         this.fileWatchNotifier = fileWatcherNotificationHandler;
         this.fileWatcher = fileTreeWatcher;
+    }
 
-        initWatcher();
+    @PostConstruct
+    void initWatcher() throws IOException {
+        FileWatcherNotificationListener defaultListener = new FileWatcherNotificationListener(VirtualFileFilter.ACCEPT_ALL) {
+            @Override
+            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
+                LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
+                eventService.publish(DtoFactory.newDto(VfsWatchEvent.class)
+                                               .withPath(virtualFile.getPath().toString())
+                                               .withFile(virtualFile.isFile())
+                                               .withType(eventType));
+            }
+        };
+        fileWatchNotifier.addNotificationListener(defaultListener);
+        fileWatcher.startup();
     }
 
     @PreDestroy
@@ -164,8 +179,10 @@ public final class ProjectManager {
 
     /**
      * @return all the projects
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public List<RegisteredProject> getProjects() {
+    public List<RegisteredProject> getProjects() throws ServerException {
 
         return projectRegistry.getProjects();
     }
@@ -174,8 +191,10 @@ public final class ProjectManager {
     /**
      * @param projectPath
      * @return project or null if not found
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public RegisteredProject getProject(String projectPath) {
+    public RegisteredProject getProject(String projectPath) throws ServerException {
 
         return projectRegistry.getProject(projectPath);
 
@@ -541,22 +560,4 @@ public final class ProjectManager {
             }
         });
     }
-
-
-    private void initWatcher() throws IOException {
-        FileWatcherNotificationListener defaultListener = new FileWatcherNotificationListener(VirtualFileFilter.ACCEPT_ALL) {
-            @Override
-            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
-                LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
-                eventService.publish(DtoFactory.newDto(VfsWatchEvent.class)
-                                               .withPath(virtualFile.getPath().toString())
-                                               .withFile(virtualFile.isFile())
-                                               .withType(eventType));
-            }
-        };
-        fileWatchNotifier.addNotificationListener(defaultListener);
-        fileWatcher.startup();
-    }
-
-
 }
