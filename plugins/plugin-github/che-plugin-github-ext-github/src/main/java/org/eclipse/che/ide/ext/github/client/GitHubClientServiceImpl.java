@@ -150,9 +150,24 @@ public class GitHubClientServiceImpl implements GitHubClientService {
 
     /** {@inheritDoc} */
     @Override
+    public void getOrganizations(@NotNull AsyncRequestCallback<List<String>> callback) {
+        String url = baseUrl + ORGANIZATIONS;
+        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public Promise<List<GitHubUser>> getOrganizations() {
         String url = baseUrl + ORGANIZATIONS;
         return asyncRequestFactory.createGetRequest(url).loader(loader).send(dtoUnmarshallerFactory.newListUnmarshaller(GitHubUser.class));
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void getUserInfo(@NotNull AsyncRequestCallback<GitHubUser> callback) {
+        String url = baseUrl + USER;
+        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
     /** {@inheritDoc} */

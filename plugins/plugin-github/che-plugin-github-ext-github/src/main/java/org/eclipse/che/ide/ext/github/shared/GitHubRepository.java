@@ -208,6 +208,16 @@ public interface GitHubRepository {
 
     void setHasDownloads(boolean isHasDownloads);
 
+
+    /**
+     * Get the repository parent.
+     *
+     * @return the parent repository.
+     */
+    GitHubRepository getParent();
+
+    void setParent(GitHubRepository parent);
+
     /**
      * Get whether repository has issues.
      *
