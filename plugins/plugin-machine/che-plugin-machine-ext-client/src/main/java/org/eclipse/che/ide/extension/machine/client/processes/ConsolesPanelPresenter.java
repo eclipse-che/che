@@ -414,8 +414,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
      * @return ssh service address in format host:port
      */
     private String getSshServerAddress(MachineDto machine) {
-        if (machine.getRuntime().getServers().containsKey(SSH_PORT)) {
-            return machine.getRuntime().getServers().get(SSH_PORT).getAddress();
+        if (machine.getRuntime().getServers().containsKey(SSH_PORT + "/tcp")) {
+            return machine.getRuntime().getServers().get(SSH_PORT + "/tcp").getAddress();
         } else {
             return null;
         }

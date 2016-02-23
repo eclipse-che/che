@@ -29,6 +29,7 @@ import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.transformEntries;
@@ -89,8 +90,16 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
                 };
 
         Map<String, CommandPropertyValueProvider> providers = transformEntries(machine.getRuntime().getServers(), machineToProvider);
+        Map<String, CommandPropertyValueProvider> providersWithNoTcpAliases = new HashMap<>();
+        for (Map.Entry<String, CommandPropertyValueProvider> providerEntry : providers.entrySet()) {
+            if (providerEntry.getKey().endsWith("/tcp")) {
+                providersWithNoTcpAliases.put(providerEntry.getKey().substring(0, providerEntry.getKey().length() - 4),
+                                              providerEntry.getValue());
+            }
+        }
+        providersWithNoTcpAliases.putAll(providers);
 
-        return providers.values();
+        return providersWithNoTcpAliases.values();
     }
 
     @Override

@@ -117,10 +117,13 @@ public class DockerInstance extends AbstractInstance {
 
     @Override
     public MachineRuntimeInfoImpl getRuntime() {
+        // if runtime info is not evaluated yet
         if (machineRuntime == null) {
             try {
                 final ContainerInfo containerInfo = docker.inspectContainer(container);
-                machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo, node.getHost()));
+                machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
+                                                                                                node.getHost(),
+                                                                                                getConfig()));
             } catch (IOException e) {
                 LOG.error(e.getLocalizedMessage(), e);
                 return null;

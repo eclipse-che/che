@@ -50,12 +50,12 @@ public class MachineExtensionProxyServlet extends HttpServlet {
     private static final String WORKSPACE_ID_PATTERN = "([^/]+)";
     private static final Pattern EXTENSION_API_URI = Pattern.compile(".*?/ext/([^/]+/" + WORKSPACE_ID_PATTERN + "/?.*|" + WORKSPACE_ID_PATTERN + "/)");
 
-    private final int            extServicesPort;
+    private final String         wsAgentPort;
     private final MachineManager machineManager;
 
     @Inject
-    public MachineExtensionProxyServlet(@Named("machine.extension.api_port") int extServicesPort, MachineManager machineManager) {
-        this.extServicesPort = extServicesPort;
+    public MachineExtensionProxyServlet(@Named("machine.extension.api_port") String wsAgentPort, MachineManager machineManager) {
+        this.wsAgentPort = wsAgentPort;
         this.machineManager = machineManager;
     }
 
@@ -126,7 +126,7 @@ public class MachineExtensionProxyServlet extends HttpServlet {
         }
 
         final Machine machine = machineManager.getDevMachine(workspaceId);
-        final Server server = machine.getRuntime().getServers().get(Integer.toString(extServicesPort));
+        final Server server = machine.getRuntime().getServers().get(wsAgentPort);
         if (server == null) {
             throw new ServerException("No extension server found in machine.");
         }
@@ -139,7 +139,7 @@ public class MachineExtensionProxyServlet extends HttpServlet {
         //if not we need to cut wsId from URL
         if (matcher.group(2) == null) {
             // here we cut workspaceId from extension API Url for getting access to org.eclipse.che.api.core.rest.ApiInfoService
-            // e.g localhost:8080/ide/ext/{wsid} -> localhost:{extServicesPort}/ide/ext/
+            // e.g localhost:8080/ide/ext/{wsid} -> localhost:{wsAgentPort}/ide/ext/
             String originUri = req.getRequestURI();
             final int indexOf = originUri.lastIndexOf('/', originUri.length() - 2);
             uriBuilder.replacePath(originUri.substring(0, indexOf + 1));

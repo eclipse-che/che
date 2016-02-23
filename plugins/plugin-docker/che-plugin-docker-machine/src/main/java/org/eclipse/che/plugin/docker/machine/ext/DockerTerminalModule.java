@@ -14,7 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.plugin.docker.machine.ServerConf;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.provider.TerminalServerConfProvider;
 
 /**
