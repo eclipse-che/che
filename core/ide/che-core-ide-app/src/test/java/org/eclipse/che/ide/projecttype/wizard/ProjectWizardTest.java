@@ -199,7 +199,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).createModule(eq(WORKSPACE_ID), anyString(), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID), anyString(), eq(dataObject), callbackCaptor.capture());
         GwtReflectionUtils.callOnSuccess(callbackCaptor.getValue(), projectConfig);
 
         verify(eventBus).fireEvent(Matchers.<ModuleCreatedEvent>anyObject());
@@ -217,7 +217,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).createModule(eq(WORKSPACE_ID), anyString(), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID), anyString(), eq(dataObject), callbackCaptor.capture());
         GwtReflectionUtils.callOnFailure(callbackCaptor.getValue(), throwable);
 
         verify(completeCallback).onFailure(throwable);
