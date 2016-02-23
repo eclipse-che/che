@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
@@ -130,11 +131,13 @@ public class NodeManagerTest {
         final ItemReference itemReferenceMock = mock(ItemReference.class);
         final NodeSettings nodeSettingsMock = mock(NodeSettings.class);
         final ProjectConfigDto projectConfigMock = mock(ProjectConfigDto.class);
+        final WorkspaceConfigDto workspaceConfigDtoMock = mock(WorkspaceConfigDto.class);
         final UsersWorkspaceDto usersWorkspaceDtoMock = mock(UsersWorkspaceDto.class);
 
         when(itemReferenceMock.getType()).thenReturn("project");
         when(appContextMock.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
-        when(usersWorkspaceDtoMock.getProjects()).thenReturn(Collections.singletonList(projectConfigMock));
+        when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigDtoMock);
+        when(workspaceConfigDtoMock.getProjects()).thenReturn(Collections.singletonList(projectConfigMock));
         when(projectConfigMock.getPath()).thenReturn("/path");
         when(itemReferenceMock.getPath()).thenReturn("/path");
 
@@ -149,11 +152,13 @@ public class NodeManagerTest {
         final ItemReference itemReferenceMock = mock(ItemReference.class);
         final NodeSettings nodeSettingsMock = mock(NodeSettings.class);
         final ProjectConfigDto projectConfigMock = mock(ProjectConfigDto.class);
+        final WorkspaceConfigDto workspaceConfigDtoMock = mock(WorkspaceConfigDto.class);
         final UsersWorkspaceDto usersWorkspaceDtoMock = mock(UsersWorkspaceDto.class);
 
         when(itemReferenceMock.getType()).thenReturn("project");
         when(appContextMock.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
-        when(usersWorkspaceDtoMock.getProjects()).thenReturn(Collections.singletonList(projectConfigMock));
+        when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigDtoMock);
+        when(workspaceConfigDtoMock.getProjects()).thenReturn(Collections.singletonList(projectConfigMock));
         when(projectConfigMock.getPath()).thenReturn("/path1");
         when(itemReferenceMock.getPath()).thenReturn("/path2");
 
@@ -167,11 +172,13 @@ public class NodeManagerTest {
     public void testShouldReturnFolderNode() throws Exception {
         final ItemReference itemReferenceMock = mock(ItemReference.class);
         final NodeSettings nodeSettingsMock = mock(NodeSettings.class);
+        final WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
         final UsersWorkspaceDto usersWorkspaceDtoMock = mock(UsersWorkspaceDto.class);
 
         when(itemReferenceMock.getType()).thenReturn("folder");
         when(appContextMock.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
-        when(usersWorkspaceDtoMock.getProjects()).thenReturn(Collections.<ProjectConfigDto>emptyList());
+        when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(workspaceConfigMock.getProjects()).thenReturn(Collections.<ProjectConfigDto>emptyList());
 
         nodeManager.createNodeByType(itemReferenceMock, null, nodeSettingsMock);
 
@@ -196,11 +203,13 @@ public class NodeManagerTest {
         final ProjectConfigDto project_1 = mock(ProjectConfigDto.class);
         final ProjectConfigDto project_2 = mock(ProjectConfigDto.class);
         final ProjectConfigDto project_3 = mock(ProjectConfigDto.class);
+        final WorkspaceConfigDto workspaceConfigDtoMock = mock(WorkspaceConfigDto.class);
         final UsersWorkspaceDto usersWorkspaceDtoMock = mock(UsersWorkspaceDto.class);
         final NodeSettings nodeSettingsMock = mock(NodeSettings.class);
 
         when(projectServiceClientMock.getProjects(anyString(), anyBoolean())).thenReturn(projectConfigsMock);
         when(appContextMock.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
+        when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigDtoMock);
         when(project_1.getPath()).thenReturn("/project_1/");
         when(project_2.getPath()).thenReturn("/project_1/some_path/");
         when(project_3.getPath()).thenReturn("/project_2/");
@@ -211,6 +220,6 @@ public class NodeManagerTest {
         verify(projectConfigsMock).then(getProjectsCaptor.capture());
         getProjectsCaptor.getValue().apply(newArrayList(project_1, project_2, project_3));
         verify(nodeFactoryMock, times(2)).newProjectNode(any(ProjectConfigDto.class), eq(nodeSettingsMock));
-        verify(usersWorkspaceDtoMock).withProjects(eq(newArrayList(project_1, project_2, project_3)));
+        verify(workspaceConfigDtoMock).withProjects(eq(newArrayList(project_1, project_2, project_3)));
     }
 }

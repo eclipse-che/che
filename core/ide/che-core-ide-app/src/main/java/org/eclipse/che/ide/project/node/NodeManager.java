@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Function;
@@ -102,7 +102,7 @@ public class NodeManager {
         eventBus.addHandler(DeleteProjectEvent.TYPE, new DeleteProjectHandler() {
             @Override
             public void onProjectDeleted(final DeleteProjectEvent event) {
-                removeIf(appContext.getWorkspace().getProjects(), new Predicate<ProjectConfig>() {
+                removeIf(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfig>() {
                     @Override
                     public boolean apply(@Nullable ProjectConfig input) {
                         return input.getPath().equals(event.getProjectConfig().getPath());
@@ -114,14 +114,14 @@ public class NodeManager {
         eventBus.addHandler(CreateProjectEvent.TYPE, new CreateProjectHandler() {
             @Override
             public void onProjectCreated(CreateProjectEvent event) {
-                appContext.getWorkspace().getProjects().add(event.getProjectConfig());
+                appContext.getWorkspace().getConfig().getProjects().add(event.getProjectConfig());
             }
         });
 
         eventBus.addHandler(ProjectUpdatedEvent.getType(), new ProjectUpdatedEvent.ProjectUpdatedHandler() {
             @Override
             public void onProjectUpdated(final ProjectUpdatedEvent event) {
-                final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getProjects(), new Predicate<ProjectConfigDto>() {
+                final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfigDto>() {
                     @Override
                     public boolean apply(@Nullable ProjectConfigDto input) {
                         return input.getPath().equals(event.getPath());
@@ -132,8 +132,8 @@ public class NodeManager {
                     return;
                 }
 
-                if (appContext.getWorkspace().getProjects().remove(configOptional.get())) {
-                    appContext.getWorkspace().getProjects().add(event.getUpdatedProjectDescriptor());
+                if (appContext.getWorkspace().getConfig().getProjects().remove(configOptional.get())) {
+                    appContext.getWorkspace().getConfig().getProjects().add(event.getUpdatedProjectDescriptor());
                 }
             }
         });
@@ -223,7 +223,7 @@ public class NodeManager {
         //it's a temporary solution, that will be replaced after GA release with new client side project model
         if ("project".equals(itemType) || "folder".equals(itemType)) {
 
-            final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getProjects(), new Predicate<ProjectConfigDto>() {
+            final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfigDto>() {
                 @Override
                 public boolean apply(@Nullable ProjectConfigDto input) {
                     return input.getPath().equals(itemReference.getPath());
@@ -265,7 +265,7 @@ public class NodeManager {
                 }
 
                 //fill workspace projects with loaded actual configs, temporary solution that will be replaced after GA release
-                appContext.getWorkspace().withProjects(new ArrayList<>(projects));
+                appContext.getWorkspace().getConfig().withProjects(new ArrayList<>(projects));
 
                 final Iterable<ProjectConfigDto> rootProjects = filter(projects, new Predicate<ProjectConfigDto>() {
                     @Override
