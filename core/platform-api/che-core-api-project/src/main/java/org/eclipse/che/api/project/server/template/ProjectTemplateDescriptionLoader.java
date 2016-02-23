@@ -18,6 +18,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
@@ -26,7 +27,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -48,12 +48,11 @@ public class ProjectTemplateDescriptionLoader {
 
     /**
      * @param templateDescriptionsDir
-     *         Describe path to the dir where to locate json file that describes templates for project types.
-     *         Json file must have name like: "projectTypeId".json (e.g, maven.json, python.json and so on)
+     *         path to the directory where JSON-files with project templates descriptions are located
      * @param templateLocationDir
-     *         Describe value to the dir where templates sources are located.
-     *         If in ImportSourceDescriptor.location is set in the path ${project.template_location_dir}
-     *         it will replaced with value that is set in configuration
+     *         path to the directory where project templates sources are located.
+     *         If source.location is set as ${project.template_location_dir}
+     *         it will be replaced with value that is set in configuration.
      * @param templateRegistry
      *         registry which contains templates associated with tags
      */
@@ -64,25 +63,21 @@ public class ProjectTemplateDescriptionLoader {
         this.templateDescriptionsDir = templateDescriptionsDir;
         this.templateLocationDir = templateLocationDir;
         this.templateRegistry = templateRegistry;
-
-        start();
     }
 
+    @PostConstruct
     public void start() {
         if (templateDescriptionsDir == null || !Files.exists(Paths.get(templateDescriptionsDir)) ||
             !Files.isDirectory(Paths.get(templateDescriptionsDir))) {
             LOG.error(getClass() +
                       " The configuration of project templates descriptors wasn't found or some problem with configuration was found.");
         } else {
-            Path dirPath = Paths.get(templateDescriptionsDir);
-
-            load(dirPath);
+            load(templateDescriptionsDir);
         }
     }
 
-    private void load(@NotNull Path dirPath) {
-        File templatesFolder = new File(dirPath.toString());
-
+    private void load(@NotNull String dirPath) {
+        File templatesFolder = new File(dirPath);
         File[] files = templatesFolder.listFiles();
 
         if (files == null) {
