@@ -37,6 +37,7 @@ import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -128,7 +129,7 @@ public class MavenProjectResolverTest {
 
         WorkspaceHolder workspaceHolder = new TestWorkspaceHolder(projects);
         ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
-        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaPropertiesValueProviderFactory("1.8")));
+        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
         projectTypeRegistry.registerProjectType(new MavenProjectType(new MavenValueProviderFactory()));
 
         VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);
@@ -199,8 +200,8 @@ public class MavenProjectResolverTest {
 
         protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
             super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name")
-                            .withProjects(projects));
+                             withId("id").withConfig(DtoFactory.newDto(WorkspaceConfigDto.class).withName("name")
+                            .withProjects(projects)));
         }
 
 
