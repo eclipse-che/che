@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.handlers.PostImportProjectHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectResolver;
 
@@ -33,7 +34,7 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
 public class MavenProjectImportedHandler implements PostImportProjectHandler {
 
     @Inject
-    private ProjectManager projectManager;
+    private ProjectRegistry projectManager;
 
     @Override
     public void onProjectImported(FolderEntry projectFolder) throws ForbiddenException,

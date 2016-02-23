@@ -18,14 +18,21 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.ide.maven.tools.Model;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +51,7 @@ public class MavenProjectResolver {
      *
      * @param projectFolder
      *         base folder which represents project
-     * @param projectManager
+     * @param projectRegistry
      *         special manager which is necessary for updating project after resolve
      * @throws ConflictException
      * @throws ForbiddenException
@@ -52,84 +59,40 @@ public class MavenProjectResolver {
      * @throws NotFoundException
      * @throws IOException
      */
-    public static void resolve(FolderEntry projectFolder, ProjectManager projectManager) throws ConflictException,
+    public static void resolve(FolderEntry projectFolder, ProjectRegistry projectRegistry) throws ConflictException,
                                                                                                 ForbiddenException,
                                                                                                 ServerException,
                                                                                                 NotFoundException,
                                                                                                 IOException {
-        VirtualFileEntry pom = projectFolder.getChild("pom.xml");
 
-        if (pom == null) {
-            return;
-        }
-
-        Model model = Model.readFrom(pom.getVirtualFile());
-        MavenClassPathConfigurator.configure(projectFolder);
-
-        String packaging = model.getPackaging();
-        if (packaging != null && packaging.equals("pom")) {
-            RegisteredProject project = projectManager.getProject(projectFolder.getPath().toString());
-
-            ProjectConfigImpl projectConfig = createConfig(projectFolder);
-
-            List<ProjectConfig> modules = new ArrayList<>();
-
-            for (FolderEntry folderEntry : project.getBaseFolder().getChildFolders()) {
-                MavenClassPathConfigurator.configure(folderEntry);
-
-                defineModules(folderEntry, modules);
+        if (projectFolder.getVirtualFile().exists() && projectFolder.getVirtualFile().isFolder()) {
+            final VirtualFileEntry pom = projectFolder.getChild("pom.xml");
+            if (pom == null && pom.isFile()) {
+                return;
             }
 
-            // TODO: rework after new Project API
-//            projectConfig.setModules(modules);
-            projectConfig.setSource(getSourceStorage(project));
-
-            projectManager.updateProject(projectConfig);
+            projectRegistry.initProject(projectFolder.getPath().toString(), MAVEN_ID);
+            Model model = Model.readFrom(pom.getVirtualFile());
+            MavenClassPathConfigurator.configure(projectFolder);
+            String packaging = model.getPackaging();
+            if ("pom".equals(packaging)) {
+                final List<String> mavenModules = model.getModules();
+                for (String module : mavenModules) {
+                    final File file = projectFolder.getVirtualFile().toIoFile();
+                    java.nio.file.Path path = Paths.get(file.getCanonicalPath());
+                    final java.nio.file.Path modulePath = path.resolve(module);
+                    if (modulePath.toFile().exists() && modulePath.toFile().isDirectory()) {
+                        final VirtualFileSystem fileSystem = projectFolder.getVirtualFile().getFileSystem();
+                        final VirtualFile root = fileSystem.getRoot();
+                        final String substring = modulePath.toString().substring(root.toIoFile().getPath().length());
+                        resolve(new FolderEntry(root.getChild(Path.of(substring))), projectRegistry);
+                    }
+                }
+            }
         }
     }
 
-    private static ProjectConfigImpl createConfig(FolderEntry folderEntry) throws ValueStorageException {
-        ProjectConfigImpl projectConfig = new ProjectConfigImpl();
-        projectConfig.setName(folderEntry.getName());
-        projectConfig.setPath(folderEntry.getPath().toString());
-        projectConfig.setType(MAVEN_ID);
 
-        return projectConfig;
-    }
 
-    private static SourceStorageImpl getSourceStorage(ProjectConfig config) {
-        SourceStorage sourceStorage = config.getSource();
 
-        if (sourceStorage == null) {
-            return new SourceStorageImpl("", "", Collections.emptyMap());
-        }
-
-        return new SourceStorageImpl(sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
-    }
-
-    private static void defineModules(FolderEntry folderEntry, List<ProjectConfig> modules) throws ServerException,
-                                                                                                   ForbiddenException,
-                                                                                                   IOException,
-                                                                                                   ConflictException {
-        VirtualFileEntry pom = folderEntry.getChild("pom.xml");
-
-        if (pom == null) {
-            return;
-        }
-
-        ProjectConfigImpl moduleConfig = createConfig(folderEntry);
-
-        List<ProjectConfig> internalModules = new ArrayList<>();
-
-        for (FolderEntry internalModule : folderEntry.getChildFolders()) {
-            MavenClassPathConfigurator.configure(folderEntry);
-
-            defineModules(internalModule, internalModules);
-        }
-
-        // TODO: rework after new Project API
-//        moduleConfig.setModules(internalModules);
-
-        modules.add(moduleConfig);
-    }
 }
