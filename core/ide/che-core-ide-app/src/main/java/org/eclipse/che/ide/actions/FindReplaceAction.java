@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.actions;
+// TODO: rework after new Project API
 //
 //import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 //import org.eclipse.che.api.vfs.gwt.client.VfsServiceClient;

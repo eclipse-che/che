@@ -142,12 +142,12 @@ public class WorkspaceHolder {
         private WorkspaceStatus     status;
         private WorkspaceConfigImpl workspaceConfig;
 
-        UsersWorkspaceImpl(UsersWorkspaceDto dto) {
-            id = dto.getId();
-            owner = dto.getOwner();
-            isTemporary = dto.isTemporary();
-            status = dto.getStatus();
-            workspaceConfig = new WorkspaceConfigImpl(dto.getConfig());
+        UsersWorkspaceImpl(UsersWorkspace usersWorkspace) {
+            id = usersWorkspace.getId();
+            owner = usersWorkspace.getOwner();
+            isTemporary = usersWorkspace.isTemporary();
+            status = usersWorkspace.getStatus();
+            workspaceConfig = new WorkspaceConfigImpl(usersWorkspace.getConfig());
         }
 
         @Override
@@ -196,14 +196,18 @@ public class WorkspaceHolder {
         private String                        name;
         private String                        description;
         private String                        defaultEnvName;
+        private List<? extends Command> commands;
         private List<? extends ProjectConfig> projects;
+        private List<? extends Environment> environments;
         private Map<String, String>           attributes;
 
         WorkspaceConfigImpl(WorkspaceConfig config) {
             name = config.getName();
             description = config.getDescription();
             defaultEnvName = config.getDefaultEnv();
+            commands = config.getCommands();
             projects = config.getProjects();
+            environments = config.getEnvironments();
             attributes = config.getAttributes();
         }
 
@@ -224,8 +228,7 @@ public class WorkspaceHolder {
 
         @Override
         public List<? extends Command> getCommands() {
-            // TODO
-            return new ArrayList<>(0);
+            return commands;
         }
 
         @Override
@@ -239,8 +242,7 @@ public class WorkspaceHolder {
 
         @Override
         public List<? extends Environment> getEnvironments() {
-            // TODO
-            return new ArrayList<>(0);
+            return environments;
         }
 
         @Override
