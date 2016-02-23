@@ -115,6 +115,11 @@ public class GitHubDTOFactory {
         dtoRepository.setHasDownloads(ghRepository.hasDownloads());
         dtoRepository.setHasIssues(ghRepository.hasIssues());
         dtoRepository.setOwnerLogin(ghRepository.getOwnerName());
+
+        if (ghRepository.isFork() && ghRepository.getParent() != null) {
+            dtoRepository.setParent(createRepository(ghRepository.getParent()));
+        }
+
         return dtoRepository;
     }
 

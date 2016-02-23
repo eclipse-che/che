@@ -174,8 +174,24 @@ public interface GitHubClientService {
 
     /**
      * Get the list of the organizations, where authorized user is a member.
+     *
+     * Use {@link #getOrganizations()}.
+     */
+    @Deprecated
+    void getOrganizations(@NotNull AsyncRequestCallback<List<String>> callback);
+
+    /**
+     * Get the list of the organizations, where authorized user is a member.
      */
     Promise<List<GitHubUser>> getOrganizations();
+
+    /**
+     * Get authorized user information.
+     *
+     * Use {@link #getUserInfo()}.
+     */
+    @Deprecated
+    void getUserInfo(@NotNull AsyncRequestCallback<GitHubUser> callback);
 
     /**
      * Get authorized user information.
