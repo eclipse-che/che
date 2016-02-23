@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.client;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.github.shared.Collaborators;
 import org.eclipse.che.ide.ext.github.shared.GitHubIssueComment;
 import org.eclipse.che.ide.ext.github.shared.GitHubIssueCommentInput;
@@ -23,7 +24,6 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Client service for Samples.
@@ -46,11 +46,8 @@ public interface GitHubClientService {
 
     /**
      * Get list of available public and private repositories of the authorized user.
-     *
-     * @param callback
-     *         callback called when operation is done.
      */
-    void getRepositoriesList(@NotNull AsyncRequestCallback<GitHubRepositoryList> callback);
+    Promise<List<GitHubRepository>> getRepositoriesList();
 
     /**
      * Get list of forks for given repository
@@ -107,7 +104,7 @@ public interface GitHubClientService {
 
     /**
      * Get a pull request by id for a given repository.
-     * 
+     *
      * @param owner the owner of the target repository
      * @param repository the target repository
      * @param pullRequestId the Id of the pull request
@@ -176,28 +173,14 @@ public interface GitHubClientService {
     void getCollaborators(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<Collaborators> callback);
 
     /**
-     * Get the map of available public and private repositories of the authorized user and organizations he exists in.
-     *
-     * @param callback
-     *         callback called when operation is done.
-     */
-    void getAllRepositories(@NotNull AsyncRequestCallback<Map<String, List<GitHubRepository>>> callback);
-
-    /**
      * Get the list of the organizations, where authorized user is a member.
-     *
-     * @param callback
-     *         callback called when operation is done.
      */
-    void getOrganizations(@NotNull AsyncRequestCallback<List<String>> callback);
+    Promise<List<GitHubUser>> getOrganizations();
 
     /**
      * Get authorized user information.
-     *
-     * @param callback
-     *         callback called when operation is done.
      */
-    void getUserInfo(@NotNull AsyncRequestCallback<GitHubUser> callback);
+    Promise<GitHubUser> getUserInfo();
 
     /**
      * Generate and upload new public key if not exist on github.com.

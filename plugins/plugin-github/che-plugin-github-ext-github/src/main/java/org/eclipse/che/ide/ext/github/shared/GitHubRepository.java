@@ -74,15 +74,6 @@ public interface GitHubRepository {
     void setFork(boolean isFork);
 
     /**
-     * Get the repository parent.
-     *
-     * @return the parent repository.
-     */
-    GitHubRepository getParent();
-
-    void setParent(GitHubRepository parent);
-
-    /**
      * Get the number of repository's watchers.
      *
      * @return {@link Integer} the number of watchers
@@ -225,4 +216,13 @@ public interface GitHubRepository {
     boolean isHasIssues();
 
     void setHasIssues(boolean isHasIssues);
+
+    /**
+     * Get repository's owner login.
+     *
+     * @return {@link String} owner login
+     */
+    String getOwnerLogin();
+
+    void setOwnerLogin(String ownerLogin);
 }
