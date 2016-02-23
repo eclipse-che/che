@@ -76,7 +76,7 @@ public class ProjectRegistry {
         }
 
         for (ProjectConfig projectConfig : projectConfigs) {
-            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false, true);
+            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false, false);
 
             ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
             if (handler != null) {
@@ -88,7 +88,7 @@ public class ProjectRegistry {
         FolderEntry root = new FolderEntry(vfs.getRoot());
         for (FolderEntry folder : root.getChildFolders()) {
             if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-                putProject(null, folder, true, false);
+                putProject(null, folder, true, true);
             }
         }
 
@@ -174,10 +174,10 @@ public class ProjectRegistry {
         throw new NotFoundException("Parent project not found " + path);
     }
 
-    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean persisted)
+    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected)
             throws ServerException, ConflictException,
                    NotFoundException, ForbiddenException {
-        RegisteredProject project = new RegisteredProject(folder, config, updated, persisted, this.projectTypeRegistry);
+        RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
         return project;
     }
@@ -213,7 +213,7 @@ public class ProjectRegistry {
 //        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
 //        projects.put(project.getPath(), project);
 
-        RegisteredProject project = putProject(conf, folder(projectPath), true, false);
+        RegisteredProject project = putProject(conf, folder(projectPath), true, true);
 
         ProjectInitHandler handler = handlers.getProjectInitHandler(conf.getType());
         if(handler != null)

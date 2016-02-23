@@ -463,8 +463,8 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         ProjectConfig pc1 = new NewProjectConfig("/testDetectedProjectsNotSerialized1", "pt3", null, "name", "descr", attributes, null);
         ProjectConfig pc2 = new NewProjectConfig("/testDetectedProjectsNotSerialized2", "pt3", null, "name", "descr", attributes, null);
 
-        projectRegistry.putProject(pc1, null, true, false);
-        projectRegistry.putProject(pc2, null, true, true);
+        projectRegistry.putProject(pc1, null, true, true);
+        projectRegistry.putProject(pc2, null, true, false);
 
         workspaceHolder.updateProjects(projectRegistry.getProjects());
 

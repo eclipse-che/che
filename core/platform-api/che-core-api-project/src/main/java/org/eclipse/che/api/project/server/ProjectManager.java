@@ -256,7 +256,7 @@ public final class ProjectManager {
 
 
         try {
-            return projectRegistry.putProject(projectConfig, projectFolder, true, true);
+            return projectRegistry.putProject(projectConfig, projectFolder, true, false);
         } catch (Exception e) {
             // rollback project folder
             projectFolder.getVirtualFile().delete();
@@ -300,7 +300,7 @@ public final class ProjectManager {
         if (baseFolder == null)
             throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
 
-        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, true);
+        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
 
         // TODO move to register?
         reindexProject(project);
@@ -337,7 +337,7 @@ public final class ProjectManager {
 
         String name = folder.getPath().getName();
 
-        return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true, true);
+        return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true, false);
 
     }
 

@@ -42,9 +42,8 @@ public class RegisteredProject implements ProjectConfig {
     private final ProjectConfig config;
     private final ProjectTypes  types;
     private final Map<String, Value> attributes = new HashMap<>();
-    private final ProjectTypeRegistry projectTypeRegistry;
     private       boolean             updated;
-    private       boolean             persisted;
+    private       boolean             detected;
 
     /**
      * Either root folder or config can be null, in this case Project is configured with problem
@@ -55,14 +54,14 @@ public class RegisteredProject implements ProjectConfig {
      *         - project configuration in workspace
      * @param updated
      *         - if this object was updated, i.e. no more synchronized with workspace master
-     * @param persisted
+     * @param detected
      *         - if this project was detected, initialized when "parent" project initialized
      * @param projectTypeRegistry
      */
     RegisteredProject(FolderEntry folder,
                       ProjectConfig config,
                       boolean updated,
-                      boolean persisted,
+                      boolean detected,
                       ProjectTypeRegistry projectTypeRegistry) throws NotFoundException,
                                                                       ProjectTypeConstraintException,
                                                                       ServerException,
@@ -70,8 +69,7 @@ public class RegisteredProject implements ProjectConfig {
         this.folder = folder;
         this.config = (config == null) ? new NewProjectConfig(folder.getPath()) : config;
         this.updated = updated;
-        this.persisted = persisted;
-        this.projectTypeRegistry = projectTypeRegistry;
+        this.detected = detected;
 
         if (folder == null || folder.isFile())
             problems.add(new Problem(10, "No project folder on file system " + this.config.getPath()));
@@ -160,7 +158,7 @@ public class RegisteredProject implements ProjectConfig {
     }
 
     public boolean isDetected() {
-        return !this.persisted;
+        return detected;
     }
 
     /**
