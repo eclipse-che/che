@@ -15,7 +15,6 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ModuleNode;
 import org.eclipse.che.ide.project.node.ProjectNode;
 
 /**
@@ -34,17 +33,6 @@ public interface NodeFactory {
      * @return instance of {@link org.eclipse.che.ide.project.node.ProjectNode}
      */
     ProjectNode newProjectNode(ProjectConfigDto projectConfig, NodeSettings nodeSettings);
-
-    /**
-     * Creates module node that represent project module.
-     *
-     * @param projectConfig
-     *         instance of {@link ProjectConfigDto} related to this node
-     * @param nodeSettings
-     *         node view settings
-     * @return instance of {@link org.eclipse.che.ide.project.node.ModuleNode}
-     */
-    ModuleNode newModuleNode(ProjectConfigDto projectConfig, NodeSettings nodeSettings);
 
     /**
      * Creates folder referenced node.

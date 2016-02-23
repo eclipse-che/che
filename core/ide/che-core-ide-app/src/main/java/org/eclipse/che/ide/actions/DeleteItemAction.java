@@ -39,7 +39,6 @@ import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ModuleNode;
 import org.eclipse.che.ide.project.node.ProjectNode;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.project.node.remove.DeleteNodeHandler;
@@ -237,8 +236,8 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
 
     private String getNodePath(ResourceBasedNode<?> node, String projectName) {
         String path = "";
-        if (node instanceof ModuleNode) {
-            path = ((ModuleNode)node).getStorablePath();
+        if (node instanceof ProjectNode) {
+            path = ((ProjectNode)node).getStorablePath();
         } else if (node instanceof FolderReferenceNode) {
             path = ((FolderReferenceNode)node).getStorablePath();
         } else if (node instanceof FileReferenceNode) {

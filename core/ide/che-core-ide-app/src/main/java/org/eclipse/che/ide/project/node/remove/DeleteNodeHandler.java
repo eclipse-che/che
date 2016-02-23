@@ -30,7 +30,6 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ModuleNode;
 import org.eclipse.che.ide.project.node.ProjectNode;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
@@ -206,8 +205,6 @@ public class DeleteNodeHandler {
     private String getDisplayType(@NotNull ResourceBasedNode<?> node) {
         if (node instanceof ProjectNode) {
             return "project";
-        } else if (node instanceof ModuleNode) {
-            return "module";
         } else if (node instanceof FolderReferenceNode) {
             return "folder";
         } else if (node instanceof FileReferenceNode) {
