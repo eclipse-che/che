@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -211,9 +212,12 @@ public interface GitHubRepository {
 
     /**
      * Get the repository parent.
+     * Might return null if user tried to retrieve the full repository list.
+     * If request was done to retrieve the specific repository then {@link #getParent()} will return none null value.
      *
      * @return the parent repository.
      */
+    @Nullable
     GitHubRepository getParent();
 
     void setParent(GitHubRepository parent);
