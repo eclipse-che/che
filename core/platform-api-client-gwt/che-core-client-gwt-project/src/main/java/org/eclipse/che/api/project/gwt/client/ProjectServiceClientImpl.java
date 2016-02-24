@@ -443,9 +443,6 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
         if (expression.getName() != null && !expression.getName().isEmpty()) {
             queryParameters.append("&name=").append(expression.getName());
         }
-        if (expression.getMediaType() != null && !expression.getMediaType().isEmpty()) {
-            queryParameters.append("&mediatype=").append(expression.getMediaType());
-        }
         if (expression.getText() != null && !expression.getText().isEmpty()) {
             queryParameters.append("&text=").append(expression.getText());
         }
