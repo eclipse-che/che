@@ -27,9 +27,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-
 import com.google.web.bindery.event.shared.EventBus;
+
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
@@ -68,9 +71,10 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @UiField(provided = true)
     final PartStackUIResources resources;
 
-    private final EventBus eventBus;
+    private final EventBus                    eventBus;
     private final EditorTabContextMenuFactory editorTabContextMenu;
-    private final VirtualFile file;
+    private final VirtualFile                 file;
+    private final FileTypeRegistry            fileTypeRegistry;
 
     private ActionDelegate delegate;
     private boolean        pinned;
@@ -82,9 +86,11 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
                            @Assisted String title,
                            PartStackUIResources resources,
                            EditorTabContextMenuFactory editorTabContextMenu,
-                           EventBus eventBus) {
+                           EventBus eventBus,
+                           FileTypeRegistry fileTypeRegistry) {
         this.resources = resources;
         this.eventBus = eventBus;
+        this.fileTypeRegistry = fileTypeRegistry;
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -131,7 +137,13 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     /** {@inheritDoc} */
     @Override
     public void update(@NotNull PartPresenter part) {
-        this.title.setText(part.getTitle());
+        title.setText(part.getTitle());
+
+        if (part instanceof EditorPartPresenter) {
+            VirtualFile changedFile = ((EditorPartPresenter)part).getEditorInput().getFile();
+            FileType fileType = fileTypeRegistry.getFileTypeByFile(changedFile);
+            iconPanel.setWidget(new SVGImage(fileType.getSVGImage()));
+        }
     }
 
     /** {@inheritDoc} */

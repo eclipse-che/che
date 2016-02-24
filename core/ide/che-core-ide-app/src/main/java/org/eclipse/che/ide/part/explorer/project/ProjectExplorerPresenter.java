@@ -40,6 +40,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
 import org.eclipse.che.ide.api.event.ConfigureProjectHandler;
 import org.eclipse.che.ide.api.event.ModuleCreatedEvent;
@@ -66,6 +67,7 @@ import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent.ResourceNodeDeletedHandler;
 import org.eclipse.che.ide.project.event.ResourceNodeRenamedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeRenamedEvent.ResourceNodeRenamedHandler;
+import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.ItemReferenceBasedNode;
 import org.eclipse.che.ide.project.node.ModuleNode;
 import org.eclipse.che.ide.project.node.NodeManager;
@@ -120,6 +122,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private final DtoUnmarshallerFactory       dtoUnmarshaller;
     private final ProjectServiceClient         projectService;
     private final NotificationManager          notificationManager;
+    private final Provider<EditorAgent>        editorAgentProvider;
 
     public static final int PART_SIZE = 250;
 
@@ -138,7 +141,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                     DtoUnmarshallerFactory dtoUnmarshaller,
                                     ProjectServiceClient projectService,
                                     NotificationManager notificationManager,
-                                    ProjectConfigSynchronizationListener synchronizationListener) {
+                                    ProjectConfigSynchronizationListener synchronizationListener,
+                                    Provider<EditorAgent> editorAgentProvider) {
         this.view = view;
         this.view.setDelegate(this);
 
@@ -153,6 +157,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         this.dtoUnmarshaller = dtoUnmarshaller;
         this.projectService = projectService;
         this.notificationManager = notificationManager;
+        this.editorAgentProvider = editorAgentProvider;
 
         eventBus.addHandler(CreateProjectEvent.TYPE, this);
         eventBus.addHandler(DeleteProjectEvent.TYPE, this);
@@ -343,6 +348,12 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         if (event.getNode() instanceof ItemReferenceBasedNode) {
             ItemReference newDTO = (ItemReference)event.getNewDataObject();
             ItemReferenceBasedNode node = (ItemReferenceBasedNode)event.getNode();
+
+            if (node instanceof FileReferenceNode) {
+                ItemReferenceBasedNode wrapped = nodeManager.wrap(newDTO, node.getProjectConfig());
+
+                editorAgentProvider.get().updateEditorNode(node.getData().getPath(), (FileReferenceNode)wrapped);
+            }
 
             node.setData(newDTO);
         } else if (event.getNode() instanceof ModuleNode) {

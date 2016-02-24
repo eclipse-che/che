@@ -14,8 +14,12 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Element;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-
 import com.google.web.bindery.event.shared.EventBus;
+
+import org.eclipse.che.ide.api.editor.EditorInput;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
@@ -24,12 +28,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,25 +52,28 @@ public class EditorTabWidgetTest {
     private PartStackUIResources resources;
     @Mock
     private SVGResource          icon;
-
     @Mock
-    private SVGImage iconImage;
+    private FileTypeRegistry     fileTypeRegistry;
+    @Mock
+    private SVGImage             iconImage;
 
     //additional mocks
     @Mock
-    private Element         element;
+    private Element                     element;
     @Mock
-    private OMSVGSVGElement svg;
+    private OMSVGSVGElement             svg;
     @Mock
-    private ActionDelegate  delegate;
+    private ActionDelegate              delegate;
     @Mock
-    private ClickEvent      event;
+    private ClickEvent                  event;
     @Mock
-    private VirtualFile     file;
+    private VirtualFile                 file;
     @Mock
     private EditorTabContextMenuFactory editorTabContextMenuFactory;
     @Mock
-    private EventBus eventBus;
+    private EventBus                    eventBus;
+    @Mock
+    private EditorPartPresenter         editorPartPresenter;
 
     private EditorTabWidget tab;
 
@@ -73,7 +82,7 @@ public class EditorTabWidgetTest {
         when(icon.getSvg()).thenReturn(svg);
         when(event.getNativeButton()).thenReturn(NativeEvent.BUTTON_LEFT);
 
-        tab = new EditorTabWidget(file, icon, SOME_TEXT, resources, editorTabContextMenuFactory, eventBus);
+        tab = new EditorTabWidget(file, icon, SOME_TEXT, resources, editorTabContextMenuFactory, eventBus, fileTypeRegistry);
         tab.setDelegate(delegate);
     }
 
@@ -136,4 +145,20 @@ public class EditorTabWidgetTest {
         verify(delegate).onTabClicked(tab);
     }
 
+    @Test
+    public void tabIconShouldBeUpdatedWhenMediaTypeChanged() {
+        EditorInput editorInput = mock(EditorInput.class);
+        FileType fileType = mock(FileType.class);
+
+        when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
+        when(fileTypeRegistry.getFileTypeByFile(file)).thenReturn(fileType);
+        when(fileType.getSVGImage()).thenReturn(icon);
+        when(editorInput.getFile()).thenReturn(file);
+
+        tab.update(editorPartPresenter);
+
+        verify(editorPartPresenter).getEditorInput();
+        verify(fileTypeRegistry).getFileTypeByFile(file);
+        verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
+    }
 }
