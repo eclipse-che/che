@@ -32,4 +32,7 @@ public interface LocalizationConstant extends Messages {
 
     @Key("get.product.name")
     String getProductName();
+
+    @Key("support.title")
+    String supportTitle();
 }
