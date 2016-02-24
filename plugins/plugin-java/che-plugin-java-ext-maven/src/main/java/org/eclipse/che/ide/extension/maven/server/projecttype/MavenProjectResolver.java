@@ -67,7 +67,7 @@ public class MavenProjectResolver {
 
         if (projectFolder.getVirtualFile().exists() && projectFolder.getVirtualFile().isFolder()) {
             final VirtualFileEntry pom = projectFolder.getChild("pom.xml");
-            if (pom == null && pom.isFile()) {
+            if (pom == null || !pom.isFile()) {
                 return;
             }
 

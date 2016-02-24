@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
@@ -32,8 +33,10 @@ import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
+import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.server.type.ProjectTypeUtils;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -228,15 +231,14 @@ public class ProjectService extends Service {
                                                                                     ServerException,
                                                                                     IOException {
 
-        if(path != null)
+        final ProjectConfigDto ensure = ProjectTypeUtils.ensure(projectConfigDto, typeRegistry);
+        if(path != null) {
             projectConfigDto.setPath(path);
+        }
 
         RegisteredProject project = projectManager.updateProject(projectConfigDto);
-
-
         return toProjectConfig(project, workspace, getServiceContext().getServiceUriBuilder());
     }
-
 
 
     @ApiOperation(value = "Delete a resource",
