@@ -29,10 +29,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -749,30 +747,26 @@ public class ProjectService extends Service {
                                                    .build(workspace, parent.getPath().toString().substring(1))).build();
     }
 
-//
-//    @ApiOperation(value = "Download ZIP",
-//                  notes = "Export resource as zip. It can be an entire project or folder",
-//                  position = 20)
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 201, message = ""),
-//            @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-//            @ApiResponse(code = 404, message = "Not found"),
-//            @ApiResponse(code = 500, message = "Internal Server Error")})
-//    @GET
-//    @Path("/export/{path:.*}")
-//    @Produces(ExtMediaType.APPLICATION_ZIP)
-//    public ContentStream exportZip(@ApiParam(value = "Workspace ID", required = true)
-//                                   @PathParam("ws-id") String workspace,
-//                                   @ApiParam(value = "Path to resource to be imported")
-//                                   @PathParam("path") String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//
-//        final FolderEntry folder = asFolder(path);
-//        return exportZip(folder.getVirtualFile());
-//    }
-//
+    @ApiOperation(value = "Download ZIP",
+            notes = "Export resource as zip. It can be an entire project or folder",
+            position = 20)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = ""),
+            @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+            @ApiResponse(code = 404, message = "Not found"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @GET
+    @Path("/export/{path:.*}")
+    @Produces(ExtMediaType.APPLICATION_ZIP)
+    public InputStream exportZip(@ApiParam(value = "Workspace ID", required = true)
+                                 @PathParam("ws-id") String workspace,
+                                 @ApiParam(value = "Path to resource to be exported")
+                                 @PathParam("path") String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        final FolderEntry folder = projectManager.asFolder(path);
+        return folder.getVirtualFile().zip();
+    }
 
-//
 //    @POST
 //    @Path("/export/{path:.*}")
 //    @Consumes(MediaType.TEXT_PLAIN)
@@ -840,7 +834,6 @@ public class ProjectService extends Service {
 
         return result;
     }
-
 
     @ApiOperation(value = "Get project tree",
                   notes = "Get project tree. Depth is specified in a query parameter",

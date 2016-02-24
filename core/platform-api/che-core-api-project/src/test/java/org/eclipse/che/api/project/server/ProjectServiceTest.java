@@ -1544,16 +1544,16 @@ public class ProjectServiceTest {
         assertNotNull(myProject.getBaseFolder().getChild("a/b/folder1/folder2/file1.txt"));
     }
 
-//    @Test
-//    public void testExportZip() throws Exception {
-//        ProjectImpl myProject = pm.getProject("my_project");
-//        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
-//        ContainerResponse response = launcher.service(GET,
-//                                                      String.format("http://localhost:8080/api/project/%s/export/my_project", workspace),
-//                                                      "http://localhost:8080/api", null, null, null);
-//        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-//        assertEquals(response.getContentType().toString(), ExtMediaType.APPLICATION_ZIP);
-//    }
+    @Test
+    public void testExportZip() throws Exception {
+        RegisteredProject myProject = pm.getProject("my_project");
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
+        ContainerResponse response = launcher.service(GET,
+                                                      String.format("http://localhost:8080/api/project/%s/export/my_project", workspace),
+                                                      "http://localhost:8080/api", null, null, null);
+        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
+        assertEquals(response.getContentType().toString(), ExtMediaType.APPLICATION_ZIP);
+    }
 
     @Test
     @SuppressWarnings("unchecked")
