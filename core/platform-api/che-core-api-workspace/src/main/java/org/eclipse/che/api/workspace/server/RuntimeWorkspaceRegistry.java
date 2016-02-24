@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -64,6 +63,9 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
  * Workspaces are stored in memory - in 2 Maps. First for <i>identifier -> workspace</i> mapping,
  * second for <i>owner -> list of workspaces</i> mapping(which speeds up fetching workspaces by owner).
  * Maps are guarded by {@link ReentrantReadWriteLock}.
+ *
+ * <p>The implementation doesn't validate parameters.
+ * They should be validated by caller of methods of this class.
  *
  * @author Yevhenii Voevodin
  * @author Alexander Garagatyi
@@ -120,7 +122,6 @@ public class RuntimeWorkspaceRegistry {
                                                                                                              BadRequestException,
                                                                                                              NotFoundException {
         checkRegistryIsNotStopped();
-        checkWorkspaceIsValidForStart(usersWorkspace, envName);
         // Prepare runtime workspace for start
         final RuntimeWorkspaceImpl newRuntime = RuntimeWorkspaceImpl.builder()
                                                                     .fromWorkspace(usersWorkspace)
@@ -364,43 +365,6 @@ public class RuntimeWorkspaceRegistry {
                                  environment.getName()),
                           ex);
             }
-        }
-    }
-
-    /**
-     * Checks if workspace is valid for start.
-     */
-    private void checkWorkspaceIsValidForStart(UsersWorkspace workspace, String envName) throws BadRequestException {
-        if (workspace == null) {
-            throw new BadRequestException("Required non-null workspace");
-        }
-        if (envName == null) {
-            throw new BadRequestException(format("Couldn't start workspace '%s', environment name is null",
-                                                 workspace.getConfig().getName()));
-        }
-        final Optional<? extends Environment> environmentOptional = workspace.getConfig()
-                                                                             .getEnvironments()
-                                                                             .stream()
-                                                                             .filter(env -> env.getName().equals(envName))
-                                                                             .findFirst();
-        if (!environmentOptional.isPresent()) {
-            throw new BadRequestException(format("Couldn't start workspace '%s', workspace doesn't have environment '%s'",
-                                                 workspace.getConfig().getName(),
-                                                 envName));
-        }
-        Environment environment = environmentOptional.get();
-        if (environment.getRecipe() != null && !"docker".equals(environment.getRecipe().getType())) {
-            throw new BadRequestException(format("Couldn't start workspace '%s' from environment '%s', " +
-                                                 "environment recipe has unsupported type '%s'",
-                                                 workspace.getConfig().getName(),
-                                                 envName,
-                                                 environment.getRecipe().getType()));
-        }
-        if (findDev(environment.getMachineConfigs()) == null) {
-            throw new BadRequestException(format("Couldn't start workspace '%s' from environment '%s', " +
-                                                 "environment doesn't contain dev-machine",
-                                                 workspace.getConfig().getName(),
-                                                 envName));
         }
     }
 
