@@ -292,7 +292,7 @@ if [ "${USE_HELP}" == "false" ]; then
 
   if [ "${SKIP_WSMASTER}" == "false" ]; then
 
-    echo_stage "CHE SDK: Compiling IDE & server-side plug-ins into new workspace master. ~5 minutes."
+    echo_stage "CHE SDK: Compiling everything into new IDE. ~5 minutes."
       
     # Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
     cd "${PLUGIN_IDE_WAR_DIR}/temp"
