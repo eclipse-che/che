@@ -43,12 +43,12 @@ import org.eclipse.che.ide.jseditor.client.link.LinkedModel;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
+import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.InputCallback;
+import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +74,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -142,7 +143,11 @@ public class JavaRefactoringRenameTest {
     @Mock
     private RefactoringStatusEntry            entry;
     @Mock
-    private LoaderFactory                     loaderFactory;
+    private LinkedMode                        linkedMode;
+    @Mock
+    private LinkedModel                       editorLinkedModel;
+    @Mock
+    private Document                          document;
 
     @Captor
     private ArgumentCaptor<Operation<RenameRefactoringSession>> renameRefCaptor;
@@ -153,32 +158,17 @@ public class JavaRefactoringRenameTest {
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>             refactoringErrorCaptor;
 
-    @Mock
-    private LinkedMode linkedMode;
-
-    @Mock
-    private LinkedModel editorLinkedModel;
-
-    @Mock
-    private Document document;
-
-    @Mock
-    private MessageLoader loader;
-
     private JavaRefactoringRename refactoringRename;
 
     @Before
     public void setUp() {
-        when(loaderFactory.newLoader()).thenReturn(loader);
-
         refactoringRename = new JavaRefactoringRename(renamePresenter,
                                                       refactoringUpdater,
                                                       locale,
                                                       refactoringServiceClient,
                                                       dtoFactory,
                                                       dialogFactory,
-                                                      notificationManager,
-                                                      loaderFactory);
+                                                      notificationManager);
 
         when(dtoFactory.createDto(CreateRenameRefactoring.class)).thenReturn(createRenameRefactoringDto);
         when(dtoFactory.createDto(LinkedRenameRefactoringApply.class)).thenReturn(linkedRenameRefactoringApplyDto);
@@ -280,13 +270,42 @@ public class JavaRefactoringRenameTest {
     }
 
     @Test
-    public void renameRefactoringShouldBeWithWarning() throws OperationException {
+    public void renameRefactoringShouldBeWithWarningOrErrorStatus() throws OperationException {
+        ConfirmDialog confirmDialog = mock(ConfirmDialog.class);
+
         when(result.getSeverity()).thenReturn(WARNING);
+        when(dialogFactory.createConfirmDialog(anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               anyString(),
+                                               Matchers.<ConfirmCallback>anyObject(),
+                                               Matchers.<CancelCallback>anyObject())).thenReturn(confirmDialog);
 
         refactoringRename.refactor(textEditor);
 
-        mainCheckRenameRefactoring();
-        verify(result, times(2)).getSeverity();
+        verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
+        verify(createRenamePromise).then(renameRefCaptor.capture());
+        renameRefCaptor.getValue().apply(session);
+
+        verify(linkedMode).addListener(inputArgumentCaptor.capture());
+        inputArgumentCaptor.getValue().onLinkedModeExited(true, 0, 1);
+
+        verify(refactoringServiceClient).applyLinkedModeRename(linkedRenameRefactoringApplyDto);
+
+        verify(applyModelPromise).then(refactoringStatusCaptor.capture());
+        refactoringStatusCaptor.getValue().apply(result);
+
+        verify(locale).warningOperationTitle();
+        verify(locale).renameWithWarnings();
+        verify(locale).showRenameWizard();
+        verify(locale).buttonCancel();
+        verify(dialogFactory).createConfirmDialog(anyString(),
+                                                  anyString(),
+                                                  anyString(),
+                                                  anyString(),
+                                                  Matchers.<ConfirmCallback>anyObject(),
+                                                  Matchers.<CancelCallback>anyObject());
+        verify(confirmDialog).show();
     }
 
     @Test
