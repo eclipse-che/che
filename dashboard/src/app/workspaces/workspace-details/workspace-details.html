@@ -36,7 +36,8 @@
               </ng-form>
               <div flex="none" flex-offset="5" layout="column" layout-align="end end">
                 <che-button-primary ng-disabled="(workspaceInformationForm.$invalid || workspaceDetailsCtrl.newName === workspaceDetailsCtrl.workspaceDetails.config.name)"
-                                     che-button-title="Rename" name="updateButton" ng-click="workspaceDetailsCtrl.renameWorkspace(workspaceInformationForm.$valid)"/>
+                                     che-button-title="Rename" name="updateButton" ng-click="workspaceDetailsCtrl.renameWorkspace(workspaceInformationForm.$valid)"></che-button-primary>
+
               </div>
           </div>
           <div layout="row">
@@ -65,7 +66,7 @@
             <div layout="column" flex="85">
               <che-button-danger che-button-title="Delete"
                                  ng-disabled="workspaceDetailsCtrl.workspaceDetails.status === 'STARTING' || workspaceDetailsCtrl.workspaceDetails.status === 'STOPPING'"
-                                 ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"/>
+                                 ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"></che-button-danger>
             </div>
           </div>
         </che-panel>
