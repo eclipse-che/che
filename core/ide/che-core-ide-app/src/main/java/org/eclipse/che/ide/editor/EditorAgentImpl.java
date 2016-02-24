@@ -310,7 +310,9 @@ public class EditorAgentImpl implements EditorAgent {
     private void doOpen(final VirtualFile file, final OpenEditorCallback callback) {
         final String filePath = file.getPath();
         if (openedEditors.containsKey(filePath)) {
-            workspace.setActivePart(openedEditors.get(filePath), EDITING);
+            EditorPartPresenter editor = openedEditors.get(filePath);
+            workspace.setActivePart(editor, EDITING);
+            callback.onEditorActivated(editor);
         } else {
             FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             EditorProvider editorProvider = editorRegistry.getEditor(fileType);

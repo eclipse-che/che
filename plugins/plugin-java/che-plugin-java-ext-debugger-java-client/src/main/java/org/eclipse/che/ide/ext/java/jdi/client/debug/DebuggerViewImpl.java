@@ -16,14 +16,13 @@ import elemental.events.MouseEvent;
 import elemental.html.TableCellElement;
 import elemental.html.TableElement;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -44,10 +43,10 @@ import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.util.input.SignalEvent;
-import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 /**
@@ -63,25 +62,11 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
     }
 
     @UiField
-    Button                          btnResume;
-    @UiField
-    Button                          btnStepInto;
-    @UiField
-    Button                          btnStepOver;
-    @UiField
-    Button                          btnStepReturn;
-    @UiField
-    Button                          btnDisconnect;
-    @UiField
-    Button                          btnRemoveAllBreakpoints;
-    @UiField
-    Button                          btnChangeValue;
-    @UiField
-    Button                          btnEvaluateExpression;
-    @UiField
     Label                           vmName;
     @UiField
     Label                           executionPoint;
+    @UiField
+    SimplePanel                     toolbarPanel;
     @UiField
     ScrollPanel                     variablesPanel;
     @UiField
@@ -116,15 +101,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
         this.dtoFactory = dtoFactory;
 
         setContentWidget(uiBinder.createAndBindUi(this));
-
-        btnResume.getElement().appendChild(new SVGImage(resources.resumeButton()).getElement());
-        btnStepInto.getElement().appendChild(new SVGImage(resources.stepIntoButton()).getElement());
-        btnStepOver.getElement().appendChild(new SVGImage(resources.stepOverButton()).getElement());
-        btnStepReturn.getElement().appendChild(new SVGImage(resources.stepReturnButton()).getElement());
-        btnDisconnect.getElement().appendChild(new SVGImage(resources.disconnectButton()).getElement());
-        btnRemoveAllBreakpoints.getElement().appendChild(new SVGImage(resources.removeAllBreakpointsButton()).getElement());
-        btnChangeValue.getElement().appendChild(new SVGImage(resources.changeVariableValue()).getElement());
-        btnEvaluateExpression.getElement().appendChild(new SVGImage(resources.evaluate()).getElement());
 
         TableElement breakPointsElement = Elements.createTableElement();
         breakPointsElement.setAttribute("style", "width: 100%");
@@ -169,7 +145,7 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
                     }
                 };
 
-        breakpoints = SimpleList.create                            ((SimpleList.View)breakPointsElement,
+        breakpoints = SimpleList.create((SimpleList.View)breakPointsElement,
                                         coreRes.defaultSimpleListCss(),
                                         breakpointListItemRenderer,
                                         breakpointListEventDelegate);
@@ -269,54 +245,6 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
 
     /** {@inheritDoc} */
     @Override
-    public void setEnableResumeButton(boolean isEnable) {
-        btnResume.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableRemoveAllBreakpointsButton(boolean isEnable) {
-        btnRemoveAllBreakpoints.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableDisconnectButton(boolean isEnable) {
-        btnDisconnect.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableStepIntoButton(boolean isEnable) {
-        btnStepInto.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableStepOverButton(boolean isEnable) {
-        btnStepOver.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableStepReturnButton(boolean isEnable) {
-        btnStepReturn.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableChangeValueButtonEnable(boolean isEnable) {
-        btnChangeValue.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setEnableEvaluateExpressionButtonEnable(boolean isEnable) {
-        btnEvaluateExpression.setEnabled(isEnable);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public void updateSelectedVariable() {
         variables.closeNode(selectedVariable);
         variables.expandNode(selectedVariable);
@@ -329,44 +257,16 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
         rootVariable.setVariables(variables);
     }
 
-    @UiHandler("btnResume")
-    public void onResumeButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onResumeButtonClicked();
+    @Override
+    public DebuggerVariable getSelectedDebuggerVariable() {
+        if (selectedVariable != null) {
+            return selectedVariable.getData();
+        }
+        return null;
     }
 
-    @UiHandler("btnStepInto")
-    public void onStepIntoButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onStepIntoButtonClicked();
+    @Override
+    public AcceptsOneWidget getDebuggerToolbarPanel() {
+        return toolbarPanel;
     }
-
-    @UiHandler("btnStepOver")
-    public void onStepOverButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onStepOverButtonClicked();
-    }
-
-    @UiHandler("btnStepReturn")
-    public void onStepReturnButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onStepReturnButtonClicked();
-    }
-
-    @UiHandler("btnDisconnect")
-    public void onDisconnectButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onDisconnectButtonClicked();
-    }
-
-    @UiHandler("btnRemoveAllBreakpoints")
-    public void onRemoveAllBreakpointsButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onRemoveAllBreakpointsButtonClicked();
-    }
-
-    @UiHandler("btnChangeValue")
-    public void onChangeValueButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onChangeValueButtonClicked();
-    }
-
-    @UiHandler("btnEvaluateExpression")
-    public void onEvaluateExpressionButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        delegate.onEvaluateExpressionButtonClicked();
-    }
-
 }

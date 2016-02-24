@@ -17,15 +17,15 @@ package org.eclipse.che.ide.ext.java.jdi.client;
  */
 public interface JavaRuntimeLocalizationConstant extends com.google.gwt.i18n.client.Messages {
 
-    /* Buttons */
+    /* actions */
     @Key("breakpoints")
     String breakpoints();
 
     @Key("debug")
     String debug();
 
-    @Key("disconnectButton")
-    String disconnectButton();
+    @Key("disconnectDebugger")
+    String disconnectDebugger();
 
     @Key("host")
     String host();
@@ -33,11 +33,11 @@ public interface JavaRuntimeLocalizationConstant extends com.google.gwt.i18n.cli
     @Key("port")
     String port();
 
-    @Key("removeBreakpointsButton")
-    String removeBreakpointsButton();
+    @Key("deleteAllBreakpoints")
+    String deleteAllBreakpoints();
 
-    @Key("resumeButton")
-    String resumeButton();
+    @Key("resumeExecution")
+    String resumeExecution();
 
     @Key("variables")
     String variables();
@@ -51,14 +51,45 @@ public interface JavaRuntimeLocalizationConstant extends com.google.gwt.i18n.cli
     @Key("stepOver")
     String stepOver();
 
-    @Key("stepReturn")
-    String stepReturn();
+    @Key("stepOut")
+    String stepOut();
 
-    @Key("changeValue")
-    String changeValue();
+    @Key("changeVariableValue")
+    String changeVariableValue();
 
     @Key("evaluateExpression")
     String evaluateExpression();
+
+    @Key("showHideDebuggerPanel")
+    String showHideDebuggerPanel();
+
+    /* actions descriptions */
+    @Key("resumeExecutionDescription")
+    String resumeExecutionDescription();
+
+    @Key("disconnectDebuggerDescription")
+    String disconnectDebuggerDescription();
+
+    @Key("stepIntoDescription")
+    String stepIntoDescription();
+
+    @Key("stepOverDescription")
+    String stepOverDescription();
+
+    @Key("stepOutDescription")
+    String stepOutDescription();
+
+    @Key("deleteAllBreakpointsDescription")
+    String deleteAllBreakpointsDescription();
+
+    @Key("changeVariableValueDescription")
+    String changeVariableValueDescription();
+
+    @Key("evaluateExpressionDescription")
+    String evaluateExpressionDescription();
+
+    @Key("showHideDebuggerPanelDescription")
+    String showHideDebuggerPanelDescription();
 
     /* messages */
     @Key("debugger.connecting.title")

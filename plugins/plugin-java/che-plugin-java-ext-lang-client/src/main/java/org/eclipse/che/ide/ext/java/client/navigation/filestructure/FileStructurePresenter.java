@@ -147,6 +147,9 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
             public void onEditorOpened(EditorPartPresenter editor) {
                 setCursor(editor, member.getFileRegion().getOffset());
             }
+
+            @Override
+            public void onEditorActivated(EditorPartPresenter editor) { }
         });
     }
 

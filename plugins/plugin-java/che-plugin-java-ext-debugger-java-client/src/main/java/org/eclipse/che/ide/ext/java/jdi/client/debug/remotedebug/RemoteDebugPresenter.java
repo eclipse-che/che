@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.jdi.client.debug.remotedebug;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
+import com.google.gwt.user.client.Timer;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -38,6 +39,13 @@ public class RemoteDebugPresenter implements RemoteDebugView.ActionDelegate {
     /** Calls special method on view which shows dialog window. */
     public void showDialog() {
         view.show();
+        // TODO fix behaviour. Because of animation/render we cannot set focus without delay
+        new Timer() {
+            @Override
+            public void run() {
+                view.setFocusInHostField();
+            }
+        }.schedule(300);
     }
 
     /** {@inheritDoc} */

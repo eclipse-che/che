@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.client.debug.expression;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
-import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerInfo;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Presenter for evaluating an expression.
@@ -27,25 +27,21 @@ import javax.validation.constraints.NotNull;
  */
 @Singleton
 public class EvaluateExpressionPresenter implements EvaluateExpressionView.ActionDelegate {
+    private DebuggerManager                 debuggerManager;
     private EvaluateExpressionView          view;
-    private DebuggerServiceClient           service;
-    private DebuggerInfo                    debuggerInfo;
     private JavaRuntimeLocalizationConstant constant;
 
-    /** Create presenter. */
     @Inject
-    public EvaluateExpressionPresenter(EvaluateExpressionView view, DebuggerServiceClient service,
-                                       JavaRuntimeLocalizationConstant constant) {
+    public EvaluateExpressionPresenter(EvaluateExpressionView view,
+                                       JavaRuntimeLocalizationConstant constant,
+                                       DebuggerManager debuggerManager) {
         this.view = view;
+        this.debuggerManager = debuggerManager;
         this.view.setDelegate(this);
-        this.service = service;
         this.constant = constant;
     }
 
-    /** Show dialog. */
-    public void showDialog(@NotNull DebuggerInfo debuggerInfo) {
-        this.debuggerInfo = debuggerInfo;
-        view.setExpression("");
+    public void showDialog() {
         view.setResult("");
         view.setEnableEvaluateButton(false);
         view.showDialog();
@@ -66,21 +62,23 @@ public class EvaluateExpressionPresenter implements EvaluateExpressionView.Actio
     /** {@inheritDoc} */
     @Override
     public void onEvaluateClicked() {
-        view.setEnableEvaluateButton(false);
-        service.evaluateExpression(debuggerInfo.getId(), view.getExpression(),
-                                   new AsyncRequestCallback<String>(new StringUnmarshaller()) {
-                                       @Override
-                                       protected void onSuccess(String result) {
-                                           view.setResult(result);
-                                           view.setEnableEvaluateButton(true);
-                                       }
-
-                                       @Override
-                                       protected void onFailure(Throwable exception) {
-                                           view.setResult(constant.evaluateExpressionFailed(exception.getMessage()));
-                                           view.setEnableEvaluateButton(true);
-                                       }
-                                   });
+        Debugger debugger = debuggerManager.getDebugger();
+        if (debugger != null) {
+            view.setEnableEvaluateButton(false);
+            debugger.evaluateExpression(view.getExpression()).then(new Operation<String>() {
+                @Override
+                public void apply(String result) throws OperationException {
+                    view.setResult(result);
+                    view.setEnableEvaluateButton(true);
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError error) throws OperationException {
+                    view.setResult(constant.evaluateExpressionFailed(error.getMessage()));
+                    view.setEnableEvaluateButton(true);
+                }
+            });
+        }
     }
 
     /** {@inheritDoc} */

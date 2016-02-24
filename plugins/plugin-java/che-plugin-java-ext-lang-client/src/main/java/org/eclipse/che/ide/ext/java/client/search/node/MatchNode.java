@@ -195,6 +195,9 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
             public void onEditorOpened(EditorPartPresenter editor) {
                 fileOpened(editor);
             }
+
+            @Override
+            public void onEditorActivated(EditorPartPresenter editor) { }
         });
     }
 
