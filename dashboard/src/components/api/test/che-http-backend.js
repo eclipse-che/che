@@ -350,7 +350,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getLocalGitUrl(workspaceId, projectPath) {
-    this.httpBackend.when('GET', '/api/git/' + workspaceId + '/read-only-url?projectPath=' + projectPath)
+    this.httpBackend.when('GET', '/api/ext/git/' + workspaceId + '/read-only-url?projectPath=' + projectPath)
       .respond(this.localGitUrlsMap.get(workspaceId + projectPath));
   }
 
@@ -360,7 +360,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getRemoteGitUrlArray(workspaceId, projectPath) {
-    this.httpBackend.when('POST', '/api/git/' + workspaceId + '/remote-list?projectPath=' + projectPath)
+    this.httpBackend.when('POST', '/api/ext/git/' + workspaceId + '/remote-list?projectPath=' + projectPath)
       .respond(this.remoteGitUrlArraysMap.get(workspaceId + projectPath));
   }
 
