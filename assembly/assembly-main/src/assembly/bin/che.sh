@@ -495,7 +495,7 @@ call_catalina () {
 
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT}"
+  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT} -Djava.security.egd=file:/dev/./urandom"
   export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
