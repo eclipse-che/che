@@ -63,7 +63,9 @@
               This is irreversible. Deleting your workspace will also delete its projects.
             </label>
             <div layout="column" flex="85">
-              <che-button-danger che-button-title="Delete" ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"/>
+              <che-button-danger che-button-title="Delete"
+                                 ng-disabled="workspaceDetailsCtrl.workspaceDetails.status === 'STARTING' || workspaceDetailsCtrl.workspaceDetails.status === 'STOPPING'"
+                                 ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"/>
             </div>
           </div>
         </che-panel>
