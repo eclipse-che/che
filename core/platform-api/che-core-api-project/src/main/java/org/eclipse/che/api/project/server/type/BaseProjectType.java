@@ -23,22 +23,4 @@ public class BaseProjectType extends ProjectTypeDef {
     public BaseProjectType() {
         super(ID, "Blank", true, false);
     }
-
-
-
-//    @Override
-//    public ProjectTypeResolverFactory getResolverFactory() {
-//        return new ProjectTypeResolverFactory() {
-//            @Override
-//            public ProjectTypeResolver newInstance(FolderEntry projectFolder) {
-//                return new ProjectTypeResolver() {
-//                    @Override
-//                    public boolean resolve() {
-//                        return true;
-//                    }
-//                };
-//            }
-//        };
-//    }
-
 }

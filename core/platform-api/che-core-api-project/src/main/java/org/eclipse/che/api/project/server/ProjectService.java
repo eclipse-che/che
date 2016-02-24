@@ -81,10 +81,6 @@ import java.util.Map;
 
 import static org.eclipse.che.api.project.server.DtoConverter.toProjectConfig;
 
-//import org.eclipse.che.api.vfs.ContentStream;
-//import org.eclipse.che.api.vfs.server.VirtualFileSystemImpl;
-
-
 /**
  * @author andrew00x
  * @author Eugene Voevodin
@@ -100,27 +96,12 @@ public class ProjectService extends Service {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectService.class);
 
-//    private final ExecutorService executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
-//                                                                          new ThreadFactoryBuilder()
-//                                                                                  .setNameFormat("ProjectService-IndexingThread-")
-//                                                                                  .setDaemon(true).build()
-//                                                                         );
-
     private static final Tika TIKA = new Tika();
 
     @Inject
     private ProjectManager          projectManager;
     @Inject
-    private ProjectImporterRegistry importers;
-    @Inject
     private EventService            eventService;
-    @Inject
-    private ProjectTypeRegistry     typeRegistry;
-
-//    @PreDestroy
-//    void stop() {
-//        executor.shutdownNow();
-//    }
 
     @ApiOperation(value = "Gets list of projects in root folder",
                   response = ProjectConfigDto.class,
@@ -324,7 +305,6 @@ public class ProjectService extends Service {
                                                  @PathParam("path") String path)
             throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-        //List<ProjectTypeResolution> resolutions = projectManager.resolveSources(path,false);
         List<SourceEstimation> estimations = new ArrayList<>();
         for(ProjectTypeResolution resolution : projectManager.resolveSources(path,false)) {
             if(resolution.matched()) {
@@ -368,10 +348,8 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-
             projectManager.importProject(path, sourceStorage);
     }
-
 
 
     @ApiOperation(value = "Create file",
@@ -968,8 +946,6 @@ public class ProjectService extends Service {
                                       @PathParam("path") String path,
                                       @ApiParam(value = "Resource name")
                                       @QueryParam("name") String name,
-                                      @ApiParam(value = "Media type")
-                                      @QueryParam("mediatype") String mediatype,
                                       @ApiParam(value = "Search keywords")
                                       @QueryParam("text") String text,
                                       @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
@@ -977,13 +953,6 @@ public class ProjectService extends Service {
                                       @ApiParam(value = "Skip count")
                                       @QueryParam("skipCount") int skipCount)
             throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-
-        // to search from workspace root path should end with "/" i.e /{ws}/search/?<query>
-        //final FolderEntry folder = path.isEmpty() ? projectManager.getProjectsRoot() : asFolder(path);
-
-        //SearcherProvider searcherProvider = projectManager.getSearcher();
-                //projectManager.getVfs().getSearcherProvider();
-
         Searcher searcher;
         try {
              searcher = projectManager.getSearcher();
@@ -992,7 +961,6 @@ public class ProjectService extends Service {
             return Collections.emptyList();
         }
 
-        //if (searcherProvider != null) {
             if (skipCount < 0) {
                 throw new ConflictException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
             }
@@ -1017,9 +985,7 @@ public class ProjectService extends Service {
             List <SearchResultEntry> entries = result.getResults();
 
             for (int i = skipCount; i < length; i++) {
-
-                VirtualFileEntry child = null;
-                child = root.getChild(entries.get(i).getFilePath());
+                VirtualFileEntry child = root.getChild(entries.get(i).getFilePath());
 
                 if (child != null && child.isFile()) {
                     items.add(DtoConverter.toItemReference((FileEntry)child, workspace, uriBuilder.clone()));

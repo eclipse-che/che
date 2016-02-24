@@ -137,16 +137,8 @@ public class DtoConverter {
         projectConfigDto.withMixins(mixins);
 
         projectConfigDto.withAttributes(project.getAttributes());
-
-//        List<ProjectConfigDto> modules = new ArrayList<>();
-//        for(String projPath : project.getModulePaths()) {
-//            modules.add(toProjectConfig(project.getRegistry().getProject(projPath), workspace, serviceUriBuilder));
-//        }
-//        projectConfigDto.withModules(modules);
-
         projectConfigDto.withType(project.getProjectType().getId());
         projectConfigDto.withSource(toSourceDto(project.getSource()));
-
 
         for (RegisteredProject.Problem p : project.getProblems()) {
             ProjectProblemDto projectProblem = newDto(ProjectProblemDto.class).withCode(p.code).withMessage(p.message);
@@ -199,13 +191,10 @@ public class DtoConverter {
         links.add(LinksHelper.createLink(GET,
                                          uriBuilder.clone().path(ProjectService.class, "getChildren").build(workspace, relPath).toString(),
                                          APPLICATION_JSON, LINK_REL_CHILDREN));
-        links.add(
-                LinksHelper.createLink(GET, uriBuilder.clone().path(ProjectService.class, "getTree").build(workspace, relPath).toString(),
-                                       null, APPLICATION_JSON, LINK_REL_TREE)
-        );
-//        links.add(LinksHelper.createLink(GET,
-//                                         uriBuilder.clone().path(ProjectService.class, "getModules").build(workspace, relPath).toString(),
-//                                         APPLICATION_JSON, LINK_REL_MODULES));
+        links.add(LinksHelper.createLink(GET,
+                                         uriBuilder.clone().path(ProjectService.class, "getTree").build(workspace, relPath).toString(),
+                                         null, APPLICATION_JSON, LINK_REL_TREE)
+                 );
         links.add(LinksHelper.createLink(DELETE,
                                          uriBuilder.clone().path(ProjectService.class, "delete").build(workspace, relPath).toString(),
                                          LINK_REL_DELETE));
@@ -226,6 +215,4 @@ public class DtoConverter {
                                          LINK_REL_DELETE));
         return links;
     }
-
-
 }

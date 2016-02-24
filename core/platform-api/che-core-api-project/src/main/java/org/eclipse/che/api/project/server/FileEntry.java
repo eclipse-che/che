@@ -46,8 +46,6 @@ public class FileEntry extends VirtualFileEntry {
      * Gets content of file as array of bytes.
      *
      * @return content of file as stream
-     * @throws IOException
-     *         if an i/o error occurs
      * @throws ServerException
      *         if other error occurs
      */
@@ -97,7 +95,4 @@ public class FileEntry extends VirtualFileEntry {
     public void updateContent(InputStream content) throws ForbiddenException, ServerException {
         getVirtualFile().updateContent(content, null);
     }
-
-
-
 }

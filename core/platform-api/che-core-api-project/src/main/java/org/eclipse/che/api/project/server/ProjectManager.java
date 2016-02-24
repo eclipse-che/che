@@ -92,7 +92,6 @@ public final class ProjectManager {
                                                                          );
 
     @Inject
-    @SuppressWarnings("unchecked")
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
                           EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
@@ -100,9 +99,7 @@ public final class ProjectManager {
                           ProjectImporterRegistry importers,
                           ProjectRegistry projectRegistry,
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
-                          FileTreeWatcher fileTreeWatcher
-                          //WorkspaceHolder workspaceHolder
-                         )
+                          FileTreeWatcher fileTreeWatcher)
             throws ServerException, NotFoundException, ProjectTypeConstraintException,
                    ValueStorageException, IOException, InterruptedException {
 
@@ -112,7 +109,6 @@ public final class ProjectManager {
         this.handlers = handlers;
         this.importers = importers;
         this.projectRegistry = projectRegistry;
-
         this.fileWatchNotifier = fileWatcherNotificationHandler;
         this.fileWatcher = fileTreeWatcher;
     }
@@ -138,7 +134,6 @@ public final class ProjectManager {
         executor.shutdownNow();
     }
 
-
     public FolderEntry getProjectsRoot() throws ServerException, NotFoundException {
         return new FolderEntry(vfs.getRoot());
     }
@@ -147,12 +142,7 @@ public final class ProjectManager {
         return this.projectTypeRegistry;
     }
 
-//    public ProjectHandlerRegistry getHandlers() {
-//        return handlers;
-//    }
-
     public Searcher getSearcher() throws NotFoundException, ServerException {
-
         SearcherProvider provider = vfs.getSearcherProvider();
         if (provider == null)
             throw new NotFoundException("SearcherProvider is not defined in VFS");
@@ -176,17 +166,14 @@ public final class ProjectManager {
         this.fileWatcher.removeExcludeMatcher(matcher);
     }
 
-
     /**
      * @return all the projects
      * @throws ServerException
      *         if projects are not initialized yet
      */
     public List<RegisteredProject> getProjects() throws ServerException {
-
         return projectRegistry.getProjects();
     }
-
 
     /**
      * @param projectPath
@@ -195,11 +182,8 @@ public final class ProjectManager {
      *         if projects are not initialized yet
      */
     public RegisteredProject getProject(String projectPath) throws ServerException {
-
         return projectRegistry.getProject(projectPath);
-
     }
-
 
     /**
      * create project:
@@ -220,7 +204,6 @@ public final class ProjectManager {
                                                                                ForbiddenException,
                                                                                ServerException,
                                                                                NotFoundException {
-
         // path and primary type is mandatory
         if (projectConfig.getPath() == null)
             throw new ConflictException("Path for new project should be defined ");
@@ -254,7 +237,6 @@ public final class ProjectManager {
             generator.onCreateProject(projectFolder, valueMap, options);
         }
 
-
         try {
             return projectRegistry.putProject(projectConfig, projectFolder, true, false);
         } catch (Exception e) {
@@ -262,7 +244,6 @@ public final class ProjectManager {
             projectFolder.getVirtualFile().delete();
             throw e;
         }
-
     }
 
     /**
@@ -286,15 +267,12 @@ public final class ProjectManager {
                                                                            NotFoundException,
                                                                            ConflictException,
                                                                            IOException {
-
         String path = newConfig.getPath();
 
         if (path == null)
             throw new ConflictException("Project path is not defined");
 
-
         FolderEntry baseFolder = asFolder(path);
-        //RegisteredProject oldProject = projectRegistry.getProject(apath);
 
         // If a project does not exist in the target path, create a new one
         if (baseFolder == null)
@@ -551,10 +529,6 @@ public final class ProjectManager {
                     return;
                 }
                 searcher.add(file);
-                //SearcherProvider sp = this.projectManager.getVfs().getSearcherProvider();
-                //if(sp != null)
-                //    sp.getSearcher(projectManager.getVfs(), true).add(file);
-                //searcherProvider.getSearcher(projectManager.getVfs(), true).add(file);
             } catch (Exception e) {
                 LOG.warn(String.format("Project: %s", project.getPath()), e.getMessage());
             }

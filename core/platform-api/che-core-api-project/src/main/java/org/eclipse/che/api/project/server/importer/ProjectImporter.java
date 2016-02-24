@@ -26,13 +26,13 @@ import java.io.IOException;
  * @author Vitaly Parfonov
  */
 public interface ProjectImporter {
-    public enum ImporterCategory {
+    enum ImporterCategory {
         SOURCE_CONTROL("Source Control"),
         ARCHIVE("Archive");
 
         private final String value;
 
-        private ImporterCategory(String value) {
+        ImporterCategory(String value) {
             this.value = value;
         }
 

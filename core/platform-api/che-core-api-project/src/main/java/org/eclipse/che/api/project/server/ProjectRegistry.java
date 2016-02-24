@@ -206,8 +206,6 @@ public class ProjectRegistry {
         //RegisteredProject config = getParentProject(absolutizePath(ofPath));
 //        FolderEntry baseFolder = folder(projectPath);
 
-        // new config
-        //(path, type, mixins, name, description, attributes, source);
         NewProjectConfig conf = new NewProjectConfig(projectPath, type, null, null, null, null, null);
 
 //        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
@@ -243,9 +241,6 @@ public class ProjectRegistry {
         RegisteredProject config = getParentProject(absolutizePath(ofPath));
 
         RegisteredProject project = putProject(config, config.getBaseFolder(), true, config.isDetected());
-
-                //new RegisteredProject(config.getBaseFolder(), config, true, this.projectTypeRegistry);
-        //projects.put(project.getPath(), project);
 
         return project;
     }

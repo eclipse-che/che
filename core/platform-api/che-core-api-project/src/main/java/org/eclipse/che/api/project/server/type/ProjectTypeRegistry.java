@@ -174,7 +174,7 @@ public class ProjectTypeRegistry {
     }
 
     /**
-     * Checks if incomimg Project Type definition has valid ID (Pattern.compile("[^a-zA-Z0-9-_.]")
+     * Checks if incoming Project Type definition has valid ID (Pattern.compile("[^a-zA-Z0-9-_.]")
      * and display name (should not be null or empty)
      *
      * @param type
@@ -268,11 +268,11 @@ public class ProjectTypeRegistry {
 
         ProjectTypeDef type = validatedData.get(typeId);
 
-        for (String supertypeId : type.getParents()) {
+        for (String superTypeId : type.getParents()) {
 
-            myType.addAncestor(supertypeId);
+            myType.addAncestor(superTypeId);
 
-            ProjectTypeDef supertype = validatedData.get(supertypeId);
+            ProjectTypeDef supertype = validatedData.get(superTypeId);
 
             for (Attribute attr : supertype.getAttributes()) {
 
@@ -287,7 +287,7 @@ public class ProjectTypeRegistry {
                 }
                 myType.addAttributeDefinition(attr);
             }
-            initRecursively(myType, supertypeId);
+            initRecursively(myType, superTypeId);
         }
 
     }
