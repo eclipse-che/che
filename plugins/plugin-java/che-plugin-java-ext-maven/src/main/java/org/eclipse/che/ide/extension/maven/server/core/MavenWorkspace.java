@@ -34,9 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
@@ -50,12 +52,14 @@ public class MavenWorkspace {
     private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
     private final MavenProjectManager manager;
-    private final String              wsId;
     private final ProjectRegistry     projectRegistry;
-    private final MavenCommunication communication;
+    private final MavenCommunication  communication;
+    private final ClasspathManager    classpathManager;
 
     private MavenTaskExecutor resolveExecutor;
     private MavenTaskExecutor classPathExecutor;
+
+    private Set<MavenProject> projectsToResolve = new CopyOnWriteArraySet<>();
 
 
     @Inject
@@ -63,10 +67,11 @@ public class MavenWorkspace {
                           MavenProgressNotifier notifier,
                           MavenExecutorService executorService,
                           ProjectRegistry projectRegistry,
-                          MavenCommunication communication) {
+                          MavenCommunication communication,
+                          ClasspathManager classpathManager) {
         this.projectRegistry = projectRegistry;
         this.communication = communication;
-        wsId = System.getenv("CHE_WORKSPACE_ID");
+        this.classpathManager = classpathManager;
         this.manager = manager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
         manager.addListener(new MavenProjectListener() {
@@ -78,16 +83,26 @@ public class MavenWorkspace {
             @Override
             public void projectUpdated(Map<MavenProject, MavenProjectModifications> updated,
                                        List<MavenProject> removed) {
-//                List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
-//                Set<MavenProject> rootProjectsToUpdate = importProjects(added, removed);
-//                updatedProjects.forEach(MavenWorkspace.this::updateJavaProject);
                 removeProjects(removed);
                 createNewProjects(updated.keySet());
+
+                List<MavenProject> allChangedProjects = new ArrayList<>(updated.keySet().size() + removed.size());
+                allChangedProjects.addAll(updated.keySet());
+                allChangedProjects.addAll(removed);
+                List<MavenProject> needResolve = manager.findDependentProjects(allChangedProjects);
+                needResolve.addAll(updated.keySet());
+
+                addResolveProjects(needResolve);
+
                 //TODO schedule resolving tasks
                 List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
                 communication.sendUpdateMassage(updated.keySet(), removed, collectProblems(updatedProjects));
             }
         });
+    }
+
+    private void addResolveProjects(List<MavenProject> needResolve) {
+        projectsToResolve.addAll(needResolve);
     }
 
     private void createNewProjects(Set<MavenProject> mavenProjects) {
@@ -116,6 +131,21 @@ public class MavenWorkspace {
 
     public void update(List<IProject> projects) {
         manager.update(projects, true);
+        runResolve();
+    }
+
+    private void runResolve() {
+        //TODO synchronise on projectsToResolve change
+        Set<MavenProject> needResolve = new HashSet<>(projectsToResolve);
+        projectsToResolve.clear();
+
+        for (MavenProject mavenProject : needResolve) {
+
+            resolveExecutor.submitTask(new MavenProjectResolveTask(mavenProject, manager, () -> {
+                classpathManager.updateClasspath(mavenProject);
+            }));
+        }
+
     }
 
     private void updateJavaProject(MavenProject project) {
@@ -125,7 +155,7 @@ public class MavenWorkspace {
             project.getSources().stream().map(s -> project.getProject().getFullPath().append(s)).forEach(helper::addSourceEntry);
             project.getTestSources().stream().map(s -> project.getProject().getFullPath().append(s)).forEach(helper::addSourceEntry);
             //add maven classpath container
-            helper.addContainerEntry(new Path(ClasspathManager.CONTAINER_ID));
+            helper.addContainerEntry(new Path(MavenClasspathContainer.CONTAINER_ID));
             //add JRE classpath container
             helper.addContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
 
@@ -135,4 +165,11 @@ public class MavenWorkspace {
         }
     }
 
+    /**
+     * Waits for resolving tasks ends.
+     * For test only.
+     */
+    public void waitForUpdate() {
+        resolveExecutor.waitForEndAllTasks();
+    }
 }

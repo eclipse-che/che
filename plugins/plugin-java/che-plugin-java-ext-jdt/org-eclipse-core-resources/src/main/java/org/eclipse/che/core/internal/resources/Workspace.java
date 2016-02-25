@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -95,7 +96,8 @@ public class Workspace implements IWorkspace {
      */
     protected TeamHook teamHook = null;
     private String               wsPath;
-    private ProjectManager       projectManager;
+    private final ProjectRegistry projectRegistry;
+    private final ProjectManager projectManager;
     /**
      * Scheduling rule factory. This field is null if the factory has not been used
      * yet.  The accessor method should be used rather than accessing this field
@@ -104,8 +106,9 @@ public class Workspace implements IWorkspace {
     private IResourceRuleFactory ruleFactory;
     private IUndoContext undoContext = new UndoContext();
 
-    public Workspace(String path, ProjectManager projectManager) {
+    public Workspace(String path, ProjectRegistry projectRegistry, ProjectManager projectManager) {
         this.wsPath = path;
+        this.projectRegistry = projectRegistry;
         this.projectManager = projectManager;
         try {
             projectsRoot = projectManager.getProjectsRoot();
@@ -138,7 +141,7 @@ public class Workspace implements IWorkspace {
     }
 
     public String getAbsoluteWorkspacePath() {
-        return wsPath;
+        return projectsRoot.getVirtualFile().toIoFile().getAbsolutePath();
     }
 
     public Resource newResource(IPath path, int type) {
@@ -913,7 +916,7 @@ public class Workspace implements IWorkspace {
 
 
     /** Returns project manager associated with this workspace */
-    public ProjectManager getProjectManager() {
-        return projectManager;
+    public ProjectRegistry getProjectRegistry() {
+        return projectRegistry;
     }
 }

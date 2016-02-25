@@ -18,6 +18,7 @@ import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
 import org.eclipse.che.ide.extension.maven.server.MavenServerWrapper;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProjectModifications;
+import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenWorkspaceCache;
 import org.eclipse.che.maven.server.MavenTerminal;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -405,6 +407,55 @@ public class MavenProjectManager {
         } finally {
             readLock.unlock();
         }
+    }
+
+    public List<MavenProject> findDependentProjects(List<MavenProject> projects) {
+        readLock.lock();
+        try {
+            List<MavenProject> result = new ArrayList<>();
+
+            Set<MavenKey> mavenKeys = projects.stream().map(MavenProject::getMavenKey).collect(Collectors.toSet());
+            Set<String> paths = projects.stream()
+                                        .map(project -> project.getProject().getFullPath().toOSString())
+                                        .collect(Collectors.toSet());
+
+            for (MavenProject project : projectToMavenProjectMap.values()) {
+                boolean isAdd = false;
+                for (String path : project.getModulesPath()) {
+                    if (paths.contains(path)) {
+                        isAdd = true;
+                        break;
+                    }
+                }
+
+                if (!isAdd) {
+                    for (MavenArtifact artifact : project.getDependencies()) {
+                        if (contains(mavenKeys, artifact.getArtifactId(), artifact.getGroupId(), artifact.getVersion())) {
+                            isAdd = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (isAdd) {
+                    result.add(project);
+                }
+
+            }
+
+
+            return result;
+
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    private boolean contains(Set<MavenKey> mavenKeys, String artifactId, String groupId, String version) {
+        return mavenKeys.stream().filter(key -> Objects.equals(key.getArtifactId(), artifactId)
+                                                && Objects.equals(key.getGroupId(), groupId)
+                                                && Objects.equals(key.getVersion(), version))
+                        .findFirst().isPresent();
     }
 
     private class UpdateState {

@@ -11,12 +11,7 @@
 
 package org.eclipse.che.core.internal.resources;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
-import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -28,7 +23,6 @@ import org.eclipse.core.runtime.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +110,7 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
     // TODO: rework after new Project API
     @Override
     public IProject[] getProjects() {
-        ProjectManager manager = workspace.getProjectManager();
+        ProjectRegistry manager = workspace.getProjectRegistry();
         List<IProject> projects = new ArrayList<>();
 //        try {
             List<RegisteredProject> rootProjects = manager.getProjects();

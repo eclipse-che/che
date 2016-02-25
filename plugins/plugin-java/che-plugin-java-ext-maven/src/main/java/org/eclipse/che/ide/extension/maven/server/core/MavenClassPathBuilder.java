@@ -58,10 +58,9 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
     private String workspaceId;
 
     @Inject
-    public MavenClassPathBuilder(ResourcesPlugin resourcesPlugin, ProjectManager projectManager) {
+    public MavenClassPathBuilder(ProjectManager projectManager, MavenClasspathContainerInitializer containerInitializer) {
         this.projectManager = projectManager;
-        JavaModelManager.getJavaModelManager().containerInitializersCache.put(MavenClasspathContainer.CONTAINER_ID,
-                                                                              new MavenClasspathContainerInitializer());
+
 
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(MavenClassPathBuilder.class.getSimpleName() + "-%d").build();
 

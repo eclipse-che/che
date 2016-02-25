@@ -25,13 +25,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.Path;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 import java.util.Collections;
 import java.util.Map;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Evgen Vidolob
  */
-@RunWith(MockitoJUnitRunner.class)
+@Listeners(value = {MockitoTestNGListener.class})
 public class MavenProjectManagerTest {
 
     private final String mavenServerPath = MavenProjectManagerTest.class.getResource("/maven-server").getPath();
@@ -76,7 +76,7 @@ public class MavenProjectManagerTest {
     private ArgumentCaptor<Map<MavenProject, MavenProjectModifications>> mapArgument;
 
 
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception {
         projectManager = new MavenProjectManager(manager, new MavenTerminalImpl(), new MavenServerManagerTest.MyMavenServerProgressNotifier(), workspaceProvider);
         when(workspaceProvider.get()).thenReturn(workspace);

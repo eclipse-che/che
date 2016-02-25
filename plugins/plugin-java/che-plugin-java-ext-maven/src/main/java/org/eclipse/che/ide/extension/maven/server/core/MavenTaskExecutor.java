@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Executor for {@link MavenProjectTask}. Uses {@link MavenExecutorService} as executor service.
@@ -61,7 +63,7 @@ public class MavenTaskExecutor {
     }
 
     private void runTask(MavenProjectTask task) {
-        service.submit(() -> doRunTasks(task));
+       service.submit(() -> doRunTasks(task));
     }
 
     private void doRunTasks(MavenProjectTask task) {
@@ -93,4 +95,28 @@ public class MavenTaskExecutor {
         }
     }
 
+    public void waitForEndAllTasks() {
+        if(!isWorking){
+            return;
+        }
+
+        Semaphore semaphore = new Semaphore(1);
+        try {
+            semaphore.acquire();
+            submitTask(new MavenProjectTask() {
+                @Override
+                public void perform() {
+                    semaphore.release();
+                }
+            });
+
+            while (true) {
+                if (!isWorking || semaphore.tryAcquire(1, TimeUnit.SECONDS)) {
+                    return;
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -21,9 +21,9 @@ import org.eclipse.che.maven.data.MavenWorkspaceCache;
 import org.eclipse.che.maven.server.MavenProjectInfo;
 import org.eclipse.che.maven.server.MavenServerResult;
 import org.eclipse.che.maven.server.MavenTerminal;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.Serializable;
@@ -52,7 +52,7 @@ public class MavenServerManagerTest {
     private MavenWorkspaceCache workspaceCache;
 
 
-    @Before
+    @BeforeMethod
     public void setUp() throws Exception {
         workspaceCache = new MavenWorkspaceCache();
         workspaceCache.put(new MavenKey("com.codenvy.ide", "codenvy-ide-subModule", "1.0.0-TEST-SNAPSHOT"),
@@ -61,12 +61,11 @@ public class MavenServerManagerTest {
         mavenServer.customize(workspaceCache, new MyMavenTerminal(), new MyMavenServerProgressNotifier(), true, false);
     }
 
-    @After
+    @AfterMethod
     public void cleanUp() {
         mavenServer.dispose();
         manager.shutdown();
     }
-
 
     @Test
     public void testBuildMavenServerParametersMainWorkDirExec() throws Exception {

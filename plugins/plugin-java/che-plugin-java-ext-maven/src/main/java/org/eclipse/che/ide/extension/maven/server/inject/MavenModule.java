@@ -17,12 +17,10 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
-import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
-import org.eclipse.che.ide.extension.maven.server.core.MavenClassPathBuilder;
+import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenServerNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenTerminalImpl;
-import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.project.PomChangeListener;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProviderFactory;
@@ -55,7 +53,7 @@ public class MavenModule extends AbstractModule {
         projectHandlerMultibinder.addBinding().to(MavenProjectCreatedHandler.class);
 
         newSetBinder(binder(), GeneratorStrategy.class).addBinding().to(ArchetypeGenerationStrategy.class);
-        bind(ClassPathBuilder.class).to(MavenClassPathBuilder.class).in(Singleton.class);
+//        bind(ClassPathBuilder.class).to(MavenClassPathBuilder.class).in(Singleton.class);
 
 //        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
 //        multibinder.addBinding().to(MavenTargetFilter.class);

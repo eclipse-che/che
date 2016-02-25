@@ -10,26 +10,45 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.core;
 
-import org.eclipse.jdt.core.JavaCore;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
+import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
-import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaProject;
 
 /**
  * @author Evgen Vidolob
  */
+@Singleton
 public class MavenClasspathContainerInitializer extends ClasspathContainerInitializer {
+
+    private final ClasspathManager classpathManager;
+    private final MavenProjectManager mavenProjectManager;
+
+    @Inject
+    public MavenClasspathContainerInitializer(ClasspathManager classpathManager, MavenProjectManager mavenProjectManager) {
+        this.classpathManager = classpathManager;
+        this.mavenProjectManager = mavenProjectManager;
+    }
 
     @Override
     public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
         if (isMaven2ClasspathContainer(containerPath)) {
 
-            IClasspathContainer container = MavenClasspathUtil.readMavenClasspath(project);
-            JavaCore.setClasspathContainer(containerPath, new IJavaProject[]{project},
-                                           new IClasspathContainer[]{container}, new NullProgressMonitor());
+            MavenProject mavenProject = mavenProjectManager.findMavenProject(project.getProject());
+            if (mavenProject != null) {
+                classpathManager.updateClasspath(mavenProject);
+            } else {
+                throw new CoreException(
+                        new Status(IStatus.ERROR, "maven", "Can't find maven project: " + project.getProject().getFullPath().toOSString()));
+            }
+
         }
     }
 

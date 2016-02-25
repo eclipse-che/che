@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java;
+package org.eclipse.che.ide.extension.maven.server;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
@@ -30,17 +30,13 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.jdt.javadoc.JavaElementLinks;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.codeassist.impl.AssistOptions;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.junit.After;
-import org.junit.Before;
+import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.nio.file.PathMatcher;
@@ -55,91 +51,39 @@ import java.util.Set;
 /**
  * @author Evgen Vidolob
  */
-// TODO: rework after new Project API
 public abstract class BaseTest {
 
-    protected static final String              wsPath        = BaseTest.class.getResource("/projects").getFile();
-    private static final   String              workspacePath = BaseTest.class.getResource("/projects").getFile();
-    protected static       Map<String, String> options       = new HashMap<>();
-    protected static JavaProject project;
-    protected static EventService    eventService      = new EventService();
-    protected static ResourcesPlugin plugin            /*= new ResourcesPlugin("target/index", workspacePath,
-                                                                             new DummyProjectManager(workspacePath, eventService))*/;
-    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set");
-    protected static FileBuffersPlugin
-                                     fileBuffersPlugin = new FileBuffersPlugin();
-    protected final static String INDEX_PATH = wsPath + "/fs_index";
+    protected static final String wsPath        = "target/workspace";
+    protected final static String INDEX_PATH    = "target/fs_index";
 
+    protected static Map<String, String> options = new HashMap<>();
+    protected static EventService eventService = new EventService();
+    protected static ResourcesPlugin plugin;
+    protected static JavaPlugin        javaPlugin        = new JavaPlugin(wsPath + "/set");
+    protected static FileBuffersPlugin fileBuffersPlugin = new FileBuffersPlugin();
     protected static TestWorkspaceHolder workspaceHolder;
 
-    protected static File root;
+    protected File root;
 
-    protected static ProjectManager pm;
+    protected ProjectManager pm;
 
-    protected static LocalVirtualFileSystemProvider vfsProvider;
+    protected LocalVirtualFileSystemProvider vfsProvider;
 
-    protected static ProjectRegistry projectRegistry;
+    protected ProjectRegistry projectRegistry;
 
-    protected static FileWatcherNotificationHandler fileWatcherNotificationHandler;
+    protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
-    protected static FileTreeWatcher fileTreeWatcher;
+    protected FileTreeWatcher fileTreeWatcher;
 
-    protected static ProjectTypeRegistry projectTypeRegistry;
+    protected ProjectTypeRegistry projectTypeRegistry;
 
-    protected static ProjectHandlerRegistry projectHandlerRegistry;
+    protected ProjectHandlerRegistry projectHandlerRegistry;
 
-    protected static ProjectImporterRegistry importerRegistry;
+    protected ProjectImporterRegistry importerRegistry;
 
-    static {
+    private final String mavenServerPath = BaseTest.class.getResource("/maven-server").getPath();
 
-
-        try {
-            if (workspaceHolder == null)
-                workspaceHolder = new TestWorkspaceHolder();
-
-            if (root == null)
-                root = new File(wsPath);
-
-            File indexDir = new File(INDEX_PATH);
-
-            Set<PathMatcher> filters = new HashSet<>();
-            filters.add(path -> true);
-            FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
-
-            vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
-
-
-            projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
-            projectTypeRegistry.registerProjectType(new TestProjectType());
-
-            projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
-
-            projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
-            VirtualFile virtualFile = vfsProvider.getVirtualFileSystem().getRoot();
-            for (VirtualFile file : virtualFile.getChildren()) {
-                if(file.isFolder()) {
-                    projectRegistry.initProject(file.getPath().toString(), "test");
-                }
-            }
-
-            importerRegistry = new ProjectImporterRegistry(new HashSet<>());
-
-            fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
-            fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
-
-            pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
-                                    importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
-            plugin = new ResourcesPlugin("target/index", workspacePath, projectRegistry, pm);
-            plugin.start();
-            javaPlugin.start();
-        } catch (Throwable e){
-            e.printStackTrace();
-        }
-    }
-
-
-
-
+    protected MavenServerManager mavenServerManager;
     public BaseTest() {
         options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
         options.put(JavaCore.CORE_ENCODING, "UTF-8");
@@ -156,26 +100,56 @@ public abstract class BaseTest {
         options.put(CompilerOptions.OPTION_Process_Annotations, JavaCore.DISABLED);
     }
 
-    protected static String getHandldeForRtJarStart() {
-        String javaHome = System.getProperty("java.home") + "/lib/rt.jar";
-        javaHome = javaHome.replaceAll("/", "\\\\/");
-        return String.valueOf(JavaElementLinks.LINK_SEPARATOR) + "=test/" + javaHome;
-    }
+    @BeforeMethod
+    protected void initProjectApi() throws Exception {
+        mavenServerManager = new MavenServerManager(mavenServerPath);
+        if (workspaceHolder == null)
+            workspaceHolder = new TestWorkspaceHolder();
 
-    @Before
-    public void setUp() throws Exception {
-        project = (JavaProject)JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject("/test");
-    }
+        if (root == null)
+            root = new File(wsPath);
 
-    @After
-    public void closeProject() throws Exception {
-        if (project != null) {
-            project.close();
+        if (root.exists()) {
+            IoUtil.deleteRecursive(root);
         }
-        File pref = new File(wsPath + "/test/.codenvy/project.preferences");
-        if (pref.exists()) {
-            pref.delete();
+        root.mkdir();
+
+        File indexDir = new File(INDEX_PATH);
+
+        if (indexDir.exists()) {
+            IoUtil.deleteRecursive(indexDir);
         }
+        indexDir.mkdir();
+        Set<PathMatcher> filters = new HashSet<>();
+        filters.add(path -> true);
+        FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
+
+        vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
+
+
+        projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
+        projectTypeRegistry.registerProjectType(new TestProjectType());
+
+        projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
+
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        VirtualFile virtualFile = vfsProvider.getVirtualFileSystem().getRoot();
+        for (VirtualFile file : virtualFile.getChildren()) {
+            if (file.isFolder()) {
+                projectRegistry.initProject(file.getPath().toString(), "test");
+            }
+        }
+
+        importerRegistry = new ProjectImporterRegistry(new HashSet<>());
+
+        fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
+        fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
+
+        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
+                                importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        plugin = new ResourcesPlugin("target/index", wsPath, projectRegistry, pm);
+        plugin.start();
+        javaPlugin.start();
 
     }
 
@@ -209,5 +183,6 @@ public abstract class BaseTest {
             //setProjects(new ArrayList<>(projects));
         }
     }
+
 
 }

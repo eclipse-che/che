@@ -21,7 +21,6 @@ import org.eclipse.che.jdt.refactoring.RefactoringManager;
 import org.eclipse.che.jdt.rest.CodeAssistService;
 import org.eclipse.che.jdt.rest.CompilerSetupService;
 import org.eclipse.che.jdt.rest.FormatService;
-import org.eclipse.che.jdt.rest.JavaClasspathService;
 import org.eclipse.che.jdt.rest.JavaNavigationService;
 import org.eclipse.che.jdt.rest.JavaReconcileService;
 import org.eclipse.che.jdt.rest.JdtExceptionMapper;
@@ -44,7 +43,6 @@ public class JdtGuiceModule extends AbstractModule {
         bind(JavadocService.class);
         bind(JavaNavigationService.class);
         bind(JavaReconcileService.class);
-        bind(JavaClasspathService.class);
         bind(FormatService.class);
         bind(CodeAssistService.class);
         bind(JdtExceptionMapper.class);

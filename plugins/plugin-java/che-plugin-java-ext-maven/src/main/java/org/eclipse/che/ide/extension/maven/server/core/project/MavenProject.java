@@ -238,6 +238,7 @@ public class MavenProject {
         if (!projectPath.endsWith("/")) {
             projectPath += "/";
         }
+        //TODO resolve relative path in module
         for (String name : model.getModules()) {
             result.put(name, projectPath + name);
         }
@@ -293,6 +294,10 @@ public class MavenProject {
     public List<IProject> getModulesProjects() {
         Collection<String> modulesPath = info.modulesNameToPath.values();
         return modulesPath.stream().map(path -> workspace.getRoot().getProject(path)).collect(Collectors.toList());
+    }
+
+    public Collection<String> getModulesPath() {
+        return info.modulesNameToPath.values();
     }
 
 
