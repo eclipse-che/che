@@ -24,17 +24,13 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.server.type.ProjectTypeUtils;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -69,6 +65,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -77,6 +74,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -751,64 +749,42 @@ public class ProjectService extends Service {
                                                    .build(workspace, parent.getPath().toString().substring(1))).build();
     }
 
-//
-//    @ApiOperation(value = "Download ZIP",
-//                  notes = "Export resource as zip. It can be an entire project or folder",
-//                  position = 20)
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 201, message = ""),
-//            @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-//            @ApiResponse(code = 404, message = "Not found"),
-//            @ApiResponse(code = 500, message = "Internal Server Error")})
-//    @GET
-//    @Path("/export/{path:.*}")
-//    @Produces(ExtMediaType.APPLICATION_ZIP)
-//    public ContentStream exportZip(@ApiParam(value = "Workspace ID", required = true)
-//                                   @PathParam("ws-id") String workspace,
-//                                   @ApiParam(value = "Path to resource to be imported")
-//                                   @PathParam("path") String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//
-//        final FolderEntry folder = asFolder(path);
-//        return exportZip(folder.getVirtualFile());
-//    }
-//
+    @ApiOperation(value = "Download ZIP",
+            notes = "Export resource as zip. It can be an entire project or folder",
+            position = 20)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = ""),
+            @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+            @ApiResponse(code = 404, message = "Not found"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @GET
+    @Path("/export/{path:.*}")
+    @Produces(ExtMediaType.APPLICATION_ZIP)
+    public InputStream exportZip(@ApiParam(value = "Workspace ID", required = true)
+                                 @PathParam("ws-id") String workspace,
+                                 @ApiParam(value = "Path to resource to be exported")
+                                 @PathParam("path") String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        final FolderEntry folder = projectManager.asFolder(path);
+        return folder.getVirtualFile().zip();
+    }
 
-//
-//    @POST
-//    @Path("/export/{path:.*}")
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @Produces(ExtMediaType.APPLICATION_ZIP)
-//    public Response exportDiffZip(@PathParam("ws-id") String workspace, @PathParam("path") String path, InputStream in)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry folder = asFolder(workspace, path);
-//        return VirtualFileSystemImpl.exportZip(folder.getVirtualFile(), in);
-//    }
-//
-//    @POST
-//    @Path("/export/{path:.*}")
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @Produces(MediaType.MULTIPART_FORM_DATA)
-//    public Response exportDiffZipMultipart(@PathParam("ws-id") String workspace, @PathParam("path") String path, InputStream in)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry folder = asFolder(workspace, path);
-//        return VirtualFileSystemImpl.exportZipMultipart(folder.getVirtualFile(), in);
-//    }
-
-//    @GET
-//    @Path("/export/file/{path:.*}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
-//                               @PathParam("ws-id") String workspace,
-//                               @ApiParam(value = "Path to resource to be imported")
-//                               @PathParam("path") String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FileEntry file = asFile(workspace, path);
-//        ContentStream content = file.getVirtualFile().getContent();
-//        return downloadFile(content);
-//    }
-
-
+    @GET
+    @Path("/export/file/{path:.*}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
+                               @PathParam("ws-id") String workspace,
+                               @ApiParam(value = "Path to resource to be imported")
+                               @PathParam("path") String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        final VirtualFile virtualFile = projectManager.asFile(path).getVirtualFile();
+        return Response
+                .ok(virtualFile.getContent())
+                .lastModified(new Date(virtualFile.getLastModificationDate()))
+                .header(HttpHeaders.CONTENT_LENGTH, Long.toString(virtualFile.getLength()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + virtualFile.getName() + '"')
+                .build();
+    }
 
     @ApiOperation(value = "Get project children items",
                   notes = "Request all children items for a project, such as files and folders",
@@ -842,7 +818,6 @@ public class ProjectService extends Service {
 
         return result;
     }
-
 
     @ApiOperation(value = "Get project tree",
                   notes = "Get project tree. Depth is specified in a query parameter",
