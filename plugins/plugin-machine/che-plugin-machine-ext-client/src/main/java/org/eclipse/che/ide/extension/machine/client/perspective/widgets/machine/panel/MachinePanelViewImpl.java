@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.ui.tree.Tree;
@@ -88,8 +88,8 @@ public class MachinePanelViewImpl extends BaseView<MachinePanelView.ActionDelega
             public void onNodeSelected(TreeNodeElement<MachineTreeNode> node, SignalEvent event) {
                 Object selectedNode = node.getData().getData();
 
-                if (selectedNode instanceof MachineStateDto) {
-                    delegate.onMachineSelected((MachineStateDto)selectedNode);
+                if (selectedNode instanceof MachineDto) {
+                    delegate.onMachineSelected((MachineDto)selectedNode);
                 }
             }
 
@@ -127,6 +127,6 @@ public class MachinePanelViewImpl extends BaseView<MachinePanelView.ActionDelega
 
         tree.getSelectionModel().selectSingleNode(machineNode);
 
-        delegate.onMachineSelected((MachineStateDto)machineNode.getData());
+        delegate.onMachineSelected((MachineDto)machineNode.getData());
     }
 }

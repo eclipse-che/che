@@ -95,6 +95,7 @@ export class CreateWorkspaceCtrl {
    */
   createWorkspace() {
     if (this.isCustomStack) {
+      this.stack = null;
       if (this.recipeUrl && this.recipeUrl.length > 0) {
         this.submitWorkspace();
       } else {
@@ -186,7 +187,9 @@ export class CreateWorkspaceCtrl {
    * Submit a new workspace from current workspace name, recipe url and workspace ram
    */
   submitWorkspace() {
-    let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam);
+    let attributes = this.stack ? {stackId: this.stack.id} : {};
+
+    let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
     creationPromise.then((workspaceData) => {
       let infoMessage = 'Workspace ' + workspaceData.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);

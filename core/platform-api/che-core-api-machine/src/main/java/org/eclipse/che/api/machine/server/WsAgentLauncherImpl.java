@@ -13,12 +13,12 @@ package org.eclipse.che.api.machine.server;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.spi.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +53,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     private final long                     wsAgentPingDelayMs;
     private final int                      wsAgentPingConnectionTimeoutMs;
     private final String                   wsAgentPingPath;
+    private final String                   pingTimedOutErrorMessage;
 
     @Inject
     public WsAgentLauncherImpl(Provider<MachineManager> machineManagerProvider,
@@ -61,13 +62,15 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
                                @Named("api.endpoint") URI apiEndpoint,
                                @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
-                               @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs) {
+                               @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
+                               @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage) {
         this.machineManagerProvider = machineManagerProvider;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.wsAgentStartCommandLine = wsAgentStartCommandLine;
         this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;
         this.wsAgentPingDelayMs = wsAgentPingDelayMs;
         this.wsAgentPingConnectionTimeoutMs = wsAgentPingConnectionTimeoutMs;
+        this.pingTimedOutErrorMessage = pingTimedOutErrorMessage;
         // everest respond 404 to path to rest without trailing slash
         this.wsAgentPingPath = apiEndpoint.getPath().endsWith("/") ? apiEndpoint.getPath() : apiEndpoint.getPath() + "/";
     }
@@ -78,7 +81,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
 
     @Override
     public void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException {
-        final Instance devMachine = getMachineManager().getDevMachine(workspaceId);
+        final Machine devMachine = getMachineManager().getDevMachine(workspaceId);
         try {
             getMachineManager().exec(devMachine.getId(),
                                      new CommandImpl(WS_AGENT_PROCESS_NAME, wsAgentStartCommandLine, "Arbitrary"),
@@ -102,11 +105,11 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
         } catch (BadRequestException wsAgentLaunchingExc) {
             throw new MachineException(wsAgentLaunchingExc.getLocalizedMessage(), wsAgentLaunchingExc);
         }
-        throw new MachineException("Workspace agent is not responding. Workspace " + workspaceId + " will be stopped");
+        throw new MachineException(pingTimedOutErrorMessage);
     }
 
-    private HttpJsonRequest createPingRequest(Instance devMachine) {
-        final String wsAgentPingUrl = UriBuilder.fromUri(devMachine.getMetadata()
+    private HttpJsonRequest createPingRequest(Machine devMachine) {
+        final String wsAgentPingUrl = UriBuilder.fromUri(devMachine.getRuntime()
                                                                    .getServers()
                                                                    .get(Integer.toString(WS_AGENT_PORT))
                                                                    .getUrl())

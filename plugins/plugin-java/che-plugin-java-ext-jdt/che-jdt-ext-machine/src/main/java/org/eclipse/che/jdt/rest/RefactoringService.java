@@ -43,13 +43,17 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import java.util.function.Function;
 
 /**
  * Service for all Java refactorings
+ *
  * @author Evgen Vidolob
  */
 @Path("/jdt/{ws-id}/refactoring")
@@ -64,10 +68,14 @@ public class RefactoringService {
 
     /**
      * Create move refactoring session.
-     * @param cmr move settings, contains resource paths to move.
+     *
+     * @param cmr
+     *         move settings, contains resource paths to move.
      * @return refactoring session id.
-     * @throws JavaModelException when JavaModel has a failure
-     * @throws RefactoringException when impossible to create move refactoring session
+     * @throws JavaModelException
+     *         when JavaModel has a failure
+     * @throws RefactoringException
+     *         when impossible to create move refactoring session
      */
     @POST
     @Path("move/create")
@@ -109,10 +117,14 @@ public class RefactoringService {
 
     /**
      * Set destination for reorg refactorings.
-     * @param destination the destination for reorg refactoring
+     *
+     * @param destination
+     *         the destination for reorg refactoring
      * @return refactoring status
-     * @throws RefactoringException when there are no corresponding refactoring session
-     * @throws JavaModelException when JavaModel has a failure
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
+     * @throws JavaModelException
+     *         when JavaModel has a failure
      */
     @POST
     @Path("set/destination")
@@ -124,8 +136,11 @@ public class RefactoringService {
 
     /**
      * Set move refactoring wizard setting.
-     * @param settings the move settings
-     * @throws RefactoringException when there are no corresponding refactoring session
+     *
+     * @param settings
+     *         the move settings
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
      */
     @POST
     @Path("set/move/setting")
@@ -137,9 +152,12 @@ public class RefactoringService {
     /**
      * Create refactoring change.
      * Creation of the change starts final checking for refactoring. Without creating change refactoring can't be applied.
-     * @param refactoringSession the refactoring session.
+     *
+     * @param refactoringSession
+     *         the refactoring session.
      * @return result of creation of the change.
-     * @throws RefactoringException when there are no corresponding refactoring session
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
      */
     @POST
     @Path("create/change")
@@ -151,9 +169,12 @@ public class RefactoringService {
 
     /**
      * Get refactoring preview. Preview is tree of refactoring changes.
-     * @param refactoringSession the refactoring session.
+     *
+     * @param refactoringSession
+     *         the refactoring session.
      * @return refactoring preview tree
-     * @throws RefactoringException when there are no corresponding refactoring session
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
      */
     @POST
     @Path("get/preview")
@@ -165,8 +186,11 @@ public class RefactoringService {
 
     /**
      * Change enabled/disabled state of the corresponding refactoring change.
-     * @param state the state of refactoring change
-     * @throws RefactoringException when there are no corresponding refactoring session or refactoring change
+     *
+     * @param state
+     *         the state of refactoring change
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session or refactoring change
      */
     @POST
     @Path("change/enabled")
@@ -176,7 +200,9 @@ public class RefactoringService {
 
     /**
      * Get refactoring change preview. Preview contains new and old content of the file
-     * @param change the change to get preview
+     *
+     * @param change
+     *         the change to get preview
      * @return refactoring change preview
      * @throws RefactoringException
      */
@@ -190,24 +216,31 @@ public class RefactoringService {
 
     /**
      * Apply refactoring.
-     * @param session the refactoring session
+     *
+     * @param session
+     *         the refactoring session
      * @return the result fo applied refactoring
-     * @throws RefactoringException when there are no corresponding refactoring session
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
      */
     @POST
     @Path("apply")
     @Produces("application/json")
     @Consumes("application/json")
-    public RefactoringResult applyRefactoring(RefactoringSession session) throws RefactoringException {
+    public RefactoringResult applyRefactoring(RefactoringSession session) throws RefactoringException, JavaModelException {
         return manager.applyRefactoring(session.getSessionId());
     }
 
     /**
      * Create rename refactoring session.
-     * @param settings rename settings
+     *
+     * @param settings
+     *         rename settings
      * @return the rename refactoring session
-     * @throws CoreException when RenameSupport can't be created
-     * @throws RefactoringException when Java element was not found
+     * @throws CoreException
+     *         when RenameSupport can't be created
+     * @throws RefactoringException
+     *         when Java element was not found
      */
     @POST
     @Path("rename/create")
@@ -232,7 +265,7 @@ public class RefactoringService {
             default:
                 elementToRename = null;
         }
-        if(elementToRename == null){
+        if (elementToRename == null) {
             throw new RefactoringException("Can't find java element to rename.");
         }
 
@@ -241,10 +274,14 @@ public class RefactoringService {
 
     /**
      * Apply linked mode rename refactoring.
-     * @param refactoringApply linked mode setting and refactoring session id
+     *
+     * @param refactoringApply
+     *         linked mode setting and refactoring session id
      * @return the result fo applied refactoring
-     * @throws RefactoringException when there are no corresponding refactoring session
-     * @throws CoreException  when impossible to apply rename refactoring
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
+     * @throws CoreException
+     *         when impossible to apply rename refactoring
      */
     @POST
     @Path("rename/linked/apply")
@@ -257,9 +294,12 @@ public class RefactoringService {
 
     /**
      * Validate new name. Used for validation new name in rename refactoring wizard.
-     * @param newName the new element name
+     *
+     * @param newName
+     *         the new element name
      * @return the status of validation
-     * @throws RefactoringException  when there are no corresponding refactoring session
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
      */
     @POST
     @Path("rename/validate/name")
@@ -271,8 +311,11 @@ public class RefactoringService {
 
     /**
      * Set rename refactoring wizard settings.
-     * @param settings refactoring wizard settings
-     * @throws RefactoringException  when there are no corresponding refactoring session
+     *
+     * @param settings
+     *         refactoring wizard settings
+     * @throws RefactoringException
+     *         when there are no corresponding refactoring session
      */
     @POST
     @Path("set/rename/settings")
@@ -281,9 +324,25 @@ public class RefactoringService {
         manager.setRenameSettings(settings);
     }
 
+    /**
+     * Make reindex for the project.
+     *
+     * @param projectPath
+     *         path to the project
+     * @throws JavaModelException
+     *         when something is wrong
+     */
+    @GET
+    @Path("reindex")
+    @Consumes("text/plain")
+    public Response reindexProject(@QueryParam("projectpath") String projectPath) throws JavaModelException {
+        manager.reindexProject(model.getJavaProject(projectPath));
+        return Response.ok().build();
+    }
+
     private IJavaElement getSelectionElement(ICompilationUnit compilationUnit, int offset) throws JavaModelException, RefactoringException {
         IJavaElement[] javaElements = compilationUnit.codeSelect(offset, 0);
-        if(javaElements != null && javaElements.length >0){
+        if (javaElements != null && javaElements.length > 0) {
             return javaElements[0];
         }
         throw new RefactoringException("Can't find java element to rename.");

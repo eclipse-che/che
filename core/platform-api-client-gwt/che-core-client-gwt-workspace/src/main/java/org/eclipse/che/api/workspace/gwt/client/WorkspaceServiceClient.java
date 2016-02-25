@@ -12,7 +12,7 @@ package org.eclipse.che.api.workspace.gwt.client;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -111,7 +111,7 @@ public interface WorkspaceServiceClient {
      *         the account id related to this operation
      * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
      */
-    Promise<UsersWorkspaceDto> startTemporary(WorkspaceConfigDto cfg, String accountId);
+    Promise<RuntimeWorkspaceDto> startTemporary(WorkspaceConfigDto cfg, String accountId);
 
     /**
      * Starts workspace based on workspace id and environment.
@@ -256,9 +256,9 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param machineConfig
      *         the new machine configuration
-     * @return a promise that resolves to the {@link MachineStateDto}, or rejects with an error
+     * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
      */
-    Promise<MachineStateDto> createMachine(String wsId, MachineConfigDto machineConfig);
+    Promise<MachineDto> createMachine(String wsId, MachineConfigDto machineConfig);
 
     /**
      * Returns workspace's snapshot.

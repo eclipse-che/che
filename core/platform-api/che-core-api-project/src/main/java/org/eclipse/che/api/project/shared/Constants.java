@@ -15,13 +15,8 @@ package org.eclipse.che.api.project.shared;
  */
 public class Constants {
 
-    public final static String DEFAULT_TEMPLATE_CATEGORY = "Samples";
-    public static final String BLANK_CATEGORY            = "Blank";
     public static final String BLANK_ID                  = "blank";
-    public static final String BLANK_PROJECT_TYPE        = "Blank Type";
-    public static final String LANGUAGE                  = "language";
     public static final String VCS_PROVIDER_NAME         = "vcs.provider.name";
-    public static final String ZIP_IMPORTER_ID           = "zip";
 
     private Constants() {
     }

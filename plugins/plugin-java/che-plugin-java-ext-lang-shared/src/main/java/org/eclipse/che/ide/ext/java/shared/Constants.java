@@ -13,9 +13,10 @@ package org.eclipse.che.ide.ext.java.shared;
 /** @author Artem Zatsarynnyi */
 public interface Constants {
     // project categories
-    final String JAVA_CATEGORY    = "Java";
+    final String JAVA_CATEGORY       = "Java";
     // project attribute names
-    final String LANGUAGE         = "language";
-    final String LANGUAGE_VERSION = "languageVersion";
-    final String FRAMEWORK        = "framework";
+    final String LANGUAGE            = "language";
+    final String LANGUAGE_VERSION    = "languageVersion";
+    final String FRAMEWORK           = "framework";
+    final String CONTAINS_JAVA_FILES = "containsJavaFiles";
 }

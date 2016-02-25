@@ -57,6 +57,11 @@ module.exports = function(config) {
       dir : 'coverage/'
     },
 
+    // to avoid DISCONNECTED messages on slow/busy machines
+    browserDisconnectTimeout : 10000, // default 2000
+    browserDisconnectTolerance : 1, // default 0
+    browserNoActivityTimeout : 60000, //default 10000
+
     reporters: ['progress']
   };
 

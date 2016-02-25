@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,9 @@ public class MachineTreeNodeTest {
     @Mock
     private MachineTreeNode                  parent;
     @Mock
-    private MachineStateDto                  data;
+    private MachineDto                       data;
+    @Mock
+    private MachineConfigDto                 machineConfig;
     @Mock
     private Collection<MachineTreeNode>      children;
     @Mock
@@ -50,8 +53,9 @@ public class MachineTreeNodeTest {
 
     @Before
     public void setUp() {
+        when(data.getConfig()).thenReturn(machineConfig);
         when(data.getId()).thenReturn(SOME_TEXT);
-        when(data.getName()).thenReturn(SOME_TEXT);
+        when(machineConfig.getName()).thenReturn(SOME_TEXT);
     }
 
     @Test
@@ -59,7 +63,7 @@ public class MachineTreeNodeTest {
         treeNode = new MachineTreeNode(parent, data, children);
 
         verify(data).getId();
-        verify(data).getName();
+        verify(machineConfig).getName();
 
         assertThat(treeNode.getId(), equalTo(SOME_TEXT));
         assertThat(treeNode.getName(), equalTo(SOME_TEXT));
@@ -70,7 +74,7 @@ public class MachineTreeNodeTest {
         treeNode = new MachineTreeNode(parent, SOME_TEXT, children);
 
         verify(data, never()).getId();
-        verify(data, never()).getName();
+        verify(machineConfig, never()).getName();
 
         assertThat(treeNode.getId(), equalTo(ROOT));
         assertThat(treeNode.getName(), equalTo(ROOT));

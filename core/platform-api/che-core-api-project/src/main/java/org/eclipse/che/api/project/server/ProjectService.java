@@ -29,10 +29,8 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -66,6 +64,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -74,16 +73,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.project.server.DtoConverter.toProjectConfig;
-
-//import org.eclipse.che.api.vfs.ContentStream;
-//import org.eclipse.che.api.vfs.server.VirtualFileSystemImpl;
-
 
 /**
  * @author andrew00x
@@ -100,27 +96,12 @@ public class ProjectService extends Service {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectService.class);
 
-//    private final ExecutorService executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
-//                                                                          new ThreadFactoryBuilder()
-//                                                                                  .setNameFormat("ProjectService-IndexingThread-")
-//                                                                                  .setDaemon(true).build()
-//                                                                         );
-
     private static final Tika TIKA = new Tika();
 
     @Inject
     private ProjectManager          projectManager;
     @Inject
-    private ProjectImporterRegistry importers;
-    @Inject
     private EventService            eventService;
-    @Inject
-    private ProjectTypeRegistry     typeRegistry;
-
-//    @PreDestroy
-//    void stop() {
-//        executor.shutdownNow();
-//    }
 
     @ApiOperation(value = "Gets list of projects in root folder",
                   response = ProjectConfigDto.class,
@@ -324,7 +305,6 @@ public class ProjectService extends Service {
                                                  @PathParam("path") String path)
             throws NotFoundException, ForbiddenException, ServerException, ConflictException {
 
-        //List<ProjectTypeResolution> resolutions = projectManager.resolveSources(path,false);
         List<SourceEstimation> estimations = new ArrayList<>();
         for(ProjectTypeResolution resolution : projectManager.resolveSources(path,false)) {
             if(resolution.matched()) {
@@ -368,10 +348,8 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-
             projectManager.importProject(path, sourceStorage);
     }
-
 
 
     @ApiOperation(value = "Create file",
@@ -771,64 +749,42 @@ public class ProjectService extends Service {
                                                    .build(workspace, parent.getPath().toString().substring(1))).build();
     }
 
-//
-//    @ApiOperation(value = "Download ZIP",
-//                  notes = "Export resource as zip. It can be an entire project or folder",
-//                  position = 20)
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 201, message = ""),
-//            @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-//            @ApiResponse(code = 404, message = "Not found"),
-//            @ApiResponse(code = 500, message = "Internal Server Error")})
-//    @GET
-//    @Path("/export/{path:.*}")
-//    @Produces(ExtMediaType.APPLICATION_ZIP)
-//    public ContentStream exportZip(@ApiParam(value = "Workspace ID", required = true)
-//                                   @PathParam("ws-id") String workspace,
-//                                   @ApiParam(value = "Path to resource to be imported")
-//                                   @PathParam("path") String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//
-//        final FolderEntry folder = asFolder(path);
-//        return exportZip(folder.getVirtualFile());
-//    }
-//
+    @ApiOperation(value = "Download ZIP",
+            notes = "Export resource as zip. It can be an entire project or folder",
+            position = 20)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = ""),
+            @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+            @ApiResponse(code = 404, message = "Not found"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    @GET
+    @Path("/export/{path:.*}")
+    @Produces(ExtMediaType.APPLICATION_ZIP)
+    public InputStream exportZip(@ApiParam(value = "Workspace ID", required = true)
+                                 @PathParam("ws-id") String workspace,
+                                 @ApiParam(value = "Path to resource to be exported")
+                                 @PathParam("path") String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        final FolderEntry folder = projectManager.asFolder(path);
+        return folder.getVirtualFile().zip();
+    }
 
-//
-//    @POST
-//    @Path("/export/{path:.*}")
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @Produces(ExtMediaType.APPLICATION_ZIP)
-//    public Response exportDiffZip(@PathParam("ws-id") String workspace, @PathParam("path") String path, InputStream in)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry folder = asFolder(workspace, path);
-//        return VirtualFileSystemImpl.exportZip(folder.getVirtualFile(), in);
-//    }
-//
-//    @POST
-//    @Path("/export/{path:.*}")
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @Produces(MediaType.MULTIPART_FORM_DATA)
-//    public Response exportDiffZipMultipart(@PathParam("ws-id") String workspace, @PathParam("path") String path, InputStream in)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry folder = asFolder(workspace, path);
-//        return VirtualFileSystemImpl.exportZipMultipart(folder.getVirtualFile(), in);
-//    }
-
-//    @GET
-//    @Path("/export/file/{path:.*}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
-//                               @PathParam("ws-id") String workspace,
-//                               @ApiParam(value = "Path to resource to be imported")
-//                               @PathParam("path") String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FileEntry file = asFile(workspace, path);
-//        ContentStream content = file.getVirtualFile().getContent();
-//        return downloadFile(content);
-//    }
-
-
+    @GET
+    @Path("/export/file/{path:.*}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
+                               @PathParam("ws-id") String workspace,
+                               @ApiParam(value = "Path to resource to be imported")
+                               @PathParam("path") String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        final VirtualFile virtualFile = projectManager.asFile(path).getVirtualFile();
+        return Response
+                .ok(virtualFile.getContent())
+                .lastModified(new Date(virtualFile.getLastModificationDate()))
+                .header(HttpHeaders.CONTENT_LENGTH, Long.toString(virtualFile.getLength()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + virtualFile.getName() + '"')
+                .build();
+    }
 
     @ApiOperation(value = "Get project children items",
                   notes = "Request all children items for a project, such as files and folders",
@@ -862,7 +818,6 @@ public class ProjectService extends Service {
 
         return result;
     }
-
 
     @ApiOperation(value = "Get project tree",
                   notes = "Get project tree. Depth is specified in a query parameter",
@@ -968,8 +923,6 @@ public class ProjectService extends Service {
                                       @PathParam("path") String path,
                                       @ApiParam(value = "Resource name")
                                       @QueryParam("name") String name,
-                                      @ApiParam(value = "Media type")
-                                      @QueryParam("mediatype") String mediatype,
                                       @ApiParam(value = "Search keywords")
                                       @QueryParam("text") String text,
                                       @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
@@ -977,13 +930,6 @@ public class ProjectService extends Service {
                                       @ApiParam(value = "Skip count")
                                       @QueryParam("skipCount") int skipCount)
             throws NotFoundException, ForbiddenException, ConflictException, ServerException {
-
-        // to search from workspace root path should end with "/" i.e /{ws}/search/?<query>
-        //final FolderEntry folder = path.isEmpty() ? projectManager.getProjectsRoot() : asFolder(path);
-
-        //SearcherProvider searcherProvider = projectManager.getSearcher();
-                //projectManager.getVfs().getSearcherProvider();
-
         Searcher searcher;
         try {
              searcher = projectManager.getSearcher();
@@ -992,7 +938,6 @@ public class ProjectService extends Service {
             return Collections.emptyList();
         }
 
-        //if (searcherProvider != null) {
             if (skipCount < 0) {
                 throw new ConflictException(String.format("Invalid 'skipCount' parameter: %d.", skipCount));
             }
@@ -1017,9 +962,7 @@ public class ProjectService extends Service {
             List <SearchResultEntry> entries = result.getResults();
 
             for (int i = skipCount; i < length; i++) {
-
-                VirtualFileEntry child = null;
-                child = root.getChild(entries.get(i).getFilePath());
+                VirtualFileEntry child = root.getChild(entries.get(i).getFilePath());
 
                 if (child != null && child.isFile()) {
                     items.add(DtoConverter.toItemReference((FileEntry)child, workspace, uriBuilder.clone()));

@@ -12,10 +12,10 @@ package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -42,9 +42,8 @@ public class RegisteredProject implements ProjectConfig {
     private final ProjectConfig config;
     private final ProjectTypes  types;
     private final Map<String, Value> attributes = new HashMap<>();
-    private final ProjectTypeRegistry projectTypeRegistry;
-    private       boolean        updated;
-
+    private       boolean             updated;
+    private       boolean             detected;
 
     /**
      * Either root folder or config can be null, in this case Project is configured with problem
@@ -55,16 +54,22 @@ public class RegisteredProject implements ProjectConfig {
      *         - project configuration in workspace
      * @param updated
      *         - if this object was updated, i.e. no more synchronized with workspace master
+     * @param detected
+     *         - if this project was detected, initialized when "parent" project initialized
      * @param projectTypeRegistry
      */
-     RegisteredProject(FolderEntry folder, ProjectConfig config, boolean updated, ProjectTypeRegistry projectTypeRegistry)
-            throws NotFoundException, ProjectTypeConstraintException, ServerException,
-                   ValueStorageException {
-
+    RegisteredProject(FolderEntry folder,
+                      ProjectConfig config,
+                      boolean updated,
+                      boolean detected,
+                      ProjectTypeRegistry projectTypeRegistry) throws NotFoundException,
+                                                                      ProjectTypeConstraintException,
+                                                                      ServerException,
+                                                                      ValueStorageException {
         this.folder = folder;
         this.config = (config == null) ? new NewProjectConfig(folder.getPath()) : config;
         this.updated = updated;
-        this.projectTypeRegistry = projectTypeRegistry;
+        this.detected = detected;
 
         if (folder == null || folder.isFile())
             problems.add(new Problem(10, "No project folder on file system " + this.config.getPath()));
@@ -152,6 +157,9 @@ public class RegisteredProject implements ProjectConfig {
         this.updated = false;
     }
 
+    public boolean isDetected() {
+        return detected;
+    }
 
     /**
      * @return root folder or null

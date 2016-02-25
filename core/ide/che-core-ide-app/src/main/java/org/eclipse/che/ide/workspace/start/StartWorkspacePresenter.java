@@ -79,7 +79,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
         createWsWidgets(workspaces);
 
         for (UsersWorkspaceDto workspace : workspaces) {
-            if (workspaceName.equals(workspace.getName())) {
+            if (workspaceName.equals(workspace.getConfig().getName())) {
                 selectedWorkspace = workspace;
 
                 break;
@@ -105,7 +105,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     public void onWorkspaceSelected(UsersWorkspaceDto workspace) {
         selectedWorkspace = workspace;
 
-        String wsName = workspace.getDefaultEnv();
+        String wsName = workspace.getConfig().getDefaultEnv();
 
         view.setWsName(wsName);
 

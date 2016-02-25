@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateHandler;
@@ -24,8 +25,12 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
+import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.mvp.View;
@@ -77,7 +82,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 @Singleton
 public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPanelView.ActionDelegate,
-        HasView, ProcessFinishedHandler, OutputConsole.ConsoleOutputListener {
+        HasView, ProcessFinishedHandler, OutputConsole.ConsoleOutputListener, WorkspaceStartedHandler, WorkspaceStoppedHandler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
@@ -133,6 +138,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.machineService = machineService;
 
         this.fetchMachines();
+
         this.view.setDelegate(this);
         this.view.setTitle(localizationConstant.viewConsolesTitle());
 
@@ -144,11 +150,12 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
             @Override
             public void onMachineDestroyed(DevMachineStateEvent event) {
-
             }
         });
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
@@ -196,25 +203,22 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     public void fetchMachines() {
         String workspaceId = appContext.getWorkspaceId();
 
-        Promise<List<MachineDto>> machinesPromise = machineService.getWorkspaceMachines(workspaceId);
-
-        machinesPromise.then(new Operation<List<MachineDto>>() {
+        machineService.getMachines(workspaceId).then(new Operation<List<MachineDto>>() {
             @Override
             public void apply(List<MachineDto> machines) throws OperationException {
                 List<ProcessTreeNode> rootChildren = new ArrayList<>();
 
                 rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootChildren);
-                for (MachineDto descriptor : machines) {
-                    if (descriptor.isDev()) {
+                for (MachineDto machine : machines) {
+                    if (machine.getStatus() == MachineStatus.RUNNING && machine.getConfig().isDev()) {
                         List<ProcessTreeNode> processTreeNodes = new ArrayList<ProcessTreeNode>();
-                        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, descriptor, null, processTreeNodes);
+                        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, processTreeNodes);
+                        machineNode.setRunning(true);
                         rootChildren.add(machineNode);
                         view.setProcessesData(rootNode);
-
-                        restoreState(descriptor.getId());
+                        restoreState(machine.getId());
                     }
                 }
-
             }
         });
     }
@@ -232,11 +236,9 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                     final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
                     if (type != null) {
                         final CommandConfiguration configuration = type.getConfigurationFactory().createFromDto(commandDto);
-
                         final CommandOutputConsole console = commandConsoleFactory.create(configuration, machineId);
                         console.listenToOutput(machineProcessDto.getOutputChannel());
                         console.attachToProcess(machineProcessDto);
-
                         addCommandOutput(machineId, console);
                     }
 
@@ -351,7 +353,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                 notificationManager.notify(localizationConstant.failedToFindMachine(machineId));
             }
         });
-
     }
 
     @Override
@@ -366,7 +367,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         OutputConsole defaultConsole = commandConsoleFactory.create("SSH");
         addCommandOutput(machineId, defaultConsole);
 
-        String machineName = machine.getName();
+        String machineName = machine.getConfig().getName();
         String sshServiceAddress = getSshServerAddress(machine);
         String machineHost = "";
         String sshPort = SSH_PORT;
@@ -389,8 +390,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
      * @return ssh service address in format host:port
      */
     private String getSshServerAddress(MachineDto machine) {
-        if (machine.getMetadata().getServers().containsKey(SSH_PORT)) {
-            return machine.getMetadata().getServers().get(SSH_PORT).getAddress();
+        if (machine.getRuntime().getServers().containsKey(SSH_PORT)) {
+            return machine.getRuntime().getServers().get(SSH_PORT).getAddress();
         } else {
             return null;
         }
@@ -563,6 +564,26 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         if (command != null) {
             view.markProcessHasOutput(command);
         }
+    }
+
+    @Override
+    public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        for (ProcessTreeNode processTreeNode : rootNode.getChildren()) {
+            if (processTreeNode.getType() == MACHINE_NODE) {
+                processTreeNode.setRunning(false);
+                if (processTreeNode.getChildren() != null) {
+                    processTreeNode.getChildren().clear();
+                }
+            }
+        }
+
+        view.clear();
+        view.selectNode(null);
+        view.setProcessesData(rootNode);
     }
 
 }

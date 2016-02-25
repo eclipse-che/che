@@ -325,9 +325,12 @@ public class StandardComponentInitializer {
     @Inject
     private WsConnectionListener wsConnectionListener;
 
+
+
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
-    public StandardComponentInitializer(IconRegistry iconRegistry, StandardComponentInitializer.ParserResource parserResource) {
+    public StandardComponentInitializer(IconRegistry iconRegistry,
+                                        StandardComponentInitializer.ParserResource parserResource) {
         iconRegistry.registerIcon(new Icon(BLANK_CATEGORY + ".samples.category.icon", parserResource.samplesCategoryBlank()));
     }
 

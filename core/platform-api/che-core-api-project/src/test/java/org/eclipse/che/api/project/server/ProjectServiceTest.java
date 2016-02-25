@@ -51,6 +51,7 @@ import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -141,6 +142,8 @@ public class ProjectServiceTest {
     @Mock
     private UsersWorkspaceDto      usersWorkspaceMock;
     @Mock
+    private WorkspaceConfigDto      workspaceConfigMock;
+    @Mock
     private HttpJsonRequestFactory httpJsonRequestFactory;
     @Mock
     private HttpJsonResponse       httpJsonResponse;
@@ -207,6 +210,7 @@ public class ProjectServiceTest {
 
         pm = new ProjectManager(vfsProvider, null, ptRegistry, phRegistry,
                                 importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
 
@@ -232,7 +236,8 @@ public class ProjectServiceTest {
         when(httpJsonRequestFactory.fromLink(any())).thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
-        when(usersWorkspaceMock.getProjects()).thenReturn(projects);
+        when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
+        when(workspaceConfigMock.getProjects()).thenReturn(projects);
 
         pm.createProject(testProjectConfigMock, null);
 
@@ -280,20 +285,15 @@ public class ProjectServiceTest {
 
 
     private static class TestWorkspaceHolder extends WorkspaceHolder {
-
         private TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name").withProjects(new ArrayList<>()));
-
-
+            super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")
+                                                  .withProjects(new ArrayList<>())));
         }
-
-
-
     }
 
     private static class TestSearcherProvider implements SearcherProvider {
-
 
         @Override
         public Searcher getSearcher(VirtualFileSystem virtualFileSystem, boolean create) throws ServerException {
@@ -1544,16 +1544,16 @@ public class ProjectServiceTest {
         assertNotNull(myProject.getBaseFolder().getChild("a/b/folder1/folder2/file1.txt"));
     }
 
-//    @Test
-//    public void testExportZip() throws Exception {
-//        ProjectImpl myProject = pm.getProject("my_project");
-//        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
-//        ContainerResponse response = launcher.service(GET,
-//                                                      String.format("http://localhost:8080/api/project/%s/export/my_project", workspace),
-//                                                      "http://localhost:8080/api", null, null, null);
-//        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-//        assertEquals(response.getContentType().toString(), ExtMediaType.APPLICATION_ZIP);
-//    }
+    @Test
+    public void testExportZip() throws Exception {
+        RegisteredProject myProject = pm.getProject("my_project");
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes());
+        ContainerResponse response = launcher.service(GET,
+                                                      String.format("http://localhost:8080/api/project/%s/export/my_project", workspace),
+                                                      "http://localhost:8080/api", null, null, null);
+        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
+        assertEquals(response.getContentType().toString(), ExtMediaType.APPLICATION_ZIP);
+    }
 
     @Test
     @SuppressWarnings("unchecked")

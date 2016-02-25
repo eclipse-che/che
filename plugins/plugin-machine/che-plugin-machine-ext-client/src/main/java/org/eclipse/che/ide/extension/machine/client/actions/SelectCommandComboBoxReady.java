@@ -148,7 +148,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
             machineServiceClient.getMachine(currentDevMachineId).then(new Operation<MachineDto>() {
                 @Override
                 public void apply(MachineDto arg) throws OperationException {
-                    devMachineLabelWidget.setText(arg.getName());
+                    devMachineLabelWidget.setText(arg.getConfig().getName());
                 }
             });
             lastDevMachineId = currentDevMachineId;

@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.server.nativegit;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.api.git.CredentialsProvider;
 import org.eclipse.che.api.git.UserCredential;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 
 /**
@@ -34,12 +36,12 @@ public class GitHubOAuthCredentialProvider implements CredentialsProvider {
 
     private static String OAUTH_PROVIDER_NAME = "github";
     private final OAuthTokenProvider oAuthTokenProvider;
-
+    private final String             authorizationServicePath;
 
     @Inject
     public GitHubOAuthCredentialProvider(OAuthTokenProvider oAuthTokenProvider) {
         this.oAuthTokenProvider = oAuthTokenProvider;
-
+        this.authorizationServicePath = "/oauth/authenticate";
     }
 
     @Override
@@ -65,5 +67,14 @@ public class GitHubOAuthCredentialProvider implements CredentialsProvider {
         return url.contains("github.com");
     }
 
+    @Override
+    public ProviderInfo getProviderInfo() {
+        return new ProviderInfo(OAUTH_PROVIDER_NAME, UriBuilder.fromPath(authorizationServicePath)
+                                                               .queryParam("oauth_provider", OAUTH_PROVIDER_NAME)
+                                                               .queryParam("userId", EnvironmentContext.getCurrent().getUser().getId())
+                                                               .queryParam("scope", "repo")
+                                                               .build()
+                                                               .toString());
+    }
 
 }

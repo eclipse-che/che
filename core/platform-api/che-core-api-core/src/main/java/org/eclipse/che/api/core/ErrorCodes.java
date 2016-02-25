@@ -21,4 +21,5 @@ public class ErrorCodes {
 
     public static final int NO_COMMITTER_NAME_OR_EMAIL_DEFINED = 15216;
     public static final int UNABLE_GET_PRIVATE_SSH_KEY         = 32068;
+    public static final int UNAUTHORIZED_GIT_OPERATION         = 32080;
 }

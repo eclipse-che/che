@@ -21,77 +21,63 @@ export class CheProjectType {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource) {
-
-    // keep resource
+  constructor ($q, $resource) {
+    this.$q = $q;
     this.$resource = $resource;
 
-    // types per category
-    this.typesPerCategory = {};
+    // types per category per workspace ID : workspace ID ==> map<projectTypeId, projectType>
+    this.typesIdPerWorkspace = new Map();
 
-    // project types
-    this.types = [];
+    // project types per workspace ID
+    this.typesWorkspaces = new Map();
 
     // remote call
-    this.remoteProjectTypeAPI = this.$resource('/api/project-type');
-  }
+    this.remoteProjectTypeAPI = this.$resource('/api/ext/project-type/:workspaceId');
 
+  }
 
 
   /**
    * Fetch the project types
    */
-  fetchTypes() {
+  fetchTypes(workspaceId) {
 
-    let promise = this.remoteProjectTypeAPI.query().$promise;
+    var defer = this.$q.defer();
+    let promise = this.remoteProjectTypeAPI.query({workspaceId: workspaceId}).$promise;
     let updatedPromise = promise.then((projectTypes) => {
 
-
-      // reset global list
-      this.types.length = 0;
-      for (var member in this.typesPerCategory) {
-        delete this.typesPerCategory[member];
+      var idProjectTypesMap = this.typesIdPerWorkspace.get(workspaceId);
+      if (!idProjectTypesMap) {
+        idProjectTypesMap = new Map();
+        this.typesIdPerWorkspace.set(workspaceId, idProjectTypesMap);
       }
 
+      var typesWorkspace = this.typesWorkspaces.get(workspaceId);
+      if (!typesWorkspace) {
+        typesWorkspace = [];
+        this.typesWorkspaces.set(workspaceId, typesWorkspace);
+      }
+
+      // reset global list
+      typesWorkspace.length = 0;
+
       projectTypes.forEach((projectType) => {
-
-        // get attributes
-        var category = '';
-        var attributeDescriptors = projectType.attributeDescriptors;
-        attributeDescriptors.forEach((attributeDescriptor) => {
-          if ('language' === attributeDescriptor.name) {
-            category = attributeDescriptor.values[0];
-          }
-        });
-
-        if (attributeDescriptors.length === 0) {
-          category = projectType.id;
-        }
-
-        if (category === '') {
-          return;
-        }
-
-        var typeCategory = category;
-
-        // get list
-        var lst = this.typesPerCategory[typeCategory];
-        if (!lst) {
-          lst = [];
-          this.typesPerCategory[typeCategory] = lst;
-        }
-
-        // add element on the list
-        this.typesPerCategory[typeCategory].push(projectType);
-
-
-
-        this.types.push(projectType);
+        var id = projectType.id;
+        // add in map
+        idProjectTypesMap.set(id, projectType);
+        // add in global list
+        typesWorkspace.push(projectType);
       });
-
+      defer.resolve();
+    }, (error) => {
+      if (error.status !== 304) {
+        defer.reject(error);
+      } else {
+        defer.resolve();
+      }
     });
 
-    return updatedPromise;
+    return defer.promise;
   }
 
 
@@ -100,16 +86,18 @@ export class CheProjectType {
    * Gets all project types
    * @returns {Array}
    */
-  getAllProjectTypes() {
-    return this.types;
+  getAllProjectTypes(workspaceId) {
+    let val = this.typesWorkspaces.get(workspaceId);
+    return !val ? [] : val;
   }
 
   /**
    * The types per category
    * @returns {CheProjectType.typesPerCategory|*}
    */
-  getTypesByCategory() {
-    return this.typesPerCategory;
+  getProjectTypesIDs(workspaceId) {
+    let val = this.typesIdPerWorkspace.get(workspaceId);
+    return !val ? {} : val;
   }
 
 

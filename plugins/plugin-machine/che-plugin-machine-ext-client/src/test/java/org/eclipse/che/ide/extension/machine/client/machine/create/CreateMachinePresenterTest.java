@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.machine.create;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
 import org.eclipse.che.api.project.gwt.client.ProjectTypeServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -62,9 +61,9 @@ public class CreateMachinePresenterTest {
     private CreateMachinePresenter presenter;
 
     @Mock
-    private Promise<MachineStateDto>                   machineDescriptorPromise;
+    private Promise<MachineDto>                   machineDescriptorPromise;
     @Captor
-    private ArgumentCaptor<Operation<MachineStateDto>> machineCaptor;
+    private ArgumentCaptor<Operation<MachineDto>> machineCaptor;
 
     @Before
     public void setUp() {
@@ -121,17 +120,17 @@ public class CreateMachinePresenterTest {
     @Test
     public void shouldReplaceDevMachine() throws Exception {
         when(appContext.getDevMachineId()).thenReturn(SOME_TEXT);
-        when(machineServiceClient.getMachineState(SOME_TEXT)).thenReturn(machineDescriptorPromise);
+        when(machineServiceClient.getMachine(SOME_TEXT)).thenReturn(machineDescriptorPromise);
 
         presenter.onReplaceDevMachineClicked();
 
         verify(view).getMachineName();
         verify(view).getRecipeURL();
         verify(appContext, times(2)).getDevMachineId();
-        verify(machineServiceClient).getMachineState(SOME_TEXT);
+        verify(machineServiceClient).getMachine(SOME_TEXT);
         verify(machineDescriptorPromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(mock(MachineDto.class));
-        verify(machineManager).destroyMachine(any(MachineStateDto.class));
+        verify(machineManager).destroyMachine(any(MachineDto.class));
         verify(machineManager).startDevMachine(eq(RECIPE_URL), eq(MACHINE_NAME));
         verify(view).close();
     }
@@ -139,7 +138,7 @@ public class CreateMachinePresenterTest {
     @Test
     public void shouldStartNewDevMachine() throws Exception {
         when(appContext.getDevMachineId()).thenReturn(null);
-        when(machineServiceClient.getMachineState(SOME_TEXT)).thenReturn(machineDescriptorPromise);
+        when(machineServiceClient.getMachine(SOME_TEXT)).thenReturn(machineDescriptorPromise);
 
         presenter.onReplaceDevMachineClicked();
 
@@ -149,7 +148,7 @@ public class CreateMachinePresenterTest {
         verify(machineManager).startDevMachine(eq(RECIPE_URL), eq(MACHINE_NAME));
         verify(view).close();
         verify(machineServiceClient, never()).getMachine(SOME_TEXT);
-        verify(machineManager, never()).destroyMachine(any(MachineStateDto.class));
+        verify(machineManager, never()).destroyMachine(any(MachineDto.class));
         verify(machineManager).startDevMachine(eq(RECIPE_URL), eq(MACHINE_NAME));
     }
 

@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.event.project.CloseCurrentProjectEvent;
@@ -75,8 +75,8 @@ public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
     public void onMachineRunning(MachineStateEvent event) {
         CurrentProject currentProject = appContext.getCurrentProject();
 
-        final MachineStateDto machine = event.getMachineState();
-        if (currentProject == null || !machine.isDev()) {
+        final MachineDto machine = event.getMachine();
+        if (currentProject == null || !machine.getConfig().isDev()) {
             return;
         }
 
@@ -85,7 +85,7 @@ public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
 
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
-        if (event.getMachineState().isDev()) {
+        if (event.getMachine().getConfig().isDev()) {
             value = "";
         }
     }

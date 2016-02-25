@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.project.shared.Constants;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
 
     @Override
     public String getProjectType() {
-        return Constants.BLANK_ID;
+        return BaseProjectType.ID;
     }
 
     private byte[] getReadmeContent() {

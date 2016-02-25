@@ -8,17 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
-
 package org.eclipse.che.api.project.server;
-
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -446,7 +443,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         // SPECS:
         // Only persisted variables should be persisted (no constants, no provided variables)
 
-        for (ProjectConfig project : workspaceHolder.getWorkspace().getProjects()) {
+        for (ProjectConfig project : workspaceHolder.getWorkspace().getConfig().getProjects()) {
 
             if (project.getPath().equals("/testProvidedAttributesNotSerialized")) {
 
@@ -455,12 +452,30 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
                 assertNull(project.getAttributes().get("pt2-const1"));
                 assertNull(project.getAttributes().get("pt2-provided1"));
             }
-
         }
-
-
     }
 
+    @Test
+    public void testDetectedProjectsNotSerialized() throws Exception {
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("pt2-var2", new AttributeValue("test2").getList());
+        attributes.put("pt2-var1", new AttributeValue("test1").getList());
+        ProjectConfig pc1 = new NewProjectConfig("/testDetectedProjectsNotSerialized1", "pt3", null, "name", "descr", attributes, null);
+        ProjectConfig pc2 = new NewProjectConfig("/testDetectedProjectsNotSerialized2", "pt3", null, "name", "descr", attributes, null);
+
+        projectRegistry.putProject(pc1, null, true, true);
+        projectRegistry.putProject(pc2, null, true, false);
+
+        workspaceHolder.updateProjects(projectRegistry.getProjects());
+
+        // SPECS:
+        // Only persisted projects should be persisted (no detected)
+
+        assertTrue(workspaceHolder.getWorkspace().getConfig().getProjects().size() == 1);
+
+        ProjectConfig persistedProjectConfig = workspaceHolder.getWorkspace().getConfig().getProjects().get(0);
+        assertEquals("/testDetectedProjectsNotSerialized2", persistedProjectConfig.getPath());
+    }
 
      /* ---------------------------------- */
     /* private */

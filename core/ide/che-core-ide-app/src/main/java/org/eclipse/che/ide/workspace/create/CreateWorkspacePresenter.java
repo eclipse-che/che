@@ -105,7 +105,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         workspacesNames.clear();
 
         for (UsersWorkspaceDto workspace : workspaces) {
-            workspacesNames.add(workspace.getName());
+            workspacesNames.add(workspace.getConfig().getName());
         }
 
         Promise<List<RecipeDescriptor>> recipes = recipeService.getRecipes(SKIP_COUNT, MAX_COUNT);

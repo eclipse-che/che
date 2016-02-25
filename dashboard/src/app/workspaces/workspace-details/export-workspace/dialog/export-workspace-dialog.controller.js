@@ -75,11 +75,11 @@ export class ExportWorkspaceDialogController {
 
     login.then((authData) => {
       let copyOfWorkspace = angular.copy(this.workspaceDetails);
-      copyOfWorkspace.name = 'import-' + copyOfWorkspace.name;
+      copyOfWorkspace.config.name = 'import-' + copyOfWorkspace.config.name;
 
       // get content of the recipe
-      let environments = copyOfWorkspace.environments;
-      let defaultEnvName = copyOfWorkspace.defaultEnv;
+      let environments = copyOfWorkspace.config.environments;
+      let defaultEnvName = copyOfWorkspace.config.defaultEnv;
       let defaultEnvironment = this.lodash.find(environments, (environment) => {
         return environment.name === defaultEnvName;
       });
@@ -94,7 +94,7 @@ export class ExportWorkspaceDialogController {
         let remoteRecipeAPI = this.cheRemote.newRecipe(authData);
 
         let recipeContent = this.cheRecipeTemplate.getDefaultRecipe();
-        recipeContent.name = 'recipe-' + copyOfWorkspace.name;
+        recipeContent.name = 'recipe-' + copyOfWorkspace.config.name;
         recipeContent.script = recipeScriptContent;
 
         let createRecipePromise = remoteRecipeAPI.create(recipeContent);
@@ -117,8 +117,8 @@ export class ExportWorkspaceDialogController {
             // ok now we've to import each project with a location into the remote workspace
             let importProjectsPromise = this.importProjectsIntoWorkspace(remoteWorkspaceAPI, remoteProjectAPI, remoteWorkspace, authData);
             importProjectsPromise.then(() => {
-              this.exportInCloudSteps += 'Export of workspace ' + copyOfWorkspace.name + 'finished <br>';
-              this.cheNotification.showInfo('Successfully exported the workspace to ' + copyOfWorkspace.name + ' on ' + this.privateCloudUrl);
+              this.exportInCloudSteps += 'Export of workspace ' + copyOfWorkspace.config.name + 'finished <br>';
+              this.cheNotification.showInfo('Successfully exported the workspace to ' + copyOfWorkspace.config.name + ' on ' + this.privateCloudUrl);
               this.hide();
             }, (error) => {
               this.handleError(error);
@@ -158,7 +158,7 @@ export class ExportWorkspaceDialogController {
         let remoteURL = authData.url;
         let remoteWsURL = remoteURL.replace('http', 'ws') + '/api/ws/';
 
-        let startWorkspacePromise = remoteWorkspaceAPI.startWorkspace(remoteWsURL, workspace.id, workspace.defaultEnv);
+        let startWorkspacePromise = remoteWorkspaceAPI.startWorkspace(remoteWsURL, workspace.id, workspace.config.defaultEnv);
 
         startWorkspacePromise.then(() => {
           this.exportInCloudSteps += 'ok !<br>';

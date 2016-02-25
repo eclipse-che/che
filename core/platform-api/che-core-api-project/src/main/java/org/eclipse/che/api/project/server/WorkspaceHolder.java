@@ -13,11 +13,11 @@ package org.eclipse.che.api.project.server;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.workspace.EnvironmentState;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -50,11 +51,11 @@ public class WorkspaceHolder {
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint)
+    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory)
             throws ServerException {
 
         this.apiEndpoint = apiEndpoint;
-        this.httpJsonRequestFactory = new DefaultHttpJsonRequestFactory();
+        this.httpJsonRequestFactory = httpJsonRequestFactory;
 
         // TODO - invent mechanism to recognize workspace ID
         // for Docker container name of this property is defined in
@@ -62,8 +63,9 @@ public class WorkspaceHolder {
         // it resides on Workspace Master side so not accessible from agent code
         String workspaceId = System.getenv("CHE_WORKSPACE_ID");
 
-        if (workspaceId == null)
+        if (workspaceId == null) {
             throw new ServerException("Workspace ID is not defined for Workspace Agent");
+        }
 
         this.workspace = new UsersWorkspaceImpl(workspaceDto(workspaceId));
 
@@ -87,9 +89,9 @@ public class WorkspaceHolder {
      * @throws ServerException
      */
     public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
+        List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(Collectors.toList());
 
-
-        workspace.setProjects(new ArrayList<>(projects));
+        workspace.setProjects(persistedProjects);
 
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class).path(WorkspaceService.class, "update")
@@ -134,87 +136,118 @@ public class WorkspaceHolder {
 
 
     protected static class UsersWorkspaceImpl implements UsersWorkspace {
+        private String              id;
+        private String              owner;
+        private boolean             isTemporary;
+        private WorkspaceStatus     status;
+        private WorkspaceConfigImpl workspaceConfig;
 
-        private final UsersWorkspaceDto dto;
-
-        private List<? extends ProjectConfig> projects;
-
-        UsersWorkspaceImpl(UsersWorkspaceDto dto) {
-            this.dto = dto;
-            this.projects = dto.getProjects();
+        UsersWorkspaceImpl(UsersWorkspace usersWorkspace) {
+            id = usersWorkspace.getId();
+            owner = usersWorkspace.getOwner();
+            isTemporary = usersWorkspace.isTemporary();
+            status = usersWorkspace.getStatus();
+            workspaceConfig = new WorkspaceConfigImpl(usersWorkspace.getConfig());
         }
 
+        @Override
+        public WorkspaceConfigImpl getConfig() {
+            return workspaceConfig;
+        }
 
         @Override
         public String getId() {
-            return dto.getId();
+            return id;
         }
 
         @Override
         public String getOwner() {
-            return dto.getOwner();
+            return owner;
         }
 
         @Override
         public boolean isTemporary() {
-            return dto.isTemporary();
-        }
-
-        @Override
-        public List<? extends EnvironmentState> getEnvironments() {
-            return dto.getEnvironments();
+            return isTemporary;
         }
 
         @Override
         public WorkspaceStatus getStatus() {
-            return dto.getStatus();
+            return status;
+        }
+
+        public void setProjects(final List<RegisteredProject> projects) {
+            List<NewProjectConfig> p = new ArrayList<>();
+            for (RegisteredProject project : projects) {
+                NewProjectConfig config = new NewProjectConfig(project.getPath(),
+                                                            project.getType(),
+                                                            project.getMixins(),
+                                                            project.getName(),
+                                                            project.getDescription(),
+                                                            project.getPersistableAttributes(),
+                                                            project.getSource());
+                p.add(config);
+            }
+
+            getConfig().setProjects(p);
+        }
+    }
+
+    protected static class WorkspaceConfigImpl implements WorkspaceConfig {
+        private String                        name;
+        private String                        description;
+        private String                        defaultEnvName;
+        private List<? extends Command> commands;
+        private List<? extends ProjectConfig> projects;
+        private List<? extends Environment> environments;
+        private Map<String, String>           attributes;
+
+        WorkspaceConfigImpl(WorkspaceConfig config) {
+            name = config.getName();
+            description = config.getDescription();
+            defaultEnvName = config.getDefaultEnv();
+            commands = config.getCommands();
+            projects = config.getProjects();
+            environments = config.getEnvironments();
+            attributes = config.getAttributes();
         }
 
         @Override
         public String getName() {
-            return dto.getName();
+            return name;
         }
 
         @Override
         public String getDescription() {
-            return dto.getDescription();
+            return description;
         }
 
         @Override
         public String getDefaultEnv() {
-            return dto.getDefaultEnv();
+            return defaultEnvName;
         }
 
         @Override
         public List<? extends Command> getCommands() {
-            return dto.getCommands();
+            return commands;
         }
 
         @Override
         public List<? extends ProjectConfig> getProjects() {
-            return this.projects;
+            return projects;
+        }
+
+        public void setProjects(List<NewProjectConfig> projects) {
+            this.projects = projects;
+        }
+
+        @Override
+        public List<? extends Environment> getEnvironments() {
+            return environments;
         }
 
         @Override
         public Map<String, String> getAttributes() {
-            return dto.getAttributes();
-        }
-
-        public void setProjects(final List<RegisteredProject> projects) {
-
-            List<ProjectConfig> p = new ArrayList<>();
-            for(RegisteredProject project : projects) {
-                ProjectConfig config = new NewProjectConfig(project.getPath(), project.getType(), project.getMixins(),
-                        project.getName(), project.getDescription(), project.getPersistableAttributes(),
-                        project.getSource());
-                p.add(config);
-            }
-            this.projects = p;
-
+            return attributes;
         }
     }
-
-
-
-
 }

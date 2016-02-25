@@ -14,8 +14,17 @@
 
 package org.eclipse.che.ide.util;
 
+import org.eclipse.che.ide.commons.exception.ServerException;
+import org.eclipse.che.ide.dto.DtoFactory;
+
+import java.util.Collections;
+import java.util.Map;
+
 /** Utility class for common Exception related operations. */
 public class ExceptionUtils {
+
+    private static DtoFactory dtoFactory = new DtoFactory();
+
     public static final int MAX_CAUSE = 10;
 
     public static String getStackTraceAsString(Throwable e) {
@@ -58,5 +67,39 @@ public class ExceptionUtils {
         }
 
         return s.toString();
+    }
+
+    /**
+     * Returns error code of the exception if it is of type {@clink ServerException} and has error code set, or -1 otherwise.
+     *
+     * @param exception
+     *         passed exception
+     * @return error code
+     */
+    public static int getErrorCode(Throwable exception) {
+        if (exception instanceof ServerException) {
+            return ((ServerException)exception).getErrorCode();
+        } else if (exception instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
+            return ((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)exception).getErrorCode();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Returns attributes of the exception if it is of type {@clink ServerException} and has attributes set, or empty map otherwise.
+     *
+     * @param exception
+     *         passed exception
+     * @return error code
+     */
+    public static Map<String, String> getAttributes(Throwable exception) {
+        if (exception instanceof ServerException) {
+            return ((ServerException)exception).getAttributes();
+        } else if (exception instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
+            return ((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)exception).getAttributes();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 }

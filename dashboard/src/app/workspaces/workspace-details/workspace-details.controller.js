@@ -56,7 +56,7 @@ export class WorkspaceDetailsCtrl {
       this.startUpdateWorkspaceStatus();
     }
     this.loading = false;
-    this.newName = angular.copy(this.workspaceDetails.name);
+    this.newName = angular.copy(this.workspaceDetails.config.name);
   }
 
   //Rename the workspace.
@@ -76,10 +76,10 @@ export class WorkspaceDetailsCtrl {
   doRenameWorkspace() {
     this.workspaceDetails = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
     let workspaceNewDetails = angular.copy(this.workspaceDetails);
-    workspaceNewDetails.name = this.newName;
+    workspaceNewDetails.config.name = this.newName;
     delete workspaceNewDetails.links;
 
-    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails);
+    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails.config);
     promise.then((data) => {
       this.cheWorkspace.getWorkspacesById().set(this.workspaceId, data);
       this.updateWorkspaceData();
@@ -93,7 +93,7 @@ export class WorkspaceDetailsCtrl {
   //Perform workspace deletion.
   deleteWorkspace(event) {
     var confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete the workspace ' + this.workspaceDetails.name)
+      .title('Would you like to delete the workspace ' + this.workspaceDetails.config.name)
       .content('Please confirm for the workspace removal.')
       .ariaLabel('Delete workspace')
       .ok('Delete it!')
@@ -112,7 +112,7 @@ export class WorkspaceDetailsCtrl {
   }
 
   runWorkspace() {
-    let promise = this.cheAPI.getWorkspace().startWorkspace(this.workspaceId, this.workspaceDetails.defaultEnv);
+    let promise = this.cheAPI.getWorkspace().startWorkspace(this.workspaceId, this.workspaceDetails.config.defaultEnv);
 
     promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');

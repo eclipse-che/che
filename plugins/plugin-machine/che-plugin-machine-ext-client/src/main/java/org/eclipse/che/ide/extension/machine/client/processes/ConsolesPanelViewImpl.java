@@ -293,6 +293,11 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     public void selectNode(@NotNull ProcessTreeNode node) {
         SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
+        if (node == null) {
+            selectionModel.clearSelections();
+            return;
+        }
+
         selectionModel.setTreeActive(true);
         selectionModel.clearSelections();
         selectionModel.selectSingleNode(node);
@@ -334,6 +339,15 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
             treeNode.setHasUnreadContent(true);
             treeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
         }
+    }
+
+    @Override
+    public void clear() {
+        for (IsWidget widget : processWidgets.values()) {
+            outputPanel.remove(widget);
+        }
+
+        processWidgets.clear();
     }
 
     @Override

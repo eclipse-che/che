@@ -113,7 +113,7 @@ public class MachineModule extends AbstractModule {
     @Named("codenvy.local.infrastructure.users")
     Set<User> users() {
         final Set<User> users = new HashSet<>(1);
-        final User user = new User().withId("codenvy")
+        final User user = new User().withId("che")
                                     .withName("codenvy")
                                     .withEmail("che@eclipse.org")
                                     .withPassword("secret");

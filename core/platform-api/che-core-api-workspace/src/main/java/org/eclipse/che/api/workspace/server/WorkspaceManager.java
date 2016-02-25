@@ -20,15 +20,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Channels;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineStateImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentStateImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -140,7 +138,7 @@ public class WorkspaceManager {
 
         // TODO move 'analytics' logs to the appropriate interceptors
         LOG.info("EVENT#workspace-created# WS#{}# WS-ID#{}# USER#{}#",
-                 newWorkspace.getName(),
+                 newWorkspace.getConfig().getName(),
                  newWorkspace.getId(),
                  getCurrentUserId());
         return normalizeState(newWorkspace);
@@ -193,7 +191,7 @@ public class WorkspaceManager {
      *
      * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
      * or status defined by their runtime instances(if those exist), all of these
-     * workspaces are permanent(non-temporary) and with websocket {@link Channels} injected
+     * workspaces are permanent(non-temporary)
      *
      * @param owner
      *         the id of the user whose workspaces should be fetched
@@ -245,7 +243,7 @@ public class WorkspaceManager {
         configValidator.validate(updateConfig);
         final UsersWorkspaceImpl updated = workspaceDao.update(new UsersWorkspaceImpl(updateConfig, workspaceId, getCurrentUserId()));
         // TODO move 'analytics' logs to the appropriate interceptors
-        LOG.info("EVENT#workspace-updated# WS#{}# WS-ID#{}#", updated.getName(), updated.getId());
+        LOG.info("EVENT#workspace-updated# WS#{}# WS-ID#{}#", updated.getConfig().getName(), updated.getId());
         return normalizeState(updated);
     }
 
@@ -408,16 +406,15 @@ public class WorkspaceManager {
                                                                                                                             ConflictException {
         final UsersWorkspaceImpl workspace = fromConfig(workspaceConfig, getCurrentUserId());
         workspace.setTemporary(true);
-        addChannels(workspace);
         // Temporary workspace is not persistent one, which means
         // that it is created when runtime workspace instance created(workspace started)
         hooks.beforeCreate(workspace, accountId);
-        final RuntimeWorkspaceImpl runtime = performSyncStart(workspace, workspace.getDefaultEnv(), false, accountId);
+        final RuntimeWorkspaceImpl runtime = performSyncStart(workspace, workspace.getConfig().getDefaultEnv(), false, accountId);
         hooks.afterCreate(runtime, accountId);
 
         // TODO move 'analytics' logs to the appropriate interceptors
         LOG.info("EVENT#workspace-created# WS#{}# WS-ID#{}# USER#{}# TEMP#true#",
-                 runtime.getName(),
+                 runtime.getConfig().getName(),
                  runtime.getId(),
                  getCurrentUserId());
         return runtime;
@@ -502,11 +499,11 @@ public class WorkspaceManager {
         final RuntimeWorkspaceImpl workspace = workspaceRegistry.get(workspaceId);
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             String devMachineSnapshotFailMessage = null;
-            for (MachineStateImpl machineState : workspace.getMachines()) {
+            for (MachineImpl machine : workspace.getMachines()) {
                 try {
-                    machineManager.saveSync(machineState.getId(), workspace.getOwner(), workspace.getActiveEnvName());
+                    machineManager.saveSync(machine.getId(), workspace.getOwner(), workspace.getActiveEnv());
                 } catch (ApiException apiEx) {
-                    if (machineState.isDev()) {
+                    if (machine.getConfig().isDev()) {
                         devMachineSnapshotFailMessage = apiEx.getLocalizedMessage();
                     }
                     LOG.error(apiEx.getLocalizedMessage(), apiEx);
@@ -553,18 +550,7 @@ public class WorkspaceManager {
     private UsersWorkspaceImpl normalizeState(UsersWorkspaceImpl workspace, RuntimeWorkspaceImpl runtime) {
         workspace.setTemporary(false);
         workspace.setStatus(runtime == null ? STOPPED : runtime.getStatus());
-        addChannels(workspace);
         return workspace;
-    }
-
-    private void addChannels(UsersWorkspaceImpl workspace) {
-        for (EnvironmentStateImpl environment : workspace.getEnvironments()) {
-            for (MachineStateImpl machineState : environment.getMachineConfigs()) {
-                machineState.setChannels(MachineManager.createMachineChannels(machineState.getName(),
-                                                                              workspace.getId(),
-                                                                              environment.getName()));
-            }
-        }
     }
 
     private UsersWorkspaceImpl fromConfig(WorkspaceConfig config, String owner) throws BadRequestException,
@@ -595,17 +581,16 @@ public class WorkspaceManager {
         try {
             final RuntimeWorkspaceImpl runtime = workspaceRegistry.get(workspace.getId());
             throw new ConflictException(format("Could not start workspace '%s' because its status is '%s'",
-                                               runtime.getName(),
+                                               runtime.getConfig().getName(),
                                                runtime.getStatus()));
         } catch (NotFoundException ignored) {
             // it is okay if workspace does not exist
         }
         workspace.setTemporary(false);
         workspace.setStatus(WorkspaceStatus.STARTING);
-        addChannels(workspace);
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
-                performSyncStart(workspace, firstNonNull(envName, workspace.getDefaultEnv()), recover, accountId);
+                performSyncStart(workspace, firstNonNull(envName, workspace.getConfig().getDefaultEnv()), recover, accountId);
             } catch (BadRequestException | ServerException | NotFoundException | ConflictException | ForbiddenException ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
             }

@@ -11,7 +11,7 @@
 package org.eclipse.che.api.machine.server.spi;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.machine.MachineState;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidInstanceSnapshotException;
@@ -47,7 +47,7 @@ public interface InstanceProvider {
     /**
      * Creates instance from scratch.
      *
-     * @param machineState
+     * @param machine
      *         machine description
      * @param recipe
      *         instance creation {@link Recipe}
@@ -62,7 +62,7 @@ public interface InstanceProvider {
      *         if other error occurs
      */
     Instance createInstance(Recipe recipe,
-                            MachineState machineState,
+                            Machine machine,
                             LineConsumer creationLogsOutput) throws UnsupportedRecipeException, InvalidRecipeException, MachineException;
 
     /**
@@ -81,7 +81,7 @@ public interface InstanceProvider {
      *         if other error occurs
      */
     Instance createInstance(InstanceKey instanceKey,
-                            MachineState machineState,
+                            Machine machine,
                             LineConsumer creationLogsOutput) throws NotFoundException, InvalidInstanceSnapshotException, MachineException;
 
     /**

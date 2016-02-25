@@ -17,9 +17,9 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
@@ -50,6 +50,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -91,7 +92,6 @@ public final class ProjectManager {
                                                                          );
 
     @Inject
-    @SuppressWarnings("unchecked")
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
                           EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
@@ -99,9 +99,7 @@ public final class ProjectManager {
                           ProjectImporterRegistry importers,
                           ProjectRegistry projectRegistry,
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
-                          FileTreeWatcher fileTreeWatcher
-                          //WorkspaceHolder workspaceHolder
-                         )
+                          FileTreeWatcher fileTreeWatcher)
             throws ServerException, NotFoundException, ProjectTypeConstraintException,
                    ValueStorageException, IOException, InterruptedException {
 
@@ -111,18 +109,30 @@ public final class ProjectManager {
         this.handlers = handlers;
         this.importers = importers;
         this.projectRegistry = projectRegistry;
-
         this.fileWatchNotifier = fileWatcherNotificationHandler;
         this.fileWatcher = fileTreeWatcher;
+    }
 
-        initWatcher();
+    @PostConstruct
+    void initWatcher() throws IOException {
+        FileWatcherNotificationListener defaultListener = new FileWatcherNotificationListener(VirtualFileFilter.ACCEPT_ALL) {
+            @Override
+            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
+                LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
+                eventService.publish(DtoFactory.newDto(VfsWatchEvent.class)
+                                               .withPath(virtualFile.getPath().toString())
+                                               .withFile(virtualFile.isFile())
+                                               .withType(eventType));
+            }
+        };
+        fileWatchNotifier.addNotificationListener(defaultListener);
+        fileWatcher.startup();
     }
 
     @PreDestroy
     void stop() {
         executor.shutdownNow();
     }
-
 
     public FolderEntry getProjectsRoot() throws ServerException, NotFoundException {
         return new FolderEntry(vfs.getRoot());
@@ -132,12 +142,7 @@ public final class ProjectManager {
         return this.projectTypeRegistry;
     }
 
-//    public ProjectHandlerRegistry getHandlers() {
-//        return handlers;
-//    }
-
     public Searcher getSearcher() throws NotFoundException, ServerException {
-
         SearcherProvider provider = vfs.getSearcherProvider();
         if (provider == null)
             throw new NotFoundException("SearcherProvider is not defined in VFS");
@@ -161,26 +166,24 @@ public final class ProjectManager {
         this.fileWatcher.removeExcludeMatcher(matcher);
     }
 
-
     /**
      * @return all the projects
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public List<RegisteredProject> getProjects() {
-
+    public List<RegisteredProject> getProjects() throws ServerException {
         return projectRegistry.getProjects();
     }
-
 
     /**
      * @param projectPath
      * @return project or null if not found
+     * @throws ServerException
+     *         if projects are not initialized yet
      */
-    public RegisteredProject getProject(String projectPath) {
-
+    public RegisteredProject getProject(String projectPath) throws ServerException {
         return projectRegistry.getProject(projectPath);
-
     }
-
 
     /**
      * create project:
@@ -200,9 +203,7 @@ public final class ProjectManager {
                                            Map<String, String> options) throws ConflictException,
                                                                                ForbiddenException,
                                                                                ServerException,
-                                                                               NotFoundException,
-                                                                               ProjectTypeConstraintException {
-
+                                                                               NotFoundException {
         // path and primary type is mandatory
         if (projectConfig.getPath() == null)
             throw new ConflictException("Path for new project should be defined ");
@@ -236,15 +237,13 @@ public final class ProjectManager {
             generator.onCreateProject(projectFolder, valueMap, options);
         }
 
-
         try {
-            return projectRegistry.putProject(projectConfig, projectFolder, true);
+            return projectRegistry.putProject(projectConfig, projectFolder, true, false);
         } catch (Exception e) {
             // rollback project folder
             projectFolder.getVirtualFile().delete();
             throw e;
         }
-
     }
 
     /**
@@ -268,21 +267,18 @@ public final class ProjectManager {
                                                                            NotFoundException,
                                                                            ConflictException,
                                                                            IOException {
-
         String path = newConfig.getPath();
 
         if (path == null)
             throw new ConflictException("Project path is not defined");
 
-
         FolderEntry baseFolder = asFolder(path);
-        //RegisteredProject oldProject = projectRegistry.getProject(apath);
 
         // If a project does not exist in the target path, create a new one
         if (baseFolder == null)
             throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
 
-        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true);
+        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
 
         // TODO move to register?
         reindexProject(project);
@@ -319,7 +315,7 @@ public final class ProjectManager {
 
         String name = folder.getPath().getName();
 
-        return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true);
+        return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true, false);
 
     }
 
@@ -533,31 +529,9 @@ public final class ProjectManager {
                     return;
                 }
                 searcher.add(file);
-                //SearcherProvider sp = this.projectManager.getVfs().getSearcherProvider();
-                //if(sp != null)
-                //    sp.getSearcher(projectManager.getVfs(), true).add(file);
-                //searcherProvider.getSearcher(projectManager.getVfs(), true).add(file);
             } catch (Exception e) {
                 LOG.warn(String.format("Project: %s", project.getPath()), e.getMessage());
             }
         });
     }
-
-
-    private void initWatcher() throws IOException {
-        FileWatcherNotificationListener defaultListener = new FileWatcherNotificationListener(VirtualFileFilter.ACCEPT_ALL) {
-            @Override
-            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
-                LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
-                eventService.publish(DtoFactory.newDto(VfsWatchEvent.class)
-                                               .withPath(virtualFile.getPath().toString())
-                                               .withFile(virtualFile.isFile())
-                                               .withType(eventType));
-            }
-        };
-        fileWatchNotifier.addNotificationListener(defaultListener);
-        fileWatcher.startup();
-    }
-
-
 }

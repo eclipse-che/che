@@ -11,6 +11,8 @@
 package org.eclipse.che.api.core.rest.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.dto.shared.DelegateRule;
+import org.eclipse.che.dto.shared.DelegateTo;
 
 import java.util.List;
 
@@ -113,6 +115,10 @@ public interface Link {
      */
     List<LinkParameter> getParameters();
 
+    @DelegateTo(client = @DelegateRule(type = LinkParameterResolver.class, method = "getParameter"),
+                server = @DelegateRule(type = LinkParameterResolver.class, method = "getParameter"))
+    LinkParameter getParameter(String parameterName);
+
     Link withParameters(List<LinkParameter> parameters);
 
     /**
@@ -139,4 +145,15 @@ public interface Link {
      *         request body description
      */
     void setRequestBody(RequestBodyDescriptor requestBody);
+
+    class LinkParameterResolver {
+        public static LinkParameter getParameter(Link link, String parameterName) {
+            for (LinkParameter linkParameter : link.getParameters()) {
+                if (linkParameter.getName().equals(parameterName)){
+                    return linkParameter;
+                }
+            }
+            return null;
+        }
+    }
 }

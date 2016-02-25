@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.machine.server.ssh;
 
-import org.eclipse.che.api.core.model.machine.MachineMetadata;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -64,15 +64,15 @@ public class KeysInjectorTest {
     ArgumentCaptor<MessageProcessor<LogMessage>>        messageProcessorCaptor;
 
     @Mock
-    Instance        instance;
+    Instance           instance;
     @Mock
-    MachineMetadata metadata;
+    MachineRuntimeInfo machineRuntime;
     @Mock
-    Exec            exec;
+    Exec               exec;
     @Mock
-    LogMessage      logMessage;
+    LogMessage         logMessage;
     @Mock
-    LineConsumer    lineConsumer;
+    LineConsumer       lineConsumer;
 
     @Mock
     EventService    eventService;
@@ -92,11 +92,11 @@ public class KeysInjectorTest {
     public void setUp() throws Exception {
         final Map<String, String> metadataProperties = new HashMap<>();
         metadataProperties.put("id", CONTAINER_ID);
-        when(metadata.getProperties()).thenReturn(metadataProperties);
+        when(machineRuntime.getProperties()).thenReturn(metadataProperties);
 
-        when(machineManager.getMachine(MACHINE_ID)).thenReturn(instance);
+        when(machineManager.getInstance(MACHINE_ID)).thenReturn(instance);
         when(instance.getOwner()).thenReturn(OWNER_ID);
-        when(instance.getMetadata()).thenReturn(metadata);
+        when(instance.getRuntime()).thenReturn(machineRuntime);
         when(instance.getLogger()).thenReturn(lineConsumer);
 
         keysInjector.start();
@@ -123,7 +123,7 @@ public class KeysInjectorTest {
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID));
 
-        verify(machineManager).getMachine(eq(MACHINE_ID));
+        verify(machineManager).getInstance(eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
         verifyZeroInteractions(docker, machineManager, sshManager);
     }
@@ -136,7 +136,7 @@ public class KeysInjectorTest {
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID));
 
-        verify(machineManager).getMachine(eq(MACHINE_ID));
+        verify(machineManager).getInstance(eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
         verifyZeroInteractions(docker, machineManager, sshManager);
     }
@@ -150,7 +150,7 @@ public class KeysInjectorTest {
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID));
 
-        verify(machineManager).getMachine(eq(MACHINE_ID));
+        verify(machineManager).getInstance(eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
 
         verify(docker).createExec(anyString(), anyBoolean(), eq("/bin/bash"), eq("-c"), eq("mkdir ~/.ssh/ -p" +

@@ -97,31 +97,12 @@ class IdeSvc {
             if (message.eventType === 'RUNNING' && message.workspaceId === this.selectedWorkspace.id) {
 
                 // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-                let promiseRuntime = this.cheAPI.getWorkspace().getRuntime(this.selectedWorkspace.id);
-                promiseRuntime.then((runtimeData) => {
-                    // extract the Websocket URL of the runtime
-                    let servers = runtimeData.devMachine.metadata.servers;
-
-                    var extensionServerAddress;
-                    for (var key in servers) {
-                        let server = servers[key];
-                        if ('extensions' === server.ref) {
-                            extensionServerAddress = server.address;
-                        }
-                    }
-
-                    let endpoint = runtimeData.devMachine.metadata.envVariables.CHE_API_ENDPOINT;
-
-                    var contextPath;
-                    if (endpoint.endsWith('/ide/api')) {
-                        contextPath = 'ide';
-                    } else {
-                        contextPath = 'api';
-                    }
-
+                let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(this.selectedWorkspace.id);
+                promiseRuntime.then(() => {
+                    let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.selectedWorkspace.id);
                     // try to connect
                     this.websocketReconnect = 50;
-                    this.connectToExtensionServer('ws://' + extensionServerAddress + '/' + contextPath + '/ext/ws/' + this.selectedWorkspace.id, this.selectedWorkspace.id);
+                    this.connectToExtensionServer(websocketUrl, this.selectedWorkspace.id);
 
                 });
             }
@@ -133,12 +114,12 @@ class IdeSvc {
 
     startWorkspace(bus, data) {
 
-        let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.defaultEnv);
+        let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
 
         startWorkspacePromise.then((data) => {
             // get channels
-            let environments = data.environments;
-            let defaultEnvName = data.defaultEnv;
+            let environments = data.config.environments;
+            let defaultEnvName = data.config.defaultEnv;
             let defaultEnvironment = this.lodash.find(environments, (environment) => {
               return environment.name === defaultEnvName;
             });
@@ -268,7 +249,7 @@ class IdeSvc {
         }
 
         if (inDevMode) {
-            this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(this.proxySettings + contextPath + this.selectedWorkspace.name + appendUrl);
+            this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(this.proxySettings + contextPath + this.selectedWorkspace.config.name + appendUrl);
         } else {
             this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
         }

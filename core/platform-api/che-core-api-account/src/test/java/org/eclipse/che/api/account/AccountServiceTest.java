@@ -22,10 +22,15 @@ import org.eclipse.che.api.account.shared.dto.NewMembership;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.impl.ApplicationContextImpl;
@@ -67,11 +72,9 @@ import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.POST;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.RETURNS_MOCKS;
-import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,8 +99,8 @@ public class AccountServiceTest {
     private final String USER_ID      = "user123abc456def";
     private final String ACCOUNT_ID   = "account0xffffffffff";
     private final String ACCOUNT_NAME = "codenvy";
-    private final String USER_EMAIL   = "account@mail.com";
-    private final User   user         = new User().withId(USER_ID).withEmail(USER_EMAIL);
+    private final String USER_NAME    = "account";
+    private final User   user         = new User().withId(USER_ID).withName(USER_NAME);
 
     @Mock
     private AccountDao accountDao;
@@ -145,12 +148,12 @@ public class AccountServiceTest {
         memberships.add(ownerMembership);
 
         when(environmentContext.get(SecurityContext.class)).thenReturn(securityContext);
-        when(securityContext.getUserPrincipal()).thenReturn(new SimplePrincipal(USER_EMAIL));
+        when(securityContext.getUserPrincipal()).thenReturn(new SimplePrincipal(USER_NAME));
 
         org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setUser(new org.eclipse.che.commons.user.User() {
             @Override
             public String getName() {
-                return user.getEmail();
+                return user.getName();
             }
 
             @Override
@@ -182,7 +185,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldBeAbleToCreateAccount() throws Exception {
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
+        when(userDao.getByName(USER_NAME)).thenReturn(user);
         when(accountDao.getByName(account.getName())).thenThrow(new NotFoundException("Account not found"));
         when(accountDao.getByOwner(USER_ID)).thenReturn(Collections.<Account>emptyList());
         String role = "user";
@@ -211,7 +214,7 @@ public class AccountServiceTest {
     @Test
     public void shouldNotBeAbleToCreateAccountIfUserAlreadyHasOne() throws Exception {
         prepareSecurityContext("user");
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
+        when(userDao.getByName(USER_NAME)).thenReturn(user);
         when(accountDao.getByOwner(USER_ID)).thenReturn(Arrays.asList(account));
 
         ContainerResponse response = makeRequest(POST, SERVICE_PATH, MediaType.APPLICATION_JSON, account);
@@ -220,7 +223,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldBeAbleToGetMemberships() throws Exception {
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
+        when(userDao.getByName(USER_NAME)).thenReturn(user);
         when(accountDao.getByMember(USER_ID)).thenReturn(memberships);
         when(accountDao.getById(ACCOUNT_ID)).thenReturn(account);
 
@@ -446,7 +449,7 @@ public class AccountServiceTest {
 
     @Test
     public void workspaceShouldBeRegistered() throws Exception {
-        UsersWorkspaceImpl workspace = mock(UsersWorkspaceImpl.class);
+        UsersWorkspaceImpl workspace = spy(createUsersWorkspace());
         Account account = new Account("account123");
         when(workspace.getId()).thenReturn("workspace123");
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
@@ -581,5 +584,24 @@ public class AccountServiceTest {
             when(securityContext.isUserInRole("user")).thenReturn(true);
         }
         when(securityContext.isUserInRole(role)).thenReturn(true);
+    }
+
+    private UsersWorkspaceImpl createUsersWorkspace() {
+        final EnvironmentImpl environment = new EnvironmentImpl("name",
+                                                                new RecipeImpl(),
+                                                                singletonList(new MachineConfigImpl(true,
+                                                                                                    "name",
+                                                                                                    "type",
+                                                                                                    new MachineSourceImpl("type",
+                                                                                                                          "location"),
+                                                                                                    null)));
+        return new UsersWorkspaceImpl(new WorkspaceConfigImpl("name",
+                                                              "desc",
+                                                              "defEnv",
+                                                              null,
+                                                              null,
+                                                              singletonList(environment),
+                                                              null)
+                , "id123", "owner1234");
     }
 }

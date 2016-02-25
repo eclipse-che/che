@@ -10,14 +10,50 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.machine;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * Defines runtime machine.
  *
  * @author gazarenkov
+ * @author Alexander Garagatyi
  */
-public interface Machine extends MachineState {
+public interface Machine {
     /**
-     * Returns machine specific metadata
+     * Returns configuration used to create this machine
      */
-    MachineMetadata getMetadata();
+    MachineConfig getConfig();
+
+    /**
+     * Returns machine identifier. It is unique and mandatory.
+     */
+    String getId();
+
+    /**
+     * Returns ID of workspace this machine belongs to. It is mandatory.
+     */
+    String getWorkspaceId();
+
+    /**
+     * Returns name of environment that started this machine. It is mandatory.
+     */
+    String getEnvName();
+
+    /**
+     * Returns machine owner (users identifier). It is mandatory.
+     */
+    String getOwner();
+
+    /**
+     * Runtime status of the machine
+     */
+    MachineStatus getStatus();
+
+    /**
+     * Runtime information about machine.
+     * <p>
+     * Is available only when {@link #getStatus()} returns {@link MachineStatus#RUNNING}
+     */
+    @Nullable
+    MachineRuntimeInfo getRuntime();
 }

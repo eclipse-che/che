@@ -13,7 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 
@@ -45,10 +46,10 @@ public class MachineTreeNode {
         this.data = data;
         this.children = children;
 
-        boolean isMachine = data instanceof MachineStateDto;
+        boolean isMachine = data instanceof Machine;
 
-        id = isMachine ? ((MachineStateDto)data).getId() : ROOT;
-        name = isMachine ? ((MachineStateDto)data).getName() : ROOT;
+        id = isMachine ? ((MachineDto)data).getId() : ROOT;
+        name = isMachine ? ((MachineDto)data).getConfig().getName() : ROOT;
     }
 
     @NotNull

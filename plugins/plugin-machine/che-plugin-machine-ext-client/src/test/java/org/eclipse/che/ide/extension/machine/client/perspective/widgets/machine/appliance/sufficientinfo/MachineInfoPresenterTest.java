@@ -17,6 +17,7 @@ import org.eclipse.che.api.user.gwt.client.UserProfileServiceClient;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -37,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -158,7 +160,9 @@ public class MachineInfoPresenterTest {
     //TODO fix test
     public void workspaceNameShouldBeSet() throws Exception {
         when(machine.getWorkspaceId()).thenReturn(SOME_TEXT);
-        when(wsDescriptor.getName()).thenReturn(SOME_TEXT);
+        WorkspaceConfigDto wsConfigDto = mock(WorkspaceConfigDto.class);
+        when(wsDescriptor.getConfig()).thenReturn(wsConfigDto);
+        when(wsConfigDto.getName()).thenReturn(SOME_TEXT);
         when(wsService.getUsersWorkspace(SOME_TEXT)).thenReturn(promise);
 
         presenter.update(machine);

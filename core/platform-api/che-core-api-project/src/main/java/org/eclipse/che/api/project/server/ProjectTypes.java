@@ -78,7 +78,10 @@ public class ProjectTypes {
 //                    throw new ProjectTypeConstraintException("No project type registered for " + mixinFromConfig);
 //                }
                 if (!mixin.isMixable()) {
-                    throw new ProjectTypeConstraintException("Project type " + mixin + " is not allowable to be mixin");
+                    throw new ProjectTypeConstraintException("Project type " + mixin + " is not allowable to be mixin. It not mixabel");
+                }
+                if (!mixin.isPersisted()) {
+                    throw new ProjectTypeConstraintException("Project type " + mixin + " is not allowable to be mixin. It not persisted");
                 }
 
                 // detect duplicated attributes

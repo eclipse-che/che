@@ -18,15 +18,18 @@
 export class CheWorkspaceBuilder {
 
   constructor() {
-    this.workspace = {};
-    this.workspace.projects = [];
-    this.workspace.temporary = false;
+    this.workspace = {
+      config: {
+        projects: [],
+        temporary: false
+      }
+    };
 
   }
 
 
   withName(name) {
-    this.workspace.name = name;
+    this.workspace.config.name = name;
     return this;
   }
 
@@ -36,7 +39,7 @@ export class CheWorkspaceBuilder {
   }
 
   withTemporary(temporary) {
-    this.workspace.temporary = temporary;
+    this.workspace.config.temporary = temporary;
     return this;
   }
 

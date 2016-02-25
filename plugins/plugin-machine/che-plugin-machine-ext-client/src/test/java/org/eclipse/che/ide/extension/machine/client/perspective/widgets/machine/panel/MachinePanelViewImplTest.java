@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.machine.shared.dto.MachineStateDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelView.ActionDelegate;
 import org.eclipse.che.ide.ui.tree.Tree;
@@ -49,7 +49,7 @@ public class MachinePanelViewImplTest {
     @Mock
     private MachineTreeNode               treeNode;
     @Mock
-    private MachineStateDto               machineState;
+    private MachineDto                    machineState;
 
     private MachinePanelViewImpl view;
 

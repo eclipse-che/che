@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-api-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC5-SNAPSHOT</version>
+        <version>4.0.0-RC7-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-git</artifactId>
     <packaging>jar</packaging>
@@ -45,6 +45,10 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>

@@ -22,12 +22,12 @@ export class ListWorkspacesCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor (cheAPI, $q) {
+  constructor(cheAPI, $q) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.state = 'loading';
     this.isInfoLoading = true;
-    this.workspaceFilter = {name: ''};
+    this.workspaceFilter = {config: {name: ''}};
 
     //Map of all workspaces with additional info by id:
     this.workspacesById = new Map();

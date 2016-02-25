@@ -15,6 +15,8 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 
+import static org.eclipse.che.ide.ext.java.shared.Constants.CONTAINS_JAVA_FILES;
+
 /**
  * Bare Java project type.
  *
@@ -27,5 +29,6 @@ public class JavaProjectType extends ProjectTypeDef {
         super("java", "Java", true, false);
         addConstantDefinition(Constants.LANGUAGE, "language", "java");
         addVariableDefinition(Constants.LANGUAGE_VERSION, "java version", true, jpFactory);
+        addVariableDefinition(CONTAINS_JAVA_FILES, "contains java files", true, jpFactory);
     }
 }

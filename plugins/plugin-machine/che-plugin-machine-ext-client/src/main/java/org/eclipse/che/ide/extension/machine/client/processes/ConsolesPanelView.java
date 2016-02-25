@@ -65,6 +65,9 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
     /** Marks process with a badge in process tree */
     void markProcessHasOutput(String processId);
 
+    /** Removes all process widgets from the view */
+    void clear();
+
     /** Returns index for node with given ID */
     int getNodeIndex(String processId);
 
