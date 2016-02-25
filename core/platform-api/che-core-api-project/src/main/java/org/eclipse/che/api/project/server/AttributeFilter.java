@@ -181,7 +181,7 @@ public class AttributeFilter {
             if (factory == null) {
                 List<String> value = projectConfig.getAttributes().get(attribute.getName());
 
-                persistentAttributes.put(variable.getName(), MoreObjects.firstNonNull(value, new ArrayList<>()));
+                persistentAttributes.put(variable.getName(), MoreObjects.firstNonNull(value, new ArrayList<String>()));
             }
         }
 
