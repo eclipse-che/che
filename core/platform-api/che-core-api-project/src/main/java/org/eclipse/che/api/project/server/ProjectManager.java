@@ -73,45 +73,36 @@ import java.util.concurrent.Executors;
 public final class ProjectManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
 
-    private final VirtualFileSystem vfs;
-
-    private final EventService           eventService;
-    private final ProjectTypeRegistry    projectTypeRegistry;
-    private final ProjectHandlerRegistry handlers;
-
-    private final ProjectRegistry        projectRegistry;
-
-    private final ProjectImporterRegistry importers;
-
+    private final VirtualFileSystem              vfs;
+    private final EventService                   eventService;
+    private final ProjectTypeRegistry            projectTypeRegistry;
+    private final ProjectRegistry                projectRegistry;
+    private final ProjectHandlerRegistry         handlers;
+    private final ProjectImporterRegistry        importers;
     private final FileTreeWatcher                fileWatcher;
     private final FileWatcherNotificationHandler fileWatchNotifier;
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
-                                                                          new ThreadFactoryBuilder()
-                                                                                  .setNameFormat("ProjectService-IndexingThread-")
-                                                                                  .setDaemon(true).build()
-                                                                         );
+    private final ExecutorService                executor;
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
                           EventService eventService,
                           ProjectTypeRegistry projectTypeRegistry,
+                          ProjectRegistry projectRegistry,
                           ProjectHandlerRegistry handlers,
                           ProjectImporterRegistry importers,
-                          ProjectRegistry projectRegistry,
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
-                          FileTreeWatcher fileTreeWatcher)
-            throws ServerException, NotFoundException, ProjectTypeConstraintException,
-                   ValueStorageException, IOException, InterruptedException {
-
+                          FileTreeWatcher fileTreeWatcher) throws ServerException {
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.eventService = eventService;
         this.projectTypeRegistry = projectTypeRegistry;
+        this.projectRegistry = projectRegistry;
         this.handlers = handlers;
         this.importers = importers;
-        this.projectRegistry = projectRegistry;
         this.fileWatchNotifier = fileWatcherNotificationHandler;
         this.fileWatcher = fileTreeWatcher;
+        executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
+                                                new ThreadFactoryBuilder().setNameFormat("ProjectService-IndexingThread-")
+                                                                          .setDaemon(true).build());
     }
 
     @PostConstruct
@@ -135,36 +126,33 @@ public final class ProjectManager {
         executor.shutdownNow();
     }
 
-    public FolderEntry getProjectsRoot() throws ServerException, NotFoundException {
+    public FolderEntry getProjectsRoot() throws ServerException {
         return new FolderEntry(vfs.getRoot());
     }
 
-    public ProjectTypeRegistry getProjectTypeRegistry() {
-        return this.projectTypeRegistry;
-    }
-
     public Searcher getSearcher() throws NotFoundException, ServerException {
-        SearcherProvider provider = vfs.getSearcherProvider();
-        if (provider == null)
+        final SearcherProvider provider = vfs.getSearcherProvider();
+        if (provider == null) {
             throw new NotFoundException("SearcherProvider is not defined in VFS");
+        }
 
         return provider.getSearcher(vfs);
     }
 
     public void addWatchListener(FileWatcherNotificationListener listener) {
-        this.fileWatchNotifier.addNotificationListener(listener);
+        fileWatchNotifier.addNotificationListener(listener);
     }
 
     public void removeWatchListener(FileWatcherNotificationListener listener) {
-        this.fileWatchNotifier.removeNotificationListener(listener);
+        fileWatchNotifier.removeNotificationListener(listener);
     }
 
     public void addWatchExcludeMatcher(PathMatcher matcher) {
-        this.fileWatcher.addExcludeMatcher(matcher);
+        fileWatcher.addExcludeMatcher(matcher);
     }
 
     public void removeWatchExcludeMatcher(PathMatcher matcher) {
-        this.fileWatcher.removeExcludeMatcher(matcher);
+        fileWatcher.removeExcludeMatcher(matcher);
     }
 
     /**
@@ -200,30 +188,30 @@ public final class ProjectManager {
      * @throws ServerException
      * @throws NotFoundException
      */
-    public RegisteredProject createProject(ProjectConfig projectConfig,
-                                           Map<String, String> options) throws ConflictException,
-                                                                               ForbiddenException,
-                                                                               ServerException,
-                                                                               NotFoundException {
+    public RegisteredProject createProject(ProjectConfig projectConfig, Map<String, String> options) throws ConflictException,
+                                                                                                            ForbiddenException,
+                                                                                                            ServerException,
+                                                                                                            NotFoundException {
         // path and primary type is mandatory
-        if (projectConfig.getPath() == null)
+        if (projectConfig.getPath() == null) {
             throw new ConflictException("Path for new project should be defined ");
+        }
 
-        String path = ProjectRegistryImpl.absolutizePath(projectConfig.getPath());
+        final String path = ProjectRegistryImpl.absolutizePath(projectConfig.getPath());
 
-        if (projectConfig.getType() == null)
+        if (projectConfig.getType() == null) {
             throw new ConflictException("Project Type is not defined " + path);
+        }
 
-        if (getProject(path) != null)
+        if (getProject(path) != null) {
             throw new ConflictException("Project config already exists " + path);
+        }
 
-
-        FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path));
-        CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
+        final FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path));
+        final CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
 
         if (generator != null) {
             Map<String, AttributeValue> valueMap = new HashMap<>();
-
             Map<String, List<String>> attributes = projectConfig.getAttributes();
 
             if (attributes != null) {
@@ -232,9 +220,9 @@ public final class ProjectManager {
                 }
             }
 
-            if (options == null)
+            if (options == null) {
                 options = new HashMap<>();
-
+            }
             generator.onCreateProject(projectFolder, valueMap, options);
         }
 
@@ -270,16 +258,18 @@ public final class ProjectManager {
                                                                            IOException {
         String path = newConfig.getPath();
 
-        if (path == null)
+        if (path == null) {
             throw new ConflictException("Project path is not defined");
+        }
 
-        FolderEntry baseFolder = asFolder(path);
+        final FolderEntry baseFolder = asFolder(path);
 
         // If a project does not exist in the target path, create a new one
-        if (baseFolder == null)
+        if (baseFolder == null) {
             throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
+        }
 
-        RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
+        final RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
         final ProjectUpdatedHandler updateProjectHandler = handlers.getProjectUpdatedHandler(newConfig.getType());
         if (updateProjectHandler != null) {
             updateProjectHandler.onProjectUpdated(baseFolder);
@@ -291,20 +281,22 @@ public final class ProjectManager {
         return project;
     }
 
-    public RegisteredProject importProject(String path, SourceStorage sourceStorage)
-            throws ServerException, IOException, ForbiddenException, UnauthorizedException, ConflictException, NotFoundException {
+    public RegisteredProject importProject(String path, SourceStorage sourceStorage) throws ServerException,
+                                                                                            IOException,
+                                                                                            ForbiddenException,
+                                                                                            UnauthorizedException,
+                                                                                            ConflictException,
+                                                                                            NotFoundException {
 
         final ProjectImporter importer = importers.getImporter(sourceStorage.getType());
         if (importer == null) {
             throw new NotFoundException(String.format("Unable import sources project from '%s'. Sources type '%s' is not supported.",
-                                                    sourceStorage.getLocation(), sourceStorage.getType()));
+                                                      sourceStorage.getLocation(), sourceStorage.getType()));
         }
-        // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
-        final LineConsumerFactory outputOutputConsumerFactory = () -> new ProjectImportOutputWSLineConsumer(path,
-                                                                                                            projectRegistry
-                                                                                                                    .getWorkspaceId(),
-                                                                                                            300);
 
+        // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
+        final LineConsumerFactory outputOutputConsumerFactory =
+                () -> new ProjectImportOutputWSLineConsumer(path, projectRegistry.getWorkspaceId(), 300);
 
         // Not all importers uses virtual file system API. In this case virtual file system API doesn't get events and isn't able to set
         // correct creation time. Need do it manually.
@@ -312,42 +304,35 @@ public final class ProjectManager {
 
         FolderEntry folder = asFolder(path);
 
-        if (folder == null)
+        if (folder == null) {
             folder = getProjectsRoot().createFolder(path);
-
+        }
 
         importer.importSources(folder, sourceStorage, outputOutputConsumerFactory);
 
-        String name = folder.getPath().getName();
-
+        final String name = folder.getPath().getName();
         return projectRegistry.putProject(new NewProjectConfig(path, name, BaseProjectType.ID, sourceStorage), folder, true, false);
-
     }
 
-
-    public ProjectTypeResolution estimateProject(String path, String projectTypeId)
-            throws ServerException, NotFoundException, ValueStorageException {
-
-
-
-        ProjectTypeDef projectType = projectTypeRegistry.getProjectType(projectTypeId);
+    public ProjectTypeResolution estimateProject(String path, String projectTypeId) throws ServerException,
+                                                                                           NotFoundException,
+                                                                                           ValueStorageException {
+        final ProjectTypeDef projectType = projectTypeRegistry.getProjectType(projectTypeId);
         if (projectType == null) {
             throw new NotFoundException("Project Type " + projectTypeId + " not found.");
         }
 
-       FolderEntry baseFolder = asFolder(path);
+        final FolderEntry baseFolder = asFolder(path);
 
-        if(baseFolder == null)
-            throw new NotFoundException("Folder not found: "+path);
+        if (baseFolder == null) {
+            throw new NotFoundException("Folder not found: " + path);
+        }
 
         return projectType.resolveSources(baseFolder);
-
     }
 
     // ProjectSuggestion
-    public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly)
-            throws ServerException, NotFoundException {
-
+    public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly) throws ServerException, NotFoundException {
         final List<ProjectTypeResolution> resolutions = new ArrayList<>();
 //        boolean isPresentPrimaryType = false;
 
@@ -356,17 +341,14 @@ public final class ProjectManager {
                 continue;
             }
 
-
             try {
                 ProjectTypeResolution resolution = estimateProject(path, type.getId());
-                if(resolution.matched()) {
+                if (resolution.matched()) {
                     resolutions.add(resolution);
                 }
             } catch (ValueStorageException e) {
                 LOG.warn(e.getLocalizedMessage(), e);
             }
-
-
         }
 
 //        if (!isPresentPrimaryType) {
@@ -385,46 +367,44 @@ public final class ProjectManager {
      * @throws NotFoundException
      * @throws ConflictException
      */
-    public void delete(String path) throws ServerException,
-                                           ForbiddenException,
-                                           NotFoundException,
-                                           ConflictException {
-
-
-        String apath = ProjectRegistryImpl.absolutizePath(path);
+    public void delete(String path) throws ServerException, ForbiddenException, NotFoundException, ConflictException {
+        final String apath = ProjectRegistryImpl.absolutizePath(path);
 
         // delete item
         VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
-        if (item == null)
+        if (item == null) {
             return;
+        }
 
         item.delete();
 
         // delete child projects
         projectRegistry.removeProjects(apath);
-
     }
 
-
-    public VirtualFileEntry copyTo(String itemPath, String newParentPath, String newName, boolean overwrite)
-            throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-
+    public VirtualFileEntry copyTo(String itemPath, String newParentPath, String newName, boolean overwrite) throws ServerException,
+                                                                                                                    NotFoundException,
+                                                                                                                    ConflictException,
+                                                                                                                    ForbiddenException {
         VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
-        if (oldItem == null)
+        if (oldItem == null) {
             throw new NotFoundException("Item not found " + itemPath);
+        }
 
         VirtualFile newParent = vfs.getRoot().getChild(Path.of(newParentPath));
-        if (oldItem == null)
+        if (newParent == null) {
             throw new NotFoundException("New parent not found " + newParentPath);
+        }
 
-        VirtualFile newItem = oldItem.copyTo(newParent, newName, overwrite);
-        RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
+        final VirtualFile newItem = oldItem.copyTo(newParent, newName, overwrite);
+        final RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
 
-        VirtualFileEntry copy;
-        if (newItem.isFile())
+        final VirtualFileEntry copy;
+        if (newItem.isFile()) {
             copy = new FileEntry(newItem, owner.getPath());
-        else
+        } else {
             copy = new FolderEntry(newItem, owner.getPath());
+        }
 
         if (copy.isProject()) {
             projectRegistry.getProject(copy.getProject()).getTypes();
@@ -432,38 +412,39 @@ public final class ProjectManager {
         }
 
         return copy;
-
-
     }
 
-
-    public VirtualFileEntry moveTo(String itemPath, String newParentPath, String newName, boolean overwrite)
-            throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-
-        VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
-        if (oldItem == null)
+    public VirtualFileEntry moveTo(String itemPath, String newParentPath, String newName, boolean overwrite) throws ServerException,
+                                                                                                                    NotFoundException,
+                                                                                                                    ConflictException,
+                                                                                                                    ForbiddenException {
+        final VirtualFile oldItem = vfs.getRoot().getChild(Path.of(itemPath));
+        if (oldItem == null) {
             throw new NotFoundException("Item not found " + itemPath);
+        }
 
-        VirtualFile newParent;
-        if (newParentPath == null)
+        final VirtualFile newParent;
+        if (newParentPath == null) {
             // rename only
             newParent = oldItem.getParent();
-        else
+        } else {
             newParent = vfs.getRoot().getChild(Path.of(newParentPath));
+        }
 
-        if (newParent == null)
+        if (newParent == null) {
             throw new NotFoundException("New parent not found " + newParentPath);
+        }
 
         // TODO lock token ?
-        VirtualFile newItem = oldItem.moveTo(newParent, newName, overwrite, null);
+        final VirtualFile newItem = oldItem.moveTo(newParent, newName, overwrite, null);
+        final RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
 
-        RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
-
-        VirtualFileEntry move;
-        if (newItem.isFile())
+        final VirtualFileEntry move;
+        if (newItem.isFile()) {
             move = new FileEntry(newItem, owner.getPath());
-        else
+        } else {
             move = new FolderEntry(newItem, owner.getPath());
+        }
 
         if (move.isProject()) {
             projectRegistry.getProject(move.getProject()).getTypes();
@@ -473,22 +454,23 @@ public final class ProjectManager {
         return move;
     }
 
-
     // TODO do we need ForbiddenException
     FolderEntry asFolder(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
-        if (entry == null)
+        if (entry == null) {
             return null;
+        }
+
         if (!entry.isFolder()) {
             throw new NotFoundException(String.format("Item '%s' isn't a folder. ", path));
         }
+
         return (FolderEntry)entry;
     }
 
     // TODO do we need ForbiddenException
-    VirtualFileEntry asVirtualFileEntry(String path)
-            throws NotFoundException, ServerException {
-        String apath = ProjectRegistryImpl.absolutizePath(path);
+    VirtualFileEntry asVirtualFileEntry(String path) throws NotFoundException, ServerException {
+        final String apath = ProjectRegistryImpl.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
         final VirtualFileEntry entry = root.getChild(apath);
 //        if (entry == null) {
@@ -499,20 +481,16 @@ public final class ProjectManager {
 
     FileEntry asFile(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
-        if (entry == null)
+        if (entry == null) {
             return null;
+        }
+
         if (!entry.isFile()) {
             throw new NotFoundException(String.format("Item '%s' isn't a file. ", path));
         }
+
         return (FileEntry)entry;
     }
-
-
-
-    /* ===================================== */
-    /*  Private methods                      */
-    /* ===================================== */
-
 
     /**
      * Some importers don't use virtual file system API and changes are not indexed.
@@ -525,8 +503,7 @@ public final class ProjectManager {
         final VirtualFile file = project.getBaseFolder().getVirtualFile();
         executor.execute(() -> {
             try {
-
-                Searcher searcher;
+                final Searcher searcher;
                 try {
                     searcher = getSearcher();
                 } catch (NotFoundException e) {

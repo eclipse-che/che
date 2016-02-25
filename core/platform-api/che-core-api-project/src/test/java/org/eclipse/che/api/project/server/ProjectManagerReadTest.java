@@ -76,8 +76,8 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
-        pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectHandlerRegistry,
-                                null, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                null, fileWatcherNotificationHandler, fileTreeWatcher);
         pm.initWatcher();
     }
 

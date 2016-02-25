@@ -59,8 +59,9 @@ import static org.mockito.Mockito.when;
 @Ignore
 public class MavenProjectTypeTest {
 
-    private ProjectManager  pm;
-    private HttpJsonRequest httpJsonRequest;
+    private ProjectTypeRegistry ptRegistry;
+    private ProjectManager      pm;
+    private HttpJsonRequest     httpJsonRequest;
 
 //    @Mock
 //    private Provider<AttributeFilter> filterProvider;
@@ -94,7 +95,7 @@ public class MavenProjectTypeTest {
         projTypes.add(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
         projTypes.add(new MavenProjectType(new MavenValueProviderFactory()));
 
-        ProjectTypeRegistry ptRegistry = new ProjectTypeRegistry(projTypes);
+        ptRegistry = new ProjectTypeRegistry(projTypes);
 
         Set<ProjectHandler> handlers = new HashSet<>();
         handlers.add(new MavenProjectGenerator(Collections.<GeneratorStrategy>emptySet()));
@@ -114,7 +115,7 @@ public class MavenProjectTypeTest {
 
     @Test
     public void testGetProjectType() throws Exception {
-        ProjectTypeDef pt = pm.getProjectTypeRegistry().getProjectType("maven");
+        ProjectTypeDef pt = ptRegistry.getProjectType("maven");
 
         //Assert.assertNotNull(pt);
         Assert.assertTrue(pt.getAttributes().size() > 0);

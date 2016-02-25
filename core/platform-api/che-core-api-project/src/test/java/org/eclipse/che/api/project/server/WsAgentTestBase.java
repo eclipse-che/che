@@ -117,8 +117,8 @@ public class WsAgentTestBase {
         fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
-                                importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
         pm.initWatcher();
     }
 
