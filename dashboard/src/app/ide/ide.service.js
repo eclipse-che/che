@@ -34,6 +34,7 @@ class IdeSvc {
         this.$location = $location;
         this.routeHistory = routeHistory;
 
+        this.ideParams = new Map();
 
         this.currentStep = 0;
         this.selectedWorkspace = null;
@@ -216,6 +217,10 @@ class IdeSvc {
         });
     }
 
+    setLoadingParameter(paramName, paramValue) {
+      this.ideParams.set(paramName, paramValue);
+    }
+
     setIDEAction(ideAction) {
       this.ideAction = ideAction;
     }
@@ -246,6 +251,13 @@ class IdeSvc {
 
           // reset action
           this.ideAction = null;
+        }
+
+        if (this.ideParams) {
+          for (var [key, val] of this.ideParams) {
+            appendUrl = appendUrl + '&' + key + '=' + val;
+          }
+          this.ideParams.clear();
         }
 
         if (inDevMode) {
