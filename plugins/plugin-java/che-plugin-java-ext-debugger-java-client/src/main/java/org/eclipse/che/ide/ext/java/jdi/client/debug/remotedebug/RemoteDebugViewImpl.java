@@ -100,4 +100,10 @@ public class RemoteDebugViewImpl extends Composite implements RemoteDebugView {
     public void show() {
         dialog.show();
     }
+
+    @Override
+    public void setFocusInHostField() {
+        host.setFocus(true);
+    }
+
 }

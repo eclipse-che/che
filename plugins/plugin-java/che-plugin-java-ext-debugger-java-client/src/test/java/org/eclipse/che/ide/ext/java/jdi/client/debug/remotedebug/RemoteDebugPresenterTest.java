@@ -34,13 +34,6 @@ public class RemoteDebugPresenterTest {
     private RemoteDebugPresenter presenter;
 
     @Test
-    public void dialogShouldBeShown() throws Exception {
-        presenter.showDialog();
-
-        verify(view).show();
-    }
-
-    @Test
     public void connectToRemoteDebuggerShouldBeDone() throws Exception {
         presenter.onConfirmClicked("host", 8000);
 

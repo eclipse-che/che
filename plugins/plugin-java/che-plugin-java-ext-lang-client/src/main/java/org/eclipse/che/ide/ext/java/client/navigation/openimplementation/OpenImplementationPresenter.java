@@ -192,6 +192,9 @@ public class OpenImplementationPresenter {
             public void onEditorOpened(EditorPartPresenter editor) {
                 setCursorPosition(member.getFileRegion());
             }
+
+            @Override
+            public void onEditorActivated(EditorPartPresenter editor) { }
         });
     }
 

@@ -10,19 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.client.debug.changevalue;
 
-import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
-import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerInfo;
-import org.eclipse.che.ide.ext.java.jdi.shared.UpdateVariableRequest;
-import org.eclipse.che.ide.ext.java.jdi.shared.Variable;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
+import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerVariable;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Presenter for changing variables value.
@@ -31,35 +26,33 @@ import javax.validation.constraints.NotNull;
  */
 @Singleton
 public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
-    private final DtoFactory                      dtoFactory;
-    private       ChangeValueView                 view;
-    /** Variable to change its value. */
-    private       Variable                        variable;
+    private final DebuggerManager                 debuggerManager;
+    private final ChangeValueView                 view;
+    private final DebuggerPresenter               debuggerPresenter;
     /** Connected debugger information. */
-    private       DebuggerInfo                    debuggerInfo;
-    private       DebuggerServiceClient           service;
-    private       JavaRuntimeLocalizationConstant constant;
-    private       AsyncCallback<String>           callback;
+    private final JavaRuntimeLocalizationConstant constant;
+    /** Variable to change its value. */
+    private       DebuggerVariable                debuggerVariable;
 
     /** Create presenter. */
     @Inject
-    public ChangeValuePresenter(ChangeValueView view, DebuggerServiceClient service, JavaRuntimeLocalizationConstant constant,
-                                DtoFactory dtoFactory) {
+    public ChangeValuePresenter(ChangeValueView view,
+                                JavaRuntimeLocalizationConstant constant,
+                                DebuggerManager debuggerManager,
+                                DebuggerPresenter debuggerPresenter) {
         this.view = view;
-        this.dtoFactory = dtoFactory;
+        this.debuggerManager = debuggerManager;
+        this.debuggerPresenter = debuggerPresenter;
         this.view.setDelegate(this);
-        this.service = service;
         this.constant = constant;
     }
 
     /** Show dialog. */
-    public void showDialog(@NotNull DebuggerInfo debuggerInfo, @NotNull Variable variable, @NotNull AsyncCallback<String> callback) {
-        this.debuggerInfo = debuggerInfo;
-        this.variable = variable;
-        this.callback = callback;
+    public void showDialog() {
+        this.debuggerVariable = debuggerPresenter.getSelectedVariable();
 
-        view.setValueTitle(constant.changeValueViewExpressionFieldTitle(variable.getName()));
-        view.setValue(variable.getValue());
+        view.setValueTitle(constant.changeValueViewExpressionFieldTitle(debuggerVariable.getName()));
+        view.setValue(debuggerVariable.getValue());
         view.focusInValueField();
         view.selectAllText();
         view.setEnableChangeButton(false);
@@ -75,22 +68,11 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onChangeClicked() {
-        final String newValue = view.getValue();
-        UpdateVariableRequest updateVariableRequest = dtoFactory.createDto(UpdateVariableRequest.class);
-        updateVariableRequest.setVariablePath(variable.getVariablePath());
-        updateVariableRequest.setExpression(newValue);
-
-        service.setValue(debuggerInfo.getId(), updateVariableRequest, new AsyncRequestCallback<Void>() {
-            @Override
-            protected void onSuccess(Void result) {
-                callback.onSuccess(newValue);
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
+        Debugger debugger = debuggerManager.getDebugger();
+        if (debugger != null) {
+            final String newValue = view.getValue();
+            debugger.changeVariableValue(debuggerVariable.getVariablePath().getPath(), newValue);
+        }
 
         view.close();
     }

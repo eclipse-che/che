@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.java.jdi.client;
 
 import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.ImageResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -19,22 +18,22 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public interface JavaRuntimeResources extends ClientBundle {
 
     @Source("resume.svg")
-    SVGResource resumeButton();
+    SVGResource resumeExecution();
 
     @Source("connect.svg")
     SVGResource connectButton();
 
     @Source("disconnect.svg")
-    SVGResource disconnectButton();
+    SVGResource disconnectDebugger();
 
     @Source("stepinto.svg")
-    SVGResource stepIntoButton();
+    SVGResource stepInto();
 
     @Source("stepover.svg")
-    SVGResource stepOverButton();
+    SVGResource stepOver();
 
-    @Source("stepreturn.svg")
-    SVGResource stepReturnButton();
+    @Source("stepout.svg")
+    SVGResource stepOut();
 
     @Source("debug.svg")
     SVGResource debug();
@@ -43,13 +42,13 @@ public interface JavaRuntimeResources extends ClientBundle {
     SVGResource changeVariableValue();
 
     @Source("evaluate.svg")
-    SVGResource evaluate();
+    SVGResource evaluateExpression();
 
     @Source("breakpoint.svg")
     SVGResource breakpoint();
 
     @Source("remove.svg")
-    SVGResource removeAllBreakpointsButton();
+    SVGResource deleteAllBreakpoints();
 
     @Source("separator.svg")
     SVGResource separator();

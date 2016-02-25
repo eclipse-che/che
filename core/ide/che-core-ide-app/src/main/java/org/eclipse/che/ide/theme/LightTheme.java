@@ -803,6 +803,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String getRedIconColor() {
+        return "#CF405F";
+    }
+
+    @Override
     public String getSplitterSmallBorderColor() {
         return "#8E8E8E";
     }

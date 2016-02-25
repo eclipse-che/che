@@ -100,9 +100,4 @@ public class DebuggerStateEvent extends GwtEvent<DebuggerStateEventHandler> {
         handler.onStateChanged(this);
     }
 
-    public enum DebuggerState {
-        INITIALIZED,
-        DISCONNECTED,
-        CONNECTED
-    }
 }

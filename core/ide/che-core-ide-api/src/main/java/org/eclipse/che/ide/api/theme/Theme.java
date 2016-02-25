@@ -1091,6 +1091,11 @@ public interface Theme {
     String getBlueIconColor();
 
     /**
+     * @return the red color for icon.
+     */
+    String getRedIconColor();
+
+    /**
      * @return the color of the popup background.
      */
     String getPopupBkgColor();

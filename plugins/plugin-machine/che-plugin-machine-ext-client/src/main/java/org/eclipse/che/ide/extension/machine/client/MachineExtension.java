@@ -131,7 +131,7 @@ public class MachineExtension {
         actionManager.registerAction("executeSelectedCommand", executeSelectedCommandAction);
 
         // add actions in main menu
-        runMenu.add(editCommandsAction);
+        runMenu.add(editCommandsAction, FIRST);
 
         //add actions in machine menu
         final DefaultActionGroup machineMenu = new DefaultActionGroup(localizationConstant.mainMenuMachine(), true, actionManager);

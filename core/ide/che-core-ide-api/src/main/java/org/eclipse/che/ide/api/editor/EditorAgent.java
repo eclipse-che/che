@@ -119,7 +119,9 @@ public interface EditorAgent {
      */
     void updateEditorNode(@NotNull String path, @NotNull VirtualFile virtualFile);
 
-    interface OpenEditorCallback{
+    interface OpenEditorCallback {
         void onEditorOpened(EditorPartPresenter editor);
+
+        void onEditorActivated(EditorPartPresenter editor);
     }
 }
