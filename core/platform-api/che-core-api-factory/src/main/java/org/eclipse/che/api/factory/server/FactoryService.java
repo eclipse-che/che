@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
+import com.google.gson.JsonSyntaxException;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.core.BadRequestException;
@@ -561,7 +561,7 @@ public class FactoryService extends Service {
         if (!usersWorkspace.getOwner().equals(userId)) {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
         }
-        validateWorkspace(usersWorkspace, path);
+        excludeProjectsWithoutLocation(usersWorkspace, path);
         final Factory factory = newDto(Factory.class).withWorkspace(asDto(usersWorkspace.getConfig())).withV("4.0");
         return Response.ok(factory, APPLICATION_JSON)
                        .header(CONTENT_DISPOSITION, "attachment; filename=factory.json")
@@ -590,10 +590,10 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Checks if it is possible to create the factory from specified the user's workspace,
-     * in case when it impossible {@link BadRequestException} will be thrown.
+     * Filters workspace projects, removes projects which don't have location set.
+     * If all workspace projects don't have location throws {@link BadRequestException}.
      */
-    private void validateWorkspace(UsersWorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
+    private void excludeProjectsWithoutLocation(UsersWorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
         final boolean notEmptyPath = projectPath != null;
         //Condition for sifting valid project in user's workspace
         Predicate<ProjectConfigImpl> predicate = projectConfig -> !(notEmptyPath && !projectPath.equals(projectConfig.getPath()))
@@ -610,6 +610,7 @@ public class FactoryService extends Service {
             throw new BadRequestException("Unable to create factory from this workspace, " +
                                           "because it does not contains projects with source storage set and/or specified path");
         }
+        usersWorkspace.getConfig().setProjects(filtered);
     }
 
     /**
