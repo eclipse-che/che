@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 
 import java.util.List;
 
@@ -32,6 +33,10 @@ public interface ProjectRegistry {
     List<String> getProjects(String parentPath) throws ServerException;
 
     RegisteredProject getParentProject(String path) throws NotFoundException, ServerException;
+
+    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected)
+            throws ServerException, ConflictException,
+                   NotFoundException, ForbiddenException;
 
     RegisteredProject initProject(String projectPath, String type)
             throws ConflictException, ForbiddenException,

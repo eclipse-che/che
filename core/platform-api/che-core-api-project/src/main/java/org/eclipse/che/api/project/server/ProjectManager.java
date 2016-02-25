@@ -79,7 +79,7 @@ public final class ProjectManager {
     private final ProjectTypeRegistry    projectTypeRegistry;
     private final ProjectHandlerRegistry handlers;
 
-    private final ProjectRegistryImpl projectRegistry;
+    private final ProjectRegistry        projectRegistry;
 
     private final ProjectImporterRegistry importers;
 
@@ -98,7 +98,7 @@ public final class ProjectManager {
                           ProjectTypeRegistry projectTypeRegistry,
                           ProjectHandlerRegistry handlers,
                           ProjectImporterRegistry importers,
-                          ProjectRegistryImpl projectRegistry,
+                          ProjectRegistry projectRegistry,
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
                           FileTreeWatcher fileTreeWatcher)
             throws ServerException, NotFoundException, ProjectTypeConstraintException,

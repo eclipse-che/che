@@ -26,6 +26,7 @@
     <modules>
         <module>core</module>
         <module>plugins</module>
+        <module>dashboard</module>
         <module>assembly</module>
     </modules>
     <scm>
