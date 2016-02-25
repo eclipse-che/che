@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
@@ -25,6 +26,7 @@ import org.eclipse.che.ide.ext.java.jdi.shared.Value;
 import org.eclipse.che.ide.ext.java.jdi.shared.Variable;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -153,19 +155,19 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void stepReturn(@NotNull String id, @NotNull AsyncRequestCallback<Void> callback) {
+    public void stepOut(@NotNull String id, @NotNull AsyncRequestCallback<Void> callback) {
         final String requestUrl = baseUrl + "/step/out/" + id;
         asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send(callback);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void evaluateExpression(@NotNull String id, @NotNull String expression, @NotNull AsyncRequestCallback<String> callback) {
+    public Promise<String> evaluateExpression(@NotNull String id, @NotNull String expression) {
         final String requestUrl = baseUrl + "/expression/" + id;
-        asyncRequestFactory.createPostRequest(requestUrl, null)
+        return asyncRequestFactory.createPostRequest(requestUrl, null)
                            .data(expression)
                            .header(ACCEPT, TEXT_PLAIN)
                            .header(CONTENTTYPE, TEXT_PLAIN)
-                           .send(callback);
+                           .send(new StringUnmarshaller());
     }
 }

@@ -40,4 +40,7 @@ public interface RemoteDebugView extends View<RemoteDebugView.ActionDelegate> {
         void onConfirmClicked(@NotNull String host, @Min(1) int port);
     }
 
+    /** Give focus to host field. */
+    void setFocusInHostField();
+
 }

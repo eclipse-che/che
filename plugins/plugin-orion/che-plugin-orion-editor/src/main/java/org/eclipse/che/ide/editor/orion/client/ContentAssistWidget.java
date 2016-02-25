@@ -194,26 +194,7 @@ public class ContentAssistWidget implements EventListener {
                 CompletionProposal.CompletionCallback callback = new CompletionProposal.CompletionCallback() {
                     @Override
                     public void onCompletion(final Completion completion) {
-                        textEditor.setFocus();
-                        UndoableEditor undoableEditor = ContentAssistWidget.this.textEditor;
-                        HandlesUndoRedo undoRedo = undoableEditor.getUndoRedo();
-
-                        try {
-                            if (undoRedo != null) {
-                                undoRedo.beginCompoundChange();
-                            }
-                            completion.apply(textEditor.getDocument());
-                            final LinearRange selection = completion.getSelection(textEditor.getDocument());
-                            if (selection != null) {
-                                textEditor.getDocument().setSelectedRange(selection, true);
-                            }
-                        } catch (final Exception e) {
-                            Log.error(getClass(), e);
-                        } finally {
-                            if (undoRedo != null) {
-                                undoRedo.endCompoundChange();
-                            }
-                        }
+                        applyCompletion(completion);
                     }
                 };
 
@@ -419,6 +400,20 @@ public class ContentAssistWidget implements EventListener {
             return;
         }
 
+        if (proposals.size() == 1) {
+            CompletionProposal.CompletionCallback callback = new CompletionProposal.CompletionCallback() {
+                @Override
+                public void onCompletion(Completion completion) {
+                    applyCompletion(completion);
+                }
+            };
+
+            CompletionProposal proposal = proposals.get(0);
+            proposal.getCompletion(callback);
+
+            return;
+        }
+
         /* Add new popup items. */
         for (CompletionProposal proposal : proposals) {
             addProposalPopupItem(proposal);
@@ -591,6 +586,29 @@ public class ContentAssistWidget implements EventListener {
     public void showCompletionInfo() {
         if (visible && selectedElement != null) {
             selectedElement.dispatchEvent(createValidateEvent(DOCUMENTATION));
+        }
+    }
+
+    private void applyCompletion(Completion completion) {
+        textEditor.setFocus();
+        UndoableEditor undoableEditor = textEditor;
+        HandlesUndoRedo undoRedo = undoableEditor.getUndoRedo();
+
+        try {
+            if (undoRedo != null) {
+                undoRedo.beginCompoundChange();
+            }
+            completion.apply(textEditor.getDocument());
+            final LinearRange selection = completion.getSelection(textEditor.getDocument());
+            if (selection != null) {
+                textEditor.getDocument().setSelectedRange(selection, true);
+            }
+        } catch (final Exception e) {
+            Log.error(getClass(), e);
+        } finally {
+            if (undoRedo != null) {
+                undoRedo.endCompoundChange();
+            }
         }
     }
 

@@ -13,6 +13,8 @@ package org.eclipse.che.ide.ext.java.jdi.client.inject;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerToolbar;
+import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.util.storage.BrowserLocalStorageProviderImpl;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -36,5 +38,6 @@ public class JavaRuntimeGinModule extends AbstractGinModule {
         bind(EvaluateExpressionView.class).to(EvaluateExpressionViewImpl.class).in(Singleton.class);
         bind(ChangeValueView.class).to(ChangeValueViewImpl.class).in(Singleton.class);
         bind(LocalStorageProvider.class).to(BrowserLocalStorageProviderImpl.class).in(Singleton.class);
+        bind(ToolbarPresenter.class).annotatedWith(DebuggerToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
     }
 }

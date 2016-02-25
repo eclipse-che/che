@@ -13,6 +13,7 @@ package org.eclipse.che.ide.jseditor.client.texteditor;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -62,6 +63,7 @@ import org.eclipse.che.ide.jseditor.client.filetype.FileTypeIdentifier;
 import org.eclipse.che.ide.jseditor.client.formatter.ContentFormatter;
 import org.eclipse.che.ide.jseditor.client.gutter.Gutters;
 import org.eclipse.che.ide.jseditor.client.gutter.HasGutter;
+import org.eclipse.che.ide.jseditor.client.keymap.KeyBindingAction;
 import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistantFactory;
@@ -227,6 +229,13 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
                 }
             }
         });
+        this.editorWidget.addKeybinding(new Keybinding(true, false, false, false, KeyCodes.KEY_F8, new KeyBindingAction() {
+            @Override
+            public void action() {
+                int currentLine = editorWidget.getDocument().getCursorPosition().getLine();
+                breakpointManager.changeBreakpointState(currentLine);
+            }
+        }));
     }
 
     private void setupFileContentUpdateHandler() {

@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
+import org.eclipse.che.api.project.server.handlers.ProjectUpdatedHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
@@ -78,7 +79,7 @@ public final class ProjectManager {
     private final ProjectTypeRegistry    projectTypeRegistry;
     private final ProjectHandlerRegistry handlers;
 
-    private final ProjectRegistry projectRegistry;
+    private final ProjectRegistryImpl projectRegistry;
 
     private final ProjectImporterRegistry importers;
 
@@ -97,7 +98,7 @@ public final class ProjectManager {
                           ProjectTypeRegistry projectTypeRegistry,
                           ProjectHandlerRegistry handlers,
                           ProjectImporterRegistry importers,
-                          ProjectRegistry projectRegistry,
+                          ProjectRegistryImpl projectRegistry,
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
                           FileTreeWatcher fileTreeWatcher)
             throws ServerException, NotFoundException, ProjectTypeConstraintException,
@@ -208,7 +209,7 @@ public final class ProjectManager {
         if (projectConfig.getPath() == null)
             throw new ConflictException("Path for new project should be defined ");
 
-        String path = ProjectRegistry.absolutizePath(projectConfig.getPath());
+        String path = ProjectRegistryImpl.absolutizePath(projectConfig.getPath());
 
         if (projectConfig.getType() == null)
             throw new ConflictException("Project Type is not defined " + path);
@@ -279,6 +280,10 @@ public final class ProjectManager {
             throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
 
         RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
+        final ProjectUpdatedHandler updateProjectHandler = handlers.getProjectUpdatedHandler(newConfig.getType());
+        if (updateProjectHandler != null) {
+            updateProjectHandler.onProjectUpdated(baseFolder);
+        }
 
         // TODO move to register?
         reindexProject(project);
@@ -386,7 +391,7 @@ public final class ProjectManager {
                                            ConflictException {
 
 
-        String apath = ProjectRegistry.absolutizePath(path);
+        String apath = ProjectRegistryImpl.absolutizePath(path);
 
         // delete item
         VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
@@ -483,7 +488,7 @@ public final class ProjectManager {
     // TODO do we need ForbiddenException
     VirtualFileEntry asVirtualFileEntry(String path)
             throws NotFoundException, ServerException {
-        String apath = ProjectRegistry.absolutizePath(path);
+        String apath = ProjectRegistryImpl.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
         final VirtualFileEntry entry = root.getChild(apath);
 //        if (entry == null) {

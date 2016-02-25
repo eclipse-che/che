@@ -50,7 +50,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class WsAgentTestBase {
 
-    protected final static String FS_PATH = "target/fs";
+    protected final static String FS_PATH    = "target/fs";
     protected final static String INDEX_PATH = "target/fs_index";
 
     protected TestWorkspaceHolder workspaceHolder;
@@ -63,7 +63,7 @@ public class WsAgentTestBase {
 
     protected EventService eventService;
 
-    protected ProjectRegistry projectRegistry;
+    protected ProjectRegistryImpl projectRegistry;
 
     protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
@@ -77,10 +77,10 @@ public class WsAgentTestBase {
 
     public void setUp() throws Exception {
 
-        if(workspaceHolder == null)
+        if (workspaceHolder == null)
             workspaceHolder = new TestWorkspaceHolder();
 
-        if(root == null)
+        if (root == null)
             root = new File(FS_PATH);
 
         if (root.exists()) {
@@ -109,7 +109,7 @@ public class WsAgentTestBase {
 
         this.eventService = new EventService();
 
-        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
         this.importerRegistry = new ProjectImporterRegistry(new HashSet<>());

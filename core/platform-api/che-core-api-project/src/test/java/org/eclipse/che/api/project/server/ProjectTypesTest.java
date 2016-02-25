@@ -39,7 +39,7 @@ import static org.testng.Assert.*;
  * Contributors:
  * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-public class ProjectTypesTest {
+public class ProjectTypesTest extends BaseProjectTypeTest {
 
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -86,18 +86,16 @@ public class ProjectTypesTest {
 
     @Test
     public void testGetMixins() throws Exception {
-        String otherMixinId = generate("projectMixin-", 3);
         Set<ProjectTypeDef> pts = new HashSet<>();
         pts.add(new PrimaryType());
         pts.add(new PersistedMixin());
-        pts.add(new PersistedMixin(otherMixinId, generate("projectMixinName-", 3)));
         ProjectTypeRegistry reg = new ProjectTypeRegistry(pts);
         ProjectTypes projectTypes = new ProjectTypes(generate("projectPath-", 5),
                                                      PrimaryType.PRIMARY_ID,
-                                                     Arrays.asList( PersistedMixin.PERSISTED_MIXIN_ID, otherMixinId),
+                                                     Arrays.asList( PersistedMixin.PERSISTED_MIXIN_ID),
                                                      reg);
         assertNotNull(projectTypes.getMixins());
-        assertEquals(projectTypes.getMixins().size(), 2);
+        assertEquals(projectTypes.getMixins().size(), 1);
         assertTrue(projectTypes.getMixins().containsKey(PersistedMixin.PERSISTED_MIXIN_ID));
     }
 
@@ -117,48 +115,7 @@ public class ProjectTypesTest {
     }
 
 
-    private class PrimaryType extends ProjectTypeDef {
 
-        final static String PRIMARY_ID = "primaryId";
-
-        final static String PRIMARY_NAME = "primaryName";
-
-        protected PrimaryType() {
-            this(PRIMARY_ID, PRIMARY_NAME);
-        }
-
-        protected PrimaryType(String id, String displayName) {
-            super(id, displayName, true, false, true);
-        }
-    }
-
-    private class PersistedMixin extends ProjectTypeDef {
-
-        final static String PERSISTED_MIXIN_ID = "persistedMixinId";
-        final static String PERSISTED_MIXIN_NAME = "persistedMixinName";
-
-        protected PersistedMixin() {
-            this(PERSISTED_MIXIN_ID, PERSISTED_MIXIN_NAME);
-        }
-
-        protected PersistedMixin(String id, String displayName) {
-            super(id, displayName, false, true, true);
-        }
-    }
-
-    private class NotPersistedMixin extends ProjectTypeDef {
-
-        final static String NOT_PERSISTED_MIXIN_ID = "notPersistedMixinId";
-        final static String NOT_PERSISTED_MIXIN_NAME = "notPersistedMixinName";
-
-        protected NotPersistedMixin() {
-            this(NOT_PERSISTED_MIXIN_ID, NOT_PERSISTED_MIXIN_NAME);
-        }
-
-        protected NotPersistedMixin(String id, String displayName) {
-            super(id, displayName, false, true, false);
-        }
-    }
 
 
 }

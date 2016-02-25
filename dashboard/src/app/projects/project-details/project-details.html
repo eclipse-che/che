@@ -1,4 +1,4 @@
-<che-toolbar che-title="{{projectDetailsCtrl.askedName}}"
+<che-toolbar che-title="{{projectDetailsCtrl.projectName}}"
              che-title-icons-controller="projectDetailsCtrl"
              che-button-name="Open in IDE"
              che-button-icon="fa-chevron-circle-right"
@@ -107,7 +107,7 @@
 
 <md-content md-scroll-y flex class="projects-details-project"
             ng-show="projectDetailsCtrl.missingWorkspace" layout="column" layout-align="center center" md-theme="maincontent-theme">
-    <che-empty-state che-value="The project {{projectDetailsCtrl.projectPath}} belongs to the not running workspace {{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}}."
+    <che-empty-state che-value="The project '{{projectDetailsCtrl.projectName}}' belongs to the not running workspace {{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}}."
                      che-prompt="Open the workspace {{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}} to start running it. Projects details will then be available."
                      che-icon-class="fa fa-folder-open"></che-empty-state>
 

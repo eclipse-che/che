@@ -29,8 +29,6 @@ import org.eclipse.che.ide.ext.github.shared.GitHubRepository;
 import org.eclipse.che.ide.ext.github.shared.GitHubRepositoryList;
 import org.eclipse.che.ide.ext.github.shared.GitHubUser;
 import org.kohsuke.github.GHIssueState;
-import org.kohsuke.github.GHOrganization;
-import org.kohsuke.github.GHPersonSet;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -46,10 +44,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -137,9 +132,9 @@ public class GitHubService {
     @GET
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
-    public GitHubRepositoryList listRepositories() throws ApiException {
+    public List<GitHubRepository> listRepositories() throws ApiException {
         try {
-            return gitHubDTOFactory.createRepositoriesList(gitHubFactory.connect().getMyself().listRepositories());
+            return gitHubDTOFactory.createRepositoriesList(gitHubFactory.connect().getMyself().listRepositories()).getRepositories();
         } catch (IOException e) {
             LOG.error("Get list repositories fail", e);
             throw new ServerException(e.getMessage());
@@ -239,50 +234,15 @@ public class GitHubService {
     }
 
     @GET
-    @Path("list/available")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, List<GitHubRepository>> availableRepositories() throws ApiException {
-        Map<String, List<GitHubRepository>> repoList = new HashMap<>();
-        try {
-            GitHub gitHub = gitHubFactory.connect();
-
-            //Get users' repositories
-            GitHubRepositoryList gitHubRepositoryList = gitHubDTOFactory.createRepositoriesList(gitHub.getMyself().listRepositories());
-            repoList.put(getUserInfo().getLogin(), gitHubRepositoryList.getRepositories());
-
-            //Get other repositories from all organizations that user's belong to
-            for (GHOrganization ghOrganization : gitHub.getMyself().getAllOrganizations()) {
-                String organizationName = ghOrganization.getLogin();
-                repoList.put(organizationName, gitHubDTOFactory.createRepositoriesList(
-                        gitHub.getOrganization(organizationName).listRepositories())
-                                                               .getRepositories());
-            }
-        } catch (IOException e) {
-            LOG.error("Getting list of available repositories fail", e);
-            throw new ServerException(e.getMessage());
-        }
-        return repoList;
-    }
-
-    @GET
     @Path("orgs")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> listOrganizations() throws ApiException {
-        List<String> organizations = new ArrayList<>();
-
-        GHPersonSet<GHOrganization> myOrganizations;
+    public List<GitHubUser> listOrganizations() throws ApiException {
         try {
-            myOrganizations = gitHubFactory.connect().getMyself().getAllOrganizations();
+            return gitHubDTOFactory.createCollaborators(gitHubFactory.connect().getMyself().getAllOrganizations()).getCollaborators();
         } catch (IOException e) {
             LOG.error("Getting list of available organizations fail", e);
             throw new ServerException(e.getMessage());
         }
-
-        for (GHOrganization ghOrganization : myOrganizations) {
-            organizations.add(ghOrganization.getLogin());
-        }
-
-        return organizations;
     }
 
     @GET

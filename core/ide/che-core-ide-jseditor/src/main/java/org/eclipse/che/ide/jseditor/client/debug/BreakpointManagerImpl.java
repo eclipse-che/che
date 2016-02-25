@@ -32,6 +32,7 @@ import org.eclipse.che.ide.debug.BreakpointStateEvent;
 import org.eclipse.che.ide.debug.BreakpointStateEventHandler;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.ide.debug.DebuggerState;
 import org.eclipse.che.ide.debug.DebuggerStateEvent;
 import org.eclipse.che.ide.debug.DebuggerStateEventHandler;
 import org.eclipse.che.ide.debug.HasBreakpointRenderer;
@@ -49,8 +50,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import static org.eclipse.che.ide.debug.DebuggerStateEvent.DebuggerState.CONNECTED;
-import static org.eclipse.che.ide.debug.DebuggerStateEvent.DebuggerState.DISCONNECTED;
+import static org.eclipse.che.ide.debug.DebuggerState.CONNECTED;
+import static org.eclipse.che.ide.debug.DebuggerState.DISCONNECTED;
 
 /**
  * Implementation of {@link BreakpointManager} for jseditor.
@@ -71,9 +72,8 @@ public class BreakpointManagerImpl implements BreakpointManager, LineChangeActio
     private final DebuggerManager               debuggerManager;
     private final DtoFactory                    dtoFactory;
 
-
-    private Breakpoint                       currentBreakpoint;
-    private DebuggerStateEvent.DebuggerState debuggerState;
+    private Breakpoint    currentBreakpoint;
+    private DebuggerState debuggerState;
 
     @Inject
     public BreakpointManagerImpl(final EditorAgent editorAgent,

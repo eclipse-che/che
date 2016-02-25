@@ -123,8 +123,8 @@ import static org.testng.Assert.assertNotNull;
 public class ProjectServiceTest {
     private static final String CONTENT_TYPE = "Content-Type";
 
-    private static final String      vfsUser       = "dev";
-    private static final String      workspace     = "my_ws";
+    private static final String vfsUser   = "dev";
+    private static final String workspace = "my_ws";
 
     protected final static String FS_PATH    = "target/fss";
     protected final static String INDEX_PATH = "target/fss_index";
@@ -142,7 +142,7 @@ public class ProjectServiceTest {
     @Mock
     private UsersWorkspaceDto      usersWorkspaceMock;
     @Mock
-    private WorkspaceConfigDto      workspaceConfigMock;
+    private WorkspaceConfigDto     workspaceConfigMock;
     @Mock
     private HttpJsonRequestFactory httpJsonRequestFactory;
     @Mock
@@ -152,7 +152,7 @@ public class ProjectServiceTest {
 
     private ProjectImporterRegistry importerRegistry;
 
-    protected ProjectRegistry projectRegistry;
+    protected ProjectRegistryImpl projectRegistry;
 
 
     @BeforeMethod
@@ -202,7 +202,7 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
+        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
         projectRegistry.initProjects();
 
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);

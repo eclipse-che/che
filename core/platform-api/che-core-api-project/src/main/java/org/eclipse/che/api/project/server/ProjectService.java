@@ -32,6 +32,7 @@ import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
+import org.eclipse.che.api.project.server.type.ProjectTypeUtils;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -228,15 +229,16 @@ public class ProjectService extends Service {
                                                                                     ServerException,
                                                                                     IOException {
 
-        if(path != null)
-            projectConfigDto.setPath(path);
+        //here we filtering not persisted mixin
+        //maybe not good place do it here
+        final ProjectConfigDto ensure = ProjectTypeUtils.ensure(projectConfigDto, projectManager.getProjectTypeRegistry());
+        if(path != null) {
+            ensure.setPath(path);
+        }
 
-        RegisteredProject project = projectManager.updateProject(projectConfigDto);
-
-
+        RegisteredProject project = projectManager.updateProject(ensure);
         return toProjectConfig(project, workspace, getServiceContext().getServiceUriBuilder());
     }
-
 
 
     @ApiOperation(value = "Delete a resource",

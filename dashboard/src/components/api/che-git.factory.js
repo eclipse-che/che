@@ -31,9 +31,9 @@ export class CheGit {
     this.localGitUrlsMap = new Map();
 
     // remote call
-    this.remoteGitAPI = this.$resource('/api/git', {}, {
-      getLocalUrl: {method: 'GET', url: '/api/git/:workspaceId/read-only-url?projectPath=:path', isArray: false},
-      getRemoteUrlArray: {method: 'POST', url: '/api/git/:workspaceId/remote-list?projectPath=:path', isArray: true}
+    this.remoteGitAPI = this.$resource('/api/ext/git', {}, {
+      getLocalUrl: {method: 'GET', url: '/api/ext/git/:workspaceId/read-only-url?projectPath=:path', isArray: false},
+      getRemoteUrlArray: {method: 'POST', url: '/api/ext/git/:workspaceId/remote-list?projectPath=:path', isArray: true}
     });
   }
 

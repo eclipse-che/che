@@ -125,12 +125,49 @@ function parse_command_line {
   fi
 }
 
+determine_os () {
+  # Set OS.  Mac & Windows require VirtualBox and docker-machine.
+
+  if [[ "${OSTYPE}" == "linux"* ]]; then
+    # Linux
+    LINUX=true
+  elif [[ "${OSTYPE}" == "darwin"* ]]; then
+    # Mac OSX
+    MAC=true
+  elif [[ "${OSTYPE}" == "cygwin" ]]; then
+    # POSIX compatibility layer and Linux environment emulation for Windows
+    WIN=true
+  elif [[ "${OSTYPE}" == "msys" ]]; then
+    # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+    WIN=true
+  elif [[ "${OSTYPE}" == "win32" ]]; then
+    # I'm not sure this can happen.
+    WIN=true
+  elif [[ "${OSTYPE}" == "freebsd"* ]]; then
+    # FreeBSD
+    LINUX=true
+  else
+    error_exit "We could not detect your operating system. Che is unlikely to work properly."
+  fi
+
+}
+
 function set_environment_variables {
   ### Set the value of derived environment variables.
   ### Use values set by user, unless they are broken, then fix them
   # The base directory of Che
   if [ -z "${CHE_HOME}" ]; then
-    export CHE_HOME="$(dirname "$(cd $(dirname ${0}) && pwd -P)")"
+    if [ "${WIN}" == "true" ]; then
+      # che-497: Determine windows short directory name in bash
+      export CHE_HOME=`(cd "$( dirname "${BASH_SOURCE[0]}" )" && cmd //C 'FOR %i in (..) do @echo %~Si')`
+    else 
+      export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
+    fi
+  fi
+
+  if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
+    # che-497: Determine windows short directory name in bash
+    export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
   fi
 
   # Convert Tomcat environment variables to POSIX format.
@@ -164,6 +201,19 @@ function set_environment_variables {
   # Generates a new Che assembly that contains new IDE, ws-master, and ws-agent.
   PLUGIN_ASSEMBLY_DIR="${SDK_DIR}/assembly-main"
 
+  if $USE_DEBUG; then
+    echo $CHE_HOME
+    echo $JAVA_HOME
+    echo $PLUGIN_DIR
+    echo $SDK_DIR
+    echo $PLUGIN_IDE_DIR
+    echo $PLUGIN_WSMASTER_DIR
+    echo $PLUGIN_WSAGENT_DIR
+    echo $PLUGIN_IDE_WAR_DIR
+    echo $PLUGIN_MACHINE_WAR_DIR
+    echo $PLUGIN_MACHINE_SERVER_DIR
+    echo $PLUGIN_ASSEMBLY_DIR
+  fi
 }
 
 function echo_stage {
@@ -178,6 +228,7 @@ function echo_stage {
 
 init_global_variables
 parse_command_line "$@"
+determine_os
 set_environment_variables
 
 if [ "${USE_HELP}" == "false" ]; then
@@ -186,22 +237,21 @@ if [ "${USE_HELP}" == "false" ]; then
 
   if [ "${SKIP_MAVEN}" == "false" ]; then
     echo_stage "CHE SDK: Installing each extension into local maven repository"
-  fi
 
   # Install every 3rd-party extension into local Maven repository
-  for file in $PLUGIN_DIR/*.jar
-  do
-    if [ -f $file ]; then
+    for file in $PLUGIN_DIR/*.jar
+    do
+      if [ -f $file ]; then
         cp $file $PLUGIN_IDE_DIR
         cp $file $PLUGIN_CHE_DIR
         cp $file $PLUGIN_WORKSPACE_DIR
-      
+        
         if [ "${SKIP_MAVEN}" == "false" ]; then
           mvn org.apache.maven.plugins:maven-install-plugin:2.5.1:install-file -Dfile=$file
         fi
-    fi
-  done
-  
+      fi
+    done
+  fi
 
   if [ "${SKIP_DEPENDENCIES}" == "false" ]; then
 
@@ -210,13 +260,20 @@ if [ "${USE_HELP}" == "false" ]; then
       echo_stage "CHE SDK: Adding IDE extensions as dependencies"
 
       # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
-      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
+      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar":`
+              `"${CHE_HOME}/sdk/che-plugin-sdk-logger.jar":`
+              `"${CHE_HOME}/sdk/che-plugin-sdk-logger-core.jar" `
+              `org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" `
+              `--extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
 
       echo_stage "CHE SDK: Adding extensions as dependencies to ws-master"
 
       # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
-      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSMASTER_DIR}" --extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
-
+      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar":`
+              `"${CHE_HOME}/sdk/che-plugin-sdk-logger.jar":`
+              `"${CHE_HOME}/sdk/che-plugin-sdk-logger-core.jar" `
+              `org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSMASTER_DIR}" `
+              `--extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
     fi
 
     if [ "${SKIP_WSAGENT}" == "false" ]; then
@@ -224,14 +281,18 @@ if [ "${USE_HELP}" == "false" ]; then
       echo_stage "CHE SDK: Adding extensions as dependencies to ws-agent"
   
       # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
-      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar" org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSAGENT_DIR}" --extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}"
+      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar":`
+              `"${CHE_HOME}/sdk/che-plugin-sdk-logger.jar":`
+              `"${CHE_HOME}/sdk/che-plugin-sdk-logger-core.jar" `
+              `org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSAGENT_DIR}" `
+              `--extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}"
 
     fi
   fi
 
   if [ "${SKIP_WSMASTER}" == "false" ]; then
 
-    echo_stage "CHE SDK: Compiling IDE & server-side plug-ins into new workspace master. ~5 minutes."
+    echo_stage "CHE SDK: Compiling everything into new IDE. ~5 minutes."
       
     # Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
     cd "${PLUGIN_IDE_WAR_DIR}/temp"

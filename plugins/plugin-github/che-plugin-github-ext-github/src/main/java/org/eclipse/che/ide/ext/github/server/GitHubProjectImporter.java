@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.server;
 
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.git.GitConnectionFactory;
+import org.eclipse.che.api.git.GitProjectImporter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -23,8 +26,9 @@ import org.eclipse.che.api.git.GitProjectImporter;
 public class GitHubProjectImporter extends GitProjectImporter {
 
     @Inject
-    public GitHubProjectImporter(GitConnectionFactory gitConnectionFactory) {
-        super(gitConnectionFactory);
+    public GitHubProjectImporter(GitConnectionFactory gitConnectionFactory,
+                                 EventService eventService) {
+        super(gitConnectionFactory, eventService);
     }
 
     @Override

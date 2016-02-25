@@ -218,19 +218,7 @@ public class EditorAgentImpl implements EditorAgent {
             public void onResourceRenamedEvent(ResourceNodeRenamedEvent event) {
                 ResourceBasedNode<?> resourceBaseNode = event.getNode();
 
-                if (resourceBaseNode instanceof FileReferenceNode) {
-                    FileReferenceNode fileReferenceNode = (FileReferenceNode)event.getNode();
-
-                    String oldPath = fileReferenceNode.getPath();
-
-                    if (event.getNewDataObject() instanceof ItemReference) {
-                        ItemReferenceBasedNode wrapped =
-                                nodeManager.wrap((ItemReference)event.getNewDataObject(), fileReferenceNode.getProjectConfig());
-                        if (wrapped instanceof FileReferenceNode) {
-                            updateEditorNode(oldPath, (FileReferenceNode)wrapped);
-                        }
-                    }
-                } else if (resourceBaseNode instanceof FolderReferenceNode || resourceBaseNode instanceof ModuleNode) {
+                if (resourceBaseNode instanceof FolderReferenceNode || resourceBaseNode instanceof ModuleNode) {
                     HasStorablePath renamedTargetStoragePath = ((HasStorablePath)resourceBaseNode);
                     final String oldTargetPath = renamedTargetStoragePath.getStorablePath();
                     final String newTargetPath;
@@ -322,7 +310,9 @@ public class EditorAgentImpl implements EditorAgent {
     private void doOpen(final VirtualFile file, final OpenEditorCallback callback) {
         final String filePath = file.getPath();
         if (openedEditors.containsKey(filePath)) {
-            workspace.setActivePart(openedEditors.get(filePath), EDITING);
+            EditorPartPresenter editor = openedEditors.get(filePath);
+            workspace.setActivePart(editor, EDITING);
+            callback.onEditorActivated(editor);
         } else {
             FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             EditorProvider editorProvider = editorRegistry.getEditor(fileType);
@@ -366,7 +356,7 @@ public class EditorAgentImpl implements EditorAgent {
     @Override
     public List<EditorPartPresenter> getDirtyEditors() {
         List<EditorPartPresenter> dirtyEditors = new ArrayList<>();
-        for (EditorPartPresenter partPresenter : getOpenedEditors().values()) {
+        for (EditorPartPresenter partPresenter : openedEditors.values()) {
             if (partPresenter.isDirty()) {
                 dirtyEditors.add(partPresenter);
             }
@@ -434,12 +424,15 @@ public class EditorAgentImpl implements EditorAgent {
     /** {@inheritDoc} */
     @Override
     public void updateEditorNode(@NotNull String path, @NotNull VirtualFile virtualFile) {
-        final EditorPartPresenter editor = getOpenedEditors().remove(path);
-        if (editor != null) {
-            editor.getEditorInput().setFile(virtualFile);
-            getOpenedEditors().put(virtualFile.getPath(), editor);
-            editor.onFileChanged();
+        final EditorPartPresenter editor = openedEditors.remove(path);
+
+        if (editor == null) {
+            return;
         }
+
+        editor.getEditorInput().setFile(virtualFile);
+        openedEditors.put(virtualFile.getPath(), editor);
+        editor.onFileChanged();
     }
 
     /** {@inheritDoc} */

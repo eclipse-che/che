@@ -27,6 +27,8 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.tree.generic.FileNode;
 import org.eclipse.che.ide.debug.Breakpoint;
 import org.eclipse.che.ide.debug.BreakpointManager;
+import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.BaseTest;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.changevalue.ChangeValuePresenter;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.expression.EvaluateExpressionPresenter;
@@ -35,7 +37,8 @@ import org.eclipse.che.ide.ext.java.jdi.client.fqn.FqnResolverFactory;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
 import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerInfo;
 import org.eclipse.che.ide.ext.java.jdi.shared.Location;
-import org.eclipse.che.ide.ext.java.jdi.shared.Variable;
+import org.eclipse.che.ide.ext.java.jdi.shared.UpdateVariableRequest;
+import org.eclipse.che.ide.ext.java.jdi.shared.VariablePath;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
@@ -51,6 +54,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import static org.mockito.Matchers.anyInt;
@@ -58,7 +62,6 @@ import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -71,7 +74,9 @@ import static org.mockito.Mockito.when;
  * @author Valeriy Svydenko
  */
 public class DebuggerTest extends BaseTest {
-    private static final String DEBUG_INFO = "debug_info";
+    private static final String MIME_TYPE   = "application/java";
+    private static final String DEBUG_INFO  = "debug_info";
+    private static final String DEBUGGER_ID = "debugger_id";
 
     @Captor
     private ArgumentCaptor<ProjectReadyHandler> projectActionHandlerArgumentCaptor;
@@ -111,6 +116,10 @@ public class DebuggerTest extends BaseTest {
     private LocalStorage                        localStorage;
     @Mock
     private DebuggerInfo                        debuggerInfo;
+    @Mock
+    private DebuggerManager                     debuggerManager;
+    @Mock
+    private Debugger                            debugger;
     @Mock
     private FileTypeRegistry                    fileTypeRegistry;
 
@@ -158,13 +167,11 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).disconnect(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onDisconnectButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
+
+        presenter.disconnectDebugger();
 
         verify(service).disconnect(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
-
-        verifySetEnableButtons(DISABLE_BUTTON);
-
-        verify(view).setEnableDisconnectButton(DISABLE_BUTTON);
         verify(localStorage).setItem(eq(DebuggerPresenter.LOCAL_STORAGE_DEBUGGER_KEY), anyString());
     }
 
@@ -182,9 +189,11 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).disconnect(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onDisconnectButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
 
-        verify(service).disconnect(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
+        presenter.disconnectDebugger();
+
+        verify(service).disconnect(anyString(), anyObject());
     }
 
     @Test
@@ -201,12 +210,18 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).resume(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onResumeButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+                presenter.resume();
+                return null;
+            }
+        }).when(debugger).resume();
 
-        verifySetEnableButtons(DISABLE_BUTTON);
+        presenter.resume();
+
         verify(service).resume(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
-        verify(view).setVariables(anyListOf(DebuggerVariable.class));
-        verify(view, atLeastOnce()).setEnableChangeValueButtonEnable(eq(DISABLE_BUTTON));
         verify(gutterManager).removeCurrentBreakpoint();
     }
 
@@ -224,9 +239,11 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).resume(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onResumeButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
 
-        verify(service).resume(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
+        presenter.resume();
+
+        verify(service).resume(anyString(), anyObject());
     }
 
     @Test
@@ -243,11 +260,12 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).stepInto(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onStepIntoButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
+
+        presenter.stepInto();
 
         verify(service).stepInto(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
         verify(view).setVariables(anyListOf(DebuggerVariable.class));
-        verify(view, atLeastOnce()).setEnableChangeValueButtonEnable(eq(DISABLE_BUTTON));
         verify(gutterManager).removeCurrentBreakpoint();
     }
 
@@ -265,7 +283,9 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).stepInto(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onStepIntoButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
+
+        presenter.stepInto();
 
         verify(service).stepInto(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
     }
@@ -284,11 +304,11 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).stepOver(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onStepOverButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
+
+        presenter.stepOver();
 
         verify(service).stepOver(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
-        verify(view).setVariables(anyListOf(DebuggerVariable.class));
-        verify(view, atLeastOnce()).setEnableChangeValueButtonEnable(eq(DISABLE_BUTTON));
         verify(gutterManager).removeCurrentBreakpoint();
     }
 
@@ -306,13 +326,15 @@ public class DebuggerTest extends BaseTest {
             }
         }).when(service).stepOver(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onStepOverButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
+
+        presenter.stepOver();
 
         verify(service).stepOver(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
     }
 
     @Test
-    public void testStepReturnRequestIsSuccessful() throws Exception {
+    public void testStepOutRequestIsSuccessful() throws Exception {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -323,18 +345,19 @@ public class DebuggerTest extends BaseTest {
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
             }
-        }).when(service).stepReturn(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
+        }).when(service).stepOut(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onStepReturnButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
 
-        verify(service).stepReturn(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
+        presenter.stepOut();
+
+        verify(service).stepOut(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
         verify(view).setVariables(anyListOf(DebuggerVariable.class));
-        verify(view, atLeastOnce()).setEnableChangeValueButtonEnable(eq(DISABLE_BUTTON));
         verify(gutterManager).removeCurrentBreakpoint();
     }
 
     @Test
-    public void testStepReturnRequestIsFailed() throws Exception {
+    public void testStepOutRequestIsFailed() throws Exception {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -345,11 +368,13 @@ public class DebuggerTest extends BaseTest {
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).stepReturn(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
+        }).when(service).stepOut(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
 
-        presenter.onStepReturnButtonClicked();
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
 
-        verify(service).stepReturn(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
+        presenter.stepOut();
+
+        verify(service).stepOut(anyString(), Matchers.<AsyncRequestCallback<Void>>anyObject());
     }
 
     @Test
@@ -432,27 +457,4 @@ public class DebuggerTest extends BaseTest {
         verify(asyncCallbackVoid).onFailure((Throwable)anyObject());
     }
 
-    @Test
-    public void shouldOpenChangeVariableValueDialog() throws Exception {
-        presenter.onSelectedVariableElement(mock(DebuggerVariable.class));
-        presenter.onChangeValueButtonClicked();
-
-        verify(changeValuePresenter).showDialog((DebuggerInfo)anyObject(), (Variable)anyObject(),
-                                                Matchers.<AsyncCallback<String>>anyObject());
-    }
-
-    @Test
-    public void shouldOpenEvaluateExpressionDialog() throws Exception {
-        presenter.onEvaluateExpressionButtonClicked();
-
-        verify(evaluateExpressionPresenter).showDialog((DebuggerInfo)anyObject());
-    }
-
-    protected void verifySetEnableButtons(boolean enabled) {
-        verify(view, atLeastOnce()).setEnableResumeButton(eq(enabled));
-        verify(view, atLeastOnce()).setEnableStepIntoButton(eq(enabled));
-        verify(view, atLeastOnce()).setEnableStepOverButton(eq(enabled));
-        verify(view, atLeastOnce()).setEnableStepReturnButton(eq(enabled));
-        verify(view, atLeastOnce()).setEnableEvaluateExpressionButtonEnable(eq(enabled));
-    }
 }

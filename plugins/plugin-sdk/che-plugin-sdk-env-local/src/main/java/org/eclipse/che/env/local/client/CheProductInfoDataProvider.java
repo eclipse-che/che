@@ -52,4 +52,9 @@ public class CheProductInfoDataProvider implements ProductInfoDataProvider {
     public SVGResource getLogo() {
         return resources.logo();
     }
+
+    @Override
+    public String getSupportTitle() {
+        return locale.supportTitle();
+    }
 }

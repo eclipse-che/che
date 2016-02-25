@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * This class is not intended to be extended by clients.
  *
  * @author Vlad Zhukovskyi
- * @since 4.0.0-RC5
+ * @since 4.0.0-RC7
  */
 @Beta
 public final class Path {

@@ -165,6 +165,9 @@ public class OpenDeclarationFinder {
                 public void onEditorOpened(EditorPartPresenter editor) {
                     fileOpened(editor, descriptor.getOffset());
                 }
+
+                @Override
+                public void onEditorActivated(EditorPartPresenter editor) { }
             });
         }
     }

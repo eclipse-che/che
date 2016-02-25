@@ -31,7 +31,7 @@
               tooltip="Last modified: {{projectItemCtrl.getProjectModificationDate() | amDateFormat:'dddd, MMMM Do, YYYY'}}"
               am-time-ago="projectItemCtrl.getProjectModificationDate()"></span>
     </div>
-    <p ng-show="hover">
+    <p flex ng-show="hover">
       <a ng-href="#/ide/{{projectItemCtrl.workspaceName}}">
         <che-button-default class="che-hover project-list-details-arrow"
                              che-button-icon="fa fa fa-chevron-circle-right"
