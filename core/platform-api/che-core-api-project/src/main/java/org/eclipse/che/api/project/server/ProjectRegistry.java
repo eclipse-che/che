@@ -29,6 +29,7 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import java.util.Map;
  * Caches configuration
  * @author gazarenkov
  */
+@Singleton
 public class ProjectRegistry {
 
     private final Map<String, RegisteredProject> projects;

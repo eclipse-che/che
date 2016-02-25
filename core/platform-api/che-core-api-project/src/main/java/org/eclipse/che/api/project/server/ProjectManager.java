@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
+import org.eclipse.che.api.project.server.handlers.PostImportProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -279,6 +280,8 @@ public final class ProjectManager {
             throw new NotFoundException(String.format("Folder '%s' doesn't exist.", path));
 
         RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
+        final PostImportProjectHandler postImportProjectHandler = handlers.getPostImportProjectHandler(newConfig.getType());
+        postImportProjectHandler.onProjectImported(baseFolder);
 
         // TODO move to register?
         reindexProject(project);

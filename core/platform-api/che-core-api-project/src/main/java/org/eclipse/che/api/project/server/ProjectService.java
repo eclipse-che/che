@@ -231,12 +231,12 @@ public class ProjectService extends Service {
                                                                                     ServerException,
                                                                                     IOException {
 
-        final ProjectConfigDto ensure = ProjectTypeUtils.ensure(projectConfigDto, typeRegistry);
+        final ProjectConfigDto ensure = ProjectTypeUtils.ensure(projectConfigDto, projectManager.getProjectTypeRegistry());
         if(path != null) {
-            projectConfigDto.setPath(path);
+            ensure.setPath(path);
         }
 
-        RegisteredProject project = projectManager.updateProject(projectConfigDto);
+        RegisteredProject project = projectManager.updateProject(ensure);
         return toProjectConfig(project, workspace, getServiceContext().getServiceUriBuilder());
     }
 
