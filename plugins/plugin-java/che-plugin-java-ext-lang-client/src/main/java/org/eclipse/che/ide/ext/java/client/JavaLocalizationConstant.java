@@ -320,4 +320,10 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("warning.operation.content")
     String warningOperationContent();
+
+    @Key("show.rename.wizard")
+    String showRenameWizard();
+
+    @Key("rename.with.warnings")
+    String renameWithWarnings();
 }

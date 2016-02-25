@@ -24,6 +24,7 @@
     <inherits name="org.eclipse.che.security.OAuth"/>
     <inherits name="org.eclipse.che.api.Git"/>
     <inherits name="com.google.common.base.Base"/>
+    <inherits name="org.eclipse.che.ide.ext.git.ssh.Ssh"/>
 
     <source path="client"/>
 </module>

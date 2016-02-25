@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -72,15 +73,6 @@ public interface GitHubRepository {
     boolean isFork();
 
     void setFork(boolean isFork);
-
-    /**
-     * Get the repository parent.
-     *
-     * @return the parent repository.
-     */
-    GitHubRepository getParent();
-
-    void setParent(GitHubRepository parent);
 
     /**
      * Get the number of repository's watchers.
@@ -217,6 +209,19 @@ public interface GitHubRepository {
 
     void setHasDownloads(boolean isHasDownloads);
 
+
+    /**
+     * Get the repository parent.
+     * Might return null if user tried to retrieve the full repository list.
+     * If request was done to retrieve the specific repository then {@link #getParent()} will return none null value.
+     *
+     * @return the parent repository.
+     */
+    @Nullable
+    GitHubRepository getParent();
+
+    void setParent(GitHubRepository parent);
+
     /**
      * Get whether repository has issues.
      *
@@ -225,4 +230,13 @@ public interface GitHubRepository {
     boolean isHasIssues();
 
     void setHasIssues(boolean isHasIssues);
+
+    /**
+     * Get repository's owner login.
+     *
+     * @return {@link String} owner login
+     */
+    String getOwnerLogin();
+
+    void setOwnerLogin(String ownerLogin);
 }

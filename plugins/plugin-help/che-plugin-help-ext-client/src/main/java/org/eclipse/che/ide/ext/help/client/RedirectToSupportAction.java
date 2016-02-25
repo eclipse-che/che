@@ -37,7 +37,7 @@ public class RedirectToSupportAction extends Action {
                                    ProductInfoDataProvider productInfoDataProvider,
                                    AnalyticsEventLogger eventLogger,
                                    AboutResources resources) {
-        super(locale.actionRedirectToSupportTitle(), locale.actionRedirectToSupportDescription(), null, resources.getSupport());
+        super(productInfoDataProvider.getSupportTitle(), locale.actionRedirectToSupportDescription(), null, resources.getSupport());
         this.eventLogger = eventLogger;
         this.productInfoDataProvider = productInfoDataProvider;
     }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.client.debug;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
 import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerEventList;
 import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerInfo;
@@ -142,14 +143,13 @@ public interface DebuggerServiceClient {
      * @param id
      * @param callback
      */
-    void stepReturn(@NotNull String id, @NotNull AsyncRequestCallback<Void> callback);
+    void stepOut(@NotNull String id, @NotNull AsyncRequestCallback<Void> callback);
 
     /**
      * Evaluate an expression.
      *
      * @param id
      * @param expression
-     * @param callback
      */
-    void evaluateExpression(@NotNull String id, @NotNull String expression, @NotNull AsyncRequestCallback<String> callback);
+    Promise<String> evaluateExpression(@NotNull String id, @NotNull String expression);
 }

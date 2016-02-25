@@ -21,13 +21,10 @@ export class CheStack {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource, $http) {
+  constructor ($resource) {
 
     // keep resource
     this.$resource = $resource;
-
-    // FIXME : remove when server side will implement stack API
-    this.$http = $http;
 
     // stacks per id
     this.stacksById = {};
@@ -47,34 +44,9 @@ export class CheStack {
    * Fetch the stacks
    */
   fetchStacks() {
-    // FIXME : remove comments and the client's side json file when remote stack api will be implemented
-    /*
-     let promise = this.remoteStackAPI.getStacks().$promise;
-     let updatedPromise = promise.then((stacks) => {
-
-     // reset global list
-     this.stacks.length = 0;
-     for (var member in this.stacksById) {
-     delete this.stacksById[member];
-     }
-
-     stacks.forEach((stack) => {
-
-     // get attributes
-     var stackId = stack.id;
-
-     // add element on the list
-     this.stacksById[stackId] = stack;
-     this.stacks.push(stack);
-     });
-
-
-
-     }, (error) => {*/
-    let stackContent = 'assets/html/che-stack.json';
-    let promise = this.$http.get(stackContent);
-    let updatedPromise = promise.then((data) => {
-      let stacks = data.data;
+    let promise = this.remoteStackAPI.getStacks().$promise;
+    let updatedPromise = promise.then((stacks) => {
+      // reset global list
       this.stacks.length = 0;
       for (var member in this.stacksById) {
         delete this.stacksById[member];
@@ -88,8 +60,8 @@ export class CheStack {
         this.stacksById[stackId] = stack;
         this.stacks.push(stack);
       });
-
     });
+
     return updatedPromise;
   }
 

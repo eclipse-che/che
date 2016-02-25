@@ -46,6 +46,8 @@ export class WorkspaceDetailsCtrl {
     } else {
       this.updateWorkspaceData();
     }
+
+    this.isRemoving = false;
   }
 
 
@@ -54,18 +56,17 @@ export class WorkspaceDetailsCtrl {
     this.workspaceDetails = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
     if (this.loading) {
       this.startUpdateWorkspaceStatus();
+      this.loading = false;
     }
-    this.loading = false;
     this.newName = angular.copy(this.workspaceDetails.config.name);
   }
 
   //Rename the workspace.
-  renameWorkspace(isValidName) {
-    if (!isValidName) {return;}
-
+  renameWorkspace() {
     this.isLoading = true;
 
     let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId);
+
     promise.then(() => {
       this.doRenameWorkspace();
     }, () => {
@@ -85,6 +86,7 @@ export class WorkspaceDetailsCtrl {
       this.updateWorkspaceData();
       this.cheNotification.showInfo('Workspace name is successfully updated.');
     }, (error) => {
+      this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Rename workspace failed.');
       console.log('error', error);
     });
@@ -101,14 +103,29 @@ export class WorkspaceDetailsCtrl {
       .clickOutsideToClose(true)
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
-      let promise = this.cheWorkspace.deleteWorkspaceConfig(this.workspaceId);
-      promise.then(() => {
-        this.$location.path('/workspaces');
-      }, (error) => {
-        this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Delete workspace failed.');
-        console.log('error', error);
-      });
+      if (this.workspaceDetails.status === 'STOPPED') {
+        this.removeWorkspace();
+      } else {
+        this.isRemoving = true;
+        this.stopWorkspace();
+      }
     });
+  }
+
+  removeWorkspace() {
+    this.isRemoving = true;
+
+    let promise = this.cheWorkspace.deleteWorkspaceConfig(this.workspaceId);
+
+    promise.then(() => {
+      this.isRemoving = false;
+      this.$location.path('/workspaces');
+    }, (error) => {
+      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Delete workspace failed.');
+      console.log('error', error);
+    });
+
+    return promise;
   }
 
   runWorkspace() {
@@ -129,11 +146,14 @@ export class WorkspaceDetailsCtrl {
     });
   }
 
-  startUpdateWorkspaceStatus(){
+  startUpdateWorkspaceStatus() {
     let bus = this.cheAPI.getWebsocket().getBus(this.workspaceId);
 
-    bus.subscribe('workspace:'+this.workspaceId, (message) => {
-      this.workspaceDetails.status =  message.eventType;
+    bus.subscribe('workspace:' + this.workspaceId, (message) => {
+      this.workspaceDetails.status = message.eventType;
+      if (message.eventType === 'STOPPED' && this.isRemoving) {
+        this.removeWorkspace();
+      }
     });
   }
 }

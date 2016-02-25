@@ -297,7 +297,7 @@ export class CheWorkspace {
       return '';
     }
     // extract the Websocket URL of the runtime
-    let servers = runtimeData.devMachine.metadata.servers;
+    let servers = runtimeData.devMachine.runtime.servers;
 
     var extensionServerAddress;
     for (var key in servers) {
@@ -307,7 +307,7 @@ export class CheWorkspace {
       }
     }
 
-    let endpoint = runtimeData.devMachine.metadata.envVariables.CHE_API_ENDPOINT;
+    let endpoint = runtimeData.devMachine.runtime.envVariables.CHE_API_ENDPOINT;
 
     var contextPath;
     if (endpoint.endsWith('/ide/api')) {

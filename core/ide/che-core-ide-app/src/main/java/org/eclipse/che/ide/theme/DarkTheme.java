@@ -827,6 +827,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String getRedIconColor() {
+        return "#CF405F";
+    }
+
+    @Override
     public String getSplitterSmallBorderColor() {
         return "#0D0F10";
     }

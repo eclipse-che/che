@@ -21,7 +21,8 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log) {
+    this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
     this.$websocket = $websocket;
@@ -157,12 +158,12 @@ export class CreateProjectCtrl {
 
     // sets isReady status after selection
     $rootScope.$on('create-project-github:selected', () => {
-      if(!this.isReady && this.currentTab === 'github'){
+      if (!this.isReady && this.currentTab === 'github') {
         this.isReady = true;
       }
     });
     $rootScope.$on('create-project-samples:selected', () => {
-      if(!this.isReady && this.currentTab === 'samples') {
+      if (!this.isReady && this.currentTab === 'samples') {
         this.isReady = true;
       }
     });
@@ -196,8 +197,8 @@ export class CreateProjectCtrl {
   getDefaultProjectJson() {
     return {
       source: {
-          location: '',
-          parameters: {}
+        location: '',
+        parameters: {}
       },
       project: {
         name: '',
@@ -221,11 +222,11 @@ export class CreateProjectCtrl {
    * Check changeable status for project description field
    */
   checkChangeableDescriptionStatus() {
-      if ('config' === this.currentTab) {
-        this.importProjectData.project.description = angular.copy(this.projectDescription);
-        return;
-      }
-      this.isChangeableDescription = this.projectDescription === this.importProjectData.project.description;
+    if ('config' === this.currentTab) {
+      this.importProjectData.project.description = angular.copy(this.projectDescription);
+      return;
+    }
+    this.isChangeableDescription = this.projectDescription === this.importProjectData.project.description;
   }
 
   /**
@@ -251,7 +252,9 @@ export class CreateProjectCtrl {
   refreshCM() {
     // hack to make a refresh of the zone
     this.importProjectData.cm = 'aaa';
-    this.$timeout(() => { delete this.importProjectData.cm;}, 500);
+    this.$timeout(() => {
+      delete this.importProjectData.cm;
+    }, 500);
   }
 
   /**
@@ -355,44 +358,24 @@ export class CreateProjectCtrl {
       let environments = data.config.environments;
       let envName = data.config.defaultEnv;
       let defaultEnvironment = this.lodash.find(environments, (environment) => {
-          return environment.name === envName;
+        return environment.name === envName;
       });
 
-      let channels = defaultEnvironment.machineConfigs[0].channels;
-      let statusChannel = channels.status;
-      let outputChannel = channels.output;
-      let agentChannel = 'workspace:' + data.id + ':ext-server:output';
+      let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
 
+      let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+        return machineConfigsLink.rel === 'get machine status channel';
+      });
+
+      let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+        return machineConfigsLink.rel === 'get machine logs channel';
+      });
 
       let workspaceId = data.id;
 
-      // for now, display log of status channel in case of errors
-      bus.subscribe(statusChannel, (message) => {
-        if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-
-          // need to show the error
-          this.$mdDialog.show(
-              this.$mdDialog.alert()
-                  .title('Unable to start workspace')
-                  .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
-                  .ariaLabel('Workspace start')
-                  .ok('OK')
-          );
-        }
-        if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-          // need to show the error
-          this.$mdDialog.show(
-              this.$mdDialog.alert()
-                  .title('Error when starting workspace')
-                  .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
-                  .ariaLabel('Workspace start')
-                  .ok('OK')
-          );
-        }
-        console.log('Status channel of workspaceID', workspaceId, message);
-      });
+      let agentChannel = 'workspace:' + data.id + ':ext-server:output';
+      let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
+      let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
       bus.subscribe(agentChannel, (message) => {
         if (this.createProjectSvc.getCurrentProgressStep() < 2) {
@@ -406,13 +389,45 @@ export class CreateProjectCtrl {
         }
       });
 
-      bus.subscribe(outputChannel, (message) => {
-        if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
-        } else {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
-        }
-      });
+      if (statusChannel) {
+        // for now, display log of status channel in case of errors
+        bus.subscribe(statusChannel, (message) => {
+          if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
+            this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+
+            // need to show the error
+            this.$mdDialog.show(
+              this.$mdDialog.alert()
+                .title('Unable to start workspace')
+                .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+                .ariaLabel('Workspace start')
+                .ok('OK')
+            );
+          }
+          if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
+            this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+            // need to show the error
+            this.$mdDialog.show(
+              this.$mdDialog.alert()
+                .title('Error when starting workspace')
+                .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+                .ariaLabel('Workspace start')
+                .ok('OK')
+            );
+          }
+          this.$log.log('Status channel of workspaceID', workspaceId, message);
+        });
+      }
+
+      if (outputChannel) {
+        bus.subscribe(outputChannel, (message) => {
+          if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
+            this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
+          } else {
+            this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
+          }
+        });
+      }
 
     });
   }
@@ -421,7 +436,7 @@ export class CreateProjectCtrl {
     this.createProjectSvc.setCurrentProgressStep(3);
 
     var promise;
-    var channel= null;
+    var channel = null;
     // select mode (create or import)
     if (this.selectSourceOption === 'select-source-new' && this.templatesChoice === 'templates-wizard') {
 
@@ -578,7 +593,9 @@ export class CreateProjectCtrl {
       addPromise.then(() => {
         // call the method again
         this.addCommand(workspaceId, projectName, commands, ++index, deferred);
-      }, (error) => {deferred.reject(error);});
+      }, (error) => {
+        deferred.reject(error);
+      });
     } else {
       deferred.resolve('All commands added');
     }
@@ -599,17 +616,19 @@ export class CreateProjectCtrl {
     websocketStream.onError((error) => {
       this.websocketReconnect--;
       if (this.websocketReconnect > 0) {
-        this.$timeout(() => {this.connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, bus);}, 1000);
+        this.$timeout(() => {
+          this.connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, bus);
+        }, 1000);
       } else {
         this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-        console.log('error when starting remote extension', error);
+        this.$log.log('error when starting remote extension', error);
         // need to show the error
         this.$mdDialog.show(
-            this.$mdDialog.alert()
-                .title('Unable to create project')
-                .content('Unable to connect to the remote extension server after workspace creation')
-                .ariaLabel('Project creation')
-                .ok('OK')
+          this.$mdDialog.alert()
+            .title('Unable to create project')
+            .content('Unable to connect to the remote extension server after workspace creation')
+            .ariaLabel('Project creation')
+            .ok('OK')
         );
       }
     });
@@ -706,7 +725,7 @@ export class CreateProjectCtrl {
           let findLink = this.lodash.find(recipe.links, function (link) {
             return link.rel === 'get recipe script';
           });
-          if(findLink) {
+          if (findLink) {
             this.recipeUrl = findLink.href;
             this.createWorkspace();
           }
@@ -715,14 +734,14 @@ export class CreateProjectCtrl {
         if (this.recipeUrl && this.recipeUrl.length > 0) {
           this.createWorkspace();
         } else {
-          let recipeName = 'rcp-' + (('0000' + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+          let recipeName = 'rcp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
           // needs to get recipe URL from custom recipe
           let promise = this.submitRecipe(recipeName, this.recipeScript);
           promise.then((recipe) => {
             let findLink = this.lodash.find(recipe.links, (link) => {
               return link.rel === 'get recipe script';
             });
-            if(findLink) {
+            if (findLink) {
               this.recipeUrl = findLink.href;
               this.createWorkspace();
             }
@@ -775,7 +794,7 @@ export class CreateProjectCtrl {
    */
   createWorkspace() {
     this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
-    let attributes = this.stack ? {stackId : this.stack.id} : {};
+    let attributes = this.stack ? {stackId: this.stack.id} : {};
 
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
@@ -807,7 +826,9 @@ export class CreateProjectCtrl {
           });
         }
       });
-      this.$timeout(() => {this.startWorkspace(bus, data);}, 1000);
+      this.$timeout(() => {
+        this.startWorkspace(bus, data);
+      }, 1000);
 
     }, (error) => {
       if (error.data.message) {
@@ -835,7 +856,7 @@ export class CreateProjectCtrl {
         name = this.importProjectData.project.type.replace(/\s/g, '_');
       }
 
-      name = name + '-' + (('0000' + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+      name = name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
 
       this.importProjectData.project.name = name;
       this.projectName = name;
@@ -847,10 +868,10 @@ export class CreateProjectCtrl {
    * Generates a default workspace name
    */
   generateWorkspaceName() {
-      // starts with wksp
-      var name = 'wksp';
-      name = name + '-' + (('0000' + (Math.random()*Math.pow(36,4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-      this.workspaceName = name;
+    // starts with wksp
+    var name = 'wksp';
+    name = name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+    this.workspaceName = name;
   }
 
   isImporting() {
@@ -992,7 +1013,7 @@ export class CreateProjectCtrl {
     if (!val) {
       this.generateWorkspaceName();
     }
-    this.$rootScope.$broadcast('chePanel:disabled', { id: 'create-project-workspace', disabled: val });
+    this.$rootScope.$broadcast('chePanel:disabled', {id: 'create-project-workspace', disabled: val});
   }
 
   /**
@@ -1003,7 +1024,7 @@ export class CreateProjectCtrl {
     this.currentStackTags = stack && stack.tags ? angular.copy(stack.tags) : null;
 
     if (!stack) {
-        return;
+      return;
     }
     if (this.stackTab === 'ready-to-go') {
       this.readyToGoStack = stack;
@@ -1015,7 +1036,7 @@ export class CreateProjectCtrl {
     // Enable wizard only if
     // - ready-to-go-stack with PT
     // - custom stack
-    if (stack != null && 'general' ===  stack.scope) {
+    if (stack != null && 'general' === stack.scope) {
       if ('Java' === stack.name) {
         this.enableWizardProject = true;
       } else {

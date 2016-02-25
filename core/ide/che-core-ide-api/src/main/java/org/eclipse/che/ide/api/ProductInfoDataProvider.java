@@ -49,4 +49,7 @@ public interface ProductInfoDataProvider {
      * @return SVG resources
      */
     SVGResource getLogo();
+
+    /** Returns title for support action which displayed in Help menu. */
+    public String getSupportTitle();
 }

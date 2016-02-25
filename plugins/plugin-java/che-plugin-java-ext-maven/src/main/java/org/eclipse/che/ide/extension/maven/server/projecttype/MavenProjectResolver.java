@@ -14,27 +14,17 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
+import org.eclipse.che.api.project.server.ProjectRegistryImpl;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.ide.maven.tools.Model;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
@@ -59,7 +49,7 @@ public class MavenProjectResolver {
      * @throws NotFoundException
      * @throws IOException
      */
-    public static void resolve(FolderEntry projectFolder, ProjectRegistry projectRegistry) throws ConflictException,
+    public static void resolve(FolderEntry projectFolder, ProjectRegistryImpl projectRegistry) throws ConflictException,
                                                                                                 ForbiddenException,
                                                                                                 ServerException,
                                                                                                 NotFoundException,

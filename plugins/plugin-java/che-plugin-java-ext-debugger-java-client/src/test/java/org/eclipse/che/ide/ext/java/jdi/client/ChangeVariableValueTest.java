@@ -10,28 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.client;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.googlecode.gwt.test.utils.GwtReflectionUtils;
-
+import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
+import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerVariable;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.changevalue.ChangeValuePresenter;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.changevalue.ChangeValueView;
 import org.eclipse.che.ide.ext.java.jdi.shared.UpdateVariableRequest;
 import org.eclipse.che.ide.ext.java.jdi.shared.Variable;
 import org.eclipse.che.ide.ext.java.jdi.shared.VariablePath;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,7 +51,15 @@ public class ChangeVariableValueTest extends BaseTest {
     @Mock
     private VariablePath          varPath;
     @Mock
-    private AsyncCallback<String> asyncCallback;
+    DebuggerManager               debuggerManager;
+    @Mock
+    Debugger                      debugger;
+    @Mock
+    private DebuggerPresenter     debuggerPresenter;
+    @Mock
+    private DebuggerVariable      debuggerVariable;
+    @Mock
+    private VariablePath          variablePath;
 
     @Before
     public void setUp() {
@@ -67,8 +72,12 @@ public class ChangeVariableValueTest extends BaseTest {
 
     @Test
     public void shouldShowDialog() throws Exception {
-        presenter.showDialog(debuggerInfo, var, asyncCallback);
+        when(debuggerPresenter.getSelectedVariable()).thenReturn(debuggerVariable);
+        when(debuggerVariable.getValue()).thenReturn(VAR_VALUE);
 
+        presenter.showDialog();
+
+        verify(debuggerPresenter).getSelectedVariable();
         verify(view).setValueTitle(constants.changeValueViewExpressionFieldTitle(VAR_NAME));
         verify(view).setValue(VAR_VALUE);
         verify(view).focusInValueField();
@@ -103,46 +112,15 @@ public class ChangeVariableValueTest extends BaseTest {
     }
 
     @Test
-    public void testChangeValueRequestIsSuccessful() throws Exception {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[2];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, (Void)null);
-                return callback;
-            }
-        }).when(service).setValue(anyString(), (UpdateVariableRequest)anyObject(), (AsyncRequestCallback<Void>)anyObject());
+    public void testChangeValueRequest() throws Exception {
+        when(debuggerManager.getDebugger()).thenReturn(debugger);
         when(view.getValue()).thenReturn(VAR_VALUE);
+        when(debuggerVariable.getVariablePath()).thenReturn(variablePath);
+        when(variablePath.getPath()).thenReturn(new ArrayList<>());
 
-        presenter.showDialog(debuggerInfo, var, asyncCallback);
         presenter.onChangeClicked();
 
-        verify(service).setValue(anyString(), (UpdateVariableRequest)anyObject(), (AsyncRequestCallback<Void>)anyObject());
-        verify(asyncCallback).onSuccess(eq(VAR_VALUE));
-        verify(view).close();
-    }
-
-    @Test
-    public void testChangeValueRequestIsFailed() throws Exception {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[2];
-                Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
-                onFailure.invoke(callback, mock(Throwable.class));
-                return callback;
-            }
-        }).when(service).setValue(anyString(), (UpdateVariableRequest)anyObject(), (AsyncRequestCallback<Void>)anyObject());
-        when(view.getValue()).thenReturn(VAR_VALUE);
-
-        presenter.showDialog(debuggerInfo, var, asyncCallback);
-        presenter.onChangeClicked();
-
-        verify(service).setValue(anyString(), (UpdateVariableRequest)anyObject(), (AsyncRequestCallback<Void>)anyObject());
-        verify(asyncCallback).onFailure((Throwable)anyObject());
+        verify(debugger).changeVariableValue(anyObject(), anyString());
         verify(view).close();
     }
 

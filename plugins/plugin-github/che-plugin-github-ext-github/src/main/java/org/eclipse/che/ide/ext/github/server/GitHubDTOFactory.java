@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.server;
 
-import com.google.inject.Inject;
-
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.github.shared.Collaborators;
@@ -22,10 +20,10 @@ import org.eclipse.che.ide.ext.github.shared.GitHubRepository;
 import org.eclipse.che.ide.ext.github.shared.GitHubRepositoryList;
 import org.eclipse.che.ide.ext.github.shared.GitHubUser;
 import org.kohsuke.github.GHCommitPointer;
+import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHPersonSet;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
 import org.kohsuke.github.PagedIterable;
 
 import java.io.IOException;
@@ -38,9 +36,6 @@ import java.util.List;
  * @author Igor Vinokur
  */
 public class GitHubDTOFactory {
-
-    @Inject
-    GitHubFactory gitHub;
 
     /**
      * Create DTO object of GitHub repositories collection from given repositories list
@@ -119,14 +114,10 @@ public class GitHubDTOFactory {
         dtoRepository.setPushedAt(String.valueOf(ghRepository.getPushedAt()));
         dtoRepository.setHasDownloads(ghRepository.hasDownloads());
         dtoRepository.setHasIssues(ghRepository.hasIssues());
+        dtoRepository.setOwnerLogin(ghRepository.getOwnerName());
 
         if (ghRepository.isFork() && ghRepository.getParent() != null) {
             dtoRepository.setParent(createRepository(ghRepository.getParent()));
-        }
-        //if a repository is received from list, parent in repo is null, so we have to get repo separately to get his parent
-        if (ghRepository.isFork() && ghRepository.getParent() == null) {
-            dtoRepository.setParent(createRepository(gitHub.connect().getUser(ghRepository.getOwner().getLogin())
-                                                           .getRepository(ghRepository.getName()).getParent()));
         }
 
         return dtoRepository;
@@ -189,7 +180,7 @@ public class GitHubDTOFactory {
         if (ghPullRequest.getMergedBy() != null) {
             dtoPullRequest.setMergedBy(createUser(ghPullRequest.getMergedBy()));
         }
-        if (ghPullRequest.getMergeable() !=null) {
+        if (ghPullRequest.getMergeable() != null) {
             dtoPullRequest.setMergeable(ghPullRequest.getMergeable());
         }
 
@@ -198,15 +189,15 @@ public class GitHubDTOFactory {
 
     /**
      * Create DTO object of GitHub collaborators collection from given users
-     * @param ghCollaborators collection of users from kohsuke GitHub library
+     * @param ghPersons collection of users from kohsuke GitHub library
      * @return DTO object
      * @throws IOException
      */
-    public Collaborators createCollaborators(GHPersonSet<GHUser> ghCollaborators) throws IOException {
+    public Collaborators createCollaborators(GHPersonSet<? extends GHPerson> ghPersons) throws IOException {
         Collaborators collaborators = DtoFactory.getInstance().createDto(Collaborators.class);
 
-        for (GHUser collaborator : ghCollaborators) {
-            collaborators.getCollaborators().add(createUser(collaborator));
+        for (GHPerson ghPerson : ghPersons) {
+            collaborators.getCollaborators().add(createUser(ghPerson));
         }
 
         return collaborators;
@@ -214,28 +205,28 @@ public class GitHubDTOFactory {
 
     /**
      * Create DTO object of GitHub user from given user
-     * @param ghUser user from kohsuke GitHub library
+     * @param ghPerson user from kohsuke GitHub library
      * @return DTO object
      * @throws IOException
      */
-    public GitHubUser createUser(GHUser ghUser) throws IOException {
+    public GitHubUser createUser(GHPerson ghPerson) throws IOException {
         GitHubUser dtoUser = DtoFactory.getInstance().createDto(GitHubUser.class);
 
-        dtoUser.setId(String.valueOf(ghUser.getId()));
-        dtoUser.setHtmlUrl(ghUser.getHtmlUrl().toString());
-        dtoUser.setAvatarUrl(ghUser.getAvatarUrl());
-        dtoUser.setBio(ghUser.getBlog());
-        dtoUser.setCompany(ghUser.getCompany());
-        dtoUser.setEmail(ghUser.getEmail());
-        dtoUser.setFollowers(ghUser.getFollowersCount());
-        dtoUser.setFollowing(ghUser.getFollowingCount());
-        dtoUser.setLocation(ghUser.getLocation());
-        dtoUser.setLogin(ghUser.getLogin());
-        dtoUser.setName(ghUser.getName());
-        dtoUser.setPublicGists(ghUser.getPublicGistCount());
-        dtoUser.setPublicRepos(ghUser.getPublicRepoCount());
-        dtoUser.setUrl(String.valueOf(ghUser.getUrl()));
-        dtoUser.setGravatarId(ghUser.getGravatarId());
+        dtoUser.setId(String.valueOf(ghPerson.getId()));
+        dtoUser.setHtmlUrl(ghPerson.getHtmlUrl().toString());
+        dtoUser.setAvatarUrl(ghPerson.getAvatarUrl());
+        dtoUser.setBio(ghPerson.getBlog());
+        dtoUser.setCompany(ghPerson.getCompany());
+        dtoUser.setEmail(ghPerson.getEmail());
+        dtoUser.setFollowers(ghPerson.getFollowersCount());
+        dtoUser.setFollowing(ghPerson.getFollowingCount());
+        dtoUser.setLocation(ghPerson.getLocation());
+        dtoUser.setLogin(ghPerson.getLogin());
+        dtoUser.setName(ghPerson.getName());
+        dtoUser.setPublicGists(ghPerson.getPublicGistCount());
+        dtoUser.setPublicRepos(ghPerson.getPublicRepoCount());
+        dtoUser.setUrl(String.valueOf(ghPerson.getUrl()));
+        dtoUser.setGravatarId(ghPerson.getGravatarId());
 
         return dtoUser;
     }
@@ -245,7 +236,7 @@ public class GitHubDTOFactory {
      * @param ghPullRequestHead pull-request head from kohsuke GitHub library
      * @return DTO object
      */
-    public GitHubPullRequestHead createPullRequestHead(GHCommitPointer ghPullRequestHead){
+    public GitHubPullRequestHead createPullRequestHead(GHCommitPointer ghPullRequestHead) {
         GitHubPullRequestHead dtoPullRequestHead = DtoFactory.getInstance().createDto(GitHubPullRequestHead.class);
 
         dtoPullRequestHead.setLabel(ghPullRequestHead.getLabel());

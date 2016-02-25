@@ -25,11 +25,12 @@ import java.util.Set;
 @Singleton
 public class ProjectHandlerRegistry {
 
-    private final Map<String, CreateProjectHandler>      createProjectHandlers      = new HashMap<>();
-    private final Map<String, PostImportProjectHandler>  postImportProjectHandlers  = new HashMap<>();
-    private final Map<String, GetItemHandler>            getItemHandlers            = new HashMap<>();
-    private final Map<String, ProjectCreatedHandler>     projectCreatedHandlers     = new HashMap<>();
-    private final Map<String, ProjectInitHandler>        projectInitHandlers        = new HashMap<>();
+    private final Map<String, CreateProjectHandler>     createProjectHandlers     = new HashMap<>();
+    private final Map<String, PostImportProjectHandler> postImportProjectHandlers = new HashMap<>();
+    private final Map<String, GetItemHandler>           getItemHandlers           = new HashMap<>();
+    private final Map<String, ProjectCreatedHandler>    projectCreatedHandlers    = new HashMap<>();
+    private final Map<String, ProjectInitHandler>       projectInitHandlers       = new HashMap<>();
+    private final Map<String, ProjectUpdatedHandler>    projectUpdatedHandlers    = new HashMap<>();
 
     @Inject
     public ProjectHandlerRegistry(Set<ProjectHandler> projectHandlers) {
@@ -49,6 +50,8 @@ public class ProjectHandlerRegistry {
             projectCreatedHandlers.put(handler.getProjectType(), (ProjectCreatedHandler)handler);
         } else if (handler instanceof ProjectInitHandler) {
             projectInitHandlers.put(handler.getProjectType(), (ProjectInitHandler)handler);
+        } else if (handler instanceof ProjectUpdatedHandler) {
+            projectUpdatedHandlers.put(handler.getProjectType(), (ProjectUpdatedHandler)handler);
         }
     }
 
@@ -74,6 +77,11 @@ public class ProjectHandlerRegistry {
     @Nullable
     public ProjectInitHandler getProjectInitHandler(@NotNull String projectType) {
         return projectInitHandlers.get(projectType);
+    }
+
+    @Nullable
+    public ProjectUpdatedHandler getProjectUpdatedHandler(@NotNull String projectType) {
+        return projectUpdatedHandlers.get(projectType);
     }
 
 }

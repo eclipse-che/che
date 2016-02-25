@@ -31,12 +31,14 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class MessageLoader implements AsyncRequestLoader {
 
-    public static final String DEF_MESSAGE = "Loading...";
-    public static final int    SHOW_DELAY  = 500; //500ms
+    public static final String DEF_MESSAGE    = "Loading...";
+    public static final String MESSAGE_DBG_ID = "loader-message";
+    public static final String GLASS_DBG_ID   = "glass-panel";
+    public static final String LOADER_DBG_ID  = "loader-panel";
+    public static final int    SHOW_DELAY     = 500; //500ms
 
     private boolean showing = false;
 
-    private final MessageLoaderResources resources;
     private final Label     label  = new Label();
     private final FlowPanel glass  = new FlowPanel();
     private final FlowPanel loader = new FlowPanel();
@@ -57,8 +59,7 @@ public class MessageLoader implements AsyncRequestLoader {
 
     @AssistedInject
     public MessageLoader(@Assisted String message, MessageLoaderResources resources) {
-        this.resources = resources;
-
+        label.ensureDebugId(MESSAGE_DBG_ID);
         label.setText(message == null || message.isEmpty() ? DEF_MESSAGE : message);
         label.setStyleName(resources.Css().label());
         loader.setStyleName(resources.Css().loader());
@@ -67,9 +68,11 @@ public class MessageLoader implements AsyncRequestLoader {
         loaderSvg.setStyleName(resources.Css().loaderSvg());
         loaderSvg.add(new SVGImage(resources.loader()));
 
+        loader.ensureDebugId(LOADER_DBG_ID);
         loader.add(loaderSvg);
         loader.add(label);
 
+        glass.ensureDebugId(GLASS_DBG_ID);
         glass.add(loader);
         glass.setStyleName(resources.Css().glass());
     }

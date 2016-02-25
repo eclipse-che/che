@@ -120,10 +120,9 @@ public class BootstrapController {
                     initializationFailed(reason.getMessage());
                 }
             });
+        } else {
+            startExtensionsAndDisplayUI();
         }
-//        else {
-//            startExtensionsAndDisplayUI();
-//        }
     }
 
     private void startWsAgentComponents(final Iterator<Provider<WsAgentComponent>> componentProviderIterator) {
@@ -146,7 +145,6 @@ public class BootstrapController {
                 }
             });
         } else {
-            startExtensionsAndDisplayUI();
             eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
         }
     }

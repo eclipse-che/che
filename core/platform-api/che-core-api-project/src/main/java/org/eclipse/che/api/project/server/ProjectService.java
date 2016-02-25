@@ -229,6 +229,8 @@ public class ProjectService extends Service {
                                                                                     ServerException,
                                                                                     IOException {
 
+        //here we filtering not persisted mixin
+        //maybe not good place do it here
         final ProjectConfigDto ensure = ProjectTypeUtils.ensure(projectConfigDto, projectManager.getProjectTypeRegistry());
         if(path != null) {
             ensure.setPath(path);

@@ -21,19 +21,18 @@ export class ProjectDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $location, cheAPI, $mdDialog, cheNotification) {
+  constructor($log, $route, $location, cheAPI, $mdDialog, cheNotification) {
+    this.$log = $log;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
 
     this.workspaceId = $route.current.params.workspaceId;
-    this.projectPath = '/' + $route.current.params.projectName;
+    this.projectName = $route.current.params.projectName;
+    this.projectPath = '/' + this.projectName;
 
     this.loading = true;
-
-    this.askedName = null;
-    this.askedDescription = null;
 
     this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
     cheAPI.getWorkspace().fetchWorkspaces();
@@ -78,8 +77,8 @@ export class ProjectDetailsCtrl {
 
   updateProjectDetails() {
     this.projectDetails = this.cheAPI.getProject().getProjectDetailsByKey(this.workspaceId, this.projectPath);
-    this.askedName = angular.copy(this.projectDetails.name);
-    this.askedDescription = angular.copy(this.projectDetails.description);
+    this.projectName = angular.copy(this.projectDetails.name);
+    this.projectDescription = angular.copy(this.projectDetails.description);
     this.loading = false;
   }
 
@@ -101,19 +100,19 @@ export class ProjectDetailsCtrl {
           this.updateProjectDetails();
         });
       } else {
-        this.askedDescription = projectDetails.description;
+        this.projectDescription = projectDetails.description;
       }
     }, (error) => {
-      this.projectDetails.description = this.askedDescription;
+      this.projectDetails.description = this.projectDescription;
       this.cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
-      console.log('error', error);
+      this.$log.log('error', error);
     });
 
   }
 
   isNameChanged() {
     if (this.projectDetails) {
-      return this.askedName !== this.projectDetails.name;
+      return this.projectName !== this.projectDetails.name;
     } else {
       return false;
     }
@@ -121,7 +120,7 @@ export class ProjectDetailsCtrl {
 
   isDescriptionChanged() {
     if (this.projectDetails) {
-      return this.askedDescription !== this.projectDetails.description;
+      return this.projectDescription !== this.projectDetails.description;
     } else {
       return false;
     }
@@ -133,7 +132,7 @@ export class ProjectDetailsCtrl {
     }
 
     if (this.isNameChanged()) {
-      let promise = this.cheAPI.getProject().rename(this.projectDetails.workspaceId, this.askedName, this.projectDetails.name);
+      let promise = this.cheAPI.getProject().rename(this.projectDetails.workspaceId, this.projectName, this.projectDetails.name);
 
       promise.then(() => {
         this.cheAPI.getProject().removeProjectDetailsByKey(this.workspaceId, this.projectPath);
@@ -148,9 +147,9 @@ export class ProjectDetailsCtrl {
           this.setProjectDetails(this.projectDetails);
         }
       }, (error) => {
-        this.projectDetails.name = this.askedName;
+        this.projectDetails.name = this.projectName;
         this.cheNotification.showError(error.data.message ? error.data.message : 'Update information failed.');
-        console.log('error', error);
+        this.$log.log('error', error);
       });
     } else {
       this.setProjectDetails(this.projectDetails);
@@ -173,7 +172,7 @@ export class ProjectDetailsCtrl {
       promise.then(() => {
         this.$location.path('/projects');
       }, (error) => {
-        console.log('error', error);
+        this.$log.log('error', error);
       });
     });
   }

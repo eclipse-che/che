@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.extension.machine.client;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -78,7 +79,7 @@ public class MachineExtension {
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
                             final ConsolesPanelPresenter consolesPanelPresenter,
-                            final ServerPortProvider machinePortProvider,
+                            final Provider<ServerPortProvider> machinePortProvider,
                             final OutputsContainerPresenter outputsContainerPresenter,
                             final PerspectiveManager perspectiveManager,
                             IconRegistry iconRegistry,
@@ -88,6 +89,8 @@ public class MachineExtension {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
+                machinePortProvider.get();
+
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
@@ -128,7 +131,7 @@ public class MachineExtension {
         actionManager.registerAction("executeSelectedCommand", executeSelectedCommandAction);
 
         // add actions in main menu
-        runMenu.add(editCommandsAction);
+        runMenu.add(editCommandsAction, FIRST);
 
         //add actions in machine menu
         final DefaultActionGroup machineMenu = new DefaultActionGroup(localizationConstant.mainMenuMachine(), true, actionManager);
