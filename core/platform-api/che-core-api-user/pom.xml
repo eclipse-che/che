@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-api-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC7</version>
+        <version>4.0.0-RC8-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-user</artifactId>
     <name>Che Core :: API :: User</name>
