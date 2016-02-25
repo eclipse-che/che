@@ -182,7 +182,8 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         throw new NotFoundException("Parent project not found " + path);
     }
 
-    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected)
+    @Override
+    public RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected)
             throws ServerException, ConflictException,
                    NotFoundException, ForbiddenException {
         RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);

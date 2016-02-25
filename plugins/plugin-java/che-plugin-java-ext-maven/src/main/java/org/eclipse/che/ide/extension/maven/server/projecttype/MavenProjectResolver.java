@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistryImpl;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
@@ -49,7 +49,7 @@ public class MavenProjectResolver {
      * @throws NotFoundException
      * @throws IOException
      */
-    public static void resolve(FolderEntry projectFolder, ProjectRegistryImpl projectRegistry) throws ConflictException,
+    public static void resolve(FolderEntry projectFolder, ProjectRegistry projectRegistry) throws ConflictException,
                                                                                                 ForbiddenException,
                                                                                                 ServerException,
                                                                                                 NotFoundException,

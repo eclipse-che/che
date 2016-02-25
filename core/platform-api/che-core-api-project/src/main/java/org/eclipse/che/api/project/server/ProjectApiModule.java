@@ -39,6 +39,7 @@ public class ProjectApiModule extends AbstractModule {
         Multibinder<ProjectHandler> projectHandlersMultibinder = Multibinder.newSetBinder(binder(), ProjectHandler.class);
         projectHandlersMultibinder.addBinding().to(CreateBaseProjectTypeHandler.class);
 
+        bind(ProjectRegistry.class).to(ProjectRegistryImpl.class).asEagerSingleton();
         bind(ProjectService.class);
         bind(ProjectTypeService.class);
         bind(ProjectImportersService.class);
