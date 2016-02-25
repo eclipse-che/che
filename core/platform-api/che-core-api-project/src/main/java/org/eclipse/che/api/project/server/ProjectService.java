@@ -64,6 +64,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -72,6 +73,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -767,40 +769,22 @@ public class ProjectService extends Service {
         return folder.getVirtualFile().zip();
     }
 
-//    @POST
-//    @Path("/export/{path:.*}")
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @Produces(ExtMediaType.APPLICATION_ZIP)
-//    public Response exportDiffZip(@PathParam("ws-id") String workspace, @PathParam("path") String path, InputStream in)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry folder = asFolder(workspace, path);
-//        return VirtualFileSystemImpl.exportZip(folder.getVirtualFile(), in);
-//    }
-//
-//    @POST
-//    @Path("/export/{path:.*}")
-//    @Consumes(MediaType.TEXT_PLAIN)
-//    @Produces(MediaType.MULTIPART_FORM_DATA)
-//    public Response exportDiffZipMultipart(@PathParam("ws-id") String workspace, @PathParam("path") String path, InputStream in)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FolderEntry folder = asFolder(workspace, path);
-//        return VirtualFileSystemImpl.exportZipMultipart(folder.getVirtualFile(), in);
-//    }
-
-//    @GET
-//    @Path("/export/file/{path:.*}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
-//                               @PathParam("ws-id") String workspace,
-//                               @ApiParam(value = "Path to resource to be imported")
-//                               @PathParam("path") String path)
-//            throws NotFoundException, ForbiddenException, ServerException {
-//        final FileEntry file = asFile(workspace, path);
-//        ContentStream content = file.getVirtualFile().getContent();
-//        return downloadFile(content);
-//    }
-
-
+    @GET
+    @Path("/export/file/{path:.*}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
+                               @PathParam("ws-id") String workspace,
+                               @ApiParam(value = "Path to resource to be imported")
+                               @PathParam("path") String path)
+            throws NotFoundException, ForbiddenException, ServerException {
+        final VirtualFile virtualFile = projectManager.asFile(path).getVirtualFile();
+        return Response
+                .ok(virtualFile.getContent())
+                .lastModified(new Date(virtualFile.getLastModificationDate()))
+                .header(HttpHeaders.CONTENT_LENGTH, Long.toString(virtualFile.getLength()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + virtualFile.getName() + '"')
+                .build();
+    }
 
     @ApiOperation(value = "Get project children items",
                   notes = "Request all children items for a project, such as files and folders",
