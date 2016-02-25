@@ -82,13 +82,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), IN_PROGRESS);
         connect();
 
-        messageBus = messageBusProvider.createMachineMessageBus(wsUrl);
-        messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
-            @Override
-            public void onOpen() {
-                messageBus.removeOnOpenHandler(this);
-            }
-        });
+
     }
 
     @Override
@@ -112,6 +106,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     @Override
     public void onOpen() {
         testConnection.close(); //close testing connection now we know ws-agent already start
+        messageBus = messageBusProvider.createMachineMessageBus(wsUrl);
         state = WsAgentState.STARTED;
         initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), SUCCESS);
         loader.hide();
@@ -119,6 +114,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         if (messageBusCallback != null) {
             messageBusCallback.onSuccess(messageBus);
         }
+        eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }
 
     public WsAgentState getState() {
