@@ -63,7 +63,7 @@ public class EventServiceTest {
         Assert.assertEquals(events.size(), 3);
     }
 
-    static interface I {
+    interface I {
     }
 
     static class Listener implements I, EventSubscriber<String> {
@@ -114,7 +114,7 @@ public class EventServiceTest {
     public void testHierarchicalEvent() {
         final List<String> events = new ArrayList<>();
         // register two listeners.
-        // 1. Accept only Event type.
+        // 1. Accept Event type.
         bus.subscribe(new EventSubscriber<Event>() {
             @Override
             public void onEvent(Event event) {
@@ -122,7 +122,7 @@ public class EventServiceTest {
             }
         });
 
-        // 2. Accept Event and ExtEvent types.
+        // 2. Accept ExtEvent type.
         bus.subscribe(new EventSubscriber<ExtEvent>() {
             @Override
             public void onEvent(ExtEvent event) {
@@ -138,6 +138,23 @@ public class EventServiceTest {
         Assert.assertEquals(events.size(), 2);
         Assert.assertTrue(events.contains("1:ext_event"));
         Assert.assertTrue(events.contains("2:ext_event"));
+    }
+
+    @Test
+    public void testSubscribingOnChildEvents() {
+        final List<String> events = new ArrayList<>();
+        // Accept ExtEvent type.
+        bus.subscribe(new EventSubscriber<Event>() {
+            @Override
+            public void onEvent(Event event) {
+                events.add(String.format("1:%s", event));
+            }
+        }, ExtEvent.class);
+
+        bus.publish(new Event());
+        bus.publish(new ExtEvent());
+        Assert.assertEquals(events.size(), 1);
+        Assert.assertTrue(events.contains("1:ext_event"));
     }
 
     @Test
