@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -22,6 +23,7 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,7 +181,7 @@ public class AttributeFilter {
             if (factory == null) {
                 List<String> value = projectConfig.getAttributes().get(attribute.getName());
 
-                persistentAttributes.put(variable.getName(), value);
+                persistentAttributes.put(variable.getName(), MoreObjects.firstNonNull(value, new ArrayList<>()));
             }
         }
 
