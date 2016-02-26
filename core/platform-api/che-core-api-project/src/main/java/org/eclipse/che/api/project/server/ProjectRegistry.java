@@ -51,13 +51,11 @@ public interface ProjectRegistry {
 
     /**
      * @param path
-     * @return the project owned this path.
-     * @throws NotFoundException
-     *         if not such a project found
+     * @return the project owned this path or null if not such a project found
      * @throws ServerException
      *         if projects are not initialized yet
      */
-    RegisteredProject getParentProject(String path) throws NotFoundException, ServerException;
+    RegisteredProject getParentProject(String path) throws ServerException;
 
     RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected) throws ServerException,
                                                                                                                      ConflictException,

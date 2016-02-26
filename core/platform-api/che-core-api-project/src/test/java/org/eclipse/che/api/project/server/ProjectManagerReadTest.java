@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -26,8 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 
 /**
@@ -134,20 +132,14 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testParentProject() throws Exception {
 
-        try {
-            projectRegistry.getParentProject("/normal").getPath();
-            fail("NotFoundException expected");
-        } catch (NotFoundException e) {}
+        RegisteredProject parentProject = projectRegistry.getParentProject("/normal");
+        assertNull(parentProject);
 
         assertEquals("/normal", projectRegistry.getParentProject("/normal/some/path").getPath());
         assertEquals("/normal/module", projectRegistry.getParentProject("/normal/module/some/path").getPath());
 
-        try {
-            projectRegistry.getParentProject("/some/path");
-            fail("NotFoundException expected");
-        } catch (NotFoundException e) {}
-
-
+        RegisteredProject parentProject1 = projectRegistry.getParentProject("/some/path");
+        assertNull(parentProject1);
     }
 
     @Test

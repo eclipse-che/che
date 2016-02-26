@@ -128,7 +128,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     }
 
     @Override
-    public RegisteredProject getParentProject(String path) throws NotFoundException, ServerException {
+    public RegisteredProject getParentProject(String path) throws ServerException {
         checkInitializationState();
 
         // otherwise try to find matched parent
@@ -142,7 +142,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         }
 
         // path is out of projects
-        throw new NotFoundException("Parent project not found " + path);
+        return null;
     }
 
     @Override
