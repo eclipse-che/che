@@ -220,6 +220,32 @@ public class MachineExtensionProxyServletTest {
     }
 
     @Test
+    public void shouldBeAbleToProxyWithout() throws Exception {
+        final String path = "/api/ext/" + WORKSPACE_ID + "/";
+
+        final String defaultContextPath = contextHandler.getContextPath();
+        try {
+            contextHandler.setContextPath("/api/ext/");
+
+            MockHttpServletRequest mockRequest =
+                    new MockHttpServletRequest(PROXY_ENDPOINT + path,
+                                               new ByteArrayInputStream(new byte[0]),
+                                               0,
+                                               "GET",
+                                               defaultHeaders);
+
+            MockHttpServletResponse mockResponse = new MockHttpServletResponse();
+
+            proxyServlet.service(mockRequest, mockResponse);
+
+            assertEquals(mockResponse.getStatus(), 200);
+            assertEquals(extensionApiRequest.uri, "/api/ext/");
+        } finally {
+            contextHandler.setContextPath(defaultContextPath);
+        }
+    }
+
+    @Test
     public void shouldProxyWithQueryString() throws Exception {
         final String query = "key1=value1&key2=value2&key2=value3";
 

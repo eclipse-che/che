@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.server;
+package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -101,7 +101,7 @@ public class MachineModule extends AbstractModule {
         bind(WSocketEventBusClient.class).asEagerSingleton();
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
-        bind(org.eclipse.che.ide.ext.java.server.ApiEndpointAccessibilityChecker.class);
+        bind(ApiEndpointAccessibilityChecker.class);
     }
 
     //it's need for WSocketEventBusClient and in the future will be replaced with the property
