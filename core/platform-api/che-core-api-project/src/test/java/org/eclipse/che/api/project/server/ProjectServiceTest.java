@@ -12,6 +12,7 @@ package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
@@ -1045,7 +1046,7 @@ public class ProjectServiceTest {
         assertNotNull(pm.getProject("my_project"));
     }
 
-    @Test
+    @Test(expectedExceptions = NotFoundException.class)
     public void testDeleteProject() throws Exception {
 
 
@@ -1053,7 +1054,8 @@ public class ProjectServiceTest {
                                                       String.format("http://localhost:8080/api/project/%s/my_project", workspace),
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 204, "Error: " + response.getEntity());
-        Assert.assertNull(pm.getProject("my_project"));
+
+        pm.getProject("my_project");
 
 //        verify(httpJsonRequestFactory).fromLink(eq(DtoFactory.newDto(Link.class)
 //                                                             .withHref(apiEndpoint + "/workspace/" + workspace + "/project/my_project")

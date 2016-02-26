@@ -539,11 +539,13 @@ public class ProjectService extends Service {
                                                 .build(workspace, copy.getPath().toString().substring(1));
 
         if (copy.isFolder()) {
-            final RegisteredProject project = projectManager.getProject(copy.getPath().toString());
-            final String name = project.getName();
-            final String projectType = project.getProjectType().getId();
-
-            logProjectCreatedEvent(name, projectType);
+            try {
+                final RegisteredProject project = projectManager.getProject(copy.getPath().toString());
+                final String name = project.getName();
+                final String projectType = project.getProjectType().getId();
+                logProjectCreatedEvent(name, projectType);
+            } catch (NotFoundException ignore) {
+            }
         }
 
         return Response.created(location).build();
@@ -715,10 +717,14 @@ public class ProjectService extends Service {
                                                                                                                   ServerException {
         final FolderEntry parent = projectManager.asFolder(path);
         importZip(parent.getVirtualFile(), zip, true, skipFirstLevel);
-        final RegisteredProject project = projectManager.getProject(path);
-        eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
-        final String projectType = project.getProjectType().getId();
-        logProjectCreatedEvent(path, projectType);
+
+        try {
+            final RegisteredProject project = projectManager.getProject(path);
+            eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
+            final String projectType = project.getProjectType().getId();
+            logProjectCreatedEvent(path, projectType);
+        } catch (NotFoundException ignore) {
+        }
 
         return Response.created(getServiceContext().getServiceUriBuilder()
                                                    .path(getClass(), "getChildren")
