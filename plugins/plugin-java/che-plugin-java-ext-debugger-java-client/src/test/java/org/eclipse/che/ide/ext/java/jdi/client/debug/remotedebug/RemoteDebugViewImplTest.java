@@ -76,8 +76,8 @@ public class RemoteDebugViewImplTest {
 
     @Test
     public void confirmAcceptedShouldBeCalled() throws Exception {
-        when(view.host.getText()).thenReturn(SOME_TEXT);
-        when(view.port.getText()).thenReturn("8000");
+        when(view.host.getValue()).thenReturn(SOME_TEXT);
+        when(view.port.getValue()).thenReturn("8000");
         verify(dialogFactory).createConfirmDialog(eq(SOME_TEXT),
                                                   eq(view),
                                                   confirmCallbackCaptor.capture(),
@@ -86,8 +86,8 @@ public class RemoteDebugViewImplTest {
         confirmCallbackCaptor.getValue().accepted();
 
         verify(delegate).onConfirmClicked(SOME_TEXT, 8000);
-        verify(view.host).getText();
-        verify(view.port).getText();
+        verify(view.host).getValue();
+        verify(view.port).getValue();
         verify(locale).connectToRemote();
     }
 
