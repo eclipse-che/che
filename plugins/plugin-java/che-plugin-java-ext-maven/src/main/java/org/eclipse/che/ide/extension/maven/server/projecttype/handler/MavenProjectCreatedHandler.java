@@ -15,22 +15,23 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.handlers.ProjectCreatedHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenClassPathConfigurator;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 
 /**
  * @author Roman Nikitenko
+ *
+ * @deprecated
  */
-public class MavenProjectCreatedHandler implements ProjectCreatedHandler {
+public class MavenProjectCreatedHandler  {
 
-    @Override
+
     public void onProjectCreated(FolderEntry projectFolder)
             throws ServerException, ForbiddenException, ConflictException, NotFoundException {
         MavenClassPathConfigurator.configure(projectFolder);
     }
 
-    @Override
+
     public String getProjectType() {
         return MavenAttributes.MAVEN_ID;
     }

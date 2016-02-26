@@ -73,7 +73,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
 
                 projectFolder.createFile("generated", "test".getBytes());
                 projectFolder.createFolder("project2");
-                projectRegistry.initProject("/project1/project2", BaseProjectType.ID);
+                projectRegistry.setProjectType("/project1/project2", BaseProjectType.ID, false);
 
                 //System.out.println(">>S>>> "+projectRegistry);
 

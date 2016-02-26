@@ -24,13 +24,12 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.handlers.ProjectUpdatedHandler;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
@@ -126,7 +125,7 @@ public final class ProjectManager {
         executor.shutdownNow();
     }
 
-    public FolderEntry getProjectsRoot() throws ServerException {
+    public FolderEntry getProjectsRoot() throws ServerException, NotFoundException {
         return new FolderEntry(vfs.getRoot());
     }
 
@@ -226,13 +225,31 @@ public final class ProjectManager {
             generator.onCreateProject(projectFolder, valueMap, options);
         }
 
+        final RegisteredProject project;
         try {
-            return projectRegistry.putProject(projectConfig, projectFolder, true, false);
+            project = projectRegistry.putProject(projectConfig, projectFolder, true, false);
         } catch (Exception e) {
             // rollback project folder
             projectFolder.getVirtualFile().delete();
             throw e;
         }
+
+        // primary type
+        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
+        if (projectInitHandler != null) {
+            projectInitHandler.onProjectInitialized(project.getBaseFolder());
+        }
+
+        // mixins
+        for(String mixin : project.getMixins()) {
+            projectInitHandler = handlers.getProjectInitHandler(mixin);
+            if (projectInitHandler != null) {
+                projectInitHandler.onProjectInitialized(project.getBaseFolder());
+            }
+        }
+
+        return project;
+
     }
 
     /**
@@ -270,9 +287,19 @@ public final class ProjectManager {
         }
 
         final RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
-        final ProjectUpdatedHandler updateProjectHandler = handlers.getProjectUpdatedHandler(newConfig.getType());
-        if (updateProjectHandler != null) {
-            updateProjectHandler.onProjectUpdated(baseFolder);
+
+        // primary type
+        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
+        if (projectInitHandler != null) {
+            projectInitHandler.onProjectInitialized(baseFolder);
+        }
+
+        // mixins
+        for(String mixin : project.getMixins()) {
+            projectInitHandler = handlers.getProjectInitHandler(mixin);
+            if (projectInitHandler != null) {
+                projectInitHandler.onProjectInitialized(baseFolder);
+            }
         }
 
         // TODO move to register?
@@ -297,10 +324,6 @@ public final class ProjectManager {
         // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
         final LineConsumerFactory outputOutputConsumerFactory =
                 () -> new ProjectImportOutputWSLineConsumer(path, projectRegistry.getWorkspaceId(), 300);
-
-        // Not all importers uses virtual file system API. In this case virtual file system API doesn't get events and isn't able to set
-        // correct creation time. Need do it manually.
-        //VirtualFileEntry vf = getProjectsRoot().getChild(path);
 
         FolderEntry folder = asFolder(path);
 
@@ -468,14 +491,10 @@ public final class ProjectManager {
         return (FolderEntry)entry;
     }
 
-    // TODO do we need ForbiddenException
     VirtualFileEntry asVirtualFileEntry(String path) throws NotFoundException, ServerException {
         final String apath = ProjectRegistryImpl.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
         final VirtualFileEntry entry = root.getChild(apath);
-//        if (entry == null) {
-//            throw new NotFoundException(String.format("Path '%s' doesn't exist.", apath));
-//        }
         return entry;
     }
 

@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.handlers.ProjectUpdatedHandler;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectResolver;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
  * @author Vitaly Parfonov
  */
 @Singleton
-public class ProjectBecomeMavenHandler implements ProjectUpdatedHandler {
+public class ProjectBecomeMavenHandler implements ProjectInitHandler {
 
     @Inject
     private ProjectRegistry projectRegistry;
@@ -42,10 +42,14 @@ public class ProjectBecomeMavenHandler implements ProjectUpdatedHandler {
     }
 
     @Override
-    public void onProjectUpdated(FolderEntry projectFolder)
-            throws ServerException, ForbiddenException, ConflictException, NotFoundException, IOException {
+    public void onProjectInitialized(FolderEntry projectFolder)
+            throws ServerException, ForbiddenException, ConflictException, NotFoundException {
 
-        MavenProjectResolver.resolve(projectFolder, projectRegistry);
+        try {
+            MavenProjectResolver.resolve(projectFolder, projectRegistry);
+        } catch (IOException e) {
+            throw new ServerException(e);
+        }
 
     }
 }
