@@ -66,6 +66,7 @@ public class Rename18Test extends RefactoringTest {
     @After
     public void tearDown() throws Exception {
         super.tearDown();
+		setup.tearDown();
         Hashtable options= JavaCore.getOptions();
         JavaCore.setOptions(options);
     }

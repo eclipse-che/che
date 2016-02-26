@@ -502,6 +502,7 @@ public class RenamePackageTest extends RefactoringTest {
         descriptor.setJavaElement(fragment);
         descriptor.setNewName("org.test2");
         descriptor.setUpdateReferences(true);
+        descriptor.setUpdateHierarchy(true);
         descriptor.setUpdateQualifiedNames(true);
         descriptor.setFileNamePatterns("*.properties");
         Refactoring refactoring = createRefactoring(descriptor);
@@ -517,8 +518,7 @@ public class RenamePackageTest extends RefactoringTest {
         IFile newFile = ((IContainer)newFragment.getResource()).getFile(new Path("x.properties"));
         assertEquals("This is about 'org.test2' and more", getContents(newFile));
         checkMappingChanged(jm, rm, new Object[][]{
-                {fragment, newFragment},
-                {file, newFile},
+                {file, newFile}
         });
     }
 
@@ -971,11 +971,11 @@ public class RenamePackageTest extends RefactoringTest {
         IJavaModel javaModel = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
         IJavaProject project = getRoot().getJavaProject();
         IFile _project = project.getProject().getFile(".project");
-        checkMappingUnchanged(jm, rm, new Object[]{javaModel, project, _project, getRoot(), getPackageP(),
+        checkMappingUnchanged(jm, rm, new Object[]{project, _project, getRoot(), getPackageP(),
                                                    getRoot().getPackageFragment("inexistent"), getRoot().getPackageFragment("r.inexistent"),
                                                    getRoot().getPackageFragment("p1.inexistent")});
 
-        IPackageFragment r = getRoot().getPackageFragment("r");
+        IPackageFragment r = getRoot().getPackageFragment("p1");
         ICompilationUnit r_A = r.getCompilationUnit("A.java");
         IType r_A_A = r_A.getType("A");
         IField r_A_A_a = r_A_A.getField("a");

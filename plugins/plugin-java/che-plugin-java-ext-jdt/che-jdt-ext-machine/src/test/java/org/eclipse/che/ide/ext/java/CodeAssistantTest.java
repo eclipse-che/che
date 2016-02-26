@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java;
 
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
 import org.eclipse.che.jdt.CodeAssist;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -21,10 +20,6 @@ import static org.fest.assertions.Assertions.assertThat;
  * @author Evgen Vidolob
  */
 public class CodeAssistantTest  extends BaseTest{
-
-
-    private IJavaCompletionProposalComputer[] computers;
-
     @Test
     public void testFirst() throws Exception {
         StringBuilder b = new StringBuilder("package org.eclipse.che.test;\n");
@@ -34,7 +29,7 @@ public class CodeAssistantTest  extends BaseTest{
         b.append("}\n}");
         int offset = b.indexOf("   i");
         CodeAssist codeAssist = new CodeAssist();
-        Proposals proposals = codeAssist.computeProposals(project, "com.codenvy.test.MyClass", offset, b.toString());
+        Proposals proposals = codeAssist.computeProposals(project, "org.eclipse.che.test.MyClass", offset, b.toString());
         assertThat(proposals).isNotNull();
         assertThat(proposals.getProposals()).isNotEmpty();
     }

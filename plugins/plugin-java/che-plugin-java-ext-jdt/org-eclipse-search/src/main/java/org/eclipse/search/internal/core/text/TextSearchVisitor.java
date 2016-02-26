@@ -32,7 +32,6 @@ import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.core.text.TextSearchScope;
 import org.eclipse.search.internal.core.text.FileCharSequenceProvider.FileCharSequenceException;
-import org.eclipse.search.internal.ui.Messages;
 import org.eclipse.search.internal.ui.NewSearchUI;
 import org.eclipse.search.internal.ui.SearchMessages;
 import org.eclipse.search.internal.ui.SearchPlugin;

@@ -139,6 +139,11 @@ public class JavaProjectHelper {
             outputLocation = project.getFullPath();
         }
 
+        IFolder codenvyFolder = project.getFolder(".codenvy");
+        if (!codenvyFolder.exists()) {
+            CoreUtility.createFolder(codenvyFolder, false, true, null);
+        }
+
 //		if (!project.hasNature(JavaCore.NATURE_ID)) {
 //			addNatureToProject(project, JavaCore.NATURE_ID, null);
 //		}
