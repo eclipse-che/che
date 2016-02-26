@@ -41,8 +41,20 @@ public interface GitHubClientService {
      *         the repository name.
      * @param callback
      *         callback called when operation is done.
+     * @deprecated use {@link #getRepository(String, String)}
      */
+    @Deprecated
     void getRepository(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepository> callback);
+
+    /**
+     * Get given repository information.
+     *
+     * @param user
+     *         the owner of the repository.
+     * @param repository
+     *         the repository name.
+     */
+    Promise<GitHubRepository> getRepository(String user, String repository);
 
     /**
      * Get list of available public and private repositories of the authorized user.
@@ -105,10 +117,14 @@ public interface GitHubClientService {
     /**
      * Get a pull request by id for a given repository.
      *
-     * @param owner the owner of the target repository
-     * @param repository the target repository
-     * @param pullRequestId the Id of the pull request
-     * @param callback the callback with either the pull request as argument or null if it doesn't exist
+     * @param owner
+     *         the owner of the target repository
+     * @param repository
+     *         the target repository
+     * @param pullRequestId
+     *         the Id of the pull request
+     * @param callback
+     *         the callback with either the pull request as argument or null if it doesn't exist
      */
     void getPullRequest(@NotNull String owner,
                         @NotNull String repository,

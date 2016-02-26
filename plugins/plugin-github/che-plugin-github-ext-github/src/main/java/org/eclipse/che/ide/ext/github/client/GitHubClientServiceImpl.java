@@ -81,6 +81,14 @@ public class GitHubClientServiceImpl implements GitHubClientService {
         asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
     }
 
+    @Override
+    public Promise<GitHubRepository> getRepository(String user, String repository) {
+        final String url = baseUrl + REPOSITORIES + "/" + user + "/" + repository;
+        return asyncRequestFactory.createGetRequest(url)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(GitHubRepository.class));
+    }
+
     /** {@inheritDoc} */
     @Override
     public Promise<List<GitHubRepository>> getRepositoriesList() {
