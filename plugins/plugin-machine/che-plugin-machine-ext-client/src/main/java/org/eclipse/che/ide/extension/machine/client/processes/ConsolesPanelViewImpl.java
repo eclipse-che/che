@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import elemental.js.dom.JsElement;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
@@ -377,16 +378,19 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     }
 
     @Override
-    public void setStopButtonVisibility(String nodeId, boolean visible) {
+    public void setProcessRunning(String nodeId, boolean running) {
         ProcessTreeNode processTreeNode = processTreeNodes.get(nodeId);
         if (processTreeNode == null) {
             return;
         }
 
-        if (visible) {
-            processTreeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().hideStopButton());
+        processTreeNode.setRunning(running);
+
+        JsElement spanElement = (JsElement)processTreeNode.getTreeNodeElement().getFirstChild().getChildNodes().item(1);
+        if (running) {
+            spanElement.setAttribute("running", "true");
         } else {
-            processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
+            spanElement.setAttribute("running", "false");
         }
     }
 

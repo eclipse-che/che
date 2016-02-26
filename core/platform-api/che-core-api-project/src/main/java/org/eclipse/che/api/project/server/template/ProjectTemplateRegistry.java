@@ -13,7 +13,9 @@ package org.eclipse.che.api.project.server.template;
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 
 import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +46,12 @@ public class ProjectTemplateRegistry {
         }
     }
 
+    @NotNull
     public List<ProjectTemplateDescriptor> getTemplates(List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return Arrays.asList();
+        }
+
         List<ProjectTemplateDescriptor> templateDescriptors = new ArrayList<>();
 
         templates.entrySet()

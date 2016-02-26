@@ -200,7 +200,6 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
             final HasProjectConfig hasProjectConfig = (HasProjectConfig)headElement;
             final ProjectConfigDto module = (hasProjectConfig).getProjectConfig();
             currentProject.setProjectConfig(module);
-            eventBus.fireEvent(new CurrentProjectChangedEvent(module));
         }
 
         if (headElement instanceof Node) {
@@ -211,6 +210,8 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
             currentProject.setRootProject(rootConfig);
             browserQueryFieldRenderer.setProjectName(rootConfig.getName());
         }
+
+        eventBus.fireEvent(new CurrentProjectChangedEvent(currentProject.getProjectConfig()));
     }
 
     @Override
