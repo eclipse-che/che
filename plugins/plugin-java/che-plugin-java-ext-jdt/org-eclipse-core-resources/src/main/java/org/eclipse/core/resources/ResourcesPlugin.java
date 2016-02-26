@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.core.internal.resources.Workspace;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.internal.utils.Messages;
@@ -192,14 +193,18 @@ public class ResourcesPlugin {
     private static String indexPath;
     private static String workspacePath;
     private ProjectManager projectManager;
+    private final ProjectRegistry projectRegistry;
     private static String pluginId;
 
     @Inject
-    public ResourcesPlugin(@Named("che.jdt.workspace.index.dir") String indexPath, @Named("che.user.workspaces.storage") String workspacePath,
-                           ProjectManager projectManager) {
+    public ResourcesPlugin(@Named("che.jdt.workspace.index.dir") String indexPath,
+                           @Named("che.user.workspaces.storage") String workspacePath,
+                           ProjectManager projectManager,
+                           ProjectRegistry projectRegistry) {
         ResourcesPlugin.indexPath = indexPath;
         ResourcesPlugin.workspacePath = workspacePath;
         this.projectManager = projectManager;
+        this.projectRegistry = projectRegistry;
         pluginId = "cheWsPlugin";
         EFS.setWsPath(workspacePath);
     }
@@ -218,7 +223,7 @@ public class ResourcesPlugin {
 
     @PostConstruct
     public void start() {
-        workspace = new Workspace(workspacePath, projectManager);
+        workspace = new Workspace(workspacePath, projectManager, projectRegistry);
     }
 
     /**

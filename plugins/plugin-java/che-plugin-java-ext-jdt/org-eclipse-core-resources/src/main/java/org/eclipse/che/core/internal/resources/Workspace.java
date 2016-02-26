@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -96,6 +97,7 @@ public class Workspace implements IWorkspace {
     protected TeamHook teamHook = null;
     private String               wsPath;
     private ProjectManager       projectManager;
+    private ProjectRegistry      projectRegistry;
     /**
      * Scheduling rule factory. This field is null if the factory has not been used
      * yet.  The accessor method should be used rather than accessing this field
@@ -104,9 +106,10 @@ public class Workspace implements IWorkspace {
     private IResourceRuleFactory ruleFactory;
     private IUndoContext undoContext = new UndoContext();
 
-    public Workspace(String path, ProjectManager projectManager) {
+    public Workspace(String path, ProjectManager projectManager, ProjectRegistry projectRegistry) {
         this.wsPath = path;
         this.projectManager = projectManager;
+        this.projectRegistry = projectRegistry;
         try {
             projectsRoot = projectManager.getProjectsRoot();
         } catch (ServerException e) {
@@ -907,9 +910,8 @@ public class Workspace implements IWorkspace {
 
     }
 
-
-    /** Returns project manager associated with this workspace */
-    public ProjectManager getProjectManager() {
-        return projectManager;
+    /** Returns project registry associated with this workspace */
+    public ProjectRegistry getProjectRegistry() {
+        return projectRegistry;
     }
 }

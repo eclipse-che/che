@@ -15,8 +15,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -115,16 +114,16 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
 
     @Override
     public IProject[] getProjects() {
-        ProjectManager manager = workspace.getProjectManager();
+        ProjectRegistry projectRegistry = workspace.getProjectRegistry();
         List<IProject> projects = new ArrayList<>();
         try {
-            List<RegisteredProject> rootProjects = manager.getProjects();
+            List<RegisteredProject> rootProjects = projectRegistry.getProjects();
             for (RegisteredProject rootProject : rootProjects) {
                 Project project = new Project(new Path(rootProject.getPath()), workspace);
 
                 projects.add(project);
 
-                addAllModules(projects, rootProject, manager);
+                addAllModules(projects, rootProject, projectRegistry);
             }
         } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
             LOG.error(e.getMessage(), e);
@@ -133,27 +132,27 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         return projects.toArray(new IProject[projects.size()]);
     }
 
-    // TODO: rework after new Project API
     private void addAllModules(List<IProject> projects,
                                RegisteredProject rootProject,
-                               ProjectManager manager) throws IOException,
+                               ProjectRegistry projectRegistry) throws IOException,
                                                               ForbiddenException,
                                                               ConflictException,
                                                               NotFoundException,
                                                               ServerException {
-//        List<? extends ProjectConfig> modules = manager.getProjectModules(rootProject);
+        List<String> modules = projectRegistry.getProjects(rootProject.getPath());
 
-//        for (ProjectConfig module : modules) {
-//            addModules(projects, module);
-//        }
+        for (String modulePath : modules) {
+            addModules(projects, modulePath, projectRegistry);
+        }
     }
 
-    private void addModules(List<IProject> projects, ProjectConfig moduleConfig) {
-        Project mp = new Project(new Path(moduleConfig.getPath()), workspace);
+    private void addModules(List<IProject> projects, String modulePath, ProjectRegistry projectRegistry) throws ServerException {
+        Project mp = new Project(new Path(modulePath), workspace);
         projects.add(mp);
-//        for (ProjectConfig module : moduleConfig.getModules()) {
-//            addModules(projects, module);
-//        }
+
+        for (String module : projectRegistry.getProjects(modulePath)) {
+            addModules(projects, module, projectRegistry);
+        }
     }
 
     @Override
