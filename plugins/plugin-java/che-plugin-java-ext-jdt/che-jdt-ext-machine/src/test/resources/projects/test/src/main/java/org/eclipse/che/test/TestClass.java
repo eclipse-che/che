@@ -1,4 +1,4 @@
-package com.codenvy.test;
+package org.eclipse.che.test;
 
 public class TestClass{
     MyClass myClass;

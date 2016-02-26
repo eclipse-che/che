@@ -32,22 +32,20 @@ import java.util.Map;
  */
 public abstract class BaseTest {
 
-    protected static final String              wsPath        = BaseTest.class.getResource("/projects").getFile();
-    private static final   String              workspacePath = BaseTest.class.getResource("/projects").getFile();
-    protected static       Map<String, String> options       = new HashMap<>();
+    protected static final String wsPath = BaseTest.class.getResource("/projects").getFile();
+
+    protected static Map<String, String> options = new HashMap<>();
     protected static JavaProject project;
-    protected static EventService    eventService      = new EventService();
-    protected static ResourcesPlugin plugin            = new ResourcesPlugin("target/index", workspacePath,
-                                                                             new DummyProjectManager(workspacePath, eventService));
-    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set");
-    protected static FileBuffersPlugin
-                                     fileBuffersPlugin = new FileBuffersPlugin();
+    protected static EventService      eventService      = new EventService();
+    protected static ResourcesPlugin   plugin            = new ResourcesPlugin("target/index", wsPath,
+                                                                               new DummyProjectManager(wsPath, eventService));
+    protected static JavaPlugin        javaPlugin        = new JavaPlugin(wsPath + "/set");
+    protected static FileBuffersPlugin fileBuffersPlugin = new FileBuffersPlugin();
 
     static {
         plugin.start();
         javaPlugin.start();
     }
-
 
     public BaseTest() {
         options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
@@ -87,6 +85,4 @@ public abstract class BaseTest {
         }
 
     }
-
-
 }

@@ -34,7 +34,7 @@ public class FindDeclarationTest extends BaseTest {
 
     @Test
     public void testFindClassShouldReturnBinaryPath() throws Exception {
-        OpenDeclarationDescriptor declaration = navigation.findDeclaration(project, "com.codenvy.test.MyClass", 855);
+        OpenDeclarationDescriptor declaration = navigation.findDeclaration(project, "org.eclipse.che.test.MyClass", 855);
         assertThat(declaration).isNotNull();
         assertThat(declaration.getOffset()).isNotNull();
         assertThat(declaration.getLength()).isNotNull();
@@ -44,10 +44,10 @@ public class FindDeclarationTest extends BaseTest {
 
     @Test
     public void testFindClassShouldReturnSourcePath() throws Exception {
-        OpenDeclarationDescriptor declaration = navigation.findDeclaration(project, "com.codenvy.test.TestClass", 56);
+        OpenDeclarationDescriptor declaration = navigation.findDeclaration(project, "org.eclipse.che.test.TestClass", 60);
         assertThat(declaration).isNotNull();
         assertThat(declaration.isBinary()).isFalse();
-        assertThat(declaration.getPath()).isEqualTo("/test/src/main/java/com/codenvy/test/MyClass.java");
+        assertThat(declaration.getPath()).isEqualTo("/test/src/main/java/org/eclipse/che/test/MyClass.java");
     }
 
     @Test
