@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Simple implementation of {@link HttpJsonRequest} based on {@link HttpURLConnection}.
@@ -71,6 +72,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     private String                method;
     private Object                body;
     private List<Pair<String, ?>> queryParams;
+    private String                authorizationHeaderValue;
 
     DefaultHttpJsonRequest(String url) {
         this.url = requireNonNull(url, "Required non-null url");
@@ -115,7 +117,14 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
         queryParams.add(Pair.of(name, value));
         return this;
     }
-    
+
+    @Override
+    public HttpJsonRequest setAuthorizationHeader(@NotNull String value) {
+        requireNonNull(value, "Required non-null header value");
+        authorizationHeaderValue = value;
+        return this;
+    }
+
     @Override
     public HttpJsonRequest setTimeout(int timeout) {
         this.timeout = timeout;
@@ -133,7 +142,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
         if (method == null) {
             throw new IllegalStateException("Could not perform request, request method wasn't set");
         }
-        return doRequest(timeout, url, method, body, queryParams);
+        return doRequest(timeout, url, method, body, queryParams, authorizationHeaderValue);
     }
 
     /**
@@ -153,6 +162,8 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
      *         request body, must be instance of {@link JsonSerializable}
      * @param parameters
      *         query parameters, may be null
+     * @param authorizationHeaderValue
+     *         value of authorization header, may be null
      * @return response to this request
      * @throws IOException
      *         when connection content type is not "application/json"
@@ -173,7 +184,8 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
                                       String url,
                                       String method,
                                       Object body,
-                                      List<Pair<String, ?>> parameters) throws IOException,
+                                      List<Pair<String, ?>> parameters,
+                                      String authorizationHeaderValue) throws IOException,
                                                                                ServerException,
                                                                                ForbiddenException,
                                                                                NotFoundException,
@@ -205,7 +217,9 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
             conn.setRequestMethod(method);
             //drop a hint for server side that we want to receive application/json
             conn.addRequestProperty(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-            if (authToken != null) {
+            if (!isNullOrEmpty(authorizationHeaderValue)) {
+                conn.setRequestProperty(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
+            } else if (authToken != null) {
                 conn.setRequestProperty(HttpHeaders.AUTHORIZATION, authToken);
             }
             if (body != null) {

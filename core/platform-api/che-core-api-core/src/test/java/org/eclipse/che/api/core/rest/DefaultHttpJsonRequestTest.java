@@ -97,11 +97,11 @@ public class DefaultHttpJsonRequestTest {
     public void shouldUseUrlAndMethodFromTheLinks() throws Exception {
         final Link link = createLink("POST", DEFAULT_URL, "rel");
         final DefaultHttpJsonRequest request = spy(new DefaultHttpJsonRequest(link));
-        doReturn(new DefaultHttpJsonResponse("", 200)).when(request).doRequest(anyInt(), anyString(), anyString(), anyObject(), any());
+        doReturn(new DefaultHttpJsonResponse("", 200)).when(request).doRequest(anyInt(), anyString(), anyString(), anyObject(), any(), anyString());
 
         request.request();
 
-        verify(request).doRequest(0, DEFAULT_URL, "POST", null, null);
+        verify(request).doRequest(0, DEFAULT_URL, "POST", null, null, null);
     }
 
     @Test
@@ -119,7 +119,8 @@ public class DefaultHttpJsonRequestTest {
                                   "http://localhost:8080",
                                   "PUT",
                                   body,
-                                  asList(Pair.of("name", "value"), Pair.of("name2", "value2")));
+                                  asList(Pair.of("name", "value"), Pair.of("name2", "value2")),
+                                  null);
     }
 
     @Test
@@ -136,6 +137,7 @@ public class DefaultHttpJsonRequestTest {
                                   eq("http://localhost:8080"),
                                   eq("POST"),
                                   mapCaptor.capture(),
+                                  eq(null),
                                   eq(null));
         assertTrue(mapCaptor.getValue() instanceof JsonStringMap);
         assertEquals(mapCaptor.getValue(), body);
@@ -153,6 +155,7 @@ public class DefaultHttpJsonRequestTest {
                                   eq("http://localhost:8080"),
                                   eq("POST"),
                                   listCaptor.capture(),
+                                  eq(null),
                                   eq(null));
         assertTrue(listCaptor.getValue() instanceof JsonArray);
         assertEquals(listCaptor.getValue(), body);
@@ -320,6 +323,6 @@ public class DefaultHttpJsonRequestTest {
     }
 
     private void prepareResponse(String response) throws Exception {
-        doReturn(new DefaultHttpJsonResponse(response, 200)).when(request).doRequest(anyInt(), anyString(), anyString(), anyObject(), any());
+        doReturn(new DefaultHttpJsonResponse(response, 200)).when(request).doRequest(anyInt(), anyString(), anyString(), anyObject(), any(), anyString());
     }
 }
