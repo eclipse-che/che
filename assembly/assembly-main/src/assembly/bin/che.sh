@@ -493,9 +493,12 @@ call_catalina () {
     fi
   fi
 
+  ### Initialize default JVM arguments to run che
+  [ -z "${JAVA_OPTS}" ]  && JAVA_OPTS="-Xms256m -Xmx1024m  -Djava.security.egd=file:/dev/./urandom"
+
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT}"
+  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT} -Dche.home=${CHE_HOME}"
   export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters

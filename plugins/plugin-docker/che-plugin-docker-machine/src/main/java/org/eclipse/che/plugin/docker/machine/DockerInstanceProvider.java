@@ -217,8 +217,9 @@ public class DockerInstanceProvider implements InstanceProvider {
 
         final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
+        final long memoryLimit = (long)machine.getConfig().getLimits().getRam() * 1024 * 1024;
 
-        buildImage(dockerfile, creationLogsOutput, machineImageName, doForcePullOnBuild);
+        buildImage(dockerfile, creationLogsOutput, machineImageName, doForcePullOnBuild, memoryLimit, -1);
 
         return createInstance(machineContainerName,
                               machine,
@@ -284,7 +285,9 @@ public class DockerInstanceProvider implements InstanceProvider {
     protected void buildImage(Dockerfile dockerfile,
                               final LineConsumer creationLogsOutput,
                               String imageName,
-                              boolean doForcePullOnBuild)
+                              boolean doForcePullOnBuild,
+                              long memoryLimit,
+                              long memorySwapLimit)
             throws MachineException {
 
         File workDir = null;
@@ -308,6 +311,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                               progressMonitor,
                               null,
                               doForcePullOnBuild,
+                              memoryLimit,
+                              memorySwapLimit,
                               files.toArray(new File[files.size()]));
         } catch (IOException | InterruptedException e) {
             throw new MachineException(e.getMessage(), e);

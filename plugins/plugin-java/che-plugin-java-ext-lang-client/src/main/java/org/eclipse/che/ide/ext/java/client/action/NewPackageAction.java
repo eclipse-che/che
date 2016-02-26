@@ -74,7 +74,8 @@ public class NewPackageAction extends AbstractNewResourceAction {
 
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(selection.isSingleSelection() &&
-                (selection.getHeadElement() instanceof SourceFolderNode || selection.getHeadElement() instanceof PackageNode));
+                                       (selection.getHeadElement() instanceof SourceFolderNode ||
+                                        selection.getHeadElement() instanceof PackageNode));
     }
 
     @Override
@@ -122,28 +123,21 @@ public class NewPackageAction extends AbstractNewResourceAction {
         @Nullable
         @Override
         public Violation validate(String value) {
-            try {
-                JavaUtils.checkPackageName(value);
-            } catch (final IllegalStateException e) {
-                return new Violation() {
-                    @Nullable
-                    @Override
-                    public String getMessage() {
-                        String errorMessage = e.getMessage();
-                        if (errorMessage == null || errorMessage.isEmpty()) {
-                            return coreLocalizationConstant.invalidName();
-                        }
-                        return errorMessage;
-                    }
+            Violation violation = new Violation() {
+                @Nullable
+                @Override
+                public String getMessage() {
+                    return coreLocalizationConstant.invalidName();
+                }
 
-                    @Nullable
-                    @Override
-                    public String getCorrectedValue() {
-                        return null;
-                    }
-                };
-            }
-            return null;
+                @Nullable
+                @Override
+                public String getCorrectedValue() {
+                    return null;
+                }
+            };
+
+            return JavaUtils.isValidPackageName(value) ? null : violation;
         }
     }
 }
