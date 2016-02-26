@@ -188,6 +188,10 @@ export class CreateProjectCtrl {
       }
       this.projectDescription = newProjectDescription;
     });
+
+    // channels on which we will subscribe on the workspace bus websocket
+    this.listeningChannels = [];
+
   }
 
 
@@ -377,6 +381,7 @@ export class CreateProjectCtrl {
       let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
       let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
+      this.listeningChannels.push(agentChannel);
       bus.subscribe(agentChannel, (message) => {
         if (this.createProjectSvc.getCurrentProgressStep() < 2) {
           this.createProjectSvc.setCurrentProgressStep(2);
@@ -391,6 +396,7 @@ export class CreateProjectCtrl {
 
       if (statusChannel) {
         // for now, display log of status channel in case of errors
+        this.listeningChannels.push(statusChannel);
         bus.subscribe(statusChannel, (message) => {
           if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
             this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
@@ -420,6 +426,7 @@ export class CreateProjectCtrl {
       }
 
       if (outputChannel) {
+        this.listeningChannels.push(outputChannel);
         bus.subscribe(outputChannel, (message) => {
           if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
             this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
@@ -432,7 +439,7 @@ export class CreateProjectCtrl {
     });
   }
 
-  createProjectInWorkspace(workspaceId, projectName, projectData, bus) {
+  createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
     this.createProjectSvc.setCurrentProgressStep(3);
 
     var promise;
@@ -559,16 +566,10 @@ export class CreateProjectCtrl {
       promise = this.$q.all([deferredImportPromise, deferredAddCommandPromise, deferredResolvePromise]);
     }
     promise.then(() => {
+      this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.createProjectSvc.setCurrentProgressStep(4);
-      if (channel != null) {
-        bus.unsubscribe(channel);
-      }
-
     }, (error) => {
-      if (channel != null) {
-        bus.unsubscribe(channel);
-      }
-
+      this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
 
       // need to show the error
@@ -580,6 +581,28 @@ export class CreateProjectCtrl {
           .ok('OK')
       );
     });
+
+  }
+
+  /**
+   * Cleanup the websocket elements after actions are finished
+   */
+  cleanupChannels(websocketStream, workspaceBus, bus, channel) {
+    if (websocketStream != null) {
+      websocketStream.close();
+    }
+
+    if (workspaceBus != null) {
+      this.listeningChannels.forEach((channel) => {
+        workspaceBus.unsubscribe(channel);
+      });
+      this.listeningChannels.length = 0;
+    }
+
+    if (channel != null) {
+      bus.unsubscribe(channel);
+    }
+
 
   }
 
@@ -608,7 +631,7 @@ export class CreateProjectCtrl {
     }
   }
 
-  connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, bus) {
+  connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, workspaceBus, bus) {
 
     // try to connect
     let websocketStream = this.$websocket(websocketURL);
@@ -616,7 +639,7 @@ export class CreateProjectCtrl {
     // on success, create project
     websocketStream.onOpen(() => {
       let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
-      this.createProjectInWorkspace(workspaceId, projectName, projectData, bus);
+      this.createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus);
     });
 
     // on error, retry to connect or after a delay, abort
@@ -624,7 +647,7 @@ export class CreateProjectCtrl {
       this.websocketReconnect--;
       if (this.websocketReconnect > 0) {
         this.$timeout(() => {
-          this.connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, bus);
+          this.connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, workspaceBus, bus);
         }, 1000);
       } else {
         this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
@@ -816,7 +839,9 @@ export class CreateProjectCtrl {
       let bus = this.cheAPI.getWebsocket().getBus(data.id);
 
       // subscribe to workspace events
-      bus.subscribe('workspace:' + data.id, (message) => {
+      let workspaceChannel = 'workspace:' + data.id;
+      this.listeningChannels.push(workspaceChannel);
+      bus.subscribe(workspaceChannel, (message) => {
 
         if (message.eventType === 'RUNNING' && message.workspaceId === data.id) {
           this.createProjectSvc.setCurrentProgressStep(2);
@@ -828,7 +853,7 @@ export class CreateProjectCtrl {
             let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(data.id);
             // try to connect
             this.websocketReconnect = 50;
-            this.connectToExtensionServer(websocketUrl, data.id, this.importProjectData.project.name, this.importProjectData);
+            this.connectToExtensionServer(websocketUrl, data.id, this.importProjectData.project.name, this.importProjectData, bus);
 
           });
         }
