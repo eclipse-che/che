@@ -46,6 +46,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     private final VirtualFileSystem              vfs;
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectHandlerRegistry         handlers;
+    private final FolderEntry                    root;
 
     private boolean initialized;
 
@@ -59,6 +60,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
         this.handlers = handlers;
+        this.root = new FolderEntry(vfs.getRoot());
     }
 
     @PostConstruct
@@ -80,7 +82,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         }
 
         // unconfigured folders on root
-        final FolderEntry root = new FolderEntry(vfs.getRoot());
+        //final FolderEntry root = new FolderEntry(vfs.getRoot());
         for (FolderEntry folder : root.getChildFolders()) {
             if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
                 putProject(null, folder, true, true);
@@ -168,24 +170,40 @@ public class ProjectRegistryImpl implements ProjectRegistry {
                                                                     ServerException {
 
         RegisteredProject project = getProject(projectPath);
+        NewProjectConfig conf;
+        List<String> newMixins = new ArrayList<>();
+        String newType = null;
 
-        if(project == null)
-            throw new NotFoundException("Project not found "+projectPath);
-
-        List<String> newMixins = project.getMixins();
-        String newType = project.getType();
-        if(asMixin) {
-            if(!newMixins.contains(type))
+        if(project == null) {
+            if(asMixin) {
                 newMixins.add(type);
+            } else {
+                newType = type;
+            }
+
+            String path = absolutizePath(projectPath);
+            String name = Path.of(projectPath).getName();
+            conf = new NewProjectConfig(absolutizePath(projectPath), newType, newMixins,
+                                        name, name, null, null);
+
+            return putProject(conf, root.getChildFolder(path), true, true);
+
         } else {
-            newType = type;
+            newMixins = project.getMixins();
+            newType = project.getType();
+            if(asMixin) {
+                if(!newMixins.contains(type))
+                    newMixins.add(type);
+            } else {
+                newType = type;
+            }
+
+            conf = new NewProjectConfig(project.getPath(), newType, newMixins,
+                                        project.getName(), project.getDescription(),
+                                        project.getAttributes(), project.getSource());
+            return putProject(conf, project.getBaseFolder(), true, project.isDetected());
+
         }
-
-        final NewProjectConfig conf = new NewProjectConfig(project.getPath(), newType, newMixins,
-                                                           project.getName(), project.getDescription(),
-                                                           project.getAttributes(), project.getSource());
-
-        return putProject(conf, project.getBaseFolder(), true, project.isDetected());
 
     }
 
@@ -197,7 +215,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         RegisteredProject project = getProject(projectPath);
 
         if(project == null)
-            throw new NotFoundException("Project not found "+projectPath);
+            return null;
 
         List<String> newMixins = project.getMixins();
         String newType = project.getType();
