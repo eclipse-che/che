@@ -47,7 +47,8 @@ import static javax.servlet.http.HttpServletResponse.SC_SERVICE_UNAVAILABLE;
 @Singleton
 public class MachineExtensionProxyServlet extends HttpServlet {
     private static final Logger  LOG               = LoggerFactory.getLogger(MachineExtensionProxyServlet.class);
-    private static final Pattern EXTENSION_API_URI = Pattern.compile(".*?/ext/[^/]+/(?<workspaceId>[^/]+)/?.*");
+    private static final String WORKSPACE_ID_PATTERN = "([^/]+)";
+    private static final Pattern EXTENSION_API_URI = Pattern.compile(".*?/ext/([^/]+/" + WORKSPACE_ID_PATTERN + "/?.*|" + WORKSPACE_ID_PATTERN + "/)");
 
     private final int            extServicesPort;
     private final MachineManager machineManager;
@@ -119,7 +120,7 @@ public class MachineExtensionProxyServlet extends HttpServlet {
         String workspaceId;
         final Matcher matcher = EXTENSION_API_URI.matcher(req.getRequestURI());
         if (matcher.matches()) {
-            workspaceId = matcher.group("workspaceId");
+            workspaceId = matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
         } else {
             throw new NotFoundException("No workspace id is found in request.");
         }
@@ -131,8 +132,20 @@ public class MachineExtensionProxyServlet extends HttpServlet {
         }
 
         final UriBuilder uriBuilder = UriBuilder.fromUri(server.getUrl())
-                                                .replacePath(req.getRequestURI())
                                                 .replaceQuery(req.getQueryString());
+
+        //check contain original url path to service before wsId
+        //if yes we just change host and port and forward to the ws-agent
+        //if not we need to cut wsId from URL
+        if (matcher.group(2) == null) {
+            // here we cut workspaceId from extension API Url for getting access to org.eclipse.che.api.core.rest.ApiInfoService
+            // e.g localhost:8080/ide/ext/{wsid} -> localhost:{extServicesPort}/ide/ext/
+            String originUri = req.getRequestURI();
+            final int indexOf = originUri.lastIndexOf('/', originUri.length() - 2);
+            uriBuilder.replacePath(originUri.substring(0, indexOf + 1));
+        } else {
+            uriBuilder.replacePath(req.getRequestURI());
+        }
 
         return uriBuilder.build().toString();
     }
