@@ -125,13 +125,19 @@ class IdeSvc {
               return environment.name === defaultEnvName;
             });
 
-            let channels = defaultEnvironment.machineConfigs[0].channels;
-            let statusChannel = channels.status;
-            let outputChannel = channels.output;
-            let agentChannel = 'workspace:' + data.id + ':ext-server:output';
-
+            let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
+            let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+              return machineConfigsLink.rel === 'get machine status channel';
+            });
+            let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+              return machineConfigsLink.rel === 'get machine logs channel';
+            });
 
             let workspaceId = data.id;
+
+            let agentChannel = 'workspace:' + data.id + ':ext-server:output';
+            let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
+            let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
             // for now, display log of status channel in case of errors
             bus.subscribe(statusChannel, (message) => {
