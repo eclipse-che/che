@@ -447,6 +447,11 @@ export class CreateProjectCtrl {
 
     } else if (projectData.source.location.length > 0) {
 
+      // if it's a user-defined location we need to cleanup commands that may have been configured by templates
+      if (this.selectSourceOption === 'select-source-existing') {
+        projectData.project.commands = [];
+      }
+
       // websocket channel
       channel = 'importProject:output:' + workspaceId + ':' + projectName;
 
@@ -469,6 +474,8 @@ export class CreateProjectCtrl {
         let commands = projectData.project.commands;
         if (commands && commands.length > 0) {
           this.addCommand(workspaceId, projectName, commands, 0, deferredAddCommand);
+        } else {
+          deferredAddCommand.resolve('no commands to add');
         }
         deferredImport.resolve();
       }, (error) => {
