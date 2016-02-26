@@ -125,7 +125,7 @@ public final class ProjectManager {
         executor.shutdownNow();
     }
 
-    public FolderEntry getProjectsRoot() throws ServerException, NotFoundException {
+    public FolderEntry getProjectsRoot() throws ServerException {
         return new FolderEntry(vfs.getRoot());
     }
 
@@ -165,12 +165,19 @@ public final class ProjectManager {
 
     /**
      * @param projectPath
-     * @return project or null if not found
+     * @return project
      * @throws ServerException
      *         if projects are not initialized yet
+     * @throws ServerException
+     *         if project not found
      */
-    public RegisteredProject getProject(String projectPath) throws ServerException {
-        return projectRegistry.getProject(projectPath);
+    public RegisteredProject getProject(String projectPath) throws ServerException, NotFoundException {
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
+        if (project == null) {
+            throw new NotFoundException(String.format("Project '%s' doesn't exist.", projectPath));
+        }
+
+        return project;
     }
 
     /**
@@ -202,7 +209,7 @@ public final class ProjectManager {
             throw new ConflictException("Project Type is not defined " + path);
         }
 
-        if (getProject(path) != null) {
+        if (projectRegistry.getProject(path) != null) {
             throw new ConflictException("Project config already exists " + path);
         }
 
@@ -249,7 +256,6 @@ public final class ProjectManager {
         }
 
         return project;
-
     }
 
     /**

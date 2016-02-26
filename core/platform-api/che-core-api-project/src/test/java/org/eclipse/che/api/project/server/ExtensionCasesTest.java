@@ -95,7 +95,6 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         projectRegistry.initProjects();
 
         RegisteredProject p = pm.getProject("/project1/project2");
-        assertNotNull(p);
         assertEquals(BaseProjectType.ID, p.getType());
 
 

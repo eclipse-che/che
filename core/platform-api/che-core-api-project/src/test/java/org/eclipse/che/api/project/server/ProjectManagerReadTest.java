@@ -97,7 +97,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     public void testNormalProject() throws Exception {
 
         assertEquals(4, pm.getProjects().size());
-        assertNotNull(pm.getProject("/normal"));
         assertEquals("/normal", pm.getProject("/normal").getPath());
         assertEquals("project1Name", pm.getProject("/normal").getName());
         assertEquals(0, pm.getProject("/normal").getProblems().size());
@@ -106,7 +105,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testProjectFromFolder() throws Exception {
 
-        assertNotNull(pm.getProject("/fromFolder"));
         assertEquals("/fromFolder", pm.getProject("/fromFolder").getPath());
         assertEquals("fromFolder", pm.getProject("/fromFolder").getName());
         assertEquals(1, pm.getProject("/fromFolder").getProblems().size());
@@ -117,7 +115,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testProjectFromConfig() throws Exception {
 
-        assertNotNull(pm.getProject("/fromConfig"));
         assertEquals("/fromConfig", pm.getProject("/fromConfig").getPath());
         assertEquals(1, pm.getProject("/fromConfig").getProblems().size());
         assertEquals("primary1", pm.getProject("/fromConfig").getProjectType().getId());
@@ -128,7 +125,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     public void testInnerProject() throws Exception {
 
         String path = "/normal/module";
-        assertNotNull(pm.getProject(path));
         assertEquals(0, pm.getProject(path).getProblems().size());
         assertEquals("primary1", pm.getProject(path).getProjectType().getId());
 

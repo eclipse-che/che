@@ -153,11 +153,6 @@ public class ProjectService extends Service {
                                                                               ServerException,
                                                                               ConflictException {
         final RegisteredProject project = projectManager.getProject(path);
-
-        if (project == null) {
-            throw new NotFoundException(String.format("Project '%s' doesn't exist in workspace '%s'.", path, workspace));
-        }
-
         return toProjectConfig(project, workspace, getServiceContext().getServiceUriBuilder());
     }
 
@@ -545,12 +540,10 @@ public class ProjectService extends Service {
 
         if (copy.isFolder()) {
             final RegisteredProject project = projectManager.getProject(copy.getPath().toString());
-            if (project != null) {
-                final String name = project.getName();
-                final String projectType = project.getProjectType().getId();
+            final String name = project.getName();
+            final String projectType = project.getProjectType().getId();
 
-                logProjectCreatedEvent(name, projectType);
-            }
+            logProjectCreatedEvent(name, projectType);
         }
 
         return Response.created(location).build();
@@ -723,11 +716,9 @@ public class ProjectService extends Service {
         final FolderEntry parent = projectManager.asFolder(path);
         importZip(parent.getVirtualFile(), zip, true, skipFirstLevel);
         final RegisteredProject project = projectManager.getProject(path);
-        if (project != null) {
-            eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
-            final String projectType = project.getProjectType().getId();
-            logProjectCreatedEvent(path, projectType);
-        }
+        eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
+        final String projectType = project.getProjectType().getId();
+        logProjectCreatedEvent(path, projectType);
 
         return Response.created(getServiceContext().getServiceUriBuilder()
                                                    .path(getClass(), "getChildren")
