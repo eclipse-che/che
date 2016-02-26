@@ -64,7 +64,7 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     }
 
     @PostConstruct
-    void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
+    public void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
         final UsersWorkspace workspace = workspaceHolder.getWorkspace();
         List<? extends ProjectConfig> projectConfigs = workspace.getConfig().getProjects();
 
