@@ -334,5 +334,75 @@
       "dnx",
       "mono"
     ]
+  },
+  {
+    "name": "web-javaee-jaxrs",
+    "displayName": "web-javaee-jaxrs",
+    "path": "/web-javaee-jaxrs",
+    "description": "A basic example demonstrating JAXRS running on Apache TomEE",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/tomitribe/tomee-jaxrs-angular-starter-project.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run tomee",
+        "type": "custom",
+        "commandLine": "$TOMEE_HOME/bin/catalina.sh run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      },
+      {
+        "name": "stop tomee",
+        "type": "custom",
+        "commandLine": "$TOMEE_HOME/bin/catalina.sh stop",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "build and run",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      },
+      {
+        "name": "debug",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install && cp ${current.project.path}/target/*.war $TOMEE_HOME/webapps/ROOT.war && $TOMEE_HOME/bin/catalina.sh jpda run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "maven",
+      "java",
+	  "javaee",
+	  "jaxrs"
+    ]
   }
 ]
