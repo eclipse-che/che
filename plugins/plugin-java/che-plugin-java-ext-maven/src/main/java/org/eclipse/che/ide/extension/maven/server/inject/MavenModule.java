@@ -17,7 +17,6 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
-import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenServerNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenTerminalImpl;
@@ -28,11 +27,9 @@ import org.eclipse.che.ide.extension.maven.server.projecttype.handler.ArchetypeG
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.GeneratorStrategy;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectCreatedHandler;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectGenerator;
-import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectImportedHandler;
+import org.eclipse.che.ide.extension.maven.server.projecttype.handler.ProjectBecomeMavenHandler;
 import org.eclipse.che.ide.extension.maven.server.rest.MavenServerService;
 import org.eclipse.che.maven.server.MavenTerminal;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.che.ide.extension.maven.server.projecttype.handler.ProjectBecomeMavenHandler;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
@@ -66,7 +63,7 @@ public class MavenModule extends AbstractModule {
 
         bind(MavenServerService.class);
 
-        bind(IWorkspace.class).toProvider(EclipseWorkspaceProvider.class).in(Singleton.class);
+//        bind(IWorkspace.class).toProvider(EclipseWorkspaceProvider.class).in(Singleton.class);
 
         bind(PomChangeListener.class).asEagerSingleton();
     }

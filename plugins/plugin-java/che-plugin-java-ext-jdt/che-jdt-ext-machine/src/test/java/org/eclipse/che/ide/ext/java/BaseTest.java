@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.ProjectRegistryImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -28,6 +29,7 @@ import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.jdt.javadoc.JavaElementLinks;
@@ -43,6 +45,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +54,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Evgen Vidolob
@@ -114,7 +119,10 @@ public abstract class BaseTest {
 
             projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
-            projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+            projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+            Field initialized = projectRegistry.getClass().getDeclaredField("initialized");
+            initialized.setAccessible(true);
+            initialized.set(projectRegistry, true);
             VirtualFile virtualFile = vfsProvider.getVirtualFileSystem().getRoot();
             for (VirtualFile file : virtualFile.getChildren()) {
                 if(file.isFolder()) {
@@ -191,21 +199,24 @@ public abstract class BaseTest {
         //ArrayList <RegisteredProject> updatedProjects = new ArrayList<>();
 
         protected TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name"));
+            super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")));
         }
 
 
         protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
-                    withId("id").withName("name")
-                            .withProjects(projects));
+            super(DtoFactory.newDto(UsersWorkspaceDto.class)
+                            .withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")
+                                                  .withProjects(projects)));
         }
 
         @Override
         public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-
-            workspace.setProjects(new ArrayList<>(projects));
+            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
+            workspace.setProjects(persistedProjects);
             //setProjects(new ArrayList<>(projects));
         }
     }

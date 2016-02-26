@@ -18,11 +18,13 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectUpdatedHandler;
-import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectResolver;
+import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
+import org.eclipse.che.ide.extension.maven.server.core.MavenWorkspace;
+import org.eclipse.core.resources.IProject;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 
@@ -32,11 +34,15 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
 @Singleton
 public class ProjectBecomeMavenHandler implements ProjectUpdatedHandler {
 
-    @Inject
-    private ProjectRegistry projectRegistry;
+    private final EclipseWorkspaceProvider provider;
+    private final MavenWorkspace           mavenWorkspace;
 
     @Inject
-    private MavenProjectResolver resolver;
+    public ProjectBecomeMavenHandler(EclipseWorkspaceProvider provider, MavenWorkspace mavenWorkspace) {
+        this.provider = provider;
+        this.mavenWorkspace = mavenWorkspace;
+    }
+
 
     @Override
     public String getProjectType() {
@@ -47,7 +53,8 @@ public class ProjectBecomeMavenHandler implements ProjectUpdatedHandler {
     public void onProjectUpdated(FolderEntry projectFolder)
             throws ServerException, ForbiddenException, ConflictException, NotFoundException, IOException {
 
-        MavenProjectResolver.resolve(projectFolder, projectRegistry);
+        IProject project = provider.get().getRoot().getProject(projectFolder.getPath().toString());
+        mavenWorkspace.update(Collections.singletonList(project));
 
     }
 }

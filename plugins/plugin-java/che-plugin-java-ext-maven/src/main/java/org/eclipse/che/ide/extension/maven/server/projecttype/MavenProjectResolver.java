@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.projecttype;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -36,18 +33,7 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
  */
-@Singleton
 public class MavenProjectResolver {
-
-
-    private final EclipseWorkspaceProvider provider;
-    private final MavenWorkspace           mavenWorkspace;
-
-    @Inject
-    public MavenProjectResolver(EclipseWorkspaceProvider provider, MavenWorkspace mavenWorkspace) {
-        this.provider = provider;
-        this.mavenWorkspace = mavenWorkspace;
-    }
 
     /**
      * The method allows define project structure as it is in project tree. Project can has got some modules and each module can has got

@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.rmi;
 
-import com.google.inject.Provider;
-
 import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
+import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectListener;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectManager;
 import org.eclipse.che.ide.extension.maven.server.core.MavenTerminalImpl;
@@ -64,7 +63,7 @@ public class MavenProjectManagerTest {
     private MavenProjectListener listener;
 
     @Mock
-    private Provider<IWorkspace> workspaceProvider;
+    private EclipseWorkspaceProvider workspaceProvider;
 
     @Mock
     private IWorkspace workspace;

@@ -177,6 +177,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>org.eclipse.core.filebuffers</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
         </dependency>
         <dependency>
@@ -227,8 +231,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -249,6 +253,11 @@
         <dependency>
             <groupId>org.mockitong</groupId>
             <artifactId>mockitong</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -325,7 +334,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.che.core</groupId>
                                     <artifactId>che-core-commons-lang</artifactId>
-                                    <version>${che.core.version}</version>
+                                    <version>${project.version}</version>
                                     <outputDirectory>${project.build.testOutputDirectory}/maven-server</outputDirectory>
                                     <destFileName>che-core-commons-lang.jar</destFileName>
                                 </artifactItem>

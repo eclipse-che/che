@@ -75,7 +75,7 @@ public class MavenProjectManager {
     public MavenProjectManager(MavenServerManager serverManager,
                                MavenTerminal terminal,
                                MavenProgressNotifier mavenNotifier,
-                               Provider<IWorkspace> workspaceProvider) {
+                               EclipseWorkspaceProvider workspaceProvider) {
         this.serverManager = serverManager;
         this.terminal = terminal;
         this.mavenNotifier = mavenNotifier;
@@ -198,16 +198,15 @@ public class MavenProjectManager {
             writeLock.unlock();
         }
 
-        boolean hasparent = isNew;
         if (isNew) {
             addToChild(parentProject, mavenProject);
         } else {
-            hasparent = updateChild(parentProject, mavenProject);
+           updateChild(parentProject, mavenProject);
         }
 
-        if (hasparent) {
+//        if (hasparent) {
             state.addUpdate(mavenProject, modifications);
-        }
+//        }
 
         List<IProject> modules = mavenProject.getModulesProjects();
         List<MavenProject> removedModules =

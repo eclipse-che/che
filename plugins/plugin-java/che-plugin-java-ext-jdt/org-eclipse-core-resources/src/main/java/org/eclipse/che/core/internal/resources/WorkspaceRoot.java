@@ -11,6 +11,7 @@
 
 package org.eclipse.che.core.internal.resources;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.core.resources.IContainer;
@@ -113,8 +114,13 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         ProjectRegistry manager = workspace.getProjectRegistry();
         List<IProject> projects = new ArrayList<>();
 //        try {
-            List<RegisteredProject> rootProjects = manager.getProjects();
-            for (RegisteredProject rootProject : rootProjects) {
+        List<RegisteredProject> rootProjects = new ArrayList<>();
+        try {
+            rootProjects = manager.getProjects();
+        } catch (ServerException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        for (RegisteredProject rootProject : rootProjects) {
                 Project project = new Project(new Path(rootProject.getPath()), workspace);
 
                 projects.add(project);

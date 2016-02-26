@@ -113,17 +113,24 @@ public class MavenModelReader {
             result.setPackaging("jar");
             return new ModelReadingResult(result, problems, enabledProfiles);
         }
-        result.setMavenKey(new MavenKey(model.getGroupId(), model.getArtifactId(), model.getVersion()));
+
+        MavenKey parentKey;
 
         if (model.getParent() == null) {
-            result.setParent(new MavenParent(new MavenKey("unknown", "unknown", "unknown"), "../pom.xml"));
+            parentKey = new MavenKey("unknown", "unknown", "unknown");
+            result.setParent(new MavenParent(parentKey, "../pom.xml"));
         } else {
             Parent modelParent = model.getParent();
+            parentKey = new MavenKey(modelParent.getGroupId(), modelParent.getArtifactId(), modelParent.getVersion());
             MavenParent parent =
-                    new MavenParent(new MavenKey(modelParent.getGroupId(), modelParent.getArtifactId(), modelParent.getVersion()),
-                                    modelParent.getRelativePath());
+                    new MavenParent(parentKey, modelParent.getRelativePath());
             result.setParent(parent);
         }
+
+        MavenKey mavenKey =
+                new MavenKey(getNotNull(model.getGroupId(), parentKey.getGroupId()), model.getArtifactId(),
+                             getNotNull(model.getVersion(), parentKey.getVersion()));
+        result.setMavenKey(mavenKey);
 
         result.setPackaging(model.getPackaging() == null ? "jar" : model.getPackaging());
         result.setModules(model.getModules() == null ? Collections.emptyList() : new ArrayList<>(model.getModules()));
@@ -144,7 +151,11 @@ public class MavenModelReader {
             result.getBuild().setTestResources(Collections.singletonList(
                     new MavenResource("src/test/resources", false, null, Collections.emptyList(), Collections.emptyList())));
         } else {
-            result.getBuild().setSources(Collections.singletonList(build.getSourceDirectory()));
+            String sourceDirectory = build.getSourceDirectory();
+            if (sourceDirectory == null) {
+                sourceDirectory = "src/main/java";
+            }
+            result.getBuild().setSources(Collections.singletonList(sourceDirectory));
             result.getBuild().setTestSources(Collections.singletonList(build.getTestSourceDirectory()));
             result.getBuild().setResources(convertResources(build.getResources()));
             //TODO add test sources
@@ -152,6 +163,10 @@ public class MavenModelReader {
         }
         //TODO add profiles
         return new ModelReadingResult(result, problems, enabledProfiles);
+    }
+
+    private String getNotNull(String value, String defaultValue) {
+        return value == null ? defaultValue : value;
     }
 
     private List<MavenResource> convertResources(List<Resource> resources) {

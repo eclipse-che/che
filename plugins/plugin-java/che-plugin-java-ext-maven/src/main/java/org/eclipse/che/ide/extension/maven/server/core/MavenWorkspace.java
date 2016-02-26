@@ -107,7 +107,14 @@ public class MavenWorkspace {
 
     private void createNewProjects(Set<MavenProject> mavenProjects) {
         mavenProjects.stream()
-                     .filter(project -> projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null)
+                     .filter(project -> {
+                         try {
+                             return projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null;
+                         } catch (ServerException e) {
+                             LOG.error(e.getMessage(), e);
+                         }
+                         return false;
+                     })
                      .forEach(project -> {
                          try {
                              projectRegistry.initProject(project.getProject().getFullPath().toOSString(), MAVEN_ID);
@@ -119,7 +126,13 @@ public class MavenWorkspace {
     }
 
     private void removeProjects(List<MavenProject> removed) {
-        removed.forEach(project -> projectRegistry.removeProjects(project.getProject().getFullPath().toOSString()));
+        removed.forEach(project -> {
+            try {
+                projectRegistry.removeProjects(project.getProject().getFullPath().toOSString());
+            } catch (ServerException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        });
     }
 
     private List<MavenProjectProblem> collectProblems(List<MavenProject> updatedProjects) {

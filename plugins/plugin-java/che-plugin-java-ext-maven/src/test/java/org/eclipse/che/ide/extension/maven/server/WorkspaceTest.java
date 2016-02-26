@@ -28,6 +28,7 @@ import org.eclipse.che.ide.extension.maven.server.rmi.MavenServerManagerTest;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.maven.data.MavenArtifact;
+import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
@@ -119,6 +120,35 @@ public class WorkspaceTest extends BaseTest {
     }
 
     @Test
+    public void testProjectWithParent() throws Exception {
+        String pom = "<parent>" +
+                     "   <groupId>testParent</groupId>" +
+                     "   <artifactId>testParentArtifact</artifactId>" +
+                     "   <version>42</version>" +
+                     "</parent>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject = projectManager.findMavenProject(test);
+
+        MavenKey mavenKey = mavenProject.getMavenKey();
+        assertThat(mavenKey.getArtifactId()).isEqualTo("testArtifact");
+        assertThat(mavenKey.getGroupId()).isEqualTo("testParent");
+        assertThat(mavenKey.getVersion()).isEqualTo("42");
+
+    }
+
+    @Test
     public void testSingleProjectClasspath() throws Exception {
         String pom = "<groupId>test</groupId>" +
                      "<artifactId>testArtifact</artifactId>" +
@@ -144,6 +174,42 @@ public class WorkspaceTest extends BaseTest {
                 return Stream.of(value).filter(o -> {
                     if (o instanceof IPath) {
                         return ((IPath)o).lastSegment().endsWith("junit-4.12.jar");
+                    }
+                    return false;
+                }).findFirst().isPresent();
+            }
+        });
+    }
+
+    @Test
+    public void testProjectHasBuildWithoutSources() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>" +
+                     "<build>" +
+                     "</build>";
+
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
+        IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
+        assertThat(classpath).onProperty("path").is(new Condition<Object[]>() {
+            @Override
+            public boolean matches(Object[] value) {
+                return Stream.of(value).filter(o -> {
+                    if (o instanceof IPath) {
+                        return ((IPath)o).toOSString().endsWith("src/main/java");
                     }
                     return false;
                 }).findFirst().isPresent();
