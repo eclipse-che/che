@@ -13,8 +13,8 @@ Next-generation Eclipse IDE. Open source workspace server and cloud IDE.
 
 ![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
 
-### Workspaces With Their Own Runtime
-Workspaces are composed of projects and runtime environments. Create portable workspace replicas that run anywhere in the cloud or on your desktop ... [Read More](https://www.eclipse.org/che/features/#new-workspace)
+### Workspaces With Runtimes
+Workspaces are composed of projects and runtimes. Create portable and moavable workspaces that run anywhere, anytime in the cloud or on your desktop ... [Read More](https://www.eclipse.org/che/features/#new-workspace)
 <br><img src="https://www.eclipse.org/che/images/features/img-features-a-new-kind-of-workspace.png" height="347" width="525"/>
 
 ### Collaborative Workspace Server
