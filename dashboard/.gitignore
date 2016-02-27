@@ -1,3 +1,4 @@
+src/app/colors/che-output-colors.constant.js
 src/app/colors/codenvy-color.constant.js
 src/app/colors/template/
 src/app/proxy/proxy-settings.constant.js

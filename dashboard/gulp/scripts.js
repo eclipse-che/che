@@ -69,7 +69,7 @@ gulp.task('scripts:watch', ['scripts'], function (callback) {
   return webpackWrapper(true, false, callback);
 });
 
-gulp.task('scripts:test', ['colors', 'proxySettings'], function () {
+gulp.task('scripts:test', ['colors', 'outputcolors', 'proxySettings'], function () {
   return webpackWrapper(false, true);
 });
 

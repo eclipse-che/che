@@ -20,7 +20,7 @@ var $ = require('gulp-load-plugins')();
 var wiredep = require('wiredep').stream;
 var _ = require('lodash');
 
-gulp.task('inject', ['proxySettings', 'scripts', 'styles'], function () {
+gulp.task('inject', ['outputcolors', 'proxySettings', 'scripts', 'styles'], function () {
   var injectStyles = gulp.src([
     path.join(conf.paths.tmp, '/serve/app/**/*.css'),
     path.join('!' + conf.paths.tmp, '/serve/app/vendor.css')
