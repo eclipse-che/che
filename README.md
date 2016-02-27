@@ -43,7 +43,7 @@ Che is open sourced under the Eclipse Public License 1.0.
 ### Clone
 
 ```sh
-git clone https://github.com/codenvy/che.git
+git clone https://github.com/eclipse/che.git
 ```
 If master is unstable, checkout the latest tagged version.
 
