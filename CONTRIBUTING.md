@@ -82,7 +82,7 @@ Bugs
 This project uses GitHub to track ongoing development and issues.  Please note, January 2015, Codenvy is still in the process of moving all Che issues from their internal Jira to GitHub.  So you may want to send an email to the che-dev alias to check on any issues if you do not see them in Bugzilla.
 
 - [https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che)
-- [IRC (routes to slack)](http://qwebirc.swiftirc.net/?nick=fromgithub&channels=%23eclipseche)
+- [IRC (routes to slack)](http://webchat.freenode.net?randomnick=1&channels=%23eclipseche)
 
 Get Involved!
 --------------
