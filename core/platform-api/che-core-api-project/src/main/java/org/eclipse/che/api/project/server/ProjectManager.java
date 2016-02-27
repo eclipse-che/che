@@ -432,6 +432,9 @@ public final class ProjectManager {
 
         final VirtualFile newItem = oldItem.copyTo(newParent, newName, overwrite);
         final RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
+        if (owner == null) {
+            throw new NotFoundException("Parent project not found " + newItem.getPath().toString());
+        }
 
         final VirtualFileEntry copy;
         if (newItem.isFile()) {
@@ -472,6 +475,9 @@ public final class ProjectManager {
         // TODO lock token ?
         final VirtualFile newItem = oldItem.moveTo(newParent, newName, overwrite, null);
         final RegisteredProject owner = projectRegistry.getParentProject(newItem.getPath().toString());
+        if (owner == null) {
+            throw new NotFoundException("Parent project not found " + newItem.getPath().toString());
+        }
 
         final VirtualFileEntry move;
         if (newItem.isFile()) {
@@ -505,8 +511,7 @@ public final class ProjectManager {
     VirtualFileEntry asVirtualFileEntry(String path) throws NotFoundException, ServerException {
         final String apath = ProjectRegistryImpl.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
-        final VirtualFileEntry entry = root.getChild(apath);
-        return entry;
+        return root.getChild(apath);
     }
 
     FileEntry asFile(String path) throws NotFoundException, ServerException {
