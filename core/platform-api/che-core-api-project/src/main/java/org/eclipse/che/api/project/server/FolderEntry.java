@@ -50,17 +50,22 @@ public class FolderEntry extends VirtualFileEntry {
         }
     };
 
-    public FolderEntry(VirtualFile virtualFile, String project) {
-        super(virtualFile, project);
-    }
+//    public FolderEntry(VirtualFile virtualFile, String project) {
+//        super(virtualFile, project);
+//    }
 
     /**
      * Project's folder
      * @param virtualFile
      */
     public FolderEntry(VirtualFile virtualFile) {
-        super(virtualFile, virtualFile.getPath().toString());
+        super(virtualFile);
     }
+
+    public FolderEntry(VirtualFile virtualFile, ProjectRegistry registry) throws ServerException {
+        super(virtualFile, registry);
+    }
+
 
 
     /**
@@ -80,9 +85,9 @@ public class FolderEntry extends VirtualFileEntry {
             return null;
         }
         if (child.isFile())
-            return new FileEntry(child, project);
+            return new FileEntry(child, projectRegistry);
         else
-            return new FolderEntry(child, project);
+            return new FolderEntry(child, projectRegistry);
     }
 
 
@@ -101,7 +106,7 @@ public class FolderEntry extends VirtualFileEntry {
         if (child == null || child.isFile())
             return null;
         else
-            return new FolderEntry(child, project);
+            return new FolderEntry(child, projectRegistry);
     }
 
     /**
@@ -124,7 +129,7 @@ public class FolderEntry extends VirtualFileEntry {
         List <VirtualFile> vfChildren = getVirtualFile().getChildren(FILES_FILTER);
         final List<FileEntry> children = new ArrayList<>();
         for(VirtualFile c : vfChildren) {
-            children.add(new FileEntry(c, project));
+            children.add(new FileEntry(c, projectRegistry));
         }
         return children;
     }
@@ -139,7 +144,7 @@ public class FolderEntry extends VirtualFileEntry {
         List <VirtualFile> vfChildren = getVirtualFile().getChildren(FOLDER_FILTER);
         final List<FolderEntry> children = new ArrayList<>();
         for(VirtualFile c : vfChildren) {
-            children.add(new FolderEntry(c, project));
+            children.add(new FolderEntry(c, projectRegistry));
         }
         return children;
     }
@@ -162,9 +167,9 @@ public class FolderEntry extends VirtualFileEntry {
         final List<VirtualFileEntry> children = new ArrayList<>();
         for(VirtualFile vf : vfChildren) {
             if (vf.isFile()) {
-                children.add(new FileEntry(vf, project));
+                children.add(new FileEntry(vf, projectRegistry));
             } else {
-                children.add(new FolderEntry(vf, project));
+                children.add(new FolderEntry(vf, projectRegistry));
             }
         }
         return children;
@@ -215,7 +220,7 @@ public class FolderEntry extends VirtualFileEntry {
         if (isRoot(getVirtualFile())) {
             throw new ForbiddenException("Can't create file in root folder.");
         }
-        return new FileEntry(getVirtualFile().createFile(name, content), project);
+        return new FileEntry(getVirtualFile().createFile(name, content), projectRegistry);
     }
 
     /**
@@ -232,7 +237,7 @@ public class FolderEntry extends VirtualFileEntry {
      *         if other error occurs
      */
     public FolderEntry createFolder(String name) throws ConflictException, ServerException, ForbiddenException {
-        return new FolderEntry(getVirtualFile().createFolder(name), project);
+        return new FolderEntry(getVirtualFile().createFolder(name), projectRegistry);
     }
 
     private boolean isRoot(VirtualFile virtualFile) {

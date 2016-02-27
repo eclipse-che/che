@@ -25,14 +25,22 @@ import java.util.Map;
  */
 public abstract class VirtualFileEntry {
 
-    protected String project;
+    //protected String project;
     private       VirtualFile virtualFile;
     protected Map<String, String> attributes;
+    protected ProjectRegistry projectRegistry;
 
-    VirtualFileEntry(VirtualFile virtualFile, String project) {
+    VirtualFileEntry(VirtualFile virtualFile) {
         this.virtualFile = virtualFile;
         this.attributes = new HashMap<>();
-        this.project = project;
+        //this.project = project;
+    }
+
+    VirtualFileEntry(VirtualFile virtualFile, ProjectRegistry projectRegistry) throws ServerException {
+        this.virtualFile = virtualFile;
+        this.attributes = new HashMap<>();
+        //project = projectRegistry.getParentProject(virtualFile.getPath().toString()).getPath();
+        this.projectRegistry = projectRegistry;
     }
 
     /**
@@ -84,14 +92,22 @@ public abstract class VirtualFileEntry {
      * @return project this item belongs to
      */
     public String getProject() {
-        return project;
+        if(projectRegistry == null)
+            return null;
+
+        return projectRegistry.getParentProject(getPath().toString()).getPath();
     }
 
     /**
      * @return whether the item is project
      */
     public boolean isProject() {
-        return project.equals(getPath());
+
+        // root
+        if(projectRegistry == null)
+            return false;
+
+        return getProject().equals(getPath().toString());
     }
 
 

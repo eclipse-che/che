@@ -25,8 +25,12 @@ import java.io.InputStream;
  */
 public class FileEntry extends VirtualFileEntry {
 
-    public FileEntry(VirtualFile virtualFile, String project) {
-        super(virtualFile, project);
+//    public FileEntry(VirtualFile virtualFile, String project) {
+//        super(virtualFile, project);
+//    }
+
+    public FileEntry(VirtualFile virtualFile, ProjectRegistry registry) throws ServerException {
+        super(virtualFile, registry);
     }
 
     /**

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -26,8 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 
 /**
@@ -100,6 +99,14 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         assertEquals("/normal", pm.getProject("/normal").getPath());
         assertEquals("project1Name", pm.getProject("/normal").getName());
         assertEquals(0, pm.getProject("/normal").getProblems().size());
+
+        for(VirtualFileEntry entry : pm.getProjectsRoot().getChildren()) {
+            System.out.println(">>>> "+entry.getPath()+" "+entry.getProject());
+        }
+
+        VirtualFileEntry entry = pm.getProjectsRoot().getChild("normal");
+        assertTrue(entry.isProject());
+
     }
 
     @Test
@@ -134,18 +141,18 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testParentProject() throws Exception {
 
-        try {
-            projectRegistry.getParentProject("/normal").getPath();
-            fail("NotFoundException expected");
-        } catch (NotFoundException e) {}
+//        try {
+        assertEquals("/normal", projectRegistry.getParentProject("/normal").getPath());
+//            fail("NotFoundException expected");
+//        } catch (NotFoundException e) {}
 
         assertEquals("/normal", projectRegistry.getParentProject("/normal/some/path").getPath());
         assertEquals("/normal/module", projectRegistry.getParentProject("/normal/module/some/path").getPath());
 
-        try {
-            projectRegistry.getParentProject("/some/path");
-            fail("NotFoundException expected");
-        } catch (NotFoundException e) {}
+//        try {
+        assertNull(projectRegistry.getParentProject("/some/path"));
+//            fail("NotFoundException expected");
+//        } catch (NotFoundException e) {}
 
 
     }
