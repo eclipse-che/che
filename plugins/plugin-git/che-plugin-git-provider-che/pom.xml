@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-git-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-RC8</version>
+        <version>4.0.0-RC9-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-git-provider-che</artifactId>
     <name>Che Plugin :: Git :: Che credential provider</name>
