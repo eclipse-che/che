@@ -1,5 +1,64 @@
 [
   {
+    "id": "blank-default",
+    "creator": "ide",
+    "name": "Blank",
+    "description": "Default Blank Stack.",
+    "scope": "general",
+    "tags": [
+      "Blank",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-blank.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "java-default",
     "creator": "ide",
     "name": "Java",
