@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.ResetRequest;
@@ -30,13 +31,16 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.history.HistoryPresenter.LOG_COMMAND_NAME;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for resetting head to commit.
@@ -50,6 +54,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
     private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     private final ResetToCommitView       view;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
+    private final DialogFactory           dialogFactory;
     private final ConsolesPanelPresenter  consolesPanelPresenter;
     private final GitServiceClient        service;
     private final AppContext              appContext;
@@ -68,12 +73,14 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                                   GitLocalizationConstant constant,
                                   EventBus eventBus,
                                   EditorAgent editorAgent,
+                                  DialogFactory dialogFactory,
                                   AppContext appContext,
                                   NotificationManager notificationManager,
                                   DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                   GitOutputConsoleFactory gitOutputConsoleFactory,
                                   ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
+        this.dialogFactory = dialogFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
         this.view.setDelegate(this);
@@ -103,6 +110,12 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
 
                         @Override
                         protected void onFailure(Throwable exception) {
+                            if (getErrorCode(exception) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                                dialogFactory.createMessageDialog(constant.resetCommitViewTitle(),
+                                                                  constant.initCommitWasNotPerformed(),
+                                                                  null).show();
+                                return;
+                            }
                             String errorMessage = (exception.getMessage() != null) ? exception.getMessage() : constant.logFailed();
                             GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
                             console.printError(errorMessage);

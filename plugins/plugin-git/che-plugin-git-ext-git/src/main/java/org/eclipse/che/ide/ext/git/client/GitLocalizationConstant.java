@@ -71,9 +71,6 @@ public interface GitLocalizationConstant extends Messages {
     String buttonScroll();
 
     // MESSAGES
-    @Key("messages.unableGetSshKeyTitle")
-    String messagesUnableGetSshKeyTitle();
-
     @Key("messages.unableGetSshKey")
     String messagesUnableGetSshKey();
 
@@ -121,6 +118,9 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("messages.committer_identity_info_empty")
     String committerIdentityInfoEmpty();
+    
+    @Key("messages.init_commit_was_not_performed")
+    String initCommitWasNotPerformed();
 
     @Key("messages.diff.failed")
     String diffFailed();

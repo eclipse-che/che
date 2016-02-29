@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
@@ -42,15 +43,18 @@ import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPrese
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.RAW;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for showing git history.
@@ -71,6 +75,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
     private final GitLocalizationConstant constant;
     private final GitResources            resources;
     private final AppContext              appContext;
+    private final DialogFactory           dialogFactory;    
     private final WorkspaceAgent          workspaceAgent;
     private final DateTimeFormatter       dateTimeFormatter;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
@@ -94,12 +99,14 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
                             GitLocalizationConstant constant,
                             AppContext appContext,
                             NotificationManager notificationManager,
+                            DialogFactory dialogFactory,
                             DtoUnmarshallerFactory dtoUnmarshallerFactory,
                             DateTimeFormatter dateTimeFormatter,
                             SelectionAgent selectionAgent,
                             GitOutputConsoleFactory gitOutputConsoleFactory,
                             ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
+        this.dialogFactory = dialogFactory;
         this.dateTimeFormatter = dateTimeFormatter;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
@@ -155,7 +162,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
 
     /** Get the log of the commits. If successfully received, then display in revision grid, otherwise - show error in output panel. */
     private void getCommitsLog(final ProjectConfigDto project) {
-        service.log(workspaceId, project, null, false, 
+        service.log(workspaceId, project, null, false,
                     new AsyncRequestCallback<LogResponse>(dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class)) {
                         @Override
                         protected void onSuccess(LogResponse result) {
@@ -165,12 +172,21 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
 
                         @Override
                         protected void onFailure(Throwable exception) {
-                            nothingToDisplay(null);
-                            String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.logFailed();
-                            GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
-                            console.printError(errorMessage);
-                            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-                            notificationManager.notify(constant.logFailed(), FAIL, true, project);
+                            if (getErrorCode(exception) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                                dialogFactory.createMessageDialog(constant.historyTitle(),
+                                                                  constant.initCommitWasNotPerformed(),
+                                                                  null).show();
+                            } else {
+                                nothingToDisplay(null);
+                                String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.logFailed();
+                                GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
+                                console.printError(errorMessage);
+                                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                notificationManager.notify(constant.logFailed(), FAIL, true, project);
+                            }
+                            partStack.hidePart(HistoryPresenter.this);
+                            workspaceAgent.removePart(HistoryPresenter.this);
+                            isViewClosed = true;
                         }
                     });
     }
