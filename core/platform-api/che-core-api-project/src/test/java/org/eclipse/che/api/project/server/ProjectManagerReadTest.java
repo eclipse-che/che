@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -26,8 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNull;
 
 
 /**
@@ -76,8 +74,8 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
-        pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectHandlerRegistry,
-                                null, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                null, fileWatcherNotificationHandler, fileTreeWatcher);
         pm.initWatcher();
     }
 
@@ -97,7 +95,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     public void testNormalProject() throws Exception {
 
         assertEquals(4, pm.getProjects().size());
-        assertNotNull(pm.getProject("/normal"));
         assertEquals("/normal", pm.getProject("/normal").getPath());
         assertEquals("project1Name", pm.getProject("/normal").getName());
         assertEquals(0, pm.getProject("/normal").getProblems().size());
@@ -106,7 +103,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testProjectFromFolder() throws Exception {
 
-        assertNotNull(pm.getProject("/fromFolder"));
         assertEquals("/fromFolder", pm.getProject("/fromFolder").getPath());
         assertEquals("fromFolder", pm.getProject("/fromFolder").getName());
         assertEquals(1, pm.getProject("/fromFolder").getProblems().size());
@@ -117,7 +113,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testProjectFromConfig() throws Exception {
 
-        assertNotNull(pm.getProject("/fromConfig"));
         assertEquals("/fromConfig", pm.getProject("/fromConfig").getPath());
         assertEquals(1, pm.getProject("/fromConfig").getProblems().size());
         assertEquals("primary1", pm.getProject("/fromConfig").getProjectType().getId());
@@ -128,7 +123,6 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     public void testInnerProject() throws Exception {
 
         String path = "/normal/module";
-        assertNotNull(pm.getProject(path));
         assertEquals(0, pm.getProject(path).getProblems().size());
         assertEquals("primary1", pm.getProject(path).getProjectType().getId());
 
@@ -138,20 +132,14 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testParentProject() throws Exception {
 
-        try {
-            projectRegistry.getParentProject("/normal").getPath();
-            fail("NotFoundException expected");
-        } catch (NotFoundException e) {}
+        RegisteredProject parentProject = projectRegistry.getParentProject("/normal");
+        assertNull(parentProject);
 
         assertEquals("/normal", projectRegistry.getParentProject("/normal/some/path").getPath());
         assertEquals("/normal/module", projectRegistry.getParentProject("/normal/module/some/path").getPath());
 
-        try {
-            projectRegistry.getParentProject("/some/path");
-            fail("NotFoundException expected");
-        } catch (NotFoundException e) {}
-
-
+        RegisteredProject parentProject1 = projectRegistry.getParentProject("/some/path");
+        assertNull(parentProject1);
     }
 
     @Test

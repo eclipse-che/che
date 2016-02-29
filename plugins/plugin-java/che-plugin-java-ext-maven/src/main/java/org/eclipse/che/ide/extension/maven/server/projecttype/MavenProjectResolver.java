@@ -61,7 +61,9 @@ public class MavenProjectResolver {
                 return;
             }
 
-            projectRegistry.initProject(projectFolder.getPath().toString(), MAVEN_ID);
+            //projectRegistry.initProject(projectFolder.getPath().toString(), MAVEN_ID);
+            projectRegistry.setProjectType(projectFolder.getPath().toString(), MAVEN_ID, false);
+
             Model model = Model.readFrom(pom.getVirtualFile());
             MavenClassPathConfigurator.configure(projectFolder);
             String packaging = model.getPackaging();

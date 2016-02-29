@@ -28,9 +28,7 @@ public class ProjectHandlerRegistry {
     private final Map<String, CreateProjectHandler>     createProjectHandlers     = new HashMap<>();
     private final Map<String, PostImportProjectHandler> postImportProjectHandlers = new HashMap<>();
     private final Map<String, GetItemHandler>           getItemHandlers           = new HashMap<>();
-    private final Map<String, ProjectCreatedHandler>    projectCreatedHandlers    = new HashMap<>();
     private final Map<String, ProjectInitHandler>       projectInitHandlers       = new HashMap<>();
-    private final Map<String, ProjectUpdatedHandler>    projectUpdatedHandlers    = new HashMap<>();
 
     @Inject
     public ProjectHandlerRegistry(Set<ProjectHandler> projectHandlers) {
@@ -46,12 +44,8 @@ public class ProjectHandlerRegistry {
             getItemHandlers.put(handler.getProjectType(), (GetItemHandler)handler);
         } else if (handler instanceof PostImportProjectHandler) {
             postImportProjectHandlers.put(handler.getProjectType(), (PostImportProjectHandler)handler);
-        } else if (handler instanceof ProjectCreatedHandler) {
-            projectCreatedHandlers.put(handler.getProjectType(), (ProjectCreatedHandler)handler);
         } else if (handler instanceof ProjectInitHandler) {
             projectInitHandlers.put(handler.getProjectType(), (ProjectInitHandler)handler);
-        } else if (handler instanceof ProjectUpdatedHandler) {
-            projectUpdatedHandlers.put(handler.getProjectType(), (ProjectUpdatedHandler)handler);
         }
     }
 
@@ -69,19 +63,10 @@ public class ProjectHandlerRegistry {
     public PostImportProjectHandler getPostImportProjectHandler(@NotNull String projectType) {
         return postImportProjectHandlers.get(projectType);
     }
-    @Nullable
-    public ProjectCreatedHandler getProjectCreatedHandler(@NotNull String projectType) {
-        return projectCreatedHandlers.get(projectType);
-    }
 
     @Nullable
     public ProjectInitHandler getProjectInitHandler(@NotNull String projectType) {
         return projectInitHandlers.get(projectType);
-    }
-
-    @Nullable
-    public ProjectUpdatedHandler getProjectUpdatedHandler(@NotNull String projectType) {
-        return projectUpdatedHandlers.get(projectType);
     }
 
 }

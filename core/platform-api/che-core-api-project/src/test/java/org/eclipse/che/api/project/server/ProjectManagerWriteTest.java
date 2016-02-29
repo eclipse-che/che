@@ -328,7 +328,6 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         pm.createProject(pc, null);
         String folderPath = "/testUpdateProjectOnRawFolder/folder";
         pm.getProjectsRoot().createFolder(folderPath);
-        assertNull(pm.getProject(folderPath));
 
         // SPECS:
         // If update is called on raw folder new project should be created
@@ -336,7 +335,6 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         pc = new NewProjectConfig(folderPath, BaseProjectType.ID, null, "raw", "descr", null, null);
         pm.updateProject(pc);
 
-        assertNotNull(pm.getProject(folderPath));
         assertEquals(BaseProjectType.ID, pm.getProject(folderPath).getType());
 
 

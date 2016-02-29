@@ -34,7 +34,7 @@ public class MavenProjectCreatedTest {
             @Override
             protected void configure() {
                 Multibinder<ProjectHandler> projectTypeResolverMultibinder = Multibinder.newSetBinder(binder(), ProjectHandler.class);
-                projectTypeResolverMultibinder.addBinding().to(MavenProjectCreatedHandler.class);
+                projectTypeResolverMultibinder.addBinding().to(ProjectBecomeMavenHandler.class);
             }
         });
         mavenProjectCreatedHandler = injector.getInstance(MavenProjectCreatedHandler.class);

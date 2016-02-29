@@ -12,6 +12,7 @@ package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
@@ -154,6 +155,7 @@ public class ProjectServiceTest {
 
     protected ProjectRegistryImpl projectRegistry;
 
+    protected ProjectTypeRegistry ptRegistry;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -196,7 +198,7 @@ public class ProjectServiceTest {
         projectTypes.add(new LocalProjectType("module_type", "module type"));
         projectTypes.add(chuck);
 
-        ProjectTypeRegistry ptRegistry = new ProjectTypeRegistry(projectTypes);
+        ptRegistry = new ProjectTypeRegistry(projectTypes);
 
         phRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
@@ -208,8 +210,8 @@ public class ProjectServiceTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        pm = new ProjectManager(vfsProvider, null, ptRegistry, phRegistry,
-                                importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm = new ProjectManager(vfsProvider, null, ptRegistry, projectRegistry, phRegistry,
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
         pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -448,7 +450,7 @@ public class ProjectServiceTest {
             }
         };
 
-        pm.getProjectTypeRegistry().registerProjectType(pt);
+        ptRegistry.registerProjectType(pt);
 
         Map<String, List<String>> attributeValues = new LinkedHashMap<>();
         attributeValues.put("new_project_attribute", singletonList("to be or not to be"));
@@ -511,7 +513,7 @@ public class ProjectServiceTest {
 
         ProjectTypeDef pt = new ProjectTypeDef("testUpdateProject", "my project type", true, false) {
         };
-        pm.getProjectTypeRegistry().registerProjectType(pt);
+        ptRegistry.registerProjectType(pt);
 
         pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class).withDescription("created project").withType(
                                  "testUpdateProject").withPath("/testUpdateProject"), null);
@@ -644,7 +646,7 @@ public class ProjectServiceTest {
             }
         };
 
-        pm.getProjectTypeRegistry().registerProjectType(pt);
+        ptRegistry.registerProjectType(pt);
 
         ContainerResponse response =
                 launcher.service(GET, String.format("http://localhost:8080/api/project/%s/estimate/%s?type=%s",
@@ -704,7 +706,7 @@ public class ProjectServiceTest {
             }
         };
 
-        pm.getProjectTypeRegistry().registerProjectType(pt);
+        ptRegistry.registerProjectType(pt);
 
         ContainerResponse response =
                 launcher.service(GET, String.format("http://localhost:8080/api/project/%s/resolve/%s",
@@ -1044,7 +1046,7 @@ public class ProjectServiceTest {
         assertNotNull(pm.getProject("my_project"));
     }
 
-    @Test
+    @Test(expectedExceptions = NotFoundException.class)
     public void testDeleteProject() throws Exception {
 
 
@@ -1052,7 +1054,8 @@ public class ProjectServiceTest {
                                                       String.format("http://localhost:8080/api/project/%s/my_project", workspace),
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 204, "Error: " + response.getEntity());
-        Assert.assertNull(pm.getProject("my_project"));
+
+        pm.getProject("my_project");
 
 //        verify(httpJsonRequestFactory).fromLink(eq(DtoFactory.newDto(Link.class)
 //                                                             .withHref(apiEndpoint + "/workspace/" + workspace + "/project/my_project")

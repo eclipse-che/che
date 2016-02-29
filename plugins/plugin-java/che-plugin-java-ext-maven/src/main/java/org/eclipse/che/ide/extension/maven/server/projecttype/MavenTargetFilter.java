@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
@@ -60,7 +61,8 @@ public class MavenTargetFilter implements VirtualFileFilter {
     private boolean isMavenModule(FolderEntry rootFolder) throws ProjectTypeConstraintException,
                                                                  ForbiddenException,
                                                                  ValueStorageException,
-                                                                 ServerException {
+                                                                 ServerException,
+                                                                 NotFoundException {
         String projectPath = rootFolder.getPath().subPath(0, 1).toString();
         RegisteredProject project = projectManager.getProject(projectPath);
         if (rootFolder.getName().equals(project.getName())) {

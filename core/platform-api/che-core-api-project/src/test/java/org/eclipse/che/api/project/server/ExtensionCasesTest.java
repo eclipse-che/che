@@ -61,8 +61,8 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
-        pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectHandlerRegistry,
-                                null, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                null, fileWatcherNotificationHandler, fileTreeWatcher);
         pm.initWatcher();
 
 
@@ -73,7 +73,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
 
                 projectFolder.createFile("generated", "test".getBytes());
                 projectFolder.createFolder("project2");
-                projectRegistry.initProject("/project1/project2", BaseProjectType.ID);
+                projectRegistry.setProjectType("/project1/project2", BaseProjectType.ID, false);
 
                 //System.out.println(">>S>>> "+projectRegistry);
 
@@ -95,7 +95,6 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         projectRegistry.initProjects();
 
         RegisteredProject p = pm.getProject("/project1/project2");
-        assertNotNull(p);
         assertEquals(BaseProjectType.ID, p.getType());
 
 

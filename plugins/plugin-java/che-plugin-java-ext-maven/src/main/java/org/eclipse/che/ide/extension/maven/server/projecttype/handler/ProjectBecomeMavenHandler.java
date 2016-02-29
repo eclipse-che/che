@@ -32,7 +32,7 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
  * @author Vitaly Parfonov
  */
 @Singleton
-public class ProjectBecomeMavenHandler implements ProjectUpdatedHandler {
+public class ProjectBecomeMavenHandler implements ProjectInitHandler {
 
     private final EclipseWorkspaceProvider provider;
     private final MavenWorkspace           mavenWorkspace;
@@ -50,8 +50,8 @@ public class ProjectBecomeMavenHandler implements ProjectUpdatedHandler {
     }
 
     @Override
-    public void onProjectUpdated(FolderEntry projectFolder)
-            throws ServerException, ForbiddenException, ConflictException, NotFoundException, IOException {
+    public void onProjectInitialized(FolderEntry projectFolder)
+            throws ServerException, ForbiddenException, ConflictException, NotFoundException {
 
         IProject project = provider.get().getRoot().getProject(projectFolder.getPath().toString());
         mavenWorkspace.update(Collections.singletonList(project));

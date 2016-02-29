@@ -75,9 +75,7 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
         //TODO Temporary solution for IDEX-4270
         try {
             RegisteredProject project = projectManager.getProject(projectPath);
-            if (project != null) {
-                MavenClassPathConfigurator.configure(project.getBaseFolder());
-            }
+            MavenClassPathConfigurator.configure(project.getBaseFolder());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

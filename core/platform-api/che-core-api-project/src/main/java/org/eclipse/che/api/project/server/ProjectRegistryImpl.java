@@ -18,10 +18,8 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
-import org.eclipse.che.api.project.server.type.InvalidValueException;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
@@ -30,7 +28,6 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,20 +35,18 @@ import java.util.Map;
 
 /**
  * Caches configuration
+ *
  * @author gazarenkov
  */
 @Singleton
 public class ProjectRegistryImpl implements ProjectRegistry {
 
     private final Map<String, RegisteredProject> projects;
-
-    private final WorkspaceHolder        workspaceHolder;
-
-    private final VirtualFileSystem   vfs;
-
-    private final ProjectTypeRegistry projectTypeRegistry;
-
-    private final ProjectHandlerRegistry handlers;
+    private final WorkspaceHolder                workspaceHolder;
+    private final VirtualFileSystem              vfs;
+    private final ProjectTypeRegistry            projectTypeRegistry;
+    private final ProjectHandlerRegistry         handlers;
+    private final FolderEntry                    root;
 
     private boolean initialized;
 
@@ -59,19 +54,18 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     public ProjectRegistryImpl(WorkspaceHolder workspaceHolder,
                                VirtualFileSystemProvider vfsProvider,
                                ProjectTypeRegistry projectTypeRegistry,
-                               ProjectHandlerRegistry handlers)
-            throws ConflictException, NotFoundException,
-                   ServerException, ForbiddenException {
+                               ProjectHandlerRegistry handlers) throws ServerException {
         this.projects = new HashMap<>();
         this.workspaceHolder = workspaceHolder;
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
         this.handlers = handlers;
+        this.root = new FolderEntry(vfs.getRoot());
     }
 
     @PostConstruct
-    void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
-        UsersWorkspace workspace = workspaceHolder.getWorkspace();
+    public void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
+        final UsersWorkspace workspace = workspaceHolder.getWorkspace();
         List<? extends ProjectConfig> projectConfigs = workspace.getConfig().getProjects();
 
         if (projectConfigs == null) {
@@ -79,16 +73,16 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         }
 
         for (ProjectConfig projectConfig : projectConfigs) {
-            RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false, false);
+            final RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false, false);
 
-            ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
+            final ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
             if (handler != null) {
                 handler.onProjectInitialized(folder(project.getPath()));
             }
         }
 
         // unconfigured folders on root
-        FolderEntry root = new FolderEntry(vfs.getRoot());
+        //final FolderEntry root = new FolderEntry(vfs.getRoot());
         for (FolderEntry folder : root.getChildFolders()) {
             if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
                 putProject(null, folder, true, true);
@@ -103,12 +97,6 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         return workspaceHolder.getWorkspace().getId();
     }
 
-
-    /**
-     * @return all the projects
-     * @throws ServerException
-     *         if projects are not initialized yet
-     */
     @Override
     public List<RegisteredProject> getProjects() throws ServerException {
         checkInitializationState();
@@ -116,12 +104,6 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         return new ArrayList<>(projects.values());
     }
 
-    /**
-     * @param projectPath
-     * @return project or null if not found
-     * @throws ServerException
-     *         if projects are not initialized yet
-     */
     @Override
     public RegisteredProject getProject(String projectPath) throws ServerException {
         checkInitializationState();
@@ -129,18 +111,11 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         return projects.get(absolutizePath(projectPath));
     }
 
-    /**
-     * @param parentPath
-     *         where to find
-     * @return child projects
-     * @throws ServerException
-     *         if projects are not initialized yet
-     */
     @Override
     public List<String> getProjects(String parentPath) throws ServerException {
         checkInitializationState();
 
-        Path root = Path.of(absolutizePath(parentPath));
+        final Path root = Path.of(absolutizePath(parentPath));
         List<String> children = new ArrayList<>();
 
         for (String key : projects.keySet()) {
@@ -152,21 +127,9 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         return children;
     }
 
-    /**
-     * @param path
-     * @return the project owned this path.
-     * @throws NotFoundException
-     *         if not such a project found
-     * @throws ServerException
-     *         if projects are not initialized yet
-     */
     @Override
-    public RegisteredProject getParentProject(String path) throws NotFoundException, ServerException {
+    public RegisteredProject getParentProject(String path) throws ServerException {
         checkInitializationState();
-
-        // it is a project
-//        if (projects.containsKey(path))
-//            return projects.get(path);
 
         // otherwise try to find matched parent
         Path test;
@@ -179,14 +142,18 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         }
 
         // path is out of projects
-        throw new NotFoundException("Parent project not found " + path);
+        return null;
     }
 
     @Override
-    public RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected)
-            throws ServerException, ConflictException,
-                   NotFoundException, ForbiddenException {
-        RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
+    public RegisteredProject putProject(ProjectConfig config,
+                                        FolderEntry folder,
+                                        boolean updated,
+                                        boolean detected) throws ServerException,
+                                                                 ConflictException,
+                                                                 NotFoundException,
+                                                                 ForbiddenException {
+        final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
         return project;
     }
@@ -195,75 +162,78 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     /*   to use from extension                     */
     /*  ------------------------------------------ */
 
-    /**
-     * To init new project from sources
-     * @param projectPath
-     * @param type
-     * @return
-     * @throws ProjectTypeConstraintException
-     * @throws InvalidValueException
-     * @throws ValueStorageException
-     * @throws NotFoundException
-     * @throws ServerException
-     */
-    @Override
-    public RegisteredProject initProject(String projectPath, String type)
-            throws ConflictException, ForbiddenException,
-                   NotFoundException, ServerException {
-        checkInitializationState();
 
-        // it throws NFE if not here
-        //RegisteredProject config = getParentProject(absolutizePath(ofPath));
-//        FolderEntry baseFolder = folder(projectPath);
+    public RegisteredProject setProjectType(String projectPath, String type,
+                                            boolean asMixin) throws ConflictException,
+                                                                    ForbiddenException,
+                                                                    NotFoundException,
+                                                                    ServerException {
 
-        int index = projectPath.lastIndexOf(File.separatorChar);
-        String projectName = projectPath.substring(index + 1);
-        NewProjectConfig conf = new NewProjectConfig(projectPath, projectName, type, null);
+        RegisteredProject project = getProject(projectPath);
+        NewProjectConfig conf;
+        List<String> newMixins = new ArrayList<>();
+        String newType = null;
 
-//        RegisteredProject project = new RegisteredProject(baseFolder, conf, true, this.projectTypeRegistry);
-//        projects.put(project.getPath(), project);
+        if(project == null) {
+            if(asMixin) {
+                newMixins.add(type);
+            } else {
+                newType = type;
+            }
 
-        RegisteredProject project = putProject(conf, folder(projectPath), true, true);
+            String path = absolutizePath(projectPath);
+            String name = Path.of(projectPath).getName();
+            conf = new NewProjectConfig(absolutizePath(projectPath), newType, newMixins,
+                                        name, name, null, null);
 
-        ProjectInitHandler handler = handlers.getProjectInitHandler(conf.getType());
-        if(handler != null)
-            handler.onProjectInitialized(folder(project.getPath()));
+            return putProject(conf, root.getChildFolder(path), true, true);
 
+        } else {
+            newMixins = project.getMixins();
+            newType = project.getType();
+            if(asMixin) {
+                if(!newMixins.contains(type))
+                    newMixins.add(type);
+            } else {
+                newType = type;
+            }
 
-        return project;
+            conf = new NewProjectConfig(project.getPath(), newType, newMixins,
+                                        project.getName(), project.getDescription(),
+                                        project.getAttributes(), project.getSource());
+            return putProject(conf, project.getBaseFolder(), true, project.isDetected());
+
+        }
 
     }
 
-    /**
-     * To reinit parent project
-     * @param ofPath
-     * @return
-     * @throws ProjectTypeConstraintException
-     * @throws InvalidValueException
-     * @throws ValueStorageException
-     * @throws NotFoundException
-     * @throws ServerException
-     */
-    @Override
-    public RegisteredProject reinitParentProject(String ofPath)
-            throws ConflictException, ForbiddenException,
-                   NotFoundException, ServerException {
-        checkInitializationState();
+    public RegisteredProject removeProjectType(String projectPath, String type) throws ConflictException,
+                                                                                       ForbiddenException,
+                                                                                       NotFoundException,
+                                                                                       ServerException {
 
-        // it throws NFE if not here
-        RegisteredProject config = getParentProject(absolutizePath(ofPath));
+        RegisteredProject project = getProject(projectPath);
 
-        RegisteredProject project = putProject(config, config.getBaseFolder(), true, config.isDetected());
+        if(project == null)
+            return null;
 
-        return project;
+        List<String> newMixins = project.getMixins();
+        String newType = project.getType();
+
+        if(!newMixins.contains(type))
+            newMixins.remove(type);
+        else if(newType.equals(type))
+            newType = BaseProjectType.ID;
+
+        final NewProjectConfig conf = new NewProjectConfig(project.getPath(), newType, newMixins,
+                                                           project.getName(), project.getDescription(),
+                                                           project.getAttributes(), project.getSource());
+
+        return putProject(conf, project.getBaseFolder(), true, project.isDetected());
+
     }
 
-    /**
-     * removes all projects on and under the incoming path
-     * @param path
-     * @throws ServerException
-     *         if projects are not initialized yet
-     */
+
     @Override
     public void removeProjects(String path) throws ServerException {
         projects.remove(path);
@@ -271,12 +241,10 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     }
 
     static String absolutizePath(String path) {
-
         return (path.startsWith("/")) ? path : "/".concat(path);
     }
 
     FolderEntry folder(String path) throws ServerException {
-
         VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
         return (vf == null) ? null : new FolderEntry(vf);
     }
@@ -286,4 +254,5 @@ public class ProjectRegistryImpl implements ProjectRegistry {
             throw new ServerException("Projects are not initialized yet");
         }
     }
+
 }

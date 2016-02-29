@@ -130,7 +130,7 @@ public class EventService {
      * @param subscriber The subscriber to call when an event is published.
      * @param eventType The event to subscribe to.
      */
-    public <T> void subscribe(EventSubscriber<? extends T> subscriber, Class<T> eventType) {
+    public <T> void subscribe(EventSubscriber<? super T> subscriber, Class<T> eventType) {
         doSubscribe(subscriber, eventType);
     }
 

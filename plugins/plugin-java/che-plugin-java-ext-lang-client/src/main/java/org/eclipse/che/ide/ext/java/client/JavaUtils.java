@@ -10,16 +10,47 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client;
 
+import com.google.gwt.regexp.shared.RegExp;
+
 import org.eclipse.che.ide.runtime.IStatus;
-import org.eclipse.che.ide.runtime.Status;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A collection of methods for Java-specific things.
  *
  * @author Artem Zatsarynnyi
+ * @@author Dmitry Shnurenko
  */
 public class JavaUtils {
+
+    /**
+     * The package name will be only in lower case, the first character will be always a lower letter,
+     * the rest can mix underscore, lower letters and numbers.
+     */
+    private static final RegExp PACKAGE_PATTERN = RegExp.compile("^([a-zA-Z_]{1}[a-zA-Z0-9_]*(\\.[a-zA-Z_]{1}[a-zA-Z0-9_]*)*)?$");
+
+    /**
+     * The Class Name will always start with an Upper Case Letter or an underscore, the rest can mix underscore,
+     * letters and numbers. Inner Classes will always start with a dollar symbol ($) and must obey the class
+     * name rules described previously.
+     */
+    private static final RegExp COMPILATION_UNIT_PATTERN =
+            RegExp.compile("^(([a-zA-Z][a-zA-Z_$0-9]*(\\.[a-zA-Z][a-zA-Z$0-9]*)*)\\.)?([a-zA-Z_][a-zA-Z_$0-9]*)$");
+
+    private static final List<String> KEY_WORDS = Arrays.asList("abstract", "assert", "boolean", "break", "byte", "case", "catch",
+                                                                "char", "class", "const", "continue", "default", "do", "double",
+                                                                "else", "enum", "extends", "false", "final", "finally", "float",
+                                                                "for", "goto", "if", "implements", "import", "instanceof", "int",
+                                                                "interface", "long", "native", "new", "null", "package", "private",
+                                                                "protected", "public", "return", "short", "static", "strictfp",
+                                                                "super", "switch", "synchronized", "this", "throw", "throws",
+                                                                "transient", "true", "try", "void", "volatile", "while");
+
+
     private JavaUtils() {
+        throw new UnsupportedOperationException("Impossible create instance of " + getClass());
     }
 
     /**
@@ -27,6 +58,8 @@ public class JavaUtils {
      * Throws {@link IllegalStateException} if the specified name isn't a valid Java compilation unit name.
      * <p>
      * A compilation unit name must obey the following rules:
+     * <p/>
+     * <p/>
      * <ul>
      * <li> it must not be null
      * <li> it must be suffixed by a dot ('.') followed by one of the java like extension
@@ -40,9 +73,8 @@ public class JavaUtils {
      *         with a detail message that describes what is wrong with the specified name
      */
     public static void checkCompilationUnitName(String name) throws IllegalStateException {
-        IStatus status = validateCompilationUnitName(name);
-        if (status.getSeverity() == IStatus.ERROR) {
-            throw new IllegalStateException(status.getMessage());
+        if (!isValidCompilationUnitName(name)) {
+            throw new IllegalStateException("Value is not valid.");
         }
     }
 
@@ -54,14 +86,30 @@ public class JavaUtils {
      * @return <code>true</code> if the specified text is a valid compilation unit name, <code>false</code> otherwise
      */
     public static boolean isValidCompilationUnitName(String name) {
-        IStatus status = validateCompilationUnitName(name);
-        switch (status.getSeverity()) {
-            case Status.WARNING:
-            case Status.OK:
-                return true;
-            default:
-                return false;
+        return isNameMatchedPattern(name, COMPILATION_UNIT_PATTERN);
+    }
+
+    private static boolean isNameMatchedPattern(String name, RegExp pattern) {
+        if (name == null) {
+            return false;
         }
+
+        if (isContainKeyWord(name)) {
+            return false;
+        }
+        int statusCode = pattern.test(name) ? IStatus.OK : IStatus.ERROR;
+
+        return !name.isEmpty() && statusCode == 0;
+    }
+
+    private static boolean isContainKeyWord(String name) {
+        for (String part : name.split("\\.")) {
+            if (KEY_WORDS.contains(part)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -78,9 +126,8 @@ public class JavaUtils {
      *         with a detail message that describes what is wrong with the specified name
      */
     public static void checkPackageName(String name) throws IllegalStateException {
-        IStatus status = validatePackageName(name);
-        if (status.getSeverity() == IStatus.ERROR) {
-            throw new IllegalStateException(status.getMessage());
+        if (!isValidPackageName(name)) {
+            throw new IllegalStateException("Value is not valid.");
         }
     }
 
@@ -92,28 +139,6 @@ public class JavaUtils {
      * @return <code>true</code> if the specified text is a valid package name, <code>false</code> otherwise
      */
     public static boolean isValidPackageName(String name) {
-        IStatus status = validatePackageName(name);
-        switch (status.getSeverity()) {
-            case Status.WARNING:
-            case Status.OK:
-                return true;
-            default:
-                return false;
-        }
+        return isNameMatchedPattern(name, PACKAGE_PATTERN);
     }
-
-    private static IStatus validateCompilationUnitName(String name) {
-//        return JavaConventions.validateCompilationUnitName(name, JavaCore.getOption(JavaCore.COMPILER_SOURCE),
-//                                                           JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE));
-        //TODO provide more simple way to check java names
-        return Status.OK_STATUS;
-    }
-
-    private static IStatus validatePackageName(String name) {
-//        return JavaConventions.validatePackageName(name, JavaCore.getOption(JavaCore.COMPILER_SOURCE),
-//                                                   JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE));
-        //TODO provide more simple way to check java names
-        return Status.OK_STATUS;
-    }
-
 }

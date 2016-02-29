@@ -19,32 +19,83 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import java.util.List;
 
 /**
- * //
- *
  * @author Vitalii Parfonov
  */
 public interface ProjectRegistry {
+
     String getWorkspaceId();
 
+    /**
+     * @return all the projects
+     * @throws ServerException
+     *         if projects are not initialized yet
+     */
     List<RegisteredProject> getProjects() throws ServerException;
 
+    /**
+     * @param projectPath
+     * @return project or null if not found
+     * @throws ServerException
+     *         if projects are not initialized yet
+     */
     RegisteredProject getProject(String projectPath) throws ServerException;
 
+    /**
+     * @param parentPath
+     *         where to find
+     * @return child projects
+     * @throws ServerException
+     *         if projects are not initialized yet
+     */
     List<String> getProjects(String parentPath) throws ServerException;
 
-    RegisteredProject getParentProject(String path) throws NotFoundException, ServerException;
+    /**
+     * @param path
+     * @return the project owned this path or null if not such a project found
+     * @throws ServerException
+     *         if projects are not initialized yet
+     */
+    RegisteredProject getParentProject(String path) throws ServerException;
 
-    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected)
-            throws ServerException, ConflictException,
-                   NotFoundException, ForbiddenException;
+    RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected) throws ServerException,
+                                                                                                                     ConflictException,
+                                                                                                                     NotFoundException,
+                                                                                                                     ForbiddenException;
 
-    RegisteredProject initProject(String projectPath, String type)
-            throws ConflictException, ForbiddenException,
-                   NotFoundException, ServerException;
 
-    RegisteredProject reinitParentProject(String ofPath)
-                           throws ConflictException, ForbiddenException,
-                                  NotFoundException, ServerException;
+    RegisteredProject setProjectType(String projectPath, String type, boolean asMixin) throws ConflictException,
+                                                                                              ForbiddenException,
+                                                                                              NotFoundException,
+                                                                                              ServerException;
 
+    RegisteredProject removeProjectType(String projectPath, String type) throws ConflictException,
+                                                              ForbiddenException,
+                                                              NotFoundException,
+                                                              ServerException;
+
+//    /**
+//     * To init new project from sources
+//     *
+//     * @param projectPath
+//     * @param type
+//     * @return
+//     * @throws ProjectTypeConstraintException
+//     * @throws InvalidValueException
+//     * @throws ValueStorageException
+//     * @throws NotFoundException
+//     * @throws ServerException
+//     */
+//    RegisteredProject initProject(String projectPath, String type) throws ConflictException,
+//                                                                          ForbiddenException,
+//                                                                          NotFoundException,
+//                                                                          ServerException;
+
+    /**
+     * removes all projects on and under the incoming path
+     *
+     * @param path
+     * @throws ServerException
+     *         if projects are not initialized yet
+     */
     void removeProjects(String path) throws ServerException;
 }
