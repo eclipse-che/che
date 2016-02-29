@@ -28,13 +28,13 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.editor.event.CloseNonPinnedEditorsEvent;
 import org.eclipse.che.ide.part.editor.event.CloseNonPinnedEditorsEvent.CloseNonPinnedEditorsHandler;
 import org.eclipse.che.ide.part.editor.event.PinEditorTabEvent;
 import org.eclipse.che.ide.part.editor.event.PinEditorTabEvent.PinEditorTabEventHandler;
+import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTab;
 import org.eclipse.che.ide.part.widgets.listtab.ListButton;
 import org.eclipse.che.ide.part.widgets.listtab.ListItem;
@@ -218,6 +218,8 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     @Override
     public void onTabClose(@NotNull TabItem tab) {
         removeItemFromList(tab);
+
+        eventBus.fireEvent(new FileEvent(((EditorTab)tab).getFile(), CLOSE));
     }
 
     /** {@inheritDoc} */
