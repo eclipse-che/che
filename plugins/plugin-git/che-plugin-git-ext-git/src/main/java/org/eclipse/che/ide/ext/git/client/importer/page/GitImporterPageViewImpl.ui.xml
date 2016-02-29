@@ -11,7 +11,8 @@
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:ide='urn:import:org.eclipse.che.ide.ui'>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
     <ui:with field="style" type="org.eclipse.che.ide.ext.git.client.importer.page.GitImporterPageViewImpl.Style"/>
     <g:DockLayoutPanel unit="PX" addStyleNames="{style.mainPanel}">
@@ -20,7 +21,7 @@
                 <g:FlowPanel height="65px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.gitImporterPageProjectUrl}"
                              addStyleNames="{style.labelPosition}"/>
-                    <g:TextBox ui:field="projectUrl" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="3"
+                    <ide:TextBox ui:field="projectUrl" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="3"
                                debugId="file-importProject-projectUrl"/>
                     <g:Label ui:field="labelUrlError" width="100%" wordWrap="true" addStyleNames="{style.labelErrorPosition}"/>
                 </g:FlowPanel>
@@ -31,7 +32,7 @@
                 <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.gitImporterPageProjectName}"
                              addStyleNames="{style.labelPosition}"/>
-                    <g:TextBox ui:field="projectName" addStyleNames="{style.inputField} {style.alignRight}"
+                    <ide:TextBox ui:field="projectName" addStyleNames="{style.inputField} {style.alignRight}"
                                tabIndex="4"
                                debugId="file-importProject-projectName" title="{locale.gitImporterPageProjectNamePrompt}"/>
                 </g:FlowPanel>
@@ -51,7 +52,7 @@
 
                 <g:FlowPanel height="55px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.gitImporterPageKeepDirectoryField}" addStyleNames="{style.labelPosition}"/>
-                    <g:TextBox ui:field="directoryName" addStyleNames="{style.inputField} {style.alignRight}"
+                    <ide:TextBox ui:field="directoryName" addStyleNames="{style.inputField} {style.alignRight}"
                                tabIndex="9" debugId="file-importProject-keepDirectoryName" title="{locale.gitImporterPageBranchField}"/>
                 </g:FlowPanel>
 
@@ -62,7 +63,7 @@
 
                 <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.gitImporterPageBranchField}" addStyleNames="{style.labelPosition}"/>
-                    <g:TextBox ui:field="branch" addStyleNames="{style.inputField} {style.alignRight}"
+                    <ide:TextBox ui:field="branch" addStyleNames="{style.inputField} {style.alignRight}"
                                tabIndex="10" debugId="file-importProject-branchName" title="{locale.gitImporterPageBranchField}"/>
                 </g:FlowPanel>
 

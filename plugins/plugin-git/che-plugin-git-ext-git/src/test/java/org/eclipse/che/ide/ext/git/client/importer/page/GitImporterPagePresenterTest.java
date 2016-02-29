@@ -85,7 +85,9 @@ public class GitImporterPagePresenterTest {
 
         presenter.projectUrlChanged(incorrectUrl);
 
-        verify(view).showUrlError(eq(locale.importProjectMessageStartWithWhiteSpace()));
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageStartWithWhiteSpace()));
+
         verify(dataObject).setName(eq(name));
         verify(view).setProjectName(name);
         verify(updateDelegate).updateControls();
@@ -174,7 +176,9 @@ public class GitImporterPagePresenterTest {
 
         presenter.projectUrlChanged(incorrectUrl);
 
-        verify(view).showUrlError(eq(locale.importProjectMessageProtocolIncorrect()));
+        verify(view).markURLInvalid();
+        verify(view).setURLErrorMessage(eq(locale.importProjectMessageProtocolIncorrect()));
+
         verify(source).setLocation(eq(incorrectUrl));
         verify(view).setProjectName(anyString());
         verify(updateDelegate).updateControls();
@@ -188,8 +192,10 @@ public class GitImporterPagePresenterTest {
         presenter.projectNameChanged(correctName);
 
         verify(dataObject).setName(eq(correctName));
-        verify(view).hideNameError();
-        verify(view, never()).showNameError();
+
+        verify(view).markURLValid();
+        verify(view).setURLErrorMessage(eq(null));
+        verify(view, never()).markURLInvalid();
         verify(updateDelegate).updateControls();
     }
 
@@ -201,8 +207,8 @@ public class GitImporterPagePresenterTest {
         presenter.projectNameChanged(correctName);
 
         verify(dataObject).setName(eq(correctName));
-        verify(view).hideNameError();
-        verify(view, never()).showNameError();
+        verify(view).markNameValid();
+        verify(view, never()).markNameInvalid();
         verify(updateDelegate).updateControls();
     }
 
@@ -225,7 +231,7 @@ public class GitImporterPagePresenterTest {
         presenter.projectNameChanged(incorrectName);
 
         verify(dataObject).setName(eq(incorrectName));
-        verify(view).showNameError();
+        verify(view).markNameInvalid();
         verify(updateDelegate).updateControls();
     }
 
@@ -294,9 +300,9 @@ public class GitImporterPagePresenterTest {
     }
 
     private void verifyInvocationsForCorrectUrl(String correctUrl) {
-        verify(view, never()).showUrlError(anyString());
+        verify(view, never()).markURLInvalid();
         verify(source).setLocation(eq(correctUrl));
-        verify(view).hideUrlError();
+        verify(view).markURLValid();
         verify(view).setProjectName(anyString());
         verify(updateDelegate).updateControls();
     }

@@ -171,6 +171,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
     private SpanElement createCommandElement(ProcessTreeNode node) {
         SpanElement root = Elements.createSpanElement();
+        root.setAttribute("running", "" + node.isRunning());
+
         root.appendChild(createCloseElement(node));
         root.appendChild(createStopProcessElement(node));
 
