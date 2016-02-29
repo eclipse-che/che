@@ -49,6 +49,9 @@
             float: left;
             padding-left: 4px;
             cursor: default;
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .close {
