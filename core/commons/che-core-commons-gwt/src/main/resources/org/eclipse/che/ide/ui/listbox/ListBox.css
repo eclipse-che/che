@@ -35,6 +35,21 @@
     display: inline;
 }
 
+.listBox input {
+    font-size: inherit;
+    font-weight: inherit !important;
+    vertical-align: bottom;
+    white-space: nowrap;
+    color: listBoxColor;
+    background-color: textFieldBackgroundColor;
+    padding-left: 8px;
+    display: inline;
+    border: none;
+    height: 100%;
+    width: literal("calc(100% - 32px)");
+    outline: none;
+}
+
 .listBox > label {
     margin-right: 22px;
     line-height: 22px;
