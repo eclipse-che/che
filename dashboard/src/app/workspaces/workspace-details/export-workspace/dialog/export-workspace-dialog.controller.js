@@ -111,7 +111,7 @@ export class ExportWorkspaceDialogController {
           let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
           let remoteProjectAPI = this.cheRemote.newProject(authData);
           this.exportInCloudSteps += 'Creating remote workspace...';
-          let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, copyOfWorkspace);
+          let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, copyOfWorkspace.config);
           createWorkspacePromise.then((remoteWorkspace) => {
             this.exportInCloudSteps += 'ok !<br>';
             // ok now we've to import each project with a location into the remote workspace
@@ -147,7 +147,7 @@ export class ExportWorkspaceDialogController {
     var projectPromises = [];
 
     // ok so
-    workspace.projects.forEach((project) => {
+    workspace.config.projects.forEach((project) => {
       if (project.source && project.source.location && project.source.location.length > 0) {
         let deferred = this.$q.defer();
         let deferredPromise = deferred.promise;
