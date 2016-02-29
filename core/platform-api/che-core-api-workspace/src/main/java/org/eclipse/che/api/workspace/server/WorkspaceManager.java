@@ -399,11 +399,13 @@ public class WorkspaceManager {
      * @see WorkspaceHooks#beforeCreate(UsersWorkspace, String)
      * @see RuntimeWorkspaceRegistry#start(UsersWorkspace, String)
      */
-    public RuntimeWorkspaceImpl startTemporaryWorkspace(WorkspaceConfig workspaceConfig, @Nullable String accountId) throws ServerException,
-                                                                                                                            BadRequestException,
-                                                                                                                            ForbiddenException,
-                                                                                                                            NotFoundException,
-                                                                                                                            ConflictException {
+    public RuntimeWorkspaceImpl startTemporaryWorkspace(WorkspaceConfig workspaceConfig,
+                                                        @Nullable String accountId) throws ServerException,
+                                                                                           BadRequestException,
+                                                                                           ForbiddenException,
+                                                                                           NotFoundException,
+                                                                                           ConflictException {
+
         final UsersWorkspaceImpl workspace = fromConfig(workspaceConfig, getCurrentUserId());
         workspace.setTemporary(true);
         // Temporary workspace is not persistent one, which means
@@ -573,7 +575,9 @@ public class WorkspaceManager {
     UsersWorkspaceImpl performAsyncStart(UsersWorkspaceImpl workspace,
                                          String envName,
                                          boolean recover,
-                                         @Nullable String accountId) throws ConflictException {
+                                         @Nullable String accountId) throws ConflictException,
+                                                                            BadRequestException {
+
         // Runtime workspace registry performs this check as well
         // but this check needed here because permanent workspace start performed asynchronously
         // which means that even if registry won't start workspace client receives workspace object
@@ -588,6 +592,17 @@ public class WorkspaceManager {
         }
         workspace.setTemporary(false);
         workspace.setStatus(WorkspaceStatus.STARTING);
+
+        if (envName != null && !workspace.getConfig()
+                                         .getEnvironments()
+                                         .stream()
+                                         .anyMatch(env -> env.getName().equals(envName))) {
+
+            throw new BadRequestException(format("Couldn't start workspace '%s', workspace doesn't have environment '%s'",
+                                                 workspace.getConfig().getName(),
+                                                 envName));
+        }
+
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 performSyncStart(workspace, firstNonNull(envName, workspace.getConfig().getDefaultEnv()), recover, accountId);

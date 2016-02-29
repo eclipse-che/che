@@ -30,7 +30,7 @@ import static java.lang.String.format;
 @Singleton
 public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator {
     /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
-    private static final Pattern WS_NAME = Pattern.compile("[\\w][\\w\\.\\-]{1,18}[\\w]");
+    private static final Pattern WS_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
 
     /**
      * Checks that workspace configuration is valid.
@@ -49,58 +49,67 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
     @Override
     public void validate(WorkspaceConfig config) throws BadRequestException {
         // configuration object itself
-        requiredNotNull(config.getName(), "Workspace name required");
-        if (!WS_NAME.matcher(config.getName()).matches()) {
-            throw new BadRequestException("Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, " +
-                                          "latin letters, underscores, dots, dashes and should start and end only with digits, " +
-                                          "latin letters or underscores");
-        }
+        checkNotNull(config.getName(), "Workspace name required");
+        checkArgument(WS_NAME.matcher(config.getName()).matches(),
+                      "Incorrect workspace name, it must be between 3 and 20 characters and may contain digits, " +
+                      "latin letters, underscores, dots, dashes and should start and end only with digits, " +
+                      "latin letters or underscores");
 
         //attributes
         for (String attributeName : config.getAttributes().keySet()) {
             //attribute name should not be empty and should not start with codenvy
-            if (attributeName.trim().isEmpty() || attributeName.toLowerCase().startsWith("codenvy")) {
-                throw new BadRequestException(format("Attribute name '%s' is not valid", attributeName));
-            }
+            checkArgument(attributeName != null && !attributeName.trim().isEmpty() && !attributeName.toLowerCase().startsWith("codenvy"),
+                          "Attribute name '%s' is not valid",
+                          attributeName);
         }
 
         //environments
-        requiredNotNull(config.getDefaultEnv(), "Workspace default environment name required");
-        if (!config.getEnvironments().stream().anyMatch(env -> env.getName().equals(config.getDefaultEnv()))) {
-            throw new BadRequestException("Workspace default environment configuration required");
-        }
+        checkArgument(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
+        checkArgument(config.getEnvironments()
+                            .stream()
+                            .anyMatch(env -> config.getDefaultEnv().equals(env.getName())),
+                      "Workspace default environment configuration required");
+
         for (Environment environment : config.getEnvironments()) {
             final String envName = environment.getName();
-            requiredNotNull(envName, "Environment name should not be null");
+            checkArgument(!isNullOrEmpty(envName), "Environment name should be neither null nor empty");
+
+            checkArgument(environment.getRecipe() == null || "docker".equals(environment.getRecipe().getType()),
+                          "Couldn't start workspace '%s' from environment '%s', environment recipe has unsupported type '%s'",
+                          config.getName(),
+                          envName,
+                          environment.getRecipe() != null ? environment.getRecipe().getType() : null);
 
             //machine configs
-            if (environment.getMachineConfigs().isEmpty()) {
-                throw new BadRequestException("Environment '" + envName + "' should contain at least 1 machine");
-            }
+            checkArgument(!environment.getMachineConfigs().isEmpty(), "Environment '%s' should contain at least 1 machine", envName);
+
             final long devCount = environment.getMachineConfigs()
                                              .stream()
                                              .filter(MachineConfig::isDev)
                                              .count();
-            if (devCount != 1) {
-                throw new BadRequestException(format("Environment should contain exactly 1 dev machine, but '%s' contains '%d'",
-                                                     envName,
-                                                     devCount));
-            }
+            checkArgument(devCount == 1,
+                          "Environment should contain exactly 1 dev machine, but '%s' contains '%d'",
+                          envName,
+                          devCount);
             for (MachineConfig machineCfg : environment.getMachineConfigs()) {
-                if (isNullOrEmpty(machineCfg.getName())) {
-                    throw new BadRequestException("Environment " + envName + " contains machine without of name");
-                }
-                requiredNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without of source");
-                //TODO require type?
+                checkArgument(!isNullOrEmpty(machineCfg.getName()), "Environment %s contains machine with null or empty name", envName);
+                checkNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without source");
+                checkArgument("docker".equals(machineCfg.getType()),
+                              "Type of machine %s in environment %s is not supported. Supported value is 'docker'.",
+                              machineCfg.getName(),
+                              envName);
             }
         }
 
         //commands
         for (Command command : config.getCommands()) {
-            requiredNotNull(command.getName(), "Workspace " + config.getName() + " contains command without of name");
-            requiredNotNull(command.getCommandLine(), format("Command line required for command '%s' in workspace '%s'",
-                                                             command.getName(),
-                                                             config.getName()));
+            checkArgument(!isNullOrEmpty(command.getName()),
+                          "Workspace %s contains command with null or empty name",
+                          config.getName());
+            checkArgument(!isNullOrEmpty(command.getCommandLine()),
+                          "Command line required for command '%s' in workspace '%s'",
+                          command.getName(),
+                          config.getName());
         }
 
         //projects
@@ -111,9 +120,31 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
      * Checks that object reference is not null, throws {@link BadRequestException}
      * in the case of null {@code object} with given {@code message}.
      */
-    private void requiredNotNull(Object object, String message) throws BadRequestException {
+    private void checkNotNull(Object object, String message) throws BadRequestException {
         if (object == null) {
             throw new BadRequestException(message);
+        }
+    }
+
+    /**
+     * Checks that expression is true, throws {@link BadRequestException} otherwise.
+     *
+     * <p>Exception uses error message built from error message template and error message parameters.
+     */
+    private void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageParams) throws BadRequestException {
+        if (!expression) {
+            throw new BadRequestException(format(errorMessageTemplate, errorMessageParams));
+        }
+    }
+
+    /**
+     * Checks that expression is true, throws {@link BadRequestException} otherwise.
+     *
+     * <p>Exception uses error message built from error message template and error message parameters.
+     */
+    private void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
+        if (!expression) {
+            throw new BadRequestException(errorMessage);
         }
     }
 }
