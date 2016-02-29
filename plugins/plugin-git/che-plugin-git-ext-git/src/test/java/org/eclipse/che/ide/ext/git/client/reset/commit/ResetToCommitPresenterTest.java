@@ -83,6 +83,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
                                                constant,
                                                eventBus,
                                                editorAgent,
+                                               dialogFactory,
                                                appContext,
                                                notificationManager,
                                                dtoUnmarshallerFactory,

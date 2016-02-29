@@ -24,4 +24,5 @@ public class ErrorCodes {
     public static final int UNAUTHORIZED_GIT_OPERATION         = 32080;
     public static final int FAILED_CHECKOUT                    = 32063;
     public static final int FAILED_CHECKOUT_WITH_START_POINT   = 32064;
+    public static final int INIT_COMMIT_WAS_NOT_PERFORMED      = 32082;
 }

@@ -65,10 +65,10 @@ public class BranchRenameCommand extends RemoteOperationCommand<Void> {
             commandLine.add("-t");
             commandLine.add(branchName);
             start();
-        } catch (GitException e) {
-            String errorMessage = e.getMessage();
+        } catch (GitException exception) {
+            String errorMessage = exception.getMessage();
             if (!checkoutErrorPattern.matcher(errorMessage).find()) {
-                throw new GitException(errorMessage);
+                throw exception;
             }
             //local branch already exist - so ignore and try perform the next step
         }
