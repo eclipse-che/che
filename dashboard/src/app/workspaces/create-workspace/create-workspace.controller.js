@@ -52,6 +52,7 @@ export class CreateWorkspaceCtrl {
     this.stack = null;
     this.recipeUrl = null;
     this.recipeScript = null;
+    this.importWorkspace = '';
   }
 
   /**
@@ -114,6 +115,10 @@ export class CreateWorkspaceCtrl {
           this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
         });
       }
+    } else if (this.selectSourceOption === 'select-source-import') {
+      let workspaceConfig = this.importWorkspace.length > 0 ? angular.fromJson(this.importWorkspace).config : {};
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig);
+      this.redirectAfterSubmitWorkspace(creationPromise);
     } else {
       //check predefined recipe location
       if (this.stack && this.stack.source && this.stack.source.type === 'location') {
@@ -188,16 +193,23 @@ export class CreateWorkspaceCtrl {
    */
   submitWorkspace() {
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-
     let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
-    creationPromise.then((workspaceData) => {
+    this.redirectAfterSubmitWorkspace(creationPromise);
+  }
+
+
+  /**
+   * Handle the redirect for the given promise after workspace has been created
+   * @param promise used to gather workspace data
+     */
+  redirectAfterSubmitWorkspace(promise) {
+    promise.then((workspaceData) => {
       let infoMessage = 'Workspace ' + workspaceData.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
       this.$location.path('/workspace/' + workspaceData.id);
     }, (error) => {
       let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
       this.cheNotification.showError(errorMessage);
-      this.$location.path('/workspaces');
     });
   }
 
