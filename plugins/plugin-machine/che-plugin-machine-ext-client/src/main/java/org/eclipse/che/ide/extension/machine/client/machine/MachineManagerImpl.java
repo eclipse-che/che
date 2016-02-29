@@ -281,7 +281,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                 appContext.setDevMachineId(machineId);
                 appContext.setProjectsRoot(machineDto.getRuntime().projectsRoot());
                 devMachine = entityFactory.createMachine(machineDto);
-                wsAgentStateController.initialize(devMachine.getWsServerExtensionsUrl() + "/" + appContext.getWorkspaceId());
+                wsAgentStateController.initialize(devMachine.getWsServerExtensionsUrl(), appContext.getWorkspaceId());
             }
         });
     }

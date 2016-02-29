@@ -8,27 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.server;
+package org.eclipse.che.wsagent.server;
+
+import com.google.common.base.Strings;
 
 import javax.inject.Provider;
-import java.net.URI;
 
 /**
- * Provides URI of Che API endpoint for usage inside machine to be able to connect to host machine using docker host IP.
+ * Provides value of Che API endpoint URL for usage inside machine to be able to connect to host machine using docker host IP.
  *
- * @author Alexander Garagatyi
+ * @author Artem Zatsarynnyi
  */
-public class UriApiEndpointProvider implements Provider<URI> {
+public class ApiEndpointProvider implements Provider<String> {
 
     public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
 
     @Override
-    public URI get() {
-        try {
-            return new URI(System.getenv(API_ENDPOINT_URL_VARIABLE));
-        } catch (Exception e) {
-            throw new RuntimeException("System variable CHE_API_ENDPOINT contain invalid value of Che api endpoint:" +
-                                       System.getenv(API_ENDPOINT_URL_VARIABLE));
-        }
+    public String get() {
+        return Strings.nullToEmpty(System.getenv(API_ENDPOINT_URL_VARIABLE));
     }
 }

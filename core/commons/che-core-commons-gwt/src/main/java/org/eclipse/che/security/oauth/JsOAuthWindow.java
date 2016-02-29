@@ -76,7 +76,7 @@ public class JsOAuthWindow {
 
                     if (href) {
                         var path = popupWindow.location.pathname;
-                        if (path == (authUrl.substring(authUrl.lastIndexOf("/ws"))) || path == "/dashboard/") {
+                        if (path.startsWith("/ws/") || path.startsWith("/dashboard/")) {
                             instance.@org.eclipse.che.security.oauth.JsOAuthWindow::setAuthenticationStatus(I)(3);
                             popupWindow.close();
                             popupWindow = null;

@@ -18,25 +18,20 @@
 Requirements
 =============
 
- *  Java Platform, Standard Edition 8 Development Kit (JDK 7) or later;
- *  Apache Maven version 3 or later.
- *  Docker 1.8 or later.
+ *  Java Platform, Standard Edition 8 Development Kit.
+ *  Apache Maven version 3.3.1+.
+ *  Docker 1.8+.
 
 
-===========
-Installing
-===========
-See eclipse.org/che
-
-===================
-Running & Stopping
-===================
+===============
+Getting Started
+===============
 See eclipse.org/che
 
 =============
 Contributing
 =============
-See github.com/codenvy/che
+See github.com/eclipse/che
 
 ==============
 Documentation

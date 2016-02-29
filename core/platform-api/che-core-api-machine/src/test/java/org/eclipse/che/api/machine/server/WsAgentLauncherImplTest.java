@@ -34,7 +34,6 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.util.Collections;
 
 import static org.mockito.Matchers.any;
@@ -51,7 +50,7 @@ public class WsAgentLauncherImplTest {
     private static final String     WS_ID                         = "wsId";
     private static final String     MACHINE_ID                    = "machineId";
     private static final String     WS_AGENT_START_CMD_LINE       = "cmdLine";
-    private static final String     API_ENDPOINT_PATH             = "/some/path/";
+    private static final String     WS_AGENT_API_ENDPOINT_PATH    = "/some/path/";
     private static final String     WS_AGENT_PORT                 = Integer.toString(WsAgentLauncherImpl.WS_AGENT_PORT);
     private static final long       WS_AGENT_MAX_START_TIME_MS    = 1000;
     private static final long       WS_AGENT_PING_DELAY_MS        = 1;
@@ -82,11 +81,11 @@ public class WsAgentLauncherImplTest {
         wsAgentLauncher = new WsAgentLauncherImpl(() -> machineManager,
                                                   requestFactory,
                                                   WS_AGENT_START_CMD_LINE,
-                                                  new URI("http://localhost:8080" + API_ENDPOINT_PATH),
                                                   WS_AGENT_MAX_START_TIME_MS,
                                                   WS_AGENT_PING_DELAY_MS,
                                                   WS_AGENT_PING_CONN_TIMEOUT_MS,
-                                                  WS_AGENT_TIMED_OUT_MESSAGE);
+                                                  WS_AGENT_TIMED_OUT_MESSAGE,
+                                                  WS_AGENT_API_ENDPOINT_PATH);
         pingRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
         when(machineManager.getDevMachine(WS_ID)).thenReturn(machine);
         when(machine.getId()).thenReturn(MACHINE_ID);
@@ -114,10 +113,10 @@ public class WsAgentLauncherImplTest {
         wsAgentLauncher.startWsAgent(WS_ID);
 
         verify(requestFactory).fromUrl(UriBuilder.fromUri(WS_AGENT_SERVER_URL)
-                                                 .replacePath(API_ENDPOINT_PATH)
+                                                 .replacePath(WS_AGENT_API_ENDPOINT_PATH)
                                                  .build()
                                                  .toString());
-        verify(pingRequest).setMethod(HttpMethod.OPTIONS);
+        verify(pingRequest).setMethod(HttpMethod.GET);
         verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
         verify(pingRequest).request();
         verify(pingResponse).getResponseCode();
@@ -133,10 +132,10 @@ public class WsAgentLauncherImplTest {
         wsAgentLauncher.startWsAgent(WS_ID);
 
         verify(requestFactory).fromUrl(UriBuilder.fromUri(WS_AGENT_SERVER_URL)
-                                                 .replacePath(API_ENDPOINT_PATH)
+                                                 .replacePath(WS_AGENT_API_ENDPOINT_PATH)
                                                  .build()
                                                  .toString());
-        verify(pingRequest).setMethod(HttpMethod.OPTIONS);
+        verify(pingRequest).setMethod(HttpMethod.GET);
         verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
         verify(pingRequest, times(4)).request();
         verify(pingResponse).getResponseCode();
@@ -151,10 +150,10 @@ public class WsAgentLauncherImplTest {
         wsAgentLauncher.startWsAgent(WS_ID);
 
         verify(requestFactory).fromUrl(UriBuilder.fromUri(WS_AGENT_SERVER_URL)
-                                                 .replacePath(API_ENDPOINT_PATH)
+                                                 .replacePath(WS_AGENT_API_ENDPOINT_PATH)
                                                  .build()
                                                  .toString());
-        verify(pingRequest).setMethod(HttpMethod.OPTIONS);
+        verify(pingRequest).setMethod(HttpMethod.GET);
         verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
         verify(pingRequest, times(3)).request();
         verify(pingResponse, times(3)).getResponseCode();
@@ -224,24 +223,5 @@ public class WsAgentLauncherImplTest {
         when(pingRequest.request()).thenThrow(new ServerException(""));
 
         wsAgentLauncher.startWsAgent(WS_ID);
-    }
-
-    @Test
-    public void shouldAddTrailingSlashToPingPath() throws Exception {
-        String pingUrlWithoutTrailingSlash = WS_AGENT_SERVER_URL.substring(0, WS_AGENT_SERVER_URL.length() - 1);
-        ServerImpl server = new ServerImpl(SERVER);
-        server.setUrl(pingUrlWithoutTrailingSlash);
-        doReturn(Collections.<String, Server>singletonMap(WS_AGENT_PORT, server)).when(machineRuntime).getServers();
-
-        wsAgentLauncher.startWsAgent(WS_ID);
-
-        verify(requestFactory).fromUrl(UriBuilder.fromUri(pingUrlWithoutTrailingSlash + "/")
-                                                 .replacePath(API_ENDPOINT_PATH)
-                                                 .build()
-                                                 .toString());
-        verify(pingRequest).setMethod(HttpMethod.OPTIONS);
-        verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
-        verify(pingRequest).request();
-        verify(pingResponse).getResponseCode();
     }
 }

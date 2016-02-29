@@ -94,8 +94,8 @@ public class RenameNonPrivateFieldTest extends RefactoringTest {
 
 	@After
 	public void tearDown() throws Exception {
-		setup.tearDown();
 		super.tearDown();
+		setup.tearDown();
 		Hashtable options = JavaCore.getOptions();
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
 		JavaCore.setOptions(options);

@@ -28,62 +28,41 @@ init_global_variables () {
   NC='\033[0m'
 
   ### Define various error and usage messages
-  WRONG="
-Looks like something went wrong. Possible issues:
-  1. (Win | Mac) VirtualBox not installed          ==> Rerun Docker Toolbox installation
-  2. (Win | Mac) Docker Machine not installed      ==> Rerun Docker Toolbox installation
-  3. (Win | Mac) Docker is not reachable           ==> Docker VM failed to start
-  4. (Win | Mac) Docker ok, but docker ps fails    ==> Docker environment variables not set properly
-  5. (Linux) Docker is not reachable               ==> Install: wget -qO- https://get.docker.com/ | sh
-  6. (Linux) Permissions not properly set          ==> Che must run as UID 1000 with user in docker group
-  7. Could not find the Che app server             ==> Did /tomcat get moved away from CHE_HOME?
-  8. Wrong version of Java found                   ==> Che requires Java 1.8
-  9. Did you use the right parameter syntax?       ==> See usage
-
-We have seen issues with VirtualBox on Windows where your VM gets corrupted when your computer is
-suspended while the VM is still running. This will appear as SSH or ethernet connection issues. This is
-rare, but if encountered, current known solution is to uninstall VirtualBox and Docker Toolbox, and then
-reinstall.
-"
-
-  CHE_VARIABLES="
-Che Environment Variables:
-  (REQUIRED) JAVA_HOME                             ==> Location of Java runtime
-  (REQUIRED: WIN|MAC) DOCKER_TOOLBOX_INSTALL_PATH  ==> Location of Docker Toolbox
-  (REQUIRED: WIN|MAC) VBOX_MSI_INSTALL_PATH        ==> Location of VirtualBox
-  (OPTIONAL) CHE_HOME                              ==> Directory where Che is installed
-  (OPTIONAL) CHE_LOCAL_CONF_DIR                    ==> Directory with custom Che .properties files
-  (OPTIONAL) CHE_LOGS_DIR                          ==> Directory for Che output logs
-  (OPTIONAL) CHE_DOCKER_MACHINE_NAME               ==> (Win | Mac) Name of VM created by docker-machine
-  (OPTIONAL) CHE_CONTAINER_NAME                    ==> Name to apply to Docker container if using -i option
-  (OPTIONAL) DOCKER_MACHINE_HOST                   ==> (Linux) Docker host IP - set if browser clients remote
-  "
-
   USAGE="
 Usage:
-  che [OPTIONS] [run | start | stop]
-     -i,        --image              Launches Che within a Docker container using latest image
-     -i:tag,    --image:tag          Launches Che within a Docker container using specific image tag
-     -c:name,   --container:name     Sets the container name if -i provided; default=che
+  che [OPTIONS] [COMMAND]
+     -m:name,   --machine:name       For Win & Mac, sets the docker-machine VM name; default=default
      -p:port,   --port:port          Port that Che server will use for HTTP requests; default=8080
      -r:ip,     --remote:ip          If Che clients are not localhost, set to IP address of Che server
+     -h,        --help               Show this help
+     -d,        --debug              Use debug mode (prints command line options + app server debug)
+
+  Options when running Che natively:
+     -b,        --blocking-entropy   Security: https://wiki.apache.org/tomcat/HowTo/FasterStartUp
      -g,        --registry           Launch Docker registry as a container (used for ws snapshots)
-     -m:name,   --machine:name       For Win & Mac, sets the docker-machine VM name; default=default
      -s:client, --skip:client        Do not print browser client connection information
      -s:java,   --skip:java          Do not enforce Java version checks
      -s:uid,    --skip:uid           Do not enforce UID=1000 for Docker
-     -t,        --stop-container     If stopping Che, will also stop Che container if Che ran with -i
-     -h,        --help               Show this help
-     -d,        --debug              Use debug mode (prints command line options + app server debug)
-     run                             Starts Che application server in current console
-     start                           Starts Che application server in new console
-     stop                            Stops Che application server
 
-The -r flag sets the DOCKER_MACHINE_HOST system environment variable. Set this to the IP address of the node
-that is running your Docker daemon. Only necessary to set this if on Linux and your browser clients are not
-localhost, ie they are remote. This property automatically set for Che on Windows and Mac."
+  Options when running Che in a Docker container:
+     -i,        --image              Launches Che within a Docker container using latest image
+     -i:tag,    --image:tag          Launches Che within a Docker container using specific image
+     -c:name,   --container:name     Sets the container name if -i provided; default=che
+     -t,        --stop-container     If stopping Che, will also stop Che container if Che ran with -i
+
+  Commands:
+     run                             (Default) Starts Che server with logging in current console
+     start                           Starts Che server in new console
+     stop                            Stops Che server
+
+Docs: http://eclipse.org/che/getting-started.
+
+If you are running Che as a server on a VM for multiple users to access, review the various networking
+configuration items that control how clients, Che and workspaces initiate connections. See:
+https://eclipse-che.readme.io/docs/networking."
 
   # Command line parameters
+  USE_BLOCKING_ENTROPY=false
   USE_DOCKER=false
   CHE_DOCKER_TAG=latest
   CHE_PORT=8080
@@ -113,7 +92,8 @@ error_exit () {
   echo "!!!"
   echo "!!! ${1}"
   echo "!!!"
-  echo "${WRONG} ${CHE_VARIABLES} ${USAGE}"
+  echo "${USAGE}"
+#  echo "${WRONG} ${CHE_VARIABLES} ${USAGE}"
   JUMP_TO_END=true
 }
 
@@ -122,6 +102,9 @@ parse_command_line () {
   for command_line_option in "$@"
   do
   case ${command_line_option} in
+    -b|--blocking-entropy)
+      USE_BLOCKING_ENTROPY=true
+    ;;
     -i|--image)
       USE_DOCKER=true
     ;;
@@ -191,6 +174,7 @@ parse_command_line () {
   done
 
   if ${USE_DEBUG}; then
+    echo "USE_BLOCKING_ENTROPY: ${USE_BLOCKING_ENTROPY}"
     echo "USE_DOCKER: ${USE_DOCKER}"
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
@@ -251,10 +235,10 @@ set_environment_variables () {
     export DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
-  if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
+  #if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
     # che-497: Determine windows short directory name in bash
-    export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
-  fi
+    # export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
+  #fi
 
   # Convert Tomcat environment variables to POSIX format.
   if [[ "${JAVA_HOME}" == *":"* ]]; then
@@ -263,6 +247,22 @@ set_environment_variables () {
 
   if [[ "${CHE_HOME}" == *":"* ]]; then
     CHE_HOME=$(echo /"${CHE_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
+  fi
+
+  if [[ "${CHE_HOME}" =~ \ |\' ]] && [[ "${WIN}" == "true" ]]; then
+    echo "!!!"
+    echo "!!! Ohhhhh boy."
+    echo "!!! You are on Windows and installed Che into a directory that contains a space."
+    echo "!!! Tomcat behaves badly because of this."
+    echo "!!!"
+    echo "!!! We attempted to work around this by converting your path to one without a space."
+    echo "!!! However, it seems that the drive where Che is installed does not allow this."
+    echo "!!! So we seem to be buggered."
+    echo "!!!"
+    echo "!!! You can fix this issue by installing Che into a directory without spaces in the name."
+    echo "!!! Isn't Windows fun?  Long live William Shatner."
+    echo "!!!"
+    JUMP_TO_END=true
   fi
 
   # Che configuration directory - where .properties files can be placed by user
@@ -471,7 +471,6 @@ call_catalina () {
     return
   fi
 
-
   # Test to see that Java is installed and working
   "${JAVA_HOME}"/bin/java &>/dev/null || JAVA_EXIT=$? || true
   if [ "${JAVA_EXIT}" != "1" ]; then
@@ -481,7 +480,7 @@ call_catalina () {
 
   if [[ "${SKIP_JAVA_VERSION}" == false ]]; then
     # Che requires Java version 1.8 or higher.
-    JAVA_VERSION=$("${JAVA_HOME}/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    JAVA_VERSION=$("${JAVA_HOME}"/bin/java -version 2>&1 | awk -F '"' '/version/ {print $2}')
     if [  -z "${JAVA_VERSION}" ]; then
       error_exit "Failure running JAVA_HOME/bin/java -version. We received ${JAVA_VERSION}."
       return
@@ -493,9 +492,16 @@ call_catalina () {
     fi
   fi
 
+  ### Initialize default JVM arguments to run che
+  if [[ "${USE_BLOCKING_ENTROPY}" == true ]]; then
+    [ -z "${JAVA_OPTS}" ] && JAVA_OPTS="-Xms256m -Xmx1024m"
+  else
+    [ -z "${JAVA_OPTS}" ] && JAVA_OPTS="-Xms256m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
+  fi  
+
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
-  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT}"
+  export JAVA_OPTS="${JAVA_OPTS} -Dport.http=${CHE_PORT} -Dche.home=${CHE_HOME}"
   export SERVER_PORT=${CHE_PORT}
 
   # Launch the Che application server, passing in command line parameters
@@ -726,7 +732,7 @@ if [ "${USE_HELP}" == "false" ] && [ "${JUMP_TO_END}" == "false" ]; then
 
   set_environment_variables
 
-  if ${WIN} ; then
+  if ${WIN} && [ "${JUMP_TO_END}" == "false" ]; then
     # Prep windows
     # Check to see if %userprofile%\AppData\Local\che exists.
     # Create directory if it doesn't exist
@@ -741,7 +747,9 @@ if [ "${USE_HELP}" == "false" ] && [ "${JUMP_TO_END}" == "false" ]; then
   fi
 
   ### Variables are all set.  Get Docker ready
-  get_docker_ready
+  if [ "${JUMP_TO_END}" == "false" ]; then
+    get_docker_ready
+  fi
 
   ### Launch or shut down Che server
   if [ "${JUMP_TO_END}" == "false" ]; then
