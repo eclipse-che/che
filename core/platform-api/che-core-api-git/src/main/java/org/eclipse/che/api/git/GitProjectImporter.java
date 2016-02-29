@@ -215,7 +215,7 @@ public class GitProjectImporter implements ProjectImporter {
     }
 
     private void initRepository(GitConnection git, DtoFactory dtoFactory) throws GitException {
-        final InitRequest request = dtoFactory.createDto(InitRequest.class).withInitCommit(false).withBare(false);
+        final InitRequest request = dtoFactory.createDto(InitRequest.class).withBare(false);
         git.init(request);
     }
 
