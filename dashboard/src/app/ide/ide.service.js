@@ -34,7 +34,6 @@ class IdeSvc {
         this.$location = $location;
         this.routeHistory = routeHistory;
 
-        this.ideParams = new Map();
 
         this.currentStep = 0;
         this.selectedWorkspace = null;
@@ -125,19 +124,13 @@ class IdeSvc {
               return environment.name === defaultEnvName;
             });
 
-            let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
-            let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-              return machineConfigsLink.rel === 'get machine status channel';
-            });
-            let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-              return machineConfigsLink.rel === 'get machine logs channel';
-            });
+            let channels = defaultEnvironment.machineConfigs[0].channels;
+            let statusChannel = channels.status;
+            let outputChannel = channels.output;
+            let agentChannel = 'workspace:' + data.id + ':ext-server:output';
+
 
             let workspaceId = data.id;
-
-            let agentChannel = 'workspace:' + data.id + ':ext-server:output';
-            let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
-            let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
             // for now, display log of status channel in case of errors
             bus.subscribe(statusChannel, (message) => {
@@ -223,10 +216,6 @@ class IdeSvc {
         });
     }
 
-    setLoadingParameter(paramName, paramValue) {
-      this.ideParams.set(paramName, paramValue);
-    }
-
     setIDEAction(ideAction) {
       this.ideAction = ideAction;
     }
@@ -257,13 +246,6 @@ class IdeSvc {
 
           // reset action
           this.ideAction = null;
-        }
-
-        if (this.ideParams) {
-          for (var [key, val] of this.ideParams) {
-            appendUrl = appendUrl + '&' + key + '=' + val;
-          }
-          this.ideParams.clear();
         }
 
         if (inDevMode) {

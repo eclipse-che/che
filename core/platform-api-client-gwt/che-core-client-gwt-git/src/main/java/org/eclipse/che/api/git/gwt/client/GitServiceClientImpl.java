@@ -155,7 +155,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void cloneRepository(String workspaceId,
+    public void cloneRepository(String workspaceId, 
                                 ProjectConfigDto project,
                                 String remoteUri,
                                 String remoteName,
@@ -206,7 +206,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void add(String workspaceId,
+    public void add(String workspaceId, 
                     ProjectConfigDto project,
                     boolean update,
                     @Nullable List<String> filePattern,
@@ -229,7 +229,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void commit(String workspaceId,
+    public void commit(String workspaceId, 
                        ProjectConfigDto project,
                        String message,
                        boolean all,
@@ -245,7 +245,7 @@ public class GitServiceClientImpl implements GitServiceClient{
     }
 
     @Override
-    public void commit(final String workspaceId,
+    public void commit(final String workspaceId, 
                        final ProjectConfigDto project,
                        final String message,
                        final List<String> files,
@@ -263,7 +263,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void config(String workspaceId,
+    public void config(String workspaceId, 
                        ProjectConfigDto project,
                        @Nullable List<String> entries,
                        boolean all,
@@ -278,7 +278,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void push(String workspaceId,
+    public void push(String workspaceId, 
                      ProjectConfigDto project,
                      List<String> refSpec,
                      String remote,
@@ -291,7 +291,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void remoteList(String workspaceId,
+    public void remoteList(String workspaceId, 
                            ProjectConfigDto project,
                            @Nullable String remoteName,
                            boolean verbose,
@@ -319,24 +319,13 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void branchList(String workspaceId,
+    public void branchList(String workspaceId, 
                            ProjectConfigDto project,
                            @Nullable String remoteMode,
                            AsyncRequestCallback<List<Branch>> callback) {
         BranchListRequest branchListRequest = dtoFactory.createDto(BranchListRequest.class).withListMode(remoteMode);
         String url = extPath + "/git/" + workspaceId + BRANCH_LIST + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchListRequest).send(callback);
-    }
-
-    @Override
-    public Promise<Status> status(String workspaceId, ProjectConfigDto project) {
-        final String params = "?projectPath=" + project.getPath() + "&format=" + PORCELAIN;
-        final String url = extPath + "/git/" + workspaceId + STATUS + params;
-        return asyncRequestFactory.createPostRequest(url, null)
-                                  .loader(loader)
-                                  .header(CONTENTTYPE, APPLICATION_JSON)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(Status.class));
     }
 
     /** {@inheritDoc} */
@@ -352,7 +341,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void branchDelete(String workspaceId,
+    public void branchDelete(String workspaceId, 
                              ProjectConfigDto project,
                              String name,
                              boolean force,
@@ -364,7 +353,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void branchRename(String workspaceId,
+    public void branchRename(String workspaceId,  
                              ProjectConfigDto project,
                              String oldName,
                              String newName,
@@ -386,7 +375,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void checkout(String workspaceId,
+    public void checkout(String workspaceId, 
                          ProjectConfigDto project,
                          CheckoutRequest checkoutRequest,
                          AsyncRequestCallback<String> callback) {
@@ -396,7 +385,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void remove(String workspaceId,
+    public void remove(String workspaceId, 
                        ProjectConfigDto project,
                        List<String> items,
                        boolean cached,
@@ -408,7 +397,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void reset(String workspaceId,
+    public void reset(String workspaceId, 
                       ProjectConfigDto project,
                       String commit,
                       @Nullable ResetRequest.ResetType resetType,
@@ -439,7 +428,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void remoteAdd(String workspaceId,
+    public void remoteAdd(String workspaceId, 
                           ProjectConfigDto project,
                           String name,
                           String repositoryURL,
@@ -451,7 +440,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void remoteDelete(String workspaceId,
+    public void remoteDelete(String workspaceId, 
                              ProjectConfigDto project,
                              String name,
                              AsyncRequestCallback<String> callback) {
@@ -461,7 +450,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void fetch(String workspaceId,
+    public void fetch(String workspaceId, 
                       ProjectConfigDto project,
                       String remote,
                       List<String> refspec,
@@ -483,7 +472,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void pull(String workspaceId,
+    public void pull(String workspaceId, 
                      ProjectConfigDto project,
                      String refSpec,
                      String remote,
@@ -495,7 +484,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void diff(String workspaceId,
+    public void diff(String workspaceId, 
                      ProjectConfigDto project,
                      List<String> fileFilter,
                      DiffRequest.DiffType type,
@@ -516,7 +505,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void showFileContent(String workspaceId,
+    public void showFileContent(String workspaceId, 
                                 @NotNull ProjectConfigDto project,
                                 String file,
                                 String version,
@@ -528,7 +517,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void diff(String workspaceId,
+    public void diff(String workspaceId, 
                      ProjectConfigDto project,
                      List<String> fileFilter,
                      DiffRequest.DiffType type,
@@ -564,7 +553,7 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void merge(String workspaceId,
+    public void merge(String workspaceId, 
                       ProjectConfigDto project,
                       String commit,
                       AsyncRequestCallback<MergeResult> callback) {

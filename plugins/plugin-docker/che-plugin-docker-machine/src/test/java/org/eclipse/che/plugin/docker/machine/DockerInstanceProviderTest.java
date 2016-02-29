@@ -71,7 +71,6 @@ public class DockerInstanceProviderTest {
     private static final String WORKSPACE_ID        = "wsId";
     private static final String DISPLAY_NAME        = "DisplayName";
     private static final String USER_TOKEN          = "userToken";
-    private static final int    MEMORY_LIMIT_MB     = 64;
 
     @Mock
     private DockerConnector dockerConnector;
@@ -151,8 +150,6 @@ public class DockerInstanceProviderTest {
                                            any(ProgressMonitor.class),
                                            any(AuthConfigs.class),
                                            anyBoolean(),
-                                           eq((long)MEMORY_LIMIT_MB * 1024 * 1024),
-                                           eq((long)-1),
                                            anyVararg());
     }
 
@@ -235,7 +232,7 @@ public class DockerInstanceProviderTest {
                                                                           DISPLAY_NAME,
                                                                           "machineType",
                                                                           machineSource,
-                                                                          new LimitsImpl(MEMORY_LIMIT_MB)),
+                                                                          new LimitsImpl(64)),
                                                     "machineId",
                                                     WORKSPACE_ID,
                                                     "envName",
@@ -265,7 +262,7 @@ public class DockerInstanceProviderTest {
                                                                           DISPLAY_NAME,
                                                                           "machineType",
                                                                           machineSource,
-                                                                          new LimitsImpl(MEMORY_LIMIT_MB)),
+                                                                          new LimitsImpl(64)),
                                                     "machineId",
                                                     WORKSPACE_ID,
                                                     "envName",
@@ -1389,7 +1386,7 @@ public class DockerInstanceProviderTest {
 
     private void createInstanceFromRecipe() throws Exception {
         createInstanceFromRecipe(false,
-                                 MEMORY_LIMIT_MB,
+                                 64,
                                  "machineId",
                                  "userId",
                                  WORKSPACE_ID,
@@ -1419,7 +1416,7 @@ public class DockerInstanceProviderTest {
                                           Recipe recipe) throws Exception {
 
         createInstanceFromRecipe(isDev == null ? false : isDev,
-                                 memorySizeInMB == null ? MEMORY_LIMIT_MB : memorySizeInMB,
+                                 memorySizeInMB == null ? 64 : memorySizeInMB,
                                  machineId == null ? "machineId" : machineId,
                                  userId == null ? "userId" : userId,
                                  workspaceId == null ? WORKSPACE_ID : workspaceId,
@@ -1500,7 +1497,7 @@ public class DockerInstanceProviderTest {
                                    tag == null ? "tag" : tag,
                                    registry == null ? "localhost:1234" : registry,
                                    isDev == null ? false : isDev,
-                                   memorySizeInMB == null ? MEMORY_LIMIT_MB : memorySizeInMB,
+                                   memorySizeInMB == null ? 64 : memorySizeInMB,
                                    machineId == null ? "machineId" : machineId,
                                    userId == null ? "userId" : userId,
                                    workspaceId == null ? WORKSPACE_ID : workspaceId,

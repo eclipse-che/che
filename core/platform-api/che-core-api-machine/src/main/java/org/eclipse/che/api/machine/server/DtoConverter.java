@@ -73,7 +73,6 @@ public final class DtoConverter {
                                                               .withId(machine.getId())
                                                               .withStatus(machine.getStatus())
                                                               .withOwner(machine.getOwner())
-                                                              .withEnvName(machine.getEnvName())
                                                               .withWorkspaceId(machine.getWorkspaceId());
         if (machine.getRuntime() != null) {
             machineDto.withRuntime(asDto(machine.getRuntime()));

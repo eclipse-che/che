@@ -30,7 +30,7 @@ public interface ProjectRegistry {
      * @throws ServerException
      *         if projects are not initialized yet
      */
-    List<RegisteredProject> getProjects() throws ServerException;
+    List<RegisteredProject> getProjects();
 
     /**
      * @param projectPath
@@ -38,7 +38,7 @@ public interface ProjectRegistry {
      * @throws ServerException
      *         if projects are not initialized yet
      */
-    RegisteredProject getProject(String projectPath) throws ServerException;
+    RegisteredProject getProject(String projectPath);
 
     /**
      * @param parentPath
@@ -47,15 +47,17 @@ public interface ProjectRegistry {
      * @throws ServerException
      *         if projects are not initialized yet
      */
-    List<String> getProjects(String parentPath) throws ServerException;
+    List<String> getProjects(String parentPath);
 
     /**
      * @param path
-     * @return the project owned this path or null if not such a project found
+     * @return the project owned this path.
+     * @throws NotFoundException
+     *         if not such a project found
      * @throws ServerException
      *         if projects are not initialized yet
      */
-    RegisteredProject getParentProject(String path) throws ServerException;
+    RegisteredProject getParentProject(String path);
 
     RegisteredProject putProject(ProjectConfig config, FolderEntry folder, boolean updated, boolean detected) throws ServerException,
                                                                                                                      ConflictException,

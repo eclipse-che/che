@@ -66,27 +66,30 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     @PostConstruct
     public void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
         final UsersWorkspace workspace = workspaceHolder.getWorkspace();
+
         List<? extends ProjectConfig> projectConfigs = workspace.getConfig().getProjects();
 
         if (projectConfigs == null) {
             projectConfigs = new ArrayList<>();
         }
 
+        // take all the projects from ws's config
         for (ProjectConfig projectConfig : projectConfigs) {
-            final RegisteredProject project = putProject(projectConfig, folder(projectConfig.getPath()), false, false);
-
-            final ProjectInitHandler handler = handlers.getProjectInitHandler(projectConfig.getType());
-            if (handler != null) {
-                handler.onProjectInitialized(folder(project.getPath()));
-            }
+             String path = projectConfig.getPath();
+             VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
+             FolderEntry projFolder = ((vf == null) ? null : new FolderEntry(vf, this));
+             putProject(projectConfig, projFolder, false, false);
         }
 
         // unconfigured folders on root
-        //final FolderEntry root = new FolderEntry(vfs.getRoot());
         for (FolderEntry folder : root.getChildFolders()) {
             if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-                putProject(null, folder, true, true);
+                putProject(null, folder, true, false);
             }
+        }
+
+        for(RegisteredProject project : projects.values()) {
+            fireInitHandlers(project);
         }
 
         initialized = true;
@@ -98,21 +101,21 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     }
 
     @Override
-    public List<RegisteredProject> getProjects() throws ServerException {
+    public List<RegisteredProject> getProjects()  {
         checkInitializationState();
 
         return new ArrayList<>(projects.values());
     }
 
     @Override
-    public RegisteredProject getProject(String projectPath) throws ServerException {
+    public RegisteredProject getProject(String projectPath) {
         checkInitializationState();
 
         return projects.get(absolutizePath(projectPath));
     }
 
     @Override
-    public List<String> getProjects(String parentPath) throws ServerException {
+    public List<String> getProjects(String parentPath)  {
         checkInitializationState();
 
         final Path root = Path.of(absolutizePath(parentPath));
@@ -128,8 +131,12 @@ public class ProjectRegistryImpl implements ProjectRegistry {
     }
 
     @Override
-    public RegisteredProject getParentProject(String path) throws ServerException {
+    public RegisteredProject getParentProject(String path)  {
         checkInitializationState();
+
+        // return this if a project
+        if(getProject(path) != null)
+            return getProject(path);
 
         // otherwise try to find matched parent
         Path test;
@@ -140,9 +147,10 @@ public class ProjectRegistryImpl implements ProjectRegistry {
 
             path = test.toString();
         }
+        return null;
 
         // path is out of projects
-        return null;
+        //throw new NotFoundException("Parent project not found " + path);
     }
 
     @Override
@@ -244,14 +252,33 @@ public class ProjectRegistryImpl implements ProjectRegistry {
         return (path.startsWith("/")) ? path : "/".concat(path);
     }
 
-    FolderEntry folder(String path) throws ServerException {
-        VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
-        return (vf == null) ? null : new FolderEntry(vf);
+//    private FolderEntry folder(String path) throws ServerException {
+//        VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
+//        return (vf == null) ? null : new FolderEntry(vf, path);
+//    }
+
+    void fireInitHandlers(RegisteredProject project)
+            throws ForbiddenException, ConflictException, NotFoundException, ServerException {
+
+        // primary type
+        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
+        if (projectInitHandler != null) {
+            projectInitHandler.onProjectInitialized(project.getBaseFolder());
+        }
+
+        // mixins
+        for(String mixin : project.getMixins()) {
+            projectInitHandler = handlers.getProjectInitHandler(mixin);
+            if (projectInitHandler != null) {
+                projectInitHandler.onProjectInitialized(project.getBaseFolder());
+            }
+        }
     }
 
-    private void checkInitializationState() throws ServerException {
+
+    private void checkInitializationState() {
         if (!initialized) {
-            throw new ServerException("Projects are not initialized yet");
+            throw new IllegalStateException("Projects are not initialized yet");
         }
     }
 

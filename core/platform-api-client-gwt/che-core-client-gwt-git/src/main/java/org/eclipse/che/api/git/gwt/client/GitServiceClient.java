@@ -595,21 +595,8 @@ public interface GitServiceClient {
      * @param project
      *         project (root of GIT repository)
      * @param callback
-     * @deprecated use {@link #status(String, ProjectConfigDto)}
      */
-    @Deprecated
     void status(String workspaceId, ProjectConfigDto project, AsyncRequestCallback<Status> callback);
-
-    /**
-     * Returns the current working tree status.
-     *
-     * @param workspaceId
-     *         id of the workspace
-     * @param project
-     *         the project.
-     * @return the promise which either resolves working tree status or rejects with an error
-     */
-    Promise<Status> status(String workspaceId, ProjectConfigDto project);
 
     /**
      * Get the Git ReadOnly Url for the pointed item's location.

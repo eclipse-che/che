@@ -112,7 +112,7 @@ public class Workspace implements IWorkspace {
         this.projectManager = projectManager;
         try {
             projectsRoot = projectManager.getProjectsRoot();
-        } catch (ServerException e) {
+        } catch (ServerException | NotFoundException e) {
             throw new IllegalStateException(e);
         }
         _workManager = new WorkManager(this);

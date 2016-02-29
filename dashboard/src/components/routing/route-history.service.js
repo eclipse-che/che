@@ -27,14 +27,6 @@ export class RouteHistory {
     });
   }
 
-  /**
-   * Add a new path on top of all existing paths
-   * @param path the path on which we will we redirecting when we pop current path
-   */
-  pushPath(path) {
-    this.history.push(path);
-  }
-
   getPaths() {
     return this.history;
   }

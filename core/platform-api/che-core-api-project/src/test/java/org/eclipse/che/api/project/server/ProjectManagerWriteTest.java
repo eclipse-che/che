@@ -185,7 +185,8 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         }
 
         assertNull(projectRegistry.getProject("/testInvalidPTProjectCreateFailed"));
-        assertNull(projectRegistry.folder("/testInvalidPTProjectCreateFailed"));
+        assertNull(pm.getProjectsRoot().getChild("/testInvalidPTProjectCreateFailed"));
+        //assertNull(projectRegistry.folder("/testInvalidPTProjectCreateFailed"));
 
         // check mixin as well
         List<String> ms = new ArrayList<>();
@@ -220,7 +221,9 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         } catch (ProjectTypeConstraintException e) {
         }
 
-        assertNull(projectRegistry.folder("/testConflictAttributesProjectCreateFailed"));
+        //assertNull(projectRegistry.folder("/testConflictAttributesProjectCreateFailed"));
+
+        assertNull(pm.getProjectsRoot().getChild("/testConflictAttributesProjectCreateFailed"));
 
     }
 
@@ -374,7 +377,8 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         assertNull(projectRegistry.getProject("/testDeleteProject/inner"));
         assertNull(projectRegistry.getProject("/testDeleteProject"));
-        assertNull(projectRegistry.folder("/testDeleteProject/inner"));
+        assertNull(pm.getProjectsRoot().getChild("/testDeleteProject/inner"));
+        //assertNull(projectRegistry.folder("/testDeleteProject/inner"));
 
     }
 

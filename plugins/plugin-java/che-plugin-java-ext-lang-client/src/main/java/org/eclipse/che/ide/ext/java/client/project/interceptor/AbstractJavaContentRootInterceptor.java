@@ -75,12 +75,12 @@ public abstract class AbstractJavaContentRootInterceptor implements NodeIntercep
         final ProjectConfigDto projectConfig = folderNode.getProjectConfig();
 
         String srcFolder = _getSourceFolder(projectConfig, getSrcFolderAttribute());
-        if (srcFolder != null && folderNode.getStorablePath().endsWith(srcFolder)) {
+        if (folderNode.getStorablePath().endsWith(srcFolder)) {
             return ContentRoot.SOURCE;
         }
 
         String testSrcFolder = _getSourceFolder(projectConfig, getTestSrcFolderAttribute());
-        if (testSrcFolder != null && folderNode.getStorablePath().endsWith(testSrcFolder)) {
+        if (folderNode.getStorablePath().endsWith(testSrcFolder)) {
             return ContentRoot.TEST_SOURCE;
         }
 
@@ -88,17 +88,30 @@ public abstract class AbstractJavaContentRootInterceptor implements NodeIntercep
     }
 
     private String _getSourceFolder(ProjectConfigDto projectConfig, String srcAttribute) {
-        final Map<String, List<String>> attributes = projectConfig.getAttributes();
+        Map<String, List<String>> attributes = projectConfig.getAttributes();
         if (!attributes.containsKey(srcAttribute)) {
-            return null;
+            return "";
         }
 
-        final List<String> values = attributes.get(srcAttribute);
+        List<String> values = attributes.get(srcAttribute);
+
         if (values.isEmpty()) {
             return "";
         }
 
-        final String srcFolder = values.get(0);
+        String srcFolder = "";
+
+        if ("maven.resource.folder".equals(srcAttribute)) {
+            for (String srcFolderValue : values) {
+                if (srcFolderValue.endsWith("/resources")) {
+                    srcFolder = srcFolderValue;
+
+                    break;
+                }
+            }
+        } else {
+            srcFolder = values.get(0);
+        }
 
         return projectConfig.getPath() + (srcFolder.startsWith("/") ? srcFolder : "/" + srcFolder);
     }

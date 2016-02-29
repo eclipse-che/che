@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
@@ -126,7 +125,7 @@ public final class ProjectManager {
     }
 
     public FolderEntry getProjectsRoot() throws ServerException {
-        return new FolderEntry(vfs.getRoot());
+        return new FolderEntry(vfs.getRoot(), projectRegistry);
     }
 
     public Searcher getSearcher() throws NotFoundException, ServerException {
@@ -213,7 +212,7 @@ public final class ProjectManager {
             throw new ConflictException("Project config already exists " + path);
         }
 
-        final FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path));
+        final FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path), projectRegistry);
         final CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
 
         if (generator != null) {
@@ -241,19 +240,22 @@ public final class ProjectManager {
             throw e;
         }
 
-        // primary type
-        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
-        if (projectInitHandler != null) {
-            projectInitHandler.onProjectInitialized(project.getBaseFolder());
-        }
+        // TODO
+        ((ProjectRegistryImpl)projectRegistry).fireInitHandlers(project);
 
-        // mixins
-        for(String mixin : project.getMixins()) {
-            projectInitHandler = handlers.getProjectInitHandler(mixin);
-            if (projectInitHandler != null) {
-                projectInitHandler.onProjectInitialized(project.getBaseFolder());
-            }
-        }
+//        // primary type
+//        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
+//        if (projectInitHandler != null) {
+//            projectInitHandler.onProjectInitialized(project.getBaseFolder());
+//        }
+//
+//        // mixins
+//        for(String mixin : project.getMixins()) {
+//            projectInitHandler = handlers.getProjectInitHandler(mixin);
+//            if (projectInitHandler != null) {
+//                projectInitHandler.onProjectInitialized(project.getBaseFolder());
+//            }
+//        }
 
         return project;
     }
@@ -294,19 +296,22 @@ public final class ProjectManager {
 
         final RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
 
-        // primary type
-        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
-        if (projectInitHandler != null) {
-            projectInitHandler.onProjectInitialized(baseFolder);
-        }
+        // TODO
+        ((ProjectRegistryImpl)projectRegistry).fireInitHandlers(project);
 
-        // mixins
-        for(String mixin : project.getMixins()) {
-            projectInitHandler = handlers.getProjectInitHandler(mixin);
-            if (projectInitHandler != null) {
-                projectInitHandler.onProjectInitialized(baseFolder);
-            }
-        }
+//        // primary type
+//        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
+//        if (projectInitHandler != null) {
+//            projectInitHandler.onProjectInitialized(baseFolder);
+//        }
+//
+//        // mixins
+//        for(String mixin : project.getMixins()) {
+//            projectInitHandler = handlers.getProjectInitHandler(mixin);
+//            if (projectInitHandler != null) {
+//                projectInitHandler.onProjectInitialized(baseFolder);
+//            }
+//        }
 
         // TODO move to register?
         reindexProject(project);
@@ -433,9 +438,9 @@ public final class ProjectManager {
 
         final VirtualFileEntry copy;
         if (newItem.isFile()) {
-            copy = new FileEntry(newItem, owner.getPath());
+            copy = new FileEntry(newItem, projectRegistry);
         } else {
-            copy = new FolderEntry(newItem, owner.getPath());
+            copy = new FolderEntry(newItem, projectRegistry);
         }
 
         if (copy.isProject()) {
@@ -476,9 +481,9 @@ public final class ProjectManager {
 
         final VirtualFileEntry move;
         if (newItem.isFile()) {
-            move = new FileEntry(newItem, owner.getPath());
+            move = new FileEntry(newItem, projectRegistry);
         } else {
-            move = new FolderEntry(newItem, owner.getPath());
+            move = new FolderEntry(newItem, projectRegistry);
         }
 
         if (move.isProject()) {

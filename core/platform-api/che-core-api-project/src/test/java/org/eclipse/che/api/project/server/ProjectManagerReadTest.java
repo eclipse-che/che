@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 
 /**
@@ -98,6 +99,14 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         assertEquals("/normal", pm.getProject("/normal").getPath());
         assertEquals("project1Name", pm.getProject("/normal").getName());
         assertEquals(0, pm.getProject("/normal").getProblems().size());
+
+        for(VirtualFileEntry entry : pm.getProjectsRoot().getChildren()) {
+            System.out.println(">>>> "+entry.getPath()+" "+entry.getProject());
+        }
+
+        VirtualFileEntry entry = pm.getProjectsRoot().getChild("normal");
+        assertTrue(entry.isProject());
+
     }
 
     @Test
@@ -132,14 +141,20 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
     @Test
     public void testParentProject() throws Exception {
 
-        RegisteredProject parentProject = projectRegistry.getParentProject("/normal");
-        assertNull(parentProject);
+//        try {
+        assertEquals("/normal", projectRegistry.getParentProject("/normal").getPath());
+//            fail("NotFoundException expected");
+//        } catch (NotFoundException e) {}
 
         assertEquals("/normal", projectRegistry.getParentProject("/normal/some/path").getPath());
         assertEquals("/normal/module", projectRegistry.getParentProject("/normal/module/some/path").getPath());
 
-        RegisteredProject parentProject1 = projectRegistry.getParentProject("/some/path");
-        assertNull(parentProject1);
+//        try {
+        assertNull(projectRegistry.getParentProject("/some/path"));
+//            fail("NotFoundException expected");
+//        } catch (NotFoundException e) {}
+
+
     }
 
     @Test
