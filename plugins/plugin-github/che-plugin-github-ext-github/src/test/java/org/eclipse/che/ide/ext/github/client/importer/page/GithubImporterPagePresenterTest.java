@@ -420,7 +420,7 @@ public class GithubImporterPagePresenterTest {
         verify(gitHubClientService).getUserInfo();
         verify(gitHubClientService).getOrganizations();
 
-        verify(gitHubAuthenticator).authorize(anyString(), asyncCallbackCaptor.capture());
+        verify(gitHubAuthenticator).authenticate(anyString(), asyncCallbackCaptor.capture());
         AsyncCallback<OAuthStatus> asyncCallback = asyncCallbackCaptor.getValue();
         asyncCallback.onFailure(exception);
 
@@ -463,7 +463,7 @@ public class GithubImporterPagePresenterTest {
         verify(gitHubClientService).getUserInfo();
         verify(gitHubClientService).getOrganizations();
 
-        verify(gitHubAuthenticator).authorize(anyString(), asyncCallbackCaptor.capture());
+        verify(gitHubAuthenticator).authenticate(anyString(), asyncCallbackCaptor.capture());
         AsyncCallback<OAuthStatus> asyncCallback = asyncCallbackCaptor.getValue();
         asyncCallback.onSuccess(null);
 

@@ -101,6 +101,9 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
 
     @Override
     public void onBeforeExpand(final BeforeExpandNodeEvent event) {
+        if (appContext.getFactory() != null) {
+            return;
+        }
         Node expandedNode = event.getNode();
 
         if (!(expandedNode instanceof ProjectNode)) {
