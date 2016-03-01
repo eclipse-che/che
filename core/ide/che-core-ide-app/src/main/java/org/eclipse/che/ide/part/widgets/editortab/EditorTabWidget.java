@@ -108,7 +108,6 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         closeButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                EditorTabWidget.this.eventBus.fireEvent(new FileEvent(EditorTabWidget.this.file, FileEvent.FileOperation.CLOSE));
                 delegate.onTabClose(EditorTabWidget.this);
             }
         }, ClickEvent.getType());
@@ -142,7 +141,8 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         if (part instanceof EditorPartPresenter) {
             VirtualFile changedFile = ((EditorPartPresenter)part).getEditorInput().getFile();
             FileType fileType = fileTypeRegistry.getFileTypeByFile(changedFile);
-            iconPanel.setWidget(new SVGImage(fileType.getSVGImage()));
+            icon = fileType.getSVGImage();
+            iconPanel.setWidget(getIcon());
         }
     }
 

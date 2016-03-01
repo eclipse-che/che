@@ -101,15 +101,6 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
         eventBus.addHandler(CloseNonPinnedEditorsEvent.getType(), this);
     }
 
-    private void removeItemFromList(@NotNull TabItem tab) {
-        ListItem listItem = getListItemByTab(tab);
-
-        if (listItem != null) {
-            listButton.removeListItem(listItem);
-            items.remove(listItem);
-        }
-    }
-
     @Nullable
     private ListItem getListItemByTab(@NotNull TabItem tabItem) {
         for (Entry<ListItem, TabItem> entry : items.entrySet()) {
@@ -217,9 +208,11 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     /** {@inheritDoc} */
     @Override
     public void onTabClose(@NotNull TabItem tab) {
-        removeItemFromList(tab);
+        ListItem listItem = getListItemByTab(tab);
+        listButton.removeListItem(listItem);
+        items.remove(listItem);
 
-        eventBus.fireEvent(new FileEvent(((EditorTab)tab).getFile(), CLOSE));
+        eventBus.fireEvent(new FileEvent(((EditorTab) tab).getFile(), CLOSE));
     }
 
     /** {@inheritDoc} */
