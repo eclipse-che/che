@@ -25,8 +25,8 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
-import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.type.ProjectType;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
@@ -1107,8 +1107,11 @@ public class ProjectService extends Service {
     public List<ItemReference> getChildren(@ApiParam(value = "Workspace ID", required = true)
                                            @PathParam("ws-id") String workspace,
                                            @ApiParam(value = "Path to a project", required = true)
-                                           @PathParam("parent") String path)
-            throws NotFoundException, ForbiddenException, ServerException {
+                                           @PathParam("parent") String path) throws NotFoundException,
+                                                                                    ForbiddenException,
+                                                                                    ServerException,
+                                                                                    ValueStorageException,
+                                                                                    ProjectTypeConstraintException {
         final FolderEntry folder = asFolder(workspace, path);
         final List<VirtualFileEntry> children = folder.getChildren();
         final ArrayList<ItemReference> result = new ArrayList<>(children.size());
@@ -1117,11 +1120,26 @@ public class ProjectService extends Service {
             if (child.isFile()) {
                 result.add(DtoConverter.toItemReference((FileEntry)child, uriBuilder.clone()));
             } else {
-                result.add(DtoConverter.toItemReference((FolderEntry)child, uriBuilder.clone(), projectManager));
+                result.add(getItemReference((FolderEntry)child, uriBuilder));
             }
         }
 
         return result;
+    }
+
+    private ItemReference getItemReference(FolderEntry folder, UriBuilder uriBuilder) throws ServerException,
+                                                                                             ProjectTypeConstraintException,
+                                                                                             ForbiddenException,
+                                                                                             NotFoundException,
+                                                                                             ValueStorageException {
+        ItemReference itemReference = DtoConverter.toItemReference(folder, uriBuilder.clone(), projectManager);
+
+        if (projectManager.isProjectFolder(folder) || projectManager.isModuleFolder(folder)) {
+            ProjectConfigDto projectConfig = DtoConverter.toProjectConfig(new Project(folder, projectManager), uriBuilder);
+            itemReference.setProjectConfig(projectConfig);
+        }
+
+        return itemReference;
     }
 
     @ApiOperation(value = "Get project tree",
