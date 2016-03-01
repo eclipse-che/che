@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import static com.google.gwt.dom.client.Style.Display.BLOCK;
 import static com.google.gwt.dom.client.Style.Display.NONE;
@@ -198,11 +197,10 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
         tabs.remove(presenter);
         contents.remove(presenter);
 
-        try {
-            PartPresenter activePart = contents.getLast();
-            selectTab(activePart);
-        } catch (NoSuchElementException exception) {
+        if (contents.isEmpty()) {
             getElement().getParentElement().getStyle().setDisplay(NONE);
+        } else {
+            selectTab(contents.getLast());
         }
 
         //this hack need to force redraw dom element to apply correct styles
