@@ -67,8 +67,6 @@ public class NodeManager {
     protected final AppContext             appContext;
     protected final String                 workspaceId;
 
-    private ModuleNode moduleNode;
-
     @Inject
     public NodeManager(NodeFactory nodeFactory,
                        ProjectServiceClient projectService,
@@ -184,33 +182,10 @@ public class NodeManager {
         }
 
         if ("module".equals(itemType)) {
-            moduleNode = null;
-
-            for (ProjectConfigDto moduleConfigDto : configDto.getModules()) {
-                createModuleNode(itemReference, moduleConfigDto, settings);
-
-                if (moduleNode != null) {
-                    return moduleNode;
-                }
-            }
+            return nodeFactory.newModuleNode(itemReference.getProjectConfig(), settings);
         }
 
         return null;
-    }
-
-    private void createModuleNode(ItemReference itemReference,
-                                  ProjectConfigDto moduleConfig,
-                                  NodeSettings settings) {
-
-        if (itemReference.getName().equals(moduleConfig.getName())) {
-            moduleNode = nodeFactory.newModuleNode(moduleConfig, settings);
-
-            return;
-        }
-
-        for (ProjectConfigDto configDto : moduleConfig.getModules()) {
-            createModuleNode(itemReference, configDto, settings);
-        }
     }
 
     @NotNull
@@ -219,20 +194,6 @@ public class NodeManager {
             @Override
             public List<Node> apply(PromiseError arg) throws FunctionException {
                 return Collections.emptyList();
-            }
-        };
-    }
-
-    /** Project Reference operations ********************* */
-    public Promise<ProjectConfigDto> getProjectDescriptor(String path) {
-        return AsyncPromiseHelper.createFromAsyncRequest(getProjectDescriptoRC(path));
-    }
-
-    private RequestCall<ProjectConfigDto> getProjectDescriptoRC(final String path) {
-        return new RequestCall<ProjectConfigDto>() {
-            @Override
-            public void makeCall(AsyncCallback<ProjectConfigDto> callback) {
-                projectService.getProject(workspaceId, path, _callback(callback, dtoUnmarshaller.newUnmarshaller(ProjectConfigDto.class)));
             }
         };
     }

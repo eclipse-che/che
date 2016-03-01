@@ -21,9 +21,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
@@ -425,7 +425,7 @@ public final class DefaultProjectManager implements ProjectManager {
                                                                   NotFoundException {
         ProjectConfigDto projectConfigDto = getProjectFromWorkspace(project.getWorkspace(), project.getPath());
         if (projectConfigDto == null) {
-            projectConfigDto = newDto(ProjectConfigDto.class);
+            projectConfigDto = findModule(project);
         }
 
         FolderEntry projectFolder = project.getBaseFolder();
@@ -436,6 +436,25 @@ public final class DefaultProjectManager implements ProjectManager {
         attributeFilter.addRuntimeAttributesToProject(projectConfigDto, projectFolder);
 
         return projectConfigDto;
+    }
+
+    private ProjectConfigDto findModule(Project project) throws ServerException {
+        String path = project.getPath();
+        if (!path.contains("/")){
+            return newDto(ProjectConfigDto.class);
+        }
+
+        String[] parts = path.split("/");
+
+        int projectNameIndex = 1;
+
+        ProjectConfigDto projectConfig = getProjectFromWorkspace(project.getWorkspace(), "/" + parts[projectNameIndex]);
+
+        if (projectConfig == null) {
+            return newDto(ProjectConfigDto.class);
+        } else {
+            return projectConfig.findModule(project.getPath());
+        }
     }
 
     @Override

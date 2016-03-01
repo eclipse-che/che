@@ -120,36 +120,6 @@ public class AttributeFilter {
                                                                                                                          parentFolder);
             projectConfig.getAttributes().putAll(attributes);
         }
-
-        for (ProjectConfigDto configDto : projectConfig.getModules()) {
-            FolderEntry module = findModuleByPath(parentFolder, configDto.getPath());
-
-            addAttributesToProject(configDto, module, attributeType);
-        }
-    }
-
-    private FolderEntry findModuleByPath(FolderEntry parent, String path) throws ServerException, ForbiddenException {
-        if (!path.contains("/")) {
-            return parent;
-        }
-
-        //module which is located in module or project
-        FolderEntry module = (FolderEntry)parent.getChild(path.substring(path.lastIndexOf("/")));
-
-        if (module == null) {
-            //module which is located in simple folder
-            module = (FolderEntry)parent.getChild(definePathToModule(path));
-        }
-
-        return module == null ? parent : module;
-    }
-
-    private String definePathToModule(String path) {
-        if (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-
-        return path.substring(path.indexOf("/"));
     }
 
     private ProjectTypes getProjectTypes(FolderEntry module, ProjectConfig moduleConfig) throws ProjectTypeConstraintException,
