@@ -270,6 +270,10 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             throw new IllegalArgumentException("Children shouldn't be null");
         }
 
+        if (children.isEmpty()) {
+            return;
+        }
+
         showToolbar();
 
         if (tree.getRootNodes().isEmpty()) {
