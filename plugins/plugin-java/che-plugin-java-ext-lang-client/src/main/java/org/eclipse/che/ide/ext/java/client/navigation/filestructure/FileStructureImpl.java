@@ -29,10 +29,10 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
-import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
-import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
+import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.window.Window;
 
 import javax.validation.constraints.NotNull;
@@ -53,16 +53,18 @@ final class FileStructureImpl extends Window implements FileStructure {
 
     private static FileStructureImplUiBinder UI_BINDER = GWT.create(FileStructureImplUiBinder.class);
 
+    private final NodeFactory nodeFactory;
+    private final Tree        tree;
+
+    private ActionDelegate delegate;
+
     @UiField
     DockLayoutPanel treeContainer;
     @UiField
     Label           showInheritedLabel;
 
-    private final NodeFactory              nodeFactory;
-    private final JavaLocalizationConstant locale;
-    private final Tree                     tree;
-
-    private ActionDelegate delegate;
+    @UiField(provided = true)
+    final JavaLocalizationConstant locale;
 
     private Predicate<Node> LEAFS = new Predicate<Node>() {
         @Override
@@ -132,6 +134,13 @@ final class FileStructureImpl extends Window implements FileStructure {
             tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
         }
         tree.expandAll();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void hide() {
+        super.hide();
+        delegate.onEscapeClicked();
     }
 
     /** {@inheritDoc} */
