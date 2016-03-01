@@ -19,8 +19,6 @@ import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
-
 /**
  * Gets predefined docker containers host for machine servers instead of evaluating it from docker configuration
  *
@@ -41,8 +39,7 @@ public class LocalDockerInstanceRuntimeInfo extends DockerInstanceRuntimeInfo {
     public LocalDockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
                                           @Assisted String containerHost,
                                           @Nullable @Named("machine.docker.local_node_host") String dockerNodeHost) {
-        super(containerInfo, firstNonNull(firstNonNull(dockerNodeHost,
-                                                       System.getenv(CHE_DOCKER_MACHINE_HOST)),
-                                          containerHost));
+        super(containerInfo, dockerNodeHost != null ? dockerNodeHost :
+                             (System.getenv(CHE_DOCKER_MACHINE_HOST) != null ? System.getenv(CHE_DOCKER_MACHINE_HOST) : containerHost));
     }
 }
