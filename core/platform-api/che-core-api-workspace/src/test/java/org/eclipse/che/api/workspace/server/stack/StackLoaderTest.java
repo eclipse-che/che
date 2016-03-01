@@ -44,6 +44,7 @@ import org.eclipse.che.api.workspace.server.stack.adapters.ProjectConfigAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.StackComponentAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.StackSourceAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.WorkspaceConfigAdapter;
+import org.eclipse.che.api.workspace.server.stack.adapters.MachineConfigAdapter;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
@@ -216,7 +217,7 @@ public class StackLoaderTest {
                                      .registerTypeAdapter(Recipe.class, new RecipeTypeAdapter())
                                      .registerTypeAdapter(Limits.class, new LimitsAdapter())
                                      .registerTypeAdapter(MachineSource.class, new MachineSourceAdapter())
-                                     .registerTypeAdapter(MachineConfig.class, new MachineSourceAdapter())
+                                     .registerTypeAdapter(MachineConfig.class, new MachineConfigAdapter())
                                      .registerTypeAdapter(StackSource.class, new StackSourceAdapter())
                                      .create();
 
