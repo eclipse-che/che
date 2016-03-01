@@ -20,9 +20,9 @@ import org.eclipse.che.security.oauth.OAuthStatus;
  */
 public interface OAuth2Authenticator {
 
-    void authorize(String authenticatorUrl, AsyncCallback<OAuthStatus> callback);
+    void authenticate(String authenticationUrl, AsyncCallback<OAuthStatus> callback);
 
-    Promise<OAuthStatus> authorize(String authenticationUrl);
+    Promise<OAuthStatus> authenticate(String authenticationUrl);
 
     String getProviderName();
 }

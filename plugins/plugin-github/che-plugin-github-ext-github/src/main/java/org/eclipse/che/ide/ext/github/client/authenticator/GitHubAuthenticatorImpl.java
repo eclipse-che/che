@@ -82,13 +82,13 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
     }
 
     @Override
-    public void authorize(String authenticationUrl, @NotNull final AsyncCallback<OAuthStatus> callback) {
+    public void authenticate(String authenticationUrl, @NotNull final AsyncCallback<OAuthStatus> callback) {
         this.authenticationUrl = authenticationUrl;
         this.callback = callback;
         view.showDialog();
     }
 
-    public Promise<OAuthStatus> authorize(String authenticationUrl) {
+    public Promise<OAuthStatus> authenticate(String authenticationUrl) {
         this.authenticationUrl = authenticationUrl;
 
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<OAuthStatus>() {
