@@ -137,10 +137,14 @@ class View extends Composite {
             @Override
             public void onKeyDown(KeyDownEvent event) {
                 if (KeyboardEvent.KeyCode.ESC == event.getNativeEvent().getKeyCode()) {
+                    event.stopPropagation();
+                    event.preventDefault();
                     if (delegate != null) {
                         delegate.onEscapeKey();
                     }
                 } else if (KeyboardEvent.KeyCode.ENTER == event.getNativeEvent().getKeyCode()) {
+                    event.stopPropagation();
+                    event.preventDefault();
                     if (delegate != null) {
                         delegate.onEnterKey();
                     }

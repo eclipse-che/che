@@ -162,7 +162,8 @@ public class JavaRefactoringRename implements FileEventHandler {
 
     @Override
     public void onFileOperation(FileEvent event) {
-        if (event.getOperationType() == CLOSE && textEditor.getDocument().getFile().getPath().equals(event.getFile().getPath())) {
+        if (event.getOperationType() == CLOSE && textEditor != null && textEditor.getDocument() != null &&
+                textEditor.getDocument().getFile().getPath().equals(event.getFile().getPath())) {
             isActiveLinkedEditor = false;
         }
     }

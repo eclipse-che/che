@@ -18,7 +18,6 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.LinkElement;
-import com.google.gwt.dom.client.Node;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
@@ -94,6 +93,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
                 });
             }
         });
+
         // must not be delayed
         registerEditor();
         KeyMode.init();
@@ -131,6 +131,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
                 initializationFailed(callback, "Failed to inject Orion editor", e);
             }
         }, scripts, new String[0]);
+
         injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit-10.0/code_edit/built-codeEdit.css");
     }
 
@@ -154,9 +155,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
             public void onSuccess(final JavaScriptObject[] result) {
                 //use 4th element as keybinding module
                 keyBindingModule = result[3].cast();
-
                 endConfiguration(callback);
-
             }
         },
          new String[]{"orion/codeEdit",
