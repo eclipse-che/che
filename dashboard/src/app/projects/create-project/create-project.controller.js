@@ -122,20 +122,26 @@ export class CreateProjectCtrl {
 
     }
 
-    // fetch workspaces when initializing
-    let promise = cheAPI.getWorkspace().fetchWorkspaces();
-    promise.then(() => {
-        this.updateData();
-      },
-      (error) => {
-        // etag handling so also retrieve last data that were fetched before
-        if (error.status === 304) {
-          // ok
+    this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
+
+    if (this.workspaces.length > 0) {
+      this.updateData();
+    } else {
+      // fetch workspaces when initializing
+      let promise = cheAPI.getWorkspace().fetchWorkspaces();
+      promise.then(() => {
           this.updateData();
-          return;
-        }
-        this.state = 'error';
-      });
+        },
+        (error) => {
+          // etag handling so also retrieve last data that were fetched before
+          if (error.status === 304) {
+            // ok
+            this.updateData();
+            return;
+          }
+          this.state = 'error';
+        });
+    }
 
     // selected current tab
     this.currentTab = '';
@@ -237,17 +243,23 @@ export class CreateProjectCtrl {
    * Fetching operation has been done, so get workspaces and websocket connection
    */
   updateData() {
-
-    this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
-
-    // generate project name
-    this.generateProjectName(true);
-
-    // init WS bus
-    if (this.workspaces.length > 0) {
-      this.messageBus = this.cheAPI.getWebsocket().getBus(this.workspaces[0].id);
+    //if create project in progress and workspace have started
+    if (this.createProjectSvc.isCreateProjectInProgress() && this.createProjectSvc.getCurrentProgressStep() > 0) {
+      let workspaceName = this.createProjectSvc.getWorkspaceOfProject();
+      let findWorkspace = this.lodash.find(this.workspaces, function (workspace) {
+        return workspace.config.name === workspaceName;
+      });
+      //check current workspace
+      if (findWorkspace) {
+        // init WS bus
+        this.messageBus = this.cheAPI.getWebsocket().getBus(findWorkspace.id);
+      } else {
+        this.resetCreateProgress();
+      }
+    } else {
+      // generate project name
+      this.generateProjectName(true);
     }
-
   }
 
   /**
