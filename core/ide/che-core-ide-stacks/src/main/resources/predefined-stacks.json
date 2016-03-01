@@ -761,7 +761,7 @@
     "creator": "tomitribe",
     "name": "TomEE",
     "description": "Default Java Stack with JDK 8, Maven and Apache TomEE 1.7.3.",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "Ubuntu",
       "Java",
