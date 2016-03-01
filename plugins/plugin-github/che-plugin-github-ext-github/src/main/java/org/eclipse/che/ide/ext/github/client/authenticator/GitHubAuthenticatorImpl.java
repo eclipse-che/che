@@ -17,7 +17,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.ssh.gwt.client.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -84,6 +86,18 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
         this.authenticationUrl = authenticationUrl;
         this.callback = callback;
         view.showDialog();
+    }
+
+    public Promise<OAuthStatus> authorize(String authenticationUrl) {
+        this.authenticationUrl = authenticationUrl;
+
+        return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<OAuthStatus>() {
+            @Override
+            public void makeCall(AsyncCallback<OAuthStatus> callback) {
+                GitHubAuthenticatorImpl.this.callback = callback;
+                view.showDialog();
+            }
+        });
     }
 
     @Override
