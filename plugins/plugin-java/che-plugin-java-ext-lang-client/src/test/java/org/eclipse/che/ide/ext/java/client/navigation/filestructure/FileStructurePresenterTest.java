@@ -28,6 +28,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.jseditor.client.document.Document;
+import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -44,6 +45,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -188,5 +190,16 @@ public class FileStructurePresenterTest {
         when(nodePromise.then(Matchers.<Function<Node, Node>>anyObject())).thenReturn(nodePromise);
 
         presenter.show(editorPartPresenter);
+    }
+
+    @Test
+    public void cursorShouldBeReturnedInPreviousPositionAfterDialogClosingByEscapeButton() {
+        presenter.show(editorPartPresenter);
+
+        presenter.onEscapeClicked();
+
+        verify(editorPartPresenter).setFocus();
+        verify(editorPartPresenter).getDocument();
+        verify(document).setSelectedRange(Matchers.<LinearRange>anyObject(), eq(true));
     }
 }
