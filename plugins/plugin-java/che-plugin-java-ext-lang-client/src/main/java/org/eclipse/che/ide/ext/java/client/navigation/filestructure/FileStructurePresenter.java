@@ -57,6 +57,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
 
     private EmbeddedTextEditorPresenter activeEditor;
     private boolean                     showInheritedMembers;
+    private int                         cursorOffset;
 
     @Inject
     public FileStructurePresenter(FileStructure view,
@@ -91,6 +92,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
             return;
         }
         activeEditor = ((EmbeddedTextEditorPresenter)editorPartPresenter);
+        cursorOffset = activeEditor.getCursorOffset();
         VirtualFile file = activeEditor.getEditorInput().getFile();
 
         String projectPath = file.getProject().getProjectConfig().getPath();
@@ -141,6 +143,12 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
         showInheritedMembers = false;
     }
 
+    @Override
+    public void onEscapeClicked() {
+        activeEditor.setFocus();
+        setCursor(activeEditor, cursorOffset);
+    }
+
     private void openFile(VirtualFile result, final Member member) {
         editorAgent.openEditor(result, new EditorAgent.OpenEditorCallback() {
             @Override
@@ -149,7 +157,8 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
             }
 
             @Override
-            public void onEditorActivated(EditorPartPresenter editor) { }
+            public void onEditorActivated(EditorPartPresenter editor) {
+            }
         });
     }
 
