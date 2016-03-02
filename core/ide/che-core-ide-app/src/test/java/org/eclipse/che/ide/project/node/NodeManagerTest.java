@@ -143,8 +143,8 @@ public class NodeManagerTest {
 
         nodeManager.createNodeByType(itemReferenceMock, null, nodeSettingsMock);
 
-        verify(nodeFactoryMock).newProjectNode(eq(projectConfigMock), eq(nodeSettingsMock));
-        verify(nodeFactoryMock, never()).newFolderReferenceNode(any(ItemReference.class), any(ProjectConfigDto.class), any(NodeSettings.class));
+        verify(nodeFactoryMock, never()).newProjectNode(eq(projectConfigMock), eq(nodeSettingsMock));
+        verify(nodeFactoryMock).newFolderReferenceNode(any(ItemReference.class), any(ProjectConfigDto.class), any(NodeSettings.class));
     }
 
     @Test
