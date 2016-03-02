@@ -111,6 +111,8 @@ public class MavenProjectManager {
     public void resolveMavenProject(IProject project, MavenProject mavenProject) {
         MavenServerWrapper mavenServer = serverManager.createMavenServer();
         try {
+
+            mavenNotifier.setText("Resolving project: " + mavenProject.getName());
             mavenServer.customize(copyWorkspaceCache(), terminal, mavenNotifier, false, true);
             MavenProjectModifications modifications = mavenProject.resolve(project, mavenServer, serverManager);
             dispatcher.projectResolved(mavenProject, modifications);
@@ -170,7 +172,6 @@ public class MavenProjectManager {
         }
 
         stack.addFirst(mavenProject);
-        mavenNotifier.setText("Reading pom: " + mavenProject.getPomPath());
 
         List<MavenProject> oldModules = findModules(mavenProject);
         Set<MavenProject> oldChilds = new HashSet<>();

@@ -8,30 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.maven.shared;
+package org.eclipse.che.ide.extension.maven.shared.dto;
+
+import org.eclipse.che.dto.shared.DTO;
 
 /**
+ * Info massage that points to client that messaging started/stopped
+ *
  * @author Evgen Vidolob
  */
-public enum MessageType {
-    NOTIFICATION(1), UPDATE(2), START_STOP(3);
+@DTO
+public interface StartStopNotification {
 
-    private final int type;
+    boolean isStart();
 
-    MessageType(int type) {
-        this.type = type;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public static MessageType valueOf(int type) {
-        for (MessageType messageType : values()) {
-            if(messageType.type == type){
-                return messageType;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
+    void setStart(boolean start);
 }

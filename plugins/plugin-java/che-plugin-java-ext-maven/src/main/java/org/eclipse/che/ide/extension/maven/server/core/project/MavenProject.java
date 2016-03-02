@@ -85,6 +85,14 @@ public class MavenProject {
         return info.testResources;
     }
 
+    public String getName() {
+        String name = info.name;
+        if (name == null) {
+            name = info.mavenKey.getArtifactId();
+        }
+        return name;
+    }
+
     public String getSourceLevel() {
         //todo
         throw new UnsupportedOperationException();
@@ -181,6 +189,7 @@ public class MavenProject {
         }
 
         newInfo.packaging = model.getPackaging();
+        newInfo.name = model.getName();
 
         newInfo.sources = model.getBuild().getSources();
         newInfo.testSources = model.getBuild().getTestSources();
@@ -306,6 +315,7 @@ public class MavenProject {
         public MavenKey parentKey;
 
         public String packaging;
+        public String name;
 
         public Properties properties;
 

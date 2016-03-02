@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server;
 
+import com.google.gson.JsonObject;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -17,6 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenCommunication;
 import org.eclipse.che.ide.extension.maven.server.core.MavenExecutorService;
@@ -25,6 +28,7 @@ import org.eclipse.che.ide.extension.maven.server.core.MavenWorkspace;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.server.rmi.MavenServerManagerTest;
+import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.maven.data.MavenArtifact;
@@ -53,6 +57,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -88,7 +93,12 @@ public class WorkspaceTest extends BaseTest {
                                                 public void sendNotification(NotificationMessage message) {
                                                     System.out.println(message.toString());
                                                 }
-                                            }, new ClasspathManager(root.getAbsolutePath()));
+
+                                                @Override
+                                                public void send(JsonObject object, MessageType type) {
+
+                                                }
+                                            }, new ClasspathManager(root.getAbsolutePath()), pm);
     }
 
 
@@ -116,7 +126,28 @@ public class WorkspaceTest extends BaseTest {
         assertThat(dependencies).onProperty("artifactId").containsExactly("junit", "hamcrest-core");
         assertThat(dependencies).onProperty("groupId").containsExactly("junit", "org.hamcrest");
         assertThat(dependencies).onProperty("version").containsExactly("4.12", "1.3");
+    }
 
+    @Test
+    public void testUpdateProjectShuldSetName() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+
+        RegisteredProject project = projectRegistry.getProject("test");
+        assertThat(project.getName()).isEqualTo("test");
     }
 
     @Test
@@ -146,6 +177,53 @@ public class WorkspaceTest extends BaseTest {
         assertThat(mavenKey.getGroupId()).isEqualTo("testParent");
         assertThat(mavenKey.getVersion()).isEqualTo("42");
 
+    }
+
+    @Test
+    public void testProjectNameShuldUseArtifactIdIfNotDeclared() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject = projectManager.findMavenProject(test);
+
+        String name = mavenProject.getName();
+        assertThat(name).isNotNull().isNotEmpty().isEqualTo("testArtifact");
+    }
+
+    @Test
+    public void testProjectNameUsedFromPom() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     " <name>testName</name>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>";
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject = projectManager.findMavenProject(test);
+
+        String name = mavenProject.getName();
+        assertThat(name).isNotNull().isNotEmpty().isEqualTo("testName");
     }
 
     @Test
@@ -495,7 +573,11 @@ public class WorkspaceTest extends BaseTest {
             throws ServerException, NotFoundException, ConflictException, ForbiddenException {
         FolderEntry folder = pm.getProjectsRoot().createFolder(name);
         folder.createFile("pom.xml", getPomContent(pomContent).getBytes());
-        projectRegistry.initProject(name, "test");
+        ProjectConfigImpl config = new ProjectConfigImpl();
+        config.setType(MAVEN_ID);
+        config.setPath(name);
+
+        projectRegistry.putProject(config, pm.getProjectsRoot().getChildFolder(name), true, true);
         return folder;
     }
 

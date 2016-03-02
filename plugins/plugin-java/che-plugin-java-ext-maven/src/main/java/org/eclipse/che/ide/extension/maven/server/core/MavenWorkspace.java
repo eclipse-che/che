@@ -17,7 +17,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathHelper;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
@@ -52,6 +54,7 @@ public class MavenWorkspace {
     private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
     private final MavenProjectManager manager;
+    private final ProjectManager projectManager;
     private final ProjectRegistry     projectRegistry;
     private final MavenCommunication  communication;
     private final ClasspathManager    classpathManager;
@@ -68,11 +71,13 @@ public class MavenWorkspace {
                           MavenExecutorService executorService,
                           ProjectRegistry projectRegistry,
                           MavenCommunication communication,
-                          ClasspathManager classpathManager) {
+                          ClasspathManager classpathManager,
+                          ProjectManager projectManager) {
         this.projectRegistry = projectRegistry;
         this.communication = communication;
         this.classpathManager = classpathManager;
         this.manager = manager;
+        this.projectManager = projectManager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
         manager.addListener(new MavenProjectListener() {
             @Override
@@ -107,17 +112,16 @@ public class MavenWorkspace {
 
     private void createNewProjects(Set<MavenProject> mavenProjects) {
         mavenProjects.stream()
-                     .filter(project -> {
-                         try {
-                             return projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null;
-                         } catch (ServerException e) {
-                             LOG.error(e.getMessage(), e);
-                         }
-                         return false;
-                     })
+//                     .filter(project -> projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null)
                      .forEach(project -> {
                          try {
-                             projectRegistry.initProject(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+                             ProjectConfigImpl config = new ProjectConfigImpl();
+                             config.setType(MAVEN_ID);
+                             String path = project.getProject().getFullPath().toOSString();
+                             config.setPath(path);
+                             config.setName(project.getProject().getFullPath().lastSegment());
+
+                             projectRegistry.putProject(config, projectManager.getProjectsRoot().getChildFolder(path), true, true);
                          } catch (ConflictException | ForbiddenException | ServerException | NotFoundException e) {
                              LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
                          }

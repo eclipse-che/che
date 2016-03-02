@@ -231,5 +231,15 @@ public class MavenServerManagerTest {
         public boolean isCanceled() {
             return false;
         }
+
+        @Override
+        public void start() {
+
+        }
+
+        @Override
+        public void stop() {
+
+        }
     }
 }

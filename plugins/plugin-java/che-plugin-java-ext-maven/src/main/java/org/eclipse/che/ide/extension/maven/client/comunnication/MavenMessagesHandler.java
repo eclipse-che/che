@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
@@ -32,13 +33,17 @@ import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.ide.extension.maven.shared.dto.ProjectsUpdateMessage;
+import org.eclipse.che.ide.extension.maven.shared.dto.StartStopNotification;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
+import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Evgen Vidolob
@@ -56,13 +61,13 @@ public class MavenMessagesHandler {
 
     @Inject
     public MavenMessagesHandler(EventBus eventBus,
-                                final MessageBusProvider messageBus,
                                 NotificationManager notificationManager,
                                 final DtoFactory factory,
                                 final ProjectExplorerPresenter projectExplorer,
                                 ProjectServiceClient projectServiceClient,
                                 AppContext context,
-                                PomEditorReconciler pomEditorReconciler) {
+                                PomEditorReconciler pomEditorReconciler,
+                                final WsAgentStateController agentStateController) {
         this.eventBus = eventBus;
 
         this.notificationManager = notificationManager;
@@ -73,29 +78,40 @@ public class MavenMessagesHandler {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                try {
-                    messageBus.getMachineMessageBus().subscribe(MavenAttributes.MAVEN_CHANEL_NAME, new MessageHandler() {
-                        @Override
-                        public void onMessage(String message) {
-                            Jso jso = Jso.deserialize(message);
-                            int type = jso.getFieldCastedToInteger("$type");
-                            MessageType messageType = MessageType.valueOf(type);
-                            switch (messageType) {
-                                case NOTIFICATION:
-                                    NotificationMessage dto = factory.createDtoFromJson(message, NotificationMessage.class);
-                                    handleNotification(dto);
-                                    break;
-                                case UPDATE:
-                                    handleUpdate(factory.createDtoFromJson(message, ProjectsUpdateMessage.class));
-                                    break;
-                                default:
-                                    Log.error(getClass(), "Unknown message type:" + messageType);
-                            }
+                agentStateController.getMessageBus().then(new Operation<MessageBus>() {
+                    @Override
+                    public void apply(MessageBus messageBus) throws OperationException {
+                        try {
+                            messageBus.subscribe(MavenAttributes.MAVEN_CHANEL_NAME, new MessageHandler() {
+                                @Override
+                                public void onMessage(String message) {
+                                    Jso jso = Jso.deserialize(message);
+                                    int type = jso.getFieldCastedToInteger("$type");
+                                    MessageType messageType = MessageType.valueOf(type);
+                                    switch (messageType) {
+                                        case NOTIFICATION:
+                                            NotificationMessage dto = factory.createDtoFromJson(message, NotificationMessage.class);
+                                            handleNotification(dto);
+                                            break;
+
+                                        case UPDATE:
+                                            handleUpdate(factory.createDtoFromJson(message, ProjectsUpdateMessage.class));
+                                            break;
+
+                                        case START_STOP:
+                                            handleStartStop(factory.createDtoFromJson(message, StartStopNotification.class));
+                                            break;
+
+                                        default:
+                                            Log.error(getClass(), "Unknown message type:" + messageType);
+                                    }
+                                }
+                            });
+                        } catch (WebSocketException e) {
+                            Log.error(getClass(), e);
                         }
-                    });
-                } catch (WebSocketException e) {
-                    Log.error(getClass(), e);
-                }
+                    }
+                });
             }
 
             @Override
@@ -104,11 +120,24 @@ public class MavenMessagesHandler {
             }
         });
 
+
+    }
+
+    private void handleStartStop(StartStopNotification dto) {
+        if (dto.isStart()) {
+            notification = notificationManager.notify("Maven", "", StatusNotification.Status.PROGRESS, true);
+        } else {
+            if (notification instanceof StatusNotification) {
+                ((StatusNotification)notification).setStatus(StatusNotification.Status.SUCCESS);
+            }
+            notification = null;
+        }
     }
 
     private void handleUpdate(ProjectsUpdateMessage dto) {
         List<String> updatedProjects = dto.getUpdatedProjects();
-        for (String path : updatedProjects) {
+        Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
+        for (String path : projectToRefresh) {
             final String projectPath = path;
             Promise<ProjectConfigDto> promise = projectServiceClient.getProject(context.getWorkspaceId(), path);
             promise.then(new Operation<ProjectConfigDto>() {
@@ -124,15 +153,29 @@ public class MavenMessagesHandler {
             }
         }
 
-       pomEditorReconciler.updateProblems(dto.getProblems());
+        pomEditorReconciler.updateProblems(dto.getProblems());
+    }
+
+    private Set<String> computeUniqueHiLevelProjects(List<String> updatedProjects) {
+        Set<String> result = new HashSet<>();
+        for (String project : updatedProjects) {
+            Path path = new Path(project);
+            if (path.segmentCount() > 1) {
+                //TODO maven modules may exists in sub sub directory
+                path = path.removeLastSegments(1);
+            }
+            result.add(path.toString());
+        }
+        return result;
     }
 
     private void handleNotification(NotificationMessage message) {
-        if(notification == null){
-            notification = notificationManager.notify("Maven", "", StatusNotification.Status.PROGRESS, true);
+        if (notification != null) {
+            notification.setContent(message.getText());
+            notification.notifyObservers();
+        } else {
+            Log.error(getClass(), "Notification is null.", message);
         }
-        notification.setContent(message.getText());
-        notification.notifyObservers();
 
     }
 }

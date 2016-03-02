@@ -14,7 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
+import org.eclipse.che.ide.extension.maven.shared.dto.StartStopNotification;
 import org.eclipse.che.maven.server.MavenServerProgressNotifier;
 
 /**
@@ -56,6 +58,22 @@ public class MavenServerNotifier implements MavenProgressNotifier {
     @Override
     public boolean isCanceled() {
         return false;
+    }
+
+    @Override
+    public void stop() {
+        sendStartStop(false);
+    }
+
+    private void sendStartStop(boolean isStart) {
+        StartStopNotification dto = DtoFactory.newDto(StartStopNotification.class);
+        dto.setStart(isStart);
+        communication.send(DtoFactory.getInstance().toJsonElement(dto).getAsJsonObject(), MessageType.START_STOP);
+    }
+
+    @Override
+    public void start() {
+        sendStartStop(true);
     }
 
 }

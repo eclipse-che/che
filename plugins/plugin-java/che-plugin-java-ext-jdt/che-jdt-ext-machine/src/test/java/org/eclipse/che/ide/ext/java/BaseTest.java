@@ -83,7 +83,7 @@ public abstract class BaseTest {
 
     protected static LocalVirtualFileSystemProvider vfsProvider;
 
-    protected static ProjectRegistry projectRegistry;
+    protected static ProjectRegistryImpl projectRegistry;
 
     protected static FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
@@ -120,23 +120,15 @@ public abstract class BaseTest {
             projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
             projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
-            Field initialized = projectRegistry.getClass().getDeclaredField("initialized");
-            initialized.setAccessible(true);
-            initialized.set(projectRegistry, true);
-            VirtualFile virtualFile = vfsProvider.getVirtualFileSystem().getRoot();
-            for (VirtualFile file : virtualFile.getChildren()) {
-                if(file.isFolder()) {
-                    projectRegistry.initProject(file.getPath().toString(), "test");
-                }
-            }
+            projectRegistry.initProjects();
 
             importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 
             fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
             fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-            pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
-                                    importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+            pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                    importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
             plugin = new ResourcesPlugin("target/index", workspacePath, projectRegistry, pm);
             plugin.start();
             javaPlugin.start();

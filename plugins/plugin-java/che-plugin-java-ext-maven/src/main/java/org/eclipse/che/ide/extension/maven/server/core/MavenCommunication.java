@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.core;
 
+import com.google.gson.JsonObject;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
+import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.maven.data.MavenProjectProblem;
 
@@ -31,4 +33,6 @@ public interface MavenCommunication {
                            List<MavenProjectProblem> mavenProjectProblems);
 
     void sendNotification(NotificationMessage message);
+
+    void send(JsonObject object, MessageType type);
 }

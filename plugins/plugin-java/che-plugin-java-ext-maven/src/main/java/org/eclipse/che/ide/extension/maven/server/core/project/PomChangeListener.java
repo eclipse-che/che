@@ -81,14 +81,18 @@ public class PomChangeListener {
 
 //    @ScheduleDelay(initialDelay = 30, delay = 3)
     protected void updateProms(){
-        if(projectToUpdate.size() == 0){
-            return;
+        try {
+            if (projectToUpdate.size() == 0) {
+                return;
+            }
+            Set<String> projects = new HashSet<>(projectToUpdate);
+            projectToUpdate.clear();
+            IWorkspace workspace = eclipseWorkspaceProvider.get();
+            List<IProject> projectsList =
+                    projects.stream().map(project -> workspace.getRoot().getProject(project)).collect(Collectors.toList());
+            mavenWorkspace.update(projectsList);
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
-        Set<String> projects = new HashSet<>(projectToUpdate);
-        projectToUpdate.clear();
-        IWorkspace workspace = eclipseWorkspaceProvider.get();
-        List<IProject> projectsList =
-                projects.stream().map(project -> workspace.getRoot().getProject(project)).collect(Collectors.toList());
-        mavenWorkspace.update(projectsList);
     }
 }

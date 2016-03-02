@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.maven.server;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.ProjectRegistryImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
@@ -21,7 +20,6 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
@@ -41,7 +39,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.nio.file.PathMatcher;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,7 +70,7 @@ public abstract class BaseTest {
 
     protected LocalVirtualFileSystemProvider vfsProvider;
 
-    protected ProjectRegistry projectRegistry;
+    protected ProjectRegistryImpl projectRegistry;
 
     protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
@@ -133,28 +130,21 @@ public abstract class BaseTest {
 
         projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new TestProjectType());
+        projectTypeRegistry.registerProjectType(new MavenProjectType());
 
         projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
         projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
-        Field initialized = projectRegistry.getClass().getDeclaredField("initialized");
-        initialized.setAccessible(true);
-        initialized.set(projectRegistry, true);
-
-        VirtualFile virtualFile = vfsProvider.getVirtualFileSystem().getRoot();
-        for (VirtualFile file : virtualFile.getChildren()) {
-            if (file.isFolder()) {
-                projectRegistry.initProject(file.getPath().toString(), "test");
-            }
-        }
+        projectRegistry.initProjects();
 
         importerRegistry = new ProjectImporterRegistry(new HashSet<>());
 
         fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectHandlerRegistry,
-                                importerRegistry, projectRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+        pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+
         plugin = new ResourcesPlugin("target/index", wsPath, projectRegistry, pm);
         plugin.start();
         javaPlugin.start();
@@ -165,6 +155,13 @@ public abstract class BaseTest {
 
         protected TestProjectType() {
             super("test", "test", true, true);
+        }
+    }
+
+    protected static class MavenProjectType extends ProjectTypeDef {
+
+        protected MavenProjectType() {
+            super("maven", "maven", true, true);
         }
     }
 

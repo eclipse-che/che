@@ -26,4 +26,8 @@ public interface MavenProgressNotifier {
     void setPercentUndefined(boolean undefined);
 
     boolean isCanceled();
+
+    void start();
+
+    void stop();
 }

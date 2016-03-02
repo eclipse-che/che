@@ -95,7 +95,8 @@ public class MavenWebSocketCommunication implements MavenCommunication {
         send(DtoFactory.getInstance().toJsonElement(message).getAsJsonObject(), MessageType.NOTIFICATION);
     }
 
-    private void send(JsonObject dto, MessageType type) {
+    @Override
+    public void send(JsonObject dto, MessageType type) {
         try {
 
             ChannelBroadcastMessage message = new ChannelBroadcastMessage();

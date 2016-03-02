@@ -133,6 +133,7 @@ public class MavenModelReader {
         result.setMavenKey(mavenKey);
 
         result.setPackaging(model.getPackaging() == null ? "jar" : model.getPackaging());
+        result.setName(model.getName());
         result.setModules(model.getModules() == null ? Collections.emptyList() : new ArrayList<>(model.getModules()));
 
         Map<String, String> properties = model.getProperties();

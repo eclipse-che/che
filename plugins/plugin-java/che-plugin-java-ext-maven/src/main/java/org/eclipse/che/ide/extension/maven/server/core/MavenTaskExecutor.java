@@ -68,7 +68,7 @@ public class MavenTaskExecutor {
 
     private void doRunTasks(MavenProjectTask task) {
         int taskDone = 0;
-
+        notifier.start();
         while (true) {
             taskDone++;
             int restTasks;
@@ -88,6 +88,7 @@ public class MavenTaskExecutor {
                 task = queue.poll();
                 if (task == null) {
                     isWorking = false;
+                    notifier.stop();
                     return;
                 }
             }
@@ -103,12 +104,7 @@ public class MavenTaskExecutor {
         Semaphore semaphore = new Semaphore(1);
         try {
             semaphore.acquire();
-            submitTask(new MavenProjectTask() {
-                @Override
-                public void perform() {
-                    semaphore.release();
-                }
-            });
+            submitTask(semaphore::release);
 
             while (true) {
                 if (!isWorking || semaphore.tryAcquire(1, TimeUnit.SECONDS)) {
@@ -116,7 +112,7 @@ public class MavenTaskExecutor {
                 }
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.debug(e.getMessage(), e);
         }
     }
 }
