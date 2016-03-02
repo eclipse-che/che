@@ -173,6 +173,19 @@ class IdeSvc {
               }
 
               let agentStep = 2;
+
+              if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
+                this.steps[agentStep].hasError = true;
+                // need to show the error
+                this.$mdDialog.show(
+                  this.$mdDialog.alert()
+                    .title('Error when starting agent')
+                    .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
+                    .ariaLabel('Workspace agent start')
+                    .ok('OK')
+                );
+              }
+
                 if (this.steps[agentStep].logs.length > 0) {
                     this.steps[agentStep].logs = this.steps[agentStep].logs + '\n' + message;
                 } else {

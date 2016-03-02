@@ -855,6 +855,20 @@ export class CreateProjectCtrl {
       this.listeningChannels.push(workspaceChannel);
       bus.subscribe(workspaceChannel, (message) => {
 
+        if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
+          this.createProjectSvc.setCurrentProgressStep(2);
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+          // need to show the error
+          this.$mdDialog.show(
+            this.$mdDialog.alert()
+              .title('Error when starting agent')
+              .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
+              .ariaLabel('Workspace agent start')
+              .ok('OK')
+          );
+        }
+
+
         if (message.eventType === 'RUNNING' && message.workspaceId === data.id) {
           this.createProjectSvc.setCurrentProgressStep(2);
 
