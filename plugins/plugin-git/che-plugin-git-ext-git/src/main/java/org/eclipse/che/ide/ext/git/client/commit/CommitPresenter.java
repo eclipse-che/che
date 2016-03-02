@@ -39,7 +39,6 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -255,11 +254,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             }).show();
             return;
         }
-        String errorMessage = (exception.getMessage() != null && !exception.getMessage().isEmpty()) ? exception.getMessage() : constant.commitFailed();
+        String exceptionMessage = exception.getMessage();
+        String errorMessage = (exceptionMessage != null && !exceptionMessage.isEmpty()) ? exceptionMessage : constant.commitFailed();
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-        notificationManager.notify(constant.commitFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
+        notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, true, appContext.getCurrentProject().getRootProject());
     }
 
     /** {@inheritDoc} */
