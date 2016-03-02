@@ -667,8 +667,12 @@ export class CreateProjectCtrl {
         // need to show the error
         this.$mdDialog.show(
           this.$mdDialog.alert()
-            .title('Unable to create project')
-            .content('Unable to connect to the remote extension server after workspace creation')
+            .title('Workspace Connection Error')
+            .content('It seems that your workspace is running, but we cannot connect your browser to it. This commonly happens when Che was' +
+              ' not configured properly. If your browser is connecting to workspaces running remotely, then you must start Che with the ' +
+              '--remote:<ip-address> flag where the <ip-address> is the IP address of the node that is running your Docker workspaces.' +
+              'Please restart Che with this flag. You can read about what this flag does and why it is essential at: ' +
+              'https://eclipse-che.readme.io/docs/configuration#envrionment-variables')
             .ariaLabel('Project creation')
             .ok('OK')
         );
@@ -881,7 +885,7 @@ export class CreateProjectCtrl {
           promiseRuntime.then(() => {
             let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(data.id);
             // try to connect
-            this.websocketReconnect = 50;
+            this.websocketReconnect = 10;
             this.connectToExtensionServer(websocketUrl, data.id, this.importProjectData.project.name, this.importProjectData, bus);
 
           });
