@@ -184,7 +184,7 @@ public class MergePresenterTest extends BaseTest {
         verify(partPresenter).getEditorInput();
         verify(file).getPath();
         verify(gitOutputConsoleFactory).create(MERGE_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), rootProjectConfig);
     }

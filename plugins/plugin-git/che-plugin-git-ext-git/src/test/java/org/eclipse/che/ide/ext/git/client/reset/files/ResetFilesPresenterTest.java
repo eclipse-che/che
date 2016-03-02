@@ -184,7 +184,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         verify(view).close();
         verify(service, never()).reset(anyString(), eq(projectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                                        (AsyncRequestCallback<Void>)anyObject());
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(constant, times(2)).nothingToReset();
     }
@@ -227,7 +227,7 @@ public class ResetFilesPresenterTest extends BaseTest {
         verify(service).reset(anyString(), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(constant, times(2)).resetFilesSuccessfully();
     }
 

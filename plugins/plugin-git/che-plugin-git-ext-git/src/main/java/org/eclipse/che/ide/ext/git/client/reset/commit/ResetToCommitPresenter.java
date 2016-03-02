@@ -180,7 +180,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                                   //so we must repeat the logic which is performed when we open a project
                                   eventBus.fireEvent(new OpenProjectEvent(project));
                               }
-                              console.printInfo(constant.resetSuccessfully());
+                              console.print(constant.resetSuccessfully());
                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                               notificationManager.notify(constant.resetSuccessfully(), project);
 

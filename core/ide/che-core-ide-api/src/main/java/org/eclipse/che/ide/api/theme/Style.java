@@ -564,4 +564,16 @@ public class Style {
         return theme.getListBoxDropdownBackgroundColor();
     }
 
+    public static String getGitConsoleStagedFilesColor() {
+        return theme.gitConsoleStagedFilesColor();
+    }
+
+    public static String getGitConsoleUnstagedFilesColor() {
+        return theme.gitConsoleUnstagedFilesColor();
+    }
+
+    public static String getGitConsoleErrorColor() {
+        return theme.gitConsoleErrorColor();
+    }
+
 }

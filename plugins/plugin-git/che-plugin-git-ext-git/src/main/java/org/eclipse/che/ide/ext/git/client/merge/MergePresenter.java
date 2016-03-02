@@ -179,7 +179,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                       new AsyncRequestCallback<MergeResult>(dtoUnmarshallerFactory.newUnmarshaller(MergeResult.class)) {
                           @Override
                           protected void onSuccess(final MergeResult result) {
-                              console.printInfo(formMergeMessage(result));
+                              console.print(formMergeMessage(result));
                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                               notificationManager.notify(formMergeMessage(result), appContext.getCurrentProject().getRootProject());
                               refreshProject(openedEditors);

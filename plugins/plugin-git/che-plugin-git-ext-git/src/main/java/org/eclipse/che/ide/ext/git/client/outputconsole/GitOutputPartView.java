@@ -37,13 +37,16 @@ public interface GitOutputPartView extends View<GitOutputPartView.ActionDelegate
      */
     void print(String text);
 
+    /**
+     * Print colored text in console area.
+     *
+     * @param text
+     *         text that need to be shown
+     * @param color
+     *         color of the text
+     */
+
     void print(String text, String color);
-
-    void printInfo(String text);
-
-    void printWarn(String text);
-
-    void printError(String text);
 
     /**
      * Set title of console part.

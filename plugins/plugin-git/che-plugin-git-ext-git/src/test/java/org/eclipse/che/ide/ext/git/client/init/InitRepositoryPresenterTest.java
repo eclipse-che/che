@@ -74,7 +74,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
 
         verify(gitRepositoryInitializer).initGitRepository(eq(rootProjectConfig), (AsyncCallback<Void>)anyObject());
         verify(gitOutputConsoleFactory).create(INIT_COMMAND_NAME);
-        verify(console).printInfo(eq(constant.initSuccess()));
+        verify(console).print(eq(constant.initSuccess()));
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), rootProjectConfig);
     }

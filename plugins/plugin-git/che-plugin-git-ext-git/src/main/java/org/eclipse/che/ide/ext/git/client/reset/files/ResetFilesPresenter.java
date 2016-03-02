@@ -150,7 +150,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         final GitOutputConsole console = gitOutputConsoleFactory.create(RESET_COMMAND_NAME);
         if (files.isEmpty()) {
             view.close();
-            console.printInfo(constant.nothingToReset());
+            console.print(constant.nothingToReset());
             consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
             notificationManager.notify(constant.nothingToReset(), project.getRootProject());
             return;
@@ -160,7 +160,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         service.reset(workspaceId, project.getRootProject(), "HEAD", ResetType.MIXED, files, new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
-                console.printInfo(constant.resetFilesSuccessfully());
+                console.print(constant.resetFilesSuccessfully());
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                 notificationManager.notify(constant.resetFilesSuccessfully(), project.getRootProject());
             }

@@ -178,7 +178,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                           new RequestCallback<String>() {
                               @Override
                               protected void onSuccess(String result) {
-                                  console.printInfo(constant.fetchSuccess(remoteUrl));
+                                  console.print(constant.fetchSuccess(remoteUrl));
                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                                   notification.setStatus(SUCCESS);
                                   notification.setTitle(constant.fetchSuccess(remoteUrl));

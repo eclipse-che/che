@@ -29,34 +29,59 @@ public interface Status {
 
     void setBranchName(String branchName);
 
+    /**
+     * New files that are staged in index.
+     */
     List<String> getAdded();
 
     void setAdded(List<String> added);
 
-    List<String> getChanged();
-
-    void setChanged(List<String> changed);
-
-    List<String> getRemoved();
-
-    void setRemoved(List<String> removed);
-
-    List<String> getMissing();
-
-    void setMissing(List<String> missing);
-
-    List<String> getModified();
-
-    void setModified(List<String> modified);
-
+    /**
+     * New files that are not staged in index.
+     */
     List<String> getUntracked();
 
     void setUntracked(List<String> untracked);
 
+    /**
+     * Modified files that are staged in index.
+     */
+    List<String> getChanged();
+
+    void setChanged(List<String> changed);
+
+    /**
+     * Modified files that are not staged in index.
+     */
+    List<String> getModified();
+
+    void setModified(List<String> modified);
+
+    /**
+     * Deleted files that are staged in index.
+     */
+    List<String> getRemoved();
+
+    void setRemoved(List<String> removed);
+
+    /**
+     * Deleted files that are not staged in index.
+     */
+    List<String> getMissing();
+
+    void setMissing(List<String> missing);
+
+    /**
+     * Folders that contain only untracked files.
+     * @see #getUntracked()
+     */
     List<String> getUntrackedFolders();
 
     void setUntrackedFolders(List<String> untrackedFolders);
 
+    /**
+     * Files that have conflicts.
+     */
     List<String> getConflicting();
 
     void setConflicting(List<String> added);
