@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-ext-jdt-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-RC10-SNAPSHOT</version>
+        <version>4.0.0-RC10</version>
     </parent>
     <artifactId>org.eclipse.core.filebuffers</artifactId>
     <packaging>jar</packaging>
