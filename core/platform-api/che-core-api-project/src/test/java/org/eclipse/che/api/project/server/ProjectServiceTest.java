@@ -995,6 +995,23 @@ public class ProjectServiceTest {
     }
 
     @Test
+    public void testCreateFolderInRoot() throws Exception {
+        String folder = "my_folder";
+        ContainerResponse response = launcher.service(POST,
+                                                      String.format("http://localhost:8080/api/project/%s/folder/%s",
+                                                                    workspace, folder),
+                                                      "http://localhost:8080/api", null, null, null);
+        assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
+        ItemReference fileItem = (ItemReference)response.getEntity();
+        assertEquals(fileItem.getType(), "folder");
+        assertEquals(fileItem.getName(), folder);
+        assertEquals(fileItem.getPath(), "/" + folder);
+        validateFolderLinks(fileItem);
+        assertEquals(response.getHttpHeaders().getFirst("Location"),
+                     URI.create(String.format("http://localhost:8080/api/project/%s/children/%s", workspace, folder)));
+    }
+
+    @Test
     public void testCreatePath() throws Exception {
         ContainerResponse response = launcher.service(POST,
                                                       String.format("http://localhost:8080/api/project/%s/folder/my_project/a/b/c",

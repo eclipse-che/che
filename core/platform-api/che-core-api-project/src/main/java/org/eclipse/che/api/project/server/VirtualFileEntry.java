@@ -95,7 +95,11 @@ public abstract class VirtualFileEntry {
         if(projectRegistry == null)
             return null;
 
-        return projectRegistry.getParentProject(getPath().toString()).getPath();
+        final RegisteredProject parentProject = projectRegistry.getParentProject(getPath().toString());
+        if(parentProject == null) {
+            return null;
+        }
+        return parentProject.getPath();
     }
 
     /**
@@ -104,9 +108,8 @@ public abstract class VirtualFileEntry {
     public boolean isProject() {
 
         // root
-        if(projectRegistry == null)
+        if(projectRegistry == null || getProject() == null)
             return false;
-
         return getProject().equals(getPath().toString());
     }
 
