@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
+import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
@@ -62,12 +63,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.INFO;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.WARNING;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -108,8 +111,6 @@ public class JavaRefactoringRenameTest {
     @Mock
     private RefactoringUpdater       refactoringUpdater;
     @Mock
-    private EventBus                 eventBus;
-    @Mock
     private DtoUnmarshallerFactory   unmarshallerFactory;
     @Mock
     private NotificationManager      notificationManager;
@@ -141,11 +142,15 @@ public class JavaRefactoringRenameTest {
     @Mock
     private RefactoringResult                 result;
     @Mock
+    private FileEvent                         fileEvent;
+    @Mock
     private RefactoringStatusEntry            entry;
     @Mock
     private LinkedMode                        linkedMode;
     @Mock
     private LinkedModel                       editorLinkedModel;
+    @Mock
+    private EventBus                          eventBus;
     @Mock
     private Document                          document;
 
@@ -167,6 +172,7 @@ public class JavaRefactoringRenameTest {
                                                       locale,
                                                       refactoringServiceClient,
                                                       dtoFactory,
+                                                      eventBus,
                                                       dialogFactory,
                                                       notificationManager);
 
@@ -190,7 +196,6 @@ public class JavaRefactoringRenameTest {
         when(virtualFile.getProject()).thenReturn(hasProjectConfig);
         when(hasProjectConfig.getProjectConfig()).thenReturn(projectConfig);
         when(textEditor.getCursorOffset()).thenReturn(CURSOR_OFFSET);
-        when(textEditor.getDocument()).thenReturn(document);
         when(document.getContentRange(anyInt(), anyInt())).thenReturn(NEW_JAVA_CLASS_NAME);
         when(((HasLinkedMode)textEditor).getLinkedMode()).thenReturn(linkedMode);
         when(((HasLinkedMode)textEditor).createLinkedModel()).thenReturn(editorLinkedModel);
@@ -211,6 +216,19 @@ public class JavaRefactoringRenameTest {
         mainCheckRenameRefactoring();
 
         verify(refactoringUpdater).updateAfterRefactoring(Matchers.<RefactorInfo>any(), Matchers.<List<ChangeInfo>>any());
+        verify(eventBus).addHandler(FileEvent.TYPE, refactoringRename);
+    }
+
+    @Test
+    public void turnOffLinkedEditorModeWhenEditorIsClosed() throws Exception {
+        when(fileEvent.getOperationType()).thenReturn(CLOSE);
+        when(virtualFile.getPath()).thenReturn(PATH);
+        when(fileEvent.getFile()).thenReturn(virtualFile);
+
+        refactoringRename.refactor(textEditor);
+        refactoringRename.onFileOperation(fileEvent);
+
+        assertFalse(refactoringRename.isActiveLinkedEditor());
     }
 
     @Test

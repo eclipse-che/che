@@ -14,6 +14,7 @@ import {CheFocusable} from './focusable/che-focusable.directive';
 import {CheAutoScroll} from './scroll/che-automatic-scroll.directive';
 import {CheListOnScrollBottom} from './scroll/che-list-on-scroll-bottom.directive';
 import {CheReloadHref} from './reload-href/che-reload-href.directive';
+import {CheFormatOutput} from './format-output/che-format-output.directive';
 
 
 export class AttributeConfig {
@@ -27,6 +28,8 @@ export class AttributeConfig {
     register.directive('cheListOnScrollBottom', CheListOnScrollBottom);
 
     register.directive('cheReloadHref', CheReloadHref);
+
+    register.directive('cheFormatOutput', CheFormatOutput);
 
   }
 }

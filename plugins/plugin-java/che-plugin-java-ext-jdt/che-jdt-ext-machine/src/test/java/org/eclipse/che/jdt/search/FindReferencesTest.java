@@ -18,6 +18,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.core.JavaProject;
@@ -36,8 +37,6 @@ import static org.fest.assertions.Assertions.assertThat;
  * @author Evgen Vidolob
  */
 public class FindReferencesTest extends BaseTest {
-
-
     private final JUnitSourceSetup setup;
 
     public FindReferencesTest() {
@@ -107,8 +106,8 @@ public class FindReferencesTest extends BaseTest {
 
     @Test
     public void testSearchManagerFindUsage() throws Exception {
-        IPackageFragmentRoot root = ((JavaProject)JUnitSourceSetup.getProject()).getPackageFragmentRoot(
-                new Path(JUnitSourceSetup.SRC_CONTAINER));
+        IJavaProject aProject = JUnitSourceSetup.getProject();
+        IPackageFragmentRoot root = ((JavaProject)aProject).getPackageFragmentRoot(new Path(JUnitSourceSetup.SRC_CONTAINER));
         IPackageFragment packageFragment = root.createPackageFragment("che", true, null);
         StringBuilder a = new StringBuilder();
         a.append("package che;\n");
@@ -137,10 +136,8 @@ public class FindReferencesTest extends BaseTest {
         b.append("}\n");
         packageFragment.createCompilationUnit("B.java", b.toString(), true, null);
 
-
         SearchManager manager = new SearchManager();
-        FindUsagesResponse response =
-                manager.findUsage(JUnitSourceSetup.getProject(), compilationUnitA.getResource().getFullPath().toOSString(), 26);
+        FindUsagesResponse response = manager.findUsage(aProject, "che.A", 26);
 
         assertThat(response.getSearchElementLabel()).isEqualTo("A");
         List<org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject> projects = response.getProjects();

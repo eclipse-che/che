@@ -12,12 +12,15 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
+import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.text.Position;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -52,6 +55,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
@@ -67,7 +71,7 @@ import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSta
  * @author Valeriy Svydenko
  */
 @Singleton
-public class JavaRefactoringRename {
+public class JavaRefactoringRename implements FileEventHandler {
     private final RenamePresenter          renamePresenter;
     private final RefactoringUpdater       refactoringUpdater;
     private final JavaLocalizationConstant locale;
@@ -88,6 +92,7 @@ public class JavaRefactoringRename {
                                  JavaLocalizationConstant locale,
                                  RefactoringServiceClient refactoringServiceClient,
                                  DtoFactory dtoFactory,
+                                 EventBus eventBus,
                                  DialogFactory dialogFactory,
                                  NotificationManager notificationManager) {
         this.renamePresenter = renamePresenter;
@@ -99,6 +104,8 @@ public class JavaRefactoringRename {
         this.notificationManager = notificationManager;
 
         isActiveLinkedEditor = false;
+
+        eventBus.addHandler(FileEvent.TYPE, this);
     }
 
     /**
@@ -151,6 +158,18 @@ public class JavaRefactoringRename {
                 }
             }
         });
+    }
+
+    @Override
+    public void onFileOperation(FileEvent event) {
+        if (event.getOperationType() == CLOSE && textEditor.getDocument().getFile().getPath().equals(event.getFile().getPath())) {
+            isActiveLinkedEditor = false;
+        }
+    }
+
+    /** returns {@code true} if linked editor is activated. */
+    public boolean isActiveLinkedEditor() {
+        return isActiveLinkedEditor;
     }
 
     private void activateLinkedModeIntoEditor(final RenameRefactoringSession session, final Document document) {

@@ -122,6 +122,17 @@ public interface HttpJsonRequest {
     HttpJsonRequest addQueryParam(@NotNull String name, @NotNull Object value);
 
     /**
+     * Adds authorization header to the request.
+     *
+     * @param value
+     *         authorization header value
+     * @return this request instance
+     * @throws NullPointerException
+     *         when value is null
+     */
+    HttpJsonRequest setAuthorizationHeader(@NotNull String value);
+
+    /**
      * Sets request timeout in milliseconds.
      *
      * @param timeoutMs

@@ -110,7 +110,7 @@ gulp.task('existingfonts', function () {
     .pipe(gulp.dest(conf.paths.dist + '/fonts/'));
 });
 
-gulp.task('fonts', ['colors', 'proxySettings', 'existingfonts'], function () {
+gulp.task('fonts', ['colors', 'outputcolors', 'proxySettings', 'existingfonts'], function () {
   return gulp.src($.mainBowerFiles().concat('bower_components/material-design-iconfont/iconfont/*'))
     .pipe($.filter('**/*.{eot,svg,ttf,woff,woff2}'))
     .pipe($.flatten())
@@ -128,6 +128,19 @@ gulp.task('colorstemplate', function () {
 gulp.task('colors', ['colorstemplate'], function () {
   return gulp.src("src/app/colors/template/che-color.constant.js.template")
     .pipe($.rename("che-color.constant.js"))
+    .pipe(gulp.dest("src/app/colors"));
+});
+
+gulp.task('outputcolorstemplate', function () {
+  return gulp.src('src/app/colors/che-output-colors.constant.js.template')
+    .pipe($.replace('%CONTENT%', fs.readFileSync('src/app/colors/che-output-colors.json')))
+    .pipe($.replace('\"', '\''))
+    .pipe(gulp.dest('src/app/colors/template'));
+});
+
+gulp.task('outputcolors', ['outputcolorstemplate'], function () {
+  return gulp.src("src/app/colors/template/che-output-colors.constant.js.template")
+    .pipe($.rename("che-output-colors.constant.js"))
     .pipe(gulp.dest("src/app/colors"));
 });
 

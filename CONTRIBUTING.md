@@ -4,11 +4,11 @@ Thanks for your interest in this project.
 
 Project Description
 --------------------
-Che's objective is to create high performance developer environments by producing extensible, RESTful workspaces combined with a cloud IDE that can be customized with plug-ins. Tools are written in Java and run in the browser. 
+Che's objective is to create high performance developer environments by producing extensible, RESTful workspaces combined with a cloud IDE that can be customized with plug-ins. Tools are written in Java and run in the browser. If you are new to Che, please see the [getting started guide](http://eclipse.org/che/getting-started/).
 
 Developer Resources
 --------------------
-Information regarding source code management, builds, and coding standards. Until Che has completed its initial CQs, all code contributions are made directly through commits or pull requests at http://github.com/codenvy/che.
+Information regarding source code management, builds, and coding standards. All code contributions are made directly through commits or pull requests at http://github.com/eclipse/che.
 
 Reporting Issues
 -----------------
@@ -82,6 +82,7 @@ Bugs
 This project uses GitHub to track ongoing development and issues.  Please note, January 2015, Codenvy is still in the process of moving all Che issues from their internal Jira to GitHub.  So you may want to send an email to the che-dev alias to check on any issues if you do not see them in Bugzilla.
 
 - [https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che)
+- [IRC (routes to slack)](http://webchat.freenode.net?randomnick=1&channels=%23eclipseche)
 
 Get Involved!
 --------------
