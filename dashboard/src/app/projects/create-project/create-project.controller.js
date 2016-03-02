@@ -1044,8 +1044,8 @@ export class CreateProjectCtrl {
     this.workspaceName = workspace.config.name;
     this.stackLibraryOption = 'existing-workspace';
     let stack = null;
-    if (workspace.attributes && workspace.attributes.stackId) {
-      let stackId = workspace.attributes.stackId;
+    if (workspace.config.attributes && workspace.config.attributes.stackId) {
+      let stackId = workspace.config.attributes.stackId;
       stack = this.cheStack.getStackById(stackId);
     }
     this.updateCurrentStack(stack);
