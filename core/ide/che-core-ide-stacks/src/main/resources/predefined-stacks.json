@@ -573,8 +573,8 @@
       }
     ],
     "source": {
-      "type": "image",
-      "origin": "codenvy/debian_jre"
+      "type": "recipe",
+      "origin": "FROM codenvy/debian_jre\nCMD tail -f /dev/null"
     },
     "workspaceConfig": {
       "environments": [
@@ -655,8 +655,8 @@
       "description": null
     },
     "source": {
-      "type": "image",
-      "origin": "codenvy/ubuntu_jre"
+      "type": "recipe",
+      "origin": "FROM codenvy/ubuntu_jre\nCMD tail -f /dev/null"
     },
     "permissions": {
       "groups": [
