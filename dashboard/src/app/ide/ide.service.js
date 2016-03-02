@@ -135,7 +135,7 @@ class IdeSvc {
             // for now, display log of status channel in case of errors
             bus.subscribe(statusChannel, (message) => {
                 if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
-                    this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+                    this.steps[this.currentStep].hasError = true;
 
                     // need to show the error
                     this.$mdDialog.show(
@@ -147,7 +147,7 @@ class IdeSvc {
                     );
                 }
                 if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
-                    this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+                    this.steps[this.currentStep].hasError = true;
                     // need to show the error
                     this.$mdDialog.show(
                         this.$mdDialog.alert()
