@@ -321,7 +321,7 @@ public class PushToRemotePresenterTest extends BaseTest {
                              (AsyncRequestCallback<PushResponse>)anyObject());
         verify(view).close();
         verify(gitOutputConsoleFactory).create(PUSH_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(constant).pushSuccess(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), rootProjectConfig);
@@ -344,7 +344,7 @@ public class PushToRemotePresenterTest extends BaseTest {
                              (AsyncRequestCallback<PushResponse>)anyObject());
         verify(view).close();
         verify(gitOutputConsoleFactory).create(PUSH_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(constant).pushUpToDate();
         verify(notificationManager).notify(anyString(), rootProjectConfig);

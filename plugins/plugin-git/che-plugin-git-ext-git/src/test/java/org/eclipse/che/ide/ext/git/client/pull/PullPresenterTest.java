@@ -106,7 +106,7 @@ public class PullPresenterTest extends BaseTest {
                                       constant,
                                       notificationManager,
                                       dtoUnmarshallerFactory,
-                                      dtoFactory,
+                                      dialogFactory,
                                       branchSearcher,
                                       projectExplorer,
                                       gitOutputConsoleFactory,
@@ -316,7 +316,7 @@ public class PullPresenterTest extends BaseTest {
         verify(editorAgent).getOpenedEditors();
         verify(service).pull(anyObject(), eq(rootProjectConfig), anyString(), eq(REPOSITORY_NAME), (AsyncRequestCallback)anyObject());
         verify(gitOutputConsoleFactory).create(PULL_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(constant).pullSuccess(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
@@ -350,7 +350,7 @@ public class PullPresenterTest extends BaseTest {
         verify(editorAgent).getOpenedEditors();
         verify(service).pull(anyObject(), eq(rootProjectConfig), anyString(), eq(REPOSITORY_NAME), (AsyncRequestCallback)anyObject());
         verify(gitOutputConsoleFactory).create(PULL_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(constant).pullUpToDate();
         verify(notificationManager).notify(anyString(), rootProjectConfig);
@@ -438,7 +438,7 @@ public class PullPresenterTest extends BaseTest {
 
         verify(view).close();
         verify(gitOutputConsoleFactory).create(PULL_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         //check Refresh project is not called

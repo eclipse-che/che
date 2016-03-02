@@ -1439,4 +1439,19 @@ public class DarkTheme implements Theme {
     public String toolButtonActiveBoxShadow() {
         return "inset 1px 1px 0 0 #3c3c3c";
     }
+
+    @Override
+    public String gitConsoleStagedFilesColor() {
+        return "lightgreen";
+    }
+
+    @Override
+    public String gitConsoleUnstagedFilesColor() {
+        return "#F62217";
+    }
+
+    @Override
+    public String gitConsoleErrorColor() {
+        return "#F62217";
+    }
 }
