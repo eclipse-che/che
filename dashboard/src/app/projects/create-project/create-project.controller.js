@@ -689,6 +689,9 @@ export class CreateProjectCtrl {
     if ('image' === recipeSource.type) {
       // needs to add recipe for that script
       promise = this.submitRecipe('generated-' + stack.name, 'FROM ' + recipeSource.origin);
+    } else if ('recipe' === recipeSource.type) {
+
+      promise = this.submitRecipe('generated-' + stack.name, recipeSource.origin);
     } else {
       throw 'Not implemented';
     }
