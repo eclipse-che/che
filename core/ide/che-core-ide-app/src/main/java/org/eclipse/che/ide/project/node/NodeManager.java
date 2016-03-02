@@ -37,11 +37,11 @@ import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
 import org.eclipse.che.ide.api.project.node.settings.SettingsProvider;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.node.factory.NodeFactory;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -220,20 +220,7 @@ public class NodeManager {
             return nodeFactory.newFileReferenceNode(itemReference, configDto, settings);
         }
 
-        //it's a temporary solution, that will be replaced after GA release with new client side project model
-        if ("project".equals(itemType) || "folder".equals(itemType)) {
-
-            final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfigDto>() {
-                @Override
-                public boolean apply(@Nullable ProjectConfigDto input) {
-                    return input.getPath().equals(itemReference.getPath());
-                }
-            });
-
-            if (configOptional.isPresent()) {
-                return nodeFactory.newProjectNode(configOptional.get(), settings);
-            }
-
+        if ("folder".equals(itemType) || "project".equals(itemType)) {
             return nodeFactory.newFolderReferenceNode(itemReference, configDto, settings);
         }
 

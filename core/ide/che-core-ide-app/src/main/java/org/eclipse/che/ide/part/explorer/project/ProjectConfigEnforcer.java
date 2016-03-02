@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -53,6 +52,13 @@ public class ProjectConfigEnforcer implements NodeInterceptor {
     private final NodeFactory          nodeFactory;
     private final SettingsProvider     nodeSettingsProvider;
 
+    private final Predicate<Node> PROJECT_FOLDER = new Predicate<Node>() {
+        @Override
+        public boolean apply(@Nullable Node input) {
+            return input instanceof FolderReferenceNode && ((FolderReferenceNode)input).getData().getType().equals("project");
+        }
+    };
+
     @Inject
     public ProjectConfigEnforcer(ProjectServiceClient projectClient,
                                  AppContext appContext,
@@ -67,15 +73,9 @@ public class ProjectConfigEnforcer implements NodeInterceptor {
     /** {@inheritDoc} */
     @Override
     public Promise<List<Node>> intercept(Node parent, final List<Node> children) {
+        final List<Node> toReplace = newArrayList(filter(children, PROJECT_FOLDER));
 
-        final List<Node> toRemove = newArrayList(filter(children, new Predicate<Node>() {
-            @Override
-            public boolean apply(@Nullable Node input) {
-                return input instanceof FolderReferenceNode && ((FolderReferenceNode)input).getData().getType().equals("project");
-            }
-        }));
-
-        if (Iterables.isEmpty(toRemove)) {
+        if (toReplace.isEmpty()) {
             return resolve(children);
         }
 
@@ -86,7 +86,7 @@ public class ProjectConfigEnforcer implements NodeInterceptor {
                                     appContext.getWorkspace().getConfig().withProjects(projects);
 
                                     List<Node> toAdd =
-                                            newArrayList(transform(toRemove, new com.google.common.base.Function<Node, Node>() {
+                                            newArrayList(transform(toReplace, new com.google.common.base.Function<Node, Node>() {
                                                 @Nullable
                                                 @Override
                                                 public Node apply(@Nullable Node input) {
@@ -117,7 +117,7 @@ public class ProjectConfigEnforcer implements NodeInterceptor {
                                                 }
                                             }));
 
-                                    for (Node folder : toRemove) {
+                                    for (Node folder : toReplace) {
                                         children.remove(folder);
                                     }
 
