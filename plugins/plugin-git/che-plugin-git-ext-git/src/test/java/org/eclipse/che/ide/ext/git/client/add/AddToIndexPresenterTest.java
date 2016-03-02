@@ -119,7 +119,7 @@ public class AddToIndexPresenterTest extends BaseTest {
         onSuccess.invoke(callback, this.statusResponse);
 
         verify(gitOutputConsoleFactory).create(ADD_TO_INDEX_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), eq(rootProjectConfig));
         verify(view, never()).showDialog();
@@ -281,7 +281,7 @@ public class AddToIndexPresenterTest extends BaseTest {
         verify(service).add(anyString(), eq(rootProjectConfig), eq(NEED_UPDATING), (List<String>)anyObject(),
                             (RequestCallback<Void>)anyObject());
         verify(gitOutputConsoleFactory, times(2)).create(ADD_TO_INDEX_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), eq(rootProjectConfig));
         verify(constant, times(2)).addSuccess();

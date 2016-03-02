@@ -21,9 +21,8 @@ import javax.validation.constraints.NotNull;
  * @author Roman Nikitenko
  */
 public interface GitOutputConsole extends OutputConsole {
-
     /**
-     * Print text on console.
+     * Print text in console.
      *
      * @param text
      *         text that need to be shown
@@ -31,25 +30,22 @@ public interface GitOutputConsole extends OutputConsole {
     void print(@NotNull String text);
 
     /**
-     * [INFO] text
+     * Print colored text in console.
      *
      * @param text
+     *         text that need to be shown
+     * @param color
+     *         color of printed text
      */
-    void printInfo(String text);
+    void print(@NotNull String text, @NotNull String color);
 
     /**
-     * [ERROR] text
+     * Print error in console.
      *
      * @param text
+     *         text that need to be shown as error
      */
-    void printError(String text);
-
-    /**
-     * [WARNING] text
-     *
-     * @param text
-     */
-    void printWarn(String text);
+    void printError(@NotNull String text);
 
     /** Clear console. Remove all messages. */
     void clear();

@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -77,6 +78,21 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
         }
     }
 
+    @Override
+    public void print(String text, String color) {
+        view.print(text, color);
+        view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
+    }
+
+    @Override
+    public void printError(String text) {
+        print(text, Style.getGitConsoleErrorColor());
+    }
+
     /** {@inheritDoc} */
     public void clear() {
         view.clear();
@@ -91,33 +107,6 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
     @Override
     public void onScrollClicked() {
         view.scrollBottom();
-    }
-
-    public void printInfo(String text) {
-        view.printInfo(text);
-        view.scrollBottom();
-
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
-        }
-    }
-
-    public void printWarn(String text) {
-        view.printWarn(text);
-        view.scrollBottom();
-
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
-        }
-    }
-
-    public void printError(String text) {
-        view.printError(text);
-        view.scrollBottom();
-
-        for (ConsoleOutputListener outputListener : outputListeners) {
-            outputListener.onConsoleOutput(this);
-        }
     }
 
     @Override

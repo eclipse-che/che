@@ -231,7 +231,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             message += " " + constant.commitUser(revision.getCommitter().getName());
         }
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
-        console.printInfo(message);
+        console.print(message);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
         notificationManager.notify(message, appContext.getCurrentProject().getRootProject());
         view.setMessage("");

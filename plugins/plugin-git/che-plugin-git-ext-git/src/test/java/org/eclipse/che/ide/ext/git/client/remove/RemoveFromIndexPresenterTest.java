@@ -165,7 +165,7 @@ public class RemoveFromIndexPresenterTest extends BaseTest {
         verify(service).remove(anyString(), eq(rootProjectConfig), anyObject(), eq(REMOVED), anyObject());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(gitOutputConsoleFactory).create(REMOVE_FROM_INDEX_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(constant, times(2)).removeFilesSuccessfull();
         verify(view).close();
