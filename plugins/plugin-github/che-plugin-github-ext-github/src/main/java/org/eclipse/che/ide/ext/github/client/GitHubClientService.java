@@ -70,8 +70,20 @@ public interface GitHubClientService {
      *         the repository name.
      * @param callback
      *         callback called when operation is done.
+     * @deprecated use {@link #getForks(String user, String repository)}
      */
+    @Deprecated
     void getForks(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepositoryList> callback);
+
+    /**
+     * Get list of forks for given repository
+     *
+     * @param user
+     *         the owner of the repository.
+     * @param repository
+     *         the repository name.
+     */
+    Promise<GitHubRepositoryList> getForks(String user, String repository);
 
     /**
      * Fork the given repository for the authorized user.
@@ -82,8 +94,20 @@ public interface GitHubClientService {
      *         the repository name.
      * @param callback
      *         callback called when operation is done.
+     * @deprecated use {@link #fork(String, String)}
      */
+    @Deprecated
     void fork(@NotNull String user, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubRepository> callback);
+
+    /**
+     * Fork the given repository for the authorized user.
+     *
+     * @param user
+     *         the owner of the repository to fork.
+     * @param repository
+     *         the repository name.
+     */
+    Promise<GitHubRepository> fork(String user, String repository);
 
     /**
      * Add a comment to the issue on the given repository.
@@ -111,8 +135,20 @@ public interface GitHubClientService {
      *         the repository name.
      * @param callback
      *         callback called when operation is done.
+     * @deprecated use {@link #getPullRequests(String, String)}
      */
+    @Deprecated
     void getPullRequests(@NotNull String owner, @NotNull String repository, @NotNull AsyncRequestCallback<GitHubPullRequestList> callback);
+
+    /**
+     * Get pull requests for given repository.
+     *
+     * @param owner
+     *         the repository owner.
+     * @param repository
+     *         the repository name.
+     */
+    Promise<GitHubPullRequestList> getPullRequests(@NotNull String owner, @NotNull String repository);
 
     /**
      * Get a pull request by id for a given repository.
@@ -142,9 +178,27 @@ public interface GitHubClientService {
      *         the pull request information.
      * @param callback
      *         callback called when operation is done.
+     * @deprecated use {@link #createPullRequest(String, String, GitHubPullRequestCreationInput)}
      */
-    void createPullRequest(@NotNull String user, @NotNull String repository, @NotNull GitHubPullRequestCreationInput input,
+    @Deprecated
+    void createPullRequest(@NotNull String user,
+                           @NotNull String repository,
+                           @NotNull GitHubPullRequestCreationInput input,
                            @NotNull AsyncRequestCallback<GitHubPullRequest> callback);
+
+    /**
+     * Create a pull request on origin repository
+     *
+     * @param user
+     *         the owner of the repository.
+     * @param repository
+     *         the repository name.
+     * @param input
+     *         the pull request information.
+     */
+    Promise<GitHubPullRequest> createPullRequest(@NotNull String user,
+                                                 @NotNull String repository,
+                                                 @NotNull GitHubPullRequestCreationInput input);
 
     /**
      * Get the list of available public repositories for a GitHub user.
