@@ -196,7 +196,7 @@ public class RegisteredProject implements ProjectConfig {
 
     @Override
     public String getPath() {
-        return ProjectRegistryImpl.absolutizePath(config.getPath());
+        return ProjectRegistry.absolutizePath(config.getPath());
     }
 
     @Override

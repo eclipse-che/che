@@ -153,7 +153,7 @@ public class ProjectServiceTest {
 
     private ProjectImporterRegistry importerRegistry;
 
-    protected ProjectRegistryImpl projectRegistry;
+    protected ProjectRegistry projectRegistry;
 
     protected ProjectTypeRegistry ptRegistry;
 
@@ -204,7 +204,7 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
         projectRegistry.initProjects();
 
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
