@@ -193,7 +193,6 @@
                             che-name="name"
                             che-label-name="Name"
                             che-place-holder="Name of the project"
-                            ng-change="createProjectCtrl.checkChangeableNameStatus()"
                             ng-model="createProjectCtrl.projectName"
                             required
                             unique-project-name="createProjectCtrl.workspaceSelected"
@@ -210,7 +209,6 @@
                                 che-name="description"
                                 che-label-name="Description"
                                 che-place-holder="Description of the project"
-                                ng-change="createProjectCtrl.checkChangeableDescriptionStatus()"
                                 ng-model="createProjectCtrl.projectDescription"
                                 ng-maxlength="256">
                         <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
