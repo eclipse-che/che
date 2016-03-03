@@ -88,13 +88,12 @@ export class CreateProjectSamplesCtrl {
    * Select the first element in the list
    */
   initItem($first, template, createProjectCtrl) {
-      if ($first && createProjectCtrl.selectSourceOption === 'select-source-new') {
-        this.$timeout(() => {
-          this.selectTemplate(template, createProjectCtrl);
-        }, 1000);
-      }
+    if ($first && createProjectCtrl.selectSourceOption === 'select-source-new') {
+      this.$timeout(() => {
+        this.selectTemplate(template, createProjectCtrl);
+      }, 1000);
+    }
   }
-
 
 
   /**
@@ -105,6 +104,6 @@ export class CreateProjectSamplesCtrl {
   getItemsSize(items) {
     return Object.keys(items).length;
 
-}
+  }
 
 }

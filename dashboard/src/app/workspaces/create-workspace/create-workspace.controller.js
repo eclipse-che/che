@@ -45,8 +45,8 @@ export class CreateWorkspaceCtrl {
     };
 
     // fetch default recipe if we haven't one
-     if (!cheAPI.getRecipeTemplate().getDefaultRecipe()) {
-       cheAPI.getRecipeTemplate().fetchDefaultRecipe();
+    if (!cheAPI.getRecipeTemplate().getDefaultRecipe()) {
+      cheAPI.getRecipeTemplate().fetchDefaultRecipe();
     }
 
     this.stack = null;
@@ -216,7 +216,7 @@ export class CreateWorkspaceCtrl {
   /**
    * Handle the redirect for the given promise after workspace has been created
    * @param promise used to gather workspace data
-     */
+   */
   redirectAfterSubmitWorkspace(promise) {
     promise.then((workspaceData) => {
       let infoMessage = 'Workspace ' + workspaceData.name + ' successfully created.';
