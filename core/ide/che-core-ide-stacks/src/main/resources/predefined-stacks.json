@@ -755,5 +755,87 @@
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
     }
-  }
+  },
+  {
+    "id": "tomee-default",
+    "creator": "tomitribe",
+    "name": "TomEE",
+    "description": "Default Java Stack with JDK 8, Maven and Apache TomEE 1.7.3.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Java",
+      "JDK",
+      "Maven",
+      "TomEE",
+      "Subversion",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "TomEE",
+        "version": "1.7.3"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "tomitribe/ubuntu_tomee_173_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "newMaven",
+          "type": "mvn"
+        }
+      ]
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+ }
 ]
