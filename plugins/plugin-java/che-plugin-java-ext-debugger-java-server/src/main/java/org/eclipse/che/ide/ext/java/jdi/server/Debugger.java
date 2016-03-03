@@ -549,7 +549,10 @@ public class Debugger implements EventsHandler {
             if ("static".equals(s)) {
                 continue;
             }
-            if (expression.length() > 0) {
+            // Here we need !s.startsWith("[") condition because
+            // we shouldn't add '.' between arrayName and index of a element
+            // For example we can receive ["arrayName", "[index]"]
+            if (expression.length() > 0 && !s.startsWith("[")) {
                 expression.append('.');
             }
             expression.append(s);
