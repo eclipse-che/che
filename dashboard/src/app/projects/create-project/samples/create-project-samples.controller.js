@@ -67,7 +67,7 @@ export class CreateProjectSamplesCtrl {
 
 
     // update name, type, description
-    createProjectCtrl.importProjectData.project.description = template.description;
+    createProjectCtrl.setProjectDescription(template.description);
     createProjectCtrl.importProjectData.project.type = template.projectType;
     createProjectCtrl.importProjectData.project.commands = template.commands;
 
@@ -76,9 +76,8 @@ export class CreateProjectSamplesCtrl {
     name = name.replace(/\s/g, '_');
     // strip dot
     name = name.replace(/\./g, '_');
-    createProjectCtrl.importProjectData.project.name = name;
 
-    createProjectCtrl.projectName = name;
+    createProjectCtrl.setProjectName(name);
 
     // broadcast event
     this.$rootScope.$broadcast('create-project-samples:selected');
@@ -89,13 +88,12 @@ export class CreateProjectSamplesCtrl {
    * Select the first element in the list
    */
   initItem($first, template, createProjectCtrl) {
-      if ($first && createProjectCtrl.selectSourceOption === 'select-source-new') {
-        this.$timeout(() => {
-          this.selectTemplate(template, createProjectCtrl);
-        }, 1000);
-      }
+    if ($first && createProjectCtrl.selectSourceOption === 'select-source-new') {
+      this.$timeout(() => {
+        this.selectTemplate(template, createProjectCtrl);
+      }, 1000);
+    }
   }
-
 
 
   /**
@@ -106,6 +104,6 @@ export class CreateProjectSamplesCtrl {
   getItemsSize(items) {
     return Object.keys(items).length;
 
-}
+  }
 
 }
