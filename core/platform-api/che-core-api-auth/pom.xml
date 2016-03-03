@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-api-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC11</version>
+        <version>4.0.0-RC12-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-auth</artifactId>
     <packaging>jar</packaging>
