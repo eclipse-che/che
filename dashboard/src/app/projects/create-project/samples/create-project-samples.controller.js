@@ -67,7 +67,7 @@ export class CreateProjectSamplesCtrl {
 
 
     // update name, type, description
-    createProjectCtrl.importProjectData.project.description = template.description;
+    createProjectCtrl.setProjectDescription(template.description);
     createProjectCtrl.importProjectData.project.type = template.projectType;
     createProjectCtrl.importProjectData.project.commands = template.commands;
 
@@ -76,9 +76,8 @@ export class CreateProjectSamplesCtrl {
     name = name.replace(/\s/g, '_');
     // strip dot
     name = name.replace(/\./g, '_');
-    createProjectCtrl.importProjectData.project.name = name;
 
-    createProjectCtrl.projectName = name;
+    createProjectCtrl.setProjectName(name);
 
     // broadcast event
     this.$rootScope.$broadcast('create-project-samples:selected');

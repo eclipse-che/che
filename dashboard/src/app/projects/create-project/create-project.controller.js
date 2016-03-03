@@ -174,30 +174,12 @@ export class CreateProjectCtrl {
       }
     });
 
-    this.isChangeableName = true;
-    this.isChangeableDescription = true;
-
-    $scope.$watch('createProjectCtrl.importProjectData.project.name', (newProjectName) => {
-
-      if (newProjectName === '') {
-        return;
-      }
-
-      if (!this.isChangeableName) {
-        return;
-      }
-      this.projectName = newProjectName;
-    });
-    $scope.$watch('createProjectCtrl.importProjectData.project.description', (newProjectDescription) => {
-      if (!this.isChangeableDescription) {
-        return;
-      }
-      this.projectDescription = newProjectDescription;
-    });
-
     // channels on which we will subscribe on the workspace bus websocket
     this.listeningChannels = [];
 
+    this.projectName = null;
+    this.projectDescription = null;
+    this.defaultWorkspaceName = null;
   }
 
 
@@ -215,28 +197,6 @@ export class CreateProjectCtrl {
         description: ''
       }
     };
-  }
-
-  /**
-   * Check changeable status for project name field
-   */
-  checkChangeableNameStatus() {
-    if ('config' === this.currentTab) {
-      this.importProjectData.project.name = angular.copy(this.projectName);
-      return;
-    }
-    this.isChangeableName = this.projectName === this.importProjectData.project.name;
-  }
-
-  /**
-   * Check changeable status for project description field
-   */
-  checkChangeableDescriptionStatus() {
-    if ('config' === this.currentTab) {
-      this.importProjectData.project.description = angular.copy(this.projectDescription);
-      return;
-    }
-    this.isChangeableDescription = this.projectDescription === this.importProjectData.project.description;
   }
 
   /**
@@ -291,8 +251,8 @@ export class CreateProjectCtrl {
    * @param gitHubRepository the repository selected
    */
   selectGitHubRepository(gitHubRepository) {
-    this.importProjectData.project.name = gitHubRepository.name;
-    this.importProjectData.project.description = gitHubRepository.description;
+    this.setProjectName(gitHubRepository.name);
+    this.setProjectDescription(gitHubRepository.description);
     this.importProjectData.source.location = gitHubRepository.clone_url;
   }
 
@@ -349,13 +309,9 @@ export class CreateProjectCtrl {
     } else if ('config' === tab) {
       this.importProjectData.project.type = 'blank';
       this.importProjectData.source.type = 'git';
-      // set name and description from input fields into object
-      if (!this.isChangeableDescription) {
-        this.importProjectData.project.description = angular.copy(this.projectDescription);
-      }
-      if (!this.isChangeableName) {
-        this.importProjectData.project.name = angular.copy(this.projectName);
-      }
+      //try to set default values
+      this.setProjectDescription(this.importProjectData.project.description);
+      this.setProjectName(this.importProjectData.project.name);
       this.refreshCM();
     }
     // github and samples tabs have broadcast selection events for isReady status
@@ -728,15 +684,9 @@ export class CreateProjectCtrl {
    * Call the create operation that may create or import a project
    */
   create() {
-
-    // set name and description for imported project
-    if (!this.isChangeableDescription) {
-      this.importProjectData.project.description = angular.copy(this.projectDescription);
-    }
-    if (!this.isChangeableName) {
-      this.importProjectData.project.name = angular.copy(this.projectName);
-    }
-    this.createProjectSvc.setProject(this.importProjectData.project.name);
+    this.importProjectData.project.description = this.projectDescription;
+    this.importProjectData.project.name = this.projectName;
+    this.createProjectSvc.setProject(this.projectName);
 
     if (this.templatesChoice === 'templates-wizard') {
       this.createProjectSvc.setIDEAction('createProject:projectName=' + this.projectName);
@@ -816,7 +766,7 @@ export class CreateProjectCtrl {
           let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
 
           // mode
-          this.createProjectInWorkspace(this.workspaceSelected.id, this.importProjectData.project.name, this.importProjectData, bus);
+          this.createProjectInWorkspace(this.workspaceSelected.id, this.projectName, this.importProjectData, bus);
         });
 
       }, (error) => {
@@ -923,8 +873,7 @@ export class CreateProjectCtrl {
 
       name = name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
 
-      this.importProjectData.project.name = name;
-      this.projectName = name;
+      this.setProjectName(name);
     }
 
   }
@@ -934,9 +883,9 @@ export class CreateProjectCtrl {
    */
   generateWorkspaceName() {
     // starts with wksp
-    var name = 'wksp';
-    name = name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-    this.workspaceName = name;
+    let name = 'wksp';
+    name += '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+    this.setWorkspaceName(name);
   }
 
   isImporting() {
@@ -1048,7 +997,7 @@ export class CreateProjectCtrl {
    */
   cheStackLibraryWorkspaceSelecter(workspace) {
     this.workspaceSelected = workspace;
-    this.workspaceName = workspace.config.name;
+    this.setWorkspaceName(workspace.config.name);
     this.stackLibraryOption = 'existing-workspace';
     let stack = null;
     if (workspace.config.attributes && workspace.config.attributes.stackId) {
@@ -1115,6 +1064,50 @@ export class CreateProjectCtrl {
 
   selectWizardProject() {
     this.importProjectData.source.location = '';
+  }
+
+  /**
+   * Set workspace name
+   * @param name
+   */
+  setWorkspaceName(name) {
+    if (!name) {
+      return;
+    }
+    if (!this.defaultWorkspaceName || this.defaultWorkspaceName === this.workspaceName) {
+      this.defaultWorkspaceName = name;
+      this.workspaceName = angular.copy(name);
+    }
+  }
+
+  /**
+   * Set project name
+   * @param name
+   */
+  setProjectName(name) {
+    if (!name) {
+      return;
+    }
+    if (!this.defaultProjectName || this.defaultProjectName === this.projectName) {
+      this.defaultProjectName = name;
+      this.projectName = angular.copy(name);
+    }
+    this.importProjectData.project.name = this.projectName;
+  }
+
+  /**
+   * Set project description
+   * @param description
+   */
+  setProjectDescription(description) {
+    if (!description) {
+      return;
+    }
+    if (!this.defaultProjectDescription || this.defaultProjectDescription === this.projectDescription) {
+      this.defaultProjectDescription = description;
+      this.projectDescription = angular.copy(description);
+    }
+    this.importProjectData.project.description = this.projectDescription;
   }
 
 }
