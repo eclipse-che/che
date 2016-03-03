@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.maven.server.projecttype.handler;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistryImpl;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -41,9 +41,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Vitaly Parfonov
@@ -88,9 +85,9 @@ public class MavenProjectResolverTest {
             "</project>";
 
 
-    private File                rootDirectory;
-    private VirtualFile         root;
-    private ProjectRegistryImpl projectRegistry;
+    private File            rootDirectory;
+    private VirtualFile     root;
+    private ProjectRegistry projectRegistry;
 
 
     //    @Before
@@ -107,7 +104,7 @@ public class MavenProjectResolverTest {
         root = vfsProvider.getVirtualFileSystem().getRoot();
 
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, new ProjectHandlerRegistry(
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, new ProjectHandlerRegistry(
                 Collections.<ProjectHandler>emptySet()));
 
     }
