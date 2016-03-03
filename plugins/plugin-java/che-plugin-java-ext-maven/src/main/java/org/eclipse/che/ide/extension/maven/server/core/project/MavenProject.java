@@ -122,11 +122,7 @@ public class MavenProject {
 
     private List<MavenProjectProblem> generateProblems() {
         List<MavenProjectProblem> result = new ArrayList<>();
-        if (!isParentResolved()) {
-            result.add(new MavenProjectProblem(getPomPath(), "Can't find parent: " + info.parentKey.getArtifactId() + ":" +
-                                                             info.parentKey.getArtifactId() + ":" + info.parentKey.getVersion(),
-                                               MavenProblemType.DEPENDENCY));
-        }
+
         result.addAll(info.problems);
         result.addAll(info.modulesNameToPath.entrySet().stream().filter(entry -> !project.getFolder(entry.getKey()).exists())
                                             .map(entry -> new MavenProjectProblem(getPomPath(),
