@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +30,7 @@ public class DebuggerManager {
     private final AppContext appContext;
 
     private Map<String, Debugger> debuggers;
+    private Debugger debugger;
 
     @Inject
     protected DebuggerManager(AppContext appContext) {
@@ -40,25 +40,22 @@ public class DebuggerManager {
 
     /**
      * Register new debugger for the specified project type ID.
+     * TODO: don't link debugger with project.
      *
      * @param projectTypeId
      * @param debugger
      */
     public void registeredDebugger(String projectTypeId, Debugger debugger) {
         debuggers.put(projectTypeId, debugger);
+        setDebugger(debugger);
     }
 
-    /**
-     * @return debugger for current project type or null otherwise
-     */
+    public void setDebugger(Debugger debugger) {
+        this.debugger = debugger;
+    }
+
     @Nullable
     public Debugger getDebugger() {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject != null) {
-            String projectTypeId = currentProject.getProjectConfig().getType();
-            return debuggers.get(projectTypeId);
-        }
-
-        return null;
+        return debugger;
     }
 }
