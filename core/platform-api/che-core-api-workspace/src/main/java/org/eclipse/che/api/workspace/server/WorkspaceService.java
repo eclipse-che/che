@@ -79,14 +79,17 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.eclipse.che.api.workspace.server.Constants.GET_ALL_USER_WORKSPACES;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_CREATE_WORKSPACE;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_RUNTIME_WORKSPACE;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_WORKSPACES;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_REMOVE_WORKSPACE;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_START_WORKSPACE;
-import static org.eclipse.che.api.workspace.server.Constants.START_WORKSPACE;
+import static org.eclipse.che.api.machine.shared.Constants.WS_AGENT_SERVER_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_RUNTIME_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WEB_SOCKET_URL_WS_AGENT;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.STOP_WORKSPACE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -954,7 +957,24 @@ public class WorkspaceService extends Service {
                                            .path(getClass(), "stop")
                                            .build(workspace.getId())
                                            .toString(),
-                                 Constants.STOP_WORKSPACE));
+                                 STOP_WORKSPACE));
+
+            if (RuntimeWorkspaceDto.class.isAssignableFrom(workspace.getClass())) {
+                RuntimeWorkspaceDto runtimeWorkspace = (RuntimeWorkspaceDto)workspace;
+                runtimeWorkspace.getDevMachine()
+                                .getRuntime()
+                                .getServers()
+                                .values()
+                                .stream()
+                                .filter(server ->  WS_AGENT_SERVER_REFERENCE.equals(server.getRef()))
+                                .findAny()
+                                .ifPresent(wsAgent -> links.add(createLink("GET",
+                                                                           UriBuilder.fromUri(wsAgent.getUrl())
+                                                                                     .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                                                                                     .build()
+                                                                                     .toString(),
+                                                                           LINK_REL_GET_WEB_SOCKET_URL_WS_AGENT)));
+            }
         }
         return (T)workspace.withLinks(links);
     }

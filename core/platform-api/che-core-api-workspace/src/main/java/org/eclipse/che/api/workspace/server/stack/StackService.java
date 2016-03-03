@@ -61,15 +61,15 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.Response.Status.CREATED;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_CREATE_STACK;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_STACKS_BY_CREATOR;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_STACK_BY_ID;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_REMOVE_STACK;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_SEARCH_STACKS;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_UPDATE_STACK;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_UPLOAD_ICON;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_ICON;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_DELETE_ICON;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_STACK;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACKS_BY_CREATOR;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACK_BY_ID;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_STACK;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SEARCH_STACKS;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_UPDATE_STACK;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_UPLOAD_ICON;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_ICON;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_DELETE_ICON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
 /**

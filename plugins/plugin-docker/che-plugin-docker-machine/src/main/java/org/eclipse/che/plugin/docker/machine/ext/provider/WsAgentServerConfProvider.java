@@ -20,6 +20,8 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.net.URI;
 
+import static org.eclipse.che.api.machine.shared.Constants.WS_AGENT_SERVER_REFERENCE;
+
 /**
  * Provides server conf that describes workspace agent server
  *
@@ -27,7 +29,6 @@ import java.net.URI;
  */
 @Singleton
 public class WsAgentServerConfProvider implements Provider<ServerConf> {
-    public static final String WS_AGENT_SERVER_REFERENCE = "extensions";
 
     @Inject
     @Named("api.endpoint")
