@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.status;
 
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -23,6 +24,9 @@ import org.eclipse.che.ide.rest.StringUnmarshaller;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.eclipse.che.api.git.shared.StatusFormat.LONG;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -72,9 +76,7 @@ public class StatusCommandPresenter {
                            new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                                @Override
                                protected void onSuccess(String result) {
-                                   final GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
-                                   printGitStatus(result, console);
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   printGitStatus(result);
                                }
 
                                @Override
@@ -89,27 +91,28 @@ public class StatusCommandPresenter {
      *
      * @param statusText
      *         text to be printed
-     * @param console
-     *         console for displaying status
      */
-    private void printGitStatus(String statusText, GitOutputConsole console) {
-
+    private void printGitStatus(String statusText) {
+        GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
         console.print("");
-        String[] lines = statusText.split("\n");
-        for (String line : lines) {
 
-            if (line.startsWith("\tmodified:") || line.startsWith("#\tmodified:")) {
-                console.printError(line);
+        List<String> statusLines = Arrays.asList(statusText.split("\n"));
+        boolean containsStagedChanges = statusLines.contains("Changes to be committed:");
+        boolean stagedChangesAlreadyPrinted = false;
+        for (String line : statusLines) {
+            if ((line.startsWith("\t") || line.startsWith("#\t")) && containsStagedChanges && !stagedChangesAlreadyPrinted) {
+                console.print(line, Style.getGitConsoleStagedFilesColor());
+                if (statusLines.indexOf(line) == statusLines.size() - 1 || statusLines.get(statusLines.indexOf(line) + 1).equals("")) {
+                    stagedChangesAlreadyPrinted = true;
+                }
+                continue;
+            } else if ((line.startsWith("\t") || line.startsWith("#\t"))) {
+                console.print(line, Style.getGitConsoleUnstagedFilesColor());
                 continue;
             }
-
-            if (line.startsWith("\t") || line.startsWith("#\t")) {
-                console.printInfo(line);
-                continue;
-            }
-
             console.print(line);
         }
-    }
 
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+    }
 }

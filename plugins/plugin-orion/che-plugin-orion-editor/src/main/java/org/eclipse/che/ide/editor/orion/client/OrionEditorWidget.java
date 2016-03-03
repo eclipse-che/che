@@ -96,6 +96,7 @@ import org.eclipse.che.ide.jseditor.client.texteditor.CompositeEditorWidget;
 import org.eclipse.che.ide.jseditor.client.texteditor.ContentInitializedHandler;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget;
 import org.eclipse.che.ide.jseditor.client.texteditor.LineStyler;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -130,6 +131,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     private final JavaScriptObject           uiUtilsOverlay;
     private final KeymapPrefReader           keymapPrefReader;
     private final ContentAssistWidgetFactory contentAssistWidgetFactory;
+    private final DialogFactory              dialogFactory;
 
     @UiField
     SimplePanel        panel;
@@ -169,6 +171,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                              final KeymapPrefReader keymapPrefReader,
                              final Provider<OrionKeyBindingModule> keyBindingModuleProvider,
                              final ContentAssistWidgetFactory contentAssistWidgetFactory,
+                             final DialogFactory dialogFactory,
                              @Assisted final List<String> editorModes,
                              @Assisted final WidgetInitializedCallback widgetInitializedCallback) {
         this.keyBindingModuleProvider = keyBindingModuleProvider;
@@ -176,6 +179,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         this.moduleHolder = moduleHolder;
         this.keyModeInstances = keyModeInstances;
         this.eventBus = eventBus;
+        this.dialogFactory = dialogFactory;
         initWidget(UIBINDER.createAndBindUi(this));
 
         this.keymapPrefReader = keymapPrefReader;
@@ -193,6 +197,8 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
         codeEditWidgetModule.createEditorView(panel.getElement(), JavaScriptObject.createObject())
                             .then(new EditorViewCreatedOperation(widgetInitializedCallback));
+
+        registerPromptFunction();
     }
 
     private static JavaScriptObject getEditorSettings() {
@@ -801,4 +807,56 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
             widgetInitializedCallback.initialized(OrionEditorWidget.this);
         }
     }
+
+    /**
+     * Registers global prompt function to be accessible directly from JavaScript.
+     *
+     * Function promptIDE(title, text, defaultValue, callback)
+     *      title        Dialog title
+     *      text         The text to display in the dialog box
+     *      defaultValue The default value
+     *      callback     function(value)
+     *                      clicking "OK" will return input value
+     *                      clicking "Cancel" will return null
+     */
+    private native void registerPromptFunction() /*-{
+        if (!$wnd["promptIDE"]) {
+            var instance = this;
+            $wnd["promptIDE"] = function(title, text, defaultValue, callback) {
+                instance.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget::askLineNumber(*)(title, text, defaultValue, callback);
+            };
+        }
+    }-*/;
+
+    /**
+     * Custom callback to pass given value to native javascript function.
+     */
+    private class InputCallback implements org.eclipse.che.ide.ui.dialogs.InputCallback {
+
+        private JavaScriptObject callback;
+
+        public InputCallback(JavaScriptObject callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public native void accepted(String value) /*-{
+            var callback = this.@org.eclipse.che.ide.editor.orion.client.OrionEditorWidget.InputCallback::callback;
+            callback(value);
+        }-*/;
+
+    };
+
+    private void askLineNumber(String title, String text, String defaultValue, final JavaScriptObject callback) {
+        if (defaultValue == null) {
+            defaultValue = "";
+        } else {
+            // It's strange situation defaultValue.length() returns 'undefined' but must return a number.
+            // Reinitialise the variable resolves the problem.
+            defaultValue = "" + defaultValue;
+        }
+
+        dialogFactory.createInputDialog(title, text, defaultValue, 0, defaultValue.length(), new InputCallback(callback), null).show();
+    }
+
 }

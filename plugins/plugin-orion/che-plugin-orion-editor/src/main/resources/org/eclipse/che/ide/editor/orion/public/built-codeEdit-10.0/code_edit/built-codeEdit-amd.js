@@ -35907,14 +35907,35 @@ define('orion/editorCommands',[
 					var line;
 					var editor = this.editor || that.editor;
 					var model = editor.getModel();
+
 					if (data.parameters && data.parameters.valueFor('line')) { //$NON-NLS-0$
 						line = data.parameters.valueFor('line'); //$NON-NLS-0$
-					} else {
-						line = model.getLineAtOffset(editor.getCaretOffset());
-						line = prompt(messages.gotoLinePrompt, line + 1);
 						if (line) {
-							line = parseInt(line, 10);
+							editor.onGotoLine(line - 1, 0);
 						}
+						return;
+					}
+
+					line = model.getLineAtOffset(editor.getCaretOffset());
+
+					// try to use promptIDE(title, text, defaultValue, callback) function
+					if (window["promptIDE"]) {
+						window["promptIDE"](messages.gotoLineTooltip, messages.gotoLinePrompt, line + 1,
+							function(value) {
+								if (value) {
+									value = parseInt(value, 10);
+								}
+								if (value) {
+									editor.onGotoLine(value - 1, 0);
+								}
+							});
+						return;
+					}
+
+					// use browser based
+					line = prompt(messages.gotoLinePrompt, line + 1);
+					if (line) {
+						line = parseInt(line, 10);
 					}
 					if (line) {
 						editor.onGotoLine(line - 1, 0);

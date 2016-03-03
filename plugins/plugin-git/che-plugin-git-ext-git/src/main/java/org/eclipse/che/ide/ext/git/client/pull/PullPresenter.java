@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PullResponse;
@@ -27,7 +27,6 @@ import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
@@ -36,11 +35,13 @@ import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPrese
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -58,6 +59,8 @@ import static org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPr
 public class PullPresenter implements PullView.ActionDelegate {
     public static final String PULL_COMMAND_NAME = "Git pull";
 
+    private static final String GREEN_COLOR = "lightgreen";
+
     private final PullView                 view;
     private final GitServiceClient         gitServiceClient;
     private final EventBus                 eventBus;
@@ -66,7 +69,7 @@ public class PullPresenter implements PullView.ActionDelegate {
     private final AppContext               appContext;
     private final NotificationManager      notificationManager;
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
-    private final DtoFactory               dtoFactory;
+    private final DialogFactory            dialogFactory;
     private final BranchSearcher           branchSearcher;
     private final ProjectExplorerPresenter projectExplorer;
     private final GitOutputConsoleFactory  gitOutputConsoleFactory;
@@ -84,13 +87,13 @@ public class PullPresenter implements PullView.ActionDelegate {
                          GitLocalizationConstant constant,
                          NotificationManager notificationManager,
                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                         DtoFactory dtoFactory,
+                         DialogFactory dialogFactory,
                          BranchSearcher branchSearcher,
                          ProjectExplorerPresenter projectExplorer,
                          GitOutputConsoleFactory gitOutputConsoleFactory,
                          ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
-        this.dtoFactory = dtoFactory;
+        this.dialogFactory = dialogFactory;
         this.branchSearcher = branchSearcher;
         this.projectExplorer = projectExplorer;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
@@ -131,13 +134,7 @@ public class PullPresenter implements PullView.ActionDelegate {
 
                                         @Override
                                         protected void onFailure(Throwable exception) {
-                                            String errorMessage =
-                                                    exception.getMessage() != null ? exception.getMessage()
-                                                                                   : constant.remoteListFailed();
-                                            GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
-                                            console.printError(errorMessage);
-                                            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-                                            notificationManager.notify(constant.remoteListFailed(), FAIL, true, project.getRootProject());
+                                            handleError(exception, REMOTE_REPO_COMMAND_NAME);
                                             view.setEnablePullButton(false);
                                         }
                                     }
@@ -172,13 +169,7 @@ public class PullPresenter implements PullView.ActionDelegate {
 
                                         @Override
                                         protected void onFailure(Throwable exception) {
-                                            String errorMessage =
-                                                    exception.getMessage() != null ? exception.getMessage()
-                                                                                   : constant.branchesListFailed();
-                                            GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
-                                            console.printError(errorMessage);
-                                            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-                                            notificationManager.notify(constant.branchesListFailed(), FAIL, true, project.getRootProject());
+                                            handleError(exception, BRANCH_LIST_COMMAND_NAME);
                                             view.setEnablePullButton(false);
                                         }
                                     }
@@ -199,30 +190,30 @@ public class PullPresenter implements PullView.ActionDelegate {
 
         final StatusNotification notification =
                 notificationManager.notify(constant.pullProcess(), PROGRESS, true, project.getRootProject());
-        final GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
 
         gitServiceClient.pull(workspaceId, project.getRootProject(), getRefs(), remoteName,
                               new AsyncRequestCallback<PullResponse>(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class)) {
                                   @Override
                                   protected void onSuccess(PullResponse result) {
-                                      console.printInfo(result.getCommandOutput());
+                                      GitOutputConsole console = gitOutputConsoleFactory.create(PULL_COMMAND_NAME);
+                                      console.print(result.getCommandOutput(), GREEN_COLOR);
                                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                                       notification.setStatus(SUCCESS);
                                       if (result.getCommandOutput().contains("Already up-to-date")) {
                                           notification.setTitle(constant.pullUpToDate());
                                       } else {
-                                          refreshProject(openedEditors);
+                                          refreshProjectNodesAndEditors(openedEditors);
                                           notification.setTitle(constant.pullSuccess(remoteUrl));
                                       }
                                   }
 
                                   @Override
-                                  protected void onFailure(Throwable throwable) {
-                                      if (throwable.getMessage().contains("Merge conflict")) {
-                                          refreshProject(openedEditors);
+                                  protected void onFailure(Throwable exception) {
+                                      notification.setStatus(FAIL);
+                                      if (getErrorCode(exception) == ErrorCodes.MERGE_CONFLICT) {
+                                          refreshProjectNodesAndEditors(openedEditors);
                                       }
-                                      handleError(throwable, remoteUrl, notification, console);
-                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                      handleError(exception, PULL_COMMAND_NAME);
                                   }
                               });
     }
@@ -233,7 +224,7 @@ public class PullPresenter implements PullView.ActionDelegate {
      * @param openedEditors
      *         editors that corresponds to open files
      */
-    private void refreshProject(final List<EditorPartPresenter> openedEditors) {
+    private void refreshProjectNodesAndEditors(final List<EditorPartPresenter> openedEditors) {
         projectExplorer.reloadChildren();
         for (EditorPartPresenter partPresenter : openedEditors) {
             final VirtualFile file = partPresenter.getEditorInput().getFile();
@@ -255,32 +246,40 @@ public class PullPresenter implements PullView.ActionDelegate {
     /**
      * Handler some action whether some exception happened.
      *
-     * @param throwable
-     *         exception what happened
+     * @param exception
+     *         exception that happened
+     * @param commandName
+     *         name of the command
      */
-    private void handleError(@NotNull Throwable throwable, @NotNull String remoteUrl, StatusNotification notification,
-                             GitOutputConsole console) {
-        String errorMessage = throwable.getMessage();
-        notification.setStatus(FAIL);
-        if (errorMessage == null) {
-            console.printError(constant.pullFail(remoteUrl));
-            notification.setTitle(constant.pullFail(remoteUrl));
+    private void handleError(@NotNull Throwable exception, @NotNull String commandName) {
+        int errorCode = getErrorCode(exception);
+        if (errorCode == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
+            dialogFactory.createMessageDialog(constant.pullTitle(), constant.committerIdentityInfoEmpty(), null).show();
+            return;
+        } else if (errorCode == ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY) {
+            dialogFactory.createMessageDialog(constant.pullTitle(), constant.messagesUnableGetSshKey(), null).show();
             return;
         }
 
-        try {
-            errorMessage = dtoFactory.createDtoFromJson(errorMessage, ServiceError.class).getMessage();
-            if (errorMessage.equals("Unable get private ssh key")) {
-                console.printError(constant.messagesUnableGetSshKey());
-                notification.setTitle(constant.messagesUnableGetSshKey());
-                return;
+        String errorMessage = exception.getMessage();
+        if (errorMessage == null) {
+            switch (commandName) {
+                case REMOTE_REPO_COMMAND_NAME:
+                    errorMessage = constant.remoteListFailed();
+                    break;
+                case BRANCH_LIST_COMMAND_NAME:
+                    errorMessage = constant.branchesListFailed();
+                    break;
+                case PULL_COMMAND_NAME:
+                    errorMessage = constant.pullFail(view.getRepositoryUrl());
+                    break;
             }
-            console.printError(errorMessage);
-            notification.setTitle(errorMessage);
-        } catch (Exception e) {
-            console.printError(errorMessage);
-            notification.setTitle(errorMessage);
         }
+
+        GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
+        console.printError(errorMessage);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        notificationManager.notify(errorMessage, FAIL, true, project.getRootProject());
     }
 
     /** {@inheritDoc} */

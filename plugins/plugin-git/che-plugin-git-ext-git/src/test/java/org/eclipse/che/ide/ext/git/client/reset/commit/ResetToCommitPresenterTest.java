@@ -83,6 +83,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
                                                constant,
                                                eventBus,
                                                editorAgent,
+                                               dialogFactory,
                                                appContext,
                                                notificationManager,
                                                dtoUnmarshallerFactory,
@@ -179,7 +180,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
         verify(service).reset(anyString(), anyObject(), eq(PROJECT_PATH), eq(HARD), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(eventBus).fireEvent(Matchers.<Event<OpenProjectEvent>>anyObject());
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
     }
 
@@ -213,7 +214,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
         verify(service).reset(anyString(), anyObject(), eq(PROJECT_PATH), eq(HARD), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(eventBus).fireEvent(Matchers.<Event<OpenProjectEvent>>anyObject());
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
     }
 

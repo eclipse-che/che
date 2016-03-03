@@ -23,12 +23,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.ext.git.client.GitResources;
+import org.eclipse.che.ide.ui.TextBox;
 
 import javax.validation.constraints.NotNull;
 
@@ -144,25 +143,38 @@ public class GitImporterPageViewImpl extends Composite implements GitImporterPag
     }
 
     @Override
-    public void showNameError() {
-        projectName.addStyleName(style.inputError());
+    public void markURLValid() {
+        projectUrl.markValid();
     }
 
     @Override
-    public void hideNameError() {
-        projectName.removeStyleName(style.inputError());
+    public void markURLInvalid() {
+        projectUrl.markInvalid();
     }
 
     @Override
-    public void showUrlError(@NotNull String message) {
-        projectUrl.addStyleName(style.inputError());
-        labelUrlError.setText(message);
+    public void unmarkURL() {
+        projectUrl.unmark();
     }
 
     @Override
-    public void hideUrlError() {
-        projectUrl.removeStyleName(style.inputError());
-        labelUrlError.setText("");
+    public void setURLErrorMessage(@NotNull String message) {
+        labelUrlError.setText(message != null ? message : "");
+    }
+
+    @Override
+    public void markNameValid() {
+        projectName.markValid();
+    }
+
+    @Override
+    public void markNameInvalid() {
+        projectName.markInvalid();
+    }
+
+    @Override
+    public void unmarkName() {
+        projectName.unmark();
     }
 
     @NotNull

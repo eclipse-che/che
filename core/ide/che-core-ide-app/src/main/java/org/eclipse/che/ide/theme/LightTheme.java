@@ -1416,4 +1416,19 @@ public class LightTheme implements Theme {
     public String toolButtonActiveBoxShadow() {
         return "inset 1px 1px 0 0 #6F6E6E";
     }
+
+    @Override
+    public String gitConsoleStagedFilesColor() {
+        return "green";
+    }
+
+    @Override
+    public String gitConsoleUnstagedFilesColor() {
+        return "red";
+    }
+
+    @Override
+    public String gitConsoleErrorColor() {
+        return "red";
+    }
 }

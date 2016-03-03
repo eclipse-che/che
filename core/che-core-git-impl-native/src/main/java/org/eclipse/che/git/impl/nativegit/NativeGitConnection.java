@@ -14,6 +14,7 @@ package org.eclipse.che.git.impl.nativegit;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ErrorCodes;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.Config;
@@ -87,8 +88,6 @@ import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -103,14 +102,19 @@ import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
  */
 public class NativeGitConnection implements GitConnection {
 
-    private static final Pattern authErrorPattern         =
-        Pattern.compile(
-            ".*fatal: could not read (Username|Password) for '.*': No such device or address.*|" +
-            ".*fatal: could not read (Username|Password) for '.*': Input/output error.*|" +
-            ".*fatal: Authentication failed for '.*'.*|.*fatal: Could not read from remote repository\\.\\n\\nPlease make sure " +
-            "you have the correct access rights\\nand the repository exists\\.\\n.*",
-            Pattern.MULTILINE);
-    private static final Pattern notInGitRepoErrorPattern = Pattern.compile("^fatal: Not a git repository.*(\\n.*)*$", Pattern.MULTILINE);
+    private static final Pattern authErrorPattern                         =
+            Pattern.compile(
+                    ".*fatal: could not read (Username|Password) for '.*': No such device or address.*|" +
+                    ".*fatal: could not read (Username|Password) for '.*': Input/output error.*|" +
+                    ".*fatal: Authentication failed for '.*'.*|.*fatal: Could not read from remote repository\\.\\n\\nPlease make sure " +
+                    "you have the correct access rights\\nand the repository exists\\.\\n.*",
+                    Pattern.MULTILINE);
+    private static final Pattern notInGitRepoErrorPattern                 =
+            Pattern.compile("^fatal: Not a git repository.*(\\n.*)*$", Pattern.MULTILINE);
+    private static final Pattern noInitCommitWhenBranchCreateErrorPattern = Pattern.compile("fatal: Not a valid object name: '.*'.\n");
+    private static final Pattern noInitCommitWhenLogErrorPattern          =
+            Pattern.compile("fatal: your current branch '.*' does not have any commits yet\n");
+    private static final Pattern noInitCommitWhenPullErrorPattern         = Pattern.compile("fatal: empty ident name .* not allowed\n");
     private final NativeGit         nativeGit;
     private final CredentialsLoader credentialsLoader;
     private final GitUserResolver   userResolver;
@@ -175,8 +179,14 @@ public class NativeGitConnection implements GitConnection {
     public Branch branchCreate(BranchCreateRequest request) throws GitException {
         BranchCreateCommand branchCreateCommand = nativeGit.createBranchCreateCommand();
         branchCreateCommand.setBranchName(request.getName())
-                           .setStartPoint(request.getStartPoint())
-                           .execute();
+                           .setStartPoint(request.getStartPoint());
+        try {
+            branchCreateCommand.execute();
+        } catch (ServerException exception) {
+            if (noInitCommitWhenBranchCreateErrorPattern.matcher(exception.getMessage()).find()) {
+                throw new GitException(exception.getMessage(), ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
+            }
+        }
         return DtoFactory.getInstance().createDto(Branch.class).withName(getBranchRef(request.getName())).withActive(false)
                          .withDisplayName(request.getName()).withRemote(false);
     }
@@ -358,25 +368,19 @@ public class NativeGitConnection implements GitConnection {
         InitCommand initCommand = nativeGit.createInitCommand();
         initCommand.setBare(request.isBare());
         initCommand.execute();
-        //make initial commit.
-        if (!request.isBare() && request.isInitCommit()) {
-            try {
-                nativeGit.createAddCommand()
-                         .setFilePattern(new ArrayList<>(Collections.singletonList(".")))
-                         .execute();
-                nativeGit.createCommitCommand()
-                         .setCommitter(getLocalCommitter())
-                         .setMessage("init")
-                         .execute();
-            } catch (GitException ignored) {
-                //if nothing to commit
-            }
-        }
     }
 
     @Override
     public LogPage log(LogRequest request) throws GitException {
-        return new LogPage(nativeGit.createLogCommand().setFileFilter(request.getFileFilter()).execute());
+        try {
+            return new LogPage(nativeGit.createLogCommand().setFileFilter(request.getFileFilter()).execute());
+        } catch (ServerException exception) {
+            if (noInitCommitWhenLogErrorPattern.matcher(exception.getMessage()).find()) {
+                throw new GitException(exception.getMessage(), ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
+            } else {
+                throw exception;
+            }
+        }        
     }
 
     @Override
@@ -419,7 +423,20 @@ public class NativeGitConnection implements GitConnection {
                    .setRemoteUri(remoteUri)
                    .setTimeout(request.getTimeout());
 
-        executeRemoteCommand(pullCommand);
+        try {
+            executeRemoteCommand(pullCommand);
+        } catch (GitException exception) {
+            if (noInitCommitWhenPullErrorPattern.matcher(exception.getMessage()).find()) {
+                throw new GitException(exception.getMessage(), ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED);
+            } else if ("Unable get private ssh key".equals(exception.getMessage())) {
+                throw new GitException(exception.getMessage(), ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY);
+            } else if (("Auto-merging file\nCONFLICT (content): Merge conflict in file\n" +
+                        "Automatic merge failed; fix conflicts and then commit the result.\n").equals(exception.getMessage())) {
+                throw new GitException(exception.getMessage(), ErrorCodes.MERGE_CONFLICT);
+            } else {
+                throw exception;
+            }
+        }
 
         return pullCommand.getPullResponse();
     }

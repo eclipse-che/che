@@ -177,6 +177,7 @@ body, td {
 .gwt-TextBox {
     min-height: 22px;
     padding: 0 5px 0 5px;
+    transition: border-bottom 0.2s linear;
 }
 
 .gwt-TextArea {
@@ -185,9 +186,14 @@ body, td {
     resize: none;
 }
 
+.gwt-TextBox[success] {
+    border-bottom: 1px solid successColor;
+}
+
 .gwt-TextBox:invalid,
 .gwt-TextBox:required,
-.gwt-TextBox.inputError {
+.gwt-TextBox.inputError,
+.gwt-TextBox[error] {
     border-bottom: 1px solid errorColor !important;
 }
 
@@ -199,11 +205,6 @@ body, td {
     background-color: textFieldFocusedBackgroundColor;
     -webkit-text-fill-color: textFieldFocusedColor;
     -webkit-animation: textFieldFocus 0.2s infinite;
-}
-
-.gwt-TextBox:focus {
-    border-bottom: 1px solid successColor;
-    transition: border-bottom 0.2s linear;
 }
 
 .gwt-TextBox-readonly:focus {

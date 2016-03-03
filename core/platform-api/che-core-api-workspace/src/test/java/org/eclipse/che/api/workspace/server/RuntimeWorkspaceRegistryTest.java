@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -22,7 +21,6 @@ import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
@@ -37,7 +35,6 @@ import org.testng.annotations.Test;
 import java.util.Collections;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -76,48 +73,6 @@ public class RuntimeWorkspaceRegistryTest {
         when(machineManagerMock.createMachineSync(any(), any(), any()))
                 .thenAnswer(invocation -> machineMock((MachineConfig)invocation.getArguments()[0]));
         registry = new RuntimeWorkspaceRegistry(machineManagerMock);
-    }
-
-    @Test(expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "Required non-null workspace")
-    public void testStartWithNullWorkspace() throws Exception {
-        registry.start(null, "environment");
-    }
-
-    @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Couldn't start workspace '.*', environment name is null")
-    public void testStartWithNullEnvName() throws Exception {
-        registry.start(workspaceMock(), null);
-    }
-
-    @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Couldn't start workspace '', workspace doesn't have environment 'non-existing'")
-    public void testStartWithNonExistingEnvironmentName() throws Exception {
-        registry.start(workspaceMock(), "non-existing");
-    }
-
-    @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Couldn't start workspace '.*' from environment '.*', " +
-                                            "environment recipe has unsupported type 'non-docker'")
-    public void testStartWithNonDockerEnvironmentRecipe() throws Exception {
-        final UsersWorkspaceImpl workspaceMock = workspaceMock();
-        EnvironmentImpl environment = new EnvironmentImpl(workspaceMock.getConfig().getDefaultEnv(),
-                                                          new RecipeImpl().withType("non-docker"),
-                                                          null);
-        when(workspaceMock.getConfig().getEnvironments()).thenReturn(singletonList(environment));
-
-        registry.start(workspaceMock, workspaceMock.getConfig().getDefaultEnv());
-    }
-
-    @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Couldn't start workspace '.*' from environment '.*', environment doesn't contain dev-machine")
-    public void testStartWithEnvironmentWhichDoesNotContainDevMachine() throws Exception {
-        final UsersWorkspaceImpl workspaceMock = workspaceMock();
-        EnvironmentImpl environment = new EnvironmentImpl(workspaceMock.getConfig().getDefaultEnv(),
-                                                          new RecipeImpl().withType("docker"), null);
-        environment.setMachineConfigs(emptyList());
-        when(workspaceMock.getConfig().getEnvironments()).thenReturn(singletonList(environment));
-
-        registry.start(workspaceMock, workspaceMock.getConfig().getDefaultEnv());
     }
 
     @Test

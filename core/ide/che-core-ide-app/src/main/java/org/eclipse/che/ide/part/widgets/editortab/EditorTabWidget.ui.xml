@@ -78,6 +78,9 @@
             font-size: 11px;
             font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
             line-height: 22px;
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .closeTabPanel {
@@ -211,7 +214,7 @@
         <g:Label ui:field="title" styleName="{style.titlePanel}" />
         <g:FlowPanel styleName="{style.closeTabPanel}">
             <g:FlowPanel ui:field="closeButton" styleName="{style.closeTabButton}">
-                <svg:SVGImage resource="{resources.closeIcon}"></svg:SVGImage>
+                <svg:SVGImage resource="{resources.closeIcon}"/>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

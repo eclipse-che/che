@@ -88,7 +88,7 @@ public class DeleteRepositoryPresenter {
         service.deleteRepository(workspaceId, project.getRootProject(), new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
-                console.printInfo(constant.deleteGitRepositorySuccess());
+                console.print(constant.deleteGitRepositorySuccess());
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                 notificationManager.notify(constant.deleteGitRepositorySuccess(), project.getRootProject());
                 getRootProject(project.getRootProject());

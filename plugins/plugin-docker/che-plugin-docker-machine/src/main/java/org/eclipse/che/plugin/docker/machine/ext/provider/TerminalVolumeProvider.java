@@ -34,7 +34,7 @@ import java.nio.file.Paths;
 @Singleton
 public class TerminalVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/terminal:ro";
+    private static final String CONTAINER_TARGET = ":/mnt/che/terminal:ro,Z";
     private static final String TERMINAL         = "terminal";
     private static final Logger LOG              = LoggerFactory.getLogger(TerminalVolumeProvider.class);
 

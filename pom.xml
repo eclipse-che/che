@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.0.0-RC9-SNAPSHOT</version>
+        <version>4.0.0-RC11-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>4.0.0-RC9-SNAPSHOT</version>
+    <version>4.0.0-RC11-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -36,7 +36,7 @@
         <url>https://github.com/codenvy/che-core</url>
     </scm>
     <properties>
-        <che.lib.version>4.0.0-RC9-SNAPSHOT</che.lib.version>
+        <che.lib.version>4.0.0-RC11-SNAPSHOT</che.lib.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>

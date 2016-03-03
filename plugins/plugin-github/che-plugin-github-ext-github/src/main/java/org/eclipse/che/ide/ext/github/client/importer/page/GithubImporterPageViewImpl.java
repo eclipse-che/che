@@ -39,7 +39,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
@@ -48,6 +47,7 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.ext.github.client.GitHubLocalizationConstant;
 import org.eclipse.che.ide.ext.github.client.GitHubResources;
 import org.eclipse.che.ide.ext.github.client.load.ProjectData;
+import org.eclipse.che.ide.ui.TextBox;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -239,30 +239,44 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
         projectName.setText("");
         projectDescription.setText("");
         githubPanel.removeFromParent();
-        hideUrlError();
-        hideNameError();
+
+        unmarkURL();
+        unmarkName();
     }
 
     @Override
-    public void showNameError() {
-        projectName.addStyleName(style.inputError());
+    public void markURLValid() {
+        projectUrl.markValid();
     }
 
     @Override
-    public void hideNameError() {
-        projectName.removeStyleName(style.inputError());
+    public void markURLInvalid() {
+        projectUrl.markInvalid();
     }
 
     @Override
-    public void showUrlError(@NotNull String message) {
-        projectUrl.addStyleName(style.inputError());
-        labelUrlError.setText(message);
+    public void unmarkURL() {
+        projectUrl.unmark();
     }
 
     @Override
-    public void hideUrlError() {
-        projectUrl.removeStyleName(style.inputError());
-        labelUrlError.setText("");
+    public void setURLErrorMessage(@NotNull String message) {
+        labelUrlError.setText(message != null ? message : "");
+    }
+
+    @Override
+    public void markNameValid() {
+        projectName.markValid();
+    }
+
+    @Override
+    public void markNameInvalid() {
+        projectName.markInvalid();
+    }
+
+    @Override
+    public void unmarkName() {
+        projectName.unmark();
     }
 
     @NotNull

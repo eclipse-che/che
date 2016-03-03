@@ -115,7 +115,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                                if (!result.isClean()) {
                                    addSelection();
                                } else {
-                                   console.printInfo(constant.nothingAddToIndex());
+                                   console.print(constant.nothingAddToIndex());
                                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                                    notificationManager.notify(constant.nothingAddToIndex(), project.getRootProject());
                                }
@@ -181,7 +181,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                 @Override
                 protected void onSuccess(final Void result) {
 
-                    console.printInfo(constant.addSuccess());
+                    console.print(constant.addSuccess());
                     consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                     notificationManager.notify(constant.addSuccess(), project.getRootProject());
                 }

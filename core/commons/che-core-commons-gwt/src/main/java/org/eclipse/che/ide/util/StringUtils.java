@@ -297,7 +297,7 @@ public class StringUtils {
     }
 
     public static boolean isNullOrEmpty(String s) {
-        return s == null || "".equals(s);
+        return s == null || s.isEmpty();
     }
 
     public static boolean isNullOrWhitespace(String s) {

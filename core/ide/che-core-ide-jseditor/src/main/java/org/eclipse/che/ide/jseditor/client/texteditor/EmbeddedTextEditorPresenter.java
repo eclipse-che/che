@@ -106,6 +106,8 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
     /** File type used when we have no idea of the actual content type. */
     public final static String DEFAULT_CONTENT_TYPE = "text/plain";
 
+    private static final String TOGGLE_LINE_BREAKPOINT = "Toggle line breakpoint";
+
     private final WorkspaceAgent         workspaceAgent;
     private final EditorWidgetFactory<T> editorWidgetFactory;
     private final EditorModule<T>        editorModule;
@@ -235,7 +237,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
                 int currentLine = editorWidget.getDocument().getCursorPosition().getLine();
                 breakpointManager.changeBreakpointState(currentLine);
             }
-        }));
+        }),  TOGGLE_LINE_BREAKPOINT);
     }
 
     private void setupFileContentUpdateHandler() {

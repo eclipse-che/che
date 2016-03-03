@@ -26,7 +26,7 @@
     <che-panel che-title="Import workspace" ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-import'">
 
       <ui-codemirror class="workspace-editor" ui-codemirror="createWorkspaceCtrl.editorOptions"
-                     ng-model="createWorkspaceCtrl.workspaceConfig"></ui-codemirror>
+                     ng-model="createWorkspaceCtrl.importWorkspace"></ui-codemirror>
 
     </che-panel>
     <che-workspace-select-stack ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-recipe'"

@@ -92,7 +92,7 @@ public class InitRepositoryPresenter {
 
             @Override
             public void onSuccess(Void result) {
-                console.printInfo(constant.initSuccess());
+                console.print(constant.initSuccess());
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                 notificationManager.notify(constant.initSuccess(), currentProject.getRootProject());
                 getRootProject(currentProject.getRootProject());

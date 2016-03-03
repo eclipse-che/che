@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.oauth;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.security.oauth.OAuthStatus;
 
 /**
@@ -19,7 +20,9 @@ import org.eclipse.che.security.oauth.OAuthStatus;
  */
 public interface OAuth2Authenticator {
 
-    void authorize(String authenticatorUrl, AsyncCallback<OAuthStatus> callback);
+    void authenticate(String authenticationUrl, AsyncCallback<OAuthStatus> callback);
+
+    Promise<OAuthStatus> authenticate(String authenticationUrl);
 
     String getProviderName();
 }

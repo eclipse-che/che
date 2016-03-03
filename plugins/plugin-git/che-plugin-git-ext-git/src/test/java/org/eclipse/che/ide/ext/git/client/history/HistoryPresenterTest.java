@@ -98,6 +98,7 @@ public class HistoryPresenterTest extends BaseTest {
                                          constant,
                                          appContext,
                                          notificationManager,
+                                         dialogFactory,
                                          dtoUnmarshallerFactory,
                                          dateTimeFormatter,
                                          selectionAgent,
