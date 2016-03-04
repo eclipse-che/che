@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC11-SNAPSHOT</version>
+        <version>4.0.0-RC12-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-machine-war</artifactId>
     <packaging>war</packaging>
