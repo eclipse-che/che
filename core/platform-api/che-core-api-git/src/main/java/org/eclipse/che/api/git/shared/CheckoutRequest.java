@@ -60,4 +60,11 @@ public interface CheckoutRequest extends GitRequest {
     
     CheckoutRequest withFiles(List<String> files);
 
+    void setNoTrack(boolean noTrack);
+
+    /** @return indicates whether --no-track option should be applied during checkout */
+    boolean isNoTrack();
+
+    CheckoutRequest withNoTrack(boolean noTrack);
+
 }
