@@ -106,21 +106,12 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
         void onPreviewSsh(@NotNull String machineId);
 
         /**
-         * Will be called when user selects command node
+         * Perform actions when tree node is selected.
          *
-         * @param commandId
-         *         id of command node
+         * @param node
+         *         selected tree node
          */
-        void onCommandSelected(@NotNull String commandId);
-
-        /**
-         * Will be called when user selects terminal node
-         *
-         * @param terminalId
-         *         id of terminal node
-         */
-        void onTerminalSelected(@NotNull String terminalId);
-
+        void onTreeNodeSelected(@NotNull ProcessTreeNode node);
 
         /**
          * Will be called when user clicks 'Stop' button

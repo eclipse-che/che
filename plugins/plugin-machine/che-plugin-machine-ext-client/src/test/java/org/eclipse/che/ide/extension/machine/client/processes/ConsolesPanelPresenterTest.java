@@ -440,9 +440,12 @@ public class ConsolesPanelPresenterTest {
 
     @Test
     public void shouldShowCommanOutputWhenCommandSelected() throws Exception {
+        ProcessTreeNode commandNode = mock(ProcessTreeNode.class);
+        when(commandNode.getId()).thenReturn(PROCESS_ID);
+
         presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onCommandSelected(PROCESS_ID);
+        presenter.onTreeNodeSelected(commandNode);
 
         verify(view).showProcessOutput(eq(PROCESS_ID));
         verify(view).setProcessRunning(anyString(), eq(true));
@@ -450,20 +453,26 @@ public class ConsolesPanelPresenterTest {
 
     @Test
     public void stopButtonShouldBeHiddenWhenConsoleHasFinishedProcess() {
+        ProcessTreeNode commandNode = mock(ProcessTreeNode.class);
+        when(commandNode.getId()).thenReturn(PROCESS_ID);
+
         when(outputConsole.isFinished()).thenReturn(true);
         presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onCommandSelected(PROCESS_ID);
+        presenter.onTreeNodeSelected(commandNode);
 
         verify(view).setProcessRunning(PROCESS_ID, false);
     }
 
     @Test
     public void stopButtonStateShouldBeRefreshedWhenConsoleHasRunningProcess() {
+        ProcessTreeNode commandNode = mock(ProcessTreeNode.class);
+        when(commandNode.getId()).thenReturn(PROCESS_ID);
+
         when(outputConsole.isFinished()).thenReturn(false);
         presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onCommandSelected(PROCESS_ID);
+        presenter.onTreeNodeSelected(commandNode);
 
         verify(view).setProcessRunning(PROCESS_ID, true);
     }
@@ -557,7 +566,9 @@ public class ConsolesPanelPresenterTest {
         TerminalPresenter terminal = mock(TerminalPresenter.class);
         presenter.terminals.put(PROCESS_ID, terminal);
 
-        presenter.onTerminalSelected(PROCESS_ID);
+        ProcessTreeNode terminalNode = mock(ProcessTreeNode.class);
+        when(terminalNode.getId()).thenReturn(PROCESS_ID);
+        presenter.onTreeNodeSelected(terminalNode);
 
         verify(view).showProcessOutput(eq(PROCESS_ID));
         verify(view, never()).setProcessRunning(PROCESS_ID, true);
