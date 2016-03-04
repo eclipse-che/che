@@ -39,6 +39,7 @@ import org.eclipse.che.ide.ext.java.client.project.interceptor.TestContentRootDe
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 import org.eclipse.che.ide.ext.java.client.project.settings.JavaNodeSettingsProvider;
+import org.eclipse.che.ide.ext.java.client.reference.JavaFqnProvider;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchService;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchServiceWS;
 import org.eclipse.che.ide.ext.java.client.search.node.NodeFactory;
@@ -46,6 +47,7 @@ import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsPresen
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidgetImpl;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
+import org.eclipse.che.ide.reference.FqnProvider;
 import org.eclipse.che.ide.settings.common.SettingsPagePresenter;
 
 /**
@@ -73,6 +75,8 @@ public class JavaGinModule extends AbstractGinModule {
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(JavaClassInterceptor.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(TestContentRootDecorator.class);
 
+        GinMapBinder<String, FqnProvider> fqnProviders = GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
+        fqnProviders.addBinding("maven").to(JavaFqnProvider.class);
 
         install(new GinFactoryModuleBuilder().build(JavaNodeFactory.class));
         install(new GinFactoryModuleBuilder().implement(PropertyWidget.class, PropertyWidgetImpl.class)
