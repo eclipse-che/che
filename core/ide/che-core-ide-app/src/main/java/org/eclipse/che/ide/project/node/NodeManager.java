@@ -15,7 +15,9 @@ import com.google.common.base.Predicate;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Function;
@@ -84,7 +86,8 @@ public class NodeManager {
                        SettingsProvider nodeSettingsProvider,
                        DtoFactory dtoFactory,
                        Set<NodeIconProvider> nodeIconProvider,
-                       AppContext appContext) {
+                       final AppContext appContext,
+                       EventBus eventBus) {
         this.nodeFactory = nodeFactory;
         this.projectService = projectService;
         this.dtoUnmarshaller = dtoUnmarshaller;
@@ -93,8 +96,47 @@ public class NodeManager {
         this.dtoFactory = dtoFactory;
         this.nodeIconProvider = nodeIconProvider;
         this.appContext = appContext;
-        
+
         this.workspaceId = appContext.getWorkspace().getId();
+
+        eventBus.addHandler(DeleteProjectEvent.TYPE, new DeleteProjectHandler() {
+            @Override
+            public void onProjectDeleted(final DeleteProjectEvent event) {
+                removeIf(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfig>() {
+                    @Override
+                    public boolean apply(@Nullable ProjectConfig input) {
+                        return input.getPath().equals(event.getProjectConfig().getPath());
+                    }
+                });
+            }
+        });
+
+        eventBus.addHandler(CreateProjectEvent.TYPE, new CreateProjectHandler() {
+            @Override
+            public void onProjectCreated(CreateProjectEvent event) {
+                appContext.getWorkspace().getConfig().getProjects().add(event.getProjectConfig());
+            }
+        });
+
+        eventBus.addHandler(ProjectUpdatedEvent.getType(), new ProjectUpdatedEvent.ProjectUpdatedHandler() {
+            @Override
+            public void onProjectUpdated(final ProjectUpdatedEvent event) {
+                final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfigDto>() {
+                    @Override
+                    public boolean apply(@Nullable ProjectConfigDto input) {
+                        return input.getPath().equals(event.getPath());
+                    }
+                });
+
+                if (!configOptional.isPresent()) {
+                    return;
+                }
+
+                if (appContext.getWorkspace().getConfig().getProjects().remove(configOptional.get())) {
+                    appContext.getWorkspace().getConfig().getProjects().add(event.getUpdatedProjectDescriptor());
+                }
+            }
+        });
     }
 
     /** Children operations ********************* */
@@ -118,21 +160,12 @@ public class NodeManager {
         return newPromise(new RequestCall<List<ItemReference>>() {
             @Override
             public void makeCall(AsyncCallback<List<ItemReference>> callback) {
-                projectService.getChildren(workspaceId, path, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
+                projectService
+                        .getChildren(workspaceId, path, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
             }
         }).thenPromise(filterItemReference())
           .thenPromise(createItemReferenceNodes(projectConfigDto, nodeSettings))
           .catchError(handleError());
-    }
-
-    protected Function<List<Node>, Promise<List<Node>>> sortNodes() {
-        return new Function<List<Node>, Promise<List<Node>>>() {
-            @Override
-            public Promise<List<Node>> apply(List<Node> nodes) throws FunctionException {
-                Collections.sort(nodes, new FoldersOnTopFilter());
-                return Promises.resolve(nodes);
-            }
-        };
     }
 
     @NotNull
@@ -140,7 +173,8 @@ public class NodeManager {
         return new RequestCall<List<ItemReference>>() {
             @Override
             public void makeCall(AsyncCallback<List<ItemReference>> callback) {
-                projectService.getChildren(workspaceId, path, _callback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
+                projectService
+                        .getChildren(workspaceId, path, _callback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
             }
         };
     }
@@ -217,6 +251,19 @@ public class NodeManager {
                     return Collections.emptyList();
                 }
 
+                //fill workspace projects with loaded actual configs, temporary solution that will be replaced after GA release
+                appContext.getWorkspace().getConfig().withProjects(new ArrayList<>(projects));
+
+                final Iterable<ProjectConfigDto> rootProjects = filter(projects, new Predicate<ProjectConfigDto>() {
+                    @Override
+                    public boolean apply(@Nullable ProjectConfigDto input) {
+                        final Path path = Path.valueOf(input.getPath());
+
+                        // For paths like: '/project' or '/project/' segment count always will be equals to 1
+                        return path.segmentCount() == 1;
+                    }
+                });
+
                 final NodeSettings settings = nodeSettingsProvider.getSettings();
 
                 final Iterable<Node> nodes = transform(rootProjects, new com.google.common.base.Function<ProjectConfigDto, Node>() {
@@ -230,41 +277,6 @@ public class NodeManager {
                 return newArrayList(nodes);
             }
         });
-    }
-
-    /** Content methods ********************* */
-
-    @NotNull
-    public Promise<String> getContent(@NotNull final VirtualFile virtualFile) {
-        return AsyncPromiseHelper.createFromAsyncRequest(contentGetRC(virtualFile));
-    }
-
-    @NotNull
-    private RequestCall<String> contentGetRC(@NotNull final VirtualFile vFile) {
-        return new RequestCall<String>() {
-            @Override
-            public void makeCall(AsyncCallback<String> callback) {
-                projectService.getFileContent(workspaceId, vFile.getPath(), _callback(callback, dtoUnmarshaller.newUnmarshaller(String.class)));
-            }
-        };
-    }
-
-    @NotNull
-    public Promise<Void> updateContent(@NotNull VirtualFile virtualFile, @NotNull String content) {
-        return AsyncPromiseHelper.createFromAsyncRequest(contentUpdateRC(virtualFile, content));
-    }
-
-    @NotNull
-    private RequestCall<Void> contentUpdateRC(@NotNull final VirtualFile vFile, @NotNull final String content) {
-        return new RequestCall<Void>() {
-            @Override
-            public void makeCall(AsyncCallback<Void> callback) {
-                projectService.updateFile(workspaceId, 
-                                          vFile.getPath(),
-                                          content,
-                                          _callback(callback, dtoUnmarshaller.newUnmarshaller(Void.class)));
-            }
-        };
     }
 
     /** Common methods ********************* */
@@ -313,6 +325,7 @@ public class NodeManager {
         return node;
     }
 
+    @Deprecated
     public static boolean isProjectOrModuleNode(Node node) {
         return node instanceof ProjectNode || node instanceof ModuleNode;
     }
