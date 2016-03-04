@@ -35921,19 +35921,19 @@ define('orion/editorCommands',[
 					if (window["promptIDE"]) {
 						window["promptIDE"](messages.gotoLineTooltip, messages.gotoLinePrompt, line + 1,
 							function(value) {
-                                if (!value) return;
-                                if (value.indexOf(":") > 0) {
-                                    var values = value.split(":");
-                                    if (!values[0] || !values[1]) return;
-                                    values[0] = parseInt(values[0], 10);
-                                    values[1] = parseInt(values[1], 10);
-                                    if (!values[0] || !values[1]) return;
-                                    editor.onGotoLine(values[0] - 1, values[1] - 1, values[1] - 1);
-                                } else {
-                                    value = parseInt(value, 10);
-                                    if (!value) return;
-                                    editor.onGotoLine(value - 1, 0);
-                                }
+								if (!value) return;
+								if (value.indexOf(":") > 0) {
+									var values = value.split(":");
+									if (!values[0] || !values[1]) return;
+									values[0] = parseInt(values[0], 10);
+									values[1] = parseInt(values[1], 10);
+									if (!values[0] || !values[1]) return;
+									editor.onGotoLine(values[0] - 1, values[1] - 1, values[1] - 1);
+								} else {
+									value = parseInt(value, 10);
+									if (!value) return;
+									editor.onGotoLine(value - 1, 0);
+								}
 							});
 						return;
 					}
@@ -35942,8 +35942,8 @@ define('orion/editorCommands',[
 					line = prompt(messages.gotoLinePrompt, line + 1);
 					if (!line) return;
 					line = parseInt(line, 10);
-                    if (!line) return;
-                    editor.onGotoLine(line - 1, 0);
+					if (!line) return;
+					editor.onGotoLine(line - 1, 0);
 				}
 			});
 			this.commandService.addCommand(gotoLineCommand);
