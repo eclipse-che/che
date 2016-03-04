@@ -12,9 +12,9 @@ package org.eclipse.che.ide.ext.java.client.reference;
 
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
 import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
-import org.eclipse.che.ide.reference.FqnProvider;
 
 /**
  * The class contains business logic which allows extract fqn for {@link PackageNode} and {@link JavaFileNode}.

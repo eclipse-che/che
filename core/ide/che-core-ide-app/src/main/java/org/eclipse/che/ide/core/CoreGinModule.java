@@ -96,6 +96,7 @@ import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscribe
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
@@ -162,7 +163,6 @@ import org.eclipse.che.ide.projecttype.ProjectTypeRegistryImpl;
 import org.eclipse.che.ide.projecttype.wizard.PreSelectedProjectTypeManagerImpl;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistryImpl;
-import org.eclipse.che.ide.reference.FqnProvider;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.RestContextProvider;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;

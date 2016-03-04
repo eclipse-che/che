@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.Map;
