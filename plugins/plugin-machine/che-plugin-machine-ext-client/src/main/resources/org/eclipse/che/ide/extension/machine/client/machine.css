@@ -307,19 +307,19 @@
 
 .processTree .processButton {
     float: right;
-    color: categoryHeaderButtonColor;
-    border: 1px solid categoryHeaderButtonColor;
     margin: 3px 6px 0 5px;
-    width: 14px;
+    width: 12px;
     height: 13px;
-    opacity: 0.5;
     font-size: 13px;
     font-weight: bold;
-    border-radius: 2px;
     line-height: 10px;
     box-sizing: border-box;
     text-align: center;
     cursor: pointer;
+}
+
+.processTree .processButton > svg {
+    margin-top: 2px;
 }
 
 .processButton span:hover {

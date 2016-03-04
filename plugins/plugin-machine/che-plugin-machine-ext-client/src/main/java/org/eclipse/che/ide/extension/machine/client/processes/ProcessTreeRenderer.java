@@ -107,7 +107,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                 locale.viewMachineRunningTooltip());
 
         SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().processButton());
-        newTerminalButton.setTextContent("+");
+        newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
         root.appendChild(newTerminalButton);
 
         Tooltip.create((elemental.dom.Element)newTerminalButton,

@@ -76,6 +76,9 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("control.machine.destroy.description")
     String machineDestroyDescription();
 
+    @Key("control.terminal.new")
+    String newTerminal();
+
     @Key("control.terminal.create.text")
     String newTerminalTitle();
 

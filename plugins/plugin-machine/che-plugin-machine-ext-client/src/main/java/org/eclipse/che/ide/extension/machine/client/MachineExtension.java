@@ -36,7 +36,6 @@ import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBoxReady;
@@ -47,6 +46,7 @@ import org.eclipse.che.ide.extension.machine.client.machine.console.ClearConsole
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleToolbar;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
@@ -108,7 +108,6 @@ public class MachineExtension {
     private void prepareActions(MachineLocalizationConstant localizationConstant,
                                 ActionManager actionManager,
                                 KeyBindingAgent keyBinding,
-                                NewTerminalAction newTerminalAction,
                                 ExecuteSelectedCommandAction executeSelectedCommandAction,
                                 SelectCommandComboBoxReady selectCommandAction,
                                 EditCommandsAction editCommandsAction,
@@ -119,7 +118,8 @@ public class MachineExtension {
                                 StopMachineAction stopMachineAction,
                                 SwitchPerspectiveAction switchPerspectiveAction,
                                 CreateSnapshotAction createSnapshotAction,
-                                RunCommandAction runCommandAction) {
+                                RunCommandAction runCommandAction,
+                                NewTerminalAction newTerminalAction) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -129,9 +129,6 @@ public class MachineExtension {
         actionManager.registerAction("editCommands", editCommandsAction);
         actionManager.registerAction("selectCommandAction", selectCommandAction);
         actionManager.registerAction("executeSelectedCommand", executeSelectedCommandAction);
-
-        // add actions in main menu
-        runMenu.add(editCommandsAction, FIRST);
 
         //add actions in machine menu
         final DefaultActionGroup machineMenu = new DefaultActionGroup(localizationConstant.mainMenuMachine(), true, actionManager);
@@ -145,6 +142,11 @@ public class MachineExtension {
         actionManager.registerAction("createSnapshot", createSnapshotAction);
         actionManager.registerAction("runCommand", runCommandAction);
         actionManager.registerAction("newTerminal", newTerminalAction);
+
+        // add actions in main menu
+        runMenu.add(newTerminalAction, FIRST);
+        runMenu.addSeparator();
+        runMenu.add(editCommandsAction);
 
         workspaceMenu.add(stopWorkspaceAction);
 
