@@ -230,9 +230,9 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
                     final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
-                            .withName(machineProcessDto.getName())
-                            .withCommandLine(machineProcessDto.getCommandLine())
-                            .withType(machineProcessDto.getType());
+                                                            .withName(machineProcessDto.getName())
+                                                            .withCommandLine(machineProcessDto.getCommandLine())
+                                                            .withType(machineProcessDto.getType());
 
                     final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
                     if (type != null) {

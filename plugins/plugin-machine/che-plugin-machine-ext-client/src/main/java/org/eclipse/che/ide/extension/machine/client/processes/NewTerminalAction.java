@@ -34,8 +34,8 @@ public class NewTerminalAction extends AbstractPerspectiveAction {
     @Inject
     public NewTerminalAction(MachineLocalizationConstant locale,
                              MachineResources machineResources,
-                               ConsolesPanelPresenter consolesPanelPresenter,
-                               AnalyticsEventLogger eventLogger) {
+                             ConsolesPanelPresenter consolesPanelPresenter,
+                             AnalyticsEventLogger eventLogger) {
         super(Collections.singletonList( PROJECT_PERSPECTIVE_ID),
                 locale.newTerminal(),
                 locale.newTerminalDescription(),
