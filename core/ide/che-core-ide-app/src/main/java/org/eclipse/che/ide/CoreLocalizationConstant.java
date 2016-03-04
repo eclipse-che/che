@@ -769,4 +769,13 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("error.configuration.content")
     String errorConfigurationContent();
+
+    @Key("show.reference")
+    String showReference();
+
+    @Key("reference.label")
+    String referenceLabel();
+
+    @Key("path.label")
+    String pathLabel();
 }
