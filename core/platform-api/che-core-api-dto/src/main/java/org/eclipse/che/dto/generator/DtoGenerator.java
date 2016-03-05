@@ -128,14 +128,6 @@ public class DtoGenerator {
         File outFile = new File(outputFilePath);
 
         try {
-            StringBuilder sb = new StringBuilder();
-            for (String dtoPackage : dtoPackages) {
-                if (sb.length() > 0) {
-                    sb.append(dtoPackage);
-                }
-                sb.append(dtoPackage);
-            }
-
             DtoTemplate dtoTemplate = new DtoTemplate(packageName, className, impl);
             Reflections reflection = new Reflections(new ConfigurationBuilder().setUrls(urls).setScanners(new SubTypesScanner(), new TypeAnnotationsScanner()));
             
