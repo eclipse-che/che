@@ -1129,7 +1129,7 @@ export class CreateProjectCtrl {
     if (!name) {
       return;
     }
-    if (!this.defaultProjectName || this.defaultProjectName === this.projectName) {
+    if (!this.projectName || !this.defaultProjectName || this.defaultProjectName === this.projectName) {
       this.defaultProjectName = name;
       this.projectName = angular.copy(name);
     }
@@ -1144,7 +1144,7 @@ export class CreateProjectCtrl {
     if (!description) {
       return;
     }
-    if (!this.defaultProjectDescription || this.defaultProjectDescription === this.projectDescription) {
+    if (!this.projectDescription || !this.defaultProjectDescription || this.defaultProjectDescription === this.projectDescription) {
       this.defaultProjectDescription = description;
       this.projectDescription = angular.copy(description);
     }
