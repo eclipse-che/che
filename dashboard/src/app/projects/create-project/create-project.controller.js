@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -34,6 +34,7 @@ export class CreateProjectCtrl {
     this.createProjectSvc = createProjectSvc;
     this.lodash = lodash;
     this.$q = $q;
+    this.$document = $document;
 
     // JSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
@@ -206,7 +207,7 @@ export class CreateProjectCtrl {
     //if create project in progress and workspace have started
     if (this.createProjectSvc.isCreateProjectInProgress() && this.createProjectSvc.getCurrentProgressStep() > 0) {
       let workspaceName = this.createProjectSvc.getWorkspaceOfProject();
-      let findWorkspace = this.lodash.find(this.workspaces, function (workspace) {
+      let findWorkspace = this.lodash.find(this.workspaces, (workspace) => {
         return workspace.config.name === workspaceName;
       });
       //check current workspace
@@ -319,16 +320,16 @@ export class CreateProjectCtrl {
   }
 
 
-  startWorkspace(bus, data) {
+  startWorkspace(bus, workspace) {
 
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
 
-    startWorkspacePromise.then((data) => {
+    startWorkspacePromise.then((workspace) => {
       // get channels
-      let environments = data.config.environments;
-      let envName = data.config.defaultEnv;
+      let environments = workspace.config.environments;
+      let envName = workspace.config.defaultEnv;
       let defaultEnvironment = this.lodash.find(environments, (environment) => {
         return environment.name === envName;
       });
@@ -343,9 +344,9 @@ export class CreateProjectCtrl {
         return machineConfigsLink.rel === 'get machine logs channel';
       });
 
-      let workspaceId = data.id;
+      let workspaceId = workspace.id;
 
-      let agentChannel = 'workspace:' + data.id + ':ext-server:output';
+      let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
       let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
       let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
@@ -366,7 +367,7 @@ export class CreateProjectCtrl {
         // for now, display log of status channel in case of errors
         this.listeningChannels.push(statusChannel);
         bus.subscribe(statusChannel, (message) => {
-          if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
+          if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
             this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
 
             // need to show the error
@@ -378,7 +379,7 @@ export class CreateProjectCtrl {
                 .ok('OK')
             );
           }
-          if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
+          if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
             this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
             // need to show the error
             this.$mdDialog.show(
@@ -539,8 +540,11 @@ export class CreateProjectCtrl {
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-
-      // need to show the error
+      //if we have a SSH error
+      if (error.data.errorCode === 32068) {
+        this.showAddSecretKeyDialog(projectData.source.location, workspaceId);
+        return;
+      }
       this.$mdDialog.show(
         this.$mdDialog.alert()
           .title('Error while creating the project')
@@ -550,6 +554,25 @@ export class CreateProjectCtrl {
       );
     });
 
+  }
+
+  /**
+   * Show the add ssh key dialog
+   * @param repoURL  the repository URL
+   * @param workspaceId  the workspace IDL
+   */
+  showAddSecretKeyDialog(repoURL, workspaceId) {
+    let parentEl = angular.element(this.$document.body);
+
+    this.$mdDialog.show({
+      bindToController: true,
+      clickOutsideToClose: true,
+      controller: 'AddSecretKeyNotificationCtrl',
+      controllerAs: 'addSecretKeyNotificationCtrl',
+      locals: {repoURL: repoURL, workspaceId: workspaceId},
+      parent: parentEl,
+      templateUrl: 'app/projects/create-project/add-ssh-key-notification/add-ssh-key-notification.html'
+    });
   }
 
   /**
@@ -739,7 +762,7 @@ export class CreateProjectCtrl {
         // needs to get recipe URL from stack
         let promise = this.computeRecipeForStack(this.stack);
         promise.then((recipe) => {
-          let findLink = this.lodash.find(recipe.links, function (link) {
+          let findLink = this.lodash.find(recipe.links, (link) => {
             return link.rel === 'get recipe script';
           });
           if (findLink) {
@@ -815,22 +838,22 @@ export class CreateProjectCtrl {
 
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
-    creationPromise.then((data) => {
+    creationPromise.then((workspace) => {
 
       // init message bus if not there
       if (this.workspaces.length === 0) {
-        this.messageBus = this.cheAPI.getWebsocket().getBus(data.id);
+        this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
       }
 
       // recipe url
-      let bus = this.cheAPI.getWebsocket().getBus(data.id);
+      let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
 
       // subscribe to workspace events
-      let workspaceChannel = 'workspace:' + data.id;
+      let workspaceChannel = 'workspace:' + workspace.id;
       this.listeningChannels.push(workspaceChannel);
       bus.subscribe(workspaceChannel, (message) => {
 
-        if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
+        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
           this.createProjectSvc.setCurrentProgressStep(2);
           this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
           // need to show the error
@@ -844,23 +867,23 @@ export class CreateProjectCtrl {
         }
 
 
-        if (message.eventType === 'RUNNING' && message.workspaceId === data.id) {
+        if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id) {
           this.createProjectSvc.setCurrentProgressStep(2);
 
           this.importProjectData.project.name = this.projectName;
 
-          let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(data.id);
+          let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(workspace.id);
           promiseRuntime.then(() => {
-            let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(data.id);
+            let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
             // try to connect
             this.websocketReconnect = 10;
-            this.connectToExtensionServer(websocketUrl, data.id, this.importProjectData.project.name, this.importProjectData, bus);
+            this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
 
           });
         }
       });
       this.$timeout(() => {
-        this.startWorkspace(bus, data);
+        this.startWorkspace(bus, workspace);
       }, 1000);
 
     }, (error) => {
