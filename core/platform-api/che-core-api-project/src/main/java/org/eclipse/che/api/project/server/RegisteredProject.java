@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Internal Project implementation
@@ -56,7 +57,7 @@ public class RegisteredProject implements ProjectConfig {
      *         - if this object was updated, i.e. no more synchronized with workspace master
      * @param detected
      *         - if this project was detected, initialized when "parent" project initialized
-     * @param projectTypeRegistry
+     * @param projectTypeRegistry - project type registry
      */
     RegisteredProject(FolderEntry folder,
                       ProjectConfig config,
@@ -77,18 +78,25 @@ public class RegisteredProject implements ProjectConfig {
         if (config == null)
             problems.add(new Problem(11, "No project configured in workspace " + this.config.getPath()));
 
+        // 1. init project types
         this.types = new ProjectTypes(this.config.getPath(), this.config.getType(), this.config.getMixins(), projectTypeRegistry);
 
-        // init transient (implicit, like git) project types.
-        // TODO should we do that in constructor?
+        // 2. init transient (implicit, like git) project types.
         types.addTransient(folder);
 
-        // initialize attributes
+        // 3. initialize attributes
         initAttributes();
 
 
     }
 
+    /**
+     * inits project attributes
+     * @throws ValueStorageException
+     * @throws ProjectTypeConstraintException
+     * @throws ServerException
+     * @throws NotFoundException
+     */
     private void initAttributes()
             throws ValueStorageException, ProjectTypeConstraintException, ServerException, NotFoundException {
 
@@ -110,7 +118,7 @@ public class RegisteredProject implements ProjectConfig {
 
                 if (valueProviderFactory != null) {
 
-                    // read-only. TODO the constants instead?
+                    // read-only.
                     if(folder != null)
                         value = new AttributeValue(valueProviderFactory.newInstance(folder).getValues(name));
                     else
@@ -132,31 +140,54 @@ public class RegisteredProject implements ProjectConfig {
     }
 
 
+    /**
+     * @return primary project type
+     */
     public ProjectTypeDef getProjectType() {
         return types.getPrimary();
     }
 
+    /**
+     * @return mixin project types
+     */
     public Map<String, ProjectTypeDef> getMixinTypes() {
         return types.getMixins();
     }
 
+    /**
+     * @return all project types (primary + mixins, convenient method)
+     */
     public Map<String, ProjectTypeDef> getTypes() {
         return types.getAll();
     }
 
+    /**
+     * @return attributes as name / Value Map
+     */
     public Map<String, Value> getAttributeEntries() {
         return attributes;
     }
 
 
+    /**
+     * @return whether this project is synchronized with Workspace storage
+     * On the other words this project is not updated
+     */
     public boolean isSynced() {
         return !this.updated;
     }
 
+    /**
+     * should be called after synchronization with Workspace storage
+     */
     public void setSync() {
         this.updated = false;
     }
 
+    /**
+     * @return whether this project is detected using Project Type resolver
+     * If so it should not be persisted to Workspace storage
+     */
     public boolean isDetected() {
         return detected;
     }
@@ -175,7 +206,9 @@ public class RegisteredProject implements ProjectConfig {
         return problems;
     }
 
-
+    /**
+     * @return non provided attributes, those attributes can be persisted to Workspace storage
+     */
     public Map<String, List <String>> getPersistableAttributes() {
         Map<String, List <String>> attrs = new HashMap<>();
         for(HashMap.Entry<String, Value> entry : getAttributeEntries().entrySet()) {
@@ -184,7 +217,6 @@ public class RegisteredProject implements ProjectConfig {
             // not provided, not constants
             if(def != null &&
                ((def.isVariable() && ((Variable) def).getValueProviderFactory() == null)))
- //              || !def.isVariable()))
                 attrs.put(entry.getKey(), entry.getValue().getList());
         }
         return attrs;
@@ -221,14 +253,9 @@ public class RegisteredProject implements ProjectConfig {
 
     @Override
     public List<String> getMixins() {
-        List <String> mixins = new ArrayList<>();
+        return types.getMixins().values().stream().filter(ProjectTypeDef::isPersisted).map(ProjectTypeDef::getId)
+                    .collect(Collectors.toList());
 
-        for(ProjectTypeDef mixin : types.getMixins().values()) {
-            if(mixin.isPersisted())
-                mixins.add(mixin.getId());
-        }
-
-        return mixins;
     }
 
     @Override

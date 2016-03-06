@@ -338,6 +338,7 @@ public final class ProjectManager {
 
     // ProjectSuggestion
     public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly) throws ServerException, NotFoundException {
+
         final List<ProjectTypeResolution> resolutions = new ArrayList<>();
 //        boolean isPresentPrimaryType = false;
 
@@ -465,7 +466,6 @@ public final class ProjectManager {
         return move;
     }
 
-    // TODO do we need ForbiddenException
     FolderEntry asFolder(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
         if (entry == null) {

@@ -32,9 +32,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Caches configuration
+ * Stores internal representation of Projects registered in the Workspace Agent
  *
  * @author gazarenkov
  */
@@ -129,15 +130,9 @@ public class ProjectRegistry {
         checkInitializationState();
 
         final Path root = Path.of(absolutizePath(parentPath));
-        List<String> children = new ArrayList<>();
 
-        for (String key : projects.keySet()) {
-            if (Path.of(key).isChild(root)) {
-                children.add(key);
-            }
-        }
-
-        return children;
+        return projects.keySet().stream().filter(key -> Path.of(key).isChild(root))
+                       .collect(Collectors.toList());
     }
 
     /**
@@ -164,7 +159,19 @@ public class ProjectRegistry {
 
     }
 
-    public RegisteredProject putProject(ProjectConfig config,
+    /**
+     * Creates RegisteredProject and caches it
+     * @param config - project config
+     * @param folder - base folder of project
+     * @param updated - whether this configuration was updated
+     * @param detected - whether this is automatically detected or explicitly defined project
+     * @return project
+     * @throws ServerException
+     * @throws ConflictException
+     * @throws NotFoundException
+     * @throws ForbiddenException
+     */
+    RegisteredProject putProject(ProjectConfig config,
                                         FolderEntry folder,
                                         boolean updated,
                                         boolean detected) throws ServerException,
@@ -181,7 +188,7 @@ public class ProjectRegistry {
      *
      * @param path - from where to remove
      */
-    public void removeProjects(String path) throws ServerException {
+     void removeProjects(String path) throws ServerException {
         projects.remove(path);
         getProjects(path).forEach(projects::remove);
     }
@@ -190,7 +197,28 @@ public class ProjectRegistry {
     /*   to use from extension                     */
     /*  ------------------------------------------ */
 
-
+    /**
+     * Extension writer should call this method to apply changes which (supposedly) change
+     * Attributes defined with particular Project Type
+     * For example:
+     * - extension code knows that particular file content is used by Value Provider
+     * so this method should be called when content of this file changed to check
+     * and update attributes.
+     * OR
+     * If Extension writer wants to force initializing folder to be Project
+     * For example:
+     * - extension code knows that particular folder inside should (or may) be treated
+     * as sub-project of same as "parent" project type
+     *
+     * @param projectPath - absolute project path
+     * @param type - type to be updated or added
+     * @param asMixin - whether the type supposed to be mixin (true) or primary (false)
+     * @return - refreshed project
+     * @throws ConflictException
+     * @throws ForbiddenException
+     * @throws NotFoundException
+     * @throws ServerException
+     */
     public RegisteredProject setProjectType(String projectPath, String type,
                                             boolean asMixin) throws ConflictException,
                                                                     ForbiddenException,
@@ -235,6 +263,21 @@ public class ProjectRegistry {
 
     }
 
+    /**
+     * Extension writer should call this method to apply changes which supposedly
+     * make the Project no longer have particular Project Type.
+     * For example:
+     * - extension code knows that removeing some file inside project's file system
+     * will (or may) cause removing particular project type
+     *
+     * @param projectPath - project path
+     * @param type - project type
+     * @return - refreshed project
+     * @throws ConflictException
+     * @throws ForbiddenException
+     * @throws NotFoundException
+     * @throws ServerException
+     */
     public RegisteredProject removeProjectType(String projectPath, String type) throws ConflictException,
                                                                                        ForbiddenException,
                                                                                        NotFoundException,
@@ -261,13 +304,22 @@ public class ProjectRegistry {
 
     }
 
-
-
-
+    /**
+     * @param path - a path
+     * @return absolute (with lead slash) path
+     */
     static String absolutizePath(String path) {
         return (path.startsWith("/")) ? path : "/".concat(path);
     }
 
+    /**
+     * Fires init handlers for all the project types of incoming project
+     * @param project - the project
+     * @throws ForbiddenException
+     * @throws ConflictException
+     * @throws NotFoundException
+     * @throws ServerException
+     */
     void fireInitHandlers(RegisteredProject project)
             throws ForbiddenException, ConflictException, NotFoundException, ServerException {
 
