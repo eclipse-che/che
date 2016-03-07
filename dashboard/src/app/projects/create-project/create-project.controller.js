@@ -586,6 +586,24 @@ export class CreateProjectCtrl {
   addCommand(workspaceId, projectName, commands, index, deferred) {
     if (index < commands.length) {
       let newCommand = angular.copy(commands[index]);
+
+      // Update project command lines using current.project.path with actual path based on workspace runtime configuration
+      // so adding the same project twice allow to use commands for each project without first selecting project in tree
+      let workspaceConfig = this.cheAPI.getWorkspace().getRuntimeConfig(workspaceId);
+      if (workspaceConfig.devMachine) {
+        let runtime = workspaceConfig.devMachine.runtime;
+        if (runtime) {
+          let envVar = runtime.envVariables;
+          if (envVar) {
+            let cheProjectsRoot = envVar['CHE_PROJECTS_ROOT'];
+            if (cheProjectsRoot) {
+              // replace current project path by the full path of the project
+              let projectPath = cheProjectsRoot + '/' + projectName;
+              newCommand.commandLine = newCommand.commandLine.replace(/\$\{current.project.path\}/g, projectPath);
+            }
+          }
+        }
+      }
       newCommand.name = projectName + ': ' + newCommand.name;
       var addPromise = this.cheAPI.getWorkspace().addCommand(workspaceId, newCommand);
       addPromise.then(() => {

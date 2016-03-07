@@ -94,6 +94,7 @@ import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscribe
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
@@ -244,6 +245,8 @@ public class CoreGinModule extends AbstractGinModule {
     protected void configure() {
         GinMapBinder<String, Perspective> mapBinder = GinMapBinder.newMapBinder(binder(), String.class, Perspective.class);
         mapBinder.addBinding(PROJECT_PERSPECTIVE_ID).to(ProjectPerspective.class);
+
+        GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
 
         install(new GinFactoryModuleBuilder().implement(WorkBenchPartController.class,
                                                         WorkBenchPartControllerImpl.class).build(WorkBenchControllerFactory.class));

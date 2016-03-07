@@ -19,6 +19,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.node.MutableNode;
+import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.node.resource.DeleteProcessor;
 import org.eclipse.che.ide.api.project.node.resource.RenameProcessor;
 import org.eclipse.che.ide.ext.java.client.project.settings.JavaNodeSettings;
@@ -81,5 +82,29 @@ public class JavaFileNode extends FileReferenceNode implements MutableNode {
         throw new UnsupportedOperationException("Not implemented");
     }
 
+    public String getFqn() {
+        String sourcePath = getSourceFolderPath(this);
 
+        String fqn = "";
+
+        String nodePath = getData().getPath();
+
+        if (nodePath.startsWith(sourcePath + '/')) {
+            fqn = nodePath.substring(sourcePath.length() + 1);
+        }
+
+        fqn = fqn.substring(0, fqn.indexOf('.'));
+
+        return fqn.replace('/', '.');
+    }
+
+    private String getSourceFolderPath(Node node) {
+        Node parent = node.getParent();
+
+        if (parent instanceof SourceFolderNode) {
+            return ((SourceFolderNode)parent).getStorablePath();
+        }
+
+        return getSourceFolderPath(parent);
+    }
 }

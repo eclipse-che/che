@@ -103,6 +103,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     private final CommandTypeRegistry         commandTypeRegistry;
 
     ProcessTreeNode                rootNode;
+    ProcessTreeNode                selectedTreeNode;
     Map<String, TerminalPresenter> terminals = new HashMap<>();
 
     Map<String, OutputConsole>     consoles = new HashMap<>();
@@ -304,6 +305,29 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     }
 
     /**
+     * Opens new terminal for the selected machine.
+     */
+    public void newTerminal() {
+        workspaceAgent.setActivePart(this);
+
+        if (selectedTreeNode == null) {
+            if (appContext.getDevMachineId() != null) {
+                onAddTerminal(appContext.getDevMachineId());
+            }
+            return;
+        }
+
+        if (selectedTreeNode.getType() == MACHINE_NODE) {
+            onAddTerminal(selectedTreeNode.getId());
+        } else {
+            if (selectedTreeNode.getParent() != null &&
+                    selectedTreeNode.getParent().getType() == MACHINE_NODE) {
+                onAddTerminal(selectedTreeNode.getParent().getId());
+            }
+        }
+    }
+
+    /**
      * Adds new terminal to the processes panel
      *
      * @param machineId
@@ -408,15 +432,11 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     }
 
     @Override
-    public void onTerminalSelected(@NotNull String terminalId) {
-        view.showProcessOutput(terminalId);
-        resfreshStopButtonState(terminalId);
-    }
+    public void onTreeNodeSelected(@NotNull ProcessTreeNode node) {
+        selectedTreeNode = node;
 
-    @Override
-    public void onCommandSelected(@NotNull String commandId) {
-        view.showProcessOutput(commandId);
-        resfreshStopButtonState(commandId);
+        view.showProcessOutput(node.getId());
+        resfreshStopButtonState(node.getId());
     }
 
     @Override
@@ -491,6 +511,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     }
     
     private void resfreshStopButtonState(String selectedNodeId) {
+        if (selectedNodeId == null) {
+            return;
+        }
+
         for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
             String nodeId = entry.getKey();
             if (selectedNodeId.equals(nodeId) && !entry.getValue().isFinished()) {

@@ -1,5 +1,90 @@
 # Change Log
 
+## [4.0.0-RC11](https://github.com/eclipse/che/tree/4.0.0-RC11) (2016-03-03)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC10...4.0.0-RC11)
+
+**Issues fixed with 'bugs' label:**
+
+- Che cannot create projects with SELinux enabled [\#232](https://github.com/eclipse/che/issues/232)
+
+**Issues with no labels:**
+
+- Nightly docker image issue: can't open the created project [\#624](https://github.com/eclipse/che/issues/624)
+- CHE-614 Max size of message queue exceeded during starting workspace in Che [\#522](https://github.com/eclipse/che/issues/522)
+
+**Pull requests merged:**
+
+- CHE-651 \[dashboard\] Add missing shadow on popup [\#628](https://github.com/eclipse/che/pull/628) ([benoitf](https://github.com/benoitf))
+- CHE-700 Add subversion to blank stack [\#627](https://github.com/eclipse/che/pull/627) ([benoitf](https://github.com/benoitf))
+- Add Z suffix to fix mounting issues on Fedora with SELinux enabled [\#623](https://github.com/eclipse/che/pull/623) ([eivantsov](https://github.com/eivantsov))
+- CHE-653: Change value fails with NullPointerException [\#622](https://github.com/eclipse/che/pull/622) ([mmorhun](https://github.com/mmorhun))
+- CHE-695 : \[dashboard\] use fixed versions [\#621](https://github.com/eclipse/che/pull/621) ([benoitf](https://github.com/benoitf))
+- Add promise-based methods for GitHub client service [\#618](https://github.com/eclipse/che/pull/618) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Che 212  disable field auto completion after its adjustments [\#617](https://github.com/eclipse/che/pull/617) ([olexii4](https://github.com/olexii4))
+- CHE-201: remove breakpoints in case of absence of linked file [\#607](https://github.com/eclipse/che/pull/607) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add TomEE 1.7.3 stack and sample application [\#570](https://github.com/eclipse/che/pull/570) ([jgallimore](https://github.com/jgallimore))
+
+## [4.0.0-RC10](https://github.com/eclipse/che/tree/4.0.0-RC10) (2016-03-02)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC9...4.0.0-RC10)
+
+**Issues with no labels:**
+
+- CHE-671 Investigate the reason of failing parser [\#599](https://github.com/eclipse/che/issues/599)
+- CHE-661 unzip ws-agent in quiet mode [\#588](https://github.com/eclipse/che/issues/588)
+- CHE-660 Connection timeout when updating a sizable project [\#586](https://github.com/eclipse/che/issues/586)
+- CHE-654 Unclosed zip archive when building che [\#577](https://github.com/eclipse/che/issues/577)
+- CHE-652 Display Codenvy logo while display in the striped loader [\#574](https://github.com/eclipse/che/issues/574)
+- CHE-650 Cannot export a workspace [\#571](https://github.com/eclipse/che/issues/571)
+- CHE-641 Add default blank stack [\#561](https://github.com/eclipse/che/issues/561)
+- CHE-624 readme file should provide more information to get started with Che [\#537](https://github.com/eclipse/che/issues/537)
+- CHE-622 Commands are added to custom stacks [\#533](https://github.com/eclipse/che/issues/533)
+- CHE-611 Cannot run a workspace from Dashboard [\#519](https://github.com/eclipse/che/issues/519)
+- CHE-610 Restarting a workspace with a project results in an attempt to recreate a project [\#516](https://github.com/eclipse/che/issues/516)
+- CHE-603 \[dashboard\] allow to add new routes on route history [\#507](https://github.com/eclipse/che/issues/507)
+- CHE-602 \[dashboard\] Allow to send to IDE some loading parameters [\#506](https://github.com/eclipse/che/issues/506)
+- CHE-596 Make non-blocking entropy the default for Che startup [\#499](https://github.com/eclipse/che/issues/499)
+- CHE-591 Clean up plugin installer [\#494](https://github.com/eclipse/che/issues/494)
+- CHE-589 Broken project tree [\#492](https://github.com/eclipse/che/issues/492)
+- CHE-581 New workspace from 'Import an existing workspace configuration' is created wrong [\#478](https://github.com/eclipse/che/issues/478)
+- CHE-574 After using a factory the just cloned project is not configured [\#464](https://github.com/eclipse/che/issues/464)
+- CHE-573 Factory configuration feature in the IDE works incorrect [\#463](https://github.com/eclipse/che/issues/463)
+- CHE-571 Cannot create a factory after cloning the Java- Web-Spring tempate [\#461](https://github.com/eclipse/che/issues/461)
+- CHE-566 Prototype transitions on the right side of the loader [\#458](https://github.com/eclipse/che/issues/458)
+- CHE-567 Display the outputs with syntax coloration on the right side of the loader [\#457](https://github.com/eclipse/che/issues/457)
+- CHE-565 Improvements on the crane design [\#455](https://github.com/eclipse/che/issues/455)
+- CHE-559 After creation a new machine in existed workspace output is empty [\#444](https://github.com/eclipse/che/issues/444)
+- CHE-555 Preview  URL for application is wrong [\#436](https://github.com/eclipse/che/issues/436)
+- CHE-550 Adapt projects in dashboard to 4.0 changes [\#430](https://github.com/eclipse/che/issues/430)
+- CHE-549 \[dashboard\] increase timeout delays in unit tests [\#429](https://github.com/eclipse/che/issues/429)
+- CHE-547 \[dashboard\] Adapt project-type to 4.0 project-type [\#423](https://github.com/eclipse/che/issues/423)
+- CHE-546 Workspace Agent should consider to return transitional state while initializing projects [\#422](https://github.com/eclipse/che/issues/422)
+- CHE-545 Add estimate and resolve method calls from project API [\#420](https://github.com/eclipse/che/issues/420)
+- CHE-542 Unify how to get workspace runtime config [\#419](https://github.com/eclipse/che/issues/419)
+- CHE-541 Use a common way to get ws agen websocket URL [\#417](https://github.com/eclipse/che/issues/417)
+- CHE-537 Adopt maven plugin according to CHE-258  [\#409](https://github.com/eclipse/che/issues/409)
+- CHE-536 Differentiate explicitly created and detected projects on Workspace Agent. Do not save detected to Master ProjectConfig.  [\#408](https://github.com/eclipse/che/issues/408)
+- CHE-535 Java bare type could be only available if there are java files [\#407](https://github.com/eclipse/che/issues/407)
+- CHE-532 Add the debug id on the 'Loader' widget [\#403](https://github.com/eclipse/che/issues/403)
+- CHE-522 Unexpected the 'Failed to commit' message in the 'Events' after git commit [\#387](https://github.com/eclipse/che/issues/387)
+- CHE-521 Git status output is different if 'Committer' has a name or has not. [\#386](https://github.com/eclipse/che/issues/386)
+- CHE-520 Project Explorer doesn't display just created project [\#385](https://github.com/eclipse/che/issues/385)
+- CHE-514 Fix jdt tests [\#375](https://github.com/eclipse/che/issues/375)
+- CHE-512 Investigate ability to get content from Orion compare widget  [\#374](https://github.com/eclipse/che/issues/374)
+- CHE-510 Style improvements for dashboard [\#373](https://github.com/eclipse/che/issues/373)
+- CHE-507 Error appears when creating a new sample project [\#370](https://github.com/eclipse/che/issues/370)
+
+**Pull requests merged:**
+
+- CHE-435 \[dashboard\] Introduce meaningful warning if browser is not being able ping ws agent [\#620](https://github.com/eclipse/che/pull/620) ([benoitf](https://github.com/benoitf))
+- CHE-495 Used simple entropy source.  [\#619](https://github.com/eclipse/che/pull/619) ([skabashnyuk](https://github.com/skabashnyuk))
+- CHE-209: fix recipes [\#616](https://github.com/eclipse/che/pull/616) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-439: fix referencing attributes due to model changes [\#615](https://github.com/eclipse/che/pull/615) ([ashumilova](https://github.com/ashumilova))
+- CHE-689 \[dashboard\] report error when starting agent [\#614](https://github.com/eclipse/che/pull/614) ([benoitf](https://github.com/benoitf))
+- CHE-522: Correct message when user tries to commit clean directory [\#612](https://github.com/eclipse/che/pull/612) ([dimasnurenko](https://github.com/dimasnurenko))
+- Che 217  improve creating project flow [\#604](https://github.com/eclipse/che/pull/604) ([olexii4](https://github.com/olexii4))
+- Autogenerated changes log. [\#603](https://github.com/eclipse/che/pull/603) ([skabashnyuk](https://github.com/skabashnyuk))
+- CHE-414: Display staged changes in green when status called [\#560](https://github.com/eclipse/che/pull/560) ([vinokurig](https://github.com/vinokurig))
+
 ## [4.0.0-RC9](https://github.com/eclipse/che/tree/4.0.0-RC9) (2016-03-01)
 [Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC8...4.0.0-RC9)
 
@@ -137,7 +222,7 @@
 ## [4.0.0-RC5](https://github.com/eclipse/che/tree/4.0.0-RC5) (2016-02-18)
 [Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC4...4.0.0-RC5)
 
-**Implemented Issues with 'enhancement' label:**
+**Issues with 'enhancement' label:**
 
 - What is the right way to stop che? [\#287](https://github.com/eclipse/che/issues/287)
 - Eclipse Che che.sh script not compatible with bash [\#262](https://github.com/eclipse/che/issues/262)

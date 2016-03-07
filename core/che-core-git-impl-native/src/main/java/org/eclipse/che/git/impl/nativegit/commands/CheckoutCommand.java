@@ -11,6 +11,7 @@
 package org.eclipse.che.git.impl.nativegit.commands;
 
 import java.util.List;
+
 import org.eclipse.che.api.git.GitException;
 
 import java.io.File;
@@ -22,10 +23,11 @@ import java.io.File;
  */
 public class CheckoutCommand extends GitCommand<Void> {
 
-    private boolean createNew;
-    private String  branchName;
-    private String  trackBranch;
-    private String  startPoint;
+    private boolean      createNew;
+    private boolean      noTrack;
+    private String       branchName;
+    private String       trackBranch;
+    private String       startPoint;
     private List<String> filePaths;
 
     public CheckoutCommand(File place) {
@@ -45,27 +47,31 @@ public class CheckoutCommand extends GitCommand<Void> {
 
         reset();
         commandLine.add("checkout");
-       
-        if (filePaths != null && !filePaths.isEmpty()){
-            for (String file : filePaths){
-        	    commandLine.add(file);
+
+        if (filePaths != null && !filePaths.isEmpty()) {
+            for (String file : filePaths) {
+                commandLine.add(file);
             }
         } else {
-	        if (createNew) {
-	            commandLine.add("-b");
-	            commandLine.add(branchName);
-	        } else if (branchName != null) {
-	            commandLine.add(branchName);
-	        }
-	
-	        if (trackBranch != null) {
-	            commandLine.add("-t");
-	            commandLine.add(trackBranch);
-	        } else if (startPoint != null) {
-	            commandLine.add(startPoint);
-	        }
+            if (createNew) {
+                commandLine.add("-b");
+                commandLine.add(branchName);
+            } else if (branchName != null) {
+                commandLine.add(branchName);
+            }
+
+            if (trackBranch != null) {
+                commandLine.add("-t");
+                commandLine.add(trackBranch);
+            } else if (startPoint != null) {
+                commandLine.add(startPoint);
+            }
         }
-        
+
+        if (noTrack) {
+            commandLine.add("--no-track");
+        }
+
         start();
         return null;
     }
@@ -109,7 +115,7 @@ public class CheckoutCommand extends GitCommand<Void> {
         this.startPoint = startPoint;
         return this;
     }
-    
+
     /**
      * @param filePaths
      *         checkout specific files(s)
@@ -119,4 +125,15 @@ public class CheckoutCommand extends GitCommand<Void> {
         this.filePaths = filePaths;
         return this;
     }
+
+    /**
+     * @param noTrack
+     *         checkout without setting upstream
+     * @return CheckoutCommand with no-track option
+     */
+    public CheckoutCommand setNoTrack(boolean noTrack) {
+        this.noTrack = noTrack;
+        return this;
+    }
+
 }
