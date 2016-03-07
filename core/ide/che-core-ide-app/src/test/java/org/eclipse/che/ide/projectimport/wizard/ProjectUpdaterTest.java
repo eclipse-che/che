@@ -13,7 +13,12 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
@@ -21,8 +26,6 @@ import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.test.GwtReflectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,10 +33,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.RETURNS_DEFAULTS;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,9 +75,24 @@ public class ProjectUpdaterTest {
     @Mock
     private ProjectConfigDto                 projectConfig;
     @Mock
-    private Unmarshallable<ProjectConfigDto> projectUnmarshallable;
-    @Mock
     private Wizard.CompleteCallback          completeCallback;
+    @Mock
+    private UsersWorkspaceDto                usersWorkspaceDtoMock;
+    @Mock
+    private WorkspaceConfigDto               workspaceConfigDtoMock;
+
+    private Promise<ProjectConfigDto> getUpdatedProjectMock;
+
+    private Promise<List<ProjectConfigDto>> getProjectsMock;
+
+    @Captor
+    private ArgumentCaptor<Operation<ProjectConfigDto>> getUpdatedProjectCaptor;
+
+    @Captor
+    private ArgumentCaptor<Operation<List<ProjectConfigDto>>> getProjectsCaptor;
+
+    @Captor
+    private ArgumentCaptor<Operation<PromiseError>> errorOperationCaptor;
 
     @Captor
     private ArgumentCaptor<AsyncRequestCallback<ProjectConfigDto>> asyncRequestCallback;
@@ -72,30 +100,57 @@ public class ProjectUpdaterTest {
     private ProjectUpdater updater;
 
     @Before
+    @SuppressWarnings("unchecked")
     public void setUp() {
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(appContext.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
+        when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigDtoMock);
         when(projectConfig.getName()).thenReturn(PROJECT_NAME);
-        when(dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)).thenReturn(projectUnmarshallable);
 
-        updater = new ProjectUpdater(dtoUnmarshallerFactory,
-                                     projectServiceClient,
+        getUpdatedProjectMock = createPromiseMock();
+        getProjectsMock = createPromiseMock();
+
+        when(projectServiceClient.updateProject(anyString(), anyString(), any(ProjectConfigDto.class))).thenReturn(getUpdatedProjectMock);
+        when(projectServiceClient.getProjects(anyString(), anyBoolean())).thenReturn(getProjectsMock);
+
+        updater = new ProjectUpdater(projectServiceClient,
                                      projectNotificationSubscriber,
                                      eventBus,
                                      appContext);
     }
 
+    private Promise createPromiseMock() {
+        return mock(Promise.class, new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                if (invocation.getMethod().getReturnType().isInstance(invocation.getMock())) {
+                    return invocation.getMock();
+                }
+                return RETURNS_DEFAULTS.answer(invocation);
+            }
+        });
+    }
+
     @Test
-    public void projectShouldBeUpdatedWhenConfigurationIsRequired() {
+    public void projectShouldBeUpdatedWhenConfigurationIsRequired() throws Exception {
         updater.updateProject(completeCallback, projectConfig, true);
 
+        verify(getUpdatedProjectMock).then(getUpdatedProjectCaptor.capture());
+        getUpdatedProjectCaptor.getValue().apply(projectConfig);
+
         verify(projectConfig).getName();
-        verify(dtoUnmarshallerFactory).newUnmarshaller(ProjectConfigDto.class);
 
         verify(projectServiceClient).updateProject(eq(WORKSPACE_ID),
                                                    eq('/' + PROJECT_NAME),
-                                                   eq(projectConfig),
-                                                   asyncRequestCallback.capture());
-        GwtReflectionUtils.callOnSuccess(asyncRequestCallback.getValue(), projectConfig);
+                                                   eq(projectConfig));
+
+        verify(getProjectsMock).then(getProjectsCaptor.capture());
+        getProjectsCaptor.getValue().apply(singletonList(projectConfig));
+
+        verify(projectServiceClient).getProjects(eq(WORKSPACE_ID), eq(true));
+        verify(appContext).getWorkspace();
+        verify(usersWorkspaceDtoMock).getConfig();
+        verify(workspaceConfigDtoMock).withProjects(eq(newArrayList(projectConfig)));
 
         verify(eventBus, times(2)).fireEvent(Matchers.<CreateProjectEvent>anyObject());
         verify(projectNotificationSubscriber).onSuccess();
@@ -103,17 +158,20 @@ public class ProjectUpdaterTest {
     }
 
     @Test
-    public void projectShouldBeUpdatedWhenConfigurationIsNotRequired() {
+    public void projectShouldBeUpdatedWhenConfigurationIsNotRequired() throws Exception {
         updater.updateProject(completeCallback, projectConfig, false);
 
+        verify(getUpdatedProjectMock).then(getUpdatedProjectCaptor.capture());
+        getUpdatedProjectCaptor.getValue().apply(projectConfig);
+
         verify(projectConfig).getName();
-        verify(dtoUnmarshallerFactory).newUnmarshaller(ProjectConfigDto.class);
 
         verify(projectServiceClient).updateProject(eq(WORKSPACE_ID),
                                                    eq('/' + PROJECT_NAME),
-                                                   eq(projectConfig),
-                                                   asyncRequestCallback.capture());
-        GwtReflectionUtils.callOnSuccess(asyncRequestCallback.getValue(), projectConfig);
+                                                   eq(projectConfig));
+
+        verify(getProjectsMock).then(getProjectsCaptor.capture());
+        getProjectsCaptor.getValue().apply(singletonList(projectConfig));
 
         verify(eventBus).fireEvent(Matchers.<ProjectUpdatedEvent>anyObject());
         verify(projectNotificationSubscriber).onSuccess();

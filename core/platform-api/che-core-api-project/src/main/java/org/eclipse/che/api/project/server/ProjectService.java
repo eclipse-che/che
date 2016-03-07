@@ -356,7 +356,10 @@ public class ProjectService extends Service {
                                @ApiParam(value = "New file name", required = true)
                                @QueryParam("name") String fileName,
                                InputStream content) throws NotFoundException, ConflictException, ForbiddenException, ServerException {
+
         final FolderEntry parent = projectManager.asFolder(parentPath);
+        if(parent == null)
+            throw new NotFoundException("Parent not found for "+parentPath);
         final FileEntry newFile = parent.createFile(fileName, content);
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final ItemReference fileReference = DtoConverter.toItemReference(newFile, workspace, uriBuilder.clone());
@@ -425,6 +428,8 @@ public class ProjectService extends Service {
                                                                    ForbiddenException,
                                                                    ServerException {
         final FolderEntry parent = projectManager.asFolder(parentPath);
+        if(parent == null)
+            throw new NotFoundException("Parent not found for "+parentPath);
         return uploadFile(parent.getVirtualFile(), formData);
     }
 
@@ -452,6 +457,9 @@ public class ProjectService extends Service {
                                                                             ForbiddenException,
                                                                             NotFoundException {
         final FolderEntry parent = projectManager.asFolder(path);
+        if(parent == null)
+            throw new NotFoundException("Parent not found for "+path);
+
         return uploadZip(parent.getVirtualFile(), formData);
     }
 
@@ -489,7 +497,10 @@ public class ProjectService extends Service {
                                @ApiParam(value = "Full path to a file", required = true)
                                @PathParam("path") String path,
                                InputStream content) throws NotFoundException, ForbiddenException, ServerException {
+
         final FileEntry file = projectManager.asFile(path);
+        if(file == null)
+            throw new NotFoundException("File not found for "+path);
         file.updateContent(content);
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.UPDATED,
@@ -587,18 +598,6 @@ public class ProjectService extends Service {
                                                 .path(getClass(), move.isFile() ? "getFile" : "getChildren")
                                                 .build(workspace, move.getPath().toString().substring(1));
 
-//        if (move.isFolder()) {
-//            final ProjectImpl project = projectManager.getProject(move.getPath().toString());
-//            if (project != null) {
-//                final String name = project.getName();
-//                final String projectType = project.getProjectType().getId();
-////                LOG.info("EVENT#project-destroyed# PROJECT#{}# TYPE#{}# WS#{}# USER#{}#", name, projectType,
-////                         EnvironmentContext.getCurrent().getWorkspaceName(), EnvironmentContext.getCurrent().getUser().getName());
-//
-////                logProjectCreatedEvent(name, projectType);
-//            }
-//        }
-
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.MOVED,
                                                           workspace, projectPath(entry.getPath().toString()), entry.getPath().toString(),
                                                           entry.isFolder(),
@@ -672,26 +671,7 @@ public class ProjectService extends Service {
             baseProjectFolder.getVirtualFile().unzip(zip, true, stripNumber);
         }
 
-//        ProjectConfigDto projectConfig = DtoFactory.getInstance()
-//                                                   .createDto(ProjectConfigDto.class)
-//                                                   .withName(projectName)
-//                                                   .withDescription(projectDescription);
-
-        //List<ProjectTypeResolution> resolutions = projectManager.resolveSources(path, false);
-
-//        for (ProjectTypeResolution resolution : projectManager.resolveSources(path, false)) {
-//            ProjectType projectType = typeRegistry.getProjectType(resolution.getType());
-//
-//            if (projectType.isPersisted()) {
-//                projectConfig.withType(projectType.getId());
-//                projectConfig.withAttributes(estimation.getAttributes());
-//            }
-//        }
-
         return resolveSources(workspace, path);
-
-        //project source already imported going to configure project
-        //return updateProject(workspace, path, projectConfig);
     }
 
     @ApiOperation(value = "Import zip",
@@ -716,6 +696,9 @@ public class ProjectService extends Service {
                                                                                                                   ForbiddenException,
                                                                                                                   ServerException {
         final FolderEntry parent = projectManager.asFolder(path);
+        if(parent == null)
+            throw new NotFoundException("Parent not found for "+path);
+
         importZip(parent.getVirtualFile(), zip, true, skipFirstLevel);
 
         try {
@@ -746,7 +729,10 @@ public class ProjectService extends Service {
                                  @PathParam("ws-id") String workspace,
                                  @ApiParam(value = "Path to resource to be exported")
                                  @PathParam("path") String path) throws NotFoundException, ForbiddenException, ServerException {
+
         final FolderEntry folder = projectManager.asFolder(path);
+        if(folder == null)
+            throw new NotFoundException("Folder not found " + folder);
         return folder.getVirtualFile().zip();
     }
 
@@ -757,7 +743,11 @@ public class ProjectService extends Service {
                                @PathParam("ws-id") String workspace,
                                @ApiParam(value = "Path to resource to be imported")
                                @PathParam("path") String path) throws NotFoundException, ForbiddenException, ServerException {
-        final VirtualFile virtualFile = projectManager.asFile(path).getVirtualFile();
+
+        final FileEntry file = projectManager.asFile(path);
+        if(file == null)
+            throw new NotFoundException("File not found " + path);
+        final VirtualFile virtualFile = file.getVirtualFile();
 
         return Response.ok(virtualFile.getContent(), TIKA.detect(virtualFile.getName()))
                        .lastModified(new Date(virtualFile.getLastModificationDate()))
@@ -786,6 +776,8 @@ public class ProjectService extends Service {
                                                                                     ForbiddenException,
                                                                                     ServerException {
         final FolderEntry folder = projectManager.asFolder(path);
+        if(folder == null)
+            throw new NotFoundException("Parent not found for " + path);
         final List<VirtualFileEntry> children = folder.getChildren();
         final ArrayList<ItemReference> result = new ArrayList<>(children.size());
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
@@ -850,23 +842,8 @@ public class ProjectService extends Service {
                                                                         ServerException,
                                                                         ValueStorageException,
                                                                         ProjectTypeConstraintException {
-        // TODO reconsider this
-//        ProjectImpl project = projectManager.getProject(projectPath(path));
 
         final VirtualFileEntry entry = projectManager.getProjectsRoot().getChild(path);
-
-//        if (project != null) {
-//            // If there is a project, allow it to intercept getting file meta-data
-//            entry = project.getItem(path);
-//        } else {
-//            // If there is no project, try to retrieve the item directly
-//            FolderEntry wsRoot = projectManager.getProjectsRoot();
-//            if (wsRoot != null) {
-//                entry = wsRoot.getChild(path);
-//            } else {
-//                entry = null;
-//            }
-//        }
 
         if (entry == null) {
             throw new NotFoundException("Project " + path + " was not found");

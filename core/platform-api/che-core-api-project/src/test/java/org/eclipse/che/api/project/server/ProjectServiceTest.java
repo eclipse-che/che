@@ -153,7 +153,7 @@ public class ProjectServiceTest {
 
     private ProjectImporterRegistry importerRegistry;
 
-    protected ProjectRegistryImpl projectRegistry;
+    protected ProjectRegistry projectRegistry;
 
     protected ProjectTypeRegistry ptRegistry;
 
@@ -204,7 +204,7 @@ public class ProjectServiceTest {
 
         importerRegistry = new ProjectImporterRegistry(Collections.<ProjectImporter>emptySet());
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, ptRegistry, phRegistry);
         projectRegistry.initProjects();
 
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
@@ -992,6 +992,23 @@ public class ProjectServiceTest {
                      URI.create(String.format("http://localhost:8080/api/project/%s/children/my_project/test", workspace)));
         VirtualFileEntry folder = pm.getProject("my_project").getBaseFolder().getChild("test");
         Assert.assertTrue(folder.isFolder());
+    }
+
+    @Test
+    public void testCreateFolderInRoot() throws Exception {
+        String folder = "my_folder";
+        ContainerResponse response = launcher.service(POST,
+                                                      String.format("http://localhost:8080/api/project/%s/folder/%s",
+                                                                    workspace, folder),
+                                                      "http://localhost:8080/api", null, null, null);
+        assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
+        ItemReference fileItem = (ItemReference)response.getEntity();
+        assertEquals(fileItem.getType(), "folder");
+        assertEquals(fileItem.getName(), folder);
+        assertEquals(fileItem.getPath(), "/" + folder);
+        validateFolderLinks(fileItem);
+        assertEquals(response.getHttpHeaders().getFirst("Location"),
+                     URI.create(String.format("http://localhost:8080/api/project/%s/children/%s", workspace, folder)));
     }
 
     @Test

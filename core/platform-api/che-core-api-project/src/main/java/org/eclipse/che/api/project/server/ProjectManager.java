@@ -202,7 +202,7 @@ public final class ProjectManager {
             throw new ConflictException("Path for new project should be defined ");
         }
 
-        final String path = ProjectRegistryImpl.absolutizePath(projectConfig.getPath());
+        final String path = ProjectRegistry.absolutizePath(projectConfig.getPath());
 
         if (projectConfig.getType() == null) {
             throw new ConflictException("Project Type is not defined " + path);
@@ -240,22 +240,7 @@ public final class ProjectManager {
             throw e;
         }
 
-        // TODO
-        ((ProjectRegistryImpl)projectRegistry).fireInitHandlers(project);
-
-//        // primary type
-//        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
-//        if (projectInitHandler != null) {
-//            projectInitHandler.onProjectInitialized(project.getBaseFolder());
-//        }
-//
-//        // mixins
-//        for(String mixin : project.getMixins()) {
-//            projectInitHandler = handlers.getProjectInitHandler(mixin);
-//            if (projectInitHandler != null) {
-//                projectInitHandler.onProjectInitialized(project.getBaseFolder());
-//            }
-//        }
+        projectRegistry.fireInitHandlers(project);
 
         return project;
     }
@@ -296,22 +281,8 @@ public final class ProjectManager {
 
         final RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
 
-        // TODO
-        ((ProjectRegistryImpl)projectRegistry).fireInitHandlers(project);
+        projectRegistry.fireInitHandlers(project);
 
-//        // primary type
-//        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
-//        if (projectInitHandler != null) {
-//            projectInitHandler.onProjectInitialized(baseFolder);
-//        }
-//
-//        // mixins
-//        for(String mixin : project.getMixins()) {
-//            projectInitHandler = handlers.getProjectInitHandler(mixin);
-//            if (projectInitHandler != null) {
-//                projectInitHandler.onProjectInitialized(baseFolder);
-//            }
-//        }
 
         // TODO move to register?
         reindexProject(project);
@@ -367,6 +338,7 @@ public final class ProjectManager {
 
     // ProjectSuggestion
     public List<ProjectTypeResolution> resolveSources(String path, boolean transientOnly) throws ServerException, NotFoundException {
+
         final List<ProjectTypeResolution> resolutions = new ArrayList<>();
 //        boolean isPresentPrimaryType = false;
 
@@ -402,7 +374,7 @@ public final class ProjectManager {
      * @throws ConflictException
      */
     public void delete(String path) throws ServerException, ForbiddenException, NotFoundException, ConflictException {
-        final String apath = ProjectRegistryImpl.absolutizePath(path);
+        final String apath = ProjectRegistry.absolutizePath(path);
 
         // delete item
         VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
@@ -494,7 +466,6 @@ public final class ProjectManager {
         return move;
     }
 
-    // TODO do we need ForbiddenException
     FolderEntry asFolder(String path) throws NotFoundException, ServerException {
         final VirtualFileEntry entry = asVirtualFileEntry(path);
         if (entry == null) {
@@ -509,7 +480,7 @@ public final class ProjectManager {
     }
 
     VirtualFileEntry asVirtualFileEntry(String path) throws NotFoundException, ServerException {
-        final String apath = ProjectRegistryImpl.absolutizePath(path);
+        final String apath = ProjectRegistry.absolutizePath(path);
         final FolderEntry root = getProjectsRoot();
         return root.getChild(apath);
     }

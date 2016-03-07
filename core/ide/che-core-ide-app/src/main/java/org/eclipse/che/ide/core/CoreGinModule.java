@@ -129,6 +129,7 @@ import org.eclipse.che.ide.part.editor.recent.RecentFileActionFactory;
 import org.eclipse.che.ide.part.editor.recent.RecentFileList;
 import org.eclipse.che.ide.part.editor.recent.RecentFileStore;
 import org.eclipse.che.ide.part.explorer.project.DefaultNodeInterceptor;
+import org.eclipse.che.ide.part.explorer.project.ProjectConfigEnforcer;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
@@ -354,6 +355,7 @@ public class CoreGinModule extends AbstractGinModule {
 
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
         nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
+        nodeInterceptors.addBinding().to(ProjectConfigEnforcer.class);
     }
 
     /** Configure Core UI components, resources and views */

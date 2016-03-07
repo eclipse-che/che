@@ -17,10 +17,19 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 
 /**
+ * Called after project initialized
  * @author gazarenkov
  */
 public interface ProjectInitHandler extends ProjectHandler {
 
+    /**
+     *
+     * @param projectFolder - base folder
+     * @throws ServerException
+     * @throws ForbiddenException
+     * @throws ConflictException
+     * @throws NotFoundException
+     */
     void onProjectInitialized(FolderEntry projectFolder)
             throws ServerException, ForbiddenException, ConflictException, NotFoundException;
 }

@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -323,13 +324,9 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     @Override
     public void rename(String workspaceId, String path, String newName, String newMediaType, AsyncRequestCallback<Void> callback) {
-        String requestUrl = extPath + "/project/" + workspaceId + "/rename" + normalizePath(path) + "?name=" + newName;
-        if (newMediaType != null) {
-            requestUrl += "&mediaType=" + newMediaType;
-        }
-        asyncRequestFactory.createPostRequest(requestUrl, null)
-                           .loader(loaderFactory.newLoader("Renaming..."))
-                           .send(callback);
+        final Path source = Path.valueOf(path);
+        final Path sourceParent = source.removeLastSegments(1);
+        move(workspaceId, source.toString(), sourceParent.toString(), newName, callback);
     }
 
     @Override
