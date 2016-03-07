@@ -34,19 +34,19 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left" che-event-logger="projects">
-                <div class="navbar-item" layout="row" layout-align="start center">
-                  <i class="fa fa-folder-open icon">&nbsp;</i>
-                  <span>Projects</span>
-                </div>
-              </md-button>
-            </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left" che-event-logger="workspaces">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="fa fa-server fa-lg icon">&nbsp;</i>
                   <span>Workspaces</span>
+                </div>
+              </md-button>
+            </md-list-item>
+            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
+              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left" che-event-logger="projects">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <i class="fa fa-folder-open icon">&nbsp;</i>
+                  <span>Projects</span>
                 </div>
               </md-button>
             </md-list-item>
