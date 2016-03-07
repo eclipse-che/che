@@ -13,8 +13,6 @@
 import {DashboardCtrl} from './dashboard.controller';
 import {DashboardLastProjectsCtrl} from './last-projects/last-projects.controller';
 import {DashboardLastProjects} from './last-projects/last-projects.directive';
-import {WelcomeBackCtrl} from './welcome-back/welcome-back.controller';
-import {WelcomeBack} from './welcome-back/welcome-back.directive';
 
 export class DashboardConfig {
 
@@ -23,10 +21,6 @@ export class DashboardConfig {
     // last projects
     register.controller('DashboardLastProjectsCtrl', DashboardLastProjectsCtrl);
     register.directive('dashboardLastProjects', DashboardLastProjects);
-
-    // welcome back
-    register.controller('WelcomeBackCtrl', WelcomeBackCtrl);
-    register.directive('welcomeBack', WelcomeBack);
 
     // controller
     register.controller('DashboardCtrl', DashboardCtrl);
