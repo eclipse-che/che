@@ -10,27 +10,33 @@
  */
 'use strict';
 
-import {DashboardCtrl} from './dashboard.controller';
-import {DashboardLastProjectsCtrl} from './last-projects/last-projects.controller';
+import {DashboardController} from './dashboard.controller';
+import {DashboardLastWorkspacesController} from './last-workspaces/last-workspaces.controller';
+import {DashboardLastWorkspaces} from './last-workspaces/last-workspaces.directive';
+import {DashboardLastProjectsController} from './last-projects/last-projects.controller';
 import {DashboardLastProjects} from './last-projects/last-projects.directive';
 
 export class DashboardConfig {
 
   constructor(register) {
 
+    // last workspaces
+    register.controller('DashboardLastWorkspacesController', DashboardLastWorkspacesController);
+    register.directive('dashboardLastWorkspaces', DashboardLastWorkspaces);
+
     // last projects
-    register.controller('DashboardLastProjectsCtrl', DashboardLastProjectsCtrl);
+    register.controller('DashboardLastProjectsController', DashboardLastProjectsController);
     register.directive('dashboardLastProjects', DashboardLastProjects);
 
     // controller
-    register.controller('DashboardCtrl', DashboardCtrl);
+    register.controller('DashboardController', DashboardController);
 
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/', {
         templateUrl: 'app/dashboard/dashboard.html',
-        controller: 'DashboardCtrl',
-        controllerAs: 'dashboardCtrl',
+        controller: 'DashboardController',
+        controllerAs: 'dashboardController',
         resolve: {
           check: ['$q', 'cheService', 'cheAdminService', function ($q, cheService, cheAdminService) {
             var defer = $q.defer();

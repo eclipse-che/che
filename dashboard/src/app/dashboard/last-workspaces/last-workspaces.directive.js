@@ -12,11 +12,11 @@
 
 /**
  * @ngdoc directive
- * @name dashboard.directive:DashboardLastProjects
- * @description This class is handling the directive of the listing last opened projects in the dashboard
- * @author Florent Benoit
+ * @name dashboard.directive:DashboardLastWorkspaces
+ * @description This class is handling the directive of the listing last opened workspaces in the dashboard
+ * @author Oleksii Orel
  */
-export class DashboardLastProjects {
+export class DashboardLastWorkspaces {
 
 
   /**
@@ -25,10 +25,10 @@ export class DashboardLastProjects {
    */
   constructor() {
     this.restrict = 'E';
-    this.templateUrl = 'app/dashboard/last-projects/last-projects.html';
+    this.templateUrl = 'app/dashboard/last-workspaces/last-workspaces.html';
 
-    this.controller = 'DashboardLastProjectsController';
-    this.controllerAs = 'dashboardLastProjectsController';
+    this.controller = 'DashboardLastWorkspacesController';
+    this.controllerAs = 'dashboardLastWorkspacesController';
     this.bindToController = true;
   }
 

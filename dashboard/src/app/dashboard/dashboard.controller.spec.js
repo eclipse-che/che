@@ -22,7 +22,7 @@ describe('controllers', function(){
   it('empty', inject(function($controller) {
     expect(scope.awesomeThings).toBeUndefined();
 
-    $controller('DashboardCtrl', {
+    $controller('DashboardController', {
       $scope: scope
     });
 
