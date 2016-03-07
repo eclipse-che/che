@@ -62,6 +62,16 @@
     border: 1px solid popupBorderColor;
 }
 
+.categories svg {
+    margin-top: 3px;
+}
+
+.categories svg,
+.categories svg g,
+.categories svg path {
+    fill: iconColor;
+}
+
 .description {
     color: textFieldColor;
     font-size: textFieldFontSize;
