@@ -83,8 +83,8 @@ import static org.testng.Assert.assertEquals;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_REMOVE_STACK;
-import static org.eclipse.che.api.workspace.server.Constants.LINK_REL_GET_STACK_BY_ID;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_STACK;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACK_BY_ID;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static java.util.Collections.singletonList;
 

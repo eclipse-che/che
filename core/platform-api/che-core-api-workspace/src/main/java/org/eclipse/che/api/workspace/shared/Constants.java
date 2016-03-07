@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.rest.permission.Operation;
 
@@ -41,6 +41,7 @@ public final class Constants {
     public static final String LINK_REL_DELETE_ICON = "delete icon link";
 
     public static final String LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL = "get workspace events channel";
+    public static final String LINK_REL_GET_WEB_SOCKET_URL_WS_AGENT  = "wsagent.websocket";
 
     private Constants() {
     }

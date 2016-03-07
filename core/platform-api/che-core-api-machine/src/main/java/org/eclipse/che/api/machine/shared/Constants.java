@@ -36,6 +36,8 @@ public class Constants {
     public static final String LINK_REL_GET_MACHINE_LOGS_CHANNEL   = "get machine logs channel";
     public static final String LINK_REL_GET_MACHINE_STATUS_CHANNEL = "get machine status channel";
 
+    public static final String WS_AGENT_SERVER_REFERENCE = "extensions";
+
     private Constants() {
     }
 }
