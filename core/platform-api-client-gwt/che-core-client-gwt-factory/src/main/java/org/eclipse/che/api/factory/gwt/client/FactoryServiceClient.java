@@ -61,7 +61,7 @@ public interface FactoryServiceClient {
     void getFactoryJson(@NotNull String workspaceId, @NotNull String path, @NotNull AsyncRequestCallback<Factory> callback);
 
     /**
-     * Save factory to storage.
+     * Get factory as JSON.
      *
      * @param workspaceId
      *         workspace id
@@ -90,4 +90,15 @@ public interface FactoryServiceClient {
      * @return a promise that will provide a list of {@link Factory}s, or rejects with an error
      */
     Promise<List<Factory>> findFactory(Integer skipCount, Integer maxItems, List<Pair<String, String>> params);
+
+    /**
+     * Updates factory by id
+     *
+     * @param id
+     *         factory identifier
+     * @param factory
+     *         update body
+     * @return updated factory
+     */
+    Promise<Factory> updateFactory(String id, Factory factory);
 }

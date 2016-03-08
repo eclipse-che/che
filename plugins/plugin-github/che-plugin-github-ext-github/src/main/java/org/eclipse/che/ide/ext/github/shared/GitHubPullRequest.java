@@ -112,4 +112,26 @@ public interface GitHubPullRequest {
     void setMergeable(boolean mergeable);
 
     GitHubPullRequest withMergeable(boolean mergeable);
+
+    /**
+     * Get pull request body.
+     *
+     * @return {@link String} body
+     */
+    String getBody();
+
+    void setBody(String body);
+
+    GitHubPullRequest withBody(String body);
+
+    /**
+     * Get pull request title.
+     *
+     * @return {@link String} title
+     */
+    String getTitle();
+
+    void setTitle(String title);
+
+    GitHubPullRequest withTitle(String title);
 }

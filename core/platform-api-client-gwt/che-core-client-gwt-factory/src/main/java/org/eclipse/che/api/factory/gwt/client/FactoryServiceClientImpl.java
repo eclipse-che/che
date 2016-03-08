@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.gwt.client;
 
 import com.google.common.base.Joiner;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -85,7 +86,7 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
         }
         asyncRequestFactory.createGetRequest(url.toString())
                            .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
-                            .loader(loaderFactory.newLoader("Getting info about factory..."))
+                           .loader(loaderFactory.newLoader("Getting info about factory..."))
                            .send(callback);
     }
 
@@ -130,6 +131,14 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
                                   .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Searching factory..."))
                                   .send(unmarshallerFactory.newListUnmarshaller(Factory.class));
+    }
+
+    @Override
+    public Promise<Factory> updateFactory(String id, Factory factory) {
+        return asyncRequestFactory.createRequest(RequestBuilder.PUT, API_FACTORY_BASE_URL + id, factory, false)
+                                  .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Updating factory..."))
+                                  .send(unmarshallerFactory.newUnmarshaller(Factory.class));
     }
 
     /**
