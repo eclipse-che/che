@@ -68,7 +68,8 @@ export class CheFooter {
     var logo = attrs.cheLogo;
     var productName  = attrs.cheProductName;
     var supportEmail = attrs.cheSupportEmail;
-    var supportHelp = attrs.cheSupportHelp;
+    var supportHelpPath = attrs.cheSupportHelpPath;
+    var supportHelpTitle = attrs.cheSupportHelpTitle;
 
     var template = '<div class=\"che-footer\" layout=\"row\" layout-align=\"start center\">';
     if (logo) {
@@ -83,8 +84,8 @@ export class CheFooter {
       template += '<a class=\"che-footer-button-mail che-footer-button\" ng-href=\"mailto:' + supportEmail + subject + '&body={{productWish}}\">Make a wish<a/>';
     }
 
-    if (supportHelp) {
-      template += '<a class=\"che-footer-button-community che-footer-button\" ng-href=\"' + supportHelp + '\" target=\"_blank\">Community<a/>';
+    if (supportHelpPath && supportHelpTitle) {
+      template += '<a class=\"che-footer-button-community che-footer-button\" ng-href=\"' + supportHelpPath + '\" target=\"_blank\">' + supportHelpTitle + '<a/>';
     }
     template += '</div>';
     return template;
