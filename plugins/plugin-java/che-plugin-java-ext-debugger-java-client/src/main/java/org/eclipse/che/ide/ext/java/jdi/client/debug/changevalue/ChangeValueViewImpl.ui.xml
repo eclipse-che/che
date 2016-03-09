@@ -13,13 +13,8 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:with field='locale' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant'/>
-    <ui:with field='res' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources'/>
-    <ui:style>
-        .alignBtn {
-            float: right;
-        }
 
+    <ui:style>
         .alignLeft {
             float: left;
         }
@@ -27,31 +22,14 @@
         .emptyBorder {
             margin: 6px;
         }
-
-        .space {
-            margin-right: 5px;
-        }
     </ui:style>
+
     <g:DockLayoutPanel unit="PX" width="440px" height="200px" addStyleNames="{style.emptyBorder}">
-        <g:south size="26">
-            <g:FlowPanel>
-                <g:Button addStyleNames="{style.alignBtn}" width="60px" ui:field="btnCancel"
-                          text="{locale.changeValueViewCancelButtonTitle}"/>
-                <g:Button addStyleNames="{style.alignBtn} {style.space}" width="60px" ui:field="btnChange"
-                          text="{locale.changeValueViewChangeButtonTitle}"/>
-            </g:FlowPanel>
-        </g:south>
+        <g:north size="20">
+            <g:Label ui:field="changeValueLabel" addStyleNames="{style.alignLeft}"/>
+        </g:north>
         <g:center>
-            <g:FlowPanel addStyleNames="{style.emptyBorder}">
-                <g:DockLayoutPanel unit="PX" width="100%" height="100%">
-                    <g:north size="20">
-                        <g:Label ui:field="changeValueLabel" addStyleNames="{style.alignLeft}"/>
-                    </g:north>
-                    <g:center>
-                        <g:TextArea ui:field="value" width="415px" height="125px"/>
-                    </g:center>
-                </g:DockLayoutPanel>
-            </g:FlowPanel>
+            <g:TextArea ui:field="value" width="428px"/>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>

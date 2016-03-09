@@ -11,17 +11,19 @@
 package org.eclipse.che.ide.ext.java.jdi.client.debug.expression;
 
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
-import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
+import org.eclipse.che.ide.ui.window.Window;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,41 +39,47 @@ import javax.validation.constraints.NotNull;
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
  */
 @Singleton
-public class EvaluateExpressionViewImpl extends DialogBox implements EvaluateExpressionView {
+public class EvaluateExpressionViewImpl extends Window implements EvaluateExpressionView {
     interface EvaluateExpressionViewImplUiBinder extends UiBinder<Widget, EvaluateExpressionViewImpl> {
     }
 
-    private static EvaluateExpressionViewImplUiBinder ourUiBinder = GWT.create(EvaluateExpressionViewImplUiBinder.class);
+    private static EvaluateExpressionViewImplUiBinder uiBinder = GWT.create(EvaluateExpressionViewImplUiBinder.class);
 
-    @UiField
-    Button                          btnEvaluate;
-    @UiField
-    Button                          btnCancel;
     @UiField
     TextBox                         expression;
     @UiField
     TextArea                        result;
     @UiField(provided = true)
     JavaRuntimeLocalizationConstant locale;
-    @UiField(provided = true)
-    JavaRuntimeResources            res;
+
+    private Button         evaluateButton;
     private ActionDelegate delegate;
 
     /**
      * Create view.
-     *
-     * @param resources
-     * @param locale
      */
     @Inject
-    protected EvaluateExpressionViewImpl(JavaRuntimeResources resources, JavaRuntimeLocalizationConstant locale) {
+    protected EvaluateExpressionViewImpl(JavaRuntimeLocalizationConstant locale) {
         this.locale = locale;
-        this.res = resources;
 
-        Widget widget = ourUiBinder.createAndBindUi(this);
+        Widget widget = uiBinder.createAndBindUi(this);
 
-        this.setText(this.locale.evaluateExpressionViewTitle());
+        this.setTitle(this.locale.evaluateExpressionViewTitle());
         this.setWidget(widget);
+
+        Button closeButton = createButton(locale.evaluateExpressionViewCloseButtonTitle(), "debugger-close-btn", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                delegate.onCloseClicked();
+            }
+        });
+
+        evaluateButton = createButton(locale.evaluateExpressionViewEvaluateButtonTitle(), "debugger-evaluate-btn", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                delegate.onEvaluateClicked();
+            }
+        });
 
         expression.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -81,6 +89,9 @@ public class EvaluateExpressionViewImpl extends DialogBox implements EvaluateExp
                 }
             }
         });
+
+        addButtonToFooter(closeButton);
+        addButtonToFooter(evaluateButton);
     }
 
     /** {@inheritDoc} */
@@ -105,13 +116,18 @@ public class EvaluateExpressionViewImpl extends DialogBox implements EvaluateExp
     /** {@inheritDoc} */
     @Override
     public void setEnableEvaluateButton(boolean enabled) {
-        btnEvaluate.setEnabled(enabled);
+        evaluateButton.setEnabled(enabled);
     }
 
     /** {@inheritDoc} */
     @Override
     public void focusInExpressionField() {
-        expression.setFocus(true);
+        new Timer() {
+            @Override
+            public void run() {
+                expression.setFocus(true);
+            }
+        }.schedule(300);
     }
 
     /** {@inheritDoc} */
@@ -123,24 +139,17 @@ public class EvaluateExpressionViewImpl extends DialogBox implements EvaluateExp
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.center();
         this.show();
+        if (!expression.getText().isEmpty()) {
+            expression.selectAll();
+            evaluateButton.setEnabled(true);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    @UiHandler("btnEvaluate")
-    public void onEvaluateClicked(ClickEvent event) {
-        delegate.onEvaluateClicked();
-    }
-
-    @UiHandler("btnCancel")
-    public void onCancelClicked(ClickEvent event) {
-        delegate.onCancelClicked();
     }
 
     @UiHandler("expression")
