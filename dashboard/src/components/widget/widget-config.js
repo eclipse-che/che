@@ -10,9 +10,6 @@
  */
 'use strict';
 
-
-import {CheBoxCtrl} from './box/che-box.controller';
-import {CheBox} from './box/che-box.directive';
 import {CheButtonPrimary} from './button/che-button-primary.directive';
 import {CheButtonDanger} from './button/che-button-danger.directive';
 import {CheButtonDefault} from './button/che-button-default.directive';
@@ -61,11 +58,7 @@ export class WidgetConfig {
   constructor(register) {
 
     //box
-    register.controller('CheBoxCtrl', CheBoxCtrl)
-      .directive('cheBox', CheBox)
-
-      // button
-      .directive('cheButtonPrimary', CheButtonPrimary)
+    register.directive('cheButtonPrimary', CheButtonPrimary)
       .directive('cheButtonDanger', CheButtonDanger)
       .directive('cheButtonDefault', CheButtonDefault)
       .directive('cheButtonNotice', CheButtonNotice)
