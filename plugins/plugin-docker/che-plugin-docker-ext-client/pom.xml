@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-RC13-SNAPSHOT</version>
+        <version>4.0.0-RC13</version>
     </parent>
     <artifactId>che-plugin-docker-ext-client</artifactId>
     <packaging>jar</packaging>

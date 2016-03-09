@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-commons-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC13-SNAPSHOT</version>
+        <version>4.0.0-RC13</version>
     </parent>
     <artifactId>che-core-commons-gwt</artifactId>
     <name>Che Core :: Commons :: GWT</name>
