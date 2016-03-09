@@ -55,7 +55,7 @@ public class EvaluateExpressionPresenter implements EvaluateExpressionView.Actio
 
     /** {@inheritDoc} */
     @Override
-    public void onCancelClicked() {
+    public void onCloseClicked() {
         view.close();
     }
 

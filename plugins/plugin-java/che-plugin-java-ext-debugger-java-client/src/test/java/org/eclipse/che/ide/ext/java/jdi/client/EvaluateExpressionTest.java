@@ -76,8 +76,8 @@ public class EvaluateExpressionTest extends BaseTest {
     }
 
     @Test
-    public void shouldCloseDialogOnCancelClicked() throws Exception {
-        presenter.onCancelClicked();
+    public void shouldCloseDialogOnCloseClicked() throws Exception {
+        presenter.onCloseClicked();
 
         verify(view).close();
     }
