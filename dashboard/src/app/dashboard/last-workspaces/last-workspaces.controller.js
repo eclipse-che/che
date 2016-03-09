@@ -12,42 +12,42 @@
 
 /**
  * @ngdoc controller
- * @name dashboard.controller:DashboardLastProjectsController
- * @description This class is handling the controller of the last projects to display in the dashboard
- * @author Florent Benoit
+ * @name dashboard.controller:DashboardLastWorkspacesController
+ * @description This class is handling the controller of the last workspaces to display in the dashboard
+ * @author Oleksii Orel
  */
-export class DashboardLastProjectsController {
+export class DashboardLastWorkspacesController {
 
 
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheProject, cheWorkspace) {
-    this.projects = [];
+  constructor(cheWorkspace) {
+    this.cheWorkspace = cheWorkspace;
+
     this.state = 'loading';
+    this.workspaces = cheWorkspace.getWorkspaces();
 
     // fetch workspaces when initializing
     let promise = cheWorkspace.fetchWorkspaces();
 
     promise.then(() => {
-        this.projects = cheProject.getAllProjects();
         this.state = 'OK';
       },
       (error) => {
         if (error.status === 304) {
           // ok
-          this.projects = cheProject.getAllProjects();
           this.state = 'OK';
           return;
         }
         this.state = 'error';
       });
+
   }
 
-
-  getProjects() {
-    return this.projects;
+  getWorkspaces() {
+    return this.workspaces;
   }
 
 
