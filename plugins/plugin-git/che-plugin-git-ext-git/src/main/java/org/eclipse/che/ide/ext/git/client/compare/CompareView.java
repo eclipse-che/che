@@ -48,7 +48,10 @@ interface CompareView extends View<CompareView.ActionDelegate> {
     void show(String oldContent, String newContent, String revision, String file);
 
     interface ActionDelegate {
-        /** Performs some actions in response to user's clicking on the 'Close' button. */
-        void onCloseButtonClicked();
+        /** Performs some actions in response to user's closing the window.
+         *
+         * @param newContent new content of compare widget
+         */
+        void onClose(String newContent);
     }
 }

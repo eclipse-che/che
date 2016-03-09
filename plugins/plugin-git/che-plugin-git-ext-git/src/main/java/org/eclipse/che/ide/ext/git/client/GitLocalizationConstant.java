@@ -36,6 +36,9 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("button.close")
     String buttonClose();
+    
+    @Key("button.refresh")
+    String buttonRefresh();
 
     @Key("button.commit")
     String buttonCommit();
@@ -51,6 +54,12 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("button.ok")
     String buttonOk();
+
+    @Key("button.yes")
+    String buttonYes();
+
+    @Key("button.no")
+    String buttonNo();
 
     @Key("button.push")
     String buttonPush();
@@ -226,6 +235,12 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("messages.notAuthorized")
     String messagesNotAuthorized();
+
+    @Key("messages.compare_save.title")
+    String compareSaveTitle();
+
+    @Key("messages.compare_save.question")
+    String compareSaveQuestion();
 
     @Key("importProject.messageStartWithWhiteSpace")
     String importProjectMessageStartWithWhiteSpace();
@@ -443,6 +458,9 @@ public interface GitLocalizationConstant extends Messages {
 
     @Key("view.compare.your.version.title")
     String compareYourVersionTitle();
+
+    @Key("view.compare.read.only.title")
+    String compareReadOnlyTitle();
 
     // ChangeList
     @Key("view.change.list.title")
