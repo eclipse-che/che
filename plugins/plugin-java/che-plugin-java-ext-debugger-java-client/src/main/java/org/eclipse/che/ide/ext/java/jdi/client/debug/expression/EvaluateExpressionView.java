@@ -23,8 +23,8 @@ import javax.validation.constraints.NotNull;
 public interface EvaluateExpressionView extends View<EvaluateExpressionView.ActionDelegate> {
     /** Needs for delegate some function into EvaluateExpression view. */
     public interface ActionDelegate {
-        /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
-        void onCancelClicked();
+        /** Performs any actions appropriate in response to the user having pressed the Close button. */
+        void onCloseClicked();
 
         /** Performs any actions appropriate in response to the user having pressed the Evaluate button. */
         void onEvaluateClicked();

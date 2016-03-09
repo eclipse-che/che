@@ -11,15 +11,17 @@
 package org.eclipse.che.ide.ext.java.jdi.client.debug.changevalue;
 
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
-import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
+import org.eclipse.che.ide.ui.window.Window;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,41 +37,47 @@ import javax.validation.constraints.NotNull;
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
  */
 @Singleton
-public class ChangeValueViewImpl extends DialogBox implements ChangeValueView {
+public class ChangeValueViewImpl extends Window implements ChangeValueView {
     interface ChangeValueViewImplUiBinder extends UiBinder<Widget, ChangeValueViewImpl> {
     }
 
-    private static ChangeValueViewImplUiBinder ourUiBinder = GWT.create(ChangeValueViewImplUiBinder.class);
+    private static ChangeValueViewImplUiBinder uiBinder = GWT.create(ChangeValueViewImplUiBinder.class);
 
-    @UiField
-    Button                          btnChange;
-    @UiField
-    Button                          btnCancel;
     @UiField
     TextArea                        value;
     @UiField
     Label                           changeValueLabel;
-    @UiField(provided = true)
-    JavaRuntimeLocalizationConstant locale;
-    @UiField(provided = true)
-    JavaRuntimeResources            res;
+
     private ActionDelegate delegate;
+    private Button         changeButton;
 
     /**
      * Create view.
-     *
-     * @param resources
-     * @param locale
      */
     @Inject
-    protected ChangeValueViewImpl(JavaRuntimeResources resources, JavaRuntimeLocalizationConstant locale) {
-        this.locale = locale;
-        this.res = resources;
+    protected ChangeValueViewImpl(JavaRuntimeLocalizationConstant locale) {
+        Widget widget = uiBinder.createAndBindUi(this);
 
-        Widget widget = ourUiBinder.createAndBindUi(this);
-
-        this.setText(this.locale.changeValueViewTitle());
+        this.setTitle(locale.changeValueViewTitle());
         this.setWidget(widget);
+
+        Button cancelButton =
+                createButton(locale.changeValueViewCancelButtonTitle(), "debugger-change-value-cancel-btn", new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent clickEvent) {
+                        delegate.onCancelClicked();
+                    }
+                });
+
+        changeButton = createButton(locale.changeValueViewChangeButtonTitle(), "debugger-change-value-change-btn", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                delegate.onChangeClicked();
+            }
+        });
+
+        addButtonToFooter(cancelButton);
+        addButtonToFooter(changeButton);
     }
 
     /** {@inheritDoc} */
@@ -88,13 +96,18 @@ public class ChangeValueViewImpl extends DialogBox implements ChangeValueView {
     /** {@inheritDoc} */
     @Override
     public void setEnableChangeButton(boolean isEnable) {
-        btnChange.setEnabled(isEnable);
+        changeButton.setEnabled(isEnable);
     }
 
     /** {@inheritDoc} */
     @Override
     public void focusInValueField() {
-        value.setFocus(true);
+        new Timer() {
+            @Override
+            public void run() {
+                value.setFocus(true);
+            }
+        }.schedule(300);
     }
 
     /** {@inheritDoc} */
@@ -118,24 +131,17 @@ public class ChangeValueViewImpl extends DialogBox implements ChangeValueView {
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.center();
         this.show();
+        if (!value.getText().isEmpty()) {
+            value.selectAll();
+            setEnableChangeButton(true);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    @UiHandler("btnChange")
-    public void onChangeButtonClicked(ClickEvent event) {
-        delegate.onChangeClicked();
-    }
-
-    @UiHandler("btnCancel")
-    public void onCancelButtonClicked(ClickEvent event) {
-        delegate.onCancelClicked();
     }
 
     @UiHandler("value")
