@@ -24,6 +24,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
+import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
@@ -176,7 +177,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
     }
 
     @Override
-    protected void initializeEditor() {
+    protected void initializeEditor(final OpenEditorCallback callback) {
         new TextEditorInit<T>(configuration,
                               generalEventBus,
                               this.codeAssistantFactory,
@@ -197,11 +198,13 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
             @Override
             public void onError() {
                 displayErrorPanel(constant.editorInitErrorMessage());
+                callback.onInitializationFailed();
             }
 
             @Override
             public void onFileError() {
                 displayErrorPanel(constant.editorFileErrorMessage());
+                callback.onInitializationFailed();
             }
         };
         documentStorage.getDocument(input.getFile(), dualCallback);

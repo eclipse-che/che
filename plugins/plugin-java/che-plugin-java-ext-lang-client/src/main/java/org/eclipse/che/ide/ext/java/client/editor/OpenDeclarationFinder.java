@@ -21,6 +21,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
@@ -160,14 +161,11 @@ public class OpenDeclarationFinder {
             editorAgent.activateEditor(editorPartPresenter);
             fileOpened(editorPartPresenter, descriptor.getOffset());
         } else {
-            editorAgent.openEditor(result, new EditorAgent.OpenEditorCallback() {
+            editorAgent.openEditor(result, new OpenEditorCallbackImpl() {
                 @Override
                 public void onEditorOpened(EditorPartPresenter editor) {
                     fileOpened(editor, descriptor.getOffset());
                 }
-
-                @Override
-                public void onEditorActivated(EditorPartPresenter editor) { }
             });
         }
     }
