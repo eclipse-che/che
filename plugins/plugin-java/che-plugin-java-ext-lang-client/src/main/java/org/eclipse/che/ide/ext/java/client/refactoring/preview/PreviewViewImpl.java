@@ -196,7 +196,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
             }
             refreshComperingFiles(preview);
 
-            compare.refresh();
+            compare.reload();
         }
     }
 
