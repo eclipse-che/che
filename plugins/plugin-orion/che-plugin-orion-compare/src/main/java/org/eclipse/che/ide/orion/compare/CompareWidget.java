@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.orion.compare;
 
+import elemental.events.CustomEvent;
 import elemental.events.Event;
 import elemental.events.EventListener;
 import elemental.html.Window;
@@ -37,12 +38,21 @@ import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 /**
  * Widget for compering (diff) for two files.
  * @author Evgen Vidolob
+ * @author Igor Vinokur
  */
 public class CompareWidget extends Composite {
 
     private Frame           frame;
+    private JsIFrameElement iFrame;
     private Promise<Window> framePromise;
     private CompareConfig   compareConfig;
+
+    /**
+     * Callback for receiving content.
+     */
+    public interface ContentCallBack {
+        void onContentReceived(String content);
+    }
 
     public CompareWidget(final CompareConfig compareConfig, final String themeId, LoaderFactory loaderFactory) {
         this.compareConfig = compareConfig;
@@ -59,9 +69,8 @@ public class CompareWidget extends Composite {
                     @Override
                     public void onLoad(LoadEvent event) {
                         frame.getElement().cast();
-                        final JsIFrameElement iFrame = frame.getElement().cast();
+                        iFrame = frame.getElement().cast();
                         callback.onSuccess(iFrame.getContentWindow());
-                        loader.hide();
                     }
                 });
             }
@@ -100,13 +109,50 @@ public class CompareWidget extends Composite {
     }
 
     /**
-     * Refresh compare according to configuration
+     * Reload compare according to configuration.
+     */
+    public void reload() {
+        framePromise.then(new Operation<Window>() {
+            @Override
+            public void apply(Window arg) throws OperationException {
+                sendConfig(arg, compareConfig);
+            }
+        });
+    }
+
+    /**
+     * Refresh compare parts.
      */
     public void refresh() {
         framePromise.then(new Operation<Window>() {
             @Override
             public void apply(Window arg) throws OperationException {
-                sendConfig(arg, compareConfig);
+                JSONObject obj = new JSONObject();
+                obj.put("type", new JSONString("refresh"));
+                arg.postMessage(obj.toString(), "*");
+            }
+        });
+    }
+
+    /**
+     * get content of editable part of compare widget.
+     *
+     * @param contentCallBack callBack with received contents
+     */
+    public void getContent(final ContentCallBack contentCallBack) {
+        framePromise.then(new Operation<Window>() {
+            @Override
+            public void apply(final Window arg) throws OperationException {
+                JSONObject obj = new JSONObject();
+                obj.put("type", new JSONString("getNewContentRequest"));
+                arg.postMessage(obj.toString(), "*");
+
+                arg.addEventListener("getNewContentResponse", new EventListener() {
+                    @Override
+                    public void handleEvent(Event evt) {
+                        contentCallBack.onContentReceived(((CustomEvent)evt).getDetail().toString());
+                    }
+                }, false);
             }
         });
     }

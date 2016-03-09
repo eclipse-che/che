@@ -29,6 +29,7 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareWidget;
+import org.eclipse.che.ide.orion.compare.CompareWidget.ContentCallBack;
 import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
@@ -58,6 +59,7 @@ final class CompareViewImpl extends Window implements CompareView {
 
     private ActionDelegate delegate;
     private ThemeAgent     themeAgent;
+    private CompareWidget  compare;
 
     private final CompareFactory compareFactory;
     private final LoaderFactory  loaderFactory;
@@ -77,11 +79,19 @@ final class CompareViewImpl extends Window implements CompareView {
         Button closeButton = createButton(locale.buttonClose(), "git-compare-close-btn", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onCloseButtonClicked();
+                onClose();
+            }
+        });
+
+        Button refreshButton = createButton(locale.buttonRefresh(), "git-compare-refresh-btn", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                compare.refresh();
             }
         });
 
         addButtonToFooter(closeButton);
+        addButtonToFooter(refreshButton);
 
         comparePanel.getElement().setId(Document.get().createUniqueId());
     }
@@ -92,6 +102,16 @@ final class CompareViewImpl extends Window implements CompareView {
         this.delegate = delegate;
     }
 
+    @Override
+    protected void onClose() {
+        compare.getContent(new ContentCallBack() {
+            @Override
+            public void onContentReceived(String content) {
+                delegate.onClose(content);
+            }
+        });
+    }
+
     /** {@inheritDoc} */
     @Override
     public void show(String oldContent, String newContent, String revision, String file) {
@@ -100,10 +120,10 @@ final class CompareViewImpl extends Window implements CompareView {
 
         super.show();
 
-        this.revision.setText(revision);
+        this.revision.setText(revision + locale.compareReadOnlyTitle());
 
         FileOptions newFile = compareFactory.createFieOptions();
-        newFile.setReadOnly(true);
+        newFile.setReadOnly(false);
 
         FileOptions oldFile = compareFactory.createFieOptions();
         oldFile.setReadOnly(true);
@@ -119,7 +139,7 @@ final class CompareViewImpl extends Window implements CompareView {
         compareConfig.setShowTitle(false);
         compareConfig.setShowLineStatus(false);
 
-        CompareWidget compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
+        compare = new CompareWidget(compareConfig, themeAgent.getCurrentThemeId(), loaderFactory);
         comparePanel.clear();
         comparePanel.add(compare);
     }
