@@ -23,7 +23,7 @@ export class CheAPI {
    * @ngInject for Dependency injection
    */
   constructor(cheProject, cheWorkspace, cheUser, cheProfile, cheProjectType, cheProjectTemplate, cheWebsocket, cheGit, cheSvn,
-              cheService, cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack) {
+              cheService, cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider) {
     this.cheProject = cheProject;
     this.cheWorkspace = cheWorkspace;
     this.cheUser = cheUser;
@@ -39,6 +39,7 @@ export class CheAPI {
     this.cheRecipe = cheRecipe;
     this.cheRecipeTemplate = cheRecipeTemplate;
     this.cheStack = cheStack;
+    this.cheOAuthProvider = cheOAuthProvider;
 
     // register listener of projects onto workspaces
     this.cheWorkspace.addListener(this.cheProject);
@@ -68,6 +69,14 @@ export class CheAPI {
    */
   getUser() {
     return this.cheUser;
+  }
+
+  /**
+   * The Che oAuth Provider API
+   * @returns {CheOAuthProvider|*}
+   */
+  getOAuthProvider() {
+    return this.cheOAuthProvider;
   }
 
   /**
