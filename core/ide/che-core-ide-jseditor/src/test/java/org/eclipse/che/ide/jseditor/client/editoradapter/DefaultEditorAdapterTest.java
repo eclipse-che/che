@@ -10,6 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.editoradapter;
 
+import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -28,15 +37,6 @@ import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
 import org.eclipse.che.ide.jseditor.client.text.TextRange;
 import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
-import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.RequiresResize;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwtmockito.GwtMockitoTestRunner;
-import com.google.web.bindery.event.shared.EventBus;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +47,7 @@ import org.mockito.Mock;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import static org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -173,10 +174,11 @@ public class DefaultEditorAdapterTest {
     @Test
     public void shouldInit() throws EditorInitException {
         final EditorInput input = mock(EditorInput.class);
+        final OpenEditorCallback editorCallback = mock(OpenEditorCallback.class);
 
-        defaultEditorAdapter.init(input);
+        defaultEditorAdapter.init(input, editorCallback);
 
-        verify(textEditor).init(input);
+        verify(textEditor).init(input, editorCallback);
     }
 
     @Test
@@ -432,6 +434,7 @@ public class DefaultEditorAdapterTest {
         final FileEvent event = mock(FileEvent.class);
         final VirtualFile file = mock(VirtualFile.class);
         final EditorInput input = mock(EditorInput.class);
+        final OpenEditorCallback editorCallback = mock(OpenEditorCallback.class);
         String path = "filePath";
 
         when(input.getFile()).thenReturn(file);
@@ -439,7 +442,7 @@ public class DefaultEditorAdapterTest {
         when(file.getPath()).thenReturn(path);
         when(event.getOperationType()).thenReturn(FileEvent.FileOperation.CLOSE);
 
-        defaultEditorAdapter.init(input);
+        defaultEditorAdapter.init(input, editorCallback);
         defaultEditorAdapter.onFileOperation(event);
 
         verify(workspaceAgent).removePart(defaultEditorAdapter);

@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor;
 
-import org.eclipse.che.ide.api.parts.PartPresenter;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 
 import javax.validation.constraints.NotNull;
 
@@ -51,10 +53,10 @@ public interface EditorPartPresenter extends PartPresenter {
      *
      * @param input
      *         the editor input
-     * @throws EditorInitException
-     *         if this editor was not initialized successfully
+     * @param callback
+     *         callback with actions which should be performed when editor was initialized
      */
-    void init(@NotNull EditorInput input) throws EditorInitException;
+    void init(@NotNull EditorInput input, OpenEditorCallback callback);
 
     /**
      * Returns the input for this editor.  If this value changes the part must
@@ -105,8 +107,9 @@ public interface EditorPartPresenter extends PartPresenter {
 
     /**
      * Closes this text editor after optionally saving changes.
-     * 
-     * @param save <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
+     *
+     * @param save
+     *         <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
      */
     void close(boolean save);
 }

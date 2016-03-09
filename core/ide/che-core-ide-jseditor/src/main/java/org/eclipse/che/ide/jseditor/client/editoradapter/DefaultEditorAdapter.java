@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
@@ -47,6 +46,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 
 /**
  * Default implementation of {@link EditorAdapter}.
@@ -145,8 +146,8 @@ public class DefaultEditorAdapter extends Composite implements EditorAdapter, Fi
     }
 
     @Override
-    public void init(final EditorInput input) throws EditorInitException {
-        this.textEditor.init(input);
+    public void init(final EditorInput input, OpenEditorCallback callback) {
+        this.textEditor.init(input, callback);
         this.input = input;
     }
 
