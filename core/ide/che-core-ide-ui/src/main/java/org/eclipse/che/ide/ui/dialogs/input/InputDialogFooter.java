@@ -11,13 +11,15 @@
 package org.eclipse.che.ide.ui.dialogs.input;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
@@ -32,7 +34,7 @@ import static org.eclipse.che.ide.ui.window.Window.Resources;
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
-public class InputDialogFooter extends Composite {
+public class InputDialogFooter implements IsWidget {
 
     private static final Resources                   resources = GWT.create(Resources.class);
     /** The UI binder instance. */
@@ -44,13 +46,16 @@ public class InputDialogFooter extends Composite {
     Button                 okButton;
     @UiField
     Button                 cancelButton;
+
+    HTMLPanel rootPanel;
+
     /** The action delegate. */
     private ActionDelegate actionDelegate;
 
     @Inject
     public InputDialogFooter(final @NotNull UILocalizationConstant messages) {
         this.messages = messages;
-        initWidget(uiBinder.createAndBindUi(this));
+        rootPanel = uiBinder.createAndBindUi(this);
 
         okButton.addStyleName(resources.windowCss().primaryButton());
         okButton.getElement().setId("askValue-dialog-ok");
@@ -94,7 +99,12 @@ public class InputDialogFooter extends Composite {
         return okButton;
     }
 
+    @Override
+    public Widget asWidget() {
+        return rootPanel;
+    }
+
     /** The UI binder interface for this component. */
-    interface ConfirmWindowFooterUiBinder extends UiBinder<Widget, InputDialogFooter> {
+    interface ConfirmWindowFooterUiBinder extends UiBinder<HTMLPanel, InputDialogFooter> {
     }
 }

@@ -11,13 +11,15 @@
 package org.eclipse.che.ide.ui.dialogs.confirm;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
@@ -31,7 +33,7 @@ import javax.validation.constraints.NotNull;
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
-public class ConfirmDialogFooter extends Composite {
+public class ConfirmDialogFooter implements IsWidget {
 
     private static final Window.Resources            resources = GWT.create(Window.Resources.class);
     /** The UI binder instance. */
@@ -43,13 +45,15 @@ public class ConfirmDialogFooter extends Composite {
     Button                 okButton;
     @UiField
     Button                 cancelButton;
+    HTMLPanel rootPanel;
+
     /** The action delegate. */
     private ConfirmDialogView.ActionDelegate actionDelegate;
 
     @Inject
     public ConfirmDialogFooter(final @NotNull UILocalizationConstant messages) {
         this.messages = messages;
-        initWidget(uiBinder.createAndBindUi(this));
+        rootPanel = uiBinder.createAndBindUi(this);
 
         okButton.addStyleName(resources.windowCss().primaryButton());
         okButton.getElement().setId("ask-dialog-ok");
@@ -60,7 +64,8 @@ public class ConfirmDialogFooter extends Composite {
     /**
      * Overwrites label of Ok button
      *
-     * @param label new label
+     * @param label
+     *         new label
      */
     public void setOkButtonLabel(String label) {
         okButton.setText(label);
@@ -69,7 +74,8 @@ public class ConfirmDialogFooter extends Composite {
     /**
      * Overwrites label of Cancel button
      *
-     * @param label new label
+     * @param label
+     *         new label
      */
     public void setCancelButtonLabel(String label) {
         cancelButton.setText(label);
@@ -107,7 +113,12 @@ public class ConfirmDialogFooter extends Composite {
         this.actionDelegate.cancelled();
     }
 
+    @Override
+    public Widget asWidget() {
+        return rootPanel;
+    }
+
     /** The UI binder interface for this component. */
-    interface ConfirmDialogFooterUiBinder extends UiBinder<Widget, ConfirmDialogFooter> {
+    interface ConfirmDialogFooterUiBinder extends UiBinder<HTMLPanel, ConfirmDialogFooter> {
     }
 }

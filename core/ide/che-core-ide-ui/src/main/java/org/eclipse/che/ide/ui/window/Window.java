@@ -188,7 +188,14 @@ public abstract class Window implements IsWidget {
 
     /** Set focus to current window. */
     public void focus() {
-        view.focusView();
+        view.setFocus();
+    }
+
+    /**
+     * Sets focus on the last focused child element if such exists.
+     */
+    public void focusLastFocusedElement() {
+        view.focusLastFocusedElement();
     }
 
     /**
