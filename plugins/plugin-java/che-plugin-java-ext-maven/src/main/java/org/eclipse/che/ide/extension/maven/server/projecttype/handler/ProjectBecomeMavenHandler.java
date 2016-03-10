@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.projecttype.handler;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -32,24 +31,20 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
 @Singleton
 public class ProjectBecomeMavenHandler implements ProjectInitHandler {
 
-    @Inject
-    private ProjectRegistry projectRegistry;
-
-
     @Override
     public String getProjectType() {
         return MAVEN_ID;
     }
 
     @Override
-    public void onProjectInitialized(FolderEntry projectFolder)
-            throws ServerException, ForbiddenException, ConflictException, NotFoundException {
-
+    public void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder) throws ServerException,
+                                                                                                 ForbiddenException,
+                                                                                                 ConflictException,
+                                                                                                 NotFoundException {
         try {
-            MavenProjectResolver.resolve(projectFolder, projectRegistry);
+            MavenProjectResolver.resolve(projectFolder, registry);
         } catch (IOException e) {
             throw new ServerException(e);
         }
-
     }
 }
