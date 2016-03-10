@@ -52,7 +52,7 @@ public class ProjectTemplateDescriptionLoaderTest {
         URL resource = getClass().getClassLoader().getResource("che-templates");
 
         //noinspection ConstantConditions
-        new ProjectTemplateDescriptionLoader(resource.getPath(), "location", templateRegistry);
+        new ProjectTemplateDescriptionLoader(resource.getPath(), templateRegistry);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ProjectTemplateDescriptionLoaderTest {
     @Test
     public void templatesShouldNotBeRegisteredWhenPathToTemplateJsonIsIncorrect() {
         reset(templateRegistry);
-        new ProjectTemplateDescriptionLoader("incorrect path", "location", templateRegistry);
+        new ProjectTemplateDescriptionLoader("incorrect path", templateRegistry);
 
         verify(templateRegistry, never()).register(tagsCaptor.capture(), templateCaptor.capture());
     }
@@ -91,13 +91,11 @@ public class ProjectTemplateDescriptionLoaderTest {
         assertThat(descriptor.getSource().getLocation(), is(equalTo("${project.template_location_dir}")));
 
         //noinspection ConstantConditions
-        new ProjectTemplateDescriptionLoader(resource.getPath(), "location", templateRegistry);
+        new ProjectTemplateDescriptionLoader(resource.getPath(), templateRegistry);
 
         verify(templateRegistry).register(tagsCaptor.capture(), templateCaptor.capture());
 
         ProjectTemplateDescriptor descriptorWithNewLocation = templateCaptor.getValue();
-
-        assertThat(descriptorWithNewLocation.getSource().getLocation(), is(equalTo("location")));
 
         assertEquals(1, descriptor.getCommands().size());
         CommandDto commandDto = descriptor.getCommands().get(0);

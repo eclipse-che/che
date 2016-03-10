@@ -13,7 +13,6 @@ package org.eclipse.che.api.project.server;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,39 +41,31 @@ public class ProjectTemplateDescriptionLoader {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProjectTemplateRegistry.class);
 
-    private final String                  templateDescriptionsDir;
-    private final String                  templateLocationDir;
+    private final String                  templateDescriptionLocationDir;
     private final ProjectTemplateRegistry templateRegistry;
 
     /**
-     * @param templateDescriptionsDir
-     *         Describe path to the dir where to locate json file that describes templates for project types.
-     *         Json file must have name like: "projectTypeId".json (e.g, maven.json, python.json and so on)
-     * @param templateLocationDir
-     *         Describe value to the dir where templates sources are located.
-     *         If in ImportSourceDescriptor.location is set in the path ${project.template_location_dir}
-     *         it will replaced with value that is set in configuration
+     * @param templateDescriptionLocationDir
+     *         Describes value which is a path the directory with template descriptors (not sources).
      * @param templateRegistry
      *         registry which contains templates associated with tags
      */
     @Inject
-    public ProjectTemplateDescriptionLoader(@Named("project.template_descriptions_dir") String templateDescriptionsDir,
-                                            @Named("project.template_location_dir") String templateLocationDir,
+    public ProjectTemplateDescriptionLoader(@Named("project.template_description.location_dir") String templateDescriptionLocationDir,
                                             ProjectTemplateRegistry templateRegistry) {
-        this.templateDescriptionsDir = templateDescriptionsDir;
-        this.templateLocationDir = templateLocationDir;
+        this.templateDescriptionLocationDir = templateDescriptionLocationDir;
         this.templateRegistry = templateRegistry;
 
         start();
     }
 
     public void start() {
-        if (templateDescriptionsDir == null || !Files.exists(Paths.get(templateDescriptionsDir)) ||
-            !Files.isDirectory(Paths.get(templateDescriptionsDir))) {
+        if (templateDescriptionLocationDir == null || !Files.exists(Paths.get(templateDescriptionLocationDir)) ||
+            !Files.isDirectory(Paths.get(templateDescriptionLocationDir))) {
             LOG.error(getClass() +
                       " The configuration of project templates descriptors wasn't found or some problem with configuration was found.");
         } else {
-            Path dirPath = Paths.get(templateDescriptionsDir);
+            Path dirPath = Paths.get(templateDescriptionLocationDir);
 
             load(dirPath);
         }
@@ -107,13 +98,6 @@ public class ProjectTemplateDescriptionLoader {
         final List<ProjectTemplateDescriptor> templates = DtoFactory.getInstance().createListDtoFromJson(stream, 
                                                                                                          ProjectTemplateDescriptor.class);
         for (ProjectTemplateDescriptor template : templates) {
-            SourceStorageDto source = template.getSource();
-            String location = source.getLocation();
-            
-            if (location.contains("${project.template_location_dir}") && templateLocationDir != null) {
-                source.setLocation(location.replace("${project.template_location_dir}", templateLocationDir));
-            }
-
             templateRegistry.register(template.getTags(), template);
         }
     }
