@@ -16,6 +16,9 @@
     <ui:with field='res' type='org.eclipse.che.ide.Resources'/>
     <ui:with field='locale' type='org.eclipse.che.ide.CoreLocalizationConstant'/>
     <ui:style>
+        @eval buttonHoverBackground org.eclipse.che.ide.api.theme.Style.getButtonHoverBackground();
+        @eval buttonHoverBorderColor org.eclipse.che.ide.api.theme.Style.getButtonHoverBorderColor();
+
         .emptyBorder {
             margin: 6px;
         }
@@ -45,6 +48,12 @@
             margin-left: 2px;
             border-radius: 5px;
             padding: 0 7px;
+        }
+
+        .selectDirectoryButton:hover,
+        .selectDirectoryButton:focus {
+            box-shadow: 0 0 0 2px buttonHoverBorderColor, 0 0 0 3px buttonHoverBackground;
+            border: none;
         }
 
         .floating {
