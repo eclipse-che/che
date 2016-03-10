@@ -58,6 +58,6 @@ public class EventOriginClientPropagationPolicy implements ClientEventPropagatio
     public boolean shouldPropagated(URI uri, Object event) {
         final EventOrigin eventOrigin = event.getClass().getAnnotation(EventOrigin.class);
         final Set<String> set = forPropagation.get(uri);
-        return set != null && set.contains(eventOrigin.value());
+        return set != null && eventOrigin != null && set.contains(eventOrigin.value());
     }
 }
