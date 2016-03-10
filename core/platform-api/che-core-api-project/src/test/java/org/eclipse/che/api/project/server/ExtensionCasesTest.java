@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  *  @author gazarenkov
@@ -68,7 +67,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
 
         projectHandlerRegistry.register(new ProjectInitHandler() {
             @Override
-            public void onProjectInitialized(FolderEntry projectFolder)
+            public void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
                     throws ServerException, NotFoundException, ConflictException, ForbiddenException {
 
                 projectFolder.createFile("generated", "test".getBytes());

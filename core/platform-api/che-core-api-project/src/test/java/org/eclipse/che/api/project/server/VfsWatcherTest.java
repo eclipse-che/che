@@ -12,6 +12,9 @@ package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherEventType;
+import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -23,6 +26,8 @@ public class VfsWatcherTest extends WsAgentTestBase {
     @BeforeMethod
     public void setUp() throws Exception {
         super.setUp();
+
+        pm.addWatchListener(new MyPTListener());
     }
 
     @Test
@@ -60,6 +65,22 @@ public class VfsWatcherTest extends WsAgentTestBase {
         public void onEvent(VfsWatchEvent event) {
 
             System.out.println(" >>>>> " + event.getPath() +" " + event.getType() + " " + event.isFile());
+        }
+    }
+
+    private static class MyPTListener extends FileWatcherNotificationListener {
+
+        public MyPTListener() {
+            super(file -> {
+                if(file.getPath().getName().equals("file.txt"))
+                    return true;
+                return false;
+            });
+        }
+
+        @Override
+        public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
+            System.out.println(" file.txt EVENT>>>>> " + virtualFile.getPath() + " " + eventType.name());
         }
     }
 

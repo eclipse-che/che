@@ -324,17 +324,21 @@ public class ProjectRegistry {
             throws ForbiddenException, ConflictException, NotFoundException, ServerException {
 
         // primary type
-        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(project.getType());
-        if (projectInitHandler != null) {
-            projectInitHandler.onProjectInitialized(project.getBaseFolder());
-        }
+        //ProjectTypeDef pt = project.getProjectType();
+        //pt.getAncestors();
+        fireInit(project, project.getType());
 
         // mixins
         for(String mixin : project.getMixins()) {
-            projectInitHandler = handlers.getProjectInitHandler(mixin);
-            if (projectInitHandler != null) {
-                projectInitHandler.onProjectInitialized(project.getBaseFolder());
-            }
+            fireInit(project, mixin);
+        }
+    }
+
+    void fireInit(RegisteredProject project, String type)
+            throws ForbiddenException, ConflictException, NotFoundException, ServerException {
+        ProjectInitHandler projectInitHandler = handlers.getProjectInitHandler(type);
+        if (projectInitHandler != null) {
+            projectInitHandler.onProjectInitialized(this, project.getBaseFolder());
         }
     }
 
