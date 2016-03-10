@@ -59,7 +59,7 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
 
     @Override
     public void showDialog() {
-        this.show();
+        this.show(footer.firstChoiceButton);
     }
 
     @Override
