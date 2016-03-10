@@ -31,20 +31,21 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
 @Singleton
 public class ProjectBecomeMavenHandler implements ProjectInitHandler {
 
+
     @Override
     public String getProjectType() {
         return MAVEN_ID;
     }
 
     @Override
-    public void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder) throws ServerException,
-                                                                                                 ForbiddenException,
-                                                                                                 ConflictException,
-                                                                                                 NotFoundException {
+    public void onProjectInitialized(ProjectRegistry projectRegistry, FolderEntry projectFolder)
+            throws ServerException, ForbiddenException, ConflictException, NotFoundException {
+
         try {
-            MavenProjectResolver.resolve(projectFolder, registry);
+            MavenProjectResolver.resolve(projectFolder, projectRegistry);
         } catch (IOException e) {
             throw new ServerException(e);
         }
+
     }
 }
