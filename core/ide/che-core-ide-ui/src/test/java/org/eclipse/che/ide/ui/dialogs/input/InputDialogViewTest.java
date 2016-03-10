@@ -12,19 +12,13 @@ package org.eclipse.che.ide.ui.dialogs.input;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
-import com.google.gwt.user.client.Element;
 
-import org.eclipse.che.ide.ui.UILocalizationConstant;
-import org.eclipse.che.ide.ui.dialogs.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.eclipse.che.ide.ui.dialogs.input.InputDialogView.ActionDelegate;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link InputDialogViewImpl} functionality.
@@ -44,7 +38,6 @@ public class InputDialogViewTest extends BaseTest {
     @Override
     public void setUp() {
         super.setUp();
-        when(footer.getElement()).thenReturn(mock(Element.class));
         view = new InputDialogViewImpl(footer, uiLocalizationConstant);
     }
 

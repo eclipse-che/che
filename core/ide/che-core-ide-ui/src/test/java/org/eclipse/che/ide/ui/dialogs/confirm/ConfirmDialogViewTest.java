@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ui.dialogs.confirm;
 
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
-import com.google.gwt.user.client.Element;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +18,7 @@ import org.mockito.Mock;
 
 import static org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogView.ActionDelegate;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link ConfirmDialogViewImpl} functionality.
@@ -39,7 +36,6 @@ public class ConfirmDialogViewTest extends BaseTest {
     @Override
     public void setUp() {
         super.setUp();
-        when(footer.getElement()).thenReturn(mock(Element.class));
         view = new ConfirmDialogViewImpl(footer);
     }
 
