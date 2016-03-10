@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
@@ -20,6 +22,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 
@@ -51,8 +54,8 @@ public class WorkspaceHolder {
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory)
-            throws ServerException {
+    public WorkspaceHolder(@Named("api.endpoint") String apiEndpoint,
+                           HttpJsonRequestFactory httpJsonRequestFactory) throws ServerException {
 
         this.apiEndpoint = apiEndpoint;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
@@ -68,11 +71,10 @@ public class WorkspaceHolder {
         }
 
         this.workspace = new UsersWorkspaceImpl(workspaceDto(workspaceId));
-
     }
 
+    @VisibleForTesting
     protected WorkspaceHolder(UsersWorkspaceDto workspace) throws ServerException {
-
         this.workspace = new UsersWorkspaceImpl(workspace);
     }
 
@@ -100,20 +102,15 @@ public class WorkspaceHolder {
 
         try {
             httpJsonRequestFactory.fromLink(link)
-                                  .setBody(workspace)
+                                  .setBody(DtoConverter.asDto(workspace.getConfig()))
                                   .request();
         } catch (IOException | ApiException e) {
             throw new ServerException(e.getMessage());
         }
 
         // sync local projects
-        for (RegisteredProject project : projects) {
-            if(!project.isSynced())
-                project.setSync();
-        }
-
+        projects.stream().filter(project -> !project.isSynced()).forEach(RegisteredProject::setSync);
     }
-
 
     /**
      * @param wsId

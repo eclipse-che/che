@@ -86,6 +86,7 @@ import java.net.URI;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -100,6 +101,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -292,6 +294,12 @@ public class ProjectServiceTest {
                             .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
                                                   .withName("name")
                                                   .withProjects(new ArrayList<>())));
+        }
+
+        @Override
+        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
+            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
+            workspace.setProjects(persistedProjects);
         }
     }
 

@@ -180,6 +180,11 @@ public class ProjectRegistry {
                                                                  ForbiddenException {
         final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
+
+        if (initialized) {
+            workspaceHolder.updateProjects(projects.values());
+        }
+
         return project;
     }
 
