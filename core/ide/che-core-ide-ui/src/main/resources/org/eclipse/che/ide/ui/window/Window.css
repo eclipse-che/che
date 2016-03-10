@@ -170,7 +170,8 @@
 .button:hover,
 .button:focus {
     background: buttonHoverBackground;
-    border: 1px solid buttonHoverBorderColor;
+    box-shadow: 0 0 0 2px buttonHoverBorderColor, 0 0 0 3px buttonHoverBackground;
+    border: none;
     color: buttonHoverFontColor;
 }
 
@@ -201,7 +202,8 @@
 .primaryButton:hover,
 .primaryButton:focus {
     background-color: primaryButtonHoverBackground;
-    border: 1px solid primaryButtonHoverBorderColor;
+    box-shadow: 0 0 0 2px buttonHoverBorderColor, 0 0 0 3px buttonHoverBackground;
+    border: none;
     color: primaryButtonHoverFontColor;
 }
 
