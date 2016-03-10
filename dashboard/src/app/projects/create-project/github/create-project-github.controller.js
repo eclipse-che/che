@@ -21,13 +21,14 @@ export class CreateProjectGithubCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor (cheAPI, $rootScope, $http, $q, $window, $location, $browser, $modal, $filter, GitHub, githubPopup, gitHubTokenStore,
+  constructor (cheAPI, $rootScope, $http, $q, $window, $mdDialog, $location, $browser, $modal, $filter, GitHub, githubPopup, gitHubTokenStore,
                cheBranding, githubOrganizationNameResolver) {
     this.cheAPI = cheAPI;
     this.$http = $http;
     this.$rootScope = $rootScope;
     this.$q = $q;
     this.$window = $window;
+    this.$mdDialog = $mdDialog;
     this.$location = $location;
     this.$browser = $browser;
     this.$modal = $modal;
@@ -54,6 +55,11 @@ export class CreateProjectGithubCtrl {
     this.gitHubRepositories = [];
 
     this.state = 'IDLE';
+    this.isGitHubOAuthProviderAvailable = false;
+
+    this.cheAPI.getOAuthProvider().fetchOAuthProviders().then(() => {
+      this.isGitHubOAuthProviderAvailable = this.cheAPI.getOAuthProvider().isOAuthProviderRegistered('github');
+    });
   }
 
   askLoad() {
@@ -66,8 +72,18 @@ export class CreateProjectGithubCtrl {
 
   }
 
-
   authenticateWithGitHub() {
+    if (!this.isGitHubOAuthProviderAvailable) {
+     this.$mdDialog.show({
+      controller: 'NoGithubOauthDialogController',
+      controllerAs: 'noGithubOauthDialogController',
+      bindToController: true,
+      clickOutsideToClose: true,
+      templateUrl: 'app/projects/create-project/github/oauth-dialog/no-github-oauth-dialog.html'
+     });
+    
+    return;
+    }
 
     var redirectUrl = this.$location.protocol() + '://'
       + this.$location.host() + ':'

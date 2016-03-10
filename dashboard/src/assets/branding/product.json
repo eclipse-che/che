@@ -5,5 +5,6 @@
   "favicon": "favicon.ico",
   "ideResources": "/ide/_app/",
   "helpPath": "https://www.eclipse.org/che/",
-  "supportEmail": "wish@codenvy.com"
+  "supportEmail": "wish@codenvy.com",
+  "oauthDocs": "https://eclipse-che.readme.io/docs/git#ssh-key-management"
 }
