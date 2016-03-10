@@ -1,5 +1,62 @@
 # Change Log
 
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC13...HEAD)
+
+**Issues with no labels:**
+
+- Trying to connect my github account produces a 404 page \(from Github\) [\#670](https://github.com/eclipse/che/issues/670)
+
+**Pull requests merged:**
+
+- CODENVY-193: Add jenkins build badge [\#668](https://github.com/eclipse/che/pull/668) ([riuvshin](https://github.com/riuvshin))
+- Codenvy 167: improve the che-footer widget [\#665](https://github.com/eclipse/che/pull/665) ([olexii4](https://github.com/olexii4))
+- CHE-686: add oauth providers service and check GitHub one to notify user [\#661](https://github.com/eclipse/che/pull/661) ([ashumilova](https://github.com/ashumilova))
+
+## [4.0.0-RC13](https://github.com/eclipse/che/tree/4.0.0-RC13) (2016-03-09)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC12...4.0.0-RC13)
+
+**Issues with 'enhancement' label:**
+
+- Che can't authorise to github [\#639](https://github.com/eclipse/che/issues/639)
+
+**Issues with no labels:**
+
+- Features Page Content Typo [\#656](https://github.com/eclipse/che/issues/656)
+- Question about templates folder [\#649](https://github.com/eclipse/che/issues/649)
+- CHE-669 Make terminal easier to find [\#597](https://github.com/eclipse/che/issues/597)
+- CHE-640 Password strength meter is broken on account view [\#559](https://github.com/eclipse/che/issues/559)
+
+**Pull requests merged:**
+
+- Remove unused components [\#662](https://github.com/eclipse/che/pull/662) ([ashumilova](https://github.com/ashumilova))
+- CHE-698: improve the boxes styles on dashboard page [\#660](https://github.com/eclipse/che/pull/660) ([olexii4](https://github.com/olexii4))
+- CHE-528: Resize git Merge and History icons to fit them in line [\#658](https://github.com/eclipse/che/pull/658) ([vinokurig](https://github.com/vinokurig))
+- CHE-655: add recent workspaces box on the dashboard [\#653](https://github.com/eclipse/che/pull/653) ([olexii4](https://github.com/olexii4))
+- CHE-666 Refine icons in project configuration wizard [\#652](https://github.com/eclipse/che/pull/652) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Move workspaces menu above projects one [\#651](https://github.com/eclipse/che/pull/651) ([ashumilova](https://github.com/ashumilova))
+- CHE-503: Add ability to save edited changes from compare widget [\#650](https://github.com/eclipse/che/pull/650) ([vinokurig](https://github.com/vinokurig))
+- CHE-701: Extend debugger views from Window [\#647](https://github.com/eclipse/che/pull/647) ([vinokurig](https://github.com/vinokurig))
+- Che 684 improve import from SSH error notification [\#646](https://github.com/eclipse/che/pull/646) ([olexii4](https://github.com/olexii4))
+- CHE-367: Return websocket URL of extension server when a workspace is launched [\#635](https://github.com/eclipse/che/pull/635) ([mmorhun](https://github.com/mmorhun))
+- CHE-516: Fix unstable debbuger behavior [\#580](https://github.com/eclipse/che/pull/580) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+
+## [4.0.0-RC12](https://github.com/eclipse/che/tree/4.0.0-RC12) (2016-03-06)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC11...4.0.0-RC12)
+
+**Issues with no labels:**
+
+- What's the difference between the two concepts "recipe" and "stack" [\#633](https://github.com/eclipse/che/issues/633)
+- CHE-653 Change value fails with NullPointerException [\#576](https://github.com/eclipse/che/issues/576)
+- CHE-651 Notification loose their shadow [\#573](https://github.com/eclipse/che/issues/573)
+
+**Pull requests merged:**
+
+- CHE-669 Make terminal easier to find [\#645](https://github.com/eclipse/che/pull/645) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- CHE-383: Move FqnProvider to che-core-ide-api [\#644](https://github.com/eclipse/che/pull/644) ([dimasnurenko](https://github.com/dimasnurenko))
+- CHE-383: Add ability to show and copy fqn and path of files [\#637](https://github.com/eclipse/che/pull/637) ([dimasnurenko](https://github.com/dimasnurenko))
+- Added changeslog for 4.0.0-RC9 - 4.0.0-RC11 [\#636](https://github.com/eclipse/che/pull/636) ([skabashnyuk](https://github.com/skabashnyuk))
+- CODENVY-174 pre-select correct branch when start point is set [\#629](https://github.com/eclipse/che/pull/629) ([mshaposhnik](https://github.com/mshaposhnik))
+
 ## [4.0.0-RC11](https://github.com/eclipse/che/tree/4.0.0-RC11) (2016-03-03)
 [Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC10...4.0.0-RC11)
 
@@ -14,6 +71,7 @@
 
 **Pull requests merged:**
 
+- CHE-214 \[dashboard\] use real project path for commands [\#632](https://github.com/eclipse/che/pull/632) ([benoitf](https://github.com/benoitf))
 - CHE-651 \[dashboard\] Add missing shadow on popup [\#628](https://github.com/eclipse/che/pull/628) ([benoitf](https://github.com/benoitf))
 - CHE-700 Add subversion to blank stack [\#627](https://github.com/eclipse/che/pull/627) ([benoitf](https://github.com/benoitf))
 - Add Z suffix to fix mounting issues on Fedora with SELinux enabled [\#623](https://github.com/eclipse/che/pull/623) ([eivantsov](https://github.com/eivantsov))
