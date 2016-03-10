@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.editor;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.ide.api.parts.AbstractPartPresenter;
+import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -32,13 +33,13 @@ public abstract class AbstractEditorPresenter extends AbstractPartPresenter impl
 
     /** {@inheritDoc} */
     @Override
-    public void init(@NotNull EditorInput input) throws EditorInitException {
+    public void init(@NotNull EditorInput input, final OpenEditorCallback callback) {
         this.input = input;
-        initializeEditor();
+        initializeEditor(callback);
     }
 
     /** Initializes this editor. */
-    protected abstract void initializeEditor();
+    protected abstract void initializeEditor(final OpenEditorCallback callback);
 
     /**
      * Set dirty state and notify expressions

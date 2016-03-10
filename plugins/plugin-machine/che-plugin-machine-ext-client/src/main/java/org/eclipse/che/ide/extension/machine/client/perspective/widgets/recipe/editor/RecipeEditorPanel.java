@@ -16,8 +16,8 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
-import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -34,7 +34,6 @@ import org.eclipse.che.ide.jseditor.client.editorconfig.DefaultTextEditorConfigu
 import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditor;
 import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -170,12 +169,7 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
             }
         });
 
-
-        try {
-            editor.init(new RecipeEditorInput(fileType, file));
-        } catch (EditorInitException e) {
-            Log.error(getClass(), e);
-        }
+        editor.init(new RecipeEditorInput(fileType, file), new OpenEditorCallbackImpl());
     }
 
     private EmbeddedTextEditor getEditor() {

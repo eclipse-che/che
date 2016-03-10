@@ -22,7 +22,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -60,7 +59,6 @@ import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -317,12 +315,10 @@ public class EditorAgentImpl implements EditorAgent {
             FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             EditorProvider editorProvider = editorRegistry.getEditor(fileType);
             final EditorPartPresenter editor = editorProvider.getEditor();
-            try {
-                editor.init(new EditorInputImpl(fileType, file));
-                editor.addCloseHandler(editorClosed);
-            } catch (EditorInitException e) {
-                Log.error(getClass(), e);
-            }
+
+            editor.init(new EditorInputImpl(fileType, file), callback);
+            editor.addCloseHandler(editorClosed);
+
             workspace.openPart(editor, EDITING);
             openedEditors.put(filePath, editor);
 
