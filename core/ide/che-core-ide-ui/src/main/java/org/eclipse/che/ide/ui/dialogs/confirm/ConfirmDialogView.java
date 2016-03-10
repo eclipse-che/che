@@ -23,7 +23,10 @@ public interface ConfirmDialogView {
     /** Sets the action delegate. */
     void setDelegate(ActionDelegate delegate);
 
-    /** Displays the dialog window. */
+    /**
+     * Displays the dialog window.
+     * Sets "accept" button in the focus.
+     */
     void showDialog();
 
     /** Closes the dialog window. */

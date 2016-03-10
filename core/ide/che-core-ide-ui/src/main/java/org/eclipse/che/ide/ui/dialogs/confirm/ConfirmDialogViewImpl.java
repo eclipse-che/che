@@ -64,7 +64,7 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
 
     @Override
     public void showDialog() {
-        this.show();
+        this.show(footer.okButton);
     }
 
     @Override
