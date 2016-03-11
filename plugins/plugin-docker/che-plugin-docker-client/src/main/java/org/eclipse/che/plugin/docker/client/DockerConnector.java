@@ -659,17 +659,22 @@ public class DockerConnector {
      * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
      */
     public InputStream getResource(String container, String sourcePath) throws IOException {
-        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                            .method("GET")
-                                                            .path("/containers/" + container + "/archive")
-                                                            .query("path", sourcePath)) {
+        DockerConnection connection = null;
+        try {
+            connection = connectionFactory.openConnection(dockerDaemonUri)
+                                          .method("GET")
+                                          .path("/containers/" + container + "/archive")
+                                          .query("path", sourcePath);
+
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status != OK.getStatusCode()) {
                 throw getDockerException(response);
             }
-
             return new CloseConnectionInputStream(response.getInputStream(), connection);
+        } catch (IOException io) {
+            connection.close();
+            throw io;
         }
     }
 
