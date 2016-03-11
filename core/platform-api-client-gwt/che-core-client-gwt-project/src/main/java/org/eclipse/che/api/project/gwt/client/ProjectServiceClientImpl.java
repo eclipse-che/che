@@ -86,46 +86,21 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     }
 
     @Override
-    public void getProjects(String workspaceId, boolean includeAttributes, AsyncRequestCallback<List<ProjectConfigDto>> callback) {
-        asyncRequestFactory.createGetRequest(extPath + "/project/" + workspaceId + "?includeAttributes=" + includeAttributes)
+    public void getProjects(String workspaceId, AsyncRequestCallback<List<ProjectConfigDto>> callback) {
+        asyncRequestFactory.createGetRequest(extPath + "/project/" + workspaceId)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Getting projects..."))
                            .send(callback);
     }
 
     @Override
-    public Promise<List<ProjectConfigDto>> getProjects(final String workspaceId, boolean includeAttributes) {
+    public Promise<List<ProjectConfigDto>> getProjects(final String workspaceId) {
         return newPromise(new AsyncPromiseHelper.RequestCall<List<ProjectConfigDto>>() {
             @Override
             public void makeCall(AsyncCallback<List<ProjectConfigDto>> callback) {
-                getProjects(workspaceId, false, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ProjectConfigDto.class)));
+                getProjects(workspaceId, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ProjectConfigDto.class)));
             }
         });
-    }
-
-    @Override
-    public void getProjectsInSpecificWorkspace(String wsId, AsyncRequestCallback<List<ProjectConfigDto>> callback) {
-        final String requestUrl = extPath + "/project/" + wsId;
-        asyncRequestFactory.createGetRequest(requestUrl)
-                           .header(ACCEPT, MimeType.APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting projects..."))
-                           .send(callback);
-    }
-
-    @Override
-    public void cloneProjectToCurrentWorkspace(String workspaceId,
-                                               String srcProjectPath,
-                                               String newNameForProject,
-                                               AsyncRequestCallback<String> callback) {
-        final String requestUrl = extPath + "/vfs/" + workspaceId + "/v2/clone" + "?srcVfsId=" + workspaceId +
-                                  "&srcPath=" + srcProjectPath +
-                                  "&parentPath=/" +
-                                  "&name=" + newNameForProject;
-
-        asyncRequestFactory.createPostRequest(requestUrl, null)
-                           .header(ACCEPT, MimeType.APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Copying project..."))
-                           .send(callback);
     }
 
     @Override

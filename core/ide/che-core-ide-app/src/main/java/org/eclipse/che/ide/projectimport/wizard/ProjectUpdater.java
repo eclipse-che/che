@@ -81,7 +81,7 @@ public class ProjectUpdater {
                               //dirty hack. here we have to load from server new list of projects, because after project configuring
                               //they may appear, so we need to have actual projects configuration state, need to find better way to
                               //process it
-                              projectService.getProjects(workspaceId, true).then(new Operation<List<ProjectConfigDto>>() {
+                              projectService.getProjects(workspaceId).then(new Operation<List<ProjectConfigDto>>() {
                                   @Override
                                   public void apply(List<ProjectConfigDto> projects) throws OperationException {
 

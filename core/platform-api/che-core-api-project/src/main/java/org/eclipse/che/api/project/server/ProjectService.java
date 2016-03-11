@@ -117,13 +117,10 @@ public class ProjectService extends Service {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectConfigDto> getProjects(@ApiParam("ID of workspace to get projects")
-                                              @PathParam("ws-id") String workspace,
-                                              @ApiParam("Include project attributes")
-                                              @QueryParam("includeAttributes")
-                                              @DefaultValue("false") boolean includeAttributes) throws IOException,
-                                                                                                       ServerException,
-                                                                                                       ConflictException,
-                                                                                                       ForbiddenException {
+                                              @PathParam("ws-id") String workspace) throws IOException,
+                                                                                           ServerException,
+                                                                                           ConflictException,
+                                                                                           ForbiddenException {
         List<RegisteredProject> projects = projectManager.getProjects();
         List<ProjectConfigDto> projectConfigs = new ArrayList<>(projects.size());
 
