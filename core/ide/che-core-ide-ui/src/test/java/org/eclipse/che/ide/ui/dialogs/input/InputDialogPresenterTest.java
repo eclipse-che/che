@@ -143,6 +143,31 @@ public class InputDialogPresenterTest extends BaseTest {
     }
 
     @Test
+    public void onEnterClickedWhenOkButtonInFocus() throws Exception {
+        reset(view);
+        when(view.isOkButtonInFocus()).thenReturn(true);
+
+        presenter.onEnterClicked();
+
+        verify(view, never()).showErrorHint(anyString());
+        verify(view).closeDialog();
+        verify(inputCallback).accepted(anyString());
+    }
+
+    @Test
+    public void onEnterClickedWhenCancelButtonInFocus() throws Exception {
+        reset(view);
+        when(view.isCancelButtonInFocus()).thenReturn(true);
+
+        presenter.onEnterClicked();
+
+        verify(view, never()).showErrorHint(anyString());
+        verify(inputCallback, never()).accepted(anyString());
+        verify(view).closeDialog();
+        verify(cancelCallback).cancelled();
+    }
+
+    @Test
     public void onEnterClickedWhenInputValueIsCorrect() throws Exception {
         reset(view);
         when(view.getValue()).thenReturn(CORRECT_INPUT_VALUE);

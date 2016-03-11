@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.ui.WidgetFocusTracker;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -44,11 +45,15 @@ public class ChoiceDialogFooter implements IsWidget {
     HTMLPanel rootPanel;
 
     /** The action delegate. */
-    private ChoiceDialogView.ActionDelegate actionDelegate;
+    private       ChoiceDialogView.ActionDelegate actionDelegate;
+    private final WidgetFocusTracker              widgetFocusTracker;
 
     @Inject
-    public ChoiceDialogFooter() {
+    public ChoiceDialogFooter(WidgetFocusTracker widgetFocusTracker) {
+        this.widgetFocusTracker = widgetFocusTracker;
         rootPanel = uiBinder.createAndBindUi(this);
+
+        trackFocusForWidgets();
 
         firstChoiceButton.addStyleName(resources.windowCss().primaryButton());
         firstChoiceButton.getElement().setId("ask-dialog-first");
@@ -101,6 +106,37 @@ public class ChoiceDialogFooter implements IsWidget {
     @UiHandler("thirdChoiceButton")
     public void handleThirdChoiceClick(final ClickEvent event) {
         this.actionDelegate.thirdChoiceClicked();
+    }
+
+    /** Returns {@code true} if first button is in the focus and {@code false} - otherwise. */
+    boolean isFirstButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(firstChoiceButton);
+    }
+
+    /** Returns {@code true} if second button is in the focus and {@code false} - otherwise. */
+    boolean isSecondButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(secondChoiceButton);
+    }
+
+    /** Returns {@code true} if third button is in the focus and {@code false} - otherwise. */
+    boolean isThirdButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(thirdChoiceButton);
+    }
+
+    private void trackFocusForWidgets() {
+        widgetFocusTracker.subscribe(firstChoiceButton);
+        widgetFocusTracker.subscribe(secondChoiceButton);
+        widgetFocusTracker.subscribe(thirdChoiceButton);
+    }
+
+    private void unTrackFocusForWidgets() {
+        widgetFocusTracker.unSubscribe(firstChoiceButton);
+        widgetFocusTracker.unSubscribe(secondChoiceButton);
+        widgetFocusTracker.unSubscribe(thirdChoiceButton);
+    }
+
+    public void onClose() {
+        unTrackFocusForWidgets();
     }
 
     @Override

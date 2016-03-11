@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.search.selectpath.SelectPathPresenter;
+import org.eclipse.che.ide.ui.WidgetFocusTracker;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
@@ -61,16 +62,24 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
     @UiField
     Button   selectPathButton;
 
+    Button cancelButton;
+    Button acceptButton;
+
     private ActionDelegate delegate;
-    private Button         accept;
+
+    private final SelectPathPresenter selectPathPresenter;
+    private final WidgetFocusTracker  widgetFocusTracker;
 
     @Inject
     public FullTextSearchViewImpl(CoreLocalizationConstant locale,
                                   final SelectPathPresenter selectPathPresenter,
                                   FullTextSearchViewImplUiBinder uiBinder,
-                                  AppContext appContext) {
+                                  AppContext appContext,
+                                  WidgetFocusTracker widgetFocusTracker) {
         this.locale = locale;
         this.appContext = appContext;
+        this.selectPathPresenter = selectPathPresenter;
+        this.widgetFocusTracker = widgetFocusTracker;
 
         setTitle(locale.textSearchTitle());
 
@@ -78,7 +87,7 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
         setWidget(widget);
 
         createButtons();
-        addHandlers(selectPathPresenter);
+        addHandlers();
     }
 
     @Override
@@ -89,11 +98,12 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
     @Override
     public void close() {
         hide();
+        unTrackFocusForWidgets();
     }
 
     @Override
     public void showDialog() {
-        accept.setEnabled(false);
+        acceptButton.setEnabled(false);
         isUseFileMask.setValue(false);
         filesMask.setEnabled(false);
         isUseDirectory.setValue(false);
@@ -112,11 +122,17 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
         }.schedule(100);
 
         super.show();
+        trackFocusForWidgets();
     }
 
     @Override
     public void setPathDirectory(String path) {
         directory.setText(path);
+    }
+
+    @Override
+    public String getSearchText() {
+        return text.getText();
     }
 
     @Override
@@ -136,14 +152,12 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
 
     @Override
     protected void onClose() {
-        //Do nothing
+        unTrackFocusForWidgets();
     }
 
     @Override
     protected void onEnterClicked() {
-        if (!text.getText().isEmpty()) {
-            delegate.search(text.getText());
-        }
+        delegate.onEnterClicked();
     }
 
     @Override
@@ -153,29 +167,61 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
 
     @Override
     public void setFocus() {
-        accept.setFocus(true);
+        acceptButton.setFocus(true);
+    }
+
+    @Override
+    public boolean isAcceptButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(acceptButton);
+    }
+
+    @Override
+    public boolean isCancelButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(cancelButton);
+    }
+
+    @Override
+    public boolean isSelectPathButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(selectPathButton);
+    }
+
+    private void trackFocusForWidgets() {
+        widgetFocusTracker.subscribe(acceptButton);
+        widgetFocusTracker.subscribe(cancelButton);
+        widgetFocusTracker.subscribe(selectPathButton);
+    }
+
+    private void unTrackFocusForWidgets() {
+        widgetFocusTracker.unSubscribe(acceptButton);
+        widgetFocusTracker.unSubscribe(cancelButton);
+        widgetFocusTracker.unSubscribe(selectPathButton);
+    }
+
+    @Override
+    public void showSelectPathDialog() {
+        selectPathPresenter.show(delegate);
     }
 
     private void createButtons() {
-        Button cancel = createButton(locale.cancel(), "search-cancel-button", new ClickHandler() {
+        cancelButton = createButton(locale.cancel(), "search-cancel-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                hide();
+                close();
             }
         });
 
-        accept = createPrimaryButton(locale.search(), "search-button", new ClickHandler() {
+        acceptButton = createPrimaryButton(locale.search(), "search-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.search(text.getText());
             }
         });
 
-        addButtonToFooter(accept);
-        addButtonToFooter(cancel);
+        addButtonToFooter(acceptButton);
+        addButtonToFooter(cancelButton);
     }
 
-    private void addHandlers(final SelectPathPresenter selectPathPresenter) {
+    private void addHandlers() {
         isUseFileMask.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -194,16 +240,15 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
         text.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                accept.setEnabled(!text.getValue().isEmpty());
+                acceptButton.setEnabled(!text.getValue().isEmpty());
             }
         });
 
         selectPathButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                selectPathPresenter.show(delegate);
+                showSelectPathDialog();
             }
         });
     }
-
 }

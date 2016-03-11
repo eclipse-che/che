@@ -100,4 +100,24 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
     public void setFocus() {
         view.setFocus();
     }
+
+    @Override
+    public void onEnterClicked() {
+        if (view.isAcceptButtonInFocus()) {
+            String searchText = view.getSearchText();
+            if (!searchText.isEmpty()) {
+                search(searchText);
+            }
+            return;
+        }
+
+        if (view.isCancelButtonInFocus()) {
+            view.close();
+            return;
+        }
+
+        if (view.isSelectPathButtonInFocus()) {
+            view.showSelectPathDialog();
+        }
+    }
 }
