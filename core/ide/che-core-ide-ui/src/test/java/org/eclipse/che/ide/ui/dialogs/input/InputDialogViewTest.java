@@ -38,7 +38,7 @@ public class InputDialogViewTest extends BaseTest {
     @Override
     public void setUp() {
         super.setUp();
-        view = new InputDialogViewImpl(footer, uiLocalizationConstant);
+        view = new InputDialogViewImpl(footer);
     }
 
     @Test
@@ -46,5 +46,19 @@ public class InputDialogViewTest extends BaseTest {
         view.setDelegate(actionDelegate);
 
         verify(footer).setDelegate(eq(actionDelegate));
+    }
+
+    @Test
+    public void onCloseTest() {
+        view.onClose();
+
+        verify(footer).onClose();
+    }
+
+    @Test
+    public void closeDialogTest() {
+        view.closeDialog();
+
+        verify(footer).onClose();
     }
 }

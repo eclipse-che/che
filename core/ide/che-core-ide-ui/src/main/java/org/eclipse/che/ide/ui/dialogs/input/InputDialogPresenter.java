@@ -95,6 +95,16 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
 
     @Override
     public void onEnterClicked() {
+        if (view.isOkButtonInFocus()) {
+            accepted();
+            return;
+        }
+
+        if (view.isCancelButtonInFocus()) {
+            cancelled();
+            return;
+        }
+
         if (isInputValid()) {
             accepted();
         }

@@ -47,10 +47,16 @@ public class ConfirmDialogViewTest extends BaseTest {
     }
 
     @Test
-    public void shouldCallAcceptedOnEnterClicked() throws Exception {
-        view.setDelegate(actionDelegate);
-        view.onEnterClicked();
+    public void onCloseTest() {
+        view.onClose();
 
-        verify(actionDelegate).accepted();
+        verify(footer).onClose();
+    }
+
+    @Test
+    public void closeDialogTest() {
+        view.closeDialog();
+
+        verify(footer).onClose();
     }
 }

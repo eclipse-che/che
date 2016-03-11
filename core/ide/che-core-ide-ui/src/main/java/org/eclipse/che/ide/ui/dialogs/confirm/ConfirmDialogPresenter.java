@@ -12,12 +12,14 @@ package org.eclipse.che.ide.ui.dialogs.confirm;
 
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -50,7 +52,7 @@ public class ConfirmDialogPresenter implements ConfirmDialog, ConfirmDialogView.
     public ConfirmDialogPresenter(final @NotNull ConfirmDialogView view,
                                   final @NotNull @Assisted("title") String title,
                                   final @NotNull @Assisted("message") String message,
-                                  final @Nullable @Assisted("okButtonLabel") String  okButtonLabel,
+                                  final @Nullable @Assisted("okButtonLabel") String okButtonLabel,
                                   final @Nullable @Assisted("cancelButtonLabel") String cancelButtonLabel,
                                   final @Nullable @Assisted ConfirmCallback confirmCallback,
                                   final @Nullable @Assisted CancelCallback cancelCallback) {
@@ -112,5 +114,17 @@ public class ConfirmDialogPresenter implements ConfirmDialog, ConfirmDialogView.
     @Override
     public void show() {
         this.view.showDialog();
+    }
+
+    @Override
+    public void onEnterClicked() {
+        if (view.isOkButtonInFocus()) {
+            accepted();
+            return;
+        }
+
+        if (view.isCancelButtonInFocus()) {
+            cancelled();
+        }
     }
 }
