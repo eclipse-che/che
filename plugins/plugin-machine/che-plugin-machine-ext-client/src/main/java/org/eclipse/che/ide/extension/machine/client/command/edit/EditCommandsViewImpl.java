@@ -49,6 +49,7 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
+import org.eclipse.che.ide.ui.WidgetFocusTracker;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
@@ -73,10 +74,12 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
 
     private final EditCommandResources     commandResources;
     private final IconRegistry             iconRegistry;
+    private final WidgetFocusTracker       widgetFocusTracker;
     private final CoreLocalizationConstant coreLocale;
-    private final Button                   cancelButton;
-    private final Button                   saveButton;
     private final Label                    hintLabel;
+    private       Button                   cancelButton;
+    private       Button                   saveButton;
+    private       Button                   closeButton;
 
     private final CategoryRenderer<CommandConfiguration> projectImporterRenderer =
             new CategoryRenderer<CommandConfiguration>() {
@@ -136,11 +139,13 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
                                    EditCommandResources commandResources,
                                    MachineLocalizationConstant machineLocale,
                                    CoreLocalizationConstant coreLocale,
-                                   IconRegistry iconRegistry) {
+                                   IconRegistry iconRegistry,
+                                   WidgetFocusTracker widgetFocusTracker) {
         this.commandResources = commandResources;
         this.machineLocale = machineLocale;
         this.coreLocale = coreLocale;
         this.iconRegistry = iconRegistry;
+        this.widgetFocusTracker = widgetFocusTracker;
 
         selectConfiguration = null;
         categories = new HashMap<>();
@@ -178,24 +183,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
         previewUrlPanel.setVisible(false);
         contentPanel.clear();
 
-        saveButton = createButton(coreLocale.save(), "window-edit-configurations-save", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onSaveClicked();
-            }
-        });
-        saveButton.addStyleName(this.resources.windowCss().primaryButton());
-        overFooter.add(saveButton);
-
-        cancelButton = createButton(coreLocale.cancel(), "window-edit-configurations-cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-            }
-        });
-        overFooter.add(cancelButton);
-
-        createFooterButton();
+        createButtons();
         resetFilter();
 
         getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
@@ -357,14 +345,31 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
         renderCategoriesList(categories);
     }
 
-    private void createFooterButton() {
-        final Button closeButton = createButton(coreLocale.close(), "window-edit-configurations-close",
-                                                new ClickHandler() {
-                                                    @Override
-                                                    public void onClick(ClickEvent event) {
-                                                        delegate.onCloseClicked();
-                                                    }
-                                                });
+    private void createButtons() {
+        saveButton = createButton(coreLocale.save(), "window-edit-configurations-save", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onSaveClicked();
+            }
+        });
+        saveButton.addStyleName(this.resources.windowCss().primaryButton());
+        overFooter.add(saveButton);
+
+        cancelButton = createButton(coreLocale.cancel(), "window-edit-configurations-cancel", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onCancelClicked();
+            }
+        });
+        overFooter.add(cancelButton);
+
+        closeButton = createButton(coreLocale.close(), "window-edit-configurations-close",
+                                   new ClickHandler() {
+                                       @Override
+                                       public void onClick(ClickEvent event) {
+                                           delegate.onCloseClicked();
+                                       }
+                                   });
         closeButton.addDomHandler(new BlurHandler() {
             @Override
             public void onBlur(BlurEvent blurEvent) {
@@ -398,11 +403,13 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
         super.show(focusPanel);
         configurationName.setText("");
         configurationPreviewUrl.setText("");
+        trackFocusForWidgets();
     }
 
     @Override
     public void close() {
         this.hide();
+        unTrackFocusForWidgets();
     }
 
     @Override
@@ -472,6 +479,11 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
         return selectConfiguration;
     }
 
+    @Override
+    public void setCloseButtonInFocus() {
+        closeButton.setFocus(true);
+    }
+
     @UiHandler("configurationName")
     public void onNameKeyUp(KeyUpEvent event) {
         delegate.onNameChanged();
@@ -492,14 +504,33 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
 
     @Override
     protected void onEnterClicked() {
-        if (saveButton.isEnabled()) {
-            delegate.onSaveClicked();
-        }
+        delegate.onEnterClicked();
     }
 
     @Override
     protected void onClose() {
         setSelectedConfiguration(selectConfiguration);
+        unTrackFocusForWidgets();
+    }
+
+    @Override
+    public boolean isCancelButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(cancelButton);
+    }
+
+    @Override
+    public boolean isCloseButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(closeButton);
+    }
+
+    private void trackFocusForWidgets() {
+        widgetFocusTracker.subscribe(cancelButton);
+        widgetFocusTracker.subscribe(closeButton);
+    }
+
+    private void unTrackFocusForWidgets() {
+        widgetFocusTracker.unSubscribe(cancelButton);
+        widgetFocusTracker.unSubscribe(closeButton);
     }
 
     interface EditCommandsViewImplUiBinder extends UiBinder<Widget, EditCommandsViewImpl> {
