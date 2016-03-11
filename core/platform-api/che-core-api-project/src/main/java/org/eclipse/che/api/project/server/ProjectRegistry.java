@@ -89,11 +89,11 @@ public class ProjectRegistry {
             }
         }
 
+        initialized = true;
+
         for(RegisteredProject project : projects.values()) {
             fireInitHandlers(project);
         }
-
-        initialized = true;
     }
 
     /**
@@ -181,9 +181,10 @@ public class ProjectRegistry {
         final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
 
-//        if (initialized) {
-//            workspaceHolder.updateProjects(projects.values());
-//        }
+        // check whether it isn't during #initProjects()
+        if (initialized) {
+            workspaceHolder.updateProjects(projects.values());
+        }
 
         return project;
     }
@@ -193,9 +194,11 @@ public class ProjectRegistry {
      *
      * @param path - from where to remove
      */
-     void removeProjects(String path) throws ServerException {
+    void removeProjects(String path) throws ServerException {
         projects.remove(path);
         getProjects(path).forEach(projects::remove);
+
+        workspaceHolder.updateProjects(projects.values());
     }
 
     /*  ------------------------------------------ */
