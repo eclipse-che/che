@@ -13,10 +13,12 @@ package org.eclipse.che.api.workspace.server;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 import javax.inject.Singleton;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -31,6 +33,8 @@ import static java.lang.String.format;
 public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator {
     /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
     private static final Pattern WS_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
+    private static final Pattern SERVER_PORT = Pattern.compile("[1-9]+[0-9]*/(?:tcp|udp)");
+    private static final Pattern SERVER_PROTOCOL = Pattern.compile("[a-z]{2,10}");
 
     /**
      * Checks that workspace configuration is valid.
@@ -71,34 +75,7 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
                       "Workspace default environment configuration required");
 
         for (Environment environment : config.getEnvironments()) {
-            final String envName = environment.getName();
-            checkArgument(!isNullOrEmpty(envName), "Environment name should be neither null nor empty");
-
-            checkArgument(environment.getRecipe() == null || "docker".equals(environment.getRecipe().getType()),
-                          "Couldn't start workspace '%s' from environment '%s', environment recipe has unsupported type '%s'",
-                          config.getName(),
-                          envName,
-                          environment.getRecipe() != null ? environment.getRecipe().getType() : null);
-
-            //machine configs
-            checkArgument(!environment.getMachineConfigs().isEmpty(), "Environment '%s' should contain at least 1 machine", envName);
-
-            final long devCount = environment.getMachineConfigs()
-                                             .stream()
-                                             .filter(MachineConfig::isDev)
-                                             .count();
-            checkArgument(devCount == 1,
-                          "Environment should contain exactly 1 dev machine, but '%s' contains '%d'",
-                          envName,
-                          devCount);
-            for (MachineConfig machineCfg : environment.getMachineConfigs()) {
-                checkArgument(!isNullOrEmpty(machineCfg.getName()), "Environment %s contains machine with null or empty name", envName);
-                checkNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without source");
-                checkArgument("docker".equals(machineCfg.getType()),
-                              "Type of machine %s in environment %s is not supported. Supported value is 'docker'.",
-                              machineCfg.getName(),
-                              envName);
-            }
+            validateEnv(environment, config.getName());
         }
 
         //commands
@@ -114,6 +91,56 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
 
         //projects
         //TODO
+    }
+
+    private void validateEnv(Environment environment, String workspaceName) throws BadRequestException {
+        final String envName = environment.getName();
+        checkArgument(!isNullOrEmpty(envName), "Environment name should be neither null nor empty");
+
+        checkArgument(environment.getRecipe() == null || "docker".equals(environment.getRecipe().getType()),
+                      "Recipe of environment '%s' in workspace with name '%s' has unsupported type '%s'",
+                      envName,
+                      workspaceName,
+                      environment.getRecipe() != null ? environment.getRecipe().getType() : null);
+
+        //machine configs
+        checkArgument(!environment.getMachineConfigs().isEmpty(), "Environment '%s' should contain at least 1 machine", envName);
+
+        final long devCount = environment.getMachineConfigs()
+                                         .stream()
+                                         .filter(MachineConfig::isDev)
+                                         .count();
+        checkArgument(devCount == 1,
+                      "Environment should contain exactly 1 dev machine, but '%s' contains '%d'",
+                      envName,
+                      devCount);
+        for (MachineConfig machineCfg : environment.getMachineConfigs()) {
+            validateMachine(machineCfg, envName);
+        }
+    }
+
+    private void validateMachine(MachineConfig machineCfg, String envName) throws BadRequestException {
+        checkArgument(!isNullOrEmpty(machineCfg.getName()), "Environment %s contains machine with null or empty name", envName);
+        checkNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without source");
+        checkArgument("docker".equals(machineCfg.getType()),
+                      "Type of machine %s in environment %s is not supported. Supported value is 'docker'.",
+                      machineCfg.getName(),
+                      envName);
+
+        for (ServerConf serverConf : machineCfg.getServers()) {
+            checkArgument(serverConf.getPort() != null && SERVER_PORT.matcher(serverConf.getPort()).matches(),
+                          "Machine %s contains server conf with invalid port %s",
+                          machineCfg.getName(),
+                          serverConf.getPort());
+            checkArgument(serverConf.getProtocol() == null || SERVER_PROTOCOL.matcher(serverConf.getProtocol()).matches(),
+                          "Machine %s contains server conf with invalid protocol %s",
+                          machineCfg.getName(),
+                          serverConf.getProtocol());
+        }
+        for (Map.Entry<String, String> envVariable : machineCfg.getEnvVariables().entrySet()) {
+            checkArgument(!isNullOrEmpty(envVariable.getKey()), "Machine %s contains environment variable with null or empty name");
+            checkNotNull(envVariable.getValue(), "Machine %s contains environment variable with null value");
+        }
     }
 
     /**

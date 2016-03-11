@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.machine.server.WsAgentLauncherImpl;
-import org.eclipse.che.plugin.docker.machine.ServerConf;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,6 +36,8 @@ public class WsAgentServerConfProvider implements Provider<ServerConf> {
 
     @Override
     public ServerConf get() {
-        return new ServerConf(WS_AGENT_SERVER_REFERENCE, Integer.toString(WsAgentLauncherImpl.WS_AGENT_PORT), apiEndpoint.getScheme());
+        return new ServerConfImpl(WS_AGENT_SERVER_REFERENCE,
+                                  WsAgentLauncherImpl.WS_AGENT_PORT,
+                                  apiEndpoint.getScheme());
     }
 }

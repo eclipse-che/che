@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.machine.MachineProcess;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
@@ -24,10 +25,12 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
+import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -48,7 +51,12 @@ public final class DtoConverter {
                                              .withType(config.getType())
                                              .withDev(config.isDev())
                                              .withLimits(asDto(config.getLimits()))
-                                             .withSource(asDto(config.getSource()));
+                                             .withSource(asDto(config.getSource()))
+                                             .withServers(config.getServers()
+                                                                .stream()
+                                                                .map(DtoConverter::asDto)
+                                                                .collect(Collectors.toList()))
+                                             .withEnvVariables(config.getEnvVariables());
     }
 
     /**
@@ -102,6 +110,15 @@ public final class DtoConverter {
         return newDto(ServerDto.class).withAddress(server.getAddress())
                                       .withRef(server.getRef())
                                       .withUrl(server.getUrl());
+    }
+
+    /**
+     * Converts {@link ServerConf} to {@link ServerConfDto}.
+     */
+    public static ServerConfDto asDto(ServerConf serverConf) {
+        return newDto(ServerConfDto.class).withRef(serverConf.getRef())
+                                          .withPort(serverConf.getPort())
+                                          .withProtocol(serverConf.getProtocol());
     }
 
     /**

@@ -18,6 +18,7 @@ import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -31,6 +32,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,12 +99,18 @@ public class LocalWorkspaceDaoTest {
                                                                     "dev-machine",
                                                                     "machine-type",
                                                                     machineSource,
-                                                                    new LimitsImpl(512));
+                                                                    new LimitsImpl(512),
+                                                                    Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                                                  new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                                    Collections.singletonMap("key1", "value1"));
         final MachineConfigImpl machineCfg2 = new MachineConfigImpl(false,
                                                                     "non-dev-machine",
                                                                     "machine-type-2",
                                                                     machineSource,
-                                                                    new LimitsImpl(2048));
+                                                                    new LimitsImpl(2048),
+                                                                    Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                                                  new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                                    Collections.singletonMap("key1", "value1"));
 
         final EnvironmentImpl env1 = new EnvironmentImpl("my-environment", recipe, asList(machineCfg1, machineCfg2));
         final EnvironmentImpl env2 = new EnvironmentImpl("my-environment-2", recipe, singletonList(machineCfg1));

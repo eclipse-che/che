@@ -14,6 +14,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -80,7 +81,9 @@ public interface DockerMachineFactory {
      *
      * @param containerInfo description of docker container
      * @param containerHost host where docker container is placed
+     * @param machineConfig config of machine
      */
     DockerInstanceRuntimeInfo createMetadata(@Assisted ContainerInfo containerInfo,
-                                             @Assisted String containerHost);
+                                             @Assisted String containerHost,
+                                             @Assisted MachineConfig machineConfig);
 }

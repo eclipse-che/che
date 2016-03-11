@@ -115,7 +115,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                        MIDDLE,
                        locale.viewNewTerminalTooltip());
 
-        if (machine.getRuntime().getServers().containsKey(SSH_PORT)) {
+        if (machine.getRuntime().getServers().containsKey(SSH_PORT + "/tcp")) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);

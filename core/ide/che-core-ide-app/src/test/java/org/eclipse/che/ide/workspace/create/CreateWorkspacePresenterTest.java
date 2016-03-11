@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.WorkspaceComponent;
@@ -45,9 +46,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.MAX_COUNT;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.RECIPE_TYPE;
@@ -100,8 +100,8 @@ public class CreateWorkspacePresenterTest {
     private LimitsDto                       limitsDto;
 
     //DTOs
-    @Mock
     private MachineConfigDto   machineConfigDto;
+    private WorkspaceConfigDto workspaceConfigDto;
     @Mock
     private MachineDto         machineDto;
     @Mock
@@ -110,8 +110,6 @@ public class CreateWorkspacePresenterTest {
     private EnvironmentDto     environmentDto;
     @Mock
     private CommandDto         commandDto;
-    @Mock
-    private WorkspaceConfigDto workspaceConfigDto;
     @Mock
     private UsersWorkspaceDto  usersWorkspaceDto;
 
@@ -127,6 +125,10 @@ public class CreateWorkspacePresenterTest {
 
     @Before
     public void setUp() {
+        machineConfigDto = mock(MachineConfigDto.class, new SelfReturningAnswer());
+        workspaceConfigDto = mock(WorkspaceConfigDto.class, new SelfReturningAnswer());
+        when(usersWorkspaceDto.getConfig()).thenReturn(workspaceConfigDto);
+
         when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
         when(machineSourceDto.withType(anyString())).thenReturn(machineSourceDto);
         when(machineSourceDto.withLocation(anyString())).thenReturn(machineSourceDto);
@@ -135,28 +137,14 @@ public class CreateWorkspacePresenterTest {
         when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
 
         when(dtoFactory.createDto(MachineConfigDto.class)).thenReturn(machineConfigDto);
-        when(machineConfigDto.withName(anyString())).thenReturn(machineConfigDto);
-        when(machineConfigDto.withType(anyString())).thenReturn(machineConfigDto);
-        when(machineConfigDto.withSource(machineSourceDto)).thenReturn(machineConfigDto);
-        when(machineConfigDto.withDev(anyBoolean())).thenReturn(machineConfigDto);
-        when(machineConfigDto.withLimits(limitsDto)).thenReturn(machineConfigDto);
 
         when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
         when(environmentDto.withName(anyString())).thenReturn(environmentDto);
         when(environmentDto.withMachineConfigs(Matchers.<List<MachineConfigDto>>anyObject())).thenReturn(environmentDto);
 
         when(dtoFactory.createDto(WorkspaceConfigDto.class)).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withName(anyString())).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withDefaultEnv(anyString())).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withEnvironments(Matchers.<List<EnvironmentDto>>anyObject())).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withCommands(Matchers.<List<CommandDto>>anyObject())).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withAttributes(Matchers.<Map<String, String>>anyObject())).thenReturn(workspaceConfigDto);
 
         when(dtoFactory.createDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceDto);
-        when(usersWorkspaceDto.getConfig()).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withName(anyString())).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withDefaultEnv(anyString())).thenReturn(workspaceConfigDto);
-        when(workspaceConfigDto.withEnvironments(Matchers.<List<EnvironmentDto>>anyObject())).thenReturn(workspaceConfigDto);
 
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
 
@@ -172,7 +160,7 @@ public class CreateWorkspacePresenterTest {
 
     @Test
     public void dialogShouldBeShown() {
-        presenter.show(Arrays.asList(usersWorkspaceDto), componentCallback);
+        presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
 
         verify(browserQueryFieldRenderer).getWorkspaceName();
         verify(view).setWorkspaceName(anyString());
@@ -206,7 +194,7 @@ public class CreateWorkspacePresenterTest {
     public void errorLabelShouldBeShownWhenWorkspaceNameAlreadyExist() {
         when(workspaceConfigDto.getName()).thenReturn("test");
 
-        presenter.show(Arrays.asList(usersWorkspaceDto), componentCallback);
+        presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
         reset(locale);
 
         presenter.onNameChanged();
@@ -251,7 +239,7 @@ public class CreateWorkspacePresenterTest {
 
     @Test
     public void recipesShouldBeFoundAndShown() throws Exception {
-        List<RecipeDescriptor> recipes = Arrays.asList(recipeDescriptor);
+        List<RecipeDescriptor> recipes = Collections.singletonList(recipeDescriptor);
 
         callSearchRecipesApplyMethod(recipes);
 
@@ -261,7 +249,7 @@ public class CreateWorkspacePresenterTest {
     }
 
     private void callSearchRecipesApplyMethod(List<RecipeDescriptor> recipes) throws Exception {
-        List<String> tags = Arrays.asList("test1 test2");
+        List<String> tags = Collections.singletonList("test1 test2");
 
         when(view.getTags()).thenReturn(tags);
         when(recipeServiceClient.searchRecipes(Matchers.<List<String>>anyObject(),
@@ -309,7 +297,7 @@ public class CreateWorkspacePresenterTest {
         when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(userWsPromise);
         when(recipeServiceClient.getRecipes(anyInt(), anyInt())).thenReturn(recipesPromise);
 
-        presenter.show(Arrays.asList(usersWorkspaceDto), componentCallback);
+        presenter.show(Collections.singletonList(usersWorkspaceDto), componentCallback);
 
         presenter.onCreateButtonClicked();
 
@@ -359,7 +347,7 @@ public class CreateWorkspacePresenterTest {
         when(workspaceConfigDto.getDefaultEnv()).thenReturn("name");
         when(workspaceConfigDto.getEnvironments()).thenReturn(environments);
 
-        when(environmentDto.getMachineConfigs()).thenReturn(Arrays.<MachineConfigDto>asList(machineConfigDto));
+        when(environmentDto.getMachineConfigs()).thenReturn(Collections.singletonList(machineConfigDto));
 
         clickOnCreateButton();
 

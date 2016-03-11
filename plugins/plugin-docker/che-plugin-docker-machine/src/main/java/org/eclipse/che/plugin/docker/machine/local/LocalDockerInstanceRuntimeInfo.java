@@ -12,12 +12,16 @@ package org.eclipse.che.plugin.docker.machine.local;
 
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Gets predefined docker containers host for machine servers instead of evaluating it from docker configuration
@@ -27,7 +31,7 @@ import javax.inject.Named;
  * Environment variable has lower priority.
  *
  * @author Alexander Garagatyi
- * @see org.eclipse.che.plugin.docker.machine.ServerConf
+ * @see org.eclipse.che.api.core.model.machine.ServerConf
  */
 public class LocalDockerInstanceRuntimeInfo extends DockerInstanceRuntimeInfo {
     /**
@@ -38,8 +42,16 @@ public class LocalDockerInstanceRuntimeInfo extends DockerInstanceRuntimeInfo {
     @Inject
     public LocalDockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
                                           @Assisted String containerHost,
-                                          @Nullable @Named("machine.docker.local_node_host") String dockerNodeHost) {
-        super(containerInfo, dockerNodeHost != null ? dockerNodeHost :
-                             (System.getenv(CHE_DOCKER_MACHINE_HOST) != null ? System.getenv(CHE_DOCKER_MACHINE_HOST) : containerHost));
+                                          @Assisted MachineConfig machineConfig,
+                                          @Nullable @Named("machine.docker.local_node_host") String dockerNodeHost,
+                                          @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
+                                          @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers) {
+        super(containerInfo,
+              dockerNodeHost != null ? dockerNodeHost : (System.getenv(CHE_DOCKER_MACHINE_HOST) != null ?
+                                                         System.getenv(CHE_DOCKER_MACHINE_HOST) :
+                                                         containerHost),
+              machineConfig,
+              devMachineServers,
+              allMachinesServers);
     }
 }

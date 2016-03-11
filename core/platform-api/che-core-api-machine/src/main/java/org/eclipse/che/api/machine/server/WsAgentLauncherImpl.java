@@ -40,7 +40,7 @@ import java.net.HttpURLConnection;
 public class WsAgentLauncherImpl implements WsAgentLauncher {
     public static final String WS_AGENT_PROCESS_START_COMMAND = "machine.ws_agent.run_command";
     public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
-    public static final int    WS_AGENT_PORT                  = 4401;
+    public static final String WS_AGENT_PORT                  = "4401/tcp";
 
     private static final Logger LOG                             = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
@@ -110,7 +110,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     private HttpJsonRequest createPingRequest(Machine devMachine) {
         final String wsAgentPingUrl = UriBuilder.fromUri(devMachine.getRuntime()
                                                                    .getServers()
-                                                                   .get(Integer.toString(WS_AGENT_PORT))
+                                                                   .get(WS_AGENT_PORT)
                                                                    .getUrl())
                                                 .replacePath(wsAgentPingPath)
                                                 .build()

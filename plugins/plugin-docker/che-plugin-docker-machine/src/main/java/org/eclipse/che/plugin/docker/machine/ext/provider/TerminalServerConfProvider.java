@@ -11,7 +11,8 @@
 
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
-import org.eclipse.che.plugin.docker.machine.ServerConf;
+import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -34,6 +35,6 @@ public class TerminalServerConfProvider implements Provider<ServerConf> {
 
     @Override
     public ServerConf get() {
-        return new ServerConf(TERMINAL_SERVER_REFERENCE, "4411", apiEndpoint.getScheme());
+        return new ServerConfImpl(TERMINAL_SERVER_REFERENCE, "4411/tcp", apiEndpoint.getScheme());
     }
 }

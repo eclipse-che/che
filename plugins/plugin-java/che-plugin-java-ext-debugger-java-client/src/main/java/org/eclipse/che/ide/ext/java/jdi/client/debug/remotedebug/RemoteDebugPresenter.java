@@ -88,11 +88,13 @@ public class RemoteDebugPresenter implements RemoteDebugView.ActionDelegate {
     private List<Pair<String, String>> extractPortsList(Machine machine) {
         List<Pair<String, String>> ports = new ArrayList<Pair<String, String>>();
         for (Server server : machine.getServersList()) {
-            String description = server.getPort() + " (" + server.getRef() + ")";
-            String value = server.getPort();
-            Pair<String, String> pair = new Pair<>(description, value);
+            if (server.getPort().endsWith("/tcp")) {
+                String portWithoutTcp = server.getPort().substring(0, server.getPort().length() - 4);
+                String description = portWithoutTcp + " (" + server.getRef() + ")";
+                Pair<String, String> pair = new Pair<>(description, portWithoutTcp);
 
-            ports.add(pair);
+                ports.add(pair);
+            }
         }
 
         return ports;
