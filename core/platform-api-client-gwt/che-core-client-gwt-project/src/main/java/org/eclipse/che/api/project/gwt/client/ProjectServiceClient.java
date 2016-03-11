@@ -109,14 +109,12 @@ public interface ProjectServiceClient {
      *
      * @param workspaceId
      *         id of current workspace
-     * @param name
-     *         name of the project to create
      * @param projectConfig
      *         descriptor of the project to create
      * @param callback
      *         the callback to use for the response
      */
-    void createProject(String workspaceId, String name, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
+    void createProject(String workspaceId, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
 
 
     /**

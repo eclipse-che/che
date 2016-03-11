@@ -157,10 +157,9 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     @Override
     public void createProject(String workspaceId,
-                              String name,
                               ProjectConfigDto projectConfig,
                               AsyncRequestCallback<ProjectConfigDto> callback) {
-        final String requestUrl = extPath + "/project/" + workspaceId + "?name=" + name;
+        final String requestUrl = extPath + "/project/" + workspaceId;
         asyncRequestFactory.createPostRequest(requestUrl, projectConfig)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Creating project..."))

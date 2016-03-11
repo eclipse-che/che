@@ -170,14 +170,10 @@ public class ProjectService extends Service {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     /**
-     * NOTE: String name is deprecated and not used, path inside DTO is used instead
      * NOTE: parentPath is added to make a module
      */
     public ProjectConfigDto createProject(@ApiParam(value = "ID of workspace to create project", required = true)
                                           @PathParam("ws-id") String workspace,
-                                          @ApiParam(value = "Name for new project", required = false)
-                                          @Description("project name")
-                                          @QueryParam("name") String name,
                                           @ApiParam(value = "Add to this project as module", required = false)
                                           @Description("descriptor of project") ProjectConfigDto projectConfig) throws ConflictException,
                                                                                                                        ForbiddenException,
