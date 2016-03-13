@@ -31,6 +31,7 @@ init_global_variables () {
   USAGE="
 Usage:
   che [OPTIONS] [COMMAND]
+     -v,        --vmware             Use the docker-machine VMware driver (instead of VirtualBox)
      -m:name,   --machine:name       For Win & Mac, sets the docker-machine VM name; default=default
      -p:port,   --port:port          Port that Che server will use for HTTP requests; default=8080
      -r:ip,     --remote:ip          If Che clients are not localhost, set to IP address of Che server
@@ -64,6 +65,7 @@ https://eclipse-che.readme.io/docs/networking."
   # Command line parameters
   USE_BLOCKING_ENTROPY=false
   USE_DOCKER=false
+  USE_VMWARE=false
   CHE_DOCKER_TAG=latest
   CHE_PORT=8080
   CHE_IP=
@@ -107,6 +109,9 @@ parse_command_line () {
     ;;
     -i|--image)
       USE_DOCKER=true
+    ;;
+    -v|--vmware)
+      USE_VMWARE=true
     ;;
     -g|--registry)
       LAUNCH_REGISTRY=true
@@ -171,11 +176,13 @@ parse_command_line () {
       error_exit "You passed an unknown command line option."
     ;;
   esac
+
   done
 
   if ${USE_DEBUG}; then
     echo "USE_BLOCKING_ENTROPY: ${USE_BLOCKING_ENTROPY}"
     echo "USE_DOCKER: ${USE_DOCKER}"
+    echo "USE_VMWARE": ${USE_VMWARE}
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
@@ -226,7 +233,7 @@ set_environment_variables () {
     if [ "${WIN}" == "true" ]; then
       # che-497: Determine windows short directory name in bash
       export CHE_HOME=`(cd "$( dirname "${BASH_SOURCE[0]}" )" && cmd //C 'FOR %i in (..) do @echo %~Si')`
-    else 
+    else
       export CHE_HOME="$(dirname "$(cd "$(dirname "${0}")" && pwd -P)")"
     fi
   fi
@@ -237,7 +244,7 @@ set_environment_variables () {
 
   #if [ "${WIN}" == "true" ] && [ ! -z "${JAVA_HOME}" ]; then
     # che-497: Determine windows short directory name in bash
-    # export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))` 
+    # export JAVA_HOME=`(cygpath -u $(cygpath -w --short-name "${JAVA_HOME}"))`
   #fi
 
   # Convert Tomcat environment variables to POSIX format.
@@ -310,11 +317,30 @@ get_docker_ready () {
 
   ### If Windows or Mac, launch docker-machine, if necessary
   if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
-    # Path to run VirtualBox on the command line - used for creating VMs
-    if [ ! -z "${VBOX_MSI_INSTALL_PATH}" ]; then
-      VBOXMANAGE=${VBOX_MSI_INSTALL_PATH}VBoxManage.exe
+
+    # Path to run VMware on the command line - used for creating VMs
+    # TODO: add support for VMware Workstation
+    if [ "${MAC}" == "true" ] && [ "${USE_VMWARE}" == "true" ]; then
+      VMRUN="/Applications/VMware Fusion.app/Contents/Library/vmrun"
+      VM_CHECK_CMD="${VMRUN} list | grep ${VM}"
+      DOCKER_MACHINE_DRIVER=vmwarefusion
+      if [ ! -f "$VMRUN" ]; then
+        error_exit "Could not find vmrun. Expected vmrun in $VMRUN. Check VMware Fusion installation."
+        return
+      fi
     else
-      VBOXMANAGE=/usr/local/bin/VBoxManage
+      if [ ! -z "${VBOX_MSI_INSTALL_PATH}" ]; then
+        VBOXMANAGE=${VBOX_MSI_INSTALL_PATH}VBoxManage.exe
+      else
+        VBOXMANAGE=/usr/local/bin/VBoxManage
+      fi
+      VM_CHECK_CMD="${VBOXMANAGE} showvminfo ${VM}"
+      DOCKER_MACHINE_DRIVER=virtualbox
+      DOCKER_MACHINE_DRIVER_OPTIONS=--virtualbox-host-dns-resolver
+      if [ ! -f "${VBOXMANAGE}" ]; then
+        error_exit "Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected Virtual Box at /usr/local/bin/VBoxManage."
+      return
+      fi
     fi
 
     if [ ! -f "${DOCKER_MACHINE}" ]; then
@@ -322,21 +348,16 @@ get_docker_ready () {
       return
     fi
 
-    if [ ! -f "${VBOXMANAGE}" ]; then
-      error_exit "Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected Virtual Box at /usr/local/bin/VBoxManage."
-      return
-    fi
-
     # Test to see if the VM we need is already running
     # Added || true to not fail due to set -e
-    "${VBOXMANAGE}" showvminfo ${VM} &> /dev/null || VM_EXISTS_CODE=$? || true
+    ${VM_CHECK_CMD} &> /dev/null || VM_EXISTS_CODE=$? || true
 
     if [ "${VM_EXISTS_CODE}" == "1" ]; then
       echo "Could not find an existing docker machine."
       echo -e "Creating docker machine named ${GREEN}${VM}${NC}... Please be patient, this takes a couple minutes the first time."
       "${DOCKER_MACHINE}" rm -f ${VM} &> /dev/null || true
       rm -rf ~/.docker/machine/machines/${VM}
-      "${DOCKER_MACHINE}" create -d virtualbox --virtualbox-host-dns-resolver ${VM} &> /dev/null || true
+      "${DOCKER_MACHINE}" create -d $DOCKER_MACHINE_DRIVER $DOCKER_MACHINE_DRIVER_OPTIONS ${VM} &> /dev/null || true
 
       # Seems that sometimes you have to regenerate certs even when creating new machine on windows
 
@@ -405,7 +426,7 @@ get_docker_ready () {
   fi
 
   if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
-    echo -e "${BLUE}Docker${NC} is configured to use vbox docker-machine named ${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
+    echo -e "${BLUE}Docker${NC} is configured to use docker-machine named ${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
   fi
 }
 
@@ -497,7 +518,7 @@ call_catalina () {
     [ -z "${JAVA_OPTS}" ] && JAVA_OPTS="-Xms256m -Xmx1024m"
   else
     [ -z "${JAVA_OPTS}" ] && JAVA_OPTS="-Xms256m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
-  fi  
+  fi
 
   ### Cannot add this in setenv.sh.
   ### We do the port mapping here, and this gets inserted into server.xml when tomcat boots
@@ -567,7 +588,7 @@ kill_and_launch_docker_che () {
   -v //home/user/che/workspaces:/home/user/che/workspaces \
   -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
   -e CHE_DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d --net=host codenvy/che:${CHE_DOCKER_TAG} \
-  bash -c "tail -f /dev/null" || DOCKER_EXIT=$? || true 
+  bash -c "tail -f /dev/null" || DOCKER_EXIT=$? || true
   set +x
 }
 
@@ -671,24 +692,24 @@ launch_che_server () {
         echo "Initial start of docker container failed... Attempting docker restart and exec."
         "${DOCKER}" exec ${CONTAINER} bash -c "true && sudo service docker start && "`
                                               `"//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
-                                              `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
+                                              `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
 
         if [ "${DOCKER_EXIT}" == "1" ]; then
           # If we get to this point and Docker is still failing, then we will destroy the container entirely
           CREATE_NEW_CONTAINER=true
         fi
 
-      else 
+      else
 
         # Existing container found, and it was started properly.
         echo -e "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
         "${DOCKER}" exec ${CONTAINER} bash -c "//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
-                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true   
+                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
         echo
         # Do not attempt additional docker exec command if we are restarting existing container
         return
       fi
-    fi  
+    fi
 
     if ${CREATE_NEW_CONTAINER} ; then
 
