@@ -20,6 +20,8 @@ import org.eclipse.che.ide.actions.CloseCurrentFile;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
 import org.eclipse.che.ide.actions.CopyAction;
+import org.eclipse.che.ide.actions.RedirectToDashboardProjectsAction;
+import org.eclipse.che.ide.actions.RedirectToDashboardWorkspacesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.CreateModuleAction;
 import org.eclipse.che.ide.actions.CreateProjectAction;
@@ -280,6 +282,12 @@ public class StandardComponentInitializer {
     private ShowReferenceAction showReferenceAction;
 
     @Inject
+    private RedirectToDashboardProjectsAction redirectToDashboardProjectsAction;
+
+    @Inject
+    private RedirectToDashboardWorkspacesAction redirectToDashboardWorkspacesAction;
+
+    @Inject
     @Named("XMLFileType")
     private FileType xmlFile;
 
@@ -495,6 +503,13 @@ public class StandardComponentInitializer {
         saveGroup.addSeparator();
         saveGroup.add(saveAction);
         saveGroup.add(saveAllAction);
+
+        //Compose Profile menu
+        DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_PROFILE);
+        actionManager.registerAction("redirectToDashboardProjectsAction", redirectToDashboardProjectsAction);
+        actionManager.registerAction("redirectToDashboardWorkspacesAction", redirectToDashboardWorkspacesAction);
+        profileGroup.add(redirectToDashboardProjectsAction);
+        profileGroup.add(redirectToDashboardWorkspacesAction);
 
         // Compose Help menu
         DefaultActionGroup helpGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_HELP);
