@@ -21,7 +21,7 @@ import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachine
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 
 /**
  * The action contains business logic which calls special method to create machine.
@@ -37,7 +37,7 @@ public class CreateMachineAction extends AbstractPerspectiveAction {
     public CreateMachineAction(MachineLocalizationConstant locale,
                                CreateMachinePresenter createMachinePresenter,
                                AnalyticsEventLogger eventLogger) {
-        super(Collections.singletonList(MACHINE_PERSPECTIVE_ID),
+        super(Collections.singletonList(OPERATIONS_PERSPECTIVE_ID),
               locale.machineCreateTitle(),
               locale.machineCreateDescription(),
               null, null);
@@ -58,4 +58,5 @@ public class CreateMachineAction extends AbstractPerspectiveAction {
         eventLogger.log(this);
         createMachinePresenter.showDialog();
     }
+
 }

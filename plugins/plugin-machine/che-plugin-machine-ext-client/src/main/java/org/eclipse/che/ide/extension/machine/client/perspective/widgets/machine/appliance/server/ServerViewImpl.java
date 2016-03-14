@@ -54,6 +54,13 @@ public class ServerViewImpl extends Composite implements ServerView {
         CellTable<Server> table = new CellTable<>(0, tableResources);
         table.setLoadingIndicator(null);
 
+        TextColumn<Server> ref = new TextColumn<Server>() {
+            @Override
+            public String getValue(Server server) {
+                return server.getRef();
+            }
+        };
+
         TextColumn<Server> exposedPort = new TextColumn<Server>() {
             @Override
             public String getValue(Server server) {
@@ -75,13 +82,6 @@ public class ServerViewImpl extends Composite implements ServerView {
             }
         };
 
-        TextColumn<Server> ref = new TextColumn<Server>() {
-            @Override
-            public String getValue(Server server) {
-                return server.getRef();
-            }
-        };
-
         table.addColumn(ref, locale.infoServerRef());
         table.addColumn(exposedPort, locale.infoServerPort());
         table.addColumn(address, locale.infoServerAddress());
@@ -95,4 +95,5 @@ public class ServerViewImpl extends Composite implements ServerView {
     public void setServers(@NotNull List<Server> servers) {
         this.servers.setRowData(servers);
     }
+
 }

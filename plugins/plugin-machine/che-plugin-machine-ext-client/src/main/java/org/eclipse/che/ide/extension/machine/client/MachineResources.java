@@ -69,7 +69,7 @@ public interface MachineResources extends ClientBundle {
     SVGResource projectPerspective();
 
     @Source("images/machine-perspective.svg")
-    SVGResource machinePerspective();
+    SVGResource operationsPerspective();
 
     @Source("images/machines-part-icon.svg")
     SVGResource machinesPartIcon();

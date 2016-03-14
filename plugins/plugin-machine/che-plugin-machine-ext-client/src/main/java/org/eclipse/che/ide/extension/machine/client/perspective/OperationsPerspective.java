@@ -42,25 +42,25 @@ import static org.eclipse.che.ide.api.parts.PartStackType.NAVIGATION;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class MachinePerspective extends AbstractPerspective {
+public class OperationsPerspective extends AbstractPerspective {
 
-    public final static String MACHINE_PERSPECTIVE_ID = "Machine Perspective";
+    public final static String OPERATIONS_PERSPECTIVE_ID = "Operations Perspective";
 
     @Inject
-    public MachinePerspective(PerspectiveViewImpl view,
-                              PartStackViewFactory partViewFactory,
-                              WorkBenchControllerFactory controllerFactory,
-                              PartStackPresenterFactory stackPresenterFactory,
-                              MachineConsolePresenter console,
-                              MachinePanelPresenter machinePanel,
-                              RecipePartPresenter recipePanel,
-                              NotificationManager notificationManager,
-                              OutputsContainerPresenter outputsContainer,
-                              MachineAppliancePresenter infoContainer,
-                              EventBus eventBus) {
-        super(MACHINE_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
+    public OperationsPerspective(PerspectiveViewImpl view,
+                                 PartStackViewFactory partViewFactory,
+                                 WorkBenchControllerFactory controllerFactory,
+                                 PartStackPresenterFactory stackPresenterFactory,
+                                 MachineConsolePresenter console,
+                                 MachinePanelPresenter machinePanel,
+                                 RecipePartPresenter recipePanel,
+                                 NotificationManager notificationManager,
+                                 OutputsContainerPresenter outputsContainer,
+                                 MachineAppliancePresenter infoContainer,
+                                 EventBus eventBus) {
+        super(OPERATIONS_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
 
-        notificationManager.addRule(MACHINE_PERSPECTIVE_ID);
+        notificationManager.addRule(OPERATIONS_PERSPECTIVE_ID);
 
         //central panel
         partStacks.put(EDITING, infoContainer);

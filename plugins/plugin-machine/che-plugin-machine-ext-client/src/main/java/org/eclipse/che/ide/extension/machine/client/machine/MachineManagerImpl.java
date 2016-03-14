@@ -53,7 +53,7 @@ import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.DESTROY;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.RESTART;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.START;
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
 import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.ERROR;
 import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
@@ -303,7 +303,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
 
     @Override
     public void onDevMachineCreating(MachineConfigDto machineConfig) {
-        perspectiveManager.setPerspectiveId(MACHINE_PERSPECTIVE_ID);
+        perspectiveManager.setPerspectiveId(OPERATIONS_PERSPECTIVE_ID);
         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
 
         if (machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL) != null &&
