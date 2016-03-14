@@ -52,8 +52,8 @@
 
         .selectDirectoryButton:hover,
         .selectDirectoryButton:focus {
-            box-shadow: 0 0 0 2px buttonHoverBorderColor, 0 0 0 3px buttonHoverBackground;
-            border: none;
+            box-shadow: 0 0 0 1px buttonHoverBorderColor, 0 0 0 2px buttonHoverBackground;
+            border-color: transparent;
         }
 
         .floating {

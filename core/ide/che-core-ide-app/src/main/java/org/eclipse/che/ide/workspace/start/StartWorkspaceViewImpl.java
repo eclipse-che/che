@@ -91,8 +91,8 @@ class StartWorkspaceViewImpl extends Window implements StartWorkspaceView {
             }
         });
 
-        getFooter().add(startButton);
-        getFooter().add(createButton);
+        addButtonToFooter(startButton);
+        addButtonToFooter(createButton);
     }
 
     /** {@inheritDoc} */

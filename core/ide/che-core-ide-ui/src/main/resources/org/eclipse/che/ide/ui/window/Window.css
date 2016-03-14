@@ -170,9 +170,9 @@
 .button:hover,
 .button:focus {
     background: buttonHoverBackground;
-    box-shadow: 0 0 0 2px buttonHoverBorderColor, 0 0 0 3px buttonHoverBackground;
-    border: none;
+    box-shadow: 0 0 0 1px buttonHoverBorderColor, 0 0 0 2px buttonHoverBackground;
     color: buttonHoverFontColor;
+    border-color: transparent;
 }
 
 .button:active {
@@ -185,6 +185,7 @@
 .button[disabled], .button[disabled]:HOVER {
     background: buttonDisabledBackground;
     border: 1px solid buttonDisabledBorderColor;
+    box-shadow: none;
     color: buttonDisabledFontColor;
 }
 
@@ -202,8 +203,8 @@
 .primaryButton:hover,
 .primaryButton:focus {
     background-color: primaryButtonHoverBackground;
-    box-shadow: 0 0 0 2px buttonHoverBorderColor, 0 0 0 3px buttonHoverBackground;
-    border: none;
+    box-shadow: 0 0 0 1px buttonHoverBorderColor, 0 0 0 2px buttonHoverBackground;
+    border-color: transparent;
     color: primaryButtonHoverFontColor;
 }
 
@@ -217,6 +218,7 @@
 .primaryButton[disabled], .primaryButton[disabled]:HOVER {
     background: primaryButtonDisabledBackground;
     border: 1px solid primaryButtonDisabledBorderColor;
+    box-shadow: none;
     color: primaryButtonDisabledFontColor;
 }
 
