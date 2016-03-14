@@ -36,7 +36,9 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -142,5 +144,38 @@ public class FullTextSearchPresenterTest {
         operationErrorCapture.getValue().apply(promiseError);
 
         verify(view).showErrorMessage(SEARCHED_TEXT);
+    }
+
+    @Test
+    public void onEnterClickedWhenAcceptButtonInFocus() throws Exception {
+        when(view.getSearchText()).thenReturn(SEARCHED_TEXT);
+        when(view.isAcceptButtonInFocus()).thenReturn(true);
+
+        fullTextSearchPresenter.onEnterClicked();
+
+        verify(view).getSearchText();
+        verify(projectServiceClient).search(anyString(), (QueryExpression)anyObject());
+    }
+
+    @Test
+    public void onEnterClickedWhenCancelButtonInFocus() throws Exception {
+        when(view.isCancelButtonInFocus()).thenReturn(true);
+
+        fullTextSearchPresenter.onEnterClicked();
+
+        verify(view).close();
+        verify(view, never()).getSearchText();
+        verify(projectServiceClient, never()).search(anyString(), (QueryExpression)anyObject());
+    }
+
+    @Test
+    public void onEnterClickedWhenSelectPathButtonInFocus() throws Exception {
+        when(view.isSelectPathButtonInFocus()).thenReturn(true);
+
+        fullTextSearchPresenter.onEnterClicked();
+
+        verify(view).showSelectPathDialog();
+        verify(view, never()).getSearchText();
+        verify(projectServiceClient, never()).search(anyString(), (QueryExpression)anyObject());
     }
 }

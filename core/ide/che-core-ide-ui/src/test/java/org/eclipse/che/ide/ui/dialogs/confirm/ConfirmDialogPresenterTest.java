@@ -18,6 +18,7 @@ import org.mockito.Mock;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link ConfirmDialogPresenter} functionality.
@@ -77,5 +78,27 @@ public class ConfirmDialogPresenterTest extends BaseTest {
         presenter.show();
 
         verify(view).showDialog();
+    }
+
+    @Test
+    public void onEnterClickedWhenAcceptButtonInFocusTest() throws Exception {
+        when(view.isOkButtonInFocus()).thenReturn(true);
+
+        presenter.onEnterClicked();
+
+        verify(view).closeDialog();
+        verify(confirmCallback).accepted();
+        verify(cancelCallback, never()).cancelled();
+    }
+
+    @Test
+    public void onEnterClickedWhenCancelButtonInFocusTest() throws Exception {
+        when(view.isCancelButtonInFocus()).thenReturn(true);
+
+        presenter.onEnterClicked();
+
+        verify(view).closeDialog();
+        verify(confirmCallback, never()).accepted();
+        verify(cancelCallback).cancelled();
     }
 }

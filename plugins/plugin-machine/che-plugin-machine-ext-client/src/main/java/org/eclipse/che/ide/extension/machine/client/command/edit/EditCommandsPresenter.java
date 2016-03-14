@@ -64,7 +64,6 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
     private final EditCommandsView                               view;
     private final WorkspaceServiceClient                         workspaceServiceClient;
     private final CommandManager                                 commandManager;
-    private final String                                         workspaceId;
     private final DtoFactory                                     dtoFactory;
     private final CommandTypeRegistry                            commandTypeRegistry;
     private final DialogFactory                                  dialogFactory;
@@ -72,14 +71,17 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
     private final CoreLocalizationConstant                       coreLocale;
     private final Provider<SelectCommandComboBoxReady>           selectCommandActionProvider;
     private final Set<ConfigurationChangedListener>              configurationChangedListeners;
+    private final AppContext                                     appContext;
     /** Set of the existing command names. */
     private final Set<String>                                    commandNames;
     private       CommandConfigurationPage<CommandConfiguration> editedPage;
     /** Command that being edited. */
     private       CommandConfiguration                           editedCommand;
     /** Name of the edited command before editing. */
-    private       String                                         editedCommandOriginName;
-    private       String                                         editedCommandOriginPreviewUrl;
+    String                    editedCommandOriginName;
+    String                    editedCommandOriginPreviewUrl;
+    String                    workspaceId;
+    CommandProcessingCallback commandProcessingCallback;
 
     @Inject
     protected EditCommandsPresenter(EditCommandsView view,
@@ -95,7 +97,6 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         this.view = view;
         this.workspaceServiceClient = workspaceServiceClient;
         this.commandManager = commandManager;
-        this.workspaceId = appContext.getWorkspace().getId();
         this.dtoFactory = dtoFactory;
         this.commandTypeRegistry = commandTypeRegistry;
         this.dialogFactory = dialogFactory;
@@ -103,7 +104,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         this.coreLocale = coreLocale;
         this.selectCommandActionProvider = selectCommandActionProvider;
         this.view.setDelegate(this);
-
+        this.appContext = appContext;
         configurationChangedListeners = new HashSet<>();
         commandNames = new HashSet<>();
     }
@@ -134,6 +135,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         updateCommand(selectedConfiguration).then(new Operation<UsersWorkspaceDto>() {
             @Override
             public void apply(UsersWorkspaceDto arg) throws OperationException {
+                commandProcessingCallback = getCommandProcessingCallback();
                 fetchCommands();
                 fireConfigurationUpdated(selectedConfiguration);
             }
@@ -172,6 +174,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
 
     @Override
     public void onCancelClicked() {
+        commandProcessingCallback = getCommandProcessingCallback();
         fetchCommands();
     }
 
@@ -293,6 +296,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
                     @Override
                     public void apply(UsersWorkspaceDto arg) throws OperationException {
                         view.selectNextItem();
+                        commandProcessingCallback = getCommandProcessingCallback();
                         fetchCommands();
                         fireConfigurationRemoved(selectedConfiguration);
                     }
@@ -322,6 +326,20 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
 
         commandManager.execute(selectedConfiguration);
         view.close();
+    }
+
+    @Override
+    public void onEnterClicked() {
+        if (view.isCancelButtonInFocus()) {
+            onCancelClicked();
+            return;
+        }
+
+        if (view.isCloseButtonInFocus()) {
+            onCloseClicked();
+            return;
+        }
+        onSaveClicked();
     }
 
     private void reset() {
@@ -436,6 +454,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
 
     /** Show dialog. */
     public void show() {
+        workspaceId = appContext.getWorkspaceId();
         fetchCommands();
         view.show();
     }
@@ -497,6 +516,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
                 }
                 view.setData(categories);
                 view.setFilterState(!commandConfigurations.isEmpty());
+
+                if (commandProcessingCallback != null) {
+                    commandProcessingCallback.onCompleted();
+                    commandProcessingCallback = null;
+                }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -533,6 +557,15 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         }
     }
 
+    private CommandProcessingCallback getCommandProcessingCallback() {
+        return new CommandProcessingCallback() {
+            @Override
+            public void onCompleted() {
+                view.setCloseButtonInFocus();
+            }
+        };
+    }
+
     public void addConfigurationsChangedListener(ConfigurationChangedListener listener) {
         configurationChangedListeners.add(listener);
     }
@@ -548,5 +581,10 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         void onConfigurationRemoved(CommandConfiguration command);
 
         void onConfigurationsUpdated(CommandConfiguration command);
+    }
+
+    interface CommandProcessingCallback {
+        /** Called when handling of command is completed successfully. */
+        void onCompleted();
     }
 }

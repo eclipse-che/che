@@ -32,6 +32,7 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
+import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
 import org.eclipse.che.api.workspace.server.model.stack.StackSource;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
@@ -182,11 +183,18 @@ public class StackLoaderTest {
 
         MachineSourceDto machineSourceDto = newDto(MachineSourceDto.class).withLocation("location").withType("type");
 
-        MachineConfigDto machineConfig = newDto(MachineConfigDto.class).withDev(true)
-                                                                       .withName("machine config name")
-                                                                       .withType("type")
-                                                                       .withLimits(limitsDto)
-                                                                       .withSource(machineSourceDto);
+        MachineConfigDto machineConfig =
+                newDto(MachineConfigDto.class).withDev(true)
+                                              .withName("machine config name")
+                                              .withType("type")
+                                              .withLimits(limitsDto)
+                                              .withSource(machineSourceDto)
+                                              .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
+                                                                                                    .withPort("8080")
+                                                                                                    .withProtocol("https"),
+                                                                         newDto(ServerConfDto.class).withRef("ref2")
+                                                                                                    .withPort("9090/udp")
+                                                                                                    .withProtocol("someprotocol")));
 
         EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withName("name")
                                                                     .withRecipe(recipeDto)

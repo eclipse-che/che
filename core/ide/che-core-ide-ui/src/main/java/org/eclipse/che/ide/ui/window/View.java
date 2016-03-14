@@ -20,6 +20,8 @@ import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -41,6 +43,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.util.UIUtil;
+
+import java.util.List;
 
 /**
  * The view that renders the {@link Window}. The View consists of a glass
@@ -78,7 +82,7 @@ class View extends Composite {
     private int               dragStartX;
     private int               dragStartY;
     private String            transition;
-    private FocusWidget lastFocused;
+    private FocusWidget       lastFocused;
 
     private BlurHandler blurHandler = new BlurHandler() {
         @Override
@@ -102,6 +106,16 @@ class View extends Composite {
             contentContainer.add(footer);
         }
         handleEvents();
+
+        FocusPanel dummyFocusElement = new FocusPanel();
+        dummyFocusElement.setTabIndex(0);
+        dummyFocusElement.addFocusHandler(new FocusHandler() {
+            @Override
+            public void onFocus(FocusEvent event) {
+                setFocus();
+            }
+        });
+        contentContainer.add(dummyFocusElement);
     }
 
     /**
@@ -292,11 +306,36 @@ class View extends Composite {
     }
 
     /**
-     * Set focus on the specific children element if such exists.
+     * Sets focus on the last focused child element if such exists.
      */
-    public void focusView() {
+    public void focusLastFocusedElement() {
         if (lastFocused != null) {
             lastFocused.setFocus(true);
         }
+    }
+
+    /**
+     * Sets focus on the first child of content panel if such exists.
+     * Otherwise sets focus on first child of footer
+     */
+    public void setFocus() {
+        if (!setFocusOnChildOf(content)) {
+            setFocusOnChildOf(footer);
+        }
+    }
+
+    /**
+     * Sets focus on the first focusable child if such exists.
+     * @return <code>true</code> if the focus was set
+     */
+    private boolean setFocusOnChildOf(Widget widget) {
+        List<FocusWidget> focusableChildren = UIUtil.getFocusableChildren(widget);
+        for (FocusWidget focusableWidget : focusableChildren) {
+            if (focusableWidget.isVisible()) {
+                focusableWidget.setFocus(true);
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -24,7 +24,7 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 
 /**
  * The action contains business logic which calls special method to destroy machine.
@@ -45,7 +45,7 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
                                 MachineManager machineManager,
                                 AnalyticsEventLogger eventLogger,
                                 DialogFactory dialogFactory) {
-        super(Collections.singletonList(MACHINE_PERSPECTIVE_ID),
+        super(Collections.singletonList(OPERATIONS_PERSPECTIVE_ID),
               locale.machineDestroyTitle(),
               locale.machineDestroyDescription(),
               null, null);

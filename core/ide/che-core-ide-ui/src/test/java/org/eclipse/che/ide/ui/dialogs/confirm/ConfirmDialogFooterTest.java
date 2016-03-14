@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ui.dialogs.confirm;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
+import org.eclipse.che.ide.ui.WidgetFocusTracker;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
 import com.google.gwt.event.dom.client.ClickEvent;
 
@@ -19,7 +20,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogView.ActionDelegate;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -33,6 +33,8 @@ public class ConfirmDialogFooterTest extends BaseTest {
     private UILocalizationConstant           uiLocalizationConstant;
     @Mock
     private ConfirmDialogView.ActionDelegate actionDelegate;
+    @Mock
+    private WidgetFocusTracker               widgetFocusTracker;
     @InjectMocks
     private ConfirmDialogFooter              footer;
 
@@ -55,5 +57,21 @@ public class ConfirmDialogFooterTest extends BaseTest {
         footer.handleCancelClick(mock(ClickEvent.class));
 
         verify(actionDelegate).cancelled();
+    }
+
+    @Test
+    public void shouldSubscribeToWidgetFocusTracker() throws Exception {
+        new ConfirmDialogFooter(uiLocalizationConstant, widgetFocusTracker);
+
+        verify(widgetFocusTracker).subscribe(footer.okButton);
+        verify(widgetFocusTracker).subscribe(footer.cancelButton);
+    }
+
+    @Test
+    public void shouldUnsubscribeFromWidgetFocusTracker() throws Exception {
+        footer.onClose();
+
+        verify(widgetFocusTracker).unSubscribe(footer.okButton);
+        verify(widgetFocusTracker).unSubscribe(footer.cancelButton);
     }
 }

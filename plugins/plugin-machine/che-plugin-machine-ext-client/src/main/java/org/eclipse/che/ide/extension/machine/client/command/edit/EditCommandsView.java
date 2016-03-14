@@ -17,6 +17,7 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 
 import org.eclipse.che.commons.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +68,7 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
 
     /** Sets enabled state of the 'Apply' button. */
     void setSaveButtonState(boolean enabled);
-    
+
     /** Sets enabled state of the filter input field. */
     void setFilterState(boolean enabled);
 
@@ -81,6 +82,15 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
     /** Returns the selected command configuration. */
     @Nullable
     CommandConfiguration getSelectedConfiguration();
+
+    /** Sets the focus on the 'Close' button. */
+    void setCloseButtonInFocus();
+
+    /** Returns {@code true} if cancel button is in the focus and {@code false} - otherwise. */
+    boolean isCancelButtonInFocus();
+
+    /** Returns {@code true} if close button is in the focus and {@code false} - otherwise. */
+    boolean isCloseButtonInFocus();
 
     /** Action handler for the view actions/controls. */
     interface ActionDelegate {
@@ -105,6 +115,9 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
 
         /** Called when 'Execute' button is clicked. */
         void onExecuteClicked();
+
+        /** Performs any actions appropriate in response to the user having clicked the Enter key. */
+        void onEnterClicked();
 
         /**
          * Called when some command configuration is selected.

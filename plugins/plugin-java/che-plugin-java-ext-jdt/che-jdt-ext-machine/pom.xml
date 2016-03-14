@@ -121,6 +121,10 @@
             <artifactId>org.eclipse.search</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>preferences</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.search</groupId>
             <artifactId>org.eclipse.search</artifactId>
         </dependency>

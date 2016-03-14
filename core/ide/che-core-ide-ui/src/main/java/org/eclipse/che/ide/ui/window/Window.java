@@ -188,7 +188,14 @@ public abstract class Window implements IsWidget {
 
     /** Set focus to current window. */
     public void focus() {
-        view.focusView();
+        view.setFocus();
+    }
+
+    /**
+     * Sets focus on the last focused child element if such exists.
+     */
+    public void focusLastFocusedElement() {
+        view.focusLastFocusedElement();
     }
 
     /**
@@ -223,20 +230,21 @@ public abstract class Window implements IsWidget {
             RootLayoutPanel.get().add(view);
         }
 
-        // Start the animation after the element is attached.
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                // The popup may have been hidden before this timer executes.
-                if (isShowing) {
-                    popup.getStyle().removeProperty("visibility");
+        // The popup may have been hidden before this timer executes.
+        if (isShowing) {
+            popup.getStyle().removeProperty("visibility");
+            // Start the animation after the element is attached.
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    // The popup may have been hidden before this timer executes.
                     view.setShowing(true);
                     if (selectAndFocusElement != null) {
                         selectAndFocusElement.setFocus(true);
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void handleViewEvents() {

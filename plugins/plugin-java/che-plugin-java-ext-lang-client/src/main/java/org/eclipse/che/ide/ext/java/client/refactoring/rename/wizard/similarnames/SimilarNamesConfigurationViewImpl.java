@@ -108,8 +108,8 @@ final class SimilarNamesConfigurationViewImpl extends Window implements SimilarN
             }
         });
 
-        getFooter().add(accept);
-        getFooter().add(cancel);
+        addButtonToFooter(accept);
+        addButtonToFooter(cancel);
     }
 
 }

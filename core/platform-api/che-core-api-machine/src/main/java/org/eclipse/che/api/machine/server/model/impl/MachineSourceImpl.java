@@ -31,6 +31,11 @@ public class MachineSourceImpl implements MachineSource {
         this.location = location;
     }
 
+    public MachineSourceImpl(MachineSource machineSource) {
+        this.type = machineSource.getType();
+        this.location = machineSource.getLocation();
+    }
+
     @Override
     public String getType() {
         return type;

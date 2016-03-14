@@ -92,7 +92,7 @@ public class DockerConnector {
     private final DockerConnectionFactory connectionFactory;
 
     @Inject
-    public DockerConnector(DockerConnectorConfiguration connectorConfiguration, 
+    public DockerConnector(DockerConnectorConfiguration connectorConfiguration,
                            DockerConnectionFactory connectionFactory) {
         this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
         this.initialAuthConfig = connectorConfiguration.getAuthConfigs();
@@ -167,6 +167,19 @@ public class DockerConnector {
     }
 
     /**
+     * The same as {@link #buildImage(String, ProgressMonitor, AuthConfigs, boolean, long, long, File...)} but without memory limits.
+     *
+     * @see #buildImage(String, ProgressMonitor, AuthConfigs, boolean, long, long, File...)
+     */
+    public String buildImage(String repository,
+                             ProgressMonitor progressMonitor,
+                             AuthConfigs authConfigs,
+                             boolean doForcePull,
+                             File... files) throws IOException, InterruptedException {
+        return buildImage(repository, progressMonitor, authConfigs, doForcePull, 0, 0, files);
+    }
+
+    /**
      * Builds new docker image from specified dockerfile.
      *
      * @param repository
@@ -175,6 +188,10 @@ public class DockerConnector {
      *         ProgressMonitor for images creation process
      * @param authConfigs
      *         Authentication configuration for private registries. Can be null.
+     * @param memoryLimit
+     *         Memory limit for build in bytes
+     * @param memorySwapLimit
+     *         Total memory in bytes (memory + swap), -1 to enable unlimited swap
      * @param files
      *         files that are needed for creation docker images (e.g. file of directories used in ADD instruction in Dockerfile), one of
      *         them must be Dockerfile.
@@ -187,11 +204,13 @@ public class DockerConnector {
                              ProgressMonitor progressMonitor,
                              AuthConfigs authConfigs,
                              boolean doForcePull,
+                             long memoryLimit,
+                             long memorySwapLimit,
                              File... files) throws IOException, InterruptedException {
         final File tar = Files.createTempFile(null, ".tar").toFile();
         try {
             createTarArchive(tar, files);
-            return buildImage(repository, tar, progressMonitor, authConfigs, doForcePull);
+            return doBuildImage(repository, tar, progressMonitor, dockerDaemonUri, authConfigs, doForcePull, memoryLimit, memorySwapLimit);
         } finally {
             FileCleaner.addFile(tar);
         }
@@ -640,17 +659,22 @@ public class DockerConnector {
      * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
      */
     public InputStream getResource(String container, String sourcePath) throws IOException {
-        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                            .method("GET")
-                                                            .path("/containers/" + container + "/archive")
-                                                            .query("path", sourcePath)) {
+        DockerConnection connection = null;
+        try {
+            connection = connectionFactory.openConnection(dockerDaemonUri)
+                                          .method("GET")
+                                          .path("/containers/" + container + "/archive")
+                                          .query("path", sourcePath);
+
             final DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (status != OK.getStatusCode()) {
                 throw getDockerException(response);
             }
-
             return new CloseConnectionInputStream(response.getInputStream(), connection);
+        } catch (IOException io) {
+            connection.close();
+            throw io;
         }
     }
 
@@ -752,6 +776,21 @@ public class DockerConnector {
     }
 
     /**
+     * The same as {@link #doBuildImage(String, File, ProgressMonitor, URI, AuthConfigs, boolean, long, long)} but without memory limits.
+     *
+     * @see #doBuildImage(String, File, ProgressMonitor, URI, AuthConfigs, boolean, long, long)
+     */
+    protected String doBuildImage(String repository,
+                                  File tar,
+                                  final ProgressMonitor progressMonitor,
+                                  URI dockerDaemonUri,
+                                  AuthConfigs authConfigs,
+                                  boolean doForcePull) throws IOException, InterruptedException {
+        return doBuildImage(repository, tar, progressMonitor, dockerDaemonUri, authConfigs, doForcePull, 0, 0);
+    }
+
+
+    /**
      * Builds new docker image from specified tar archive that must contain Dockerfile.
      *
      * @param repository
@@ -765,6 +804,10 @@ public class DockerConnector {
      *         Uri for remote access to docker API
      * @param authConfigs
      *         Authentication configuration for private registries. Can be null.
+     * @param memoryLimit
+     *         Memory limit for build in bytes
+     * @param memorySwapLimit
+     *         Total memory in bytes (memory + swap), -1 to enable unlimited swap
      * @return image id
      * @throws IOException
      * @throws InterruptedException
@@ -775,7 +818,9 @@ public class DockerConnector {
                                   final ProgressMonitor progressMonitor,
                                   URI dockerDaemonUri,
                                   AuthConfigs authConfigs,
-                                  boolean doForcePull) throws IOException, InterruptedException {
+                                  boolean doForcePull,
+                                  long memoryLimit,
+                                  long memorySwapLimit) throws IOException, InterruptedException {
         if (authConfigs == null) {
             authConfigs = initialAuthConfig.getAuthConfigs();
         }
@@ -794,6 +839,12 @@ public class DockerConnector {
                                                             .entity(tarInput)) {
             if (repository != null) {
                 connection.query("t", repository);
+            }
+            if (memoryLimit != 0 ) {
+                connection.query("memory", memoryLimit);
+            }
+            if (memorySwapLimit != 0) {
+                connection.query("memswap", memorySwapLimit);
             }
             final DockerResponse response = connection.request();
             final int status = response.getStatus();

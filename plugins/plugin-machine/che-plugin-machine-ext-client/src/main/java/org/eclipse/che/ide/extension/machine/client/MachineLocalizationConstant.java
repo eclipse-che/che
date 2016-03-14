@@ -216,8 +216,8 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("perspective.project.action.tooltip")
     String perspectiveProjectActionTooltip();
 
-    @Key("perspective.machine.action.tooltip")
-    String perspectiveMachineActionTooltip();
+    @Key("perspective.operations.action.tooltip")
+    String perspectiveOperationsActionTooltip();
 
     @Key("tab.info")
     String tabInfo();

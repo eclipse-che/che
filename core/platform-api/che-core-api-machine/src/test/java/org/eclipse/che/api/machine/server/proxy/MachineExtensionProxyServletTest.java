@@ -55,7 +55,7 @@ import static org.testng.Assert.fail;
 
 public class MachineExtensionProxyServletTest {
     private static final String WORKSPACE_ID            = "workspace123";
-    private static final int    EXTENSIONS_API_PORT     = 4301;
+    private static final String EXTENSIONS_API_PORT     = "4301/tcp";
     private static final String PROXY_ENDPOINT          = "http://localhost:8080";
     private static final String BASE_PATH               = "/che/api/ext/api/";
     private static final String DEFAULT_PATH            = BASE_PATH + WORKSPACE_ID + "/java/";
@@ -143,7 +143,7 @@ public class MachineExtensionProxyServletTest {
 
         extensionApiRequest = new ExtensionApiRequest();
 
-        proxyServlet = new MachineExtensionProxyServlet(4301, machineManager);
+        proxyServlet = new MachineExtensionProxyServlet(EXTENSIONS_API_PORT, machineManager);
 
         when(machineManager.getDevMachine(WORKSPACE_ID)).thenReturn(machine);
         when(machine.getRuntime()).thenReturn(machineRuntimeInfo);

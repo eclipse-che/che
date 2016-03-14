@@ -17,6 +17,7 @@ import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -29,7 +30,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Collections;
 
+import static java.util.Arrays.asList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
@@ -63,11 +66,16 @@ public class DockerInstanceReadFileContentTest {
         dockerInstance = spy(new DockerInstance(dockerConnector,
                                                 null,
                                                 null,
-                                                new MachineImpl(new MachineConfigImpl(false,
-                                                                                      "Display name",
-                                                                                      "machineType",
-                                                                                      new MachineSourceImpl("type", "location"),
-                                                                                      new LimitsImpl(64)),
+                                                new MachineImpl(
+                                                        new MachineConfigImpl(false,
+                                                                              "Display name",
+                                                                              "machineType",
+                                                                              new MachineSourceImpl("type", "location"),
+                                                                              new LimitsImpl(64),
+                                                                              asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                                                     new ServerConfImpl("ref2", "9090/udp",
+                                                                                                        "someprotocol")),
+                                                                              Collections.singletonMap("key1", "value1")),
                                                                 "machineId",
                                                                 "workspaceId",
                                                                 "envName",

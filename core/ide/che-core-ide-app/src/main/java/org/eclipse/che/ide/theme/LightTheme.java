@@ -219,7 +219,7 @@ public class LightTheme implements Theme {
 
     @Override
     public String getButtonHoverBorderColor() {
-        return "#161819";
+        return "#E9E9E9";
     }
 
     @Override
@@ -279,7 +279,7 @@ public class LightTheme implements Theme {
 
     @Override
     public String getPrimaryButtonHoverBorderColor() {
-        return "#161819";
+        return "#E9E9E9";
     }
 
     @Override

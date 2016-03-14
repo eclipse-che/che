@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
@@ -6376,6 +6377,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testConvertAnonymousToNested2() throws Exception {
+		JavaModelManager.getIndexManager().indexAll(fJProject1.getProject());
 //		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
 		fJProject1.setOption(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 		fJProject1.setOption(JavaCore.CODEASSIST_LOCAL_PREFIXES, "l");

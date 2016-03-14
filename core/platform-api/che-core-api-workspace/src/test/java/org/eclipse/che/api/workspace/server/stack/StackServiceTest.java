@@ -22,6 +22,7 @@ import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.shared.Permissible;
 import org.eclipse.che.api.machine.shared.dto.recipe.GroupDescriptor;
@@ -59,6 +60,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -170,7 +172,14 @@ public class StackServiceTest {
         MachineSourceImpl machineSource = new MachineSourceImpl(MACHINE_SOURCE_TYPE, MACHINE_SOURCE_LOCATION);
         int limitMemory = 1000;
         LimitsImpl limits = new LimitsImpl(limitMemory);
-        MachineConfigImpl machineConfig = new MachineConfigImpl(IS_DEV, MACHINE_CONFIG_NAME, MACHINE_TYPE, machineSource, limits);
+        MachineConfigImpl machineConfig = new MachineConfigImpl(IS_DEV,
+                                                                MACHINE_CONFIG_NAME,
+                                                                MACHINE_TYPE,
+                                                                machineSource,
+                                                                limits,
+                                                                Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                                Collections.singletonMap("key1", "value1"));
         EnvironmentImpl environment = new EnvironmentImpl(ENVIRONMENT_NAME, null, Collections.singletonList(machineConfig));
 
         WorkspaceConfigImpl workspaceConfig = WorkspaceConfigImpl.builder()

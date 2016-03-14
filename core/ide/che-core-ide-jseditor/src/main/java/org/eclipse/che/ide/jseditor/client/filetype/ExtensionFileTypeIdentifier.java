@@ -72,7 +72,9 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("js", makeList("application/javascript", "text/javascript"));
         this.mappings.put("coffee", makeList("text/x-coffeescript"));
         this.mappings.put("json", makeList("application/json"));
-        this.mappings.put("ts", makeList("application/typescript"));
+        this.mappings.put("ts", makeList("application/javascript", "application/typescript"));
+        this.mappings.put("es6", makeList("application/javascript", "text/javascript"));
+        this.mappings.put("jsx", makeList("application/javascript", "text/javascript"));
 
         this.mappings.put("css", makeList("text/css"));
         this.mappings.put("scss", makeList("text/x-scss"));

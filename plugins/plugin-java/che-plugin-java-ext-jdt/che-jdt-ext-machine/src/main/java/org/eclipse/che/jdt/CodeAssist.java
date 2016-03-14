@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
+import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalPresentation;
@@ -47,11 +48,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.DocumentAdapter;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer;
@@ -59,12 +64,14 @@ import org.eclipse.jdt.internal.ui.text.java.RelevanceSorter;
 import org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,6 +221,91 @@ public class CodeAssist {
 
             throw new IllegalArgumentException("CodeAssist context doesn't exist or time of completion was expired");
         }
+    }
+
+    /**
+     * Organizes the imports of a compilation unit.
+     *
+     * @param project
+     *         current java project
+     * @param fqn
+     *         fully qualified name of the java file
+     * @return list of imports which have conflicts
+     */
+    public List<ConflictImportDTO> organizeImports(IJavaProject project, String fqn) throws CoreException, BadLocationException {
+        ICompilationUnit compilationUnit = prepareCompilationUnit(project, fqn);
+        return createOrganizeImportOperation(compilationUnit, null);
+    }
+
+    /**
+     * Applies chosen imports after resolving conflicts.
+     *
+     * @param project
+     *        current java project
+     * @param fqn
+     *         fully qualified name of the java file
+     * @param  chosen
+     *          list of chosen imports as result of resolving conflicts which needed to add to all imports.
+     */
+    public void applyChosenImports(IJavaProject project, String fqn, List<String> chosen) throws CoreException, BadLocationException {
+        ICompilationUnit compilationUnit = prepareCompilationUnit(project, fqn);
+        createOrganizeImportOperation(compilationUnit, chosen);
+    }
+
+    private List<ConflictImportDTO> createOrganizeImportOperation(ICompilationUnit compilationUnit,
+                                                                 List<String> chosen) throws CoreException {
+        CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings(compilationUnit.getJavaProject());
+
+        OrganizeImportsOperation operation = new OrganizeImportsOperation(compilationUnit,
+                                                                          null,
+                                                                          settings.importIgnoreLowercase,
+                                                                          !compilationUnit.isWorkingCopy(),
+                                                                          true,
+                                                                          chosen,
+                                                                          null);
+
+        NullProgressMonitor monitor = new NullProgressMonitor();
+        TextEdit edit = operation.createTextEdit(monitor);
+
+        TypeNameMatch[][] choices = operation.getChoices();
+        //Apply organize import declarations if operation doesn't have conflicts (choices.length == 0)
+        //or all conflicts were resolved (!chosen.isEmpty())
+        if ((chosen != null && !chosen.isEmpty()) || choices == null || choices.length == 0) {
+            operation.applyChanges(edit, monitor);
+            return Collections.emptyList();
+        }
+
+        return createListOfDTOMatches(choices);
+    }
+
+    private List<ConflictImportDTO> createListOfDTOMatches(TypeNameMatch[][] choices) {
+        List<ConflictImportDTO> typeMatches = new ArrayList<>();
+        for (int i = 0; i < choices.length; i++) {
+            List<String> nameMatches = new ArrayList<>();
+            TypeNameMatch[] choice = choices[i];
+            for (int j = 0; j < choice.length; j++) {
+                nameMatches.add(choice[j].getFullyQualifiedName());
+            }
+            typeMatches.add(DtoFactory.newDto(ConflictImportDTO.class).withTypeMatches(nameMatches));
+        }
+        return typeMatches;
+    }
+
+    private ICompilationUnit prepareCompilationUnit(IJavaProject project, String fqn) throws JavaModelException {
+        ICompilationUnit compilationUnit;
+
+        IType type = project.findType(fqn);
+        if (type == null) {
+            throw new JavaModelException(
+                    new JavaModelStatus(IJavaModelStatusConstants.CORE_EXCEPTION, "Can't find a file: " + fqn));
+        }
+        if (type.isBinary()) {
+            throw new JavaModelException(
+                    new JavaModelStatus(IJavaModelStatusConstants.CORE_EXCEPTION, "Can't organize imports on binary file"));
+        } else {
+            compilationUnit = type.getCompilationUnit();
+        }
+        return compilationUnit;
     }
 
     private class CodeAssistContext {

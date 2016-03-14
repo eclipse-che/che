@@ -13,10 +13,14 @@ package org.eclipse.che.api.machine.server.model.impl;
 import org.eclipse.che.api.core.model.machine.Limits;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
-//TODO move?
+import java.util.stream.Collectors;
 
 /**
  * Data object for {@link MachineConfig}.
@@ -25,11 +29,17 @@ import java.util.Objects;
  */
 public class MachineConfigImpl implements MachineConfig {
 
-    private boolean           isDev;
-    private String            name;
-    private String            type;
-    private MachineSourceImpl source;
-    private LimitsImpl        limits;
+    public static MachineConfigImplBuilder builder() {
+        return new MachineConfigImplBuilder();
+    }
+
+    private boolean              isDev;
+    private String               name;
+    private String               type;
+    private MachineSourceImpl    source;
+    private LimitsImpl           limits;
+    private List<ServerConfImpl> servers;
+    private Map<String, String>  envVariables;
 
     public MachineConfigImpl() {
     }
@@ -38,14 +48,23 @@ public class MachineConfigImpl implements MachineConfig {
                              String name,
                              String type,
                              MachineSource source,
-                             Limits limits) {
+                             Limits limits,
+                             List<? extends ServerConf> servers,
+                             Map<String, String> envVariables) {
         this.isDev = isDev;
         this.name = name;
         this.type = type;
+        this.envVariables = envVariables;
+        if (servers != null) {
+            this.servers = servers.stream()
+                                  .map(ServerConfImpl::new)
+                                  .collect(Collectors.toList());
+        }
         if (source != null) {
-            this.source = new MachineSourceImpl(source.getType(), source.getLocation());
+            this.source = new MachineSourceImpl(source);
         }
         this.limits = new LimitsImpl(limits);
+
     }
 
     public MachineConfigImpl(MachineConfig machineCfg) {
@@ -53,7 +72,9 @@ public class MachineConfigImpl implements MachineConfig {
              machineCfg.getName(),
              machineCfg.getType(),
              machineCfg.getSource(),
-             machineCfg.getLimits());
+             machineCfg.getLimits(),
+             machineCfg.getServers(),
+             machineCfg.getEnvVariables());
     }
 
     @Override
@@ -61,26 +82,14 @@ public class MachineConfigImpl implements MachineConfig {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public MachineSource getSource() {
         return source;
     }
 
-    public void setSource(MachineSourceImpl source) {
-        this.source = source;
-    }
-
     @Override
     public boolean isDev() {
         return isDev;
-    }
-
-    public void setDev(boolean isDev) {
-        this.isDev = isDev;
     }
 
     @Override
@@ -93,12 +102,24 @@ public class MachineConfigImpl implements MachineConfig {
         return limits;
     }
 
-    public void setLimits(Limits limits) {
-        this.limits = new LimitsImpl(limits);
+    @Override
+    public List<ServerConfImpl> getServers() {
+        if (servers == null) {
+            servers = new ArrayList<>();
+        }
+        return servers;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    @Override
+    public Map<String, String> getEnvVariables() {
+        if (envVariables == null) {
+            envVariables = new HashMap<>();
+        }
+        return envVariables;
+    }
+
+    public void setLimits(Limits limits) {
+        this.limits = new LimitsImpl(limits);
     }
 
     @Override
@@ -110,7 +131,9 @@ public class MachineConfigImpl implements MachineConfig {
                Objects.equals(name, other.name) &&
                Objects.equals(source, other.source) &&
                Objects.equals(limits, other.limits) &&
-               Objects.equals(type, other.type);
+               Objects.equals(type, other.type) &&
+               Objects.equals(getServers(), other.getServers()) &&
+               Objects.equals(getEnvVariables(), other.getEnvVariables());
     }
 
     @Override
@@ -121,6 +144,8 @@ public class MachineConfigImpl implements MachineConfig {
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + Objects.hashCode(source);
         hash = hash * 31 + Objects.hashCode(limits);
+        hash = hash * 31 + Objects.hashCode(getServers());
+        hash = hash * 31 + Objects.hashCode(getEnvVariables());
         return hash;
     }
 
@@ -131,7 +156,75 @@ public class MachineConfigImpl implements MachineConfig {
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
                ", source=" + source +
-               ", memorySize=" + limits +
+               ", limits=" + limits +
+               ", servers=" + getServers() +
+               ", envVariables=" + getEnvVariables() +
                '}';
+    }
+
+    /**
+     * Helps to build complex {@link MachineConfigImpl machine config impl}.
+     *
+     * @see MachineConfigImpl#builder()
+     */
+    public static class MachineConfigImplBuilder {
+
+        private boolean                    isDev;
+        private String                     name;
+        private String                     type;
+        private MachineSource              source;
+        private Limits                     limits;
+        private List<? extends ServerConf> servers;
+        private Map<String, String>        envVariables;
+
+        public MachineConfigImpl build() {
+            return new MachineConfigImpl(isDev, name, type, source, limits, servers, envVariables);
+        }
+
+        public MachineConfigImplBuilder fromConfig(MachineConfig machineConfig) {
+            isDev = machineConfig.isDev();
+            name = machineConfig.getName();
+            type = machineConfig.getType();
+            source = machineConfig.getSource();
+            limits = machineConfig.getLimits();
+            servers = machineConfig.getServers();
+            envVariables = machineConfig.getEnvVariables();
+            return this;
+        }
+
+        public MachineConfigImplBuilder setDev(boolean isDev) {
+            this.isDev = isDev;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setType(String type) {
+            this.type = type;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setSource(MachineSource machineSource) {
+            this.source = machineSource;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setLimits(Limits limits) {
+            this.limits = limits;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setServers(List<? extends ServerConf> servers) {
+            this.servers = servers;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setEnvVariables(Map<String, String> envVariables) {
+            this.envVariables = envVariables;
+            return this;
+        }
     }
 }

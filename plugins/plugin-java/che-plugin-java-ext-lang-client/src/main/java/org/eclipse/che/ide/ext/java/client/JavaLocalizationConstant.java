@@ -129,6 +129,27 @@ public interface JavaLocalizationConstant extends Messages {
     @Key("file.structure.action.description")
     String fileStructureActionDescription();
 
+    @Key("organize.imports.name")
+    String organizeImportsName();
+
+    @Key("organize.imports.description")
+    String organizeImportsDescription();
+
+    @Key("organize.imports.failed.title")
+    String failedToProcessOrganizeImports();
+
+    @Key("organize.imports.button.finish")
+    String organizeImportsButtonFinish();
+
+    @Key("organize.imports.button.cancel")
+    String organizeImportsButtonCancel();
+
+    @Key("organize.imports.button.next")
+    String organizeImportsButtonNext();
+
+    @Key("organize.imports.button.back")
+    String organizeImportsButtonBack();
+
     @Key("show.inherited.members.label")
     String showInheritedMembersLabel();
 
