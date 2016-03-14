@@ -124,7 +124,7 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
             }
         });
 
-        getFooter().add(createButton);
+        addButtonToFooter(createButton);
     }
 
     /** {@inheritDoc} */

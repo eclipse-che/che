@@ -181,9 +181,9 @@ final class RenameViewImpl extends Window implements RenameView {
             }
         });
 
-        getFooter().add(accept);
-        getFooter().add(cancel);
-        getFooter().add(preview);
+        addButtonToFooter(accept);
+        addButtonToFooter(cancel);
+        addButtonToFooter(preview);
     }
 
     /** {@inheritDoc} */
