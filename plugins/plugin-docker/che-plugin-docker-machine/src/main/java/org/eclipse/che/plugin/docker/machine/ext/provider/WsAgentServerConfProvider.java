@@ -20,7 +20,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.net.URI;
 
-import static org.eclipse.che.api.machine.shared.Constants.WS_AGENT_SERVER_REFERENCE;
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 
 /**
  * Provides server conf that describes workspace agent server
@@ -36,8 +36,9 @@ public class WsAgentServerConfProvider implements Provider<ServerConf> {
 
     @Override
     public ServerConf get() {
-        return new ServerConfImpl(WS_AGENT_SERVER_REFERENCE,
+        return new ServerConfImpl(WSAGENT_REFERENCE,
                                   WsAgentLauncherImpl.WS_AGENT_PORT,
                                   apiEndpoint.getScheme());
     }
+
 }

@@ -39,7 +39,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Shnurenko
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class MachinePerspectiveTest {
+public class OperationsPerspectiveTest {
 
     //constructor mocks
     @Mock
@@ -92,7 +92,7 @@ public class MachinePerspectiveTest {
     @Mock
     private AcceptsOneWidget        container;
 
-    private MachinePerspective perspective;
+    private OperationsPerspective perspective;
 
     @Before
     public void setUp() {
@@ -115,7 +115,7 @@ public class MachinePerspectiveTest {
         when(stackPresenterFactory.create(Matchers.<PartStackView>anyObject(),
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
 
-        perspective = new MachinePerspective(view,
+        perspective = new OperationsPerspective(view,
                                              partViewFactory,
                                              controllerFactory,
                                              stackPresenterFactory,
@@ -130,7 +130,7 @@ public class MachinePerspectiveTest {
 
     @Test
     public void constructorShouldBeVerified() {
-        verify(notificationManager).addRule(MACHINE_PERSPECTIVE_ID);
+        verify(notificationManager).addRule(OPERATIONS_PERSPECTIVE_ID);
 
         verify(partStackPresenter).addPart(console, null);
         verify(partStackPresenter).addPart(notificationManager, Constraints.FIRST);
@@ -153,4 +153,5 @@ public class MachinePerspectiveTest {
 
         verify(partStackPresenter, times(2)).openPreviousActivePart();
     }
+
 }

@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
@@ -35,9 +36,6 @@ import java.util.Objects;
  * @author Dmitry Shnurenko
  */
 public class Machine {
-
-    public static final String TERMINAL_REF_KEY   = "terminal";
-    public static final String EXTENSIONS_REF_KEY = "extensions";
 
     private final MachineDto    descriptor;
     private final EntityFactory entityFactory;
@@ -91,7 +89,7 @@ public class Machine {
         String url = "";
         Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
         for (ServerDto descriptor : serverDescriptors.values()) {
-            if (EXTENSIONS_REF_KEY.equals(descriptor.getRef())) {
+            if (Constants.WSAGENT_REFERENCE.equals(descriptor.getRef())) {
                 url = descriptor.getUrl();
             }
         }
@@ -129,8 +127,7 @@ public class Machine {
         Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
 
         for (ServerDto descriptor : serverDescriptors.values()) {
-
-            if (TERMINAL_REF_KEY.equals(descriptor.getRef())) {
+            if (Constants.TERMINAL_REFERENCE.equals(descriptor.getRef())) {
                 String terminalUrl = descriptor.getUrl();
 
                 terminalUrl = terminalUrl.substring(terminalUrl.indexOf(':'), terminalUrl.length());

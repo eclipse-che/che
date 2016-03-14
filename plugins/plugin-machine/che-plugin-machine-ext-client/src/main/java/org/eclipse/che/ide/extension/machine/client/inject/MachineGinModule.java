@@ -50,7 +50,7 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.OutputConsoleView;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.OutputConsoleViewImpl;
-import org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective;
+import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.button.EditorButtonWidget;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.button.EditorButtonWidgetImpl;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.Tab;
@@ -61,7 +61,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelView;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelViewImpl;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 
 /**
  * GIN module for Machine extension.
@@ -80,7 +80,7 @@ public class MachineGinModule extends AbstractGinModule {
         componentBinder.addBinding("Start Machine").to(MachineComponent.class);
 
         GinMapBinder<String, Perspective> perspectiveBinder = GinMapBinder.newMapBinder(binder(), String.class, Perspective.class);
-        perspectiveBinder.addBinding(MACHINE_PERSPECTIVE_ID).to(MachinePerspective.class);
+        perspectiveBinder.addBinding(OPERATIONS_PERSPECTIVE_ID).to(OperationsPerspective.class);
 
         bind(ToolbarPresenter.class).annotatedWith(MachineConsoleToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
         bind(MachineConsoleView.class).to(MachineConsoleViewImpl.class).in(Singleton.class);

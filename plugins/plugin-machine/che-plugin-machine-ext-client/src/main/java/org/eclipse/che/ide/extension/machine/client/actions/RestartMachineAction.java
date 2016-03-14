@@ -22,7 +22,7 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.
 
 import java.util.Collections;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 
 /**
  * The action contains business logic which calls special method to restart machine.
@@ -43,7 +43,7 @@ public class RestartMachineAction extends AbstractPerspectiveAction {
                                 MachinePanelPresenter panelPresenter,
                                 MachineManager machineManager,
                                 AnalyticsEventLogger eventLogger) {
-        super(Collections.singletonList(MACHINE_PERSPECTIVE_ID),
+        super(Collections.singletonList(OPERATIONS_PERSPECTIVE_ID),
               locale.controlMachineRestartText(),
               locale.controlMachineRestartTooltip(),
               null, null);
