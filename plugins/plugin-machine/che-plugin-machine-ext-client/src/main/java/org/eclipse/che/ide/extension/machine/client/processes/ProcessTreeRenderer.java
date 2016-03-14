@@ -128,6 +128,11 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                     }
                 }
             }, true);
+
+            Tooltip.create((elemental.dom.Element) sshButton,
+                    BOTTOM,
+                    MIDDLE,
+                    locale.connectViaSSH());
         }
 
         newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
