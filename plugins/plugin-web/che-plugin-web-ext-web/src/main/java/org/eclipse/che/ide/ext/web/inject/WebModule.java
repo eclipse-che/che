@@ -54,6 +54,27 @@ public class WebModule extends AbstractGinModule {
     protected FileType provideJSFile(WebExtensionResource res) {
         return new FileType("javaScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "js");
     }
+    
+    @Provides
+    @Singleton
+    @Named("ES6FileType")
+    protected FileType provideES6File(WebExtensionResource res) {
+        return new FileType("ECMAScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "es6");
+    }
+    
+    @Provides
+    @Singleton
+    @Named("JSXFileType")
+    protected FileType provideJSXFile(WebExtensionResource res) {
+        return new FileType("JSX JavaScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "jsx");
+    }
+    
+    @Provides
+    @Singleton
+    @Named("TypeScript")
+    protected FileType provideTypeScriptFile(WebExtensionResource res) {
+        return new FileType("TypeScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "ts");
+    }
 
     @Provides
     @Singleton
