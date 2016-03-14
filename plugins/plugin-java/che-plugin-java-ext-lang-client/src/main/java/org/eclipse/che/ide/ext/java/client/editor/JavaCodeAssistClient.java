@@ -22,6 +22,7 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
+import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
@@ -29,6 +30,8 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,15 +50,18 @@ public class JavaCodeAssistClient {
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final String                 workspaceId;
+    private final MessageLoader          loader;
 
     @Inject
     public JavaCodeAssistClient(@Named("cheExtensionPath") String machineExtPath,
                                 DtoUnmarshallerFactory unmarshallerFactory,
                                 AppContext appContext,
+                                LoaderFactory loaderFactory,
                                 AsyncRequestFactory asyncRequestFactory) {
         this.machineExtPath = machineExtPath;
         this.workspaceId = appContext.getWorkspace().getId();
         this.unmarshallerFactory = unmarshallerFactory;
+        this.loader = loaderFactory.newLoader();
         this.asyncRequestFactory = asyncRequestFactory;
     }
 
@@ -132,5 +138,47 @@ public class JavaCodeAssistClient {
                 return changes;
             }
         });
+    }
+
+    /**
+     * Organizes the imports of a compilation unit.
+     *
+     * @param projectPath
+     *         path to the project
+     * @param fqn
+     *         fully qualified name of the java file
+     * @return list of imports which have conflicts
+     */
+    public Promise<List<ConflictImportDTO>> organizeImports(String projectPath, String fqn) {
+        String url = machineExtPath +
+                     "/jdt/" +
+                     workspaceId +
+                     "/code-assist/organize-imports?projectpath=" + projectPath +
+                     "&fqn=" + fqn;
+
+        return asyncRequestFactory.createPostRequest(url, null)
+                                  .loader(loader)
+                                  .send(unmarshallerFactory.newListUnmarshaller(ConflictImportDTO.class));
+    }
+
+    /**
+     * Organizes the imports of a compilation unit.
+     *
+     * @param projectPath
+     *         path to the project
+     * @param fqn
+     *         fully qualified name of the java file
+     */
+    public Promise<Void> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
+        String url = machineExtPath +
+                     "/jdt/" +
+                     workspaceId +
+                     "/code-assist/apply-imports?projectpath=" + projectPath +
+                     "&fqn=" + fqn;
+
+        return asyncRequestFactory.createPostRequest(url, chosen)
+                                  .loader(loader)
+                                  .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                                  .send();
     }
 }

@@ -21,7 +21,7 @@
 
         .label {
             float: left;
-            margin-left: 6px;
+            margin-left: 3px;
             margin-top: 6px;
         }
 

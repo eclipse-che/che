@@ -16,6 +16,7 @@ import org.eclipse.che.ide.api.text.Position;
 import org.eclipse.che.ide.api.text.annotation.Annotation;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.ext.java.client.action.ProposalAction;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
@@ -42,28 +43,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistProcessor.insertStyle;
+
 /**
  * {@link QuickAssistProcessor} for java files.
  */
 public class JavaQuickAssistProcessor implements QuickAssistProcessor {
 
-    private final JavaCodeAssistClient   client;
+    private final JavaCodeAssistClient        client;
     /** The resources used for java assistants. */
-    private final JavaResources          javaResources;
-    private final DtoUnmarshallerFactory unmarshallerFactory;
-    private final DtoFactory             dtoFactory;
-    private final RefactoringUpdater     refactoringUpdater;
-    private final EditorAgent editorAgent;
+    private final JavaResources               javaResources;
+    private final Map<String, ProposalAction> proposalActions;
+    private final DtoUnmarshallerFactory      unmarshallerFactory;
+    private final DtoFactory                  dtoFactory;
+    private final RefactoringUpdater          refactoringUpdater;
+    private final EditorAgent                 editorAgent;
 
     @Inject
     public JavaQuickAssistProcessor(final JavaCodeAssistClient client,
                                     final JavaResources javaResources,
+                                    Map<String, ProposalAction> proposalActions,
                                     DtoUnmarshallerFactory unmarshallerFactory,
                                     DtoFactory dtoFactory,
                                     RefactoringUpdater refactoringUpdater,
                                     EditorAgent editorAgent) {
         this.client = client;
         this.javaResources = javaResources;
+        this.proposalActions = proposalActions;
         this.unmarshallerFactory = unmarshallerFactory;
         this.dtoFactory = dtoFactory;
         this.refactoringUpdater = refactoringUpdater;
@@ -119,17 +125,23 @@ public class JavaQuickAssistProcessor implements QuickAssistProcessor {
         HasLinkedMode linkedEditor = editor instanceof HasLinkedMode ? (HasLinkedMode)editor : null;
         for (ProposalPresentation proposal : presentations) {
             CompletionProposal completionProposal;
-            if (proposal.getActionId() != null) {
-                completionProposal =
-                        new ActionCompletionProposal(JavaCodeAssistProcessor.insertStyle(javaResources, proposal.getDisplayString()),
-                                                     proposal.getActionId(), JavaCodeAssistProcessor.getIcon(proposal.getImage())
-                        );
+            String actionId = proposal.getActionId();
+            if (actionId != null) {
+                ProposalAction action = proposalActions.get(actionId);
+                completionProposal = new ActionCompletionProposal(insertStyle(javaResources, proposal.getDisplayString()),
+                                                                  actionId,
+                                                                  action,
+                                                                  JavaCodeAssistProcessor.getIcon(proposal.getImage())
+                );
             } else {
-                completionProposal = new JavaCompletionProposal(
-                        proposal.getIndex(),
-                        JavaCodeAssistProcessor.insertStyle(javaResources, proposal.getDisplayString()),
-                        JavaCodeAssistProcessor.getIcon(proposal.getImage()),
-                        client, responds.getSessionId(), linkedEditor, refactoringUpdater, editorAgent);
+                completionProposal = new JavaCompletionProposal(proposal.getIndex(),
+                                                                insertStyle(javaResources, proposal.getDisplayString()),
+                                                                JavaCodeAssistProcessor.getIcon(proposal.getImage()),
+                                                                client,
+                                                                responds.getSessionId(),
+                                                                linkedEditor,
+                                                                refactoringUpdater,
+                                                                editorAgent);
             }
             proposals.add(completionProposal);
         }

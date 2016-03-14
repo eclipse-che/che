@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -36,6 +37,8 @@ import java.util.StringTokenizer;
  * @noextend This class is not intended to be subclassed by clients.
   */
 public class PreferenceConstants {
+
+	public static final String ID_PLUGIN = "org.eclipse.jdt.ui";
 
 	private PreferenceConstants() {
 	}
@@ -4083,18 +4086,17 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 */
 	public static String getPreference(String key, IJavaProject project) {
-//		String val;
-//		if (project != null) {
-//			val = new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN).get(key, null);
-//			if (val != null) {
-//				return val;
-//			}
-//		}
-//		val = InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(key, null);
-//		if (val != null) {
-//			return val;
-//		}
-//		return DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(key, null);
+		String val;
+		if (project != null) {
+			val = new ProjectScope(project.getProject()).getNode(ID_PLUGIN).get(key, null);
+			if (val != null && !val.isEmpty()) {
+				return val;
+			}
+		}
+		val = InstanceScope.INSTANCE.getNode(ID_PLUGIN).get(key, null);
+		if (val != null) {
+			return val;
+		}
 		return getPreferenceStore().getString(key);
 	}
 
