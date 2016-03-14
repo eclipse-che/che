@@ -30,7 +30,7 @@ public class GitProjectType extends TransientMixin {
     @Inject
     public GitProjectType(GitValueProviderFactory gitRepositoryValueProviderFactory) {
         super(TYPE_ID, DISPLAY_NAME);
-        addVariableDefinition(VCS_PROVIDER_NAME, "Is this git repo or not?", false,
+        addVariableDefinition(VCS_PROVIDER_NAME, "Is this git repo or not?", true,
                               gitRepositoryValueProviderFactory);
         addVariableDefinition(GIT_CURRENT_BRANCH_NAME, "Name of current git branch", false,
                               gitRepositoryValueProviderFactory);
