@@ -151,6 +151,14 @@ public class GitHubClientServiceImpl implements GitHubClientService {
     }
 
     @Override
+    public Promise<GitHubPullRequestList> getPullRequests(String owner, String repository, String head) {
+        final String url = baseUrl + PULL_REQUESTS + '/' + owner + '/' + repository + "?head=" + head;
+        return asyncRequestFactory.createGetRequest(url)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(GitHubPullRequestList.class));
+    }
+
+    @Override
     public void getPullRequest(final String owner, final String repository, final String pullRequestId,
                                final AsyncRequestCallback<GitHubPullRequest> callback) {
         String url = baseUrl + PULL_REQUESTS + "/" + owner + "/" + repository + "/" + pullRequestId;

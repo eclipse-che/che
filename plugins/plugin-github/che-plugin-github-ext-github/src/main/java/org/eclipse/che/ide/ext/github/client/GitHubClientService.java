@@ -151,6 +151,18 @@ public interface GitHubClientService {
     Promise<GitHubPullRequestList> getPullRequests(@NotNull String owner, @NotNull String repository);
 
     /**
+     * Get pull requests for given repository.
+     *
+     * @param owner
+     *         the repository owner.
+     * @param repository
+     *         the repository name.
+     * @param head
+     *         user and branch name in the format of user:ref-name
+     */
+    Promise<GitHubPullRequestList> getPullRequests(String owner, String repository, String head);
+
+    /**
      * Get a pull request by id for a given repository.
      *
      * @param owner
