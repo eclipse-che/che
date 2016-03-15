@@ -32,13 +32,13 @@ export class DashboardConfig {
     register.controller('DashboardController', DashboardController);
 
     // config routes
-    register.app.config(function ($routeProvider) {
+    register.app.config(($routeProvider) => {
       $routeProvider.accessWhen('/', {
         templateUrl: 'app/dashboard/dashboard.html',
         controller: 'DashboardController',
         controllerAs: 'dashboardController',
         resolve: {
-          check: ['$q', 'cheService', 'cheAdminService', function ($q, cheService, cheAdminService) {
+          check: ['$q', 'cheService', 'cheAdminService', ($q, cheService, cheAdminService) => {
             var defer = $q.defer();
             cheService.fetchServices().then(() => {
               cheAdminService.fetchServices().then(() => {
