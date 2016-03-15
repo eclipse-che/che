@@ -30,6 +30,7 @@
         <module>plugin-web</module>
         <module>plugin-machine</module>
         <module>plugin-java</module>
+        <module>plugin-maven</module>
         <module>plugin-sdk</module>
         <module>plugin-orion</module>
         <module>plugin-git</module>
