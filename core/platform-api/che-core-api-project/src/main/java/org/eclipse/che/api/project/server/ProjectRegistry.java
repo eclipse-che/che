@@ -169,15 +169,13 @@ public class ProjectRegistry {
      * @throws ServerException
      * @throws ConflictException
      * @throws NotFoundException
-     * @throws ForbiddenException
      */
     RegisteredProject putProject(ProjectConfig config,
                                         FolderEntry folder,
                                         boolean updated,
                                         boolean detected) throws ServerException,
                                                                  ConflictException,
-                                                                 NotFoundException,
-                                                                 ForbiddenException {
+                                                                 NotFoundException {
         final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
         projects.put(project.getPath(), project);
 
@@ -208,6 +206,13 @@ public class ProjectRegistry {
     /**
      * Extension writer should call this method to apply changes which (supposedly) change
      * Attributes defined with particular Project Type
+     * If incoming Project Type is primary and:
+     * - If the folder located on projectPath is a Project, its Primary PT will be converted to incoming PT
+     * - If the folder located on projectPath is NOT a Project the folder will be converted to "detected" Project
+     * with incoming Primary PT
+     * If incoming Project Type is mixin and:
+     * - If the folder located on projectPath is a Project, this PT will be added (if not already there) to its Mixin PTs
+     * - If the folder located on projectPath is NOT a Project - ConflictException will be thrown
      * For example:
      * - extension code knows that particular file content is used by Value Provider
      * so this method should be called when content of this file changed to check
@@ -223,24 +228,24 @@ public class ProjectRegistry {
      * @param asMixin - whether the type supposed to be mixin (true) or primary (false)
      * @return - refreshed project
      * @throws ConflictException
-     * @throws ForbiddenException
      * @throws NotFoundException
      * @throws ServerException
      */
     public RegisteredProject setProjectType(String projectPath, String type,
                                             boolean asMixin) throws ConflictException,
-                                                                    ForbiddenException,
                                                                     NotFoundException,
                                                                     ServerException {
 
         RegisteredProject project = getProject(projectPath);
         NewProjectConfig conf;
         List<String> newMixins = new ArrayList<>();
-        String newType = null;
+        String newType;
 
         if(project == null) {
             if(asMixin) {
-                newMixins.add(type);
+                throw new ConflictException("Can not assing as mixin type '" + type +
+                                            "' since the " + projectPath + " is not a project.");
+
             } else {
                 newType = type;
             }
@@ -274,13 +279,16 @@ public class ProjectRegistry {
     /**
      * Extension writer should call this method to apply changes which supposedly
      * make the Project no longer have particular Project Type.
+     * In a case of removing primary project type:
+     * - if the project was NOT detected BASE Project Type will be set as primary
+     * - if the project was detected it will be converted back to the folder
      * For example:
      * - extension code knows that removeing some file inside project's file system
      * will (or may) cause removing particular project type
      *
      * @param projectPath - project path
      * @param type - project type
-     * @return - refreshed project
+     * @return - refreshed project or null if such a project not found or was removed
      * @throws ConflictException
      * @throws ForbiddenException
      * @throws NotFoundException
@@ -301,8 +309,14 @@ public class ProjectRegistry {
 
         if(!newMixins.contains(type))
             newMixins.remove(type);
-        else if(newType.equals(type))
+        else if(newType.equals(type)) {
+            if(project.isDetected()) {
+                projects.remove(project.getPath());
+                return null;
+            }
+
             newType = BaseProjectType.ID;
+        }
 
         final NewProjectConfig conf = new NewProjectConfig(project.getPath(), newType, newMixins,
                                                            project.getName(), project.getDescription(),
