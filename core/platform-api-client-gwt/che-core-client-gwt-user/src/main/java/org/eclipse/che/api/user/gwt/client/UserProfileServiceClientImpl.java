@@ -12,11 +12,13 @@ package org.eclipse.che.api.user.gwt.client;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestContext;
+import org.eclipse.che.ide.rest.StringMapUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -87,6 +89,15 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
                            .send(callback);
     }
 
+    @Override
+    public Promise<Map<String, String>> getPreferences() {
+        return asyncRequestFactory.createGetRequest(PREFS)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Getting user's preferences..."))
+                                  .send(new StringMapUnmarshaller());
+    }
+
     /** {@inheritDoc} */
     @Override
     public void updateProfile(@NotNull String id, Map<String, String> updates, AsyncRequestCallback<ProfileDescriptor> callback) {
@@ -112,4 +123,15 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
                            .send(callback);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public Promise<Map<String, String>> updatePreferences(@NotNull Map<String, String> update) {
+        final String data = JsonHelper.toJson(update);
+        return asyncRequestFactory.createPostRequest(PREFS, null)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .data(data)
+                                  .loader(loaderFactory.newLoader("Updating user's preferences..."))
+                                  .send(new StringMapUnmarshaller());
+    }
 }
