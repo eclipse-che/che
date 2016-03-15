@@ -160,7 +160,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
                        new AsyncRequestCallback<String>() {
                            @Override
                            protected void onSuccess(String result) {
-                               console.printInfo(constant.removeFilesSuccessfull());
+                               console.print(constant.removeFilesSuccessfull());
                                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                                notificationManager.notify(constant.removeFilesSuccessfull(), project.getRootProject());
 

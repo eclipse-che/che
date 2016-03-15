@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
@@ -38,11 +39,11 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for commit changes on git.
@@ -230,7 +231,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             message += " " + constant.commitUser(revision.getCommitter().getName());
         }
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
-        console.printInfo(message);
+        console.print(message);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
         notificationManager.notify(message, appContext.getCurrentProject().getRootProject());
         view.setMessage("");
@@ -253,11 +254,12 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             }).show();
             return;
         }
-        String errorMessage = (exception.getMessage() != null && !exception.getMessage().isEmpty()) ? exception.getMessage() : constant.commitFailed();
+        String exceptionMessage = exception.getMessage();
+        String errorMessage = (exceptionMessage != null && !exceptionMessage.isEmpty()) ? exceptionMessage : constant.commitFailed();
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
-        notificationManager.notify(constant.commitFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
+        notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, true, appContext.getCurrentProject().getRootProject());
     }
 
     /** {@inheritDoc} */
@@ -275,8 +277,9 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
     @Override
     public void setAmendCommitMessage() {
+        final ProjectConfigDto project = appContext.getCurrentProject().getRootProject();
         final Unmarshallable<LogResponse> unmarshall = dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class);
-        this.service.log(workspaceId, appContext.getCurrentProject().getRootProject(), null, false,
+        this.service.log(workspaceId, project, null, false,
                          new AsyncRequestCallback<LogResponse>(unmarshall) {
                              @Override
                              protected void onSuccess(final LogResponse result) {
@@ -294,8 +297,15 @@ public class CommitPresenter implements CommitView.ActionDelegate {
 
                              @Override
                              protected void onFailure(final Throwable exception) {
-                                 Log.warn(CommitPresenter.class, "Git log failed", exception);
-                                 CommitPresenter.this.view.setMessage("");
+                                 if (getErrorCode(exception) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                                     dialogFactory.createMessageDialog(constant.commitTitle(),
+                                                                       constant.initCommitWasNotPerformed(),
+                                                                       null).show();
+                                 } else {
+                                     Log.warn(CommitPresenter.class, "Git log failed", exception);
+                                     CommitPresenter.this.view.setMessage("");
+                                     notificationManager.notify(constant.logFailed(), FAIL, false, project);
+                                 }
                              }
                          });
     }

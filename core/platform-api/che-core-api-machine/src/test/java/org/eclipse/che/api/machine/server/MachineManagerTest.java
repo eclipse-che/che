@@ -22,6 +22,7 @@ import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -39,6 +40,8 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -122,7 +125,10 @@ public class MachineManagerTest {
                                                             "@name!",
                                                             "machineType",
                                                             new MachineSourceImpl("Recipe", "location"),
-                                                            new LimitsImpl(1024));
+                                                            new LimitsImpl(1024),
+                                                            Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                                          new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                            Collections.singletonMap("key1", "value1"));
         String workspaceId = "wsId";
         String environmentName = "env1";
 
@@ -132,8 +138,10 @@ public class MachineManagerTest {
     @Test
     public void shouldBeAbleToCreateMachineWithValidName() throws Exception {
         String expectedName = "validMachineName";
-        final MachineConfigImpl machineConfig = createMachineConfig();
-        machineConfig.setName(expectedName);
+        final MachineConfigImpl machineConfig = MachineConfigImpl.builder()
+                                                                 .fromConfig(createMachineConfig())
+                                                                 .setName(expectedName)
+                                                                 .build();
         MachineImpl expectedMachine = new MachineImpl(machineConfig,
                                                       MACHINE_ID,
                                                       WS_ID,
@@ -149,8 +157,10 @@ public class MachineManagerTest {
 
     @Test
     public void shouldCallWsAgentLauncherAfterDevMachineStart() throws Exception {
-        final MachineConfigImpl machineConfig = createMachineConfig();
-        machineConfig.setDev(true);
+        final MachineConfigImpl machineConfig = MachineConfigImpl.builder()
+                                                                 .fromConfig(createMachineConfig())
+                                                                 .setDev(true)
+                                                                 .build();
 
         manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME);
 
@@ -177,6 +187,9 @@ public class MachineManagerTest {
                                      "MachineName",
                                      "docker",
                                      new MachineSourceImpl("Recipe", "location"),
-                                     new LimitsImpl(1024));
+                                     new LimitsImpl(1024),
+                                     Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                   new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                     Collections.singletonMap("key1", "value1"));
     }
 }

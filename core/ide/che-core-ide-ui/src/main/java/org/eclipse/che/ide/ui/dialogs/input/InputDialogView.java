@@ -55,6 +55,12 @@ public interface InputDialogView {
     /** Hide the validation error message. */
     void hideErrorHint();
 
+    /** Returns {@code true} if OK button is in the focus and {@code false} - otherwise. */
+    boolean isOkButtonInFocus();
+
+    /** Returns {@code true} if Cancel button is in the focus and {@code false} - otherwise. */
+    boolean isCancelButtonInFocus();
+
     /** The interface for the action delegate. */
     public interface ActionDelegate {
 

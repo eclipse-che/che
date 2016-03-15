@@ -58,6 +58,9 @@ public interface MachineResources extends ClientBundle {
     @Source("images/process/terminal-tree-icon.svg")
     SVGResource terminalTreeIcon();
 
+    @Source("images/process/add-terminal.svg")
+    SVGResource addTerminalIcon();
+
     /** Returns the icon for 'Custom' command type. */
     @Source("command/arbitrary/custom-command-type.svg")
     SVGResource customCommandType();
@@ -66,7 +69,7 @@ public interface MachineResources extends ClientBundle {
     SVGResource projectPerspective();
 
     @Source("images/machine-perspective.svg")
-    SVGResource machinePerspective();
+    SVGResource operationsPerspective();
 
     @Source("images/machines-part-icon.svg")
     SVGResource machinesPartIcon();

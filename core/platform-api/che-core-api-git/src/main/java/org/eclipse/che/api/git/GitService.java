@@ -52,7 +52,7 @@ import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -87,7 +87,7 @@ public class GitService {
     private GitConnectionFactory gitConnectionFactory;
 
     @Inject
-    private ProjectManager projectManager;
+    private ProjectRegistry projectRegistry;
 
     @Inject
     private GitUrlResolver gitUrlResolver;
@@ -233,6 +233,7 @@ public class GitService {
         try (GitConnection gitConnection = getGitConnection()) {
             gitConnection.init(request);
         }
+        projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
     }
 
     @Path("log")
@@ -421,7 +422,7 @@ public class GitService {
     @Produces(MediaType.TEXT_PLAIN)
     @GET
     public String readOnlyGitUrlTextPlain(@Context UriInfo uriInfo) throws ApiException {
-        final RegisteredProject project = projectManager.getProject(projectPath);
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
         if (project.getBaseFolder().getChildFolder(".git") != null) {
             return gitUrlResolver.resolve(uriInfo.getBaseUri(), getAbsoluteProjectPath(projectPath));
         } else {
@@ -433,7 +434,7 @@ public class GitService {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public SourceStorageDto importDescriptor(@Context UriInfo uriInfo) throws ApiException {
-        final RegisteredProject project = projectManager.getProject(projectPath);
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
         if (project.getBaseFolder().getChildFolder(".git") != null) {
             try (GitConnection gitConnection = getGitConnection()) {
                 return DtoFactory.getInstance().createDto(SourceStorageDto.class)
@@ -458,13 +459,14 @@ public class GitService {
     @GET
     @Path("delete-repository")
     public void deleteRepository(@Context UriInfo uriInfo) throws ApiException {
-        final RegisteredProject project = projectManager.getProject(projectPath);
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
         final FolderEntry gitFolder = project.getBaseFolder().getChildFolder(".git");
         gitFolder.getVirtualFile().delete();
+        projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
     }
 
     private String getAbsoluteProjectPath(String wsRelatedProjectPath) throws ApiException {
-        final RegisteredProject project = projectManager.getProject(wsRelatedProjectPath);
+        final RegisteredProject project = projectRegistry.getProject(wsRelatedProjectPath);
         return project.getBaseFolder().getVirtualFile().toIoFile().getAbsolutePath();
     }
 

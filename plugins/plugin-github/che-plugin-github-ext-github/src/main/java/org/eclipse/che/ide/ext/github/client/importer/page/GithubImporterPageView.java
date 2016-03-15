@@ -66,24 +66,42 @@ public interface GithubImporterPageView extends View<GithubImporterPageView.Acti
     }
 
     /**
-     * Show the name error.
+     * Marks URL field containing valid value.
      */
-    void showNameError();
+    void markURLValid();
 
     /**
-     * Hide the name error.
+     * Marks URL field containing invalid value.
      */
-    void hideNameError();
+    void markURLInvalid();
 
     /**
-     * Show URL error.
+     * Removes mark from URL field.
      */
-    void showUrlError(@NotNull String message);
+    void unmarkURL();
 
     /**
-     * Hide URL error.
+     * Displays error message under URL field.
+     *
+     * @param message
+     *         message
      */
-    void hideUrlError();
+    void setURLErrorMessage(@NotNull String message);
+
+    /**
+     * Marks name field containing valid value.
+     */
+    void markNameValid();
+
+    /**
+     * Marks name field containing invalid value.
+     */
+    void markNameInvalid();
+
+    /**
+     * Removes mark from Name field.
+     */
+    void unmarkName();
 
     /**
      * Set the project's URL.

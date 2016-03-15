@@ -1457,4 +1457,12 @@ public interface Theme {
     String toolButtonHoverBoxShadow();
     String toolButtonActiveBoxShadow();
 
+    /********************************************************************************************
+     *
+     * Git output console
+     *
+     ********************************************************************************************/
+    String gitConsoleStagedFilesColor();
+    String gitConsoleUnstagedFilesColor();
+    String gitConsoleErrorColor();
 }

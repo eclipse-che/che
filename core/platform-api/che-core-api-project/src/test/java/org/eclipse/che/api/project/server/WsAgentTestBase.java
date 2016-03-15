@@ -63,7 +63,7 @@ public class WsAgentTestBase {
 
     protected EventService eventService;
 
-    protected ProjectRegistryImpl projectRegistry;
+    protected ProjectRegistry projectRegistry;
 
     protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
@@ -109,7 +109,7 @@ public class WsAgentTestBase {
 
         this.eventService = new EventService();
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
         this.importerRegistry = new ProjectImporterRegistry(new HashSet<>());

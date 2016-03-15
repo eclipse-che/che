@@ -14,6 +14,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.model.machine.ServerConf;
+
 /**
  * Module for components that are needed for {@link DockerInstanceProvider}
  *
@@ -37,8 +39,8 @@ public class DockerMachineModule extends AbstractModule {
                                                             .permitDuplicates();
 
         Multibinder<ServerConf> devMachineServers = Multibinder.newSetBinder(binder(),
-                                                                          ServerConf.class,
-                                                                          Names.named("machine.docker.dev_machine.machine_servers"));
+                                                                             ServerConf.class,
+                                                                             Names.named("machine.docker.dev_machine.machine_servers"));
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.machine_servers"));

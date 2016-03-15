@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -65,6 +66,16 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
     void setLimits(LimitsDto limits);
 
     MachineConfigDto withLimits(LimitsDto limits);
+
+    @Override
+    List<ServerConfDto> getServers();
+
+    MachineConfigDto withServers(List<ServerConfDto> servers);
+
+    @Override
+    Map<String, String> getEnvVariables();
+
+    MachineConfigDto withEnvVariables(Map<String, String> envVariables);
 
     @Override
     MachineConfigDto withLinks(List<Link> links);

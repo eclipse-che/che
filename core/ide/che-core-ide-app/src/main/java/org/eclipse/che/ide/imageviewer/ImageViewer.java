@@ -25,6 +25,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
+import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
@@ -164,7 +165,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
 
     /** {@inheritDoc} */
     @Override
-    protected void initializeEditor() {
+    protected void initializeEditor(OpenEditorCallback callback) {
     }
 
     /** {@inheritDoc} */

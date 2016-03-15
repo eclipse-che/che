@@ -12,7 +12,8 @@ package org.eclipse.che.ide.extension.maven.server.projecttype.handler;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistryImpl;
+import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -35,10 +36,12 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -85,9 +88,9 @@ public class MavenProjectResolverTest {
             "</project>";
 
 
-    private File                rootDirectory;
-    private VirtualFile         root;
-    private ProjectRegistryImpl projectRegistry;
+    private File            rootDirectory;
+    private VirtualFile     root;
+    private ProjectRegistry projectRegistry;
 
 
     //    @Before
@@ -104,7 +107,7 @@ public class MavenProjectResolverTest {
         root = vfsProvider.getVirtualFileSystem().getRoot();
 
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, new ProjectHandlerRegistry(
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, new ProjectHandlerRegistry(
                 Collections.<ProjectHandler>emptySet()));
 
     }
@@ -172,6 +175,10 @@ public class MavenProjectResolverTest {
                             .withProjects(projects)));
         }
 
-
+        @Override
+        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
+            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
+            workspace.setProjects(persistedProjects);
+        }
     }
 }

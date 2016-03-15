@@ -45,21 +45,24 @@ public class GitValueProviderFactory implements ValueProviderFactory {
         return new ValueProvider() {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
-                try (GitConnection gitConnection = gitConnectionFactory.getConnection(resolveLocalPathByPath(folder))) {
+                try (GitConnection gitConnection = gitConnectionFactory.getConnection(resolveLocalPath(folder))) {
                     //check whether the folder belongs to git repository
                     if (!gitConnection.isInsideWorkTree()) {
-                        return Collections.EMPTY_LIST;
+                        return Collections.emptyList();
                     }
+
                     switch (attributeName) {
                         case VCS_PROVIDER_NAME:
                             return Collections.singletonList("git");
                         case GIT_CURRENT_BRANCH_NAME:
                             return Collections.singletonList(gitConnection.status(StatusFormat.LONG).getBranchName());
                         case GIT_REPOSITORY_REMOTES:
-                            return gitConnection.remoteList(newDto(RemoteListRequest.class)).stream().map(Remote::getUrl)
+                            return gitConnection.remoteList(newDto(RemoteListRequest.class))
+                                                .stream()
+                                                .map(Remote::getUrl)
                                                 .collect(Collectors.toList());
                         default:
-                            return Collections.EMPTY_LIST;
+                            return Collections.emptyList();
                     }
                 } catch (ApiException e) {
                     throw new ValueStorageException(e.getMessage());
@@ -68,7 +71,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
         };
     }
 
-    private String resolveLocalPathByPath(FolderEntry folder) throws ApiException {
+    private String resolveLocalPath(FolderEntry folder) throws ApiException {
         return folder.getVirtualFile().toIoFile().getAbsolutePath();
     }
 }

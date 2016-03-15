@@ -215,7 +215,7 @@ public class GitProjectImporter implements ProjectImporter {
     }
 
     private void initRepository(GitConnection git, DtoFactory dtoFactory) throws GitException {
-        final InitRequest request = dtoFactory.createDto(InitRequest.class).withInitCommit(false).withBare(false);
+        final InitRequest request = dtoFactory.createDto(InitRequest.class).withBare(false);
         git.init(request);
     }
 
@@ -280,7 +280,8 @@ public class GitProjectImporter implements ProjectImporter {
                 eventService.publish(checkout.withCheckoutOnly(true)
                                              .withBranchRef(getRemoteBranch(dtoFactory, git, branchName)));
             } else {
-                checkoutAndRethrow(git, request.withCreateNew(true).withStartPoint(startPoint), FAILED_CHECKOUT_WITH_START_POINT);
+                checkoutAndRethrow(git, request.withCreateNew(true).withStartPoint(startPoint).withNoTrack(true),
+                                   FAILED_CHECKOUT_WITH_START_POINT);
                 eventService.publish(checkout.withCheckoutOnly(false));
             }
         } else {

@@ -14,6 +14,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -45,6 +46,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -203,6 +205,7 @@ public class EmbeddedTextEditorPresenterTest {
         ArgumentCaptor<EditorInitCallback> callBackCaptor = ArgumentCaptor.forClass(EditorInitCallback.class);
         ArgumentCaptor<WidgetInitializedCallback> widgetInitializedCallbackCaptor =
                 ArgumentCaptor.forClass(WidgetInitializedCallback.class);
+        final EditorAgent.OpenEditorCallback editorCallback = mock(EditorAgent.OpenEditorCallback.class);
 
         doReturn(loader).when(loaderFactory).newLoader();
         doReturn(editorWidget).when(editorWidgetFactory).createEditorWidget(Matchers.<List<String>>anyObject(),
@@ -211,7 +214,7 @@ public class EmbeddedTextEditorPresenterTest {
 
         embeddedTextEditorPresenter.injectAsyncLoader(loaderFactory);
         embeddedTextEditorPresenter.initialize(configuration, notificationManager);
-        embeddedTextEditorPresenter.init(editorInput);
+        embeddedTextEditorPresenter.init(editorInput, editorCallback);
 
         verify(documentStorage).getDocument(any(VirtualFile.class), callBackCaptor.capture());
 

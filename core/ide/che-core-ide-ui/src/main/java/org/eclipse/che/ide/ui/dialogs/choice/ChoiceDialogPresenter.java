@@ -11,9 +11,11 @@
 package org.eclipse.che.ide.ui.dialogs.choice;
 
 import javax.validation.constraints.NotNull;
+
 import org.eclipse.che.commons.annotation.Nullable;
 
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
@@ -21,7 +23,7 @@ import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * {@link ChoiceDialog} implementation.
- * 
+ *
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
@@ -48,8 +50,8 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
                                  final @Nullable @Assisted("firstCallback") ConfirmCallback firstChoiceCallback,
                                  final @Nullable @Assisted("secondCallback") ConfirmCallback secondChoiceCallback) {
         this(view, title, new InlineHTML(message),
-                firstChoiceLabel, secondChoiceLabel, "",
-                firstChoiceCallback, secondChoiceCallback, null);
+             firstChoiceLabel, secondChoiceLabel, "",
+             firstChoiceCallback, secondChoiceCallback, null);
     }
 
     @AssistedInject
@@ -61,8 +63,8 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
                                  final @Nullable @Assisted("firstCallback") ConfirmCallback firstChoiceCallback,
                                  final @Nullable @Assisted("secondCallback") ConfirmCallback secondChoiceCallback) {
         this(view, title, content,
-                firstChoiceLabel, secondChoiceLabel, "",
-                firstChoiceCallback, secondChoiceCallback, null);
+             firstChoiceLabel, secondChoiceLabel, "",
+             firstChoiceCallback, secondChoiceCallback, null);
     }
 
     @AssistedInject
@@ -76,8 +78,8 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
                                  final @Nullable @Assisted("secondCallback") ConfirmCallback secondChoiceCallback,
                                  final @Nullable @Assisted("thirdCallback") ConfirmCallback thirdChoiceCallback) {
         this(view, title, new InlineHTML(message),
-                firstChoiceLabel, secondChoiceLabel, thirdChoiceLabel,
-                firstChoiceCallback, secondChoiceCallback, thirdChoiceCallback);
+             firstChoiceLabel, secondChoiceLabel, thirdChoiceLabel,
+             firstChoiceCallback, secondChoiceCallback, thirdChoiceCallback);
     }
 
     @AssistedInject
@@ -123,6 +125,23 @@ public class ChoiceDialogPresenter implements ChoiceDialog, ChoiceDialogView.Act
         this.view.closeDialog();
         if (this.thirdChoiceCallback != null) {
             this.thirdChoiceCallback.accepted();
+        }
+    }
+
+    @Override
+    public void onEnterClicked() {
+        if (view.isFirstButtonInFocus()) {
+            firstChoiceClicked();
+            return;
+        }
+
+        if (view.isSecondButtonInFocus()) {
+            secondChoiceClicked();
+            return;
+        }
+
+        if (view.isThirdButtonInFocus()) {
+            thirdChoiceClicked();
         }
     }
 

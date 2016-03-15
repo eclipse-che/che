@@ -50,7 +50,7 @@ public class ProjectBecomeMavenHandler implements ProjectInitHandler {
     }
 
     @Override
-    public void onProjectInitialized(FolderEntry projectFolder)
+    public void onProjectInitialized(ProjectRegistry projectRegistry, FolderEntry projectFolder)
             throws ServerException, ForbiddenException, ConflictException, NotFoundException {
 
         IProject project = provider.get().getRoot().getProject(projectFolder.getPath().toString());

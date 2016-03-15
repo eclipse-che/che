@@ -1,15 +1,10 @@
 # Eclipse Che
 [![Join the chat at https://gitter.im/eclipse/che](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/eclipse/che?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/ro78pmwomlklkwbo?svg=true)](https://ci.appveyor.com/project/codenvy/che)
-
 [![Eclipse License](http://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/codenvy/che/blob/master/LICENSE)
-[![latest 3.x](https://img.shields.io/badge/latest stable-3.x-green.svg)](https://github.com/codenvy/che/tree/3.x)
-[![latest 4.x](https://img.shields.io/badge/latest dev-4.x-yellowgreen.svg)](https://github.com/codenvy/che/tree/master)
+[![Build Status](http://ci.codenvy-dev.com/jenkins/buildStatus/icon?job=che-ci-master)](http://ci.codenvy-dev.com/jenkins/job/che-ci-master)
 
 
-
-https://www.eclipse.org/che/
-Next-generation Eclipse IDE. Open source workspace server and cloud IDE.
+https://www.eclipse.org/che/. Next-generation Eclipse IDE. Open source workspace server and cloud IDE.
 
 ![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
 
@@ -51,17 +46,44 @@ If master is unstable, checkout the latest tagged version.
 
 ### Build and Run
 ```sh
-cd che
+cd che/assembly
 mvn clean install
 
-# A new assembly is packaged into:
-cd /assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
+# A new assembly is placed in:
+cd che/assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
 
 # Executable files are:
 bin/che.sh
 bin/che.bat
 ```
 Che will be available at ```localhost:8080```.
+
+### Build Submodules
+Building `/assembly` pulls already-built libraries for `core`, `plugins`, and `/dashboard` from our Nexus repository.
+
+To build core:
+```sh
+# Install maven-patch-plugin as an additional dependency.
+cd che/core
+
+# Windows: maven-patch-plugin does not work, so skip tests when building:
+# See: https://maven.apache.org/plugins/maven-patch-plugin/faq.html#Why_doesnt_this_work_on_Windows
+mvn -DskipTests=true -Dfindbugs.skip=true  -Dskip-validate-sources clean install
+```
+
+To build plugins:
+```sh
+cd che/plugins
+mvn clean install
+```
+
+To build dashboard:
+```sh
+# You need NPM, Bower, and Gulp intsalled.
+# See setup in /dashboard
+cd che/dashboard
+mvn clean install
+```
 
 ### Run Che as a Server
 If you want to run Che as a server where non-localhost clients connect, there are additional flags that you may need to configure. Please see the [usage documentation](https://eclipse-che.readme.io/docs/usage).

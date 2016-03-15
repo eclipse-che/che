@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.importer.page;
 
+import com.google.common.base.Strings;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -44,6 +45,8 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
     private GitLocalizationConstant locale;
     private GitImporterPageView     view;
 
+    private boolean                 ignoreChanges;
+
     @Inject
     public GitImporterPagePresenter(GitImporterPageView view,
                                     GitLocalizationConstant locale) {
@@ -59,6 +62,10 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
 
     @Override
     public void projectNameChanged(@NotNull String name) {
+        if (ignoreChanges) {
+            return;
+        }
+
         dataObject.setName(name);
         updateDelegate.updateControls();
 
@@ -67,14 +74,18 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
 
     private void validateProjectName() {
         if (NameUtils.checkProjectName(view.getProjectName())) {
-            view.hideNameError();
+            view.markNameValid();
         } else {
-            view.showNameError();
+            view.markNameInvalid();
         }
     }
 
     @Override
     public void projectUrlChanged(@NotNull String url) {
+        if (ignoreChanges) {
+            return;
+        }
+
         dataObject.getSource().setLocation(url);
         isGitUrlCorrect(url);
 
@@ -166,6 +177,14 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
     public void go(@NotNull AcceptsOneWidget container) {
         container.setWidget(view);
 
+        if (Strings.isNullOrEmpty(dataObject.getName()) && Strings.isNullOrEmpty(dataObject.getSource().getLocation())) {
+            ignoreChanges = true;
+
+            view.unmarkURL();
+            view.unmarkName();
+            view.setURLErrorMessage(null);
+        }
+
         view.setProjectName(dataObject.getName());
         view.setProjectDescription(dataObject.getDescription());
         view.setProjectUrl(dataObject.getSource().getLocation());
@@ -180,6 +199,8 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
 
         view.setInputsEnableState(true);
         view.focusInUrlInput();
+
+        ignoreChanges = false;
     }
 
     /** Gets project name from uri. */
@@ -193,6 +214,7 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
         if (indexStartProjectName != 0) {
             return uri.substring(indexStartProjectName);
         }
+
         return "";
     }
 
@@ -205,26 +227,38 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
      */
     private boolean isGitUrlCorrect(@NotNull String url) {
         if (WHITE_SPACE.test(url)) {
-            view.showUrlError(locale.importProjectMessageStartWithWhiteSpace());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageStartWithWhiteSpace());
             return false;
         }
+
         if (SCP_LIKE_SYNTAX.test(url)) {
-            view.hideUrlError();
+            view.markURLValid();
+            view.setURLErrorMessage(null);
             return true;
         }
+
         if (!PROTOCOL.test(url)) {
-            view.showUrlError(locale.importProjectMessageProtocolIncorrect());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageProtocolIncorrect());
             return false;
         }
+
         if (!(HOST1.test(url) || HOST2.test(url))) {
-            view.showUrlError(locale.importProjectMessageHostIncorrect());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageHostIncorrect());
             return false;
         }
+
         if (!(REPO_NAME.test(url))) {
-            view.showUrlError(locale.importProjectMessageNameRepoIncorrect());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageNameRepoIncorrect());
             return false;
         }
-        view.hideUrlError();
+
+        view.markURLValid();
+        view.setURLErrorMessage(null);
         return true;
     }
+
 }

@@ -594,6 +594,8 @@ public class AccountServiceTest {
                                                                                                     "type",
                                                                                                     new MachineSourceImpl("type",
                                                                                                                           "location"),
+                                                                                                    null,
+                                                                                                    null,
                                                                                                     null)));
         return new UsersWorkspaceImpl(new WorkspaceConfigImpl("name",
                                                               "desc",

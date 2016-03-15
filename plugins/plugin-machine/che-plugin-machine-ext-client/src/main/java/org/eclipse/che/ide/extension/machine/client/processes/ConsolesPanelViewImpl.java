@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes;
 
+import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
@@ -162,15 +163,7 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
             @Override
             public void onNodeSelected(TreeNodeElement<ProcessTreeNode> node, SignalEvent event) {
-                ProcessTreeNode.ProcessNodeType type = node.getData().getType();
-                switch (type) {
-                    case COMMAND_NODE:
-                        delegate.onCommandSelected(node.getData().getId());
-                        break;
-                    case TERMINAL_NODE:
-                        delegate.onTerminalSelected(node.getData().getId());
-                        break;
-                }
+                delegate.onTreeNodeSelected(node.getData());
             }
 
             @Override
@@ -290,19 +283,25 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     }
 
     @Override
-    public void selectNode(@NotNull ProcessTreeNode node) {
+    public void selectNode(final @NotNull ProcessTreeNode node) {
         SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
         if (node == null) {
             selectionModel.clearSelections();
-            return;
+        } else {
+            selectionModel.setTreeActive(true);
+            selectionModel.clearSelections();
+            selectionModel.selectSingleNode(node);
+
+            node.getTreeNodeElement().scrollIntoView();
         }
 
-        selectionModel.setTreeActive(true);
-        selectionModel.clearSelections();
-        selectionModel.selectSingleNode(node);
-
-        node.getTreeNodeElement().scrollIntoView();
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                delegate.onTreeNodeSelected(node);
+            }
+        });
     }
 
     @Override

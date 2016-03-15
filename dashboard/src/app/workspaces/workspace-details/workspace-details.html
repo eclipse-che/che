@@ -65,7 +65,7 @@
             </label>
             <div layout="column" flex="85">
               <che-button-danger che-button-title="Delete"
-                                 ng-disabled="workspaceDetailsCtrl.workspaceDetails.status === 'STARTING' || workspaceDetailsCtrl.workspaceDetails.status === 'STOPPING'"
+                                 ng-disabled="!(workspaceDetailsCtrl.workspaceDetails.status === 'RUNNING' || workspaceDetailsCtrl.workspaceDetails.status === 'STOPPED')"
                                  ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"></che-button-danger>
             </div>
           </div>

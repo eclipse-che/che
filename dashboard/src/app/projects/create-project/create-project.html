@@ -11,228 +11,249 @@
 
 -->
 <che-toolbar che-title="New Project">
-    <div ng-show="createProjectCtrl.isCreateProjectInProgress() && createProjectCtrl.getCurrentProgressStep() !== (createProjectCtrl.getCreationSteps().length - 1)">
-        <a class="create-project-minimize-icon che-toolbar-control-button material-design icon-ic_picture_in_picture_24px"
-                             ng-href="#/projects"
-                             ng-click="createProjectCtrl.hideCreateProjectPanel()"></a>
-    </div>
+  <div
+    ng-show="createProjectCtrl.isCreateProjectInProgress() && createProjectCtrl.getCurrentProgressStep() !== (createProjectCtrl.getCreationSteps().length - 1)">
+    <a class="create-project-minimize-icon che-toolbar-control-button material-design icon-ic_picture_in_picture_24px"
+       ng-href="#/projects"
+       ng-click="createProjectCtrl.hideCreateProjectPanel()"></a>
+  </div>
 </che-toolbar>
 
 <div ng-hide="createProjectCtrl.isCreateProjectInProgress()" id="create-project-header-steps" flex class="create-project-header-steps">
-    <div class="create-project-header-steps-panel" layout="row" layout-wrap layout-align="center center">
-        <div layout="row" layout-wrap>
-            <div ng-repeat="step in createProjectCtrl.headerSteps" layout="row" layout-align="center center">
-                <div class="create-project-header-steps-step" ng-class="{'create-project-header-steps-step-active' : (createProjectCtrl.isElementVisible($index))}" layout="row" layout-align="center center">
-                    <div class="create-project-header-steps-step-title">{{step.name}}</div>
-                </div>
-                <div class="create-project-header-steps-link" ng-class="{'create-project-header-steps-link-active' : (createProjectCtrl.isElementVisible($index + 1))}" ng-hide="$last">
+  <div class="create-project-header-steps-panel" layout="row" layout-wrap layout-align="center center">
+    <div layout="row" layout-wrap>
+      <div ng-repeat="step in createProjectCtrl.headerSteps" layout="row" layout-align="center center">
+        <div class="create-project-header-steps-step"
+             ng-class="{'create-project-header-steps-step-active' : (createProjectCtrl.isElementVisible($index))}" layout="row"
+             layout-align="center center">
+          <div class="create-project-header-steps-step-title">{{step.name}}</div>
+        </div>
+        <div class="create-project-header-steps-link"
+             ng-class="{'create-project-header-steps-link-active' : (createProjectCtrl.isElementVisible($index + 1))}" ng-hide="$last">
 
-                </div>
-            </div>
         </div>
-        <div flex class="create-project-header-steps-button" layout="row" layout-align="end end">
-            <che-button-primary che-button-title="Create"
-                                 ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
-                                 ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
-                    ></che-button-primary>
-        </div>
+      </div>
     </div>
+    <div flex class="create-project-header-steps-button" layout="row" layout-align="end end">
+      <che-button-primary che-button-title="Create"
+                          ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
+                          ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
+        ></che-button-primary>
+    </div>
+  </div>
 </div>
-
 
 
 <md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
                     ng-hide="createProjectCtrl.stacksInitialized"></md-progress-linear>
 
-<md-content id="create-project-content-page" md-scroll-y flex class="projects-create-project" ng-show="createProjectCtrl.stacksInitialized" md-theme="maincontent-theme">
-    <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
+<md-content id="create-project-content-page" md-scroll-y flex class="projects-create-project" ng-show="createProjectCtrl.stacksInitialized"
+            md-theme="maincontent-theme">
+  <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
 
 
-        <div id="create-project-panel" class="create-project-progress-panel" >
-
-            <div class="create-project-progress-panel-top" style="background-image: url('assets/images/bg-intermediate-screen.svg')">
-                <div class="create-project-progress-widget-progress" layout-align="center center" class="progress-global" layout="row">
-                    <md-icon ng-hide="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)" md-svg-src="assets/images/loader.svg" class="create-project-progress-loader-icon" aria-label="loader"></md-icon>
-                </div>
-
-                <div layout="column" class="create-project-panel-progress-title" layout-align="center center">
-                    <div class="create-project-panel-progress-counter" ng-show="createProjectCtrl.getCurrentProgressStep() < (createProjectCtrl.getCreationSteps().length - 1)">{{createProjectCtrl.getCurrentProgressStep() + 1}} / {{createProjectCtrl.getCreationSteps().length - 1}}</div>
-                    <div>{{createProjectCtrl.projectName}} : {{createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].text}}</div>
-                </div>
-            </div>
-            <div class="create-project-progress-panel-bottom">
-                <div ng-repeat="step in createProjectCtrl.getCreationSteps()">
-                    <div ng-if="$index < (createProjectCtrl.getCreationSteps().length - 1)"
-                         class="create-project-panel-progress-items"
-                         ng-class="{'create-project-panel-progress-items-enabled' : (createProjectCtrl.getCurrentProgressStep() >= $index), 'create-project-panel-progress-items-error' : createProjectCtrl.getCreationSteps()[$index].hasError}"
-                         >
-                        <div  layout="row" layout-align="start center">
-                            <div class="create-project-panel-progress-item-number" ng-class="{'create-project-panel-progress-item-number-in-progress' : (createProjectCtrl.getCurrentProgressStep() === $index && !createProjectCtrl.getCreationSteps()[$index].hasError)}">{{$index + 1}}</div>
-                            <div flex>{{createProjectCtrl.getStepText($index)}}</div>
-                            <che-button-danger ng-show="createProjectCtrl.getCreationSteps()[$index].hasError"
-                                    che-button-title="Retry" ng-click="createProjectCtrl.resetCreateProgress()" ></che-button-danger>
-                        </div>
-                    </div>
-                    <div ng-if="$index < (createProjectCtrl.getCreationSteps().length - 1)" layout="row">
-                        <div ng-class="{'create-project-panel-progress-item-link-enabled' : (createProjectCtrl.getCurrentProgressStep() > $index), 'create-project-panel-progress-item-link-error' : createProjectCtrl.getCreationSteps()[$index].hasError}"
-                             class="create-project-panel-progress-item-link">&nbsp;</div>
-                        <textarea che-auto-scroll ng-show="createProjectCtrl.getCreationSteps()[$index].logs.length > 0" flex class="create-project-panel-progress-item-output" rows="5" ng-model="createProjectCtrl.getCreationSteps()[$index].logs"></textarea>
-                    </div>
-                </div>
-                <div ng-class="{'create-project-panel-progress-lastitem-enabled' : (createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)), 'create-project-panel-progress-lastitem-error' : createProjectCtrl.getCreationSteps()[$index].hasError}"
-                     class="create-project-panel-progress-lastitem" layout="row">
-                    <div layout="column" flex layout-align="start start">
-                        <che-button-notice ng-show="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
-                                            che-button-title="Add another project" ng-click="createProjectCtrl.resetCreateNewProject()"></che-button-notice>
-                    </div>
-                    &nbsp;
-                    <div layout="column" flex layout-align="start end">
-                        <che-button-primary ng-show="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
-                                             ng-href="{{createProjectCtrl.getIDELink()}}"
-                                             ng-click="createProjectCtrl.resetCreateNewProject()"
-                                             class="che-hover create-project-details-arrow"
-                                             che-button-icon="fa fa-chevron-circle-right"
-                                             che-button-title="Open project in IDE"></che-button-primary>
-                    </div>
-                </div>
-            </div>
-
-
+    <div id="create-project-panel" class="create-project-progress-panel">
+      <div class="create-project-progress-panel-top">
+        <div class="create-project-progress-widget-progress" layout-align="center center" class="progress-global" layout="row">
+          <md-icon ng-hide="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
+                   md-svg-src="assets/images/loader.svg" class="create-project-progress-loader-icon" aria-label="loader"></md-icon>
         </div>
-    </div>
 
-    <div ng-hide="createProjectCtrl.isCreateProjectInProgress()">
-
-
-
-        <che-panel id="create-project-source-id" che-title="Select Source" che-tooltip="Choose where the initial source code for this project will come from. The choice of templates and samples will vary by the stack chosen.">
-            <md-radio-group ng-model="createProjectCtrl.selectSourceOption">
-                <md-radio-button value="select-source-new">New from blank, template, or sample project</md-radio-button>
-                <md-radio-button value="select-source-existing">Import from existing location</md-radio-button>
-            </md-radio-group>
-
-
-            <div ng-show="createProjectCtrl.selectSourceOption === 'select-source-existing'">
-                <md-tabs md-stretch-tabs="always" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
-                    <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')" che-event-logger="new.project/git">
-                        <md-tab-label>
-                            <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
-                            <span class="che-tab-label-title">Git Repository</span>
-                        </md-tab-label>
-                        <md-tab-body>
-                            <create-project-git class="projects-create-project-tab" layout="column"></create-project-git>
-                        </md-tab-body>
-                    </md-tab>
-                    <md-tab md-on-select="createProjectCtrl.setCurrentTab('github')" che-event-logger="new.project/github">
-                        <md-tab-label>
-                            <md-icon md-font-icon="fa-github" class="fa che-tab-label-icon"></md-icon>
-                            <span class="che-tab-label-title">Github</span>
-                        </md-tab-label>
-                        <md-tab-body>
-                            <create-project-github class="projects-create-project-tab" layout="column"></create-project-github>
-                        </md-tab-body>
-                    </md-tab>
-                    <md-tab md-on-select="createProjectCtrl.setCurrentTab('zip')" che-event-logger="new.project/zip">
-                        <md-tab-label>
-                            <md-icon md-font-icon="fa-file-archive-o" class="fa che-tab-label-icon"></md-icon>
-                            <span class="che-tab-label-title">Zip</span>
-                        </md-tab-label>
-                        <md-tab-body>
-                            <create-project-zip class="projects-create-project-tab" layout="column"></create-project-zip>
-                        </md-tab-body>
-                    </md-tab>
-                </md-tabs>
+        <div layout="column" class="create-project-panel-progress-title" layout-align="center center">
+          <div class="create-project-panel-progress-counter"
+               ng-show="createProjectCtrl.getCurrentProgressStep() < (createProjectCtrl.getCreationSteps().length - 1)">
+            {{createProjectCtrl.getCurrentProgressStep() + 1}} / {{createProjectCtrl.getCreationSteps().length - 1}}
+          </div>
+          <div>{{createProjectCtrl.projectName}} :
+            {{createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].text}}
+          </div>
+        </div>
+      </div>
+      <div class="create-project-progress-panel-bottom">
+        <div ng-repeat="step in createProjectCtrl.getCreationSteps()">
+          <div ng-if="$index < (createProjectCtrl.getCreationSteps().length - 1)"
+               class="create-project-panel-progress-items"
+               ng-class="{'create-project-panel-progress-items-enabled' : (createProjectCtrl.getCurrentProgressStep() >= $index), 'create-project-panel-progress-items-error' : createProjectCtrl.getCreationSteps()[$index].hasError}"
+            >
+            <div layout="row" layout-align="start center">
+              <div class="create-project-panel-progress-item-number"
+                   ng-class="{'create-project-panel-progress-item-number-in-progress' : (createProjectCtrl.getCurrentProgressStep() === $index && !createProjectCtrl.getCreationSteps()[$index].hasError)}">
+                {{$index + 1}}
+              </div>
+              <div flex>{{createProjectCtrl.getStepText($index)}}</div>
+              <che-button-danger ng-show="createProjectCtrl.getCreationSteps()[$index].hasError"
+                                 che-button-title="Retry" ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
             </div>
+          </div>
+          <div ng-if="$index < (createProjectCtrl.getCreationSteps().length - 1)" layout="row">
+            <div
+              ng-class="{'create-project-panel-progress-item-link-enabled' : (createProjectCtrl.getCurrentProgressStep() > $index), 'create-project-panel-progress-item-link-error' : createProjectCtrl.getCreationSteps()[$index].hasError}"
+              class="create-project-panel-progress-item-link">&nbsp;</div>
+            <textarea che-auto-scroll ng-show="createProjectCtrl.getCreationSteps()[$index].logs.length > 0" flex
+                      class="create-project-panel-progress-item-output" rows="5"
+                      ng-model="createProjectCtrl.getCreationSteps()[$index].logs"></textarea>
+          </div>
+        </div>
+        <div
+          ng-class="{'create-project-panel-progress-lastitem-enabled' : (createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)), 'create-project-panel-progress-lastitem-error' : createProjectCtrl.getCreationSteps()[$index].hasError}"
+          class="create-project-panel-progress-lastitem" layout="row">
+          <div layout="column" flex layout-align="start start">
+            <che-button-notice ng-show="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
+                               che-button-title="Add another project"
+                               ng-click="createProjectCtrl.resetCreateNewProject()"></che-button-notice>
+          </div>
+          &nbsp;
+          <div layout="column" flex layout-align="start end">
+            <che-button-primary ng-show="createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
+                                ng-href="{{createProjectCtrl.getIDELink()}}"
+                                ng-click="createProjectCtrl.resetCreateNewProject()"
+                                class="che-hover create-project-details-arrow"
+                                che-button-icon="fa fa-chevron-circle-right"
+                                che-button-title="Open project in IDE"></che-button-primary>
+          </div>
+        </div>
+      </div>
 
-        </che-panel>
-
-      <che-workspace-select-stack che-tab-name="tabName"
-                                   che-on-tab-change="createProjectCtrl.setStackTab(tabName)"
-                                   che-stack="stack"
-                                   che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
-                                   che-is-workspaces="true"
-                                   che-workspace="workspace"
-                                   che-workspace-change="createProjectCtrl.cheStackLibraryWorkspaceSelecter(workspace)"
-                                   che-recipe-script="createProjectCtrl.recipeScript"
-                                   che-recipe-url="createProjectCtrl.recipeUrl"></che-workspace-select-stack>
-
-        <che-panel id="create-project-workspace" che-title="Configure Workspace" che-panel-id="create-project-workspace" che-tooltip="A workspace contains projects and runtime environments. If your stack requires a new workspace, configure it here.">
-            <ng-form name="workspaceInformationForm">
-
-                <che-label-container che-label-name="Name">
-                    <che-input che-form="workspaceInformationForm"
-                                che-name="name"
-                                che-place-holder="Name of the workspace"
-                                ng-model="createProjectCtrl.workspaceName"
-                                required
-                                ng-minlength="3"
-                                ng-maxlength="20"
-                                ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-                        <div ng-message="required">A name is required.</div>
-                        <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin letters or underscores</div>
-                        <div ng-message="minlength">The name has to be more then 3 characters long.</div>
-                        <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-                    </che-input>
-                </che-label-container>
-                <che-workspace-ram-allocation-slider ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
-
-            </ng-form>
-        </che-panel>
-
-        <che-panel id="create-project-source-template" ng-show="createProjectCtrl.selectSourceOption === 'select-source-new'" che-title="Select Template" che-tooltip="Create new projects with templates configured by you using a wizard in the IDE.">
-            <md-radio-group ng-model="createProjectCtrl.templatesChoice">
-              <md-radio-button value="templates-samples">Ready-to-run project samples</md-radio-button>
-              <create-project-samples ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
-              <md-radio-button ng-if="createProjectCtrl.enableWizardProject" ng-click="createProjectCtrl.selectWizardProject()" value="templates-wizard">Wizard-driven templates</md-radio-button>
-            </md-radio-group>
-        </che-panel>
-
-        <ng-form name="projectInformationForm">
-            <che-panel che-title="Project Metadata" id="create-project-source-information"  ng-init="createProjectCtrl.setProjectInformationForm(projectInformationForm);" >
-
-                <che-input che-form="projectInformationForm"
-                            che-name="name"
-                            che-label-name="Name"
-                            che-place-holder="Name of the project"
-                            ng-change="createProjectCtrl.checkChangeableNameStatus()"
-                            ng-model="createProjectCtrl.projectName"
-                            required
-                            unique-project-name="createProjectCtrl.workspaceSelected"
-                            ng-maxlength="128"
-                            ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-                    <div ng-message="required">A name is required.</div>
-                    <div ng-message="uniqueProjectName">This project name is already used.</div>
-                    <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-                    <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-                    <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-                </che-input>
-                <div ng-show="createProjectCtrl.importProjectData.project.type && createProjectCtrl.importProjectData.project.type.length > 0">
-                    <che-input che-form="projectInformationForm"
-                                che-name="description"
-                                che-label-name="Description"
-                                che-place-holder="Description of the project"
-                                ng-change="createProjectCtrl.checkChangeableDescriptionStatus()"
-                                ng-model="createProjectCtrl.projectDescription"
-                                ng-maxlength="256">
-                        <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
-                        <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
-                    </che-input>
-                </div>
-
-            </che-panel>
-        </ng-form>
-
-
-
-        <che-button-primary id="create-project-button-import"
-                             che-button-title="Create Project"
-                             ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
-                             ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
-                             class="projects-create-project-button"
-                ></che-button-primary>
-
-        <div class="create-project-empty-space"></div>
 
     </div>
+  </div>
+
+  <div ng-hide="createProjectCtrl.isCreateProjectInProgress()">
+
+
+    <che-panel id="create-project-source-id" che-title="Select Source"
+               che-tooltip="Choose where the initial source code for this project will come from. The choice of templates and samples will vary by the stack chosen.">
+      <md-radio-group ng-model="createProjectCtrl.selectSourceOption">
+        <md-radio-button value="select-source-new">New from blank, template, or sample project</md-radio-button>
+        <md-radio-button value="select-source-existing">Import from existing location</md-radio-button>
+      </md-radio-group>
+
+
+      <div ng-show="createProjectCtrl.selectSourceOption === 'select-source-existing'">
+        <md-tabs md-stretch-tabs="always" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
+          <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')" che-event-logger="new.project/git">
+            <md-tab-label>
+              <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
+              <span class="che-tab-label-title">Git Repository</span>
+            </md-tab-label>
+            <md-tab-body>
+              <create-project-git class="projects-create-project-tab" layout="column"></create-project-git>
+            </md-tab-body>
+          </md-tab>
+          <md-tab md-on-select="createProjectCtrl.setCurrentTab('github')" che-event-logger="new.project/github">
+            <md-tab-label>
+              <md-icon md-font-icon="fa-github" class="fa che-tab-label-icon"></md-icon>
+              <span class="che-tab-label-title">Github</span>
+            </md-tab-label>
+            <md-tab-body>
+              <create-project-github class="projects-create-project-tab" layout="column"></create-project-github>
+            </md-tab-body>
+          </md-tab>
+          <md-tab md-on-select="createProjectCtrl.setCurrentTab('zip')" che-event-logger="new.project/zip">
+            <md-tab-label>
+              <md-icon md-font-icon="fa-file-archive-o" class="fa che-tab-label-icon"></md-icon>
+              <span class="che-tab-label-title">Zip</span>
+            </md-tab-label>
+            <md-tab-body>
+              <create-project-zip class="projects-create-project-tab" layout="column"></create-project-zip>
+            </md-tab-body>
+          </md-tab>
+        </md-tabs>
+      </div>
+
+    </che-panel>
+
+    <che-workspace-select-stack che-tab-name="tabName"
+                                che-on-tab-change="createProjectCtrl.setStackTab(tabName)"
+                                che-stack="stack"
+                                che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
+                                che-is-workspaces="true"
+                                che-workspace="workspace"
+                                che-workspace-change="createProjectCtrl.cheStackLibraryWorkspaceSelecter(workspace)"
+                                che-recipe-script="createProjectCtrl.recipeScript"
+                                che-recipe-url="createProjectCtrl.recipeUrl"></che-workspace-select-stack>
+
+    <che-panel id="create-project-workspace" che-title="Configure Workspace" che-panel-id="create-project-workspace"
+               che-tooltip="A workspace contains projects and runtime environments. If your stack requires a new workspace, configure it here.">
+      <ng-form name="workspaceInformationForm">
+
+        <che-label-container che-label-name="Name">
+          <che-input che-form="workspaceInformationForm"
+                     che-name="name"
+                     che-place-holder="Name of the workspace"
+                     ng-model="createProjectCtrl.workspaceName"
+                     required
+                     ng-minlength="3"
+                     ng-maxlength="20"
+                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+            <div ng-message="required">A name is required.</div>
+            <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin
+              letters or underscores
+            </div>
+            <div ng-message="minlength">The name has to be more then 3 characters long.</div>
+            <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+          </che-input>
+        </che-label-container>
+        <che-workspace-ram-allocation-slider ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
+
+      </ng-form>
+    </che-panel>
+
+    <che-panel id="create-project-source-template" ng-show="createProjectCtrl.selectSourceOption === 'select-source-new'"
+               che-title="Select Template" che-tooltip="Create new projects with templates configured by you using a wizard in the IDE.">
+      <md-radio-group ng-model="createProjectCtrl.templatesChoice">
+        <md-radio-button value="templates-samples">Ready-to-run project samples</md-radio-button>
+        <create-project-samples ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
+        <md-radio-button ng-if="createProjectCtrl.enableWizardProject" ng-click="createProjectCtrl.selectWizardProject()"
+                         value="templates-wizard">Wizard-driven templates
+        </md-radio-button>
+      </md-radio-group>
+    </che-panel>
+
+    <ng-form name="projectInformationForm">
+      <che-panel che-title="Project Metadata" id="create-project-source-information"
+                 ng-init="createProjectCtrl.setProjectInformationForm(projectInformationForm);">
+
+        <che-input che-form="projectInformationForm"
+                   che-name="name"
+                   che-label-name="Name"
+                   che-place-holder="Name of the project"
+                   ng-model="createProjectCtrl.projectName"
+                   required
+                   unique-project-name="createProjectCtrl.workspaceSelected"
+                   ng-maxlength="128"
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="uniqueProjectName">This project name is already used.</div>
+          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+        </che-input>
+        <div ng-show="createProjectCtrl.importProjectData.project.type && createProjectCtrl.importProjectData.project.type.length > 0">
+          <che-input che-form="projectInformationForm"
+                     che-name="description"
+                     che-label-name="Description"
+                     che-place-holder="Description of the project"
+                     ng-model="createProjectCtrl.projectDescription"
+                     ng-maxlength="256">
+            <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
+            <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
+          </che-input>
+        </div>
+
+      </che-panel>
+    </ng-form>
+
+
+    <che-button-primary id="create-project-button-import"
+                        che-button-title="Create Project"
+                        ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
+                        ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
+                        class="projects-create-project-button"
+      ></che-button-primary>
+
+    <div class="create-project-empty-space"></div>
+
+  </div>
 
 </md-content>

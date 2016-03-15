@@ -15,17 +15,19 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.AuthenticationService;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.notification.WSocketEventBusServer;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.local.LocalInfrastructureModule;
 import org.eclipse.che.api.machine.server.MachineModule;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
 import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
 import org.eclipse.che.api.machine.server.recipe.RecipeService;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader;
-import org.eclipse.che.api.project.server.template.ProjectTemplateRegistry;
 import org.eclipse.che.api.project.server.template.ProjectTemplateService;
 import org.eclipse.che.api.ssh.server.SshService;
 import org.eclipse.che.api.user.server.UserProfileService;
@@ -37,8 +39,8 @@ import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
 import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
+import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.docker.machine.ServerConf;
 import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
 import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
@@ -112,7 +114,7 @@ public class ApiModule extends AbstractModule {
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.dev_machine.machine_servers"));
-        machineServers.addBinding().toInstance(new ServerConf("extensions-debug", "4403", "http"));
+        machineServers.addBinding().toInstance(new ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http"));
 
         bind(RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
@@ -123,7 +125,7 @@ public class ApiModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
-                      .to("rm -rf ~/che && mkdir -p ~/che && unzip /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
+                      .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());

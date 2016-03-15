@@ -219,7 +219,7 @@ public class LightTheme implements Theme {
 
     @Override
     public String getButtonHoverBorderColor() {
-        return "#161819";
+        return "#E9E9E9";
     }
 
     @Override
@@ -279,7 +279,7 @@ public class LightTheme implements Theme {
 
     @Override
     public String getPrimaryButtonHoverBorderColor() {
-        return "#161819";
+        return "#E9E9E9";
     }
 
     @Override
@@ -1415,5 +1415,20 @@ public class LightTheme implements Theme {
     @Override
     public String toolButtonActiveBoxShadow() {
         return "inset 1px 1px 0 0 #6F6E6E";
+    }
+
+    @Override
+    public String gitConsoleStagedFilesColor() {
+        return "green";
+    }
+
+    @Override
+    public String gitConsoleUnstagedFilesColor() {
+        return "red";
+    }
+
+    @Override
+    public String gitConsoleErrorColor() {
+        return "red";
     }
 }

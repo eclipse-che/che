@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  *  @author gazarenkov
@@ -58,7 +57,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         //ProjectHandlerRegistry projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
@@ -68,7 +67,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
 
         projectHandlerRegistry.register(new ProjectInitHandler() {
             @Override
-            public void onProjectInitialized(FolderEntry projectFolder)
+            public void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
                     throws ServerException, NotFoundException, ConflictException, ForbiddenException {
 
                 projectFolder.createFile("generated", "test".getBytes());

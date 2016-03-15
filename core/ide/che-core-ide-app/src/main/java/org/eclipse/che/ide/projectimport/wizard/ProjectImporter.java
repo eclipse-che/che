@@ -157,23 +157,23 @@ public class ProjectImporter extends AbstractImporter {
             if(authenticator == null) {
                 authenticator = oAuth2AuthenticatorRegistry.getAuthenticator("default");
             }
-            authenticator.authorize(OAuth2AuthenticatorUrlProvider.get(restContext, authenticateUrl),
-                                    new AsyncCallback<OAuthStatus>() {
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            callback.onFailure(new Exception(caught.getMessage()));
-                                        }
+            authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(restContext, authenticateUrl),
+                                       new AsyncCallback<OAuthStatus>() {
+                                           @Override
+                                           public void onFailure(Throwable caught) {
+                                               callback.onFailure(new Exception(caught.getMessage()));
+                                           }
 
-                                        @Override
-                                        public void onSuccess(OAuthStatus result) {
-                                            if (!result.equals(OAuthStatus.NOT_PERFORMED)) {
-                                                doImport(pathToProject, projectName, sourceStorage);
-                                            } else  {
-                                                subscriber.onFailure("Authentication cancelled");
-                                                callback.onCompleted();
-                                            }
-                                        }
-                                    });
+                                           @Override
+                                           public void onSuccess(OAuthStatus result) {
+                                               if (!result.equals(OAuthStatus.NOT_PERFORMED)) {
+                                                   doImport(pathToProject, projectName, sourceStorage);
+                                               } else {
+                                                   subscriber.onFailure("Authentication cancelled");
+                                                   callback.onCompleted();
+                                               }
+                                           }
+                                       });
 
     }
 

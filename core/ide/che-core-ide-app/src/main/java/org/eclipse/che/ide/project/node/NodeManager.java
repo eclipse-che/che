@@ -244,7 +244,7 @@ public class NodeManager {
      */
     @NotNull
     public Promise<List<Node>> getProjectNodes() {
-        return projectService.getProjects(workspaceId, true).then(new Function<List<ProjectConfigDto>, List<Node>>() {
+        return projectService.getProjects(workspaceId).then(new Function<List<ProjectConfigDto>, List<Node>>() {
             @Override
             public List<Node> apply(List<ProjectConfigDto> projects) throws FunctionException {
                 if (projects == null) {

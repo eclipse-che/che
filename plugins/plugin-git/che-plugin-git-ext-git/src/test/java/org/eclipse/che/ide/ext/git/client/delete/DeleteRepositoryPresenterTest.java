@@ -82,7 +82,7 @@ public class DeleteRepositoryPresenterTest extends BaseTest {
         verify(appContext).getCurrentProject();
         verify(service).deleteRepository(anyString(), eq(rootProjectConfig), (AsyncRequestCallback<Void>)anyObject());
         verify(gitOutputConsoleFactory).create(DELETE_REPO_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), rootProjectConfig);
     }

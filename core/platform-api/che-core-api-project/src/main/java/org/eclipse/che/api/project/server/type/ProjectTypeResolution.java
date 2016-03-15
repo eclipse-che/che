@@ -47,8 +47,8 @@ public abstract class ProjectTypeResolution {
         return attributes;
     }
 
-     void addAttribute(String id, Value value) {
-        attributes.put(id, value);
-    }
+//     void addAttribute(String id, Value value) {
+//        attributes.put(id, value);
+//    }
 
 }

@@ -51,11 +51,17 @@ public class WebExtension {
                         WebExtensionResource resources,
                         IconRegistry iconRegistry,
                         @Named("JSFileType") FileType jsFile,
-                        @Named("HTMLFileType") FileType htmlFile) {
+                        @Named("HTMLFileType") FileType htmlFile,
+                        @Named("ES6FileType") FileType es6File,
+                        @Named("JSXFileType") FileType jsxFile,
+                        @Named("TypeScript") FileType typeScriptFile) {
         // register new Icon for javascript project type
         iconRegistry.registerIcon(new Icon("JavaScript.samples.category.icon", resources.samplesCategoryJs()));
 
         editorRegistry.registerDefaultEditor(jsFile, jsEditorProvider);
+        editorRegistry.registerDefaultEditor(es6File, jsEditorProvider);
+        editorRegistry.registerDefaultEditor(jsxFile, jsEditorProvider);
+        editorRegistry.registerDefaultEditor(typeScriptFile, jsEditorProvider);
         editorRegistry.registerDefaultEditor(htmlFile, htmlEditorProvider);
     }
 
@@ -64,11 +70,17 @@ public class WebExtension {
                                    @Named("CSSFileType") FileType cssFile,
                                    @Named("LESSFileType") FileType lessFile,
                                    @Named("JSFileType") FileType jsFile,
+                                   @Named("ES6FileType") FileType es6File,
+                                   @Named("JSXFileType") FileType jsxFile,
+                                   @Named("TypeScript") FileType typeScriptFile,
                                    @Named("HTMLFileType") FileType htmlFile,
                                    @Named("PHPFileType") FileType phpFile) {
         fileTypeRegistry.registerFileType(cssFile);
         fileTypeRegistry.registerFileType(lessFile);
         fileTypeRegistry.registerFileType(jsFile);
+        fileTypeRegistry.registerFileType(es6File);
+        fileTypeRegistry.registerFileType(jsxFile);
+        fileTypeRegistry.registerFileType(typeScriptFile);
         fileTypeRegistry.registerFileType(htmlFile);
         fileTypeRegistry.registerFileType(phpFile);
     }

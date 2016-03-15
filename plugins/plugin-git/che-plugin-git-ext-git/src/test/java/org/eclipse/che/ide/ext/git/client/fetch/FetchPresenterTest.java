@@ -228,7 +228,7 @@ public class FetchPresenterTest extends BaseTest {
                               eq(NO_REMOVE_DELETE_REFS), (RequestCallback<String>)anyObject());
         verify(view).close();
         verify(gitOutputConsoleFactory).create(FETCH_COMMAND_NAME);
-        verify(console).printInfo(anyString());
+        verify(console).print(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(constant, times(2)).fetchSuccess(eq(REMOTE_URI));

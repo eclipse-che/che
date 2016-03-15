@@ -120,21 +120,20 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
 
     private void createProject(final CompleteCallback callback) {
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient
-                .createProject(workspaceId, dataObject.getName(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
-                    @Override
-                    protected void onSuccess(ProjectConfigDto result) {
-                        eventBus.fireEvent(new CreateProjectEvent(result));
+        projectServiceClient.createProject(workspaceId, dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+            @Override
+            protected void onSuccess(ProjectConfigDto result) {
+                eventBus.fireEvent(new CreateProjectEvent(result));
 
-                        callback.onCompleted();
-                    }
+                callback.onCompleted();
+            }
 
-                    @Override
-                    protected void onFailure(Throwable exception) {
-                        final String message = dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
-                        callback.onFailure(new Exception(message));
-                    }
-                });
+            @Override
+            protected void onFailure(Throwable exception) {
+                final String message = dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
+                callback.onFailure(new Exception(message));
+            }
+        });
     }
 
     private void createModule(final CompleteCallback callback) {

@@ -11,13 +11,17 @@
 package org.eclipse.che.ide.ui.dialogs.input;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
+
+import org.eclipse.che.ide.ui.WidgetFocusTracker;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
@@ -32,7 +36,7 @@ import static org.eclipse.che.ide.ui.window.Window.Resources;
  * @author Mickaël Leduque
  * @author Artem Zatsarynnyi
  */
-public class InputDialogFooter extends Composite {
+public class InputDialogFooter implements IsWidget {
 
     private static final Resources                   resources = GWT.create(Resources.class);
     /** The UI binder instance. */
@@ -44,16 +48,25 @@ public class InputDialogFooter extends Composite {
     Button                 okButton;
     @UiField
     Button                 cancelButton;
+
+    HTMLPanel rootPanel;
+
     /** The action delegate. */
-    private ActionDelegate actionDelegate;
+    private       ActionDelegate     actionDelegate;
+    private final WidgetFocusTracker widgetFocusTracker;
 
     @Inject
-    public InputDialogFooter(final @NotNull UILocalizationConstant messages) {
+    public InputDialogFooter(final @NotNull UILocalizationConstant messages, WidgetFocusTracker widgetFocusTracker) {
         this.messages = messages;
-        initWidget(uiBinder.createAndBindUi(this));
+        rootPanel = uiBinder.createAndBindUi(this);
+
+        this.widgetFocusTracker = widgetFocusTracker;
+        widgetFocusTracker.subscribe(okButton);
+        widgetFocusTracker.subscribe(cancelButton);
 
         okButton.addStyleName(resources.windowCss().primaryButton());
         okButton.getElement().setId("askValue-dialog-ok");
+
         cancelButton.addStyleName(resources.windowCss().button());
         cancelButton.getElement().setId("askValue-dialog-cancel");
     }
@@ -94,7 +107,27 @@ public class InputDialogFooter extends Composite {
         return okButton;
     }
 
+    /** Returns {@code true} if OK button is in the focus and {@code false} - otherwise. */
+    boolean isOkButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(okButton);
+    }
+
+    /** Returns {@code true} if Cancel button is in the focus and {@code false} - otherwise. */
+    boolean isCancelButtonInFocus() {
+        return widgetFocusTracker.isWidgetFocused(cancelButton);
+    }
+
+    public void onClose() {
+        widgetFocusTracker.unSubscribe(okButton);
+        widgetFocusTracker.unSubscribe(cancelButton);
+    }
+
+    @Override
+    public Widget asWidget() {
+        return rootPanel;
+    }
+
     /** The UI binder interface for this component. */
-    interface ConfirmWindowFooterUiBinder extends UiBinder<Widget, InputDialogFooter> {
+    interface ConfirmWindowFooterUiBinder extends UiBinder<HTMLPanel, InputDialogFooter> {
     }
 }

@@ -23,6 +23,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
@@ -57,6 +58,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
 
     private EmbeddedTextEditorPresenter activeEditor;
     private boolean                     showInheritedMembers;
+    private int                         cursorOffset;
 
     @Inject
     public FileStructurePresenter(FileStructure view,
@@ -91,6 +93,7 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
             return;
         }
         activeEditor = ((EmbeddedTextEditorPresenter)editorPartPresenter);
+        cursorOffset = activeEditor.getCursorOffset();
         VirtualFile file = activeEditor.getEditorInput().getFile();
 
         String projectPath = file.getProject().getProjectConfig().getPath();
@@ -141,15 +144,18 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
         showInheritedMembers = false;
     }
 
+    @Override
+    public void onEscapeClicked() {
+        activeEditor.setFocus();
+        setCursor(activeEditor, cursorOffset);
+    }
+
     private void openFile(VirtualFile result, final Member member) {
-        editorAgent.openEditor(result, new EditorAgent.OpenEditorCallback() {
+        editorAgent.openEditor(result, new OpenEditorCallbackImpl() {
             @Override
             public void onEditorOpened(EditorPartPresenter editor) {
                 setCursor(editor, member.getFileRegion().getOffset());
             }
-
-            @Override
-            public void onEditorActivated(EditorPartPresenter editor) { }
         });
     }
 

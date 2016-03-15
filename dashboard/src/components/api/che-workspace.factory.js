@@ -299,11 +299,11 @@ export class CheWorkspace {
     // extract the Websocket URL of the runtime
     let servers = runtimeData.devMachine.runtime.servers;
 
-    var extensionServerAddress;
+    var wsagentServerAddress;
     for (var key in servers) {
       let server = servers[key];
-      if ('extensions' === server.ref) {
-        extensionServerAddress = server.address;
+      if ('wsagent' === server.ref) {
+        wsagentServerAddress = server.address;
       }
     }
 
@@ -316,7 +316,7 @@ export class CheWorkspace {
       contextPath = 'api';
     }
 
-    return 'ws://' + extensionServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
+    return 'ws://' + wsagentServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
 
   }
 

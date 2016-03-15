@@ -58,5 +58,11 @@ interface FileStructure extends View<FileStructure.ActionDelegate> {
          *         selected member
          */
         void actionPerformed(Member member);
+
+        /**
+         * Performs some actions(e.c. set cursor in previous position in active editor) when user click on escape button to close
+         * file structure dialog.
+         */
+        void onEscapeClicked();
     }
 }

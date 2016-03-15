@@ -12,6 +12,8 @@ package org.eclipse.che.api.project.shared.dto;
 
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -86,4 +88,9 @@ public interface ItemReference extends Hyperlinks {
 
     ItemReference withContentLength(long length);
 
+    /** The method can return {@code null} value. {@link ProjectConfigDto} exist only for project and modules in other cases it is null. */
+    @Nullable
+    ProjectConfigDto getProjectConfig();
+
+    void setProjectConfig(ProjectConfigDto config);
 }

@@ -23,7 +23,10 @@ public interface ChoiceDialogView {
     /** Sets the action delegate. */
     void setDelegate(ActionDelegate delegate);
 
-    /** Displays the dialog window. */
+    /**
+     * Displays the dialog window.
+     * Sets "first-choice" button in the focus.
+     */
     void showDialog();
 
     /** Closes the dialog window. */
@@ -44,6 +47,15 @@ public interface ChoiceDialogView {
     /** Sets the text of the third choice. */
     void setThirdChoiceLabel(String thirdChoiceLabel);
 
+    /** Returns {@code true} if first button is in the focus and {@code false} - otherwise. */
+    boolean isFirstButtonInFocus();
+
+    /** Returns {@code true} if second button is in the focus and {@code false} - otherwise. */
+    boolean isSecondButtonInFocus();
+
+    /** Returns {@code true} if third button is in the focus and {@code false} - otherwise. */
+    boolean isThirdButtonInFocus();
+
     /** The interface for the action delegate. */
     public interface ActionDelegate {
 
@@ -55,5 +67,8 @@ public interface ChoiceDialogView {
 
         /** Defines what's done when the user clicks the third choice. */
         void thirdChoiceClicked();
+
+        /** Performs any actions appropriate in response to the user having clicked the Enter key. */
+        void onEnterClicked();
     }
 }

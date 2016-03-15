@@ -74,17 +74,17 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
 
     @Override
     public void cancelled() {
-        this.view.closeDialog();
-        if (this.cancelCallback != null) {
-            this.cancelCallback.cancelled();
+        view.closeDialog();
+        if (cancelCallback != null) {
+            cancelCallback.cancelled();
         }
     }
 
     @Override
     public void accepted() {
-        this.view.closeDialog();
-        if (this.inputCallback != null) {
-            this.inputCallback.accepted(view.getValue());
+        view.closeDialog();
+        if (inputCallback != null) {
+            inputCallback.accepted(view.getValue());
         }
     }
 
@@ -95,6 +95,16 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
 
     @Override
     public void onEnterClicked() {
+        if (view.isOkButtonInFocus()) {
+            accepted();
+            return;
+        }
+
+        if (view.isCancelButtonInFocus()) {
+            cancelled();
+            return;
+        }
+
         if (isInputValid()) {
             accepted();
         }
@@ -103,7 +113,7 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
     @Override
     public void show() {
         isInputValid();
-        this.view.showDialog();
+        view.showDialog();
     }
 
     @Override

@@ -34,11 +34,4 @@ public interface InitRequest extends GitRequest {
     void setBare(boolean bare);
     
     InitRequest withBare(boolean bare);
-
-    /** @return <code>true</code> then all files in newly initialized repository will be commited with "init" message  */
-    boolean isInitCommit();
-
-    void setInitCommit(boolean initCommit);
-
-    InitRequest withInitCommit(boolean initCommit);
 }

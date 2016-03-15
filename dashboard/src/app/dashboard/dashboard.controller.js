@@ -12,11 +12,11 @@
 
 /**
  * @ngdoc controller
- * @name dashboard.controller:DashboardCtrl
+ * @name dashboard.controller:DashboardController
  * @description This class is handling the controller of the dashboard
  * @author Florent Benoit
  */
-export class DashboardCtrl {
+export class DashboardController {
 
 
   /**

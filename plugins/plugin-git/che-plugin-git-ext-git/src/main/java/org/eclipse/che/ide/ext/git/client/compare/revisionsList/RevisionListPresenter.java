@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.git.client.compare.revisionsList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
@@ -36,6 +37,7 @@ import java.util.Collections;
 
 import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for displaying list of revisions for comparing selected with local changes.
@@ -149,7 +151,14 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
                            @Override
                            protected void onFailure(Throwable exception) {
-                               notificationManager.notify(locale.logFailed(), FAIL, false);
+                               if (getErrorCode(exception) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
+                                   dialogFactory.createMessageDialog(locale.compareWithRevisionTitle(),
+                                                                     locale.initCommitWasNotPerformed(),
+                                                                     null).show();
+                               } else {
+                                   notificationManager.notify(locale.logFailed(), FAIL, false);
+                               }
+
                            }
                        });
     }

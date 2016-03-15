@@ -207,7 +207,7 @@ public class NodeManagerTest {
         final UsersWorkspaceDto usersWorkspaceDtoMock = mock(UsersWorkspaceDto.class);
         final NodeSettings nodeSettingsMock = mock(NodeSettings.class);
 
-        when(projectServiceClientMock.getProjects(anyString(), anyBoolean())).thenReturn(projectConfigsMock);
+        when(projectServiceClientMock.getProjects(anyString())).thenReturn(projectConfigsMock);
         when(appContextMock.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
         when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigDtoMock);
         when(project_1.getPath()).thenReturn("/project_1/");

@@ -111,7 +111,7 @@ public class ProjectUpdaterTest {
         getProjectsMock = createPromiseMock();
 
         when(projectServiceClient.updateProject(anyString(), anyString(), any(ProjectConfigDto.class))).thenReturn(getUpdatedProjectMock);
-        when(projectServiceClient.getProjects(anyString(), anyBoolean())).thenReturn(getProjectsMock);
+        when(projectServiceClient.getProjects(anyString())).thenReturn(getProjectsMock);
 
         updater = new ProjectUpdater(projectServiceClient,
                                      projectNotificationSubscriber,
@@ -147,7 +147,7 @@ public class ProjectUpdaterTest {
         verify(getProjectsMock).then(getProjectsCaptor.capture());
         getProjectsCaptor.getValue().apply(singletonList(projectConfig));
 
-        verify(projectServiceClient).getProjects(eq(WORKSPACE_ID), eq(true));
+        verify(projectServiceClient).getProjects(eq(WORKSPACE_ID));
         verify(appContext).getWorkspace();
         verify(usersWorkspaceDtoMock).getConfig();
         verify(workspaceConfigDtoMock).withProjects(eq(newArrayList(projectConfig)));

@@ -25,7 +25,7 @@ import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.ui.radiobuttongroup.RadioButtonGroup;
 
-import static org.eclipse.che.ide.extension.machine.client.perspective.MachinePerspective.MACHINE_PERSPECTIVE_ID;
+import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -65,11 +65,11 @@ public class SwitchPerspectiveAction extends Action implements CustomComponentAc
                                        }
                                    });
 
-        radioButtonGroup.addButton("", localizationConstant.perspectiveMachineActionTooltip(), resources.machinePerspective(),
+        radioButtonGroup.addButton("", localizationConstant.perspectiveOperationsActionTooltip(), resources.operationsPerspective(),
                                    new ClickHandler() {
                                        @Override
                                        public void onClick(ClickEvent event) {
-                                           perspectiveManager.setPerspectiveId(MACHINE_PERSPECTIVE_ID);
+                                           perspectiveManager.setPerspectiveId(OPERATIONS_PERSPECTIVE_ID);
                                        }
                                    });
 

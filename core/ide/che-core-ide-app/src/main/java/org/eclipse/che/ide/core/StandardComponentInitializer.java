@@ -20,6 +20,7 @@ import org.eclipse.che.ide.actions.CloseCurrentFile;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
 import org.eclipse.che.ide.actions.CopyAction;
+import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.CreateModuleAction;
 import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.CutAction;
@@ -275,6 +276,9 @@ public class StandardComponentInitializer {
     private MessageLoaderResources messageLoaderResources;
 
     @Inject
+    private ShowReferenceAction showReferenceAction;
+
+    @Inject
     @Named("XMLFileType")
     private FileType xmlFile;
 
@@ -324,7 +328,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private WsConnectionListener wsConnectionListener;
-
 
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
@@ -506,6 +509,7 @@ public class StandardComponentInitializer {
         DefaultActionGroup resourceOperation = new DefaultActionGroup(actionManager);
         actionManager.registerAction("resourceOperation", resourceOperation);
         resourceOperation.addSeparator();
+        resourceOperation.add(showReferenceAction);
         resourceOperation.add(goIntoAction);
         resourceOperation.add(openSelectedFileAction);
 

@@ -28,6 +28,7 @@ import org.eclipse.che.api.factory.shared.dto.Policies;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
+import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
@@ -49,6 +50,7 @@ import java.util.Collections;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -176,7 +178,15 @@ public class FactoryBuilderTest {
                                                                                                                               .withType(
                                                                                                                                       "git")
                                                                                                                               .withLocation(
-                                                                                                                                      "https://github.com/123/test.git"))))
+                                                                                                                                      "https://github.com/123/test.git"))
+                                                                                                                   .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
+                                                                                                                                                                         .withPort("8080")
+                                                                                                                                                                         .withProtocol("https"),
+                                                                                                                                              newDto(ServerConfDto.class).withRef("ref2")
+                                                                                                                                                                         .withPort("9090/udp")
+                                                                                                                                                                         .withProtocol("someprotocol")))
+                                                                                                                   .withEnvVariables(Collections.singletonMap("key1", "value1"))
+                                                                              ))
                                                                               .withRecipe(dto.createDto(
                                                                                       RecipeDto.class)
                                                                                              .withType("sometype")

@@ -87,4 +87,14 @@ public class FontAwesome {
      */
     public static final String UNDO = "<i class=\"fa fa-undo\"></i>";
 
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/check/
+     */
+    public static final String CHECK = "<i class=\"fa fa-check\"></i>";
+
+    /**
+     * http://fortawesome.github.io/Font-Awesome/icon/exclamation-triangle/
+     */
+    public static final String EXCLAMATION_TRIANGLE = "<i class=\"fa fa-exclamation-triangle\"></i>";
+
 }

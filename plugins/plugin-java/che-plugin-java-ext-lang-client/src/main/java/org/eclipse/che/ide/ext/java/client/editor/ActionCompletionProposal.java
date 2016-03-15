@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.ext.java.client.action.ProposalAction;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionProposal;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -21,13 +22,15 @@ import org.eclipse.che.ide.util.loging.Log;
  */
 public class ActionCompletionProposal implements CompletionProposal {
 
-    private final String               display;
-    private final String               actionId;
-    private final Icon                 icon;
+    private final String         display;
+    private final String         actionId;
+    private final ProposalAction action;
+    private final Icon           icon;
 
-    public ActionCompletionProposal(String display, String actionId, Icon icon) {
+    public ActionCompletionProposal(String display, String actionId, ProposalAction action, Icon icon) {
         this.display = display;
         this.actionId = actionId;
+        this.action = action;
         this.icon = icon;
     }
 
@@ -48,6 +51,10 @@ public class ActionCompletionProposal implements CompletionProposal {
 
     @Override
     public void getCompletion(CompletionCallback callback) {
-        Log.error(getClass(), "Can't run Action " + actionId);
+        if (action == null) {
+            Log.error(getClass(), "Can't run Action " + actionId);
+        } else {
+            action.performAsProposal();
+        }
     }
 }

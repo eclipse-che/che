@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -85,46 +86,21 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     }
 
     @Override
-    public void getProjects(String workspaceId, boolean includeAttributes, AsyncRequestCallback<List<ProjectConfigDto>> callback) {
-        asyncRequestFactory.createGetRequest(extPath + "/project/" + workspaceId + "?includeAttributes=" + includeAttributes)
+    public void getProjects(String workspaceId, AsyncRequestCallback<List<ProjectConfigDto>> callback) {
+        asyncRequestFactory.createGetRequest(extPath + "/project/" + workspaceId)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Getting projects..."))
                            .send(callback);
     }
 
     @Override
-    public Promise<List<ProjectConfigDto>> getProjects(final String workspaceId, boolean includeAttributes) {
+    public Promise<List<ProjectConfigDto>> getProjects(final String workspaceId) {
         return newPromise(new AsyncPromiseHelper.RequestCall<List<ProjectConfigDto>>() {
             @Override
             public void makeCall(AsyncCallback<List<ProjectConfigDto>> callback) {
-                getProjects(workspaceId, false, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ProjectConfigDto.class)));
+                getProjects(workspaceId, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ProjectConfigDto.class)));
             }
         });
-    }
-
-    @Override
-    public void getProjectsInSpecificWorkspace(String wsId, AsyncRequestCallback<List<ProjectConfigDto>> callback) {
-        final String requestUrl = extPath + "/project/" + wsId;
-        asyncRequestFactory.createGetRequest(requestUrl)
-                           .header(ACCEPT, MimeType.APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting projects..."))
-                           .send(callback);
-    }
-
-    @Override
-    public void cloneProjectToCurrentWorkspace(String workspaceId,
-                                               String srcProjectPath,
-                                               String newNameForProject,
-                                               AsyncRequestCallback<String> callback) {
-        final String requestUrl = extPath + "/vfs/" + workspaceId + "/v2/clone" + "?srcVfsId=" + workspaceId +
-                                  "&srcPath=" + srcProjectPath +
-                                  "&parentPath=/" +
-                                  "&name=" + newNameForProject;
-
-        asyncRequestFactory.createPostRequest(requestUrl, null)
-                           .header(ACCEPT, MimeType.APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Copying project..."))
-                           .send(callback);
     }
 
     @Override
@@ -156,10 +132,9 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     @Override
     public void createProject(String workspaceId,
-                              String name,
                               ProjectConfigDto projectConfig,
                               AsyncRequestCallback<ProjectConfigDto> callback) {
-        final String requestUrl = extPath + "/project/" + workspaceId + "?name=" + name;
+        final String requestUrl = extPath + "/project/" + workspaceId;
         asyncRequestFactory.createPostRequest(requestUrl, projectConfig)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Creating project..."))
@@ -323,13 +298,9 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
 
     @Override
     public void rename(String workspaceId, String path, String newName, String newMediaType, AsyncRequestCallback<Void> callback) {
-        String requestUrl = extPath + "/project/" + workspaceId + "/rename" + normalizePath(path) + "?name=" + newName;
-        if (newMediaType != null) {
-            requestUrl += "&mediaType=" + newMediaType;
-        }
-        asyncRequestFactory.createPostRequest(requestUrl, null)
-                           .loader(loaderFactory.newLoader("Renaming..."))
-                           .send(callback);
+        final Path source = Path.valueOf(path);
+        final Path sourceParent = source.removeLastSegments(1);
+        move(workspaceId, source.toString(), sourceParent.toString(), newName, callback);
     }
 
     @Override

@@ -238,7 +238,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getButtonHoverBorderColor() {
-        return "#161819";
+        return "#E9E9E9";
     }
 
     @Override
@@ -298,7 +298,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getPrimaryButtonHoverBorderColor() {
-        return "#161819";
+        return "#E9E9E9";
     }
 
     @Override
@@ -1438,5 +1438,20 @@ public class DarkTheme implements Theme {
     @Override
     public String toolButtonActiveBoxShadow() {
         return "inset 1px 1px 0 0 #3c3c3c";
+    }
+
+    @Override
+    public String gitConsoleStagedFilesColor() {
+        return "lightgreen";
+    }
+
+    @Override
+    public String gitConsoleUnstagedFilesColor() {
+        return "#F62217";
+    }
+
+    @Override
+    public String gitConsoleErrorColor() {
+        return "#F62217";
     }
 }

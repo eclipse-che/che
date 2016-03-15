@@ -12,15 +12,16 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.user.UserImpl;
@@ -46,10 +47,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
@@ -71,6 +75,7 @@ public class DockerInstanceProviderTest {
     private static final String WORKSPACE_ID        = "wsId";
     private static final String DISPLAY_NAME        = "DisplayName";
     private static final String USER_TOKEN          = "userToken";
+    private static final int    MEMORY_LIMIT_MB     = 64;
 
     @Mock
     private DockerConnector dockerConnector;
@@ -113,6 +118,7 @@ public class DockerInstanceProviderTest {
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setUser(new UserImpl("user", "userId", USER_TOKEN, null, false));
+        envCont.setWorkspaceId(WORKSPACE_ID);
         EnvironmentContext.setCurrent(envCont);
 
         when(dockerMachineFactory.createNode(anyString(), anyString())).thenReturn(dockerNode);
@@ -150,6 +156,8 @@ public class DockerInstanceProviderTest {
                                            any(ProgressMonitor.class),
                                            any(AuthConfigs.class),
                                            anyBoolean(),
+                                           eq((long)MEMORY_LIMIT_MB * 1024 * 1024),
+                                           eq((long)-1),
                                            anyVararg());
     }
 
@@ -228,17 +236,21 @@ public class DockerInstanceProviderTest {
         doReturn(generatedContainerId).when(dockerInstanceProvider).generateContainerName(eq(WORKSPACE_ID), eq(DISPLAY_NAME));
 
         final MachineSourceImpl machineSource = new MachineSourceImpl("type", "location");
-        final MachineImpl machine = new MachineImpl(new MachineConfigImpl(false,
-                                                                          DISPLAY_NAME,
-                                                                          "machineType",
-                                                                          machineSource,
-                                                                          new LimitsImpl(64)),
-                                                    "machineId",
-                                                    WORKSPACE_ID,
-                                                    "envName",
-                                                    "userId",
-                                                    MachineStatus.CREATING,
-                                                    null);
+        final MachineImpl machine =
+                new MachineImpl(new MachineConfigImpl(false,
+                                                      DISPLAY_NAME,
+                                                      "machineType",
+                                                      machineSource,
+                                                      new LimitsImpl(MEMORY_LIMIT_MB),
+                                                      asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                      Collections.singletonMap("key1", "value1")),
+                                "machineId",
+                                WORKSPACE_ID,
+                                "envName",
+                                "userId",
+                                MachineStatus.CREATING,
+                                null);
 
 
         createInstanceFromSnapshot(machine);
@@ -258,17 +270,21 @@ public class DockerInstanceProviderTest {
 
         final MachineSourceImpl machineSource = new MachineSourceImpl("type", "location");
         final Recipe recipe = new RecipeImpl().withType("Dockerfile").withScript("FROM busybox");
-        final MachineImpl machine = new MachineImpl(new MachineConfigImpl(false,
-                                                                          DISPLAY_NAME,
-                                                                          "machineType",
-                                                                          machineSource,
-                                                                          new LimitsImpl(64)),
-                                                    "machineId",
-                                                    WORKSPACE_ID,
-                                                    "envName",
-                                                    "userId",
-                                                    MachineStatus.CREATING,
-                                                    null);
+        final MachineImpl machine =
+                new MachineImpl(new MachineConfigImpl(false,
+                                                      DISPLAY_NAME,
+                                                      "machineType",
+                                                      machineSource,
+                                                      new LimitsImpl(MEMORY_LIMIT_MB),
+                                                      asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                      Collections.singletonMap("key1", "value1")),
+                                "machineId",
+                                WORKSPACE_ID,
+                                "envName",
+                                "userId",
+                                MachineStatus.CREATING,
+                                null);
 
         createInstanceFromRecipe(recipe, machine);
 
@@ -377,183 +393,19 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
-    public void shouldAddCommonAndDevLabelsToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        final Map<String, String> expectedLabels = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedLabels.put("che:server:" + server.getPort() + ":ref", server.getRef());
-            expectedLabels.put("che:server:" + server.getPort() + ":protocol", server.getProtocol());
-        }
-
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConf("reference3", "8082", "https"),
-                                                                new ServerConf("reference4", "8083", "sftp")));
-        for (ServerConf server : devServers) {
-            expectedLabels.put("che:server:" + server.getPort() + ":ref", server.getRef());
-            expectedLabels.put("che:server:" + server.getPort() + ":protocol", server.getProtocol());
-        }
-
-        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
-                                                            dockerConnectorConfiguration,
-                                                            dockerMachineFactory,
-                                                            dockerInstanceStopDetector,
-                                                            devServers,
-                                                            commonServers,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet(),
-                                                            null,
-                                                            workspaceFolderPathProvider,
-                                                            PROJECT_FOLDER_PATH,
-                                                            false,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet());
-
-        final boolean isDev = true;
-
-
-        createInstanceFromRecipe(isDev);
-
-
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(argumentCaptor.getValue().getLabels(), expectedLabels);
-    }
-
-    @Test
-    public void shouldAddOnlyCommonLabelsToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
-        final Map<String, String> expectedLabels = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedLabels.put("che:server:" + server.getPort() + ":ref", server.getRef());
-            expectedLabels.put("che:server:" + server.getPort() + ":protocol", server.getProtocol());
-        }
-
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConf("reference3", "8082", "https"),
-                                                                new ServerConf("reference4", "8083", "sftp")));
-
-        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
-                                                            dockerConnectorConfiguration,
-                                                            dockerMachineFactory,
-                                                            dockerInstanceStopDetector,
-                                                            devServers,
-                                                            commonServers,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet(),
-                                                            null,
-                                                            workspaceFolderPathProvider,
-                                                            PROJECT_FOLDER_PATH,
-                                                            false,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet());
-
-        final boolean isDev = false;
-
-
-        createInstanceFromRecipe(isDev);
-
-
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(argumentCaptor.getValue().getLabels(), expectedLabels);
-    }
-
-    @Test
-    public void shouldAddCommonAndDevLabelsToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
-        final Map<String, String> expectedLabels = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedLabels.put("che:server:" + server.getPort() + ":ref", server.getRef());
-            expectedLabels.put("che:server:" + server.getPort() + ":protocol", server.getProtocol());
-        }
-
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConf("reference3", "8082", "https"),
-                                                                new ServerConf("reference4", "8083", "sftp")));
-        for (ServerConf server : devServers) {
-            expectedLabels.put("che:server:" + server.getPort() + ":ref", server.getRef());
-            expectedLabels.put("che:server:" + server.getPort() + ":protocol", server.getProtocol());
-        }
-
-        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
-                                                            dockerConnectorConfiguration,
-                                                            dockerMachineFactory,
-                                                            dockerInstanceStopDetector,
-                                                            devServers,
-                                                            commonServers,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet(),
-                                                            null,
-                                                            workspaceFolderPathProvider,
-                                                            PROJECT_FOLDER_PATH,
-                                                            false,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet());
-
-        final boolean isDev = true;
-
-
-        createInstanceFromSnapshot(isDev);
-
-
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(argumentCaptor.getValue().getLabels(), expectedLabels);
-    }
-
-    @Test
-    public void shouldAddOnlyCommonLabelsToContainerOnNonDevInstanceCreationFromSnapshot() throws Exception {
-        final Map<String, String> expectedLabels = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedLabels.put("che:server:" + server.getPort() + ":ref", server.getRef());
-            expectedLabels.put("che:server:" + server.getPort() + ":protocol", server.getProtocol());
-        }
-
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConf("reference3", "8082", "https"),
-                                                                new ServerConf("reference4", "8083", "sftp")));
-
-        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
-                                                            dockerConnectorConfiguration,
-                                                            dockerMachineFactory,
-                                                            dockerInstanceStopDetector,
-                                                            devServers,
-                                                            commonServers,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet(),
-                                                            null,
-                                                            workspaceFolderPathProvider,
-                                                            PROJECT_FOLDER_PATH,
-                                                            false,
-                                                            Collections.emptySet(),
-                                                            Collections.emptySet());
-
-        final boolean isDev = false;
-
-
-        createInstanceFromSnapshot(isDev);
-
-
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(argumentCaptor.getValue().getLabels(), expectedLabels);
-    }
-
-    @Test
     public void shouldExposeCommonAndDevPortsToContainerOnDevInstanceCreationFromRecipe() throws Exception {
-        Map<String, Map<String, String>> expectedExposedPorts = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedExposedPorts.put(server.getPort(), Collections.emptyMap());
-        }
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        expectedExposedPorts.addAll(commonServers.stream()
+                                                 .map(ServerConf::getPort)
+                                                 .collect(Collectors.toList()));
 
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConf("reference3", "8082", "https"),
-                                                                new ServerConf("reference4", "8083", "sftp")));
-        for (ServerConf server : devServers) {
-            expectedExposedPorts.put(server.getPort(), Collections.emptyMap());
-        }
+        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https"),
+                                                                new ServerConfImpl("reference4", "8083", "sftp")));
+        expectedExposedPorts.addAll(devServers.stream()
+                                              .map(ServerConf::getPort)
+                                              .collect(Collectors.toList()));
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -579,17 +431,17 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
 
-        assertEquals(argumentCaptor.getValue().getExposedPorts(), expectedExposedPorts);
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
     }
 
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
-        Map<String, Map<String, String>> expectedExposedPorts = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedExposedPorts.put(server.getPort(), Collections.emptyMap());
-        }
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        expectedExposedPorts.addAll(commonServers.stream()
+                                                 .map(ServerConf::getPort)
+                                                 .collect(Collectors.toList()));
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -615,23 +467,23 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
 
-        assertEquals(argumentCaptor.getValue().getExposedPorts(), expectedExposedPorts);
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
     }
 
     @Test
     public void shouldExposeCommonAndDevPortsToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
-        Map<String, Map<String, String>> expectedExposedPorts = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedExposedPorts.put(server.getPort(), Collections.emptyMap());
-        }
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        expectedExposedPorts.addAll(commonServers.stream()
+                                                 .map(ServerConf::getPort)
+                                                 .collect(Collectors.toList()));
 
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConf("reference3", "8082", "https"),
-                                                                new ServerConf("reference4", "8083", "sftp")));
-        for (ServerConf server : devServers) {
-            expectedExposedPorts.put(server.getPort(), Collections.emptyMap());
-        }
+        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https"),
+                                                                new ServerConfImpl("reference4", "8083", "sftp")));
+        expectedExposedPorts.addAll(devServers.stream()
+                                              .map(ServerConf::getPort)
+                                              .collect(Collectors.toList()));
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -657,17 +509,17 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
 
-        assertEquals(argumentCaptor.getValue().getExposedPorts(), expectedExposedPorts);
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
     }
 
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromSnapshot() throws Exception {
-        Map<String, Map<String, String>> expectedExposedPorts = new HashMap<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConf("reference1", "8080", "http"),
-                                                                   new ServerConf("reference2", "8081", "ftp")));
-        for (ServerConf server : commonServers) {
-            expectedExposedPorts.put(server.getPort(), Collections.emptyMap());
-        }
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        expectedExposedPorts.addAll(commonServers.stream()
+                                                 .map(ServerConf::getPort)
+                                                 .collect(Collectors.toList()));
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -693,13 +545,173 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
 
-        assertEquals(argumentCaptor.getValue().getExposedPorts(), expectedExposedPorts);
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+    }
+
+    @Test
+    public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnNonDevInstanceCreationFromSnapshot() throws Exception {
+        // given
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        expectedExposedPorts.addAll(serversFromConf.stream()
+                                                   .map(ServerConf::getPort)
+                                                   .collect(Collectors.toList()));
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = false;
+
+        // when
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                          .setServers(serversFromConf)
+                                                                                          .build())
+                                                      .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+    }
+
+    @Test
+    public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnNonDevInstanceCreationFromRecipe() throws Exception {
+        // given
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        expectedExposedPorts.addAll(serversFromConf.stream()
+                                                   .map(ServerConf::getPort)
+                                                   .collect(Collectors.toList()));
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = false;
+
+        // when
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                        .setServers(serversFromConf)
+                                                                                        .build())
+                                                    .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+    }
+
+    @Test
+    public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromSnapshot() throws Exception {
+        // given
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        expectedExposedPorts.addAll(serversFromConf.stream()
+                                                   .map(ServerConf::getPort)
+                                                   .collect(Collectors.toList()));
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = true;
+
+        // when
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                          .setServers(serversFromConf)
+                                                                                          .build())
+                                                      .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+    }
+
+    @Test
+    public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe() throws Exception {
+        // given
+        List<String> expectedExposedPorts = new ArrayList<>();
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
+                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        expectedExposedPorts.addAll(serversFromConf.stream()
+                                                   .map(ServerConf::getPort)
+                                                   .collect(Collectors.toList()));
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = true;
+
+        // when
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                        .setServers(serversFromConf)
+                                                                                        .build())
+                                                    .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
     }
 
     @Test
     public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromRecipe() throws Exception {
         final String expectedHostPathOfProjects = "/tmp/projects";
-        String[] expectedVolumes = new String[]{expectedHostPathOfProjects + ":/projects"};
+        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects"};
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -734,7 +746,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
         final String expectedHostPathOfProjects = "/tmp/projects";
-        final String[] expectedVolumes = new String[]{expectedHostPathOfProjects + ":/projects"};
+        final String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects"};
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -1173,7 +1185,7 @@ public class DockerInstanceProviderTest {
     public void shouldGenerateValidNameForContainerFromPrefixWithInvalidCharacters() throws Exception {
         final String userName = "{use}r+";
         final String displayName = "displ{[ayName@";
-        EnvironmentContext.getCurrent().setUser(new UserImpl(userName));
+        EnvironmentContext.getCurrent().setUser(new UserImpl(userName, "id", "token", emptyList(), false));
         final String expectedPrefix = String.format("%s_%s_%s_", "user", "WORKSPACE_ID", "displayName");
 
         final String containerName = dockerInstanceProvider.generateContainerName("WORKSPACE_ID", displayName);
@@ -1188,8 +1200,8 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(true, wsId);
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(Arrays.asList(argumentCaptor.getValue().getEnv())
-                         .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
+        assertTrue(asList(argumentCaptor.getValue().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                    "Workspace Id variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId +
                    ". Found " + Arrays.toString(argumentCaptor.getValue().getEnv()));
     }
@@ -1200,8 +1212,8 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(true, wsId);
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(Arrays.asList(argumentCaptor.getValue().getEnv())
-                         .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
+        assertTrue(asList(argumentCaptor.getValue().getEnv())
+                           .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                    "Workspace Id variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId +
                    ". Found " + Arrays.toString(argumentCaptor.getValue().getEnv()));
     }
@@ -1212,8 +1224,8 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(false, wsId);
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertFalse(Arrays.asList(argumentCaptor.getValue().getEnv())
-                          .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
+        assertFalse(asList(argumentCaptor.getValue().getEnv())
+                            .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                     "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
 
@@ -1223,19 +1235,19 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(false, wsId);
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertFalse(Arrays.asList(argumentCaptor.getValue().getEnv())
-                          .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
+        assertFalse(asList(argumentCaptor.getValue().getEnv())
+                            .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                     "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
 
     /**
      * E.g from https://github.com/boot2docker/boot2docker/blob/master/README.md#virtualbox-guest-additions
      *
-     *   Users should be /Users
-     *   /Users should be /Users
-     *   c/Users should be /c/Users
-     *   /c/Users should be /c/Users
-     *   c:/Users should be /c/Users
+     * Users should be /Users
+     * /Users should be /Users
+     * c/Users should be /c/Users
+     * /c/Users should be /c/Users
+     * c:/Users should be /c/Users
      */
     @Test
     public void shouldEscapePathForWindowsHost() {
@@ -1283,7 +1295,7 @@ public class DockerInstanceProviderTest {
 
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(new HashSet<>(Arrays.asList(argumentCaptor.getValue().getEnv())), expectedEnv);
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(expectedEnv));
     }
 
     @Test
@@ -1314,7 +1326,7 @@ public class DockerInstanceProviderTest {
 
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(new HashSet<>(Arrays.asList(argumentCaptor.getValue().getEnv())), commonEnv);
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(commonEnv));
     }
 
     @Test
@@ -1350,7 +1362,7 @@ public class DockerInstanceProviderTest {
 
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(new HashSet<>(Arrays.asList(argumentCaptor.getValue().getEnv())), expectedEnv);
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(expectedEnv));
     }
 
     @Test
@@ -1381,171 +1393,271 @@ public class DockerInstanceProviderTest {
 
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(new HashSet<>(Arrays.asList(argumentCaptor.getValue().getEnv())), commonEnv);
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(commonEnv));
+    }
+
+    @Test
+    public void shouldAddEnvVarsFromMachineConfigToContainerOnNonDevInstanceCreationFromSnapshot() throws Exception {
+        // given
+        Map<String, String> envVarsFromConfig = new HashMap<>();
+        envVarsFromConfig.put("ENV_VAR1", "123");
+        envVarsFromConfig.put("ENV_VAR2", "234");
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = false;
+
+        // when
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                          .setEnvVariables(envVarsFromConfig)
+                                                                                          .build())
+                                                      .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
+                                                                                           .stream()
+                                                                                           .map(entry -> entry.getKey() +
+                                                                                                         "=" +
+                                                                                                         entry.getValue())
+                                                                                           .collect(Collectors.toList())));
+    }
+
+    @Test
+    public void shouldAddEnvVarsFromMachineConfigToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
+        // given
+        Map<String, String> envVarsFromConfig = new HashMap<>();
+        envVarsFromConfig.put("ENV_VAR1", "123");
+        envVarsFromConfig.put("ENV_VAR2", "234");
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = true;
+
+        // when
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                          .setEnvVariables(envVarsFromConfig)
+                                                                                          .build())
+                                                      .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
+                                                                                           .stream()
+                                                                                           .map(entry -> entry.getKey() +
+                                                                                                         "=" +
+                                                                                                         entry.getValue())
+                                                                                           .collect(Collectors.toList())));
+    }
+
+    @Test
+    public void shouldAddEnvVarsFromMachineConfigToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
+        // given
+        Map<String, String> envVarsFromConfig = new HashMap<>();
+        envVarsFromConfig.put("ENV_VAR1", "123");
+        envVarsFromConfig.put("ENV_VAR2", "234");
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = false;
+
+        // when
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                        .setEnvVariables(envVarsFromConfig)
+                                                                                        .build())
+                                                    .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
+                                                                                           .stream()
+                                                                                           .map(entry -> entry.getKey() +
+                                                                                                         "=" +
+                                                                                                         entry.getValue())
+                                                                                           .collect(Collectors.toList())));
+    }
+
+    @Test
+    public void shouldAddEnvVarsFromMachineConfigToContainerOnDevInstanceCreationFromRecipe() throws Exception {
+        // given
+        Map<String, String> envVarsFromConfig = new HashMap<>();
+        envVarsFromConfig.put("ENV_VAR1", "123");
+        envVarsFromConfig.put("ENV_VAR2", "234");
+
+        dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
+                                                            dockerConnectorConfiguration,
+                                                            dockerMachineFactory,
+                                                            dockerInstanceStopDetector,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet(),
+                                                            null,
+                                                            workspaceFolderPathProvider,
+                                                            PROJECT_FOLDER_PATH,
+                                                            false,
+                                                            Collections.emptySet(),
+                                                            Collections.emptySet());
+
+        final boolean isDev = true;
+
+        // when
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                        .setEnvVariables(envVarsFromConfig)
+                                                                                        .build())
+                                                    .build());
+
+        // then
+        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
+                                                                                           .stream()
+                                                                                           .map(entry -> entry.getKey() +
+                                                                                                         "=" +
+                                                                                                         entry.getValue())
+                                                                                           .collect(Collectors.toList())));
     }
 
     private void createInstanceFromRecipe() throws Exception {
-        createInstanceFromRecipe(false,
-                                 64,
-                                 "machineId",
-                                 "userId",
-                                 WORKSPACE_ID,
-                                 DISPLAY_NAME,
-                                 new RecipeImpl().withType("Dockerfile")
-                                                 .withScript("FROM busybox"));
+        createInstanceFromRecipe(getMachineBuilder().build());
     }
 
     private void createInstanceFromRecipe(boolean isDev) throws Exception {
-        createInstanceFromRecipe(isDev, null, null, null, null, null, null);
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                        .build())
+                                                    .build());
     }
 
     private void createInstanceFromRecipe(boolean isDev, String workspaceId) throws Exception {
-        createInstanceFromRecipe(isDev, null, null, null, workspaceId, null, null);
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                        .build())
+                                                    .setWorkspaceId(workspaceId)
+                                                    .build());
     }
 
     private void createInstanceFromRecipe(int memorySizeInMB) throws Exception {
-        createInstanceFromRecipe(null, memorySizeInMB, null, null, null, null, null);
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setLimits(new LimitsImpl(memorySizeInMB))
+                                                                                        .build())
+                                                    .build());
     }
 
-    private void createInstanceFromRecipe(Boolean isDev,
-                                          Integer memorySizeInMB,
-                                          String machineId,
-                                          String userId,
-                                          String workspaceId,
-                                          String displayName,
-                                          Recipe recipe) throws Exception {
-
-        createInstanceFromRecipe(isDev == null ? false : isDev,
-                                 memorySizeInMB == null ? 64 : memorySizeInMB,
-                                 machineId == null ? "machineId" : machineId,
-                                 userId == null ? "userId" : userId,
-                                 workspaceId == null ? WORKSPACE_ID : workspaceId,
-                                 displayName == null ? DISPLAY_NAME : displayName,
-                                 recipe == null ? new RecipeImpl().withType("Dockerfile")
-                                                                  .withScript("FROM busybox") : recipe,
-                                 "machineType",
-                                 new MachineSourceImpl("source type", "source location"),
-                                 MachineStatus.CREATING);
+    private void createInstanceFromSnapshot(String repo, String tag, String registry) throws NotFoundException, MachineException {
+        createInstanceFromSnapshot(getMachineBuilder().build(), new DockerInstanceKey(repo, tag, "imageId", registry));
     }
 
-    private void createInstanceFromRecipe(boolean isDev,
-                                          int memorySizeInMB,
-                                          String machineId,
-                                          String userId,
-                                          String workspaceId,
-                                          String displayName,
-                                          Recipe recipe,
-                                          String machineType,
-                                          MachineSource machineSource,
-                                          MachineStatus machineStatus)
-            throws Exception {
-
-        dockerInstanceProvider.createInstance(recipe,
-                                              new MachineImpl(new MachineConfigImpl(isDev,
-                                                                                    displayName,
-                                                                                    machineType,
-                                                                                    machineSource,
-                                                                                    new LimitsImpl(memorySizeInMB)),
-                                                              machineId,
-                                                              workspaceId,
-                                                              "envName",
-                                                              userId,
-                                                              machineStatus,
-                                                              null),
-                                              LineConsumer.DEV_NULL);
-    }
-
-    private void createInstanceFromRecipe(Recipe recipe, Machine machine) throws Exception {
-
-        dockerInstanceProvider.createInstance(recipe,
+    private void createInstanceFromRecipe(Machine machine) throws Exception {
+        dockerInstanceProvider.createInstance(new RecipeImpl().withType("Dockerfile")
+                                                              .withScript("FROM busybox"),
                                               machine,
                                               LineConsumer.DEV_NULL);
     }
 
     private void createInstanceFromSnapshot() throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(null, null, null, null, null, null, null, null, null);
+        createInstanceFromSnapshot(getMachineBuilder().build());
     }
 
     private void createInstanceFromSnapshot(int memorySizeInMB) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(null, null, null, null, memorySizeInMB, null, null, null, null);
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setLimits(new LimitsImpl(memorySizeInMB))
+                                                                                          .build())
+                                                      .build());
     }
 
     private void createInstanceFromSnapshot(boolean isDev) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(null, null, null, isDev, null, null, null, null, null);
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                          .build())
+                                                      .build());
     }
 
     private void createInstanceFromSnapshot(boolean isDev, String workspaceId) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(null, null, null, isDev, null, null, null, workspaceId, null);
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setDev(isDev)
+                                                                                          .build())
+                                                      .setWorkspaceId(workspaceId)
+                                                      .build());
     }
 
-    private void createInstanceFromSnapshot(String repo, String tag, String registry) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(repo, tag, registry, null, null, null, null, null, null);
-    }
-
-    private void createInstanceFromSnapshot(String repo,
-                                            String tag,
-                                            String registry,
-                                            Boolean isDev,
-                                            Integer memorySizeInMB,
-                                            String machineId,
-                                            String userId,
-                                            String workspaceId,
-                                            String displayName)
-            throws NotFoundException, MachineException {
-
-        createInstanceFromSnapshot(repo == null ? "repo" : repo,
-                                   tag == null ? "tag" : tag,
-                                   registry == null ? "localhost:1234" : registry,
-                                   isDev == null ? false : isDev,
-                                   memorySizeInMB == null ? 64 : memorySizeInMB,
-                                   machineId == null ? "machineId" : machineId,
-                                   userId == null ? "userId" : userId,
-                                   workspaceId == null ? WORKSPACE_ID : workspaceId,
-                                   displayName == null ? DISPLAY_NAME : displayName,
-                                   "machineType",
-                                   new MachineSourceImpl("source type", "source location"),
-                                   MachineStatus.CREATING,
-                                   "envName");
-    }
-
-    private void createInstanceFromSnapshot(String repo,
-                                            String tag,
-                                            String registry,
-                                            boolean isDev,
-                                            int memorySizeInMB,
-                                            String machineId,
-                                            String userId,
-                                            String workspaceId,
-                                            String displayName,
-                                            String machineType,
-                                            MachineSource machineSource,
-                                            MachineStatus machineStatus,
-                                            String envName)
-            throws NotFoundException, MachineException {
-
-        dockerInstanceProvider.createInstance(new DockerInstanceKey(repo, tag, "imageId", registry),
-                                              new MachineImpl(new MachineConfigImpl(isDev,
-                                                                                    displayName,
-                                                                                    machineType,
-                                                                                    machineSource,
-                                                                                    new LimitsImpl(memorySizeInMB)),
-                                                              machineId,
-                                                              workspaceId,
-                                                              envName,
-                                                              userId,
-                                                              machineStatus,
-                                                              null),
+    private void createInstanceFromRecipe(Recipe recipe, Machine machine) throws Exception {
+        dockerInstanceProvider.createInstance(recipe,
+                                              machine,
                                               LineConsumer.DEV_NULL);
     }
 
-    private void createInstanceFromSnapshot(Machine machine)
-            throws NotFoundException, MachineException {
-
-        dockerInstanceProvider.createInstance(new DockerInstanceKey("repo" ,
+    private void createInstanceFromSnapshot(Machine machine) throws NotFoundException, MachineException {
+        dockerInstanceProvider.createInstance(new DockerInstanceKey("repo",
                                                                     "tag",
                                                                     "imageId",
                                                                     "localhost:1234"),
                                               machine,
                                               LineConsumer.DEV_NULL);
+    }
+
+    private void createInstanceFromSnapshot(Machine machine, DockerInstanceKey dockerInstanceKey) throws NotFoundException,
+                                                                                                         MachineException {
+        dockerInstanceProvider.createInstance(dockerInstanceKey,
+                                              machine,
+                                              LineConsumer.DEV_NULL);
+    }
+
+    private MachineImpl.MachineImplBuilder getMachineBuilder() {
+        return MachineImpl.builder().fromMachine(new MachineImpl(getMachineConfigBuilder().build(),
+                                                                 "machineId",
+                                                                 WORKSPACE_ID,
+                                                                 "envName",
+                                                                 "userId",
+                                                                 MachineStatus.CREATING,
+                                                                 null));
+    }
+
+    private MachineConfigImpl.MachineConfigImplBuilder getMachineConfigBuilder() {
+        return MachineConfigImpl.builder().fromConfig(new MachineConfigImpl(false,
+                                                                            DISPLAY_NAME,
+                                                                            "machineType",
+                                                                            new MachineSourceImpl("source type", "source location"),
+                                                                            new LimitsImpl(MEMORY_LIMIT_MB),
+                                                                            asList(new ServerConfImpl("ref1", "8080", "https"),
+                                                                                   new ServerConfImpl("ref2", "9090/udp",
+                                                                                                      "someprotocol")),
+                                                                            Collections.singletonMap("key1", "value1")));
     }
 }

@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.AttributeDto;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
@@ -103,8 +102,7 @@ public class DtoConverter {
                                           .withLinks(generateFileLinks(file, workspace, uriBuilder));
     }
 
-    public static ItemReference toItemReference(FolderEntry folder, String workspace,
-                                                UriBuilder uriBuilder) throws ServerException {
+    public static ItemReference toItemReference(FolderEntry folder, String workspace, UriBuilder uriBuilder) {
         return newDto(ItemReference.class).withName(folder.getName())
                                           .withPath(folder.getPath().toString())
                                           .withType(folder.isProject() ? "project" : "folder")
@@ -123,9 +121,7 @@ public class DtoConverter {
      *         service for building URI
      * @return an instance of {@link ProjectConfigDto}
      */
-    public static ProjectConfigDto toProjectConfig(RegisteredProject project, String workspace,
-                                                   UriBuilder serviceUriBuilder) throws ServerException,
-                                                                                        ValueStorageException {
+    public static ProjectConfigDto toProjectConfig(RegisteredProject project, String workspace, UriBuilder serviceUriBuilder) {
         ProjectConfigDto projectConfigDto = newDto(ProjectConfigDto.class);
 
         projectConfigDto.withName(project.getName())
@@ -147,7 +143,7 @@ public class DtoConverter {
 
 
         if (serviceUriBuilder != null) {
-            projectConfigDto.withLinks(DtoConverter.generateProjectLinks(project, workspace, serviceUriBuilder));
+            projectConfigDto.withLinks(generateProjectLinks(project, workspace, serviceUriBuilder));
         }
 
         return projectConfigDto;
@@ -201,7 +197,7 @@ public class DtoConverter {
         return links;
     }
 
-    private static List<Link> generateFileLinks(FileEntry file, String workspace, UriBuilder uriBuilder) throws ServerException {
+    private static List<Link> generateFileLinks(FileEntry file, String workspace, UriBuilder uriBuilder) {
         final List<Link> links = new LinkedList<>();
         final String relPath = file.getPath().toString().substring(1);
 

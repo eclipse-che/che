@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.0.0-RC9-SNAPSHOT</version>
+        <version>4.0.0-RC14-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
@@ -88,6 +88,7 @@
                     <updateOnly>false</updateOnly>
                     <descriptor>${project.basedir}/src/assembly/assembly.xml</descriptor>
                     <finalName>eclipse-che-${project.version}</finalName>
+                    <tarLongFileMode>posix</tarLongFileMode>
                 </configuration>
             </plugin>
             <plugin>

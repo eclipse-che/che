@@ -123,5 +123,7 @@ public interface EditorAgent {
         void onEditorOpened(EditorPartPresenter editor);
 
         void onEditorActivated(EditorPartPresenter editor);
+
+        void onInitializationFailed();
     }
 }

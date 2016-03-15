@@ -11,7 +11,8 @@
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
 
     <ui:with field='locale' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant'/>
     <ui:with field='resources' type='org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources'/>
@@ -29,12 +30,17 @@
         .hostTextBox {
             float: left;
             margin-left: 12px;
-
+            width: 158px;
         }
 
-        .portTextBox {
+        .portComboBox {
             float: left;
             margin-left: 14px;
+            width: 160px;
+        }
+
+        .mainPanel > div {
+            overflow: visible !important;
         }
     </ui:style>
 
@@ -42,6 +48,12 @@
         <g:north size="80">
             <g:FlowPanel>
                 <g:Label text="{locale.remoteDebugViewDescription}" addStyleNames="{style.label}"/>
+            </g:FlowPanel>
+        </g:north>
+
+        <g:north size="40">
+            <g:FlowPanel>
+                <g:CheckBox ui:field="devHost" text="Connect to process on dev machine"/>
             </g:FlowPanel>
         </g:north>
 
@@ -55,7 +67,7 @@
         <g:north size="40">
             <g:FlowPanel>
                 <g:Label text="{locale.port}" addStyleNames="{style.label}"/>
-                <g:TextBox ui:field="port" addStyleNames="{style.portTextBox}"/>
+                <che:CustomComboBox ui:field="port" addStyleNames="{style.portComboBox}"/>
             </g:FlowPanel>
         </g:north>
     </g:DockLayoutPanel>

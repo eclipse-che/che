@@ -45,13 +45,15 @@ export class CreateWorkspaceCtrl {
     };
 
     // fetch default recipe if we haven't one
-     if (!cheAPI.getRecipeTemplate().getDefaultRecipe()) {
-       cheAPI.getRecipeTemplate().fetchDefaultRecipe();
+    if (!cheAPI.getRecipeTemplate().getDefaultRecipe()) {
+      cheAPI.getRecipeTemplate().fetchDefaultRecipe();
     }
 
     this.stack = null;
     this.recipeUrl = null;
     this.recipeScript = null;
+    this.importWorkspace = '';
+    this.defaultWorkspaceName = null;
   }
 
   /**
@@ -73,10 +75,24 @@ export class CreateWorkspaceCtrl {
     this.stack = stack;
     this.recipeUrl = null;
     this.isCustomStack = false;
-    if (stack && stack.workspaceConfig && stack.workspaceConfig.name) {
-      this.workspaceName = angular.copy(stack.workspaceConfig.name);
-    } else {
-      this.generateWorkspaceName();
+    if (stack.workspaceConfig && stack.workspaceConfig.name) {
+      this.setWorkspaceName(stack.workspaceConfig.name);
+      return;
+    }
+    this.generateWorkspaceName();
+  }
+
+  /**
+   * Set workspace name
+   * @param name
+   */
+  setWorkspaceName(name) {
+    if (!name) {
+      return;
+    }
+    if (!this.defaultWorkspaceName || this.defaultWorkspaceName === this.workspaceName) {
+      this.defaultWorkspaceName = name;
+      this.workspaceName = angular.copy(name);
     }
   }
 
@@ -85,9 +101,9 @@ export class CreateWorkspaceCtrl {
    */
   generateWorkspaceName() {
     // starts with wksp
-    var name = 'wksp';
-    name = name + '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-    this.workspaceName = name;
+    let name = 'wksp';
+    name += '-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
+    this.setWorkspaceName(name);
   }
 
   /**
@@ -114,6 +130,10 @@ export class CreateWorkspaceCtrl {
           this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
         });
       }
+    } else if (this.selectSourceOption === 'select-source-import') {
+      let workspaceConfig = this.importWorkspace.length > 0 ? angular.fromJson(this.importWorkspace).config : {};
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig);
+      this.redirectAfterSubmitWorkspace(creationPromise);
     } else {
       //check predefined recipe location
       if (this.stack && this.stack.source && this.stack.source.type === 'location') {
@@ -188,16 +208,23 @@ export class CreateWorkspaceCtrl {
    */
   submitWorkspace() {
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-
     let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
-    creationPromise.then((workspaceData) => {
+    this.redirectAfterSubmitWorkspace(creationPromise);
+  }
+
+
+  /**
+   * Handle the redirect for the given promise after workspace has been created
+   * @param promise used to gather workspace data
+   */
+  redirectAfterSubmitWorkspace(promise) {
+    promise.then((workspaceData) => {
       let infoMessage = 'Workspace ' + workspaceData.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
       this.$location.path('/workspace/' + workspaceData.id);
     }, (error) => {
       let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
       this.cheNotification.showError(errorMessage);
-      this.$location.path('/workspaces');
     });
   }
 

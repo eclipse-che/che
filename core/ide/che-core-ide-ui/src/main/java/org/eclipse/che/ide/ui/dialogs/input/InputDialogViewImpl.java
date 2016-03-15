@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dialogs.input;
 
-import org.eclipse.che.ide.ui.UILocalizationConstant;
 import org.eclipse.che.ide.ui.window.Window;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -37,20 +37,20 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     private static ConfirmWindowUiBinder uiBinder = GWT.create(ConfirmWindowUiBinder.class);
     /** The window footer. */
     private final InputDialogFooter footer;
+
     @UiField
     Label   label;
     @UiField
     TextBox value;
     @UiField
     Label   errorHint;
-    private ActionDelegate         delegate;
-    private int                    selectionStartIndex;
-    private int                    selectionLength;
-    private UILocalizationConstant localizationConstant;
+
+    private ActionDelegate delegate;
+    private int            selectionStartIndex;
+    private int            selectionLength;
 
     @Inject
-    public InputDialogViewImpl(final @NotNull InputDialogFooter footer, UILocalizationConstant localizationConstant) {
-        this.localizationConstant = localizationConstant;
+    public InputDialogViewImpl(final @NotNull InputDialogFooter footer) {
         Widget widget = uiBinder.createAndBindUi(this);
         setWidget(widget);
 
@@ -81,6 +81,7 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
 
     @Override
     protected void onClose() {
+        footer.onClose();
     }
 
     @Override
@@ -96,6 +97,7 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     @Override
     public void closeDialog() {
         this.hide();
+        footer.onClose();
     }
 
     @Override
@@ -133,6 +135,16 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     public void hideErrorHint() {
         errorHint.setText("");
         footer.getOkButton().setEnabled(true);
+    }
+
+    @Override
+    public boolean isOkButtonInFocus() {
+        return footer.isOkButtonInFocus();
+    }
+
+    @Override
+    public boolean isCancelButtonInFocus() {
+        return footer.isCancelButtonInFocus();
     }
 
     @UiHandler("value")

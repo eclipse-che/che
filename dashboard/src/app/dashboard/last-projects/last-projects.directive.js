@@ -27,8 +27,8 @@ export class DashboardLastProjects {
     this.restrict = 'E';
     this.templateUrl = 'app/dashboard/last-projects/last-projects.html';
 
-    this.controller = 'DashboardLastProjectsCtrl';
-    this.controllerAs = 'dashboardLastProjectsCtrl';
+    this.controller = 'DashboardLastProjectsController';
+    this.controllerAs = 'dashboardLastProjectsController';
     this.bindToController = true;
   }
 

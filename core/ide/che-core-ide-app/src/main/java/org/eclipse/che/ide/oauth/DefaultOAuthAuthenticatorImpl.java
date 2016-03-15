@@ -10,9 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.oauth;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
@@ -44,10 +49,22 @@ public class DefaultOAuthAuthenticatorImpl implements OAuth2Authenticator, OAuth
     }
 
     @Override
-    public void authorize(String authenticationUrl, @NotNull final AsyncCallback<OAuthStatus> callback) {
+    public void authenticate(String authenticationUrl, @NotNull final AsyncCallback<OAuthStatus> callback) {
         this.authenticationUrl = authenticationUrl;
         this.callback = callback;
         showDialog();
+    }
+
+    public Promise<OAuthStatus> authenticate(String authenticationUrl) {
+        this.authenticationUrl = authenticationUrl;
+
+        return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<OAuthStatus>() {
+            @Override
+            public void makeCall(AsyncCallback<OAuthStatus> callback) {
+                DefaultOAuthAuthenticatorImpl.this.callback = callback;
+                showDialog();
+            }
+        });
     }
 
     private void showDialog() {

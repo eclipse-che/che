@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.client.importer.page;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.regexp.shared.RegExp;
@@ -74,6 +75,8 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
     private final AppContext                          appContext;
     private       OAuth2Authenticator                 gitHubAuthenticator;
 
+    private       boolean                             ignoreChanges;
+
     @Inject
     public GithubImporterPagePresenter(GithubImporterPageView view,
                                        OAuth2AuthenticatorRegistry gitHubAuthenticatorRegistry,
@@ -99,6 +102,10 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
 
     @Override
     public void projectNameChanged(@NotNull String name) {
+        if (ignoreChanges) {
+            return;
+        }
+
         dataObject.setName(name);
         updateDelegate.updateControls();
 
@@ -110,14 +117,18 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
      */
     private void validateProjectName() {
         if (NameUtils.checkProjectName(view.getProjectName())) {
-            view.hideNameError();
+            view.markNameValid();
         } else {
-            view.showNameError();
+            view.markNameInvalid();
         }
     }
 
     @Override
     public void projectUrlChanged(@NotNull String url) {
+        if (ignoreChanges) {
+            return;
+        }
+
         dataObject.getSource().setLocation(url);
         isGitUrlCorrect(url);
 
@@ -189,7 +200,17 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
     public void go(@NotNull AcceptsOneWidget container) {
         container.setWidget(view);
 
-        updateView();
+        if (Strings.isNullOrEmpty(dataObject.getName()) && Strings.isNullOrEmpty(dataObject.getSource().getLocation())) {
+            ignoreChanges = true;
+
+            view.unmarkURL();
+            view.unmarkName();
+            view.setURLErrorMessage(null);
+        }
+
+        view.setProjectName(dataObject.getName());
+        view.setProjectDescription(dataObject.getDescription());
+        view.setProjectUrl(dataObject.getSource().getLocation());
 
         view.setKeepDirectoryChecked(false);
         view.setDirectoryName("");
@@ -198,15 +219,8 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
 
         view.setInputsEnableState(true);
         view.focusInUrlInput();
-    }
 
-    /**
-     * Updates the view.
-     */
-    private void updateView() {
-        view.setProjectName(dataObject.getName());
-        view.setProjectDescription(dataObject.getDescription());
-        view.setProjectUrl(dataObject.getSource().getLocation());
+        ignoreChanges = false;
     }
 
     @Override
@@ -268,9 +282,9 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
      */
     private void authorize() {
         showProcessing(true);
-        gitHubAuthenticator.authorize(
+        gitHubAuthenticator.authenticate(
                 OAuth2AuthenticatorUrlProvider.get(restContext, "github", appContext.getCurrentUser().getProfile().getUserId(),
-                                                   Lists.asList("user", new String[] {"repo", "write:public_key"})),
+                                                   Lists.asList("user", new String[]{"repo", "write:public_key"})),
                 new AsyncCallback<OAuthStatus>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -291,7 +305,9 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
         dataObject.setDescription(repository.getDescription());
         dataObject.getSource().setLocation(repository.getRepositoryUrl());
 
-        updateView();
+        view.setProjectName(repository.getName());
+        view.setProjectDescription(repository.getDescription());
+        view.setProjectUrl(repository.getRepositoryUrl());
 
         updateDelegate.updateControls();
     }
@@ -402,26 +418,38 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
      */
     private boolean isGitUrlCorrect(@NotNull String url) {
         if (WHITE_SPACE.test(url)) {
-            view.showUrlError(locale.importProjectMessageStartWithWhiteSpace());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageStartWithWhiteSpace());
             return false;
         }
+
         if (SCP_LIKE_SYNTAX.test(url)) {
-            view.hideUrlError();
+            view.markURLValid();
+            view.setURLErrorMessage(null);
             return true;
         }
+
         if (!PROTOCOL.test(url)) {
-            view.showUrlError(locale.importProjectMessageProtocolIncorrect());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageProtocolIncorrect());
             return false;
         }
+
         if (!(HOST1.test(url) || HOST2.test(url))) {
-            view.showUrlError(locale.importProjectMessageHostIncorrect());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageHostIncorrect());
             return false;
         }
+
         if (!(REPO_NAME.test(url))) {
-            view.showUrlError(locale.importProjectMessageNameRepoIncorrect());
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.importProjectMessageNameRepoIncorrect());
             return false;
         }
-        view.hideUrlError();
+
+        view.markURLValid();
+        view.setURLErrorMessage(null);
         return true;
     }
+
 }

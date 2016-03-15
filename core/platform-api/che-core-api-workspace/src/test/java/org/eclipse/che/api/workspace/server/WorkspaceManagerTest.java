@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -17,8 +18,10 @@ import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
+import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -36,6 +39,8 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -52,6 +57,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -89,7 +95,7 @@ public class WorkspaceManagerTest {
     private WorkspaceManager workspaceManager;
 
     @BeforeMethod
-    public void setUpManager() throws Exception {
+    public void setUp() throws Exception {
         workspaceManager = spy(new WorkspaceManager(workspaceDao, registry, workspaceConfigValidator, eventService, machineManager));
         workspaceManager.setHooks(workspaceHooks);
 
@@ -372,9 +378,48 @@ public class WorkspaceManagerTest {
     }
 
     @Test
+    public void performAsyncStartShouldUseDefaultEnvIfNullEnvNameProvided() throws Exception {
+        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(registry.get(workspace.getId())).thenThrow(new NotFoundException(""));
+        when(registry.start(any(), anyString(), anyBoolean())).thenReturn(createRuntime(workspace));
+
+        workspaceManager.performAsyncStart(workspace, null, false, "account");
+
+        // timeout is needed because this invocation will run in separate thread asynchronously
+        verify(registry, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
+    }
+
+    @Test
+    public void performAsyncStartShouldUseProvidedEnvInsteadOfDefault() throws Exception {
+        final WorkspaceConfigDto config = createConfig();
+        final EnvironmentDto nonDefaultEnv = newDto(EnvironmentDto.class).withName("non-default-env")
+                                                                          .withMachineConfigs(
+                                                                                  config.getEnvironments().get(0).getMachineConfigs())
+                                                                          .withRecipe(null);
+        config.getEnvironments().add(nonDefaultEnv);
+        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(config, "user123", "account");
+        when(registry.get(workspace.getId())).thenThrow(new NotFoundException(""));
+        when(registry.start(any(), anyString(), anyBoolean())).thenReturn(createRuntime(workspace));
+
+        workspaceManager.performAsyncStart(workspace, nonDefaultEnv.getName(), false, "account");
+
+        // timeout is needed because this invocation will run in separate thread asynchronously
+        verify(registry, timeout(2000)).start(workspace, nonDefaultEnv.getName(), false);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Couldn't start workspace '.*', workspace doesn't have environment '.*'")
+    public void performAsyncStartShouldCheckThatEnvWithProvidedEnvNameExists() throws Exception {
+        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(registry.get(workspace.getId())).thenThrow(new NotFoundException(""));
+
+        workspaceManager.performAsyncStart(workspace, "not-existing-env-name", false, "account");
+    }
+
+    @Test
     public void shouldBeAbleToStartTemporaryWorkspace() throws Exception {
         final WorkspaceConfigDto config = createConfig();
-        final UsersWorkspace workspace = workspaceManager.createWorkspace(config, "user123", "account");
+        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(config, "user123", "account");
         when(registry.start(workspaceCaptor.capture(), anyString(), anyBoolean())).thenReturn(createRuntime(workspace));
 
         final RuntimeWorkspaceImpl runtime = workspaceManager.startTemporaryWorkspace(config, "account");
@@ -388,6 +433,8 @@ public class WorkspaceManagerTest {
                               .get(0));
         verify(workspaceHooks).beforeCreate(captured, "account");
         verify(workspaceHooks).afterCreate(runtime, "account");
+        verify(workspaceHooks).beforeStart(captured, config.getDefaultEnv(), "account");
+        verify(workspaceManager).performSyncStart(captured, config.getDefaultEnv(), false, "account");
     }
 
     @Test
@@ -424,7 +471,9 @@ public class WorkspaceManagerTest {
     public void shouldBeAbleToGetSnapshots() throws Exception {
         when(machineManager.getSnapshots("user123", "workspace123")).thenReturn(singletonList(any()));
 
-        assertEquals(workspaceManager.getSnapshot("workspace123").size(), 1);
+        final List<SnapshotImpl> snapshots = workspaceManager.getSnapshot("workspace123");
+
+        assertEquals(snapshots.size(), 1);
     }
 
     private RuntimeWorkspaceImpl createRuntime(UsersWorkspace workspace) {
@@ -434,11 +483,19 @@ public class WorkspaceManagerTest {
     }
 
     private static WorkspaceConfigDto createConfig() {
-        MachineConfigDto devMachine = newDto(MachineConfigDto.class).withDev(true)
-                                                                    .withName("dev-machine")
-                                                                    .withType("docker")
-                                                                    .withSource(newDto(MachineSourceDto.class).withLocation("location")
-                                                                                                              .withType("recipe"));
+        MachineConfigDto devMachine =
+                newDto(MachineConfigDto.class).withDev(true)
+                                              .withName("dev-machine")
+                                              .withType("docker")
+                                              .withSource(newDto(MachineSourceDto.class).withLocation("location")
+                                                                                        .withType("recipe"))
+                                              .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
+                                                                                                    .withPort("8080")
+                                                                                                    .withProtocol("https"),
+                                                                         newDto(ServerConfDto.class).withRef("ref2")
+                                                                                                    .withPort("9090/udp")
+                                                                                                    .withProtocol("someprotocol")))
+                                              .withEnvVariables(Collections.singletonMap("key1", "value1"));
         EnvironmentDto devEnv = newDto(EnvironmentDto.class).withName("dev-env")
                                                             .withMachineConfigs(new ArrayList<>(singletonList(devMachine)))
                                                             .withRecipe(null);

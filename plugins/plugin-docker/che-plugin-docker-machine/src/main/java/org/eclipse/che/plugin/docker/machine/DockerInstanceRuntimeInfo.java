@@ -12,20 +12,25 @@ package org.eclipse.che.plugin.docker.machine;
 
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
-import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Docker implementation of {@link MachineRuntimeInfo}
@@ -60,16 +65,31 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
      */
     public static final String USER_TOKEN = "USER_TOKEN";
 
-    protected static final Pattern SERVICE_LABEL_PATTERN  =
-            Pattern.compile("che:server:(?<port>[0-9]+(/tcp|/udp)?):(?<servprop>ref|protocol)");
+    protected static final String SERVER_CONF_LABEL_PREFIX          = "che:server:";
+    protected static final String SERVER_CONF_LABEL_REF_SUFFIX      = ":ref";
+    protected static final String SERVER_CONF_LABEL_PROTOCOL_SUFFIX = ":protocol";
 
-    private final ContainerInfo info;
-    private final String        containerHost;
+    private final ContainerInfo               info;
+    private final String                      containerHost;
+    private final Map<String, ServerConfImpl> serversConf;
 
     @Inject
-    public DockerInstanceRuntimeInfo(@Assisted  ContainerInfo containerInfo, @Assisted String containerHost) {
+    public DockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
+                                     @Assisted String containerHost,
+                                     @Assisted MachineConfig machineConfig,
+                                     @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineSystemServers,
+                                     @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers) {
         this.info = containerInfo;
         this.containerHost = containerHost;
+        Stream<ServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
+        if (machineConfig.isDev()) {
+            confStream = Stream.concat(confStream, devMachineSystemServers.stream());
+        }
+        // convert list to map for quick search and normalize port - add /tcp if missing
+        this.serversConf = confStream.collect(toMap(srvConf -> srvConf.getPort().contains("/") ?
+                                                               srvConf.getPort() :
+                                                               srvConf.getPort() + "/tcp",
+                                                    ServerConfImpl::new));
     }
 
     @Override
@@ -182,59 +202,79 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     }
 
     @Override
-    public Map<String, Server> getServers() {
+    public Map<String, ServerImpl> getServers() {
         return addDefaultReferenceForServersWithoutReference(
-                addRefAndUrlToServerFromImageLabels(getServersWithFilledPorts(containerHost,
-                                                                              info.getNetworkSettings().getPorts()),
-                                                    info.getConfig().getLabels()));
+                addRefAndUrlToServers(getServersWithFilledPorts(containerHost,
+                                                                info.getNetworkSettings().getPorts()),
+                                      info.getConfig().getLabels()));
     }
 
-    private Map<String, Server> addDefaultReferenceForServersWithoutReference(Map<String, Server> servers) {
+    private Map<String, ServerImpl> addDefaultReferenceForServersWithoutReference(Map<String, ServerImpl> servers) {
         // replace / if server port contains it. E.g. 5411/udp
         servers.entrySet()
                .stream()
                .filter(server -> server.getValue().getRef() == null)
                .forEach(server -> {
                    // replace / if server port contains it. E.g. 5411/udp
-                   ((ServerImpl)server.getValue()).setRef("Server-" + server.getKey().replace("/", "-"));
+                   server.getValue().setRef("Server-" + server.getKey().replace("/", "-"));
                });
         return servers;
     }
 
-    protected HashMap<String, Server> getServersWithFilledPorts(final String host, final Map<String, List<PortBinding>> exposedPorts) {
-        final HashMap<String, Server> servers = new LinkedHashMap<>();
-
-        for (Map.Entry<String, List<PortBinding>> portEntry : exposedPorts.entrySet()) {
-            // in form 1234/tcp or 1234
-            String portOrPortUdp = portEntry.getKey();
-            // we are assigning ports automatically, so have 1 to 1 binding (at least per protocol)
-            if (!portOrPortUdp.endsWith("/udp")) {
-                // cut off /tcp if it presents
-                portOrPortUdp = portOrPortUdp.split("/", 2)[0];
+    protected Map<String, ServerImpl> addRefAndUrlToServers(final Map<String, ServerImpl> servers, final Map<String, String> labels) {
+        final Map<String, ServerConfImpl> serversConfFromLabels = getServersConfFromLabels(servers.keySet(), labels);
+        for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
+            ServerConf serverConf = serversConf.getOrDefault(serverEntry.getKey(), serversConfFromLabels.get(serverEntry.getKey()));
+            if (serverConf != null) {
+                if (serverConf.getRef() != null) {
+                    serverEntry.getValue().setRef(serverConf.getRef());
+                }
+                if (serverConf.getProtocol() != null) {
+                    serverEntry.getValue().setUrl(serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress());
+                }
             }
-            final PortBinding portBinding = portEntry.getValue().get(0);
-            servers.put(portOrPortUdp, new ServerImpl(null, host + ":" + portBinding.getHostPort(), null));
         }
 
         return servers;
     }
 
-    protected Map<String, Server> addRefAndUrlToServerFromImageLabels(final Map<String, Server> servers, final Map<String, String> labels) {
-        for (Map.Entry<String, String> label : labels.entrySet()) {
-            final Matcher matcher = SERVICE_LABEL_PATTERN.matcher(label.getKey());
-            if (matcher.matches()) {
-                final String port = matcher.group("port");
-                if (servers.containsKey(port)) {
-                    final ServerImpl server = (ServerImpl)servers.get(port);
-                    if ("ref".equals(matcher.group("servprop"))) {
-                        server.setRef(label.getValue());
-                    } else {
-                        // value is protocol
-                        server.setUrl(label.getValue() + "://" + server.getAddress());
-                    }
-                }
-            }
+    protected Map<String, ServerImpl> getServersWithFilledPorts(final String host, final Map<String, List<PortBinding>> exposedPorts) {
+        final HashMap<String, ServerImpl> servers = new LinkedHashMap<>();
+
+        for (Map.Entry<String, List<PortBinding>> portEntry : exposedPorts.entrySet()) {
+            // in form 1234/tcp
+            String portProtocol = portEntry.getKey();
+            // we are assigning ports automatically, so have 1 to 1 binding (at least per protocol)
+            String externalPort = portEntry.getValue().get(0).getHostPort();
+            servers.put(portProtocol, new ServerImpl(null,
+                                                     host + ":" + externalPort,
+                                                     null));
         }
+
         return servers;
+    }
+
+    private Map<String, ServerConfImpl> getServersConfFromLabels(final Set<String> portProtocols, final Map<String, String> labels) {
+        final HashMap<String, ServerConfImpl> serversConf = new LinkedHashMap<>();
+        for (String portProtocol : portProtocols) {
+            String ref = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_REF_SUFFIX);
+            String protocol = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_PROTOCOL_SUFFIX);
+            // it is allowed to use label without part /tcp that describes tcp port, e.g. 8080 describes 8080/tcp
+            if (ref == null && !portProtocol.endsWith("/udp")) {
+                ref = labels.get(SERVER_CONF_LABEL_PREFIX +
+                                 portProtocol.substring(0, portProtocol.length() - 4) +
+                                 SERVER_CONF_LABEL_REF_SUFFIX);
+            }
+            if (protocol == null && !portProtocol.endsWith("/udp")) {
+                protocol = labels.get(SERVER_CONF_LABEL_PREFIX +
+                                      portProtocol.substring(0, portProtocol.length() - 4) +
+                                      SERVER_CONF_LABEL_PROTOCOL_SUFFIX);
+            }
+            serversConf.put(portProtocol, new ServerConfImpl(ref,
+                                                             portProtocol,
+                                                             protocol));
+        }
+
+        return serversConf;
     }
 }

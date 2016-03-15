@@ -34,7 +34,19 @@ public interface MachineRuntimeInfo {
     String projectsRoot();
 
     /**
-     * Returns mapping of exposed ports to {@link Server}
+     * Returns mapping of exposed ports to {@link Server}.
+     *
+     * <p>Key consist of port number and transport protocol - tcp or udp with slash between these parts.
+     * <br>Example:
+     * <pre>
+     * {
+     *     8080/tcp : {
+     *         "ref" : "server_reference",
+     *         "address" : "server-with-machines.com",
+     *         "url" : "http://server-with-machines.com:8080"
+     *     }
+     * }
+     * </pre>
      */
     Map<String, ? extends Server> getServers();
 }
