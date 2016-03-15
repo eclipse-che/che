@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.github.server.rest;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -230,6 +232,36 @@ public class GitHubService {
         } catch (Exception e) {
             LOG.error("Creating  pull request fail", e);
             throw new ServerException(e.getMessage());
+        }
+    }
+
+    @PUT
+    @Path("pullrequest/{user}/{repository}/{pullRequestId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public GitHubPullRequest updatePullRequest(@PathParam("user")
+                                               String user,
+                                               @PathParam("repository")
+                                               String repository,
+                                               @PathParam("pullRequestId")
+                                               String pullRequestId,
+                                               GitHubPullRequest pullRequest) throws ServerException,
+                                                                                     UnauthorizedException {
+        try {
+            final GHPullRequest ghPullRequest = gitHubFactory.connect()
+                                                             .getUser(user)
+                                                             .getRepository(repository)
+                                                             .getPullRequest(Integer.valueOf(pullRequestId));
+            final String body = pullRequest.getBody();
+            if (body != null && !body.equals(ghPullRequest.getBody())) {
+                ghPullRequest.setBody(body);
+            }
+            final String title = pullRequest.getTitle();
+            if (title != null && !title.equals(ghPullRequest.getTitle())) {
+                ghPullRequest.setTitle(title);
+            }
+            return gitHubDTOFactory.createPullRequest(ghPullRequest);
+        } catch (IOException ioEx) {
+            throw new ServerException(ioEx.getMessage());
         }
     }
 

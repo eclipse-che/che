@@ -288,6 +288,16 @@ public class GitServiceClientImpl implements GitServiceClient{
         asyncRequestFactory.createPostRequest(url, pushRequest).send(callback);
     }
 
+    @Override
+    public Promise<PushResponse> push(String wsId, ProjectConfigDto project, List<String> refSpec, String remote, boolean force) {
+        PushRequest pushRequest = dtoFactory.createDto(PushRequest.class)
+                                            .withRemote(remote)
+                                            .withRefSpec(refSpec)
+                                            .withForce(force);
+        return asyncRequestFactory.createPostRequest(extPath + "/git/" + wsId + PUSH + "?projectPath=" + project.getPath(), pushRequest)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(PushResponse.class));
+    }
+
     /** {@inheritDoc} */
     @Override
     public void remoteList(String workspaceId,
