@@ -508,15 +508,16 @@ public class StandardComponentInitializer {
         DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_PROFILE);
         actionManager.registerAction("redirectToDashboardProjectsAction", redirectToDashboardProjectsAction);
         actionManager.registerAction("redirectToDashboardWorkspacesAction", redirectToDashboardWorkspacesAction);
+        actionManager.registerAction("showPreferences", showPreferencesAction);
         profileGroup.add(redirectToDashboardProjectsAction);
         profileGroup.add(redirectToDashboardWorkspacesAction);
+
+        profileGroup.addSeparator();
+        profileGroup.add(showPreferencesAction);
 
         // Compose Help menu
         DefaultActionGroup helpGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_HELP);
         helpGroup.addSeparator();
-
-        actionManager.registerAction("showPreferences", showPreferencesAction);
-        helpGroup.add(showPreferencesAction);
 
         actionManager.registerAction("setupProjectAction", settingsAction);
         helpGroup.add(settingsAction);
