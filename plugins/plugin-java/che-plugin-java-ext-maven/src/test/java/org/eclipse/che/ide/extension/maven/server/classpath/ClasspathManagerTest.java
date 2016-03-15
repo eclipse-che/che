@@ -30,7 +30,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.fest.util.Files;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -90,7 +89,7 @@ public class ClasspathManagerTest extends BaseTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-        Files.delete(localRepository);
+//        Files.delete(localRepository);
     }
 
     @Test

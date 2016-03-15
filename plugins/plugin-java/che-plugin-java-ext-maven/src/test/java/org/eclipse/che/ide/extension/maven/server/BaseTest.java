@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistryImpl;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -76,7 +76,7 @@ public abstract class BaseTest {
 
     protected LocalVirtualFileSystemProvider vfsProvider;
 
-    protected ProjectRegistryImpl projectRegistry;
+    protected ProjectRegistry projectRegistry;
 
     protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
@@ -140,7 +140,7 @@ public abstract class BaseTest {
 
         projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
-        projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
         projectRegistry.initProjects();
 
         importerRegistry = new ProjectImporterRegistry(new HashSet<>());
@@ -210,7 +210,7 @@ public abstract class BaseTest {
         config.setType(MAVEN_ID);
         config.setPath(name);
 
-        projectRegistry.putProject(config, pm.getProjectsRoot().getChildFolder(name), true, true);
+        projectRegistry.setProjectType(folder.getPath().toString(),MAVEN_ID, false);
         return folder;
     }
 

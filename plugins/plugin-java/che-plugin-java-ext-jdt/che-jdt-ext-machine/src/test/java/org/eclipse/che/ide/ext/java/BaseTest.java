@@ -14,14 +14,12 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.ProjectRegistryImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
@@ -30,7 +28,6 @@ import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.jdt.javadoc.JavaElementLinks;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
@@ -45,9 +42,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.nio.file.PathMatcher;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,7 +78,7 @@ public abstract class BaseTest {
 
     protected static LocalVirtualFileSystemProvider vfsProvider;
 
-    protected static ProjectRegistryImpl projectRegistry;
+    protected static ProjectRegistry projectRegistry;
 
     protected static FileWatcherNotificationHandler fileWatcherNotificationHandler;
 
@@ -119,7 +114,7 @@ public abstract class BaseTest {
 
             projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
-            projectRegistry = new ProjectRegistryImpl(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+            projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
             projectRegistry.initProjects();
 
             importerRegistry = new ProjectImporterRegistry(new HashSet<>());

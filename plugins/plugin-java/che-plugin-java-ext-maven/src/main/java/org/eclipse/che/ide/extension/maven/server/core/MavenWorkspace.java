@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathHelper;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
@@ -115,13 +114,13 @@ public class MavenWorkspace {
 //                     .filter(project -> projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null)
                      .forEach(project -> {
                          try {
-                             ProjectConfigImpl config = new ProjectConfigImpl();
-                             config.setType(MAVEN_ID);
+//                             ProjectConfigImpl config = new ProjectConfigImpl();
+//                             config.setType(MAVEN_ID);
                              String path = project.getProject().getFullPath().toOSString();
-                             config.setPath(path);
-                             config.setName(project.getProject().getFullPath().lastSegment());
+//                             config.setPath(path);
+//                             config.setName(project.getProject().getFullPath().lastSegment());
 
-                             projectRegistry.putProject(config, projectManager.getProjectsRoot().getChildFolder(path), true, true);
+                             projectRegistry.setProjectType(path, MAVEN_ID, false);
                          } catch (ConflictException | ForbiddenException | ServerException | NotFoundException e) {
                              LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
                          }
@@ -132,8 +131,8 @@ public class MavenWorkspace {
     private void removeProjects(List<MavenProject> removed) {
         removed.forEach(project -> {
             try {
-                projectRegistry.removeProjects(project.getProject().getFullPath().toOSString());
-            } catch (ServerException e) {
+                projectRegistry.removeProjectType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+            } catch (ServerException | ForbiddenException | ConflictException | NotFoundException e) {
                 LOG.error(e.getMessage(), e);
             }
         });
