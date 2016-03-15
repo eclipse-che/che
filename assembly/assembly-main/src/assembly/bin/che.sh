@@ -31,30 +31,31 @@ init_global_variables () {
   USAGE="
 Usage:
   che [OPTIONS] [COMMAND]
-     -v,        --vmware             Use the docker-machine VMware driver (instead of VirtualBox)
-     -m:name,   --machine:name       For Win & Mac, sets the docker-machine VM name; default=default
-     -p:port,   --port:port          Port that Che server will use for HTTP requests; default=8080
-     -r:ip,     --remote:ip          If Che clients are not localhost, set to IP address of Che server
-     -h,        --help               Show this help
-     -d,        --debug              Use debug mode (prints command line options + app server debug)
+     -v,        --vmware                Use the docker-machine VMware driver (instead of VirtualBox)
+     -m:name,   --machine:name          For Win & Mac, sets the docker-machine VM name; default=default
+     -a:driver, --machine-driver:driver For Win & Mac, specifies the docker-machine driver to use; default=vbox
+     -p:port,   --port:port             Port that Che server will use for HTTP requests; default=8080
+     -r:ip,     --remote:ip             If Che clients are not localhost, set to IP address of Che server
+     -h,        --help                  Show this help
+     -d,        --debug                 Use debug mode (prints command line options + app server debug)
 
   Options when running Che natively:
-     -b,        --blocking-entropy   Security: https://wiki.apache.org/tomcat/HowTo/FasterStartUp
-     -g,        --registry           Launch Docker registry as a container (used for ws snapshots)
-     -s:client, --skip:client        Do not print browser client connection information
-     -s:java,   --skip:java          Do not enforce Java version checks
-     -s:uid,    --skip:uid           Do not enforce UID=1000 for Docker
+     -b,        --blocking-entropy      Security: https://wiki.apache.org/tomcat/HowTo/FasterStartUp
+     -g,        --registry              Launch Docker registry as a container (used for ws snapshots)
+     -s:client, --skip:client           Do not print browser client connection information
+     -s:java,   --skip:java             Do not enforce Java version checks
+     -s:uid,    --skip:uid              Do not enforce UID=1000 for Docker
 
   Options when running Che in a Docker container:
-     -i,        --image              Launches Che within a Docker container using latest image
-     -i:tag,    --image:tag          Launches Che within a Docker container using specific image
-     -c:name,   --container:name     Sets the container name if -i provided; default=che
-     -t,        --stop-container     If stopping Che, will also stop Che container if Che ran with -i
+     -i,        --image                 Launches Che within a Docker container using latest image
+     -i:tag,    --image:tag             Launches Che within a Docker container using specific image
+     -c:name,   --container:name        Sets the container name if -i provided; default=che
+     -t,        --stop-container        If stopping Che, will also stop Che container if Che ran with -i
 
   Commands:
-     run                             (Default) Starts Che server with logging in current console
-     start                           Starts Che server in new console
-     stop                            Stops Che server
+     run                                (Default) Starts Che server with logging in current console
+     start                              Starts Che server in new console
+     stop                               Stops Che server
 
 Docs: http://eclipse.org/che/getting-started.
 
@@ -72,6 +73,7 @@ https://eclipse-che.readme.io/docs/networking."
   USE_HELP=false
   CHE_SERVER_ACTION=run
   VM=${CHE_DOCKER_MACHINE_NAME:-default}
+  MACHINE_DRIVER=virtualbox
   CONTAINER=${CHE_CONTAINER_NAME:-che}
   USE_DEBUG=false
   SKIP_PRINT_CLIENT=false
@@ -110,9 +112,6 @@ parse_command_line () {
     -i|--image)
       USE_DOCKER=true
     ;;
-    -v|--vmware)
-      USE_VMWARE=true
-    ;;
     -g|--registry)
       LAUNCH_REGISTRY=true
     ;;
@@ -140,6 +139,22 @@ parse_command_line () {
     -m:*|--machine:*)
       if [ "${command_line_option#*:}" != "" ]; then
         VM="${command_line_option#*:}"
+      fi
+    ;;
+    -a:*|--machine-driver:*)
+      if [ "${command_line_option#*:}" != "" ]; then
+        case "${command_line_option#*:}" in
+          vbox)
+            MACHINE_DRIVER=virtualbox
+          ;;
+          fusion)
+            MACHINE_DRIVER=fusion
+          ;;
+          *)
+          # unsupported driver
+          error_exit "Only vbox and fusion docker-machine drivers are supported."
+          ;;
+        esac
       fi
     ;;
     -s:*|--skip:*)
@@ -182,11 +197,11 @@ parse_command_line () {
   if ${USE_DEBUG}; then
     echo "USE_BLOCKING_ENTROPY: ${USE_BLOCKING_ENTROPY}"
     echo "USE_DOCKER: ${USE_DOCKER}"
-    echo "USE_VMWARE": ${USE_VMWARE}
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
     echo "CHE_DOCKER_MACHINE: ${VM}"
+    echo "MACHINE_DRIVER: ${MACHINE_DRIVER}"
     echo "LAUNCH_REGISTRY: ${LAUNCH_REGISTRY}"
     echo "SKIP_PRINT_CLIENT: ${SKIP_PRINT_CLIENT}"
     echo "SKIP_DOCKER_UID: ${SKIP_DOCKER_UID}"
@@ -320,9 +335,10 @@ get_docker_ready () {
 
     # Path to run VMware on the command line - used for creating VMs
     # TODO: add support for VMware Workstation
-    if [ "${MAC}" == "true" ] && [ "${USE_VMWARE}" == "true" ]; then
+    if [ "${MAC}" == "true" ] && [ "${MACHINE_DRIVER}" == "fusion" ]; then
       VMRUN="/Applications/VMware Fusion.app/Contents/Library/vmrun"
-      VM_CHECK_CMD="${VMRUN} list | grep ${VM}"
+      echo "$VMRUN"
+      VM_CHECK_CMD="$("$VMRUN" list \| grep $VM)"
       DOCKER_MACHINE_DRIVER=vmwarefusion
       if [ ! -f "$VMRUN" ]; then
         error_exit "Could not find vmrun. Expected vmrun in $VMRUN. Check VMware Fusion installation."
