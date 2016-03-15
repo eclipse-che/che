@@ -307,7 +307,7 @@ public class ProjectRegistry {
         List<String> newMixins = project.getMixins();
         String newType = project.getType();
 
-        if(!newMixins.contains(type))
+        if(newMixins.contains(type))
             newMixins.remove(type);
         else if(newType.equals(type)) {
             if(project.isDetected()) {
