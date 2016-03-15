@@ -22,6 +22,7 @@ import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
 import org.eclipse.che.ide.extension.maven.server.MavenServerWrapper;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectManager;
+import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.maven.server.MavenTerminal;
 
 import javax.ws.rs.GET;
@@ -40,8 +41,8 @@ import static javax.ws.rs.core.MediaType.TEXT_XML;
  */
 @Path("/maven/{wsId}/server")
 public class MavenServerService {
-    private final MavenServerManager        mavenServerManager;
-    private final ProjectRegistry projectRegistry;
+    private final MavenServerManager mavenServerManager;
+    private final ProjectRegistry    projectRegistry;
 
     @PathParam("wsId")
     private String workspaceId;
@@ -54,6 +55,9 @@ public class MavenServerService {
 
     @Inject
     private MavenProjectManager projectManager;
+
+    @Inject
+    private ClasspathManager classpathManager;
 
     @Inject
     public MavenServerService(MavenServerManager mavenServerManager, ProjectRegistry projectRegistry) {
@@ -99,4 +103,12 @@ public class MavenServerService {
             mavenServer.reset();
         }
     }
+
+    @GET
+    @Path("download/sources")
+    public boolean downloadSource(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) {
+        return classpathManager.downloadSources(projectPath, fqn);
+    }
+
+
 }

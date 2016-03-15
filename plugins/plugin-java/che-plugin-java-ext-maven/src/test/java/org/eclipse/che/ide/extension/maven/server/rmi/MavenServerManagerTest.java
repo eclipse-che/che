@@ -80,8 +80,7 @@ public class MavenServerManagerTest {
     public void testBuildMavenServerParametersClassPathMain() throws Exception {
         JavaParameters parameters = manager.buildMavenServerParameters();
         List<String> classPath = parameters.getClassPath();
-        assertThat(classPath).contains(mavenServerPath + "/maven-server-rmi.jar")
-                             .contains(mavenServerPath + "/maven-server-impl.jar")
+        assertThat(classPath).contains(mavenServerPath + "/maven-server-impl.jar")
                              .contains(mavenServerPath + "/maven-server-api.jar");
     }
 

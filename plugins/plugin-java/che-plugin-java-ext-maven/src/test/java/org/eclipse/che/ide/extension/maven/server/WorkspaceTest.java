@@ -12,14 +12,9 @@ package org.eclipse.che.ide.extension.maven.server;
 
 import com.google.gson.JsonObject;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenCommunication;
 import org.eclipse.che.ide.extension.maven.server.core.MavenExecutorService;
@@ -57,7 +52,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -72,7 +66,7 @@ public class WorkspaceTest extends BaseTest {
     @BeforeMethod
     public void setUp() throws Exception {
         MavenServerManagerTest.MyMavenServerProgressNotifier mavenNotifier = new MavenServerManagerTest.MyMavenServerProgressNotifier();
-        projectManager = new MavenProjectManager(mavenServerManager, new MavenTerminal() {
+        MavenTerminal terminal = new MavenTerminal() {
             @Override
             public void print(int level, String message, Throwable throwable) throws RemoteException {
                 System.out.println(message);
@@ -80,7 +74,8 @@ public class WorkspaceTest extends BaseTest {
                     throwable.printStackTrace();
                 }
             }
-        }, mavenNotifier, new EclipseWorkspaceProvider());
+        };
+        projectManager = new MavenProjectManager(mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
         mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
                                             new MavenCommunication() {
                                                 @Override
@@ -98,7 +93,7 @@ public class WorkspaceTest extends BaseTest {
                                                 public void send(JsonObject object, MessageType type) {
 
                                                 }
-                                            }, new ClasspathManager(root.getAbsolutePath()), pm);
+                                            }, new ClasspathManager(root.getAbsolutePath(), mavenServerManager, projectManager, terminal, mavenNotifier), pm);
     }
 
 
@@ -524,70 +519,4 @@ public class WorkspaceTest extends BaseTest {
                                                  .containsOnly("/parent", "/parent/module1");
     }
 
-    private FolderEntry createMultimoduleProject() throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-        String pom = "<groupId>test</groupId>" +
-                     "<artifactId>testArtifact</artifactId>" +
-                     "<version>42</version>" +
-                     "<modules>" +
-                     "    <module>module1</module>" +
-                     "    <module>module2</module>" +
-                     "</modules>";
-        FolderEntry parentFolder = createTestProject("parent", pom);
-
-        String pomModule1 = "<groupId>module1</groupId>" +
-                            "<artifactId>testModule1</artifactId>" +
-                            "<version>1</version>" +
-                            "<dependencies>" +
-                            "    <dependency>" +
-                            "        <groupId>junit</groupId>" +
-                            "        <artifactId>junit</artifactId>" +
-                            "        <version>4.12</version>" +
-                            "    </dependency>" +
-                            "</dependencies>";
-        createTestProject("parent/module1", pomModule1);
-
-        String pomModule2 = "<groupId>module2</groupId>" +
-                            "<artifactId>testModule2</artifactId>" +
-                            "<version>2</version>" +
-                            "<dependencies>" +
-                            "    <dependency>" +
-                            "        <groupId>junit</groupId>" +
-                            "        <artifactId>junit</artifactId>" +
-                            "        <version>4.12</version>" +
-                            "    </dependency>" +
-                            "</dependencies>";
-        createTestProject("parent/module2", pomModule2);
-        return parentFolder;
-    }
-
-    private void createTestProjectWithPackages(String projectName, String pom, String... packages)
-            throws ForbiddenException, ConflictException, NotFoundException, ServerException {
-        FolderEntry testProject = createTestProject(projectName, pom);
-        FolderEntry src = testProject.createFolder("src/main/java");
-        for (String aPackage : packages) {
-            src.createFolder(aPackage.replace(".", "/"));
-        }
-    }
-
-    private FolderEntry createTestProject(String name, String pomContent)
-            throws ServerException, NotFoundException, ConflictException, ForbiddenException {
-        FolderEntry folder = pm.getProjectsRoot().createFolder(name);
-        folder.createFile("pom.xml", getPomContent(pomContent).getBytes());
-        ProjectConfigImpl config = new ProjectConfigImpl();
-        config.setType(MAVEN_ID);
-        config.setPath(name);
-
-        projectRegistry.putProject(config, pm.getProjectsRoot().getChildFolder(name), true, true);
-        return folder;
-    }
-
-    private String getPomContent(String content) {
-        return "<?xml version=\"1.0\"?>" +
-               "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"" +
-               "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
-               "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">" +
-               "  <modelVersion>4.0.0</modelVersion>" +
-               content +
-               "</project>";
-    }
 }

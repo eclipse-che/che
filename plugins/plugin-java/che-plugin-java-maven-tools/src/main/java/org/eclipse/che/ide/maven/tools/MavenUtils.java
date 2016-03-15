@@ -305,17 +305,4 @@ public class MavenUtils {
         ProcessUtil.process(process, cmdOutput, LineConsumer.DEV_NULL);
     }
 
-    /** Checks is specified project is codenvy extension. */
-    public static boolean isCodenvyExtensionProject(java.io.File workDir) throws IOException {
-        return isCodenvyExtensionProject(Model.readFrom(workDir));
-    }
-
-    public static boolean isCodenvyExtensionProject(Model pom) {
-        for (Dependency dependency : pom.getDependencies()) {
-            if ("che-core-ide-api".equals(dependency.getArtifactId())) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

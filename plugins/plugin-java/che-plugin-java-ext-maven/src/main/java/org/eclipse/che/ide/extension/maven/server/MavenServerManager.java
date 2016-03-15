@@ -56,6 +56,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
     private boolean loggerExported;
     private boolean listenerExported;
     private String  mavenServerPath;
+    private File localRepository;
 
     @Inject
     public MavenServerManager(@Named("che.maven.server.path") String mavenServerPath) {
@@ -100,9 +101,21 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
                 mavenSettings.setMavenHome(new File(System.getenv("M2_HOME")));
                 mavenSettings.setGlobalSettings(new File(System.getProperty("user.home"), ".m2/settings.xml"));
                 mavenSettings.setLoggingLevel(MavenTerminal.LEVEL_INFO);
+                if(localRepository != null) {
+                    mavenSettings.setLocalRepository(localRepository);
+                }
                 return MavenServerManager.this.getOrCreateWrappedObject().createServer(mavenSettings);
             }
         };
+    }
+
+    /**
+     * For test use only. Sets the path to local maven repository
+     *
+     * @param localRepository
+     */
+    public void setLocalRepository(File localRepository) {
+        this.localRepository = localRepository;
     }
 
     public MavenModel interpolateModel(MavenModel model, File projectDir) {

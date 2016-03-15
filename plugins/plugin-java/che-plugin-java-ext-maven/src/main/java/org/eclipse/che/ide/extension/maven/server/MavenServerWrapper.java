@@ -12,6 +12,9 @@ package org.eclipse.che.ide.extension.maven.server;
 
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.ide.extension.maven.server.rmi.RmiObjectWrapper;
+import org.eclipse.che.maven.data.MavenArtifact;
+import org.eclipse.che.maven.data.MavenArtifactKey;
+import org.eclipse.che.maven.data.MavenRemoteRepository;
 import org.eclipse.che.maven.data.MavenWorkspaceCache;
 import org.eclipse.che.maven.server.MavenServer;
 import org.eclipse.che.maven.server.MavenServerProgressNotifier;
@@ -100,6 +103,14 @@ public abstract class MavenServerWrapper extends RmiObjectWrapper<MavenServer> {
 
     public String getEffectivePom(File pom, List<String> activeProfiles, List<String> inactiveProfile) {
         return perform(() -> getOrCreateWrappedObject().getEffectivePom(pom, activeProfiles, inactiveProfile));
+    }
+
+    public MavenArtifact resolveArtifact(MavenArtifactKey artifactKey, List<MavenRemoteRepository> repositories){
+        return perform(() -> getOrCreateWrappedObject().resolveArtifact(artifactKey, repositories));
+    }
+
+    public File getLocalRepository() {
+        return perform(() -> getOrCreateWrappedObject().getLocalRepository());
     }
 
     private <T> T perform(RunnableRemoteWithResult<T> runnable) {

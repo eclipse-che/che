@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.core.classpath;
 
-import org.eclipse.che.maven.data.MavenKey;
+import org.eclipse.che.maven.data.MavenArtifactKey;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -48,7 +49,8 @@ public class ClasspathEntryHelper {
     private Set<IPath> inclusionPatterns;
     private Set<IPath> exclusionPatterns;
 
-    private MavenKey mavenKey;
+    private MavenArtifactKey artifactKey;
+    private Path sources;
 
     public ClasspathEntryHelper(IPath path, int kind) {
         this.path = path;
@@ -63,10 +65,12 @@ public class ClasspathEntryHelper {
     public IClasspathEntry toClasspathEntry() {
         Map<String, String> attributes = new HashMap<String, String>(this.attributes);
 
-        if (mavenKey != null) {
-            attributes.put(ClasspathManager.GROUP_ID_ATTRIBUTE, mavenKey.getGroupId());
-            attributes.put(ClasspathManager.ARTIFACT_ID_ATTRIBUTE, mavenKey.getArtifactId());
-            attributes.put(ClasspathManager.VERSION_ATTRIBUTE, mavenKey.getVersion());
+        if (artifactKey != null) {
+            attributes.put(ClasspathManager.GROUP_ID_ATTRIBUTE, artifactKey.getGroupId());
+            attributes.put(ClasspathManager.ARTIFACT_ID_ATTRIBUTE, artifactKey.getArtifactId());
+            attributes.put(ClasspathManager.VERSION_ATTRIBUTE, artifactKey.getVersion());
+            attributes.put(ClasspathManager.PACKAGING_ATTRIBUTE, artifactKey.getPackaging());
+            attributes.put(ClasspathManager.CLASSIFIER_ATTRIBUTE, artifactKey.getClassifier());
         }
 
         IClasspathAttribute[] attributesArray = new IClasspathAttribute[attributes.size()];
@@ -141,12 +145,12 @@ public class ClasspathEntryHelper {
         this.exported = entry.isExported();
         this.outputLocation = entry.getOutputLocation();
 
-        this.accessRules = new ArrayList<IAccessRule>();
+        this.accessRules = new ArrayList<>();
         for (IAccessRule rule : entry.getAccessRules()) {
             this.accessRules.add(rule);
         }
 
-        this.attributes = new HashMap<String, String>();
+        this.attributes = new HashMap<>();
         for (IClasspathAttribute attribute : entry.getExtraAttributes()) {
             attributes.put(attribute.getName(), attribute.getValue());
         }
@@ -160,8 +164,10 @@ public class ClasspathEntryHelper {
         String groupId = attributes.get(ClasspathManager.GROUP_ID_ATTRIBUTE);
         String artifactId = attributes.get(ClasspathManager.ARTIFACT_ID_ATTRIBUTE);
         String version = attributes.get(ClasspathManager.VERSION_ATTRIBUTE);
+        String packaging = attributes.get(ClasspathManager.PACKAGING_ATTRIBUTE);
+        String classifier = attributes.get(ClasspathManager.CLASSIFIER_ATTRIBUTE);
         if (groupId != null && artifactId != null && version != null) {
-            this.mavenKey = new MavenKey(groupId, artifactId, version);
+            this.artifactKey = new MavenArtifactKey(groupId, artifactId, version, packaging, classifier);
         }
     }
 
@@ -192,5 +198,18 @@ public class ClasspathEntryHelper {
 
     public void setClasspathAttribute(String key, String value) {
         attributes.put(key, value);
+    }
+
+    public void setArtifactKey(MavenArtifactKey artifactKey) {
+        this.artifactKey = artifactKey;
+    }
+
+    public MavenArtifactKey getArtifactKey() {
+        return artifactKey;
+    }
+
+
+    public void setSourcePath(Path sources) {
+        this.sourcePath = sources;
     }
 }

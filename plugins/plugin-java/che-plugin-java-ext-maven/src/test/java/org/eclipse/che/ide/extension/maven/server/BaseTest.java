@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server;
 
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistryImpl;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -25,6 +29,7 @@ import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -48,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 
 /**
  * @author Evgen Vidolob
@@ -149,6 +155,73 @@ public abstract class BaseTest {
         plugin.start();
         javaPlugin.start();
 
+    }
+
+    protected FolderEntry createMultimoduleProject() throws ServerException, NotFoundException, ConflictException, ForbiddenException {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<modules>" +
+                     "    <module>module1</module>" +
+                     "    <module>module2</module>" +
+                     "</modules>";
+        FolderEntry parentFolder = createTestProject("parent", pom);
+
+        String pomModule1 = "<groupId>module1</groupId>" +
+                            "<artifactId>testModule1</artifactId>" +
+                            "<version>1</version>" +
+                            "<dependencies>" +
+                            "    <dependency>" +
+                            "        <groupId>junit</groupId>" +
+                            "        <artifactId>junit</artifactId>" +
+                            "        <version>4.12</version>" +
+                            "    </dependency>" +
+                            "</dependencies>";
+        createTestProject("parent/module1", pomModule1);
+
+        String pomModule2 = "<groupId>module2</groupId>" +
+                            "<artifactId>testModule2</artifactId>" +
+                            "<version>2</version>" +
+                            "<dependencies>" +
+                            "    <dependency>" +
+                            "        <groupId>junit</groupId>" +
+                            "        <artifactId>junit</artifactId>" +
+                            "        <version>4.12</version>" +
+                            "    </dependency>" +
+                            "</dependencies>";
+        createTestProject("parent/module2", pomModule2);
+        return parentFolder;
+    }
+
+    protected void createTestProjectWithPackages(String projectName, String pom, String... packages)
+            throws ForbiddenException, ConflictException, NotFoundException, ServerException {
+        FolderEntry testProject = createTestProject(projectName, pom);
+        FolderEntry src = testProject.createFolder("src/main/java");
+        for (String aPackage : packages) {
+            src.createFolder(aPackage.replace(".", "/"));
+        }
+    }
+
+    protected FolderEntry createTestProject(String name, String pomContent)
+            throws ServerException, NotFoundException, ConflictException, ForbiddenException {
+        FolderEntry folder = pm.getProjectsRoot().createFolder(name);
+        folder.createFile("pom.xml", getPomContent(pomContent).getBytes());
+        ProjectConfigImpl config = new ProjectConfigImpl();
+        config.setType(MAVEN_ID);
+        config.setPath(name);
+
+        projectRegistry.putProject(config, pm.getProjectsRoot().getChildFolder(name), true, true);
+        return folder;
+    }
+
+    private String getPomContent(String content) {
+        return "<?xml version=\"1.0\"?>" +
+               "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"" +
+               "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+               "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">" +
+               "  <modelVersion>4.0.0</modelVersion>" +
+               content +
+               "</project>";
     }
 
     protected static class TestProjectType extends ProjectTypeDef {
