@@ -274,7 +274,6 @@ public class BootstrapController {
         var setInterval = function () {
             clearInterval(interval);
             customInterval *= 10;
-            interval = setInterval(setInterval, customInterval);
         };
 
         var interval = setInterval(setInterval, customInterval);
