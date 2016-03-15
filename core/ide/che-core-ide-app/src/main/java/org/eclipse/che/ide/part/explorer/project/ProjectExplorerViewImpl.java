@@ -43,21 +43,22 @@ import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
 import org.eclipse.che.ide.api.project.node.settings.HasSettings;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.ui.FontAwesome;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.project.node.ProjectNode;
 import org.eclipse.che.ide.project.node.SyntheticBasedNode;
+import org.eclipse.che.ide.ui.FontAwesome;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
-import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
-import org.eclipse.che.ide.ui.smartTree.SortDir;
-import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
+import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
+import org.eclipse.che.ide.ui.smartTree.SortDir;
+import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
+import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.CollapseNodeEvent;
@@ -67,7 +68,6 @@ import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.GoIntoStateHandle
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
-import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -91,11 +91,10 @@ import static org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.State.DEAC
 @Singleton
 public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.ActionDelegate> implements ProjectExplorerView,
                                                                                                      GoIntoStateHandler {
-    private final Resources                resources;
-    private final AppContext               appContext;
-    private final Provider<EditorAgent>    editorAgentProvider;
-    private final EventBus                 eventBus;
-    private final Tree                     tree;
+    private final AppContext            appContext;
+    private final Provider<EditorAgent> editorAgentProvider;
+    private final EventBus              eventBus;
+    private final Tree                  tree;
     private StoreSortInfo foldersOnTopSort = new StoreSortInfo(new FoldersOnTopFilter(), SortDir.ASC);
 
     private ToolButton              goBackButton;
@@ -120,7 +119,6 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                                    final Provider<EditorAgent> editorAgentProvider,
                                    final EventBus eventBus) {
         super(resources);
-        this.resources = resources;
         this.appContext = appContext;
         this.editorAgentProvider = editorAgentProvider;
         this.eventBus = eventBus;
@@ -133,6 +131,8 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             public String getKey(@NotNull Node item) {
                 if (item instanceof HasStorablePath) {
                     return ((HasStorablePath)item).getStorablePath();
+                } else if (item instanceof SyntheticBasedNode) {
+                    return String.valueOf(((HasProjectConfig)item).getProjectConfig().getPath() + item.hashCode());
                 } else {
                     return String.valueOf(item.hashCode());
                 }
@@ -650,7 +650,8 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             }
 
             if (node instanceof HasAttributes && ((HasAttributes)node).getAttributes().containsKey(CUSTOM_BACKGROUND_FILL)) {
-                element.getFirstChildElement().getStyle().setBackgroundColor(((HasAttributes)node).getAttributes().get(CUSTOM_BACKGROUND_FILL).get(0));
+                element.getFirstChildElement().getStyle()
+                       .setBackgroundColor(((HasAttributes)node).getAttributes().get(CUSTOM_BACKGROUND_FILL).get(0));
             }
 
             return element;

@@ -29,7 +29,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
@@ -84,6 +83,8 @@ public class BootstrapController {
 
         appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
         dtoRegistrar.registerDtoProviders();
+
+        setCustomInterval();
     }
 
     @Inject
@@ -150,18 +151,12 @@ public class BootstrapController {
     private void startExtensionsAndDisplayUI() {
         appStateManagerProvider.get();
 
+        extensionInitializer.startExtensions();
+
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                // Instantiate extensions
-                extensionInitializer.startExtensions();
-
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        displayIDE();
-                    }
-                });
+                displayIDE();
             }
         });
     }
@@ -267,5 +262,21 @@ public class BootstrapController {
         } catch (e) {
             console.log(e.message);
         }
+    }-*/;
+
+    /**
+     * When we change browser tab and IDE executes into inactive tab, browser set code execution interval to improve performance. For
+     * example Chrome and Firefox set 1000ms = 1sec interval. The method override global setInterval function and set custom value (100ms)
+     * of interval. This solution fix issue when we need execute some code into inactive tab permanently, for example launch factory.
+     */
+    private native void setCustomInterval() /*-{
+        var customInterval = 10;
+        var setInterval = function () {
+            clearInterval(interval);
+            customInterval *= 10;
+            interval = setInterval(setInterval, customInterval);
+        };
+
+        var interval = setInterval(setInterval, customInterval);
     }-*/;
 }
