@@ -390,7 +390,7 @@ public class DockerInstanceProvider implements InstanceProvider {
             if (machine.getConfig().isDev()) {
                 portsToExpose = new HashMap<>(devMachinePortsToExpose);
 
-                final String projectFolderVolume = String.format("%s:%s",
+                final String projectFolderVolume = String.format("%s:%s:Z",
                                                                  workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
                                                                  projectFolderPath);
                 volumes = ObjectArrays.concat(devMachineSystemVolumes,

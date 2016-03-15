@@ -711,7 +711,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromRecipe() throws Exception {
         final String expectedHostPathOfProjects = "/tmp/projects";
-        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects"};
+        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects:Z"};
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -746,7 +746,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
         final String expectedHostPathOfProjects = "/tmp/projects";
-        final String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects"};
+        final String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects:Z"};
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -855,7 +855,7 @@ public class DockerInstanceProviderTest {
         final ArrayList<String> expectedVolumes = new ArrayList<>();
         expectedVolumes.addAll(devVolumes);
         expectedVolumes.addAll(commonVolumes);
-        expectedVolumes.add(expectedHostPathOfProjects + ":/projects");
+        expectedVolumes.add(expectedHostPathOfProjects + ":/projects:Z");
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -897,7 +897,7 @@ public class DockerInstanceProviderTest {
         final ArrayList<String> expectedVolumes = new ArrayList<>();
         expectedVolumes.addAll(devVolumes);
         expectedVolumes.addAll(commonVolumes);
-        expectedVolumes.add(expectedHostPathOfProjects + ":/projects");
+        expectedVolumes.add(expectedHostPathOfProjects + ":/projects:Z");
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
