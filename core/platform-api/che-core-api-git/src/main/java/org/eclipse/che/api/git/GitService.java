@@ -233,7 +233,7 @@ public class GitService {
         try (GitConnection gitConnection = getGitConnection()) {
             gitConnection.init(request);
         }
-        projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
+        projectRegistry.setProjectType(projectPath, GitProjectType.TYPE_ID, true);
     }
 
     @Path("log")
