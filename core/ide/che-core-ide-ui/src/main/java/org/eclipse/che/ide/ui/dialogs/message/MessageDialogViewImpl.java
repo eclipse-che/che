@@ -62,7 +62,7 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        show();
+        show(footer.okButton);
     }
 
     /** {@inheritDoc} */
