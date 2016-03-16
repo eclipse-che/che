@@ -29,10 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -145,10 +144,10 @@ public class CheckoutReferenceTest extends BaseTest {
     public void testOnCheckoutClickedWhenCheckoutIsSuccessful() throws Exception {
         VirtualFile virtualFile = mock(VirtualFile.class);
 
-        NavigableMap<String, EditorPartPresenter> partPresenterMap = new TreeMap<>();
-        partPresenterMap.put("partPresenter", partPresenter);
+        List<EditorPartPresenter> partPresenterList = new ArrayList<>();
+        partPresenterList.add(partPresenter);
 
-        when(editorAgent.getOpenedEditors()).thenReturn(partPresenterMap);
+        when(editorAgent.getOpenedEditors()).thenReturn(partPresenterList);
         when(partPresenter.getEditorInput()).thenReturn(editorInput);
 
         when(editorInput.getFile()).thenReturn(virtualFile);

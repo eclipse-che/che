@@ -67,8 +67,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.COMPILATION_UNIT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
@@ -523,10 +521,10 @@ public class RenamePresenterTest {
         when(changeCreationResult.isCanShowPreviewPage()).thenReturn(true);
         when(refactoringStatus.getSeverity()).thenReturn(0);
         EditorPartPresenter openEditor = mock(EditorPartPresenter.class);
-        NavigableMap<String, EditorPartPresenter> openEditors = new TreeMap<>();
+        List<EditorPartPresenter> openEditors = new ArrayList<>();
         EditorInput editorInput = mock(EditorInput.class);
         VirtualFile virtualFile = mock(VirtualFile.class);
-        openEditors.put(TEXT, openEditor);
+        openEditors.add(openEditor);
         when(editorAgent.getOpenedEditors()).thenReturn(openEditors);
         when(openEditor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(virtualFile);
@@ -562,10 +560,10 @@ public class RenamePresenterTest {
         when(changeCreationResult.isCanShowPreviewPage()).thenReturn(true);
         when(refactoringStatus.getSeverity()).thenReturn(0);
         EditorPartPresenter openEditor = mock(EditorPartPresenter.class);
-        NavigableMap<String, EditorPartPresenter> openEditors = new TreeMap<>();
+        List<EditorPartPresenter> openEditors = new ArrayList<>();
         EditorInput editorInput = mock(EditorInput.class);
         VirtualFile virtualFile = mock(VirtualFile.class);
-        openEditors.put(TEXT, openEditor);
+        openEditors.add(openEditor);
         when(editorAgent.getOpenedEditors()).thenReturn(openEditors);
         when(openEditor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(virtualFile);

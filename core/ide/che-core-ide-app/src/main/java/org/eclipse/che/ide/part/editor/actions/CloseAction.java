@@ -46,7 +46,7 @@ public class CloseAction extends EditorAbstractAction {
         eventLogger.log(this);
         VirtualFile virtualFile = getEditorFile(e);
 
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
             if (editor.getEditorInput().getFile().equals(virtualFile)) {
                 eventBus.fireEvent(new FileEvent(editor.getEditorInput().getFile(), CLOSE));
                 return;

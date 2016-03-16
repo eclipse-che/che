@@ -47,7 +47,7 @@ public class CloseAllAction extends EditorAbstractAction {
         eventLogger.log(this);
         List<VirtualFile> toClose = new ArrayList<>();
 
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
             toClose.add(editor.getEditorInput().getFile());
         }
 

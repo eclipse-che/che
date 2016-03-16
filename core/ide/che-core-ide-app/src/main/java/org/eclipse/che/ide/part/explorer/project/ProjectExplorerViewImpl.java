@@ -301,7 +301,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
             return;
         }
 
-        Map<String, EditorPartPresenter> openedEditors = editorAgentProvider.get().getOpenedEditors();
+        List<EditorPartPresenter> openedEditors = editorAgentProvider.get().getOpenedEditors();
         if (openedEditors == null || openedEditors.isEmpty()) {
             return;
         }
@@ -309,8 +309,8 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         closeEditor((HasStorablePath)node, openedEditors);
     }
 
-    private void closeEditor(HasStorablePath node, Map<String, EditorPartPresenter> openedEditors) {
-        for (EditorPartPresenter editorPartPresenter : openedEditors.values()) {
+    private void closeEditor(HasStorablePath node, List<EditorPartPresenter> openedEditors) {
+        for (EditorPartPresenter editorPartPresenter : openedEditors) {
             VirtualFile openedFile = editorPartPresenter.getEditorInput().getFile();
             if (openedFile.getPath().equals(node.getStorablePath())) {
                 eventBus.fireEvent(new FileEvent(openedFile, CLOSE));

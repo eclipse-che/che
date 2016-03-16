@@ -38,7 +38,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -183,10 +182,7 @@ public class PullPresenter implements PullView.ActionDelegate {
         final String remoteUrl = view.getRepositoryUrl();
         view.close();
 
-        final List<EditorPartPresenter> openedEditors = new ArrayList<>();
-        for (EditorPartPresenter partPresenter : editorAgent.getOpenedEditors().values()) {
-            openedEditors.add(partPresenter);
-        }
+        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
         final StatusNotification notification =
                 notificationManager.notify(constant.pullProcess(), PROGRESS, true, project.getRootProject());

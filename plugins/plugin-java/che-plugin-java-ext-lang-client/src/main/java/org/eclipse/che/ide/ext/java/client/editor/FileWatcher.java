@@ -27,7 +27,6 @@ import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -88,8 +87,7 @@ public class FileWatcher {
     }
 
     private void reparseAllOpenedFiles() {
-        Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-        for (EditorPartPresenter editorPartPresenter: openedEditors.values()) {
+        for (EditorPartPresenter editorPartPresenter: editorAgent.getOpenedEditors()) {
             if (editorPartPresenter instanceof EmbeddedTextEditorPresenter) {
                 final EmbeddedTextEditorPresenter< ? > editor = (EmbeddedTextEditorPresenter< ? >)editorPartPresenter;
                 editor.refreshEditor();

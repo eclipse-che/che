@@ -37,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,8 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class EditorAgentImplTest {
 
-    private final String TEXT = "some text";
+    private final String PATH     = "/path";
+    private final String NEW_PATH = "/newPath";
 
     //mocks for constructor
     @Mock
@@ -102,10 +104,11 @@ public class EditorAgentImplTest {
         when(fileTypeRegistry.getFileTypeByFile(fileNode2)).thenReturn(fileType);
         when(editorRegistry.getEditor(fileType)).thenReturn(editorProvider);
         when(editorProvider.getEditor()).thenReturn(editor);
-        when(file.getPath()).thenReturn(TEXT);
-        when(newFileNode.getPath()).thenReturn(TEXT + 1);
+        when(file.getPath()).thenReturn(PATH);
+        when(newFileNode.getPath()).thenReturn(NEW_PATH);
 
         when(editor.getEditorInput()).thenReturn(editorInput);
+        when(editorInput.getFile()).thenReturn(file);
 
         editorAgent = new EditorAgentImpl(eventBus,
                                           fileTypeRegistry,
@@ -123,19 +126,18 @@ public class EditorAgentImplTest {
     public void editorNodeShouldBeUpdated() {
         editorAgent.openEditor(file, callback);
 
-        editorAgent.updateEditorNode(TEXT, newFileNode);
+        editorAgent.updateEditorNode(PATH, newFileNode);
 
-        verify(editor).getEditorInput();
+        verify(editor, times(2)).getEditorInput();
         verify(editorInput).setFile(newFileNode);
         verify(editor).onFileChanged();
 
-        assertThat(editorAgent.getOpenedEditors().containsKey(TEXT + 1), is(true));
-        assertThat(editorAgent.getOpenedEditors().get(TEXT + 1), is(editor));
+        assertThat(editorAgent.getOpenedEditors().contains(editor), is(true));
     }
 
     @Test
     public void editorNodeShouldNotBeUpdatedBecauseFileIsNotOpened() {
-        editorAgent.updateEditorNode(TEXT, newFileNode);
+        editorAgent.updateEditorNode(PATH, newFileNode);
 
         verifyNoMoreInteractions(editor, newFileNode, editorInput);
     }

@@ -14,10 +14,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Editor Agent manages Editors, it allows to open a new editor with given file,
@@ -63,10 +63,19 @@ public interface EditorAgent {
     /**
      * Get all opened editors
      *
-     * @return map with all opened editors
+     * @return list with all opened editors
      */
     @NotNull
-    Map<String, EditorPartPresenter> getOpenedEditors();
+    List<EditorPartPresenter> getOpenedEditors();
+
+    /**
+     * Get opened editor by related file path
+     *
+     * @param path path of the file opened in editor
+     * @return opened editor or null if it does not exist
+     */
+    @Nullable
+    EditorPartPresenter getOpenedEditor(Path path);
 
     /**
      * Saves all opened files whose content have changed since the last save operation

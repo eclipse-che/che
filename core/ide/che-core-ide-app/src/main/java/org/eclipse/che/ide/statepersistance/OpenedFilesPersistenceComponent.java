@@ -24,7 +24,6 @@ import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.ide.actions.OpenFileAction.FILE_PARAM_ID;
@@ -59,9 +58,8 @@ public class OpenedFilesPersistenceComponent implements PersistenceComponent {
         final EditorAgent editorAgent = editorAgentProvider.get();
         final List<ActionDescriptor> actions = new ArrayList<>();
         final String openFileActionId = actionManager.getId(openFileAction);
-        final Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
-        for (EditorPartPresenter editor : openedEditors.values()) {
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
             String openedFilePath = editor.getEditorInput().getFile().getPath();
 
             actions.add(dtoFactory.createDto(ActionDescriptor.class)

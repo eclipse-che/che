@@ -153,7 +153,7 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
     }
 
     private void updateOpenedFiles() {
-        for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
             VirtualFile file = editorPartPresenter.getEditorInput().getFile();
 
             eventBus.fireEvent(new FileContentUpdateEvent(file.getPath()));
