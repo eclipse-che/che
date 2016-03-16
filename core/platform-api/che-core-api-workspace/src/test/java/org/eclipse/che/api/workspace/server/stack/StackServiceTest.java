@@ -177,8 +177,14 @@ public class StackServiceTest {
                                                                 MACHINE_TYPE,
                                                                 machineSource,
                                                                 limits,
-                                                                Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                                Arrays.asList(new ServerConfImpl("ref1",
+                                                                                                 "8080",
+                                                                                                 "https",
+                                                                                                 "some/path"),
+                                                                              new ServerConfImpl("ref2",
+                                                                                                 "9090/udp",
+                                                                                                 "someprotocol",
+                                                                                                 "/some/path")),
                                                                 Collections.singletonMap("key1", "value1"));
         EnvironmentImpl environment = new EnvironmentImpl(ENVIRONMENT_NAME, null, Collections.singletonList(machineConfig));
 

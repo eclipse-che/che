@@ -126,8 +126,14 @@ public class MachineManagerTest {
                                                             "machineType",
                                                             new MachineSourceImpl("Recipe", "location"),
                                                             new LimitsImpl(1024),
-                                                            Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                                          new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                            Arrays.asList(new ServerConfImpl("ref1",
+                                                                                             "8080",
+                                                                                             "https",
+                                                                                             "some/path"),
+                                                                          new ServerConfImpl("ref2",
+                                                                                             "9090/udp",
+                                                                                             "someprotocol",
+                                                                                             "/some/path")),
                                                             Collections.singletonMap("key1", "value1"));
         String workspaceId = "wsId";
         String environmentName = "env1";
@@ -188,8 +194,14 @@ public class MachineManagerTest {
                                      "docker",
                                      new MachineSourceImpl("Recipe", "location"),
                                      new LimitsImpl(1024),
-                                     Arrays.asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                   new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                     Arrays.asList(new ServerConfImpl("ref1",
+                                                                      "8080",
+                                                                      "https",
+                                                                      "some/path"),
+                                                   new ServerConfImpl("ref2",
+                                                                      "9090/udp",
+                                                                      "someprotocol",
+                                                                      "/some/path")),
                                      Collections.singletonMap("key1", "value1"));
     }
 }

@@ -103,4 +103,13 @@ public class GroupImpl implements Group {
         hash = 31 * hash + getAcl().hashCode();
         return hash;
     }
+
+    @Override
+    public String toString() {
+        return "GroupImpl{" +
+               "name='" + name + '\'' +
+               ", unit='" + unit + '\'' +
+               ", acl=" + acl +
+               '}';
+    }
 }

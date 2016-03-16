@@ -94,4 +94,12 @@ public class PermissionsImpl implements Permissions {
         hash = 31 * hash + getUsers().hashCode();
         return hash;
     }
+
+    @Override
+    public String toString() {
+        return "PermissionsImpl{" +
+               "users=" + users +
+               ", groups=" + groups +
+               '}';
+    }
 }

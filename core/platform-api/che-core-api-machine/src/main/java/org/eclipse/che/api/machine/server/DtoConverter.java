@@ -109,6 +109,8 @@ public final class DtoConverter {
     public static ServerDto asDto(Server server) {
         return newDto(ServerDto.class).withAddress(server.getAddress())
                                       .withRef(server.getRef())
+                                      .withProtocol(server.getProtocol())
+                                      .withPath(server.getPath())
                                       .withUrl(server.getUrl());
     }
 
@@ -118,7 +120,8 @@ public final class DtoConverter {
     public static ServerConfDto asDto(ServerConf serverConf) {
         return newDto(ServerConfDto.class).withRef(serverConf.getRef())
                                           .withPort(serverConf.getPort())
-                                          .withProtocol(serverConf.getProtocol());
+                                          .withProtocol(serverConf.getProtocol())
+                                          .withPath(serverConf.getPath());
     }
 
     /**

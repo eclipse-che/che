@@ -53,4 +53,10 @@ public interface ServerConf {
      */
     @Nullable
     String getProtocol();
+
+    /**
+     * Path to access the server.
+     */
+    @Nullable
+    String getPath();
 }

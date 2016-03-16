@@ -38,7 +38,8 @@ public class WsAgentServerConfProvider implements Provider<ServerConf> {
     public ServerConf get() {
         return new ServerConfImpl(WSAGENT_REFERENCE,
                                   WsAgentLauncherImpl.WS_AGENT_PORT,
-                                  apiEndpoint.getScheme());
+                                  apiEndpoint.getScheme(),
+                                  null);
     }
 
 }

@@ -34,7 +34,7 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
     /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
     private static final Pattern WS_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
     private static final Pattern SERVER_PORT = Pattern.compile("[1-9]+[0-9]*/(?:tcp|udp)");
-    private static final Pattern SERVER_PROTOCOL = Pattern.compile("[a-z]{2,10}");
+    private static final Pattern SERVER_PROTOCOL = Pattern.compile("[a-z][a-z0-9-+.]*");
 
     /**
      * Checks that workspace configuration is valid.

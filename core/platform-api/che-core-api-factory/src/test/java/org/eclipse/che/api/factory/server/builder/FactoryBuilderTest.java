@@ -45,9 +45,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -106,15 +105,12 @@ public class FactoryBuilderTest {
     @DataProvider(name = "setByServerParamsProvider")
     public static Object[][] setByServerParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
         Factory factory = prepareFactory();
-        return new Object[][]{
-                {dto.clone(factory)
-                    .withId("id")},
-                {dto.clone(factory)
-                    .withCreator(dto.createDto(Author.class)
-                                    .withUserId("id"))},
-                {dto.clone(factory)
-                    .withCreator(dto.createDto(Author.class)
-                                    .withCreated(123L))}
+        return new Object[][] {
+                {dto.clone(factory).withId("id")},
+                {dto.clone(factory).withCreator(dto.createDto(Author.class)
+                                                   .withUserId("id"))},
+                {dto.clone(factory).withCreator(dto.createDto(Author.class)
+                                                   .withCreated(123L))}
         };
     }
 
@@ -126,7 +122,7 @@ public class FactoryBuilderTest {
 
     @DataProvider(name = "notValidParamsProvider")
     public static Object[][] notValidParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
-        return new Object[][]{};
+        return new Object[][] {};
     }
 
 
@@ -144,53 +140,77 @@ public class FactoryBuilderTest {
     }
 
     private static Factory prepareFactory() {
+        ProjectConfigDto project = dto.createDto(ProjectConfigDto.class)
+                                      .withSource(dto.createDto(SourceStorageDto.class)
+                                                     .withType("git")
+                                                     .withLocation("location"))
+                                      .withType("type")
+                                      .withAttributes(singletonMap("key", singletonList("value")))
+                                      .withDescription("description")
+                                      .withName("name")
+                                      .withPath("/path");
+        MachineConfigDto machineConfig = dto.createDto(MachineConfigDto.class)
+                                            .withName("name")
+                                            .withType("docker")
+                                            .withDev(true)
+                                            .withSource(dto.createDto(MachineSourceDto.class)
+                                                           .withType("git")
+                                                           .withLocation("https://github.com/123/test.git"))
+                                            .withServers(asList(newDto(ServerConfDto.class).withRef("ref1")
+                                                                                           .withPort("8080")
+                                                                                           .withProtocol("https"),
+                                                                newDto(ServerConfDto.class).withRef("ref2")
+                                                                                           .withPort("9090/udp")
+                                                                                           .withProtocol("someprotocol")))
+                                            .withEnvVariables(singletonMap("key1", "value1"));
+        WorkspaceConfigDto workspaceConfig = dto.createDto(WorkspaceConfigDto.class)
+                                                .withProjects(singletonList(project))
+                                                .withAttributes(singletonMap("key", "value"))
+                                                .withCommands(singletonList(dto.createDto(CommandDto.class)
+                                                                               .withName("command1")
+                                                                               .withType("maven")
+                                                                               .withCommandLine("mvn test")))
+                                                .withDefaultEnv("env1")
+                                                .withEnvironments(singletonList(dto.createDto(EnvironmentDto.class)
+                                                                                   .withName("test")
+                                                                                   .withMachineConfigs(singletonList(machineConfig))
+                                                                                   .withRecipe(dto.createDto(RecipeDto.class)
+                                                                                                  .withType("sometype")
+                                                                                                  .withScript("some script"))));
+        Ide ide = dto.createDto(Ide.class)
+                     .withOnAppClosed(dto.createDto(OnAppClosed.class)
+                                         .withActions(singletonList(dto.createDto(Action.class).withId("warnOnClose"))))
+                     .withOnAppLoaded(dto.createDto(OnAppLoaded.class)
+                                         .withActions(asList(dto.createDto(Action.class)
+                                                                .withId("newProject"),
+                                                             dto.createDto(Action.class)
+                                                                .withId("openWelcomePage")
+                                                                .withProperties(ImmutableMap.of(
+                                                                        "authenticatedTitle",
+                                                                        "Greeting title for authenticated users",
+                                                                        "authenticatedContentUrl",
+                                                                        "http://example.com/content.url")))))
+                     .withOnProjectsLoaded(dto.createDto(OnProjectsLoaded.class)
+                                              .withActions(asList(dto.createDto(Action.class)
+                                                                     .withId("openFile")
+                                                                     .withProperties(singletonMap("file", "pom.xml")),
+                                                                  dto.createDto(Action.class)
+                                                                     .withId("run"),
+                                                                  dto.createDto(Action.class)
+                                                                     .withId("findReplace")
+                                                                     .withProperties(
+                                                                             ImmutableMap.of(
+                                                                                     "in",
+                                                                                     "src/main/resources/consts2.properties",
+                                                                                     "find",
+                                                                                     "OLD_VALUE_2",
+                                                                                     "replace",
+                                                                                     "NEW_VALUE_2",
+                                                                                     "replaceMode",
+                                                                                     "mode")))));
         return dto.createDto(Factory.class)
                   .withV("4.0")
-                  .withWorkspace(dto.createDto(WorkspaceConfigDto.class)
-                                    .withProjects(Collections.singletonList(dto.createDto(
-                                            ProjectConfigDto.class)
-                                                                               .withSource(
-                                                                                       dto.createDto(
-                                                                                               SourceStorageDto.class)
-                                                                                          .withType("git")
-                                                                                          .withLocation("location"))
-                                                                               .withType("type")
-                                                                               .withAttributes(singletonMap("key", singletonList("value")))
-                                                                               .withDescription("description")
-                                                                               .withName("name")
-                                                                               .withPath("/path")))
-                                    .withAttributes(singletonMap("key", "value"))
-                                    .withCommands(singletonList(dto.createDto(CommandDto.class)
-                                                                   .withName("command1")
-                                                                   .withType("maven")
-                                                                   .withCommandLine("mvn test")))
-                                    .withDefaultEnv("env1")
-                                    .withEnvironments(singletonList(dto.createDto(EnvironmentDto.class)
-                                                                              .withName("test")
-                                                                              .withMachineConfigs(singletonList(dto.createDto(
-                                                                                      MachineConfigDto.class)
-                                                                                                                   .withName("name")
-                                                                                                                   .withType("docker")
-                                                                                                                   .withDev(true)
-                                                                                                                   .withSource(
-                                                                                                                           dto.createDto(
-                                                                                                                                   MachineSourceDto.class)
-                                                                                                                              .withType(
-                                                                                                                                      "git")
-                                                                                                                              .withLocation(
-                                                                                                                                      "https://github.com/123/test.git"))
-                                                                                                                   .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
-                                                                                                                                                                         .withPort("8080")
-                                                                                                                                                                         .withProtocol("https"),
-                                                                                                                                              newDto(ServerConfDto.class).withRef("ref2")
-                                                                                                                                                                         .withPort("9090/udp")
-                                                                                                                                                                         .withProtocol("someprotocol")))
-                                                                                                                   .withEnvVariables(Collections.singletonMap("key1", "value1"))
-                                                                              ))
-                                                                              .withRecipe(dto.createDto(
-                                                                                      RecipeDto.class)
-                                                                                             .withType("sometype")
-                                                                                             .withScript("some script")))))
+                  .withWorkspace(workspaceConfig)
                   .withCreator(dto.createDto(Author.class)
                                   .withAccountId("accountId")
                                   .withEmail("email")
@@ -201,53 +221,11 @@ public class FactoryBuilderTest {
                                    .withUntil(123L))
                   .withButton(dto.createDto(Button.class)
                                  .withType(Button.ButtonType.logo)
-                                 .withAttributes(dto.createDto(
-                                         ButtonAttributes.class)
+                                 .withAttributes(dto.createDto(ButtonAttributes.class)
                                                     .withColor("color")
                                                     .withCounter(true)
                                                     .withLogo("logo")
                                                     .withStyle("style")))
-                  .withIde(dto.createDto(Ide.class)
-                              .withOnAppClosed(
-                                      dto.createDto(OnAppClosed.class)
-                                         .withActions(singletonList(
-                                                 dto.createDto(Action.class)
-                                                    .withId("warnOnClose"))))
-                              .withOnAppLoaded(
-                                      dto.createDto(OnAppLoaded.class)
-                                         .withActions(Arrays.asList(
-                                                 dto.createDto(Action.class)
-                                                    .withId("newProject"),
-                                                 dto.createDto(Action.class)
-                                                    .withId("openWelcomePage")
-                                                    .withProperties(
-                                                            ImmutableMap.of(
-                                                                    "authenticatedTitle",
-                                                                    "Greeting title for authenticated users",
-                                                                    "authenticatedContentUrl",
-                                                                    "http://example.com/content.url")))))
-                              .withOnProjectsLoaded(
-                                      dto.createDto(OnProjectsLoaded.class)
-                                         .withActions(Arrays.asList(
-                                                 dto.createDto(Action.class)
-                                                    .withId("openFile")
-                                                    .withProperties(
-                                                            singletonMap(
-                                                                    "file",
-                                                                    "pom.xml")),
-                                                 dto.createDto(Action.class)
-                                                    .withId("run"),
-                                                 dto.createDto(Action.class)
-                                                    .withId("findReplace")
-                                                    .withProperties(
-                                                            ImmutableMap.of(
-                                                                    "in",
-                                                                    "src/main/resources/consts2.properties",
-                                                                    "find",
-                                                                    "OLD_VALUE_2",
-                                                                    "replace",
-                                                                    "NEW_VALUE_2",
-                                                                    "replaceMode",
-                                                                    "mode"))))));
+                  .withIde(ide);
     }
 }

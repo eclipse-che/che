@@ -194,4 +194,18 @@ public class RecipeImpl implements ManagedRecipe {
         hash = 31 * hash + getTags().hashCode();
         return hash;
     }
+
+    @Override
+    public String toString() {
+        return "RecipeImpl{" +
+               "id='" + id + '\'' +
+               ", name='" + name + '\'' +
+               ", creator='" + creator + '\'' +
+               ", type='" + type + '\'' +
+               ", script='" + script + '\'' +
+               ", tags=" + tags +
+               ", permissions=" + permissions +
+               ", description='" + description + '\'' +
+               '}';
+    }
 }

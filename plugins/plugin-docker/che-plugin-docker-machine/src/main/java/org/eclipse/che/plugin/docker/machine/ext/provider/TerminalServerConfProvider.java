@@ -35,6 +35,6 @@ public class TerminalServerConfProvider implements Provider<ServerConf> {
 
     @Override
     public ServerConf get() {
-        return new ServerConfImpl(TERMINAL_SERVER_REFERENCE, "4411/tcp", apiEndpoint.getScheme());
+        return new ServerConfImpl(TERMINAL_SERVER_REFERENCE, "4411/tcp", apiEndpoint.getScheme(), null);
     }
 }

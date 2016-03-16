@@ -21,6 +21,16 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface ServerDto extends Server {
     @Override
+    String getProtocol();
+
+    ServerDto withProtocol(String protocol);
+
+    @Override
+    String getPath();
+
+    ServerDto withPath(String path);
+
+    @Override
     String getAddress();
 
     void setAddress(String address);

@@ -23,4 +23,6 @@ public interface ServerConfDto extends ServerConf {
     ServerConfDto withPort(String port);
 
     ServerConfDto withProtocol(String protocol);
+
+    ServerConfDto withPath(String path);
 }

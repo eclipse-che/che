@@ -25,15 +25,19 @@ public class ServerImpl implements Server {
     private String ref;
     private String address;
     private String url;
+    private String protocol;
+    private String path;
 
-    public ServerImpl(String ref, String address, String url) {
+    public ServerImpl(String ref, String protocol, String address, String path, String url) {
         this.ref = ref;
         this.address = address;
         this.url = url;
+        this.protocol = protocol;
+        this.path = path;
     }
 
     public ServerImpl(Server server) {
-        this(server.getRef(), server.getAddress(), server.getUrl());
+        this(server.getRef(), server.getProtocol(), server.getAddress(), server.getPath(), server.getUrl());
     }
 
     @Override
@@ -43,6 +47,15 @@ public class ServerImpl implements Server {
 
     public void setRef(String ref) {
         this.ref = ref;
+    }
+
+    @Override
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     @Override
@@ -64,12 +77,23 @@ public class ServerImpl implements Server {
     }
 
     @Override
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ServerImpl)) return false;
         final ServerImpl other = (ServerImpl)o;
         return Objects.equals(ref, other.ref) &&
+               Objects.equals(protocol, other.protocol) &&
                Objects.equals(address, other.address) &&
+               Objects.equals(path, other.path) &&
                Objects.equals(url, other.url);
     }
 
@@ -77,7 +101,9 @@ public class ServerImpl implements Server {
     public int hashCode() {
         int hash = 7;
         hash = hash * 31 + Objects.hashCode(ref);
+        hash = hash * 31 + Objects.hashCode(protocol);
         hash = hash * 31 + Objects.hashCode(address);
+        hash = hash * 31 + Objects.hashCode(path);
         hash = hash * 31 + Objects.hashCode(url);
         return hash;
     }
@@ -86,7 +112,9 @@ public class ServerImpl implements Server {
     public String toString() {
         return "ServerImpl{" +
                "ref='" + ref + '\'' +
+               ", protocol='" + protocol + '\'' +
                ", address='" + address + '\'' +
+               ", path='" + path + '\'' +
                ", url='" + url + '\'' +
                '}';
     }

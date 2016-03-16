@@ -114,7 +114,7 @@ public class ApiModule extends AbstractModule {
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.dev_machine.machine_servers"));
-        machineServers.addBinding().toInstance(new ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http"));
+        machineServers.addBinding().toInstance(new ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http", null));
 
         bind(RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))

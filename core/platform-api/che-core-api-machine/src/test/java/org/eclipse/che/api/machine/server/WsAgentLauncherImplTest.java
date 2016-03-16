@@ -58,7 +58,9 @@ public class WsAgentLauncherImplTest {
     private static final String     WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789";
     private static final String     WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
     private static final ServerImpl SERVER                        = new ServerImpl("ref",
+                                                                                   "http",
                                                                                    WS_AGENT_SERVER_LOCATION,
+                                                                                   null,
                                                                                    WS_AGENT_SERVER_URL);
     private static final String     WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
 
