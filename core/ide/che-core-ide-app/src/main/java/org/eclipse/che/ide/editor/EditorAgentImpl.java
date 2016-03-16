@@ -15,6 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -230,6 +232,25 @@ public class EditorAgentImpl implements EditorAgent {
                                                  oldTargetPath,
                                                  newTargetPath,
                                                  unmarshaller);
+                }
+            }
+        });
+
+        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
+            @Override
+            public void onWsAgentStarted(WsAgentStateEvent event) {
+                //to do nothing
+            }
+
+            @Override
+            public void onWsAgentStopped(WsAgentStateEvent event) {
+                List<VirtualFile> filesToClose = new ArrayList<>();
+                for (EditorPartPresenter editor : openedEditors.values()) {
+                    filesToClose.add(editor.getEditorInput().getFile());
+                }
+
+                for (VirtualFile virtualFile : filesToClose) {
+                    eventBus.fireEvent(new FileEvent(virtualFile, FileEvent.FileOperation.CLOSE));
                 }
             }
         });
