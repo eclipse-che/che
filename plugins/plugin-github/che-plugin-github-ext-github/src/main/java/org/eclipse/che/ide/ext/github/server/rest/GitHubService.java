@@ -33,6 +33,7 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.HttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -194,11 +198,27 @@ public class GitHubService {
     @GET
     @Path("pullrequests/{user}/{repository}")
     @Produces(MediaType.APPLICATION_JSON)
-    public GitHubPullRequestList listPullRequestsByRepository(@PathParam("user") String user, @PathParam("repository") String repository)
+    public GitHubPullRequestList listPullRequestsByRepository(@PathParam("user") String user,
+                                                              @PathParam("repository") String repository,
+                                                              @QueryParam("head") String head)
             throws ApiException {
         try {
-            return gitHubDTOFactory.createPullRequestsList(gitHubFactory.connect().getUser(user).getRepository(repository)
-                                                                        .listPullRequests(GHIssueState.OPEN));
+            final GitHub github = gitHubFactory.connect();
+            // Workaround for adding head parameter to the request
+            // TODO remove after update to 1.73 library version
+            github.setConnector(new HttpConnector() {
+                @Override
+                public HttpURLConnection connect(URL url) throws IOException {
+                    final String sourceUrl = url.toString();
+                    if (sourceUrl.contains("pulls")) {
+                        return DEFAULT.connect(URI.create(url.toString() + "&head=" + head).toURL());
+                    }
+                    return DEFAULT.connect(url);
+                }
+            });
+            return gitHubDTOFactory.createPullRequestsList(github.getUser(user)
+                                                                 .getRepository(repository)
+                                                                 .listPullRequests(GHIssueState.OPEN));
         } catch (IOException e) {
             LOG.error("Getting list of pull request by repositories", e);
             throw new ServerException(e.getMessage());
