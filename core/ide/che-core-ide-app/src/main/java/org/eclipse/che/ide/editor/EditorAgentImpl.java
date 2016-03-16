@@ -77,7 +77,7 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 @Singleton
 public class EditorAgentImpl implements EditorAgent {
 
-    private final Map<String, EditorPartPresenter> openedEditors;
+    private Map<String, EditorPartPresenter> openedEditors;
     /** Used to notify {@link EditorAgentImpl} that editor has closed */
     private final EditorPartCloseHandler editorClosed     = new EditorPartCloseHandler() {
         @Override
@@ -441,14 +441,23 @@ public class EditorAgentImpl implements EditorAgent {
     /** {@inheritDoc} */
     @Override
     public void updateEditorNode(@NotNull String path, @NotNull VirtualFile virtualFile) {
-        final EditorPartPresenter editor = openedEditors.remove(path);
+        final EditorPartPresenter editor = openedEditors.get(path);
 
         if (editor == null) {
             return;
         }
 
-        editor.getEditorInput().setFile(virtualFile);
-        openedEditors.put(virtualFile.getPath(), editor);
+        Map<String, EditorPartPresenter> newOpenedEditors = new LinkedHashMap<>();
+        for (Map.Entry<String, EditorPartPresenter> entry : openedEditors.entrySet()) {
+            if (editor == entry.getValue()) {
+                editor.getEditorInput().setFile(virtualFile);
+                newOpenedEditors.put(virtualFile.getPath(), editor);
+            } else {
+                newOpenedEditors.put(entry.getKey(), entry.getValue());
+            }
+        }
+        openedEditors = newOpenedEditors;
+
         editor.onFileChanged();
     }
 
