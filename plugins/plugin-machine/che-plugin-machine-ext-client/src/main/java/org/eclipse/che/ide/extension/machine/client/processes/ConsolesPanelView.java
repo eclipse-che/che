@@ -54,7 +54,7 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
     void setProcessesData(@NotNull ProcessTreeNode root);
 
     /** Select given process node */
-    void selectNode(@NotNull ProcessTreeNode node);
+    void selectNode(ProcessTreeNode node);
 
     /** Displays output for process with given ID */
     void showProcessOutput(String processId);
