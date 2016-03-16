@@ -8,48 +8,45 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.preferences;
+package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.api.user.gwt.client.UserProfileServiceClient;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.ext.java.client.settings.service.SettingsServiceClient;
 
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The implementation of {@link PreferencesManager} for managing user preference.
+ * The implementation of {@link PreferencesManager} for managing Java compiler properties
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Alexander Andrienko
  */
 @Singleton
-public class PreferencesManagerImpl implements PreferencesManager {
-    private final UserProfileServiceClient      userProfileService;
-    private final Map<String, String>           changedPreferences;
+public class ErrorsWarningsPreferenceManager implements PreferencesManager {
+
+    private final SettingsServiceClient service;
+    private final Map<String, String>   changedPreferences;
 
     private Map<String, String> persistedPreferences;
 
-    /**
-     * Create preferences manager
-     *
-     * @param userProfileService
-     *         user preference service client
-     */
     @Inject
-    protected PreferencesManagerImpl(UserProfileServiceClient userProfileService) {
+    protected ErrorsWarningsPreferenceManager(SettingsServiceClient service) {
+        this.service = service;
+
         this.persistedPreferences = new HashMap<>();
         this.changedPreferences = new HashMap<>();
-        this.userProfileService = userProfileService;
     }
 
-    /** {@inheritDoc} */
     @Override
     @Nullable
     public String getValue(String preference) {
@@ -59,37 +56,33 @@ public class PreferencesManagerImpl implements PreferencesManager {
         return persistedPreferences.get(preference);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setValue(String preference, String value) {
         changedPreferences.put(preference, value);
     }
 
-    /** {@inheritDoc} */
     @Override
     public Promise<Void> flushPreferences() {
         if (changedPreferences.isEmpty()) {
             return Promises.resolve(null);
         }
 
-        return userProfileService.updatePreferences(changedPreferences).thenPromise(new Function<Map<String,String>, Promise<Void>>() {
+        return service.applyCompileParameters(changedPreferences).then(new Operation<Void>() {
             @Override
-            public Promise<Void> apply(Map<String,String> result) throws FunctionException {
+            public void apply(Void aVoid) throws OperationException {
                 persistedPreferences.putAll(changedPreferences);
                 changedPreferences.clear();
-                return Promises.resolve(null);
             }
         });
     }
 
-    /** {@inheritDoc} */
     @Override
     public Promise<Map<String, String>> loadPreferences() {
-        return userProfileService.getPreferences().then(new Function<Map<String, String>, Map<String, String>>() {
+        return service.getCompileParameters().then(new Function<Map<String, String>, Map<String, String>>() {
             @Override
-            public Map<String, String> apply(Map<String, String> preferences) throws FunctionException {
-                persistedPreferences = preferences;
-                return preferences;
+            public Map<String, String> apply(Map<String, String> properties) throws FunctionException {
+                persistedPreferences.putAll(properties);
+                return properties;
             }
         });
     }

@@ -11,14 +11,20 @@
 package org.eclipse.che.ide.ext.java.client.settings.compiler;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.inject.Provider;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.preferences.PreferencePagePresenter.DirtyStateListener;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidget;
-import org.eclipse.che.ide.ext.java.client.settings.service.SettingsServiceClient;
-import org.eclipse.che.ide.settings.common.SettingsPagePresenter.DirtyStateListener;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_IMPORT;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_LOCAL;
@@ -53,7 +60,8 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.reset;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +70,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Shnurenko
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ErrorWarningsPresenterTest {
+public class JavaCompilerPreferencePresenterTest {
 
     private static final String ID_1 = "id1";
     private static final String ID_2 = "id2";
@@ -72,13 +80,17 @@ public class ErrorWarningsPresenterTest {
 
     //constructor mocks
     @Mock
-    private ErrorWarningsView        view;
+    private ErrorWarningsView             view;
     @Mock
-    private SettingsServiceClient    service;
+    private PropertyWidgetFactory         propertyFactory;
     @Mock
-    private PropertyWidgetFactory    propertyFactory;
+    private JavaLocalizationConstant      locale;
     @Mock
-    private JavaLocalizationConstant locale;
+    private PreferencesManager            preferencesManager;
+    @Mock
+    private EventBus                      eventBus;
+    @Mock
+    private Provider<NotificationManager> notificationManagerProvider;
 
     @Mock
     private DirtyStateListener           dirtyStateListener;
@@ -88,22 +100,26 @@ public class ErrorWarningsPresenterTest {
     private AcceptsOneWidget             container;
     @Mock
     private PropertyWidget               widget;
+    @Mock
+    private WsAgentStateEvent            wsAgentStateEvent;
 
     @Captor
     private ArgumentCaptor<Map<String, String>>            mapCaptor;
     @Captor
     private ArgumentCaptor<Operation<Map<String, String>>> operationCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<PromiseError>>        errorOperationCaptor;
 
     @InjectMocks
-    private ErrorWarningsPresenter presenter;
+    private JavaCompilerPreferencePresenter presenter;
 
     @Before
     public void setUp() {
+        when(preferencesManager.loadPreferences()).thenReturn(mapPromise);
+        when(mapPromise.then(Matchers.<Operation<Map<String, String>>>anyObject())).thenReturn(mapPromise);
         when(propertyFactory.create(Matchers.<ErrorWarningsOptions>anyObject())).thenReturn(widget);
-        when(service.getCompileParameters()).thenReturn(mapPromise);
 
         presenter.setUpdateDelegate(dirtyStateListener);
-
     }
 
     @Test
@@ -119,70 +135,92 @@ public class ErrorWarningsPresenterTest {
     }
 
     @Test
-    public void changedValuesShouldBeSaved() {
-        presenter.onPropertyChanged(ID_1, VALUE_1);
-        presenter.onPropertyChanged(ID_2, VALUE_2);
+    public void changedValuesShouldBeSaved() throws OperationException {
+        initWidgets();
+        when(widget.getSelectedValue()).thenReturn(VALUE_2);
+        when(preferencesManager.getValue(anyString())).thenReturn(VALUE_1);
+
+        presenter.onWsAgentStarted(wsAgentStateEvent);
+        presenter.go(container);
+
+        verify(mapPromise).then(operationCaptor.capture());
+        operationCaptor.getValue().apply(getAllProperties());
 
         presenter.storeChanges();
 
-        verify(service).applyCompileParameters(Matchers.<Map<String, String>>anyObject());
+        verify(preferencesManager, times(18)).setValue(anyString(), anyString());
+        verify(preferencesManager, times(36)).getValue(anyString());
+
+        when(preferencesManager.getValue(anyString())).thenReturn(VALUE_2);
 
         assertThat(presenter.isDirty(), equalTo(false));
     }
 
     @Test
     public void changesShouldBeReverted() throws Exception {
+        initWidgets();
+
+        when(widget.getSelectedValue()).thenReturn(VALUE_2);
+        when(preferencesManager.getValue(anyString())).thenReturn(VALUE_1);
+
+        presenter.onWsAgentStarted(wsAgentStateEvent);
         presenter.go(container);
 
         verify(mapPromise).then(operationCaptor.capture());
         operationCaptor.getValue().apply(getAllProperties());
 
-        presenter.onPropertyChanged(COMPILER_UNUSED_IMPORT.toString(), VALUE_1);
-        reset(widget);
-
+        presenter.onPropertyChanged();
         presenter.revertChanges();
 
-        verify(widget, times(18)).selectPropertyValue(anyString());
-
-        assertThat(presenter.isDirty(), equalTo(false));
+        verify(preferencesManager, times(36)).getValue(anyString());
+        verify(widget, times(36)).selectPropertyValue(anyString());
+        verify(widget, times(18)).getSelectedValue();
     }
 
     private Map<String, String> getAllProperties() {
         Map<String, String> allProperties = new HashMap<>();
 
         allProperties.put(COMPILER_UNUSED_LOCAL.toString(), VALUE_1);
-        allProperties.put(COMPILER_UNUSED_IMPORT.toString(), VALUE_2);
+        allProperties.put(COMPILER_UNUSED_IMPORT.toString(), VALUE_1);
         allProperties.put(DEAD_CODE.toString(), VALUE_1);
-        allProperties.put(METHOD_WITH_CONSTRUCTOR_NAME.toString(), VALUE_2);
+        allProperties.put(METHOD_WITH_CONSTRUCTOR_NAME.toString(), VALUE_1);
         allProperties.put(UNNECESSARY_ELSE_STATEMENT.toString(), VALUE_1);
-        allProperties.put(COMPARING_IDENTICAL_VALUES.toString(), VALUE_2);
+        allProperties.put(COMPARING_IDENTICAL_VALUES.toString(), VALUE_1);
         allProperties.put(NO_EFFECT_ASSIGNMENT.toString(), VALUE_1);
-        allProperties.put(MISSING_SERIAL_VERSION_UID.toString(), VALUE_2);
+        allProperties.put(MISSING_SERIAL_VERSION_UID.toString(), VALUE_1);
         allProperties.put(TYPE_PARAMETER_HIDE_ANOTHER_TYPE.toString(), VALUE_1);
-        allProperties.put(FIELD_HIDES_ANOTHER_VARIABLE.toString(), VALUE_2);
+        allProperties.put(FIELD_HIDES_ANOTHER_VARIABLE.toString(), VALUE_1);
         allProperties.put(MISSING_DEFAULT_CASE.toString(), VALUE_1);
-        allProperties.put(UNUSED_PRIVATE_MEMBER.toString(), VALUE_2);
+        allProperties.put(UNUSED_PRIVATE_MEMBER.toString(), VALUE_1);
         allProperties.put(UNCHECKED_TYPE_OPERATION.toString(), VALUE_1);
-        allProperties.put(USAGE_OF_RAW_TYPE.toString(), VALUE_2);
+        allProperties.put(USAGE_OF_RAW_TYPE.toString(), VALUE_1);
         allProperties.put(MISSING_OVERRIDE_ANNOTATION.toString(), VALUE_1);
-        allProperties.put(NULL_POINTER_ACCESS.toString(), VALUE_2);
+        allProperties.put(NULL_POINTER_ACCESS.toString(), VALUE_1);
         allProperties.put(POTENTIAL_NULL_POINTER_ACCESS.toString(), VALUE_1);
-        allProperties.put(REDUNDANT_NULL_CHECK.toString(), VALUE_2);
+        allProperties.put(REDUNDANT_NULL_CHECK.toString(), VALUE_1);
 
         return allProperties;
     }
 
+    private void initWidgets() {
+        when(widget.getOptionId()).thenReturn(COMPILER_UNUSED_LOCAL, COMPILER_UNUSED_IMPORT, DEAD_CODE, METHOD_WITH_CONSTRUCTOR_NAME,
+                                              UNNECESSARY_ELSE_STATEMENT, COMPARING_IDENTICAL_VALUES, NO_EFFECT_ASSIGNMENT,
+                                              MISSING_SERIAL_VERSION_UID, TYPE_PARAMETER_HIDE_ANOTHER_TYPE, FIELD_HIDES_ANOTHER_VARIABLE,
+                                              MISSING_DEFAULT_CASE, UNUSED_PRIVATE_MEMBER, UNCHECKED_TYPE_OPERATION, USAGE_OF_RAW_TYPE,
+                                              MISSING_OVERRIDE_ANNOTATION, NULL_POINTER_ACCESS, POTENTIAL_NULL_POINTER_ACCESS,
+                                              REDUNDANT_NULL_CHECK);
+    }
+
     @Test
     public void propertyShouldBeChanged() {
-        presenter.onPropertyChanged(COMPILER_UNUSED_IMPORT.toString(), VALUE_2);
+        presenter.onPropertyChanged();
 
         verify(dirtyStateListener).onDirtyChanged();
-
-        assertThat(presenter.isDirty(), equalTo(true));
     }
 
     @Test
     public void propertiesShouldBeDisplayed() throws Exception {
+        presenter.onWsAgentStarted(wsAgentStateEvent);
         presenter.go(container);
 
         verify(mapPromise).then(operationCaptor.capture());
@@ -192,5 +230,23 @@ public class ErrorWarningsPresenterTest {
         verify(widget, times(18)).selectPropertyValue(anyString());
         verify(widget, times(18)).setDelegate(presenter);
         verify(view, times(18)).addProperty(widget);
+    }
+
+    @Test
+    public void propertiesShouldBeDisplayedFailed() throws OperationException {
+        PromiseError promiseError = mock(PromiseError.class);
+        NotificationManager notificationManager = mock(NotificationManager.class);
+
+        when(notificationManagerProvider.get()).thenReturn(notificationManager);
+
+        presenter.onWsAgentStarted(wsAgentStateEvent);
+        presenter.go(container);
+
+        verify(mapPromise).catchError(errorOperationCaptor.capture());
+
+        errorOperationCaptor.getValue().apply(promiseError);
+
+        verify(preferencesManager).loadPreferences();
+        verify(notificationManager).notify(anyString(), eq(FAIL), eq(true));
     }
 }

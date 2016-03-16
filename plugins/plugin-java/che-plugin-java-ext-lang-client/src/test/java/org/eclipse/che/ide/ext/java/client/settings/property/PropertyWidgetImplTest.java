@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.DEAD_CODE;
 import static org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidgetImpl.ERROR;
 import static org.eclipse.che.ide.ext.java.client.settings.property.PropertyWidgetImpl.IGNORE;
@@ -80,16 +81,11 @@ public class PropertyWidgetImplTest {
 
         widget.onPropertyChanged(event);
 
-        verify(delegate).onPropertyChanged(DEAD_CODE.toString(), SOME_TEXT);
+        verify(delegate).onPropertyChanged();
     }
 
     @Test
-    public void onPropertyShouldBeChangedAndValueShouldNotBeFound() {
-        when(widget.property.getSelectedIndex()).thenReturn(-1);
-
-        widget.onPropertyChanged(event);
-
-        verify(delegate).onPropertyChanged(DEAD_CODE.toString(), "");
+    public void optionIdShouldBeReturned() {
+        assertEquals(widget.getOptionId(), DEAD_CODE);
     }
-
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.statepersistance;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -42,7 +41,6 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -149,13 +147,9 @@ public class AppStateManager implements WindowActionHandler,
     private void writeStateToPreferences() {
         final String json = dtoFactory.toJson(appState);
         preferencesManager.setValue(PREFERENCE_PROPERTY_NAME, json);
-        preferencesManager.flushPreferences(new AsyncCallback<Map<String, String>>() {
+        preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
             @Override
-            public void onSuccess(Map<String, String> result) {
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
+            public void apply(PromiseError arg) throws OperationException {
                 Log.error(AppStateManager.class, "Failed to store app's state to user's preferences");
             }
         });
