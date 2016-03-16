@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.core.rest.CodenvyJsonProvider;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -267,7 +267,7 @@ public class ProjectServiceTest {
 
             @Override
             public Set<Object> getSingletons() {
-                return new HashSet<>(Arrays.asList(new CodenvyJsonProvider(singleton(ContentStream.class)),
+                return new HashSet<>(Arrays.asList(new CheJsonProvider(singleton(ContentStream.class)),
                                                    new ContentStreamWriter(),
                                                    new ApiExceptionMapper()));
             }

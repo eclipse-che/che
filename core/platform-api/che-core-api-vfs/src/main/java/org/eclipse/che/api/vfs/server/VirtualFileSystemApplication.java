@@ -11,7 +11,7 @@
 package org.eclipse.che.api.vfs.server;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.core.rest.CodenvyJsonProvider;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
 
 import javax.ws.rs.core.Application;
 import java.util.Collections;
@@ -31,7 +31,7 @@ public class VirtualFileSystemApplication extends Application {
         singletons = new HashSet<>(4);
         singletons.add(new ContentStreamWriter());
         singletons.add(new ApiExceptionMapper());
-        singletons.add(new CodenvyJsonProvider(Collections.singleton(ContentStream.class)));
+        singletons.add(new CheJsonProvider(Collections.singleton(ContentStream.class)));
     }
 
     /** @see javax.ws.rs.core.Application#getClasses() */

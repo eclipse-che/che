@@ -37,7 +37,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
-import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
+import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
@@ -89,7 +89,7 @@ public class ApiModule extends AbstractModule {
         bind(WorkspaceMessenger.class).asEagerSingleton();
 
 
-        bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
+        bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(WSocketEventBusServer.class);

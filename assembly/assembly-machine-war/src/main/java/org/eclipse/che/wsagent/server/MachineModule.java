@@ -30,7 +30,7 @@ import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemModule;
 import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
+import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.generator.archetype.ArchetypeGenerator;
 import org.eclipse.che.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.git.impl.nativegit.LocalGitUserResolver;
@@ -92,7 +92,7 @@ public class MachineModule extends AbstractModule {
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
 
-        bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
+        bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);

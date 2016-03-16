@@ -11,7 +11,7 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.core.rest.CodenvyJsonProvider;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.vfs.server.ContentStream;
 import org.eclipse.che.api.vfs.server.ContentStreamWriter;
@@ -77,7 +77,7 @@ public class ProjectTemplateServiceTest {
 
             @Override
             public Set<Object> getSingletons() {
-                return new HashSet<>(asList(new CodenvyJsonProvider(new HashSet<>(asList(ContentStream.class))),
+                return new HashSet<>(asList(new CheJsonProvider(new HashSet<>(asList(ContentStream.class))),
                                             new ContentStreamWriter(),
                                             new ApiExceptionMapper()));
             }

@@ -12,7 +12,6 @@ package org.eclipse.che.everrest;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
-
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.async.AsynchronousJob;
 import org.everrest.core.impl.async.AsynchronousJobPool;
@@ -29,10 +28,10 @@ import java.util.concurrent.Callable;
 /** @author Vitaly Parfonov */
 @Singleton
 @Provider
-public class CodenvyAsynchronousJobPool extends AsynchronousJobPool implements ContextResolver<AsynchronousJobPool> {
+public class CheAsynchronousJobPool extends AsynchronousJobPool implements ContextResolver<AsynchronousJobPool> {
 
     @Inject
-    public CodenvyAsynchronousJobPool(EverrestConfiguration everrestConfiguration) {
+    public CheAsynchronousJobPool(EverrestConfiguration everrestConfiguration) {
         super(everrestConfiguration);
     }
 
