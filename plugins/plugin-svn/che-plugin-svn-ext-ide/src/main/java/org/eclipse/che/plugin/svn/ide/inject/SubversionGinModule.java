@@ -1,0 +1,103 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.plugin.svn.ide.inject;
+
+import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerView;
+import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerViewImpl;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleView;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleViewImpl;
+import org.eclipse.che.plugin.svn.ide.importer.SubversionProjectImporterView;
+import org.eclipse.che.plugin.svn.ide.importer.SubversionProjectImporterViewImpl;
+import org.eclipse.che.plugin.svn.ide.log.ShowLogsView;
+import org.eclipse.che.plugin.svn.ide.log.ShowLogsViewImpl;
+import org.eclipse.che.plugin.svn.ide.merge.MergeView;
+import org.eclipse.che.plugin.svn.ide.merge.MergeViewImpl;
+import org.eclipse.che.plugin.svn.ide.move.MoveView;
+import org.eclipse.che.plugin.svn.ide.move.MoveViewImpl;
+import org.eclipse.che.plugin.svn.ide.property.PropertyEditorView;
+import org.eclipse.che.plugin.svn.ide.property.PropertyEditorViewImpl;
+import org.eclipse.che.plugin.svn.ide.resolve.ResolveView;
+import org.eclipse.che.plugin.svn.ide.resolve.ResolveViewImpl;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionClientServiceImpl;
+import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsPresenter;
+import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsView;
+import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsViewImpl;
+import org.eclipse.che.plugin.svn.ide.commit.CommitView;
+import org.eclipse.che.plugin.svn.ide.commit.CommitViewImpl;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialog;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogPresenter;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogView;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogViewImpl;
+import org.eclipse.che.plugin.svn.ide.copy.CopyView;
+import org.eclipse.che.plugin.svn.ide.copy.CopyViewImpl;
+import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredNodeFactory;
+import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredTreeStructureProvider;
+import org.eclipse.che.plugin.svn.ide.export.ExportView;
+import org.eclipse.che.plugin.svn.ide.export.ExportViewImpl;
+import org.eclipse.che.plugin.svn.ide.importer.SubversionImportWizardRegistrar;
+import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionView;
+import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionViewImpl;
+import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
+import org.eclipse.che.ide.api.project.tree.TreeStructureProvider;
+
+import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import com.google.inject.Singleton;
+
+/**
+ * Subversion Gin module.
+ *
+ * @author Jeremy Whitlock
+ */
+@ExtensionGinModule
+public class SubversionGinModule extends AbstractGinModule {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void configure() {
+        bind(SubversionClientService.class).to(SubversionClientServiceImpl.class).in(Singleton.class);
+
+        GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding()
+                      .to(SubversionImportWizardRegistrar.class);
+
+        bind(SubversionProjectImporterView.class).to(SubversionProjectImporterViewImpl.class).in(Singleton.class);
+
+        bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class).in(Singleton.class);
+        bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
+        bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
+        bind(CopyView.class).to(CopyViewImpl.class).in(Singleton.class);
+        bind(MergeView.class).to(MergeViewImpl.class).in(Singleton.class);
+        bind(MoveView.class).to(MoveViewImpl.class).in(Singleton.class);
+        bind(ExportView.class).to(ExportViewImpl.class).in(Singleton.class);
+        bind(ShowLogsView.class).to(ShowLogsViewImpl.class).in(Singleton.class);
+        bind(PropertyEditorView.class).to(PropertyEditorViewImpl.class).in(Singleton.class);
+
+        install(new GinFactoryModuleBuilder().build(FilteredNodeFactory.class));
+        GinMultibinder.newSetBinder(binder(), TreeStructureProvider.class).addBinding().to(FilteredTreeStructureProvider.class);
+
+        bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
+        bind(DiffViewerView.class).to(DiffViewerViewImpl.class).in(Singleton.class);
+
+        bind(AskCredentialsPresenter.class);
+        bind(AskCredentialsView.class).to(AskCredentialsViewImpl.class);
+
+        install(new GinFactoryModuleBuilder().implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
+                                             .build(ChoiceDialogFactory.class));
+        bind(ChoiceDialogView.class).to(ChoiceDialogViewImpl.class);
+    }
+
+}
