@@ -36,14 +36,6 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>maven-server-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>maven-server-impl</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
@@ -51,6 +43,14 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-tomcat8-slf4j-logback</artifactId>
             <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>maven-server-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>maven-server-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
@@ -83,8 +83,8 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
                     <usedDependencies>
-                        <param>org.eclipse.che:maven-server-impl</param>
-                        <param>org.eclipse.che:maven-server-api</param>
+                        <param>org.eclipse.che.plugin:maven-server-impl</param>
+                        <param>org.eclipse.che.plugin:maven-server-api</param>
                         <param>log4j:log4j</param>
                         <param>org.jdom:jdom</param>
                         <param>org.eclipse.che.core:che-core-commons-lang</param>

@@ -23,6 +23,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Maven :: Parent</name>
     <modules>
+        <module>maven-server</module>
         <module>che-plugin-maven-tools</module>
         <module>che-plugin-maven-generator-archetype</module>
         <module>che-plugin-maven-ext-shared</module>

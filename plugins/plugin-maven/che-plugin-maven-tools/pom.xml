@@ -20,7 +20,7 @@
     </parent>
     <artifactId>che-plugin-java-maven-tools</artifactId>
     <packaging>jar</packaging>
-    <name>Che Plugin :: Java :: Maven Tools</name>
+    <name>Che Plugin :: Maven :: Maven Tools</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
     </properties>

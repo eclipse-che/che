@@ -37,7 +37,6 @@
     </scm>
     <properties>
         <che.lib.version>4.0.0-RC14-SNAPSHOT</che.lib.version>
-        <che.maven.server.version>1.0-SNAPSHOT</che.maven.server.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -69,16 +68,6 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>maven-server-api</artifactId>
-                <version>${che.maven.server.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>maven-server-impl</artifactId>
-                <version>${che.maven.server.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -504,6 +493,16 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-web-ext-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>maven-server-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>maven-server-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
