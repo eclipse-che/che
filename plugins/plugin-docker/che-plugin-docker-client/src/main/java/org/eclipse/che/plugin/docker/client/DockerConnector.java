@@ -834,6 +834,7 @@ public class DockerConnector {
                                                             .method("POST")
                                                             .path("/build")
                                                             .query("rm", 1)
+                                                            .query("forcerm", 1)
                                                             .query("pull", doForcePull)
                                                             .headers(headers)
                                                             .entity(tarInput)) {
