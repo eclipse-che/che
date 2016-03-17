@@ -21,8 +21,6 @@ import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -34,9 +32,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.history.HistoryPresenter.LOG_COMMAND_NAME;
@@ -60,11 +55,9 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
     private final AppContext              appContext;
     private final GitLocalizationConstant constant;
     private final NotificationManager     notificationManager;
-    private final EditorAgent             editorAgent;
     private final EventBus                eventBus;
     private final String                  workspaceId;
 
-    private List<EditorPartPresenter> openedEditors;
     private Revision                  selectedRevision;
 
     @Inject
@@ -72,7 +65,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                                   GitServiceClient service,
                                   GitLocalizationConstant constant,
                                   EventBus eventBus,
-                                  EditorAgent editorAgent,
                                   DialogFactory dialogFactory,
                                   AppContext appContext,
                                   NotificationManager notificationManager,
@@ -87,7 +79,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
         this.service = service;
         this.constant = constant;
         this.eventBus = eventBus;
-        this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -132,11 +123,6 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
     @Override
     public void onResetClicked() {
         view.close();
-
-        openedEditors = new ArrayList<>();
-        for (EditorPartPresenter partPresenter : editorAgent.getOpenedEditors().values()) {
-            openedEditors.add(partPresenter);
-        }
         reset();
     }
 

@@ -27,9 +27,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyMapOf;
@@ -125,9 +124,9 @@ public class OpenedFilesPersistenceComponentTest {
         when(editorPartPresenter1.getEditorInput()).thenReturn(editorInput1);
         when(editorPartPresenter2.getEditorInput()).thenReturn(editorInput2);
 
-        Map<String, EditorPartPresenter> openedEditors = new TreeMap<>();
-        openedEditors.put(FILE1_PATH, editorPartPresenter1);
-        openedEditors.put(FILE2_PATH, editorPartPresenter1);
+        List<EditorPartPresenter> openedEditors = new ArrayList<>();
+        openedEditors.add(editorPartPresenter1);
+        openedEditors.add(editorPartPresenter1);
 
         when(editorAgent.getOpenedEditors()).thenReturn(openedEditors);
     }

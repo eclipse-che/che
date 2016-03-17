@@ -49,7 +49,7 @@ public class CloseOtherAction extends EditorAbstractAction {
         eventLogger.log(this);
         final VirtualFile virtualFile = getEditorFile(e);
 
-        Iterable<EditorPartPresenter> filtered = filter(editorAgent.getOpenedEditors().values(), new Predicate<EditorPartPresenter>() {
+        Iterable<EditorPartPresenter> filtered = filter(editorAgent.getOpenedEditors(), new Predicate<EditorPartPresenter>() {
             @Override
             public boolean apply(EditorPartPresenter input) {
                 return !input.getEditorInput().getFile().equals(virtualFile);

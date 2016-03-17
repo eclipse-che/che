@@ -39,8 +39,6 @@ import org.mockito.Mock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
 import static org.eclipse.che.ide.ext.git.client.patcher.WindowPatcher.RETURNED_MESSAGE;
@@ -128,14 +126,14 @@ public class BranchPresenterTest extends BaseTest {
                                         dialogFactory,
                                         eventBus);
 
-        NavigableMap<String, EditorPartPresenter> partPresenterMap = new TreeMap<>();
-        partPresenterMap.put("partPresenter", partPresenter);
+        List<EditorPartPresenter> partPresenterList = new ArrayList<>();
+        partPresenterList.add(partPresenter);
 
         when(selectedBranch.getDisplayName()).thenReturn(BRANCH_NAME);
         when(selectedBranch.getName()).thenReturn(BRANCH_NAME);
         when(selectedBranch.isRemote()).thenReturn(IS_REMOTE);
         when(selectedBranch.isActive()).thenReturn(IS_ACTIVE);
-        when(editorAgent.getOpenedEditors()).thenReturn(partPresenterMap);
+        when(editorAgent.getOpenedEditors()).thenReturn(partPresenterList);
         when(partPresenter.getEditorInput()).thenReturn(editorInput);
     }
 

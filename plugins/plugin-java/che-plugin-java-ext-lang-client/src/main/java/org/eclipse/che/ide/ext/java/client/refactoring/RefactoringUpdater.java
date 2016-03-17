@@ -33,6 +33,7 @@ import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.resource.Path;
 
 import java.util.Iterator;
 import java.util.List;
@@ -165,11 +166,9 @@ public class RefactoringUpdater {
     /** Iterates over opened editors and fetch file with specified path or returns null. */
     private FileReferenceNode getOpenedFileOrNull(String path) {
         VirtualFile vFile = null;
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
-            if (editor.getEditorInput().getFile().getPath().equals(path)) {
-                vFile = editor.getEditorInput().getFile();
-                break;
-            }
+        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(Path.valueOf(path));
+        if (openedEditor != null) {
+            vFile = openedEditor.getEditorInput().getFile();
         }
 
         if (vFile == null || !(vFile instanceof FileReferenceNode)) {

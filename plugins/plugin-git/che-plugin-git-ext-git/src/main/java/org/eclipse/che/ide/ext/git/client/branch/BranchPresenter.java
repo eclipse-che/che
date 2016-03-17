@@ -272,7 +272,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
     }
 
     private void updateOpenedFiles() {
-        for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
             final VirtualFile file = editorPartPresenter.getEditorInput().getFile();
             final String filePath = file.getPath();
             Unmarshallable<ItemReference> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ItemReference.class);

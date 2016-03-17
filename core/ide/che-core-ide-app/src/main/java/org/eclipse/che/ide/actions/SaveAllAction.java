@@ -24,8 +24,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /** @author Evgen Vidolob */
@@ -46,9 +44,7 @@ public class SaveAllAction extends ProjectAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         eventLogger.log(this);
-        Collection<EditorPartPresenter> values = editorAgent.getOpenedEditors().values();
-        List<EditorPartPresenter> editors = new ArrayList<>(values);
-        save(editors);
+        save(editorAgent.getOpenedEditors());
     }
 
     private void save(final List<EditorPartPresenter> editors) {
@@ -82,9 +78,8 @@ public class SaveAllAction extends ProjectAction {
     /** {@inheritDoc} */
     @Override
     public void updateProjectAction(ActionEvent e) {
-//        e.getPresentation().setVisible(true);
         boolean hasDirtyEditor = false;
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
             if(editor instanceof EditorWithAutoSave) {
                 if (((EditorWithAutoSave)editor).isAutoSaveEnabled()) {
                     continue;
