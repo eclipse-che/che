@@ -64,24 +64,15 @@ public class OrionDocument extends AbstractEmbeddedDocument {
         int startOffset = param.start();
         int addedCharCount = param.addedCharCount();
         int removedCharCount = param.removedCharCount();
-        int length = 0;
 
-        if (addedCharCount != 0) {
-            //adding
-            length = addedCharCount;
-        } else if (removedCharCount != 0) {
-            //deleting
-            //TODO there may be bug
-            length = removedCharCount;
-            startOffset = startOffset - length;
-        }
-        String text = editorOverlay.getModel().getText(startOffset, startOffset + length);
+
+        String text = editorOverlay.getModel().getText(startOffset, startOffset + addedCharCount);
 
         final DocumentChangeEvent event = new DocumentChangeEvent(this,
                                                                   startOffset,
-                                                                  length,
+                                                                  addedCharCount,
                                                                   text,
-                                                                  removedCharCount);//TODO: need check removedCharCount add it for fix
+                                                                  removedCharCount);
         // according to https://github.com/codenvy/che-core/pull/122
         getDocEventBus().fireEvent(event);
     }
