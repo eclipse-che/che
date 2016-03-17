@@ -17,17 +17,19 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-
+import javax.ws.rs.core.UriInfo;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,5 +102,13 @@ public class TestService {
         if (!EnvironmentContext.getCurrent().getUser().getToken().equals(token)) {
             throw new UnauthorizedException("Token '" + token + "' it is different from token in EnvironmentContext");
         }
+    }
+
+    @GET
+    @Path("/decode")
+    @Produces(APPLICATION_JSON)
+    public String getUriInfo(@QueryParam("query") String query,
+                             @Context UriInfo uriInfo) {
+        return URLDecoder.decode(uriInfo.getRequestUri().toString());
     }
 }

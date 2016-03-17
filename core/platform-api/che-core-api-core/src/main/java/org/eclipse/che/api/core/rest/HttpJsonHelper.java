@@ -431,10 +431,7 @@ public class HttpJsonHelper {
 
                 if (parameters != null && parameters.length > 0) {
                     for (Pair<String, ?> parameter : parameters) {
-                        String name = URLEncoder.encode(parameter.first, "UTF-8");
-                        String value = parameter.second == null ? null : URLEncoder
-                                .encode(String.valueOf(parameter.second), "UTF-8");
-                        ub.replaceQueryParam(name, value);
+                        ub.queryParam(parameter.first, parameter.second);
                     }
                 }
                 url = ub.build().toString();
