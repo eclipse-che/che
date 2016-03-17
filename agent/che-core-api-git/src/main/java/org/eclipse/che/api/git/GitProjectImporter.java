@@ -111,13 +111,13 @@ public class GitProjectImporter implements ProjectImporter {
             // For factory: checkout particular commit after clone
             String commitId = null;
             // For factory: github pull request feature
-            String remoteOriginFetch = null;
+            String fetch = null;
             String branch = null;
             String startPoint = null;
             // For factory or probably for our projects templates:
             // If git repository contains more than one project need clone all repository but after cloning keep just
-            // sub-project that is specified in parameter "keepDirectory".
-            String keepDirectory = null;
+            // sub-project that is specified in parameter "keepDir".
+            String keepDir = null;
             // For factory and for our projects templates:
             // Keep all info related to the vcs. In case of Git: ".git" directory and ".gitignore" file.
             // Delete vcs info if false.
@@ -129,8 +129,8 @@ public class GitProjectImporter implements ProjectImporter {
                 commitId = parameters.get("commitId");
                 branch = parameters.get("branch");
                 startPoint = parameters.get("startPoint");
-                remoteOriginFetch = parameters.get("remoteOriginFetch");
-                keepDirectory = parameters.get("keepDirectory");
+                fetch = parameters.get("fetch");
+                keepDir = parameters.get("keepDir");
                 if (parameters.containsKey("keepVcs")) {
                     keepVcs = Boolean.parseBoolean(parameters.get("keepVcs"));
                 }
@@ -141,11 +141,11 @@ public class GitProjectImporter implements ProjectImporter {
             final DtoFactory dtoFactory = DtoFactory.getInstance();
             final String location = storage.getLocation();
             final String projectName = baseFolder.getName();
-            if (keepDirectory != null) {
+            if (keepDir != null) {
                 final File temp = Files.createTempDirectory(null).toFile();
                 try {
                     git = gitConnectionFactory.getConnection(temp, consumerFactory);
-                    sparsecheckout(git, projectName, location, branch == null ? "master" : branch, startPoint, keepDirectory, dtoFactory);
+                    sparsecheckout(git, projectName, location, branch == null ? "master" : branch, startPoint, keepDir, dtoFactory);
                     // Copy content of directory to the project folder.
                     final File projectDir = new File(localPath);
                     IoUtil.copy(temp, projectDir, IoUtil.ANY_FILTER);
@@ -159,8 +159,8 @@ public class GitProjectImporter implements ProjectImporter {
                     cloneRepository(git, "origin", location, dtoFactory);
                     if (commitId != null) {
                         checkoutCommit(git, commitId, dtoFactory);
-                    } else if (remoteOriginFetch != null) {
-                        git.getConfig().add("remote.origin.fetch", remoteOriginFetch);
+                    } else if (fetch != null) {
+                        git.getConfig().add("remote.origin.fetch", fetch);
                         fetch(git, "origin", dtoFactory);
                         if (branch != null) {
                             checkoutBranch(git, projectName, branch, startPoint, dtoFactory);
@@ -174,8 +174,8 @@ public class GitProjectImporter implements ProjectImporter {
                     if (commitId != null) {
                         fetchBranch(git, "origin", branch == null ? "*" : branch, dtoFactory);
                         checkoutCommit(git, commitId, dtoFactory);
-                    } else if (remoteOriginFetch != null) {
-                        git.getConfig().add("remote.origin.fetch", remoteOriginFetch);
+                    } else if (fetch != null) {
+                        git.getConfig().add("remote.origin.fetch", fetch);
                         fetch(git, "origin", dtoFactory);
                         if (branch != null) {
                             checkoutBranch(git, projectName, branch, startPoint, dtoFactory);
@@ -312,7 +312,7 @@ public class GitProjectImporter implements ProjectImporter {
         $ git init
         $ git remote add origin <URL>
         $ git config core.sparsecheckout true
-        $ echo keepDirectory >> .git/info/sparse-checkout
+        $ echo keepDir >> .git/info/sparse-checkout
         $ git pull origin master
         */
         initRepository(git, dtoFactory);
