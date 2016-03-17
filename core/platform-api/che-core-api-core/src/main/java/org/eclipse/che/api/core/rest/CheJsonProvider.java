@@ -52,12 +52,12 @@ import java.util.Set;
 @Provider
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
-public class CodenvyJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
+public class CheJsonProvider<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
     private Set<Class> ignoredClasses;
     private final JsonEntityProvider delegate = new JsonEntityProvider<>();
 
     @Inject
-    public CodenvyJsonProvider(@Nullable @Named("che.json.ignored_classes") Set<Class> ignoredClasses) {
+    public CheJsonProvider(@Nullable @Named("che.json.ignored_classes") Set<Class> ignoredClasses) {
         this.ignoredClasses = ignoredClasses == null ? new LinkedHashSet<Class>() : new LinkedHashSet<>(ignoredClasses);
     }
 

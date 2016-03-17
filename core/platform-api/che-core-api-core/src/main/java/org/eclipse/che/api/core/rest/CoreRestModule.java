@@ -20,7 +20,7 @@ import com.google.inject.name.Names;
 public class CoreRestModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(CodenvyJsonProvider.class);
+        bind(CheJsonProvider.class);
         bind(ApiExceptionMapper.class);
         Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"));
     }
