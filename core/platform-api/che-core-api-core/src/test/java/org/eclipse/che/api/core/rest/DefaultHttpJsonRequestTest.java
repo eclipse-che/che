@@ -57,7 +57,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -256,8 +255,20 @@ public class DefaultHttpJsonRequestTest {
     public void shouldReadJsonObjectBodyAsString(ITestContext ctx) throws Exception {
         final DefaultHttpJsonRequest request = new DefaultHttpJsonRequest(getUrl(ctx) + "/application-json");
         request.useGetMethod();
-        
+
         assertEquals(request.request().asString(), TestService.JSON_OBJECT);
+    }
+
+    @Test
+    public void shouldEncodeRequestUrlInDefaultHttpJsonRequestAndDecodeInService(ITestContext ctx) throws Exception {
+        final String base = getUrl(ctx) + "/decode";
+        final HttpJsonResponse response = new DefaultHttpJsonRequest(base).addQueryParam("query", "some white spaces !!")
+                                                                          .useGetMethod()
+                                                                          .request();
+
+        final String url = base + "?query=some white spaces !!";
+
+        assertEquals(url, response.asString());
     }
 
     @Test

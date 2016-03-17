@@ -42,13 +42,12 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Simple implementation of {@link HttpJsonRequest} based on {@link HttpURLConnection}.
@@ -62,7 +61,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * @see DefaultHttpJsonRequestFactory
  */
 public class DefaultHttpJsonRequest implements HttpJsonRequest {
- 
+
     private static final int      DEFAULT_QUERY_PARAMS_LIST_SIZE = 5;
     private static final Object[] EMPTY_ARRAY                    = new Object[0];
 
@@ -186,12 +185,12 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
                                       Object body,
                                       List<Pair<String, ?>> parameters,
                                       String authorizationHeaderValue) throws IOException,
-                                                                               ServerException,
-                                                                               ForbiddenException,
-                                                                               NotFoundException,
-                                                                               UnauthorizedException,
-                                                                               ConflictException,
-                                                                               BadRequestException {
+                                                                              ServerException,
+                                                                              ForbiddenException,
+                                                                              NotFoundException,
+                                                                              UnauthorizedException,
+                                                                              ConflictException,
+                                                                              BadRequestException {
         final String authToken = getAuthenticationToken();
         final boolean hasQueryParams = parameters != null && !parameters.isEmpty();
         if (hasQueryParams || authToken != null) {
@@ -201,11 +200,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
 
             if (hasQueryParams) {
                 for (Pair<String, ?> parameter : parameters) {
-                    String name = URLEncoder.encode(parameter.first, "UTF-8");
-                    String value = parameter.second == null ?
-                                   null :
-                                   URLEncoder.encode(String.valueOf(parameter.second), "UTF-8");
-                    ub.queryParam(name, value);
+                    ub.queryParam(parameter.first, parameter.second);
                 }
             }
             url = ub.build().toString();
