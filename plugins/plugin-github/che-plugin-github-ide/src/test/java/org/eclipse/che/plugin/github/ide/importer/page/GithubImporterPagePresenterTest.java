@@ -404,7 +404,7 @@ public class GithubImporterPagePresenterTest {
 
         presenter.keepDirectorySelected(true);
 
-        assertEquals("directory", parameters.get("keepDirectory"));
+        assertEquals("directory", parameters.get("keepDir"));
         verify(dataObject).withType("blank");
         verify(view).highlightDirectoryNameField(eq(false));
         verify(view).focusDirectoryNameFiend();
@@ -413,7 +413,7 @@ public class GithubImporterPagePresenterTest {
     @Test
     public void keepDirectoryUnSelectedTest() {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("keepDirectory", "directory");
+        parameters.put("keepDir", "directory");
         when(source.getParameters()).thenReturn(parameters);
 
         presenter.keepDirectorySelected(false);
@@ -432,7 +432,7 @@ public class GithubImporterPagePresenterTest {
 
         presenter.keepDirectoryNameChanged("directory");
 
-        assertEquals("directory", parameters.get("keepDirectory"));
+        assertEquals("directory", parameters.get("keepDir"));
         verify(dataObject, never()).setPath(any());
         verify(dataObject).withType(eq("blank"));
         verify(view).highlightDirectoryNameField(eq(false));
@@ -441,7 +441,7 @@ public class GithubImporterPagePresenterTest {
     @Test
     public void keepDirectoryNameChangedAndKeepDirectoryUnSelectedTest() {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("keepDirectory", "directory");
+        parameters.put("keepDir", "directory");
         when(source.getParameters()).thenReturn(parameters);
         when(view.keepDirectory()).thenReturn(false);
 
