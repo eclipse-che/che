@@ -68,6 +68,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     protected static final String SERVER_CONF_LABEL_PREFIX          = "che:server:";
     protected static final String SERVER_CONF_LABEL_REF_SUFFIX      = ":ref";
     protected static final String SERVER_CONF_LABEL_PROTOCOL_SUFFIX = ":protocol";
+    protected static final String SERVER_CONF_LABEL_PATH_SUFFIX     = ":path";
 
     private final ContainerInfo               info;
     private final String                      containerHost;
@@ -229,8 +230,20 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                 if (serverConf.getRef() != null) {
                     serverEntry.getValue().setRef(serverConf.getRef());
                 }
+                if (serverConf.getPath() != null) {
+                    serverEntry.getValue().setPath(serverConf.getPath());
+                }
                 if (serverConf.getProtocol() != null) {
-                    serverEntry.getValue().setUrl(serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress());
+                    serverEntry.getValue().setProtocol(serverConf.getProtocol());
+
+                    String url = serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress();
+                    if (serverConf.getPath() != null) {
+                        if (serverConf.getPath().charAt(0) != '/') {
+                            url = url + '/';
+                        }
+                        url = url + serverConf.getPath();
+                    }
+                    serverEntry.getValue().setUrl(url);
                 }
             }
         }
@@ -247,7 +260,9 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             // we are assigning ports automatically, so have 1 to 1 binding (at least per protocol)
             String externalPort = portEntry.getValue().get(0).getHostPort();
             servers.put(portProtocol, new ServerImpl(null,
+                                                     null,
                                                      host + ":" + externalPort,
+                                                     null,
                                                      null));
         }
 
@@ -259,6 +274,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
         for (String portProtocol : portProtocols) {
             String ref = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_REF_SUFFIX);
             String protocol = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_PROTOCOL_SUFFIX);
+            String path = labels.get(SERVER_CONF_LABEL_PREFIX + portProtocol + SERVER_CONF_LABEL_PATH_SUFFIX);
             // it is allowed to use label without part /tcp that describes tcp port, e.g. 8080 describes 8080/tcp
             if (ref == null && !portProtocol.endsWith("/udp")) {
                 ref = labels.get(SERVER_CONF_LABEL_PREFIX +
@@ -270,9 +286,15 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                                       portProtocol.substring(0, portProtocol.length() - 4) +
                                       SERVER_CONF_LABEL_PROTOCOL_SUFFIX);
             }
+            if (path == null && !portProtocol.endsWith("/udp")) {
+                path = labels.get(SERVER_CONF_LABEL_PREFIX +
+                                  portProtocol.substring(0, portProtocol.length() - 4) +
+                                  SERVER_CONF_LABEL_PATH_SUFFIX);
+            }
             serversConf.put(portProtocol, new ServerConfImpl(ref,
                                                              portProtocol,
-                                                             protocol));
+                                                             protocol,
+                                                             path));
         }
 
         return serversConf;

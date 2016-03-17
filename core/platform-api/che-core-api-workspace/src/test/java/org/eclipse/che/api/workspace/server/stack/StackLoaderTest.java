@@ -194,10 +194,12 @@ public class StackLoaderTest {
                                               .withSource(machineSourceDto)
                                               .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
                                                                                                     .withPort("8080")
-                                                                                                    .withProtocol("https"),
+                                                                                                    .withProtocol("https")
+                                                                                                    .withPath("some/path"),
                                                                          newDto(ServerConfDto.class).withRef("ref2")
                                                                                                     .withPort("9090/udp")
-                                                                                                    .withProtocol("someprotocol")));
+                                                                                                    .withProtocol("someprotocol")
+                                                                                                    .withPath("/some/path")));
 
         EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withName("name")
                                                                     .withRecipe(recipeDto)

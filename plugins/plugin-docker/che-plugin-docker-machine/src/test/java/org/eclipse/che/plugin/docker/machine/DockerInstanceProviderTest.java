@@ -242,8 +242,8 @@ public class DockerInstanceProviderTest {
                                                       "machineType",
                                                       machineSource,
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
-                                                      asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                      asList(new ServerConfImpl("ref1", "8080", "https", null),
+                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
                                                       Collections.singletonMap("key1", "value1")),
                                 "machineId",
                                 WORKSPACE_ID,
@@ -276,8 +276,8 @@ public class DockerInstanceProviderTest {
                                                       "machineType",
                                                       machineSource,
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
-                                                      asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                      asList(new ServerConfImpl("ref1", "8080", "https", null),
+                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
                                                       Collections.singletonMap("key1", "value1")),
                                 "machineId",
                                 WORKSPACE_ID,
@@ -395,14 +395,14 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeCommonAndDevPortsToContainerOnDevInstanceCreationFromRecipe() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
 
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https"),
-                                                                new ServerConfImpl("reference4", "8083", "sftp")));
+        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https", null),
+                                                                new ServerConfImpl("reference4", "8083", "sftp", null)));
         expectedExposedPorts.addAll(devServers.stream()
                                               .map(ServerConf::getPort)
                                               .collect(Collectors.toList()));
@@ -437,8 +437,8 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
@@ -473,14 +473,14 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeCommonAndDevPortsToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
 
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https"),
-                                                                new ServerConfImpl("reference4", "8083", "sftp")));
+        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https", null),
+                                                                new ServerConfImpl("reference4", "8083", "sftp", null)));
         expectedExposedPorts.addAll(devServers.stream()
                                               .map(ServerConf::getPort)
                                               .collect(Collectors.toList()));
@@ -515,8 +515,8 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromSnapshot() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
@@ -552,8 +552,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnNonDevInstanceCreationFromSnapshot() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -592,8 +592,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnNonDevInstanceCreationFromRecipe() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -632,8 +632,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromSnapshot() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -672,8 +672,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -1655,9 +1655,14 @@ public class DockerInstanceProviderTest {
                                                                             "machineType",
                                                                             new MachineSourceImpl("source type", "source location"),
                                                                             new LimitsImpl(MEMORY_LIMIT_MB),
-                                                                            asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                                                   new ServerConfImpl("ref2", "9090/udp",
-                                                                                                      "someprotocol")),
+                                                                            asList(new ServerConfImpl("ref1",
+                                                                                                      "8080",
+                                                                                                      "https",
+                                                                                                      null),
+                                                                                   new ServerConfImpl("ref2",
+                                                                                                      "9090/udp",
+                                                                                                      "someprotocol",
+                                                                                                      null)),
                                                                             Collections.singletonMap("key1", "value1")));
     }
 }

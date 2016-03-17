@@ -52,4 +52,9 @@ public class Server {
     public String getRef() {
         return descriptor.getRef();
     }
+
+    @NotNull
+    public String getPath() {
+        return descriptor.getPath();
+    }
 }

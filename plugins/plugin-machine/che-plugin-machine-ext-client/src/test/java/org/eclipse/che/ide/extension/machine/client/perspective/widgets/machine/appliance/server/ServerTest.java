@@ -55,6 +55,15 @@ public class ServerTest {
     }
 
     @Test
+    public void pathShouldBeReturned() {
+        when(descriptor.getPath()).thenReturn(SOME_TEXT);
+
+        assertThat(server.getPath(), equalTo(SOME_TEXT));
+
+        verify(descriptor).getPath();
+    }
+
+    @Test
     public void urlShouldBeReturned() {
         when(descriptor.getUrl()).thenReturn(SOME_TEXT);
 

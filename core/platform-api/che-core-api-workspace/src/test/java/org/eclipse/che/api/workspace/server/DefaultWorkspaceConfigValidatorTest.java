@@ -456,10 +456,9 @@ public class DefaultWorkspaceConfigValidatorTest {
     public static Object[][] invalidProtocolProvider() {
         return new Object[][] {
                 {""},
-                {"http2"},
-                {"h"},
-                {"http2s"},
-                {"httphttphttp"},
+                {"http!"},
+                {"2http"},
+                {"http:"},
                 };
     }
 
@@ -514,10 +513,12 @@ public class DefaultWorkspaceConfigValidatorTest {
 
         final List<ServerConfDto> serversConf = new ArrayList<>(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
                                                                                                          .withPort("8080/tcp")
-                                                                                                         .withProtocol("https"),
+                                                                                                         .withProtocol("https")
+                                                                                                         .withPath("some/path"),
                                                                               newDto(ServerConfDto.class).withRef("ref2")
                                                                                                          .withPort("9090/udp")
-                                                                                                         .withProtocol("protocol")));
+                                                                                                         .withProtocol("protocol")
+                                                                                                         .withPath("/some/path")));
         MachineConfigDto devMachine = newDto(MachineConfigDto.class).withDev(true)
                                                                     .withName("dev-machine")
                                                                     .withType("docker")

@@ -491,10 +491,12 @@ public class WorkspaceManagerTest {
                                                                                         .withType("recipe"))
                                               .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
                                                                                                     .withPort("8080")
-                                                                                                    .withProtocol("https"),
+                                                                                                    .withProtocol("https")
+                                                                                                    .withPath("some/path"),
                                                                          newDto(ServerConfDto.class).withRef("ref2")
                                                                                                     .withPort("9090/udp")
-                                                                                                    .withProtocol("someprotocol")))
+                                                                                                    .withProtocol("someprotocol")
+                                                                                                    .withPath("/some/path")))
                                               .withEnvVariables(Collections.singletonMap("key1", "value1"));
         EnvironmentDto devEnv = newDto(EnvironmentDto.class).withName("dev-env")
                                                             .withMachineConfigs(new ArrayList<>(singletonList(devMachine)))

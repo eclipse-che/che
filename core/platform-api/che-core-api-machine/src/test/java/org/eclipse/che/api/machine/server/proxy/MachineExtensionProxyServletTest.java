@@ -130,7 +130,9 @@ public class MachineExtensionProxyServletTest {
         String serverAddress = "localhost:" + jettyServer.getURI().getPort();
         Map<String, ServerImpl> machineServers = Collections.singletonMap(String.valueOf(EXTENSIONS_API_PORT),
                                                                           new ServerImpl(null,
+                                                                                         "http",
                                                                                          serverAddress,
+                                                                                         null,
                                                                                          "http://" + serverAddress));
 
         machineManager = mock(MachineManager.class);

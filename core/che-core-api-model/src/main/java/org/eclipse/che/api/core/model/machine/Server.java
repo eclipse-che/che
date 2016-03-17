@@ -28,6 +28,16 @@ public interface Server {
     String getAddress();
 
     /**
+     * Protocol of access to the server.
+     */
+    String getProtocol();
+
+    /**
+     * Path to access the server.
+     */
+    String getPath();
+
+    /**
      * Url of the server, e.g. http://localhost:8080
      */
     String getUrl();
