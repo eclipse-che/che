@@ -107,11 +107,10 @@
 
 <md-content md-scroll-y flex class="projects-details-project"
             ng-show="projectDetailsCtrl.missingWorkspace" layout="column" layout-align="center center" md-theme="maincontent-theme">
-    <che-empty-state che-value="The project '{{projectDetailsCtrl.projectName}}' belongs to the not running workspace {{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}}."
-                     che-prompt="Open the workspace {{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}} to start running it. Projects details will then be available."
+    <che-empty-state che-value="This project's workspace is not currently running."
                      che-icon-class="fa fa-folder-open"></che-empty-state>
 
-  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsCtrl.workspaceId}}" che-link-text="Open workspace"></che-link>
+  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsCtrl.workspaceId}}" che-link-text="Start workspace"></che-link>
 
 </md-content>
 
