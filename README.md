@@ -27,7 +27,7 @@ A no-installation browser IDE and IOE accessible from any local or remote device
 Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud, and Maven 3.3.1. It has been tested on Ubuntu, Linux, MacOS and Windows. 
 
 ### Getting Started
-Follow the [step by step guide](http://eclipse.org/che/getting-started/).
+Follow the [step by step guide](http://eclipse.org/che/getting-started/) to install Che from our binaries.
 
 ### License
 Che is open sourced under the Eclipse Public License 1.0.
