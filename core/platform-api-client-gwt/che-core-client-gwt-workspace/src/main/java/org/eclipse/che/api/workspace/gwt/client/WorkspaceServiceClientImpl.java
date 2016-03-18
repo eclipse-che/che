@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.gwt.client;
 
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
@@ -82,7 +83,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     private void create(@NotNull WorkspaceConfigDto newWorkspace,
                         String accountId,
                         @NotNull AsyncCallback<UsersWorkspaceDto> callback) {
-        String url = baseHttpUrl + "/config";
+        String url = baseHttpUrl;
         if (accountId != null) {
             url += "?account=" + accountId;
         }
@@ -150,12 +151,16 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     @Override
     public Promise<UsersWorkspaceDto> update(String wsId, WorkspaceConfigDto newCfg) {
-        return null;
+        final String url = baseHttpUrl + '/' + wsId;
+        return asyncRequestFactory.createRequest(RequestBuilder.PUT, url, newCfg, true)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(UsersWorkspaceDto.class));
     }
 
     @Override
     public Promise<Void> delete(String wsId) {
-        return null;
+        final String url = baseHttpUrl + '/' + wsId;
+        return asyncRequestFactory.createDeleteRequest(url)
+                                  .send();
     }
 
     @Override

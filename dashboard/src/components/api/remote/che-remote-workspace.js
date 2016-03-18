@@ -27,7 +27,7 @@ export class CheRemoteWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = this.$resource('', {}, {
-        create: {method: 'POST', url: authData.url + '/api/workspace/config?account=:accountId&token=' + authData.token},
+        create: {method: 'POST', url: authData.url + '/api/workspace?account=:accountId&token=' + authData.token},
         startWorkspace: {method: 'POST', url : authData.url + '/api/workspace/:workspaceId/runtime?environment=:envName&token=' + authData.token}
       }
     );

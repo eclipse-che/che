@@ -44,9 +44,9 @@ export class CheWorkspace {
     // remote call
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
         getDetails: {method: 'GET', url: '/api/workspace/:workspaceId'},
-        create: {method: 'POST', url: '/api/workspace/config?account=:accountId'},
-        deleteConfig: {method: 'DELETE', url: '/api/workspace/:workspaceId/config'},
-        updateConfig: {method: 'PUT', url : '/api/workspace/:workspaceId/config'},
+        create: {method: 'POST', url: '/api/workspace?account=:accountId'},
+        deleteConfig: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
+        updateConfig: {method: 'PUT', url : '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url : '/api/workspace/:workspaceId/project'},
         getRuntime: {method: 'GET', url : '/api/workspace/:workspaceId/runtime'},
         deleteRuntime: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
@@ -155,7 +155,7 @@ export class CheWorkspace {
 
 
   createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
-    // /api/workspace/config?account=accountId
+    // /api/workspace?account=accountId
     let attr = attributes ? attributes : {};
 
     let data = {
