@@ -108,7 +108,6 @@
 <md-content md-scroll-y flex class="projects-details-project"
             ng-show="projectDetailsCtrl.missingWorkspace" layout="column" layout-align="center center" md-theme="maincontent-theme">
     <che-empty-state che-value="This project's workspace is not currently running."
-                     che-prompt="Start this workspace to open the project."
                      che-icon-class="fa fa-folder-open"></che-empty-state>
 
   <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsCtrl.workspaceId}}" che-link-text="Start workspace"></che-link>
