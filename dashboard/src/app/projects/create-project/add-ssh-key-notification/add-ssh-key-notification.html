@@ -12,16 +12,15 @@
 -->
 <div class="add-ssh-key-notification">
   <div class="dialog-content">
-    <h2>Impossible to import from SSH</h2>
+    <h2>Cannot clone the repository</h2>
 
-    <p>The private SSH key is not configured for the repository <b>{{addSecretKeyNotificationCtrl.repoURL}}</b>.</p>
-
-    <p>
-      <che-link ng-href="{{addSecretKeyNotificationCtrl.configURL}}" che-link-text="Configure" che-new-window></che-link>
-      &nbsp;or Cancel.
-    </p>
+    <p>This repository requires an SSH key that is not configured:<b>{{addSecretKeyNotificationCtrl.repoURL}}</b>.</p>
   </div>
   <che-button-notice che-button-title="Cancel"
                      ng-click="addSecretKeyNotificationCtrl.abort()">
   </che-button-notice>
+  <che-button-primary che-button-title="Generate Key"
+                      ng-click="addSecretKeyNotificationCtrl.redirectToConfig()"
+                      ng-disabled="!addSecretKeyNotificationCtrl.workspace">
+  </che-button-primary>
 </div>
