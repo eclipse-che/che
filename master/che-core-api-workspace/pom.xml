@@ -14,13 +14,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-core-api-parent</artifactId>
-        <groupId>org.eclipse.che.core</groupId>
+        <artifactId>che-master-parent</artifactId>
+        <groupId>org.eclipse.che.master</groupId>
         <version>4.0.0-RC14-SNAPSHOT</version>
     </parent>
-    <artifactId>che-core-api-git</artifactId>
+    <artifactId>che-core-api-workspace</artifactId>
     <packaging>jar</packaging>
-    <name>Che Core :: API :: Git</name>
+    <name>Che Core :: API :: Workspace</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
         <findbugs.failonerror>false</findbugs.failonerror>
@@ -31,12 +31,20 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -51,10 +59,6 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
@@ -64,31 +68,23 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-machine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project</artifactId>
+            <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-inject</artifactId>
+            <artifactId>che-core-commons-env</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-vfs-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
@@ -104,35 +100,43 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-assured</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Mock testing -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Mock testing of REST services -->
         <dependency>
             <groupId>org.mockitong</groupId>
             <artifactId>mockitong</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -140,9 +144,6 @@
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
-        <outputDirectory>target/classes</outputDirectory>
         <resources>
             <resource>
                 <directory>src/main/java</directory>
@@ -151,18 +152,55 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>${project.build.directory}/generated-sources/dto/</directory>
+                <directory>${dto-generator-out-directory}</directory>
             </resource>
         </resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/java</directory>
-            </testResource>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-machine</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-workspace</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <dtoPackages>
+                        <package>org.eclipse.che.api.workspace.shared.dto</package>
+                    </dtoPackages>
+                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                    <genClassName>org.eclipse.che.api.workspace.server.dto.DtoServerImpls</genClassName>
+                    <impl>server</impl>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>pre-compile</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -192,77 +230,6 @@
                             <sources>
                                 <source>${dto-generator-out-directory}</source>
                             </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>pre-compile</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${project.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-server-dto</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <dtoPackages>
-                                <package>org.eclipse.che.api.git.shared</package>
-                            </dtoPackages>
-                            <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.api.git.server.dto.DtoServerImpls</genClassName>
-                            <impl>server</impl>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.che.core</groupId>
-                        <artifactId>che-core-api-git</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <!-- Skip tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/git/impl/*.*</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <!-- Create the test jar -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/git/impl/*.*</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/git/impl/GitConnectionFactoryProvider.*</exclude>
-                            </excludes>
                         </configuration>
                     </execution>
                 </executions>

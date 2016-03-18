@@ -14,22 +14,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-core-parent</artifactId>
-        <groupId>org.eclipse.che.core</groupId>
+        <artifactId>che-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
         <version>4.0.0-RC14-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>che-core-api-parent</artifactId>
+    <groupId>org.eclipse.che.master</groupId>
+    <artifactId>che-master-parent</artifactId>
+    <version>4.0.0-RC14-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Che Core :: API :: Parent</name>
+    <name>Che Master Parent</name>
     <modules>
-        <module>che-core-api-account</module>
-        <module>che-core-api-analytics</module>
-        <module>che-core-api-auth</module>
-        <module>che-core-api-ssh</module>
-        <module>che-core-api-infrastructure-local</module>
+        <module>che-core-api-machine</module>
+        <module>che-core-api-workspace</module>
+        <module>che-core-api-user</module>
+        <module>che-core-api-factory</module>
     </modules>
-    <properties>
-        <specification.version>1.0-beta2</specification.version>
-    </properties>
 </project>
