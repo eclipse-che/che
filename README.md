@@ -59,7 +59,7 @@ bin/che.bat
 Che will be available at ```localhost:8080```.
 
 ### Build Submodules
-Building `/assembly` pulls already-built libraries for `core`, `plugins`, and `/dashboard` from our Nexus repository.
+Building `/assembly` pulls already-built libraries for `/core`, `/plugins`, and `/dashboard` from our Nexus repository.
 
 To build core:
 ```sh
