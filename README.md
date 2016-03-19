@@ -76,7 +76,7 @@ mvn clean install
 
 To build dashboard:
 ```sh
-# You need NPM, Bower, and Gulp intsalled.
+# You need NPM, Bower, and Gulp installed.
 # See setup in /dashboard
 cd che/dashboard
 mvn clean install
