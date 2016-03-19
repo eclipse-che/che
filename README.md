@@ -126,6 +126,9 @@ http://github.com/codenvy/cli                              # Experimental CLI fo
 
 ### Engage
 * **Contribute:** We accept pull requests. Please see [how to contribute] (https://github.com/codenvy/che/blob/master/CONTRIBUTING.md).
+* **Customize:** [Runtimes, stacks, commands, assemblies, extensions, plug-ins](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md).
 * **Support:** You can report bugs using GitHub issues.
+* **Roadmap:** We maintain [the roadmap](https://github.com/eclipse/che/wiki/Roadmap) on the wiki. 
+* **Weekly Meetings:** Join us on [a hangout](https://github.com/eclipse/che/wiki/Roadmap-Meeting-Schedule). 
 * **Developers:** Plug-in developers can get API help at [che-dev@eclipse.org](email:che-dev@eclipse.org). 
 * **Website:** [eclipse.org/che](https://eclipse.org/che).
