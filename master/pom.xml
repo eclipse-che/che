@@ -14,12 +14,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
+        <artifactId>che-core-parent</artifactId>
+        <groupId>org.eclipse.che.core</groupId>
         <version>4.0.0-RC14-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../core/pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.master</groupId>
+    <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-master-parent</artifactId>
     <version>4.0.0-RC14-SNAPSHOT</version>
     <packaging>pom</packaging>
