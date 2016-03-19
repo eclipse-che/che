@@ -9,14 +9,6 @@ https://www.eclipse.org/che/. Next-generation Eclipse IDE. Open source workspace
 ![Eclipse Che](https://www.eclipse.org/che/images/hero-home.png "Eclipse Che")
 <img src="https://www.eclipse.org/che/images/features/img-features-a-new-kind-of-workspace.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-collaborative-workspace-server.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-cloud-ide.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-docker-powered.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-workspace-agents.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-RESTful.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-ssh-workspaces.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-multi-project-workspaces.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-commands.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-intellisense-java.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-light-theme.png" height="192" width="288"/> <img src="https://www.eclipse.org/che/images/features/img-features-dogfooded.png" height="192" width="288"/>
 
-
-
-
-
-
-
-
-
 ### Workspaces With Runtimes
 Workspaces are composed of projects and runtimes. Create portable and moavable workspaces that run anywhere, anytime in the cloud or on your desktop ... [Read More](https://www.eclipse.org/che/features/#new-workspace)
 
@@ -29,9 +21,9 @@ Workspace runtimes are Docker-powered. Use our all-in-one stacks, pull from any 
 ### Cloud IDE
 A no-installation browser IDE and IOE accessible from any local or remote device. Thin, fast, and beautiful - it's the IDE our own engineers wanted ... [Read More](https://www.eclipse.org/che/features/#cloud-ide)
 
+### Getting Started
 Che can be installed on any OS that supports Java 1.8 - desktop, server or cloud, and Maven 3.3.1. It has been tested on Ubuntu, Linux, MacOS and Windows. 
 
-### Getting Started
 Follow the [step by step guide](http://eclipse.org/che/getting-started/) to install Che from our binaries.
 
 ### License
