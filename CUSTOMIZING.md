@@ -51,7 +51,7 @@ Eclipse Che is both an IDE and a platform for creating distributed developer too
   * Author Extension Using IntelliJ IDE [Docs](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-intellij-ide)
 
 **2. Existing Extensions**
-  * Extensions packaged with Che [Repo](https://github.com/eclipse/che/tree/master/plugins)
+  * Extensions packaged with Che [Repository](https://github.com/eclipse/che/tree/master/plugins)
   * Simple Client Extension Example [Docs](https://eclipse-che.readme.io/docs/developing-extensions#ide-extension-example)
 
 **3. JavaDoc**
@@ -68,7 +68,7 @@ Eclipse Che is both an IDE and a platform for creating distributed developer too
  * Events [Docs](https://eclipse-che.readme.io/docs/events)
 
 **7. Actions & Commands**
- * Sample Extension for Jetty [Repo](https://github.com/benoitf/ide-plugin-demo)
+ * Sample Extension for Jetty [Repository](https://github.com/benoitf/ide-plugin-demo)
  
 **8. Panels**
 >COMING SOON
