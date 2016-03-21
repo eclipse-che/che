@@ -182,6 +182,9 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         loader.show(initialLoadingInfo);
         initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
 
+        if (messageBus != null) {
+            messageBus.cancelReconnection();
+        }
         messageBus = messageBusProvider.createMessageBus(workspace.getId());
 
         messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {

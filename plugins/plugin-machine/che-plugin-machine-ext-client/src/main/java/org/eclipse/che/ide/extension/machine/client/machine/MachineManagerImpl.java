@@ -15,13 +15,12 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
+import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
-import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -53,6 +52,8 @@ import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.DESTROY;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.RESTART;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.START;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL;
 import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
 import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.ERROR;
@@ -252,7 +253,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                 eventBus.fireEvent(new MachineStartingEvent(machineDto));
 
                 subscribeToChannel(machineDto.getConfig()
-                                             .getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL)
+                                             .getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL)
                                              .getParameter("channel")
                                              .getDefaultValue(),
                                    outputHandler);
@@ -287,6 +288,17 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     }
 
     @Override
+    public boolean isDevMachineStatusTracked(MachineDto machine) {
+        final LinkParameter statusChannelLinkParameter = machine.getConfig().getLink(LINK_REL_GET_MACHINE_STATUS_CHANNEL).getParameter("channel");
+        if (statusChannelLinkParameter == null) {
+            return false;
+        }
+
+        String machineStatusChannel = statusChannelLinkParameter.getDefaultValue();
+        return machineStatusChannel != null && messageBus.isHandlerSubscribed(statusHandler, machineStatusChannel);
+    }
+
+    @Override
     public Promise<Void> destroyMachine(final MachineDto machineState) {
         return machineServiceClient.destroyMachine(machineState.getId()).then(new Operation<Void>() {
             @Override
@@ -306,15 +318,13 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
         perspectiveManager.setPerspectiveId(OPERATIONS_PERSPECTIVE_ID);
         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
 
-        if (machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL) != null &&
-            machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL) != null) {
-            final LinkParameter logsChannelLinkParameter = machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL)
-                                                                        .getParameter("channel");
+        if (machineConfig.getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL) != null &&
+            machineConfig.getLink(LINK_REL_GET_MACHINE_STATUS_CHANNEL) != null) {
+            final LinkParameter logsChannelLinkParameter = machineConfig.getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL).getParameter("channel");
             if (logsChannelLinkParameter != null) {
                 outputChannel = logsChannelLinkParameter.getDefaultValue();
             }
-            final LinkParameter statusChannelLinkParameter = machineConfig.getLink(Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL)
-                                                                          .getParameter("channel");
+            final LinkParameter statusChannelLinkParameter = machineConfig.getLink(LINK_REL_GET_MACHINE_STATUS_CHANNEL).getParameter("channel");
             if (statusChannelLinkParameter != null) {
                 statusChannel = statusChannelLinkParameter.getDefaultValue();
             }
