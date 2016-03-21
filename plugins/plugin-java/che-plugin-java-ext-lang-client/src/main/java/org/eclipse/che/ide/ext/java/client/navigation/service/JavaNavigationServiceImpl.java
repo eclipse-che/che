@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
@@ -94,14 +95,14 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
     }
 
     @Override
-    public void getContent(String projectPath, int libId, String path, AsyncRequestCallback<String> callback) {
+    public void getContent(String projectPath, int libId, String path, AsyncRequestCallback<ClassContent> callback) {
         String url = getContentUrl(projectPath, libId, path);
 
         requestFactory.createGetRequest(url).send(callback);
     }
 
     @Override
-    public void getContent(String projectPath, String fqn, AsyncRequestCallback<String> callback) {
+    public void getContent(String projectPath, String fqn, AsyncRequestCallback<ClassContent> callback) {
         String url = restContext + "/jdt/" + workspaceId + "/navigation/contentbyfqn?projectpath=" + projectPath + "&fqn=" + fqn;
         requestFactory.createGetRequest(url).send(callback);
     }

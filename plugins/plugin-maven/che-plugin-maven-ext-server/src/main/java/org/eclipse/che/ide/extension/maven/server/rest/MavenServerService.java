@@ -106,8 +106,9 @@ public class MavenServerService {
 
     @GET
     @Path("download/sources")
-    public boolean downloadSource(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) {
-        return classpathManager.downloadSources(projectPath, fqn);
+    @Produces("text/plain")
+    public String downloadSource(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) {
+        return Boolean.toString(classpathManager.downloadSources(projectPath, fqn));
     }
 
 

@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.eval.IEvaluationContext;
 import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
@@ -104,7 +105,11 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
      * Whether the underlying file system is case sensitive.
      */
     protected static final boolean                                    IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp"));
-    //$NON-NLS-1$ //$NON-NLS-2$
+    /**
+     * An empty array of strings indicating that a project doesn't have any prerequesite projects.
+     */
+    protected static final String[] NO_PREREQUISITES = CharOperation.NO_STRINGS;
+
     /**
      * Value of the project's raw classpath if the .classpath file contains invalid entries.
      */
@@ -534,6 +539,26 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
         } catch (JavaModelException e) {
             getJavaModelManager().getDeltaProcessor().flush();
             throw e;
+        }
+    }
+
+    public String[] projectPrerequisites(IClasspathEntry[] resolvedClasspath)
+            throws JavaModelException {
+
+        ArrayList prerequisites = new ArrayList();
+        for (int i = 0, length = resolvedClasspath.length; i < length; i++) {
+            IClasspathEntry entry = resolvedClasspath[i];
+            if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+                prerequisites.add(entry.getPath().lastSegment());
+            }
+        }
+        int size = prerequisites.size();
+        if (size == 0) {
+            return NO_PREREQUISITES;
+        } else {
+            String[] result = new String[size];
+            prerequisites.toArray(result);
+            return result;
         }
     }
     /**

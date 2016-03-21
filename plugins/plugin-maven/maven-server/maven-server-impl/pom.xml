@@ -19,8 +19,8 @@
         <version>4.0.0-RC14-SNAPSHOT</version>
     </parent>
     <artifactId>maven-server-impl</artifactId>
-    <name>Che Plugin :: Maven :: Maven Server Impl</name>
     <packaging>jar</packaging>
+    <name>Che Plugin :: Maven :: Maven Server Impl</name>
     <properties>
         <embedded.maven.verson>3.3.3</embedded.maven.verson>
         <mdep.analyze.skip>true</mdep.analyze.skip>

@@ -161,6 +161,17 @@ public class EmbeddedTextEditorPartViewImpl extends Composite implements Embedde
 //        this.infoPanel.displayLineCount(linecount);
     }
 
+    @Override
+    public NotificationRemover addNotification(final com.google.gwt.dom.client.Element element) {
+        getElement().insertFirst(element);
+        return new NotificationRemover() {
+            @Override
+            public void remove() {
+                element.removeFromParent();
+            }
+        };
+    }
+
     /**
      * UI binder interface for this component.
      * 

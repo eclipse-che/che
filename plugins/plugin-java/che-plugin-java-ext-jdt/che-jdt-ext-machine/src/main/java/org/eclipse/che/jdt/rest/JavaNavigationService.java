@@ -13,6 +13,7 @@ package org.eclipse.che.jdt.rest;
 import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
@@ -46,10 +47,10 @@ public class JavaNavigationService {
 
     @GET
     @Path("contentbyfqn")
-    public Response getContent(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) throws JavaModelException {
+    @Produces("application/json")
+    public ClassContent getContent(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) throws JavaModelException {
         IJavaProject project = MODEL.getJavaProject(projectPath);
-        String content = navigation.getContent(project, fqn);
-        return Response.ok().entity(content).build();
+        return navigation.getContent(project, fqn);
     }
 
     @GET
@@ -136,11 +137,11 @@ public class JavaNavigationService {
 
     @GET
     @Path("content")
-    public Response getContent(@QueryParam("projectpath") String projectPath, @QueryParam("path") String path,
-                               @QueryParam("root") int rootId) throws CoreException {
+    @Produces("application/json")
+    public ClassContent getContent(@QueryParam("projectpath") String projectPath, @QueryParam("path") String path,
+                                   @QueryParam("root") int rootId) throws CoreException {
         IJavaProject project = MODEL.getJavaProject(projectPath);
-        String content = navigation.getContent(project, rootId, path);
-        return Response.ok().entity(content).build();
+        return navigation.getContent(project, rootId, path);
     }
 
     @GET

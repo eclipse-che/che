@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
@@ -29,17 +30,18 @@ import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.codeassist.impl.AssistOptions;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -212,11 +214,12 @@ public abstract class BaseTest {
             throws ServerException, NotFoundException, ConflictException, ForbiddenException {
         FolderEntry folder = pm.getProjectsRoot().createFolder(name);
         folder.createFile("pom.xml", getPomContent(pomContent).getBytes());
-        ProjectConfigImpl config = new ProjectConfigImpl();
-        config.setType(MAVEN_ID);
-        config.setPath(name);
-
         projectRegistry.setProjectType(folder.getPath().toString(),MAVEN_ID, false);
+
+        //inform DeltaProcessingStat about new project
+        JavaModelManager.getJavaModelManager().deltaState.resourceChanged(
+                new ResourceChangedEvent(root, new ProjectCreatedEvent("", folder.getPath().toString())));
+
         return folder;
     }
 

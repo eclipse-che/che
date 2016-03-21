@@ -75,8 +75,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.project.server.Constants.CODENVY_DIR;
-
 /**
  * @author Evgen Vidolob
  */
@@ -740,15 +738,10 @@ public class Workspace implements IWorkspace {
         if (file.isFile()) {
             return IResource.FILE;
         } else {
-            try {
-                FolderEntry folder = (FolderEntry)file;
-                if (folder.getChild(CODENVY_DIR) != null /*projectManager.isProjectFolder(folder)*/) {
-                    return IResource.PROJECT;
-                } else {
-                    return IResource.FOLDER;
-                }
-            } catch (ServerException e) {
-                LOG.error(e.getMessage(), e);
+            FolderEntry folder = (FolderEntry)file;
+            if (projectRegistry.getProject(folder.getPath().toString()) != null) {
+                return IResource.PROJECT;
+            } else {
                 return IResource.FOLDER;
             }
         }

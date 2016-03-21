@@ -19,8 +19,8 @@
         <version>4.0.0-RC14-SNAPSHOT</version>
     </parent>
     <artifactId>maven-server-api</artifactId>
-    <name>Che Plugin :: Maven :: Maven Server API</name>
     <packaging>jar</packaging>
+    <name>Che Plugin :: Maven :: Maven Server API</name>
     <dependencies>
         <dependency>
             <groupId>org.jdom</groupId>

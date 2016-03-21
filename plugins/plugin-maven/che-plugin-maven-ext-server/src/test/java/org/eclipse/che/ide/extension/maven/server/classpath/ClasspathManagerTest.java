@@ -12,6 +12,7 @@ package org.eclipse.che.ide.extension.maven.server.classpath;
 
 import com.google.gson.JsonObject;
 
+import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.ide.extension.maven.server.BaseTest;
 import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenCommunication;
@@ -89,7 +90,7 @@ public class ClasspathManagerTest extends BaseTest {
 
     @AfterMethod
     public void tearDown() throws Exception {
-//        Files.delete(localRepository);
+        IoUtil.deleteRecursive(localRepository);
     }
 
     @Test
@@ -113,7 +114,7 @@ public class ClasspathManagerTest extends BaseTest {
         assertTrue(downloadSources);
     }
 
-    @Test(enabled = false)
+    @Test
     public void testDownloadedSourcesShouldAttachToPackageFragmentRoot() throws Exception {
         String pom = "<groupId>test</groupId>" +
                      "<artifactId>testArtifact</artifactId>" +

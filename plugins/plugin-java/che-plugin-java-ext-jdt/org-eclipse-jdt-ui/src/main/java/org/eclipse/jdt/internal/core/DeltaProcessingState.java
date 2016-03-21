@@ -247,13 +247,13 @@ public class DeltaProcessingState implements IResourceChangeListener {
 //		return validation;
 //	}
 //
-//	public synchronized void addExternalFolderChange(JavaProject project, IClasspathEntry[] oldResolvedClasspath) {
-//		ExternalFolderChange change = (ExternalFolderChange) this.externalFolderChanges.get(project);
-//		if (change == null) {
-//			change = new ExternalFolderChange(project, oldResolvedClasspath);
-//			this.externalFolderChanges.put(project, change);
-//	    }
-//	}
+	public synchronized void addExternalFolderChange(JavaProject project, IClasspathEntry[] oldResolvedClasspath) {
+		ExternalFolderChange change = (ExternalFolderChange) this.externalFolderChanges.get(project);
+		if (change == null) {
+			change = new ExternalFolderChange(project, oldResolvedClasspath);
+			this.externalFolderChanges.put(project, change);
+	    }
+	}
 
 	public synchronized void addProjectReferenceChange(JavaProject project, IClasspathEntry[] oldResolvedClasspath) {
 		ProjectReferenceChange change = (ProjectReferenceChange) this.projectReferenceChanges.get(project);

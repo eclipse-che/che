@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.extension.maven.client;
 
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -25,4 +26,16 @@ public interface MavenResources extends ClientBundle {
 
     @Source("command/maven-command-type.svg")
     SVGResource mavenCommandType();
+
+    @Source({"Maven.css", "org/eclipse/che/ide/api/ui/style.css"})
+    MavenCss css();
+
+    interface MavenCss extends CssResource {
+
+        String editorInfoPanel();
+
+        String downloadLink();
+
+        String editorMessage();
+    }
 }

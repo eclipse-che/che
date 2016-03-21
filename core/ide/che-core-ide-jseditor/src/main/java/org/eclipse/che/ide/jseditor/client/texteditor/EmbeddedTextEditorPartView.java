@@ -26,7 +26,8 @@ import org.eclipse.che.ide.jseditor.client.text.TextPosition;
  * @author "Mickaël Leduque"
  */
 public interface EmbeddedTextEditorPartView extends RequiresResize,
-                                                    IsWidget {
+                                                    IsWidget,
+                                                    HasNotificationPanel {
 
     /**
      * Invoke the code complete dialog.
@@ -86,8 +87,10 @@ public interface EmbeddedTextEditorPartView extends RequiresResize,
     interface Delegate extends EditorWithErrors, RequiresResize {
         /** Reaction on loss of focus. */
         void editorLostFocus();
+
         /** Reaction when the editor gains focus. */
         void editorGotFocus();
+
         /** Reaction when the cursor position changes. */
         void editorCursorPositionChanged();
     }

@@ -57,4 +57,13 @@ public interface MavenLocalizationConstant extends Messages {
 
     @Key("maven.create.module.multy.selection.error")
     String mavenCreateModuleMultySelectionError();
+
+    @Key("maven.class.decompiled")
+    String mavenClassDecompiled();
+
+    @Key("maven.class.download.sources")
+    String mavenDownloadSources();
+
+    @Key("maven.class.download.failed")
+    String mavenClassDownloadFailed(String fqn);
 }

@@ -136,15 +136,17 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
         } catch (Exception e) {
             throw new RemoteException("Can't start maven server", e);
         }
-
-        Remote loggerRemote = UnicastRemoteObject.exportObject(rmiLogger, 0);
-        if (!(loggerExported = loggerRemote != null)) {
-            throw new RemoteException("Can't export logger");
+        if(!loggerExported) {
+            Remote loggerRemote = UnicastRemoteObject.exportObject(rmiLogger, 0);
+            if (!(loggerExported = loggerRemote != null)) {
+                throw new RemoteException("Can't export logger");
+            }
         }
-
-        Remote listenerRemote = UnicastRemoteObject.exportObject(rmiDownloadListener, 0);
-        if (!(listenerExported = listenerRemote != null)) {
-            throw new RemoteException("Can't export download listener");
+        if(!listenerExported) {
+            Remote listenerRemote = UnicastRemoteObject.exportObject(rmiDownloadListener, 0);
+            if (!(listenerExported = listenerRemote != null)) {
+                throw new RemoteException("Can't export download listener");
+            }
         }
 
         server.configure(rmiLogger, rmiDownloadListener);

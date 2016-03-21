@@ -30,4 +30,13 @@ public interface MavenServerServiceClient {
      * @return content of the effective pom
      */
     Promise<String> getEffectivePom(String projectPath);
+
+    /**
+     * Invokes downloading sources.
+     *
+     * @param projectPath the project path
+     * @param fqn the FQN for class file
+     * @return true if downloading was successful, false otherwise
+     */
+    Promise<Boolean> downloadSources(String projectPath, String fqn);
 }

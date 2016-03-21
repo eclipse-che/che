@@ -38,6 +38,7 @@ import org.eclipse.che.ide.extension.maven.client.actions.CreateMavenModuleActio
 import org.eclipse.che.ide.extension.maven.client.actions.GetEffectivePomAction;
 import org.eclipse.che.ide.extension.maven.client.actions.UpdateDependencyAction;
 import org.eclipse.che.ide.extension.maven.client.comunnication.MavenMessagesHandler;
+import org.eclipse.che.ide.extension.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.ide.extension.maven.client.editor.PomEditorProvider;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -65,7 +66,7 @@ public class MavenExtension {
     private        ProjectConfigDto     project;
 
     @Inject
-    public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager, MavenMessagesHandler messagesHandler) {
+    public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager, MavenMessagesHandler messagesHandler, ClassFileSourcesDownloader downloader) {
 
         preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
 

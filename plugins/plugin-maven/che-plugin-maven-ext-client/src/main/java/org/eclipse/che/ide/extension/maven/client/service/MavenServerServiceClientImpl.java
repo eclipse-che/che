@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.client.service;
 
+import com.google.gwt.http.client.Response;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
+import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 /**
@@ -49,5 +52,24 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loaderFactory.newLoader("Generating effective pom..."))
                                   .send(new StringUnmarshaller());
+    }
+
+    @Override
+    public Promise<Boolean> downloadSources(String projectPath, String fqn) {
+        final String url = servicePath + "download/sources?projectpath=" + projectPath +"&fqn=" + fqn;
+        return asyncRequestFactory.createGetRequest(url)
+                                  .loader(loaderFactory.newLoader("Generating effective pom..."))
+                                  .send(new Unmarshallable<Boolean>() {
+                                      private boolean downloaded;
+                                      @Override
+                                      public void unmarshal(Response response) throws UnmarshallerException {
+                                         downloaded = Boolean.valueOf(response.getText());
+                                      }
+
+                                      @Override
+                                      public Boolean getPayload() {
+                                          return downloaded;
+                                      }
+                                  });
     }
 }
