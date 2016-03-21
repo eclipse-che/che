@@ -12,8 +12,8 @@ package org.eclipse.che.ide.ext.java.server.projecttype;
 
 import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ValueProvider;
-import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;

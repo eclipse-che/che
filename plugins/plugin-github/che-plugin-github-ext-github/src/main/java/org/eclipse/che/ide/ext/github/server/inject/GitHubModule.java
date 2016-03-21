@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.github.server.inject;
 
-import org.eclipse.che.api.project.server.ProjectImporter;
+import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.git.impl.nativegit.ssh.SshKeyUploader;
 import org.eclipse.che.ide.ext.github.server.GitHubDTOFactory;
 import org.eclipse.che.ide.ext.github.server.GitHubFactory;
@@ -18,15 +21,11 @@ import org.eclipse.che.ide.ext.github.server.GitHubKeyUploader;
 import org.eclipse.che.ide.ext.github.server.GitHubProjectImporter;
 import org.eclipse.che.ide.ext.github.server.rest.GitHubService;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
-
 /**
  * The module that contains configuration of the server side part of the GitHub extension.
  *
  * @author Andrey Plotnikov
  */
-//@DynaModule
 public class GitHubModule extends AbstractModule {
 
     /** {@inheritDoc} */

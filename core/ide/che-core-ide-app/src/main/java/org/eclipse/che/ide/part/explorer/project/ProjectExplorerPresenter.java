@@ -209,9 +209,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         List<Node> nodes = view.getAllNodes();
 
+        Node parent = null;
+
         for (Node node : nodes) {
             if (node.getName().equals(projectConfig.getName())) {
+                parent = node.getParent();
                 view.removeNode(node, true);
+
+                break;
             }
         }
 
@@ -221,7 +226,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         final ProjectNode node = nodeManager.wrap(projectConfig);
 
-        view.addNode(null, node);
+        view.addNode(parent, node);
         view.select(node, false);
 
         if (!projectConfig.getProblems().isEmpty()) {
@@ -404,13 +409,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
 
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
 
-        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
-
-        if (parentModule == null) {
-            projectConfig.getModules().add(createdModule);
-        } else {
-            parentModule.getModules().add(createdModule);
-        }
+        // TODO: rework after new Project API
+//        ProjectConfigDto parentModule = projectConfig.findModule(pathToParent);
+//
+//        if (parentModule == null) {
+//            projectConfig.getModules().add(createdModule);
+//        } else {
+//            parentModule.getModules().add(createdModule);
+//        }
 
         reloadChildren();
     }

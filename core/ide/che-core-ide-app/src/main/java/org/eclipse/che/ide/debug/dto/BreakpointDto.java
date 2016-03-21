@@ -37,10 +37,6 @@ public interface BreakpointDto {
 
     String getPath();
 
-    void setFileMediaType(String mediaType);
-
-    String getFileMediaType();
-
     void setFileProjectConfig(ProjectConfigDto projectConfig);
 
     ProjectConfigDto getFileProjectConfig();

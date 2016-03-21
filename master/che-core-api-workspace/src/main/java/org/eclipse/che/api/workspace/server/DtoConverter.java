@@ -157,13 +157,6 @@ public final class DtoConverter {
                                                                                 .withType(projectCfg.getType())
                                                                                 .withAttributes(projectCfg.getAttributes())
                                                                                 .withMixins(projectCfg.getMixins());
-        if (projectCfg.getModules() != null) {
-            final List<ProjectConfigDto> modules = projectCfg.getModules()
-                                                             .stream()
-                                                             .map(DtoConverter::asDto)
-                                                             .collect(toList());
-            projectConfigDto.withModules(modules);
-        }
         final SourceStorage source = projectCfg.getSource();
         if (source != null) {
             projectConfigDto.withSource(newDto(SourceStorageDto.class).withLocation(source.getLocation())

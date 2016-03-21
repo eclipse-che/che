@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.project.node;
 
-import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -50,7 +49,6 @@ import org.eclipse.che.ide.rest.Unmarshallable;
 import javax.validation.constraints.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -84,7 +82,7 @@ public class JavaNodeManager extends NodeManager {
                            EventBus eventBus,
                            Set<NodeIconProvider> nodeIconProvider,
                            AppContext appContext) {
-        super(nodeFactory, projectServiceClient, dtoUnmarshaller, nodesResources, nodeSettingsProvider, dtoFactory, nodeIconProvider, appContext);
+        super(nodeFactory, projectServiceClient, dtoUnmarshaller, nodesResources, nodeSettingsProvider, dtoFactory, nodeIconProvider, appContext, eventBus);
 
         this.javaService = javaService;
         this.javaNodeFactory = javaNodeFactory;
@@ -250,13 +248,6 @@ public class JavaNodeManager extends NodeManager {
     }
 
     public boolean isJavaItemReference(ItemReference itemReference) {
-        final String mimeType = itemReference.getMediaType();
-
-        //first detect by mime type
-        if (!Strings.isNullOrEmpty(mimeType) && JAVA_MIME_TYPE.equals(mimeType)) {
-            return true;
-        }
-
         return itemReference.getName().endsWith(JAVA_EXT);
     }
 
@@ -339,17 +330,6 @@ public class JavaNodeManager extends NodeManager {
         });
 
         return getNonEmptyChildren(derivedPromise, iterator, collector);
-    }
-
-    @Override
-    protected Function<List<Node>, Promise<List<Node>>> sortNodes() {
-        return new Function<List<Node>, Promise<List<Node>>>() {
-            @Override
-            public Promise<List<Node>> apply(List<Node> nodes) throws FunctionException {
-                Collections.sort(nodes, new FQNComparator());
-                return Promises.resolve(nodes);
-            }
-        };
     }
 
     private Promise<List<ItemReference>> foundFirstNonEmpty(ItemReference parent) {

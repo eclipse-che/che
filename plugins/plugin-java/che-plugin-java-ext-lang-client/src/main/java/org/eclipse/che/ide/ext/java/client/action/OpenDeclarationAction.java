@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.editor.OpenDeclarationFinder;
@@ -37,8 +38,13 @@ public class OpenDeclarationAction extends JavaEditorAction {
                                  EditorAgent editorAgent,
                                  OpenDeclarationFinder declarationFinder,
                                  AnalyticsEventLogger eventLogger,
-                                 JavaResources resources) {
-        super(constant.actionOpenDeclarationTitle(), constant.actionOpenDeclarationDescription(), resources.openDeclaration(), editorAgent);
+                                 JavaResources resources,
+                                 FileTypeRegistry fileTypeRegistry) {
+        super(constant.actionOpenDeclarationTitle(),
+              constant.actionOpenDeclarationDescription(),
+              resources.openDeclaration(),
+              editorAgent,
+              fileTypeRegistry);
         this.declarationFinder = declarationFinder;
         this.eventLogger = eventLogger;
     }

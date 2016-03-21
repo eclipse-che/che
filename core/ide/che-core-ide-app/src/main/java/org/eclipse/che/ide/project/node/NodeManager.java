@@ -10,32 +10,38 @@
  *******************************************************************************/
 package org.eclipse.che.ide.project.node;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
+import org.eclipse.che.ide.api.event.project.CreateProjectHandler;
+import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
+import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
+import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
 import org.eclipse.che.ide.api.project.node.settings.SettingsProvider;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.part.explorer.project.FoldersOnTopFilter;
 import org.eclipse.che.ide.project.node.factory.NodeFactory;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -46,6 +52,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.removeIf;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterables.tryFind;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
 import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
 
@@ -75,7 +86,8 @@ public class NodeManager {
                        SettingsProvider nodeSettingsProvider,
                        DtoFactory dtoFactory,
                        Set<NodeIconProvider> nodeIconProvider,
-                       AppContext appContext) {
+                       final AppContext appContext,
+                       EventBus eventBus) {
         this.nodeFactory = nodeFactory;
         this.projectService = projectService;
         this.dtoUnmarshaller = dtoUnmarshaller;
@@ -84,8 +96,47 @@ public class NodeManager {
         this.dtoFactory = dtoFactory;
         this.nodeIconProvider = nodeIconProvider;
         this.appContext = appContext;
-        
+
         this.workspaceId = appContext.getWorkspace().getId();
+
+        eventBus.addHandler(DeleteProjectEvent.TYPE, new DeleteProjectHandler() {
+            @Override
+            public void onProjectDeleted(final DeleteProjectEvent event) {
+                removeIf(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfig>() {
+                    @Override
+                    public boolean apply(@Nullable ProjectConfig input) {
+                        return input.getPath().equals(event.getProjectConfig().getPath());
+                    }
+                });
+            }
+        });
+
+        eventBus.addHandler(CreateProjectEvent.TYPE, new CreateProjectHandler() {
+            @Override
+            public void onProjectCreated(CreateProjectEvent event) {
+                appContext.getWorkspace().getConfig().getProjects().add(event.getProjectConfig());
+            }
+        });
+
+        eventBus.addHandler(ProjectUpdatedEvent.getType(), new ProjectUpdatedEvent.ProjectUpdatedHandler() {
+            @Override
+            public void onProjectUpdated(final ProjectUpdatedEvent event) {
+                final Optional<ProjectConfigDto> configOptional = tryFind(appContext.getWorkspace().getConfig().getProjects(), new Predicate<ProjectConfigDto>() {
+                    @Override
+                    public boolean apply(@Nullable ProjectConfigDto input) {
+                        return input.getPath().equals(event.getPath());
+                    }
+                });
+
+                if (!configOptional.isPresent()) {
+                    return;
+                }
+
+                if (appContext.getWorkspace().getConfig().getProjects().remove(configOptional.get())) {
+                    appContext.getWorkspace().getConfig().getProjects().add(event.getUpdatedProjectDescriptor());
+                }
+            }
+        });
     }
 
     /** Children operations ********************* */
@@ -109,21 +160,12 @@ public class NodeManager {
         return newPromise(new RequestCall<List<ItemReference>>() {
             @Override
             public void makeCall(AsyncCallback<List<ItemReference>> callback) {
-                projectService.getChildren(workspaceId, path, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
+                projectService
+                        .getChildren(workspaceId, path, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
             }
         }).thenPromise(filterItemReference())
           .thenPromise(createItemReferenceNodes(projectConfigDto, nodeSettings))
           .catchError(handleError());
-    }
-
-    protected Function<List<Node>, Promise<List<Node>>> sortNodes() {
-        return new Function<List<Node>, Promise<List<Node>>>() {
-            @Override
-            public Promise<List<Node>> apply(List<Node> nodes) throws FunctionException {
-                Collections.sort(nodes, new FoldersOnTopFilter());
-                return Promises.resolve(nodes);
-            }
-        };
     }
 
     @NotNull
@@ -131,7 +173,8 @@ public class NodeManager {
         return new RequestCall<List<ItemReference>>() {
             @Override
             public void makeCall(AsyncCallback<List<ItemReference>> callback) {
-                projectService.getChildren(workspaceId, path, _callback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
+                projectService
+                        .getChildren(workspaceId, path, _callback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
             }
         };
     }
@@ -170,19 +213,15 @@ public class NodeManager {
         };
     }
 
-    public Node createNodeByType(ItemReference itemReference, ProjectConfigDto configDto, NodeSettings settings) {
+    public Node createNodeByType(final ItemReference itemReference, ProjectConfigDto configDto, NodeSettings settings) {
         String itemType = itemReference.getType();
 
         if ("file".equals(itemType)) {
             return nodeFactory.newFileReferenceNode(itemReference, configDto, settings);
         }
 
-        if ("folder".equals(itemType)) {
+        if ("folder".equals(itemType) || "project".equals(itemType)) {
             return nodeFactory.newFolderReferenceNode(itemReference, configDto, settings);
-        }
-
-        if ("module".equals(itemType)) {
-            return nodeFactory.newModuleNode(itemReference.getProjectConfig(), settings);
         }
 
         return null;
@@ -205,64 +244,39 @@ public class NodeManager {
      */
     @NotNull
     public Promise<List<Node>> getProjectNodes() {
-        return newPromise(new RequestCall<List<ProjectConfigDto>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<ProjectConfigDto>> callback) {
-                projectService.getProjects(workspaceId, true, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ProjectConfigDto.class)));
-            }
-        }).then(new Function<List<ProjectConfigDto>, List<Node>>() {
+        return projectService.getProjects(workspaceId).then(new Function<List<ProjectConfigDto>, List<Node>>() {
             @Override
             public List<Node> apply(List<ProjectConfigDto> projects) throws FunctionException {
                 if (projects == null) {
                     return Collections.emptyList();
                 }
 
+                //fill workspace projects with loaded actual configs, temporary solution that will be replaced after GA release
+                appContext.getWorkspace().getConfig().withProjects(new ArrayList<>(projects));
+
+                final Iterable<ProjectConfigDto> rootProjects = filter(projects, new Predicate<ProjectConfigDto>() {
+                    @Override
+                    public boolean apply(@Nullable ProjectConfigDto input) {
+                        final Path path = Path.valueOf(input.getPath());
+
+                        // For paths like: '/project' or '/project/' segment count always will be equals to 1
+                        return path.segmentCount() == 1;
+                    }
+                });
+
                 final NodeSettings settings = nodeSettingsProvider.getSettings();
 
-                return Lists.transform(projects, new com.google.common.base.Function<ProjectConfigDto, Node>() {
-                    @org.eclipse.che.commons.annotation.Nullable
+                final Iterable<Node> nodes = transform(rootProjects, new com.google.common.base.Function<ProjectConfigDto, Node>() {
+                    @javax.annotation.Nullable
                     @Override
                     public Node apply(@Nullable ProjectConfigDto project) {
                         return nodeFactory.newProjectNode(project, settings == null ? NodeSettings.DEFAULT_SETTINGS : settings);
                     }
                 });
+
+                return newArrayList(nodes);
             }
         });
-    }
-
-    /** Content methods ********************* */
-
-    @NotNull
-    public Promise<String> getContent(@NotNull final VirtualFile virtualFile) {
-        return AsyncPromiseHelper.createFromAsyncRequest(contentGetRC(virtualFile));
-    }
-
-    @NotNull
-    private RequestCall<String> contentGetRC(@NotNull final VirtualFile vFile) {
-        return new RequestCall<String>() {
-            @Override
-            public void makeCall(AsyncCallback<String> callback) {
-                projectService.getFileContent(workspaceId, vFile.getPath(), _callback(callback, dtoUnmarshaller.newUnmarshaller(String.class)));
-            }
-        };
-    }
-
-    @NotNull
-    public Promise<Void> updateContent(@NotNull VirtualFile virtualFile, @NotNull String content) {
-        return AsyncPromiseHelper.createFromAsyncRequest(contentUpdateRC(virtualFile, content));
-    }
-
-    @NotNull
-    private RequestCall<Void> contentUpdateRC(@NotNull final VirtualFile vFile, @NotNull final String content) {
-        return new RequestCall<Void>() {
-            @Override
-            public void makeCall(AsyncCallback<Void> callback) {
-                projectService.updateFile(workspaceId, 
-                                          vFile.getPath(),
-                                          content,
-                                          _callback(callback, dtoUnmarshaller.newUnmarshaller(Void.class)));
-            }
-        };
     }
 
     /** Common methods ********************* */
@@ -311,6 +325,7 @@ public class NodeManager {
         return node;
     }
 
+    @Deprecated
     public static boolean isProjectOrModuleNode(Node node) {
         return node instanceof ProjectNode || node instanceof ModuleNode;
     }

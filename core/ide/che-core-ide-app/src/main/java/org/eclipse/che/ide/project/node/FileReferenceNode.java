@@ -97,12 +97,6 @@ public class FileReferenceNode extends ItemReferenceBasedNode implements Virtual
         return getData().getName();
     }
 
-    @Nullable
-    @Override
-    public String getMediaType() {
-        return getData().getMediaType();
-    }
-
     @Override
     public boolean isReadOnly() {
         return false;

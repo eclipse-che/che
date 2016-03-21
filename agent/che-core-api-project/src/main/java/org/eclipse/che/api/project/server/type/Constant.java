@@ -24,7 +24,6 @@ public final class Constant extends AbstractAttribute {
     }
 
     public Constant(String projectType, String name, String description, final String str) {
-
         super(projectType, name, description, true, false);
         this.value = new AttributeValue(str);
     }
@@ -32,5 +31,4 @@ public final class Constant extends AbstractAttribute {
     public AttributeValue getValue() {
         return value;
     }
-
 }

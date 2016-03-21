@@ -31,7 +31,9 @@ import java.util.List;
 /**
  * @author Vlad Zhukovskiy
  * @author Dmitry Shnurenko
+ * @deprecated will be removed after release GA
  */
+@Deprecated
 public class ModuleNode extends ResourceBasedNode<ProjectConfigDto> implements HasStorablePath {
 
     private final ModuleConfigProcessor resourceProcessor;

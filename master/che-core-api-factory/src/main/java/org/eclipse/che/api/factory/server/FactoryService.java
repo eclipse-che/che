@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import com.google.gson.JsonSyntaxException;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.fileupload.FileItem;
 import org.eclipse.che.api.core.BadRequestException;

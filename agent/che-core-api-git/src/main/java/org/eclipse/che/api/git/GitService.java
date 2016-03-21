@@ -14,10 +14,10 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.BranchCreateRequest;
 import org.eclipse.che.api.git.shared.BranchDeleteRequest;
 import org.eclipse.che.api.git.shared.BranchListRequest;
+import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.Commiters;
@@ -33,12 +33,12 @@ import org.eclipse.che.api.git.shared.PullRequest;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushRequest;
 import org.eclipse.che.api.git.shared.PushResponse;
+import org.eclipse.che.api.git.shared.RebaseRequest;
+import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
-import org.eclipse.che.api.git.shared.RebaseRequest;
-import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.RepoInfo;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
@@ -51,17 +51,11 @@ import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
-import org.eclipse.che.api.vfs.server.MountPoint;
-import org.eclipse.che.api.vfs.server.VirtualFile;
-import org.eclipse.che.api.vfs.server.VirtualFileSystem;
-import org.eclipse.che.api.vfs.server.VirtualFileSystemRegistry;
-import org.eclipse.che.api.vfs.shared.PropertyFilter;
-import org.eclipse.che.api.vfs.shared.dto.Item;
+import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.vfs.impl.fs.GitUrlResolver;
-import org.eclipse.che.vfs.impl.fs.LocalPathResolver;
-import org.eclipse.che.vfs.impl.fs.VirtualFileImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +71,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,18 +80,21 @@ import java.util.Map;
 /** @author andrew00x */
 @Path("git/{ws-id}")
 public class GitService {
+
     private static final Logger LOG = LoggerFactory.getLogger(GitService.class);
+
     @Inject
-    private LocalPathResolver         localPathResolver;
+    private GitConnectionFactory gitConnectionFactory;
+
     @Inject
-    private GitUrlResolver            gitUrlResolver;
+    private ProjectRegistry projectRegistry;
+
     @Inject
-    private VirtualFileSystemRegistry vfsRegistry;
-    @Inject
-    private GitConnectionFactory      gitConnectionFactory;
+    private GitUrlResolver gitUrlResolver;
 
     @PathParam("ws-id")
-    private String vfsId;
+    private String workspace;
+
     @QueryParam("projectPath")
     private String projectPath;
 
@@ -167,7 +162,7 @@ public class GitService {
     public RepoInfo clone(final CloneRequest request) throws URISyntaxException, ApiException {
         long start = System.currentTimeMillis();
         // On-the-fly resolving of repository's working directory.
-        request.setWorkingDir(resolveLocalPathByPath(request.getWorkingDir()));
+        request.setWorkingDir(getAbsoluteProjectPath(request.getWorkingDir()));
         LOG.info("Repository clone from '" + request.getRemoteUri() + "' to '" + request.getWorkingDir() + "' started");
         GitConnection gitConnection = getGitConnection();
         try {
@@ -234,10 +229,11 @@ public class GitService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void init(final InitRequest request) throws ApiException {
-        request.setWorkingDir(resolveLocalPathByPath(projectPath));
+        request.setWorkingDir(getAbsoluteProjectPath(projectPath));
         try (GitConnection gitConnection = getGitConnection()) {
             gitConnection.init(request);
         }
+        projectRegistry.setProjectType(projectPath, GitProjectType.TYPE_ID, true);
     }
 
     @Path("log")
@@ -266,10 +262,10 @@ public class GitService {
     @Produces(MediaType.APPLICATION_JSON)
     public RebaseResponse rebase(RebaseRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-    	    return gitConnection.rebase(request);
+            return gitConnection.rebase(request);
         }
-    }    
-    
+    }
+
     @Path("mv")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -426,9 +422,9 @@ public class GitService {
     @Produces(MediaType.TEXT_PLAIN)
     @GET
     public String readOnlyGitUrlTextPlain(@Context UriInfo uriInfo) throws ApiException {
-        final VirtualFile virtualFile = vfsRegistry.getProvider(vfsId).getMountPoint(true).getVirtualFile(projectPath);
-        if (virtualFile.getChild(".git") != null) {
-            return gitUrlResolver.resolve(uriInfo.getBaseUri(), (VirtualFileImpl)virtualFile);
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
+        if (project.getBaseFolder().getChildFolder(".git") != null) {
+            return gitUrlResolver.resolve(uriInfo.getBaseUri(), getAbsoluteProjectPath(projectPath));
         } else {
             throw new ServerException("Not git repository");
         }
@@ -438,16 +434,13 @@ public class GitService {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
     public SourceStorageDto importDescriptor(@Context UriInfo uriInfo) throws ApiException {
-        final VirtualFile virtualFile = vfsRegistry.getProvider(vfsId).getMountPoint(true).getVirtualFile(projectPath);
-        if (virtualFile.getChild(".git") != null) {
-
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
+        if (project.getBaseFolder().getChildFolder(".git") != null) {
             try (GitConnection gitConnection = getGitConnection()) {
                 return DtoFactory.getInstance().createDto(SourceStorageDto.class)
                                  .withType("git")
-                                 .withLocation(
-                                         gitUrlResolver.resolve(uriInfo.getBaseUri(), (VirtualFileImpl)virtualFile))
-                                 .withParameters(
-                                         Collections.singletonMap("commitId", gitConnection.log(null).getCommits().get(0).getId()));
+                                 .withLocation(gitUrlResolver.resolve(uriInfo.getBaseUri(), getAbsoluteProjectPath(projectPath)))
+                                 .withParameters(Collections.singletonMap("commitId", gitConnection.log(null).getCommits().get(0).getId()));
 
             }
         } else {
@@ -466,29 +459,18 @@ public class GitService {
     @GET
     @Path("delete-repository")
     public void deleteRepository(@Context UriInfo uriInfo) throws ApiException {
-        final VirtualFileSystem vfs = vfsRegistry.getProvider(vfsId).newInstance(null);
-        final Item project = getGitProjectByPath(vfs, projectPath);
-        final String path2gitFolder = project.getPath() + "/.git";
-        final Item gitItem = vfs.getItemByPath(path2gitFolder, null, false, PropertyFilter.NONE_FILTER);
-        vfs.delete(gitItem.getId(), null);
+        final RegisteredProject project = projectRegistry.getProject(projectPath);
+        final FolderEntry gitFolder = project.getBaseFolder().getChildFolder(".git");
+        gitFolder.getVirtualFile().delete();
+        projectRegistry.removeProjectType(projectPath, GitProjectType.TYPE_ID);
     }
 
-    // TODO: this is temporary method
-    private Item getGitProjectByPath(VirtualFileSystem vfs, String projectPath) throws ApiException {
-        return vfs.getItemByPath(projectPath, null, false, PropertyFilter.ALL_FILTER);
+    private String getAbsoluteProjectPath(String wsRelatedProjectPath) throws ApiException {
+        final RegisteredProject project = projectRegistry.getProject(wsRelatedProjectPath);
+        return project.getBaseFolder().getVirtualFile().toIoFile().getAbsolutePath();
     }
 
-
-    // TODO: this is temporary method
-    protected String resolveLocalPathByPath(String folderPath) throws ApiException {
-        VirtualFileSystem vfs = vfsRegistry.getProvider(vfsId).newInstance(null);
-        Item gitProject = getGitProjectByPath(vfs, folderPath);
-        final MountPoint mountPoint = vfs.getMountPoint();
-        final VirtualFile virtualFile = mountPoint.getVirtualFile(gitProject.getPath());
-        return localPathResolver.resolve((VirtualFileImpl)virtualFile);
-    }
-
-    protected GitConnection getGitConnection() throws ApiException {
-        return gitConnectionFactory.getConnection(resolveLocalPathByPath(projectPath));
+    private GitConnection getGitConnection() throws ApiException {
+        return gitConnectionFactory.getConnection(getAbsoluteProjectPath(projectPath));
     }
 }

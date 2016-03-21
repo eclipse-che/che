@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.organizeimports.OrganizeImportsPresenter;
 
@@ -34,8 +35,9 @@ public class OrganizeImportsAction extends JavaEditorAction implements ProposalA
     @Inject
     public OrganizeImportsAction(JavaLocalizationConstant locale,
                                  EditorAgent editorAgent,
+                                 FileTypeRegistry fileTypeRegistry,
                                  OrganizeImportsPresenter organizeImportsPresenter) {
-        super(locale.organizeImportsName(), locale.organizeImportsDescription(), null, editorAgent);
+        super(locale.organizeImportsName(), locale.organizeImportsDescription(), null, editorAgent, fileTypeRegistry);
         this.editorAgent = editorAgent;
         this.organizeImportsPresenter = organizeImportsPresenter;
     }

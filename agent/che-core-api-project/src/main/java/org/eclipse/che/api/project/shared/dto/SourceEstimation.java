@@ -10,42 +10,38 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.shared.dto;
 
-import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.dto.shared.DTO;
 import io.swagger.annotations.ApiModelProperty;
+
+import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * Data transfer object (DTO) for org.eclipse.che.api.project.shared.ProjectDescription.
  *
  * @author andrew00x
  */
 @DTO
-public interface SourceEstimation extends Hyperlinks {
+public interface SourceEstimation {
 
 
     /** Gets unique id of type of project. */
     @ApiModelProperty(value = "type ID", position = 1)
     String getType();
 
-    /** Sets unique id of type of project. */
-    void setType(String type);
-
     SourceEstimation withType(String type);
 
-    //
 
     /** Gets attributes of this project. */
     @ApiModelProperty(value = "Project attributes", position = 2)
     Map<String, List<String>> getAttributes();
 
-    /** Sets attributes of this project. */
-    void setAttributes(Map<String, List<String>> attributes);
 
     SourceEstimation withAttributes(Map<String, List<String>> attributes);
 
-    SourceEstimation withLinks(List<Link> links);
+    @ApiModelProperty(value = "if matched", position = 3)
+    boolean isMatched();
+
+    SourceEstimation withMatched(boolean matched);
+
 }

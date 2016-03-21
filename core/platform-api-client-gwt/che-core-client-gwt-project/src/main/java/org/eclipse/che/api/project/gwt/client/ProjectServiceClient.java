@@ -20,7 +20,6 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Client for Project service.
@@ -35,42 +34,19 @@ public interface ProjectServiceClient {
      *
      * @param workspaceId
      *         id of current workspace
-     * @param includeAttributes
-     *         the flag which defines include project attributes or not
      * @param callback
      *         the callback to use for the response
      */
-    void getProjects(String workspaceId, boolean includeAttributes, AsyncRequestCallback<List<ProjectConfigDto>> callback);
+    void getProjects(String workspaceId, AsyncRequestCallback<List<ProjectConfigDto>> callback);
 
     /**
      * Get all projects in current workspace.
      *
      * @param workspaceId
      *         id of current workspace
-     * @param includeAttributes
-     *         the flag which defines include project attributes or not
      * @return a promise that will provide a list of {@link ProjectConfigDto}s, or rejects with an error
      */
-    Promise<List<ProjectConfigDto>> getProjects(String workspaceId, boolean includeAttributes);
-
-    /**
-     * Get all projects in specific workspace.
-     *
-     * @param callback
-     *         the callback to use for the response
-     */
-    void getProjectsInSpecificWorkspace(String wsId, AsyncRequestCallback<List<ProjectConfigDto>> callback);
-
-    /**
-     * Clone project from some workspace.
-     *
-     * @param callback
-     *         the callback to use for the response
-     */
-    void cloneProjectToCurrentWorkspace(String srcWorkspaceId,
-                                        String srcProjectPath,
-                                        String newNameForProject,
-                                        AsyncRequestCallback<String> callback);
+    Promise<List<ProjectConfigDto>> getProjects(String workspaceId);
 
     /**
      * Get project.
@@ -110,14 +86,12 @@ public interface ProjectServiceClient {
      *
      * @param workspaceId
      *         id of current workspace
-     * @param name
-     *         name of the project to create
      * @param projectConfig
      *         descriptor of the project to create
      * @param callback
      *         the callback to use for the response
      */
-    void createProject(String workspaceId, String name, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
+    void createProject(String workspaceId, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
 
 
     /**
@@ -132,7 +106,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void estimateProject(String workspaceId, String path, String projectType, AsyncRequestCallback<Map<String, List<String>>> callback);
+    void estimateProject(String workspaceId, String path, String projectType, AsyncRequestCallback<SourceEstimation> callback);
 
 
     /**

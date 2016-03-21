@@ -114,8 +114,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Com
                                 return;
                             }
                         }
-                        createWorkspacePresenter.show(workspaces, callback);
                     }
+                    createWorkspacePresenter.show(workspaces, callback);
                 }
             }
         }).catchError(new Operation<PromiseError>() {

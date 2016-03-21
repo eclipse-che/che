@@ -14,7 +14,6 @@ package org.eclipse.che.api.project.gwt.client;
 public class QueryExpression {
     private String name;
     private String path;
-    private String mediaType;
     private String text;
     private int    maxItems;
     private int    skipCount;
@@ -64,27 +63,6 @@ public class QueryExpression {
      */
     public QueryExpression setName(String name) {
         this.name = name;
-        return this;
-    }
-
-    /**
-     * Get media type of file to search.
-     *
-     * @return media type of file to search
-     */
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    /**
-     * Set media type of file to search.
-     *
-     * @param mediaType
-     *         media type of file to search
-     * @return this {@code QueryExpression}
-     */
-    public QueryExpression setMediaType(String mediaType) {
-        this.mediaType = mediaType;
         return this;
     }
 

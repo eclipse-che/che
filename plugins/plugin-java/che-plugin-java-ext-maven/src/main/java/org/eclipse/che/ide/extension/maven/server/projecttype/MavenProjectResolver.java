@@ -14,20 +14,17 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.Project;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.ide.maven.tools.Model;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
@@ -44,7 +41,7 @@ public class MavenProjectResolver {
      *
      * @param projectFolder
      *         base folder which represents project
-     * @param projectManager
+     * @param projectRegistry
      *         special manager which is necessary for updating project after resolve
      * @throws ConflictException
      * @throws ForbiddenException
@@ -52,82 +49,42 @@ public class MavenProjectResolver {
      * @throws NotFoundException
      * @throws IOException
      */
-    public static void resolve(FolderEntry projectFolder, ProjectManager projectManager) throws ConflictException,
+    public static void resolve(FolderEntry projectFolder, ProjectRegistry projectRegistry) throws ConflictException,
                                                                                                 ForbiddenException,
                                                                                                 ServerException,
                                                                                                 NotFoundException,
                                                                                                 IOException {
-        VirtualFileEntry pom = projectFolder.getChild("pom.xml");
 
-        if (pom == null) {
-            return;
-        }
-
-        Model model = Model.readFrom(pom.getVirtualFile());
-        MavenClassPathConfigurator.configure(projectFolder);
-
-        String packaging = model.getPackaging();
-        if (packaging != null && packaging.equals("pom")) {
-            Project project = new Project(projectFolder, projectManager);
-
-            ProjectConfigImpl projectConfig = createConfig(projectFolder);
-
-            List<ProjectConfig> modules = new ArrayList<>();
-
-            for (FolderEntry folderEntry : project.getBaseFolder().getChildFolders()) {
-                MavenClassPathConfigurator.configure(folderEntry);
-
-                defineModules(folderEntry, modules);
+        if (projectFolder.getVirtualFile().exists() && projectFolder.getVirtualFile().isFolder()) {
+            final VirtualFileEntry pom = projectFolder.getChild("pom.xml");
+            if (pom == null || !pom.isFile()) {
+                return;
             }
 
-            projectConfig.setModules(modules);
-            projectConfig.setSource(getSourceStorage(project.getConfig()));
+            //projectRegistry.initProject(projectFolder.getPath().toString(), MAVEN_ID);
+            projectRegistry.setProjectType(projectFolder.getPath().toString(), MAVEN_ID, false);
 
-            project.updateConfig(projectConfig);
+            Model model = Model.readFrom(pom.getVirtualFile());
+            MavenClassPathConfigurator.configure(projectFolder);
+            String packaging = model.getPackaging();
+            if ("pom".equals(packaging)) {
+                final List<String> mavenModules = model.getModules();
+                for (String module : mavenModules) {
+                    final File file = projectFolder.getVirtualFile().toIoFile();
+                    java.nio.file.Path path = Paths.get(file.getCanonicalPath());
+                    final java.nio.file.Path modulePath = path.resolve(module);
+                    if (modulePath.toFile().exists() && modulePath.toFile().isDirectory()) {
+                        final VirtualFileSystem fileSystem = projectFolder.getVirtualFile().getFileSystem();
+                        final VirtualFile root = fileSystem.getRoot();
+                        final String substring = modulePath.toString().substring(root.toIoFile().getPath().length());
+                        resolve(new FolderEntry(root.getChild(Path.of(substring))), projectRegistry);
+                    }
+                }
+            }
         }
     }
 
-    private static ProjectConfigImpl createConfig(FolderEntry folderEntry) throws ValueStorageException {
-        ProjectConfigImpl projectConfig = new ProjectConfigImpl();
-        projectConfig.setName(folderEntry.getName());
-        projectConfig.setPath(folderEntry.getPath());
-        projectConfig.setType(MAVEN_ID);
 
-        return projectConfig;
-    }
 
-    private static SourceStorageImpl getSourceStorage(ProjectConfig config) {
-        SourceStorage sourceStorage = config.getSource();
 
-        if (sourceStorage == null) {
-            return new SourceStorageImpl("", "", Collections.emptyMap());
-        }
-
-        return new SourceStorageImpl(sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
-    }
-
-    private static void defineModules(FolderEntry folderEntry, List<ProjectConfig> modules) throws ServerException,
-                                                                                                   ForbiddenException,
-                                                                                                   IOException,
-                                                                                                   ConflictException {
-        VirtualFileEntry pom = folderEntry.getChild("pom.xml");
-
-        if (pom == null) {
-            return;
-        }
-
-        ProjectConfigImpl moduleConfig = createConfig(folderEntry);
-
-        List<ProjectConfig> internalModules = new ArrayList<>();
-
-        for (FolderEntry internalModule : folderEntry.getChildFolders()) {
-            MavenClassPathConfigurator.configure(folderEntry);
-
-            defineModules(internalModule, internalModules);
-        }
-
-        moduleConfig.setModules(internalModules);
-
-        modules.add(moduleConfig);
-    }
 }

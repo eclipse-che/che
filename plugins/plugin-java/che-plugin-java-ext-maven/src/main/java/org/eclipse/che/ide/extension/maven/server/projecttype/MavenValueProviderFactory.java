@@ -10,18 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server.projecttype;
 
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.InvalidValueException;
-import org.eclipse.che.api.project.server.ValueProvider;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
-import org.eclipse.che.api.project.server.ValueStorageException;
-import org.eclipse.che.api.project.server.VirtualFileEntry;
-import org.eclipse.che.api.vfs.server.VirtualFile;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.commons.xml.XMLTreeException;
 import org.eclipse.che.ide.maven.tools.Build;
 import org.eclipse.che.ide.maven.tools.Model;
@@ -61,25 +56,8 @@ public class MavenValueProviderFactory implements ValueProviderFactory {
         return Model.readFrom(pomFile.getInputStream());
     }
 
-    @Nullable
-    protected VirtualFile getPom(FolderEntry projectFolder) {
-        try {
-            final VirtualFileEntry pomFile = projectFolder.getChild("pom.xml");
-            if (pomFile != null) {
-                return pomFile.getVirtualFile();
-            }
-            return null;
-        } catch (ForbiddenException | ServerException e) {
-            return null;
-        }
-    }
-
     protected void throwReadException(Exception e) throws ValueStorageException {
         throw new ValueStorageException("Can't read pom.xml : " + e.getMessage());
-    }
-
-    protected void throwWriteException(Exception e) throws ValueStorageException {
-        throw new ValueStorageException("Can't write pom.xml : " + e.getMessage());
     }
 
     @Override
@@ -145,42 +123,6 @@ public class MavenValueProviderFactory implements ValueProviderFactory {
                 throw new ValueStorageException("Error parsing pom.xml : " + e.getMessage());
             }
             return null;
-        }
-
-        @Override
-        public void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException {
-            try {
-                VirtualFile pom = getPom(projectFolder);
-                if (pom == null) {
-                    Model model = Model.createModel();
-                    model.setModelVersion("4.0.0");
-                    pom = projectFolder.createFile("pom.xml", new byte[0]).getVirtualFile();
-                    model.writeTo(pom);
-                }
-
-                switch (attributeName) {
-                    case ARTIFACT_ID:
-                        Model.readFrom(pom).setArtifactId(value.get(0)).writeTo(pom);
-                        break;
-                    case GROUP_ID:
-                        Model.readFrom(pom).setGroupId(value.get(0)).writeTo(pom);
-                        break;
-                    case PACKAGING:
-                        String packaging = value.get(0);
-                        if (packaging.isEmpty()) {
-                            packaging = null;
-                        }
-                        Model.readFrom(pom).setPackaging(packaging).writeTo(pom);
-                        break;
-                    case VERSION:
-                        Model.readFrom(pom).setVersion(value.get(0)).writeTo(pom);
-                        break;
-                }
-            } catch (ForbiddenException | ServerException | IOException | ConflictException e) {
-                throwWriteException(e);
-            } catch (XMLTreeException e) {
-                throw new ValueStorageException("Error parsing pom.xml : " + e.getMessage());
-            }
         }
     }
 }

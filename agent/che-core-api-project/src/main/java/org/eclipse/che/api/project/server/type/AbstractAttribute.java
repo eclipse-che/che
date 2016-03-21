@@ -31,31 +31,25 @@ public abstract class AbstractAttribute implements Attribute {
         this.variable = variable;
     }
 
-
     public String getId() {
         return projectType + ':' + name;
     }
-
 
     public String getProjectType() {
         return projectType;
     }
 
-
     public String getDescription() {
         return description;
     }
-
 
     public boolean isRequired() {
         return required;
     }
 
-
     public boolean isVariable() {
         return variable;
     }
-
 
     public String getName() {
         return name;

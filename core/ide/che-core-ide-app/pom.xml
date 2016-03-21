@@ -93,10 +93,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-vfs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace</artifactId>
         </dependency>
         <dependency>
@@ -138,10 +134,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-client-gwt-vfs</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

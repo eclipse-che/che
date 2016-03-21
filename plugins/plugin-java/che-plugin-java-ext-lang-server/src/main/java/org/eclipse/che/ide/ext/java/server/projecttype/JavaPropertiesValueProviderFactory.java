@@ -12,10 +12,9 @@ package org.eclipse.che.ide.ext.java.server.projecttype;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.InvalidValueException;
-import org.eclipse.che.api.project.server.ValueProvider;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
-import org.eclipse.che.api.project.server.ValueStorageException;
+import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 
 import java.util.List;
@@ -25,7 +24,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.CONTAINS_JAVA_FILES;
 
 /**
- * Value
+ * {@link ValueProviderFactory} for Java project type.
  *
  * @author gazarenkov
  * @author Florent Benoit
@@ -92,7 +91,7 @@ public class JavaPropertiesValueProviderFactory implements ValueProviderFactory 
         }
 
         @Override
-        public List<String> getValues(final String attributeName) throws ValueStorageException {
+        public List<String> getValues(String attributeName) throws ValueStorageException {
             if (!initialized) {
                 init();
             }
@@ -102,11 +101,6 @@ public class JavaPropertiesValueProviderFactory implements ValueProviderFactory 
                 return singletonList(valueOf(containsJavaFiles));
             }
             return null;
-        }
-
-        @Override
-        public void setValues(String attributeName, List<String> value) throws ValueStorageException, InvalidValueException {
-
         }
     }
 }

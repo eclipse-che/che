@@ -11,26 +11,19 @@
 package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.InvalidValueException;
-import org.eclipse.che.api.project.server.ValueProviderFactory;
-import org.eclipse.che.api.project.server.ValueStorageException;
-
 
 /**
  * @author gazarenkov
  */
 public class Variable extends AbstractAttribute {
 
-    protected ValueProviderFactory valueProviderFactory = null;
-    protected AttributeValue       value                = null;
+    protected ValueProviderFactory valueProviderFactory;
+    protected AttributeValue       value;
 
-
-    public Variable(String projectType, String name, String description, boolean required,
-                    ValueProviderFactory valueProviderFactory) {
+    public Variable(String projectType, String name, String description, boolean required, ValueProviderFactory valueProviderFactory) {
         this(projectType, name, description, required);
         this.valueProviderFactory = valueProviderFactory;
     }
-
 
     public Variable(String projectType, String name, String description, boolean required, AttributeValue value) {
         this(projectType, name, description, required);
@@ -46,7 +39,6 @@ public class Variable extends AbstractAttribute {
         return value;
     }
 
-
     public final AttributeValue getValue(FolderEntry projectFolder) throws ValueStorageException {
         if (valueProviderFactory != null) {
             return new AttributeValue(valueProviderFactory.newInstance(projectFolder).getValues(getName()));
@@ -55,16 +47,7 @@ public class Variable extends AbstractAttribute {
         }
     }
 
-    public final void setValue(AttributeValue value, FolderEntry projectFolder) throws InvalidValueException, ValueStorageException {
-        if (valueProviderFactory != null) {
-            this.valueProviderFactory.newInstance(projectFolder).setValues(getName(), value.getList());
-        } else
-            this.value = value;
-    }
-
     public final ValueProviderFactory getValueProviderFactory() {
         return valueProviderFactory;
     }
-
-
 }

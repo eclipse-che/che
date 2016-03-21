@@ -15,6 +15,9 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
@@ -22,11 +25,9 @@ import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * The class contains business logic which allows update project.
@@ -36,22 +37,21 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class ProjectUpdater {
 
-    private final DtoUnmarshallerFactory        dtoUnmarshallerFactory;
     private final ProjectServiceClient          projectService;
     private final ProjectNotificationSubscriber projectNotificationSubscriber;
     private final EventBus                      eventBus;
+    private final AppContext                    appContext;
     private final String                        workspaceId;
 
     @Inject
-    public ProjectUpdater(DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                          ProjectServiceClient projectService,
+    public ProjectUpdater(ProjectServiceClient projectService,
                           ProjectNotificationSubscriber projectNotificationSubscriber,
                           EventBus eventBus,
                           AppContext appContext) {
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.projectService = projectService;
         this.projectNotificationSubscriber = projectNotificationSubscriber;
         this.eventBus = eventBus;
+        this.appContext = appContext;
         this.workspaceId = appContext.getWorkspaceId();
     }
 
@@ -71,30 +71,48 @@ public class ProjectUpdater {
                               final boolean isConfigurationRequired) {
         final String projectPath = projectConfig.getPath();
 
-        Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
         projectService.updateProject(workspaceId,
                                      projectPath == null ? '/' + projectConfig.getName() : projectPath,
-                                     projectConfig,
-                                     new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
-                                         @Override
-                                         protected void onSuccess(final ProjectConfigDto result) {
-                                             if (result.getProblems().isEmpty() && !isConfigurationRequired) {
-                                                 eventBus.fireEvent(new ProjectUpdatedEvent(projectPath, result));
-                                                 projectNotificationSubscriber.onSuccess();
-                                                 callback.onCompleted();
-                                                 return;
-                                             }
-                                             eventBus.fireEvent(new CreateProjectEvent(result));
-                                             eventBus.fireEvent(new ConfigureProjectEvent(result));
-                                             projectNotificationSubscriber.onSuccess();
-                                             callback.onCompleted();
-                                         }
+                                     projectConfig)
+                      .then(new Operation<ProjectConfigDto>() {
+                          @Override
+                          public void apply(final ProjectConfigDto updated) throws OperationException {
 
-                                         @Override
-                                         protected void onFailure(Throwable exception) {
-                                             projectNotificationSubscriber.onFailure(exception.getMessage());
-                                             callback.onFailure(new Exception(exception.getMessage()));
-                                         }
-                                     });
+                              //dirty hack. here we have to load from server new list of projects, because after project configuring
+                              //they may appear, so we need to have actual projects configuration state, need to find better way to
+                              //process it
+                              projectService.getProjects(workspaceId).then(new Operation<List<ProjectConfigDto>>() {
+                                  @Override
+                                  public void apply(List<ProjectConfigDto> projects) throws OperationException {
+
+                                      appContext.getWorkspace().getConfig().withProjects(projects);
+
+                                      if (updated.getProblems().isEmpty() && !isConfigurationRequired) {
+                                          eventBus.fireEvent(new ProjectUpdatedEvent(projectPath, updated));
+                                          projectNotificationSubscriber.onSuccess();
+                                          callback.onCompleted();
+                                          return;
+                                      }
+                                      eventBus.fireEvent(new CreateProjectEvent(updated));
+                                      eventBus.fireEvent(new ConfigureProjectEvent(updated));
+                                      projectNotificationSubscriber.onSuccess();
+                                      callback.onCompleted();
+                                  }
+                              }).catchError(new Operation<PromiseError>() {
+                                  @Override
+                                  public void apply(PromiseError arg) throws OperationException {
+                                      projectNotificationSubscriber.onFailure(arg.getMessage());
+                                      callback.onFailure(new Exception(arg.getMessage()));
+                                  }
+                              });
+                          }
+                      })
+                      .catchError(new Operation<PromiseError>() {
+                          @Override
+                          public void apply(PromiseError arg) throws OperationException {
+                              projectNotificationSubscriber.onFailure(arg.getMessage());
+                              callback.onFailure(new Exception(arg.getMessage()));
+                          }
+                      });
     }
 }
