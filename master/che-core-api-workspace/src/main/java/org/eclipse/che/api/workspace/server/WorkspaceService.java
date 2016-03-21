@@ -124,7 +124,6 @@ public class WorkspaceService extends Service {
     }
 
     @POST
-    @Path("/config")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
@@ -216,7 +215,7 @@ public class WorkspaceService extends Service {
     }
 
     @PUT
-    @Path("/{id}/config")
+    @Path("/{id}")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
@@ -243,7 +242,7 @@ public class WorkspaceService extends Service {
     }
 
     @DELETE
-    @Path("/{id}/config")
+    @Path("/{id}")
     @RolesAllowed("user")
     @ApiOperation(value = "Removes the workspace",
                   notes = "This operation can be performed only by the workspace owner")
