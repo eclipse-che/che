@@ -1,10 +1,13 @@
-Eclipse Che is both an IDE and a platform for creating distributed developer tooling. There are numerous ways to extend, modify, and customize Eclipse Che. This document itemizes all of the resources available for customizing Che. We have documentation pages, tutorials, and specifications.
+Eclipse Che is a platform for creating distributed developer tooling. There are numerous ways to extend, modify, and customize Eclipse Che. This document itemizes all of the resources available for customizing Che. We have documentation pages, tutorials, and specifications.
 
 #### Add New Commands
+A command is a process that is injected into your workspace. It's outputs are streamed into the console. Commands have type and you can create, save, update and delete commands from within the IDE. You can create templates that have sample projects with default commands that are pre-populated in the IDE. Commands can reference macros that intelligently navigate the project tree or current selections.
+* [Create Commands in the IDE](https://eclipse-che.readme.io/docs/commands)
+* [Command Macro List](https://eclipse-che.readme.io/docs/commands#macros)
 
-* Register new commands in workspace [Docs](https://eclipse-che.readme.io/docs/commands)
-* Commands macro [Docs](https://eclipse-che.readme.io/docs/commands#macros)
-
+#### Custom Templates
+A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are loaded based upon the type of stack selected. You can add your own templates to the default Che distribution.
+* TODO: Reference Template Docs
 
 #### Create Custom Stacks
 
