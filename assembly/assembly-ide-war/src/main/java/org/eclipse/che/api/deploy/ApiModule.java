@@ -126,6 +126,7 @@ public class ApiModule extends AbstractModule {
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
+                          "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
