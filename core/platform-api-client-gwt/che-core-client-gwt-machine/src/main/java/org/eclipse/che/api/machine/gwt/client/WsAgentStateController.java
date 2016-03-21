@@ -201,10 +201,13 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
      * Try to connect via WebSocket connection
      */
     private void checkWsConnection() {
+        if (messageBus != null) {
+            messageBus.cancelReconnection();
+        }
         messageBus = messageBusProvider.createMachineMessageBus(wsUrl);
+
         messageBus.addOnCloseHandler(this);
         messageBus.addOnCloseHandler(this);
         messageBus.addOnOpenHandler(this);
-
     }
 }

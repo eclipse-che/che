@@ -27,6 +27,14 @@ public interface MachineManager {
     }
 
     /**
+     * Performs some actions when dev machine is creating.
+     *
+     * @param machineConfig
+     *         contains information about dev machine configuration
+     */
+    void onDevMachineCreating(MachineConfigDto machineConfig);
+
+    /**
      * Performs some actions when machine is running.
      *
      * @param machineId
@@ -72,10 +80,12 @@ public interface MachineManager {
     void restartMachine(final MachineDto machine);
 
     /**
-     * Performs some actions when dev machine is creating.
+     * Checks if the the status for dev machine is tracked by machine manager.
      *
-     * @param machineConfig
-     *         contains information about dev machine configuration
+     * @param machine
+     *         contains information about machine state
+     * @return {@code true} if status for dev machine is tracked by machine manager and {@code false} - otherwise.
      */
-    void onDevMachineCreating(MachineConfigDto machineConfig);
+    boolean isDevMachineStatusTracked(MachineDto machine);
+
 }

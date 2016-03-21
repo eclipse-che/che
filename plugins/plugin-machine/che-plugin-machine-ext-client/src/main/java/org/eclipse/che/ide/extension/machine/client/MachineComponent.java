@@ -62,9 +62,11 @@ public class MachineComponent implements WsAgentComponent {
 
                     if (isDev && status == RUNNING) {
                         callback.onSuccess(MachineComponent.this);
-
                         appContext.setDevMachineId(descriptor.getId());
-                        machineManager.onMachineRunning(descriptor.getId());
+
+                        if (!machineManager.isDevMachineStatusTracked(descriptor)) {
+                            machineManager.onMachineRunning(descriptor.getId());
+                        }
                         break;
                     }
                     if (isDev && status == CREATING) {

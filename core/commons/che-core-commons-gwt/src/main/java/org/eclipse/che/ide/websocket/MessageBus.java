@@ -183,4 +183,9 @@ public interface MessageBus extends MessageReceivedHandler {
      * @return <code>true</code> if handler subscribed to channel and <code>false</code> if not
      */
     boolean isHandlerSubscribed(MessageHandler handler, String channel);
+
+    /**
+     * Cancels attempts to reconnect by WebSocket
+     */
+    void cancelReconnection();
 }

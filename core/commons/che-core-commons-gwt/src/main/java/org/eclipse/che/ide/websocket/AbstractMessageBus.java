@@ -139,6 +139,13 @@ abstract class AbstractMessageBus implements MessageBus {
         };
     }
 
+    public void cancelReconnection() {
+        frequentlyReconnectionAttemptsCounter = MAX_FREQUENTLY_RECONNECTION_ATTEMPTS;
+        seldomReconnectionAttemptsCounter = MAX_SELDOM_RECONNECTION_ATTEMPTS;
+        frequentlyReconnectionTimer.cancel();
+        seldomReconnectionTimer.cancel();
+    }
+
     private void initialize() {
         ws = WebSocket.create(wsConnectionUrl);
         wsListener = new WsListener();
@@ -329,7 +336,6 @@ abstract class AbstractMessageBus implements MessageBus {
      *         e.g.: WebSocket is not supported by browser, WebSocket connection is not opened
      */
     private void send(String message) throws WebSocketException {
-//        checkWebSocketConnectionState();
         if (getReadyState() != ReadyState.OPEN) {
             messages2send.add(message);
             return;
