@@ -21,14 +21,16 @@ import javax.inject.Singleton;
 @Singleton
 public class GitProjectType extends TransientMixin {
 
+    public static final String TYPE_ID                 = "git";
+    public static final String DISPLAY_NAME            = "git";
     public static final String VCS_PROVIDER_NAME       = "vcs.provider.name";
     public static final String GIT_CURRENT_BRANCH_NAME = "git.current.branch.name";
     public static final String GIT_REPOSITORY_REMOTES  = "git.repository.remotes";
 
     @Inject
     public GitProjectType(GitValueProviderFactory gitRepositoryValueProviderFactory) {
-        super("git", "git");
-        addVariableDefinition(VCS_PROVIDER_NAME, "Is this git repo or not?", false,
+        super(TYPE_ID, DISPLAY_NAME);
+        addVariableDefinition(VCS_PROVIDER_NAME, "Is this git repo or not?", true,
                               gitRepositoryValueProviderFactory);
         addVariableDefinition(GIT_CURRENT_BRANCH_NAME, "Name of current git branch", false,
                               gitRepositoryValueProviderFactory);

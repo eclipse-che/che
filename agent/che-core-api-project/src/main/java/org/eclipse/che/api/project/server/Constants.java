@@ -19,17 +19,14 @@ public class Constants {
     public static final String LINK_REL_EXPORT_ZIP     = "zipball sources";
     public static final String LINK_REL_CHILDREN       = "children";
     public static final String LINK_REL_TREE           = "tree";
-    public static final String LINK_REL_MODULES        = "modules";
+    //public static final String LINK_REL_MODULES        = "modules";
     public static final String LINK_REL_DELETE         = "delete";
     public static final String LINK_REL_GET_CONTENT    = "get content";
     public static final String LINK_REL_UPDATE_CONTENT = "update content";
 
     public static final String LINK_REL_PROJECT_TYPES = "project types";
 
-    public static final String CODENVY_DIR                        = ".codenvy";
-    public static final String CODENVY_MISC_FILE                  = "misc.xml";
-
-    public static final String CODENVY_MISC_FILE_RELATIVE_PATH    = CODENVY_DIR + "/" + CODENVY_MISC_FILE;
+    public static final String CODENVY_DIR = ".codenvy";
 
     private Constants() {
     }

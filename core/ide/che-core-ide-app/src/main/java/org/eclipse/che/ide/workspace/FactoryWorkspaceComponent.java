@@ -16,23 +16,25 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.factory.gwt.client.FactoryServiceClient;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -41,22 +43,27 @@ import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
+import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
- * Retrieves specified factory, and reuse previously created workspace for this factory.
+ * Retrieves specified factory, and creates and/or starts workspace configured in it.
  *
  * @author Max Shaposhnik
- * @author Florent Benoit
  */
 @Singleton
 public class FactoryWorkspaceComponent extends WorkspaceComponent implements Component {
+    private static final String FACTORY_ID_ATTRIBUTE = "factoryId";
+
     private final FactoryServiceClient factoryServiceClient;
-    private String                     workspaceId;
+    private       Factory              factory;
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -101,17 +108,12 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
         String factoryParams = browserQueryFieldRenderer.getParameterFromURLByName("factory");
-
-        // get workspace ID to use dedicated workspace for this factory
-        this.workspaceId = browserQueryFieldRenderer.getParameterFromURLByName("workspaceId");
-
         factoryServiceClient.getFactory(factoryParams, true,
                                         new AsyncRequestCallback<Factory>(dtoUnmarshallerFactory.newUnmarshaller(Factory.class)) {
                                             @Override
                                             protected void onSuccess(Factory result) {
+                                                factory = result;
                                                 appContext.setFactory(result);
-
-                                                // get workspace
                                                 tryStartWorkspace();
                                             }
 
@@ -125,46 +127,108 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
 
     @Override
     public void tryStartWorkspace() {
-        if (this.workspaceId == null) {
-            notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceIdUndefined(), FAIL, true);
+        final WorkspaceConfigDto workspaceConfigDto = factory.getWorkspace();
+
+        if (workspaceConfigDto == null) {
+            notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceConfigUndefined(), FAIL, true);
             return;
         }
 
-        getWorkspaceToStart().then(checkWorkspaceIsStarted()).catchError(new Operation<PromiseError>() {
+        getWorkspaceToStart().then(startWorkspace()).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(locale.workspaceNotReady(workspaceId), locale.workspaceGetFailed(), FAIL, true);
                 Log.error(getClass(), arg.getMessage());
             }
         });
     }
 
-
     /**
-     * Checks if specified workspace has {@link WorkspaceStatus} which is {@code RUNNING}
-     */
-    protected Operation<UsersWorkspaceDto> checkWorkspaceIsStarted() {
-        return new Operation<UsersWorkspaceDto>() {
-            @Override
-            public void apply(UsersWorkspaceDto workspace) throws OperationException {
-                if (!RUNNING.equals(workspace.getStatus())) {
-                    notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, true);
-                    throw new OperationException(locale.workspaceNotRunning());
-                } else {
-                    startWorkspace().apply(workspace);
-                }
-            }
-        };
-    }
-
-
-    /**
-     * Gets {@link Promise} of workspace according to workspace ID specified in parameter.
+     * Gets {@link Promise} of workspace according to {@code factory} {@link org.eclipse.che.api.factory.shared.dto.Policies}.
+     * <p/>
+     * <p>Return policy for workspace:
+     * <p><i>perClick</i> - every click from any user always creates a new workspace every time and if policy is not specified<br/>
+     * it will be used by default.
+     * <p/>
+     * <p><i>perUser</i> - create one workspace for a user, a 2nd click from same user reloads the same workspace.
+     * <p/>
+     * <p><i>perAccount</i> - only create workspace for all users. A 2nd click from any user reloads the same workspace<br/>
+     * Note that if location = owner, then only 1 workspace ever is created. If location = acceptor<br/>
+     * it's one workspace for each unique user.
      */
     private Promise<UsersWorkspaceDto> getWorkspaceToStart() {
-        // get workspace from the given id
-        return this.workspaceServiceClient.getUsersWorkspace(workspaceId);
+        final WorkspaceConfigDto workspaceConfigDto = factory.getWorkspace();
+        final String policy = factory.getPolicies() == null ? "perClick" : factory.getPolicies().getCreate();
+        switch (policy) {
+            case "perUser":
+                return getWorkspaceByConditionOrCreateNew(workspaceConfigDto, new Function<UsersWorkspaceDto, Boolean>() {
+                    @Override
+                    public Boolean apply(UsersWorkspaceDto existWs) throws FunctionException {
+                        return factory.getId().equals(existWs.getConfig().getAttributes().get(FACTORY_ID_ATTRIBUTE));
+                    }
+                });
+            case "perAccount":
+                return getWorkspaceByConditionOrCreateNew(workspaceConfigDto, new Function<UsersWorkspaceDto, Boolean>() {
+                    @Override
+                    public Boolean apply(UsersWorkspaceDto arg) throws FunctionException {
+                        //TODO rework it when account will be ready
+                        return workspaceConfigDto.getName().equals(arg.getConfig().getName());
+                    }
+                });
+            case "perClick":
+            default:
+                return getWorkspaceByConditionOrCreateNew(workspaceConfigDto, new Function<UsersWorkspaceDto, Boolean>() {
+                    @Override
+                    public Boolean apply(UsersWorkspaceDto arg) throws FunctionException {
+                        return false;
+                    }
+                });
+        }
     }
 
+    /**
+     * Gets the workspace by condition which is determined by given {@link Function}
+     * if workspace found by condition then it will be returned in other way new workspace will be returned.
+     */
+    private Promise<UsersWorkspaceDto> getWorkspaceByConditionOrCreateNew(final WorkspaceConfigDto workspaceConfigDto,
+                                                                          final Function<UsersWorkspaceDto, Boolean> condition) {
+        return workspaceServiceClient.getWorkspaces(0, 0)
+                                     .thenPromise(new Function<List<UsersWorkspaceDto>, Promise<UsersWorkspaceDto>>() {
+                                         @Override
+                                         public Promise<UsersWorkspaceDto> apply(List<UsersWorkspaceDto> workspaces)
+                                                 throws FunctionException {
+                                             for (UsersWorkspaceDto existsWs : workspaces) {
+                                                 if (condition.apply(existsWs)) {
+                                                     return Promises.resolve(existsWs);
+                                                 }
+                                             }
+                                             return createWorkspaceWithCounterName(workspaces, workspaceConfigDto);
+                                         }
+                                     });
+    }
+
+    /**
+     * Create workspace with counter in name and add factoryId attribute
+     * if workspace with specified name already exist.
+     */
+    private Promise<UsersWorkspaceDto> createWorkspaceWithCounterName(final List<UsersWorkspaceDto> workspaces,
+                                                                      final WorkspaceConfigDto workspaceConfigDto) {
+        workspaceConfigDto.getAttributes().put(FACTORY_ID_ATTRIBUTE, factory.getId());
+        final Set<String> workspacesNames = new HashSet<>();
+        final String wsName = workspaceConfigDto.getName();
+        for (UsersWorkspaceDto workspace : workspaces) {
+            workspacesNames.add(workspace.getConfig().getName());
+        }
+        if (!workspacesNames.contains(wsName)) {
+            return workspaceServiceClient.create(workspaceConfigDto, null);
+        }
+        String genName = wsName;
+        int counter = 1;
+        while (workspacesNames.contains(genName)) {
+            genName = wsName + '-' + counter++;
+        }
+        workspaceConfigDto.withName(genName);
+        workspaceConfigDto.getAttributes().put(FACTORY_ID_ATTRIBUTE, factory.getId());
+        return workspaceServiceClient.create(workspaceConfigDto, null);
+    }
 }
 

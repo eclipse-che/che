@@ -15,7 +15,6 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     private Map<String, List<String>> attributes;
     private List<ProjectConfig>       modules;
     private SourceStorageImpl         storage;
-    private String                    contentRoot;
+    //private String                    contentRoot;
 
     public ProjectConfigImpl() {
     }
@@ -50,7 +49,7 @@ public class ProjectConfigImpl implements ProjectConfig {
         description = projectConfig.getDescription();
         type = projectConfig.getType();
         mixins = new ArrayList<>(projectConfig.getMixins());
-        modules = new ArrayList<>(projectConfig.getModules() != null ? projectConfig.getModules() : Collections.<ProjectConfig>emptyList());
+//        modules = new ArrayList<>(projectConfig.getModules() != null ? projectConfig.getModules() : Collections.<ProjectConfig>emptyList());
         attributes = projectConfig.getAttributes()
                                   .entrySet()
                                   .stream()
@@ -62,7 +61,7 @@ public class ProjectConfigImpl implements ProjectConfig {
             storage = new SourceStorageImpl(sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
         }
 
-        contentRoot = projectConfig.getContentRoot();
+//        contentRoot = projectConfig.getContentRoot();
     }
 
     @Override
@@ -121,17 +120,17 @@ public class ProjectConfigImpl implements ProjectConfig {
         return attributes;
     }
 
-    @Override
-    public List<ProjectConfig> getModules() {
-        if (modules == null) {
-            modules = new ArrayList<>();
-        }
-        return modules;
-    }
+//    @Override
+//    public List<ProjectConfig> getModules() {
+//        if (modules == null) {
+//            modules = new ArrayList<>();
+//        }
+//        return modules;
+//    }
 
-    public void setModules(List<ProjectConfig> modules) {
-        this.modules = modules;
-    }
+//    public void setModules(List<ProjectConfig> modules) {
+//        this.modules = modules;
+//    }
 
     public void setAttributes(Map<String, List<String>> attributes) {
         this.attributes = attributes;
@@ -142,14 +141,14 @@ public class ProjectConfigImpl implements ProjectConfig {
         return storage;
     }
 
-    @Override
-    public String getContentRoot() {
-        return contentRoot;
-    }
-
-    public void setContentRoot(String contentRoot) {
-        this.contentRoot = contentRoot;
-    }
+//    @Override
+//    public String getContentRoot() {
+//        return contentRoot;
+//    }
+//
+//    public void setContentRoot(String contentRoot) {
+//        this.contentRoot = contentRoot;
+//    }
 
     public void setSource(SourceStorageImpl sourceStorage) {
         this.storage = sourceStorage;
@@ -166,9 +165,9 @@ public class ProjectConfigImpl implements ProjectConfig {
                && Objects.equals(type, other.type)
                && getMixins().equals(other.getMixins())
                && getAttributes().equals(other.getAttributes())
-               && getModules().equals(other.getModules())
-               && Objects.equals(storage, other.getSource())
-               && Objects.equals(contentRoot, other.getContentRoot());
+//               && getModules().equals(other.getModules())
+               && Objects.equals(storage, other.getSource());
+               //&& Objects.equals(contentRoot, other.getContentRoot());
     }
 
     @Override
@@ -180,9 +179,9 @@ public class ProjectConfigImpl implements ProjectConfig {
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + getMixins().hashCode();
         hash = hash * 31 + getAttributes().hashCode();
-        hash = hash * 31 + getModules().hashCode();
+//        hash = hash * 31 + getModules().hashCode();
         hash = hash * 31 + Objects.hashCode(storage);
-        hash = hash * 31 + Objects.hashCode(contentRoot);
+        //hash = hash * 31 + Objects.hashCode(contentRoot);
         return hash;
     }
 
@@ -197,7 +196,7 @@ public class ProjectConfigImpl implements ProjectConfig {
                ", attributes=" + attributes +
                ", modules=" + modules +
                ", storage=" + storage +
-               ", contentRoot='" + contentRoot + '\'' +
+//               ", contentRoot='" + contentRoot + '\'' +
                '}';
     }
 }

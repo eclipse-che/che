@@ -35,7 +35,6 @@ import java.util.List;
 
 import static org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.RecipeFileFactory.NAME;
 import static org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.RecipeFileFactory.PATH;
-import static org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor.RecipeFileFactory.TYPE;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -82,7 +81,6 @@ public class RecipeFileFactoryTest {
         when(dtoFactory.createDto(ItemReference.class)).thenReturn(itemReference);
         when(itemReference.withName(NAME)).thenReturn(itemReference);
         when(itemReference.withPath(PATH)).thenReturn(itemReference);
-        when(itemReference.withMediaType(TYPE)).thenReturn(itemReference);
     }
 
     @Test

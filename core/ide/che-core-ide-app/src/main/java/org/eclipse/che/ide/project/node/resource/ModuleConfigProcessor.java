@@ -31,9 +31,11 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
 /**
  * @author Dmitry Shnurenko
+ * @deprecated will be removed after release GA
  */
+@Deprecated
 public class ModuleConfigProcessor extends AbstractResourceProcessor<ProjectConfigDto> {
-    
+
     private final String workspaceId;
 
     @Inject
@@ -42,7 +44,7 @@ public class ModuleConfigProcessor extends AbstractResourceProcessor<ProjectConf
                                  AppContext appContext,
                                  DtoUnmarshallerFactory unmarshallerFactory) {
         super(eventBus, projectServiceClient, unmarshallerFactory);
-        
+
         workspaceId = appContext.getWorkspace().getId();
     }
 

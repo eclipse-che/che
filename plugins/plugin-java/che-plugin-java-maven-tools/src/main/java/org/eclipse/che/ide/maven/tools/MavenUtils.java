@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.vfs.server.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFile;
 
 import javax.inject.Inject;
 import javax.inject.Named;

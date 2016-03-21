@@ -33,10 +33,6 @@ public interface VirtualFile {
 
     String getDisplayName();
 
-    /** get media type*/
-    @Nullable
-    String getMediaType();
-
     /** if user doesn't have wright rights, or file comes from external sources thad doesn't support modifying file content*/
     boolean isReadOnly();
 

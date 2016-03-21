@@ -23,5 +23,9 @@ import java.io.IOException;
  */
 public interface PostImportProjectHandler extends ProjectHandler {
 
-    void onProjectImported(FolderEntry projectFolder) throws ForbiddenException, ConflictException, ServerException, IOException, NotFoundException;
+    void onProjectImported(FolderEntry projectFolder) throws ForbiddenException,
+                                                             ConflictException,
+                                                             ServerException,
+                                                             IOException,
+                                                             NotFoundException;
 }

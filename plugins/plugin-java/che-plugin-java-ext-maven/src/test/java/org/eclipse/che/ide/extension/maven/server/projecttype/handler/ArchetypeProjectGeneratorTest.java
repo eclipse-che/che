@@ -8,6 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+// TODO: rework after new Project API
 //package org.eclipse.che.ide.extension.maven.server.projecttype.handler;
 //
 //import org.eclipse.che.api.core.ServerException;

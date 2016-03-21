@@ -11,13 +11,15 @@
 package org.eclipse.che.ide.ext.java.server.projecttype;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.CONTAINS_JAVA_FILES;
 
 /**
- * Bare Java project type
+ * Bare Java project type.
+ *
  * @author gazarenkov
  * @author Dmitry Shnurenko
  */

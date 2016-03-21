@@ -21,8 +21,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.vfs.gwt.client.VfsServiceClient;
-import org.eclipse.che.api.vfs.shared.dto.Item;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -35,7 +33,6 @@ import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.ExceptionUtils;
@@ -55,7 +52,6 @@ import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 @Singleton
 public class ProjectImporter extends AbstractImporter {
 
-    private final VfsServiceClient         vfsServiceClient;
     private final CoreLocalizationConstant localizationConstant;
     private final EventBus                 eventBus;
     private final ProjectResolver          projectResolver;
@@ -68,7 +64,6 @@ public class ProjectImporter extends AbstractImporter {
 
     @Inject
     public ProjectImporter(ProjectServiceClient projectService,
-                           VfsServiceClient vfsServiceClient,
                            CoreLocalizationConstant localizationConstant,
                            ImportProjectNotificationSubscriberFactory subscriberFactory,
                            AppContext appContext,
@@ -78,7 +73,6 @@ public class ProjectImporter extends AbstractImporter {
                            OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry,
                            EventBus eventBus) {
         super(appContext, projectService, subscriberFactory);
-        this.vfsServiceClient = vfsServiceClient;
         this.localizationConstant = localizationConstant;
         this.projectResolver = projectResolver;
         this.dialogFactory = dialogFactory;
@@ -87,24 +81,12 @@ public class ProjectImporter extends AbstractImporter {
         this.eventBus = eventBus;
     }
 
-    public void checkFolderExistenceAndImport(final CompleteCallback callback, final ProjectConfigDto projectConfig) {
+    public void importProject(CompleteCallback callback, ProjectConfigDto projectConfig) {
         this.projectConfig = projectConfig;
         this.callback = callback;
-        // check on VFS because need to check whether the folder with the same name already exists in the root of workspace
         final String projectName = projectConfig.getName();
-        vfsServiceClient.getItemByPath(workspaceId, projectName, new AsyncRequestCallback<Item>() {
-            @Override
-            protected void onSuccess(Item result) {
-                callback.onFailure(new Exception(localizationConstant.createProjectFromTemplateProjectExists(projectName)));
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                String pathToProject = '/' + projectName;
-
-                startImport(pathToProject, projectName, projectConfig.getSource());
-            }
-        });
+        String pathToProject = '/' + projectName;
+        startImport(pathToProject, projectName, projectConfig.getSource());
     }
 
     @Override

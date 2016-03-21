@@ -20,7 +20,6 @@ import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.ModuleCreatedEvent;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
@@ -32,6 +31,7 @@ import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.projectimport.wizard.ProjectImporter;
 import org.eclipse.che.ide.projectimport.wizard.ProjectUpdater;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -114,48 +114,47 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         } else if (mode == UPDATE) {
             updater.updateProject(new UpdateCallback(callback), dataObject, false);
         } else if (mode == IMPORT) {
-            importer.checkFolderExistenceAndImport(callback, dataObject);
+            importer.importProject(callback, dataObject);
         }
     }
 
     private void createProject(final CompleteCallback callback) {
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient
-                .createProject(workspaceId, dataObject.getName(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
-                    @Override
-                    protected void onSuccess(ProjectConfigDto result) {
-                        eventBus.fireEvent(new CreateProjectEvent(result));
+        projectServiceClient.createProject(workspaceId, dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+            @Override
+            protected void onSuccess(ProjectConfigDto result) {
+                eventBus.fireEvent(new CreateProjectEvent(result));
 
-                        callback.onCompleted();
-                    }
+                callback.onCompleted();
+            }
 
-                    @Override
-                    protected void onFailure(Throwable exception) {
-                        final String message = dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
-                        callback.onFailure(new Exception(message));
-                    }
-                });
+            @Override
+            protected void onFailure(Throwable exception) {
+                final String message = dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
+                callback.onFailure(new Exception(message));
+            }
+        });
     }
 
     private void createModule(final CompleteCallback callback) {
-        final String pathToSelectedNodeParent = getPathToSelectedNodeParent();
+        dataObject.setPath(new Path(getPathToSelectedNodeParent()).append(dataObject.getName()).toString());
 
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient.createModule(workspaceId,
-                                          pathToSelectedNodeParent,
-                                          dataObject,
-                                          new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
-                                              @Override
-                                              protected void onSuccess(ProjectConfigDto result) {
-                                                  eventBus.fireEvent(new ModuleCreatedEvent(result));
-                                                  callback.onCompleted();
-                                              }
+        projectServiceClient.updateProject(workspaceId,
+                                           dataObject.getPath(),
+                                           dataObject,
+                                           new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+                                               @Override
+                                               protected void onSuccess(ProjectConfigDto result) {
+                                                   eventBus.fireEvent(new CreateProjectEvent(result));
+                                                   callback.onCompleted();
+                                               }
 
-                                              @Override
-                                              protected void onFailure(Throwable exception) {
-                                                  callback.onFailure(exception);
-                                              }
-                                          });
+                                               @Override
+                                               protected void onFailure(Throwable exception) {
+                                                   callback.onFailure(exception);
+                                               }
+                                           });
     }
 
     private String getPathToSelectedNodeParent() {

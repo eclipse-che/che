@@ -209,7 +209,7 @@ public class ProjectConfigSynchronizationListenerTest {
         verify(changeLocationWidget).getText();
         verify(sourceStorage).setLocation(anyString());
 
-        verify(projectImporter).checkFolderExistenceAndImport(Matchers.<Wizard.CompleteCallback>anyObject(), eq(projectConfig));
+        verify(projectImporter).importProject(Matchers.<Wizard.CompleteCallback>anyObject(), eq(projectConfig));
     }
 
     @Test

@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.project.shared.Constants;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +37,15 @@ public class CreateBaseProjectTypeHandler implements CreateProjectHandler {
     private final String README_FILE_NAME = "README";
 
     @Override
-    public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
+    public void onCreateProject(FolderEntry baseFolder,
+                                Map<String, AttributeValue> attributes,
+                                Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
         baseFolder.createFile(README_FILE_NAME, getReadmeContent());
     }
 
     @Override
     public String getProjectType() {
-        return Constants.BLANK_ID;
+        return BaseProjectType.ID;
     }
 
     private byte[] getReadmeContent() {

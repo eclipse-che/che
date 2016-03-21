@@ -139,6 +139,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
 
     @Override
     public void projectNameChanged(String name) {
+        dataObject.setPath(name);
         dataObject.setName(name);
         updateDelegate.updateControls();
 

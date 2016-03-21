@@ -15,13 +15,13 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.project.server.importer.ProjectImporter;
 
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
-
 
 /**
  * @author Vitaly Parfonov
@@ -56,8 +56,10 @@ public class ZipProjectImporter implements ProjectImporter {
     @Override
     public void importSources(FolderEntry baseFolder,
                               SourceStorage storage,
-                              LineConsumerFactory importOutputConsumerFactory)
-            throws ForbiddenException, ConflictException, IOException, ServerException {
+                              LineConsumerFactory importOutputConsumerFactory) throws ForbiddenException,
+                                                                                      ConflictException,
+                                                                                      IOException,
+                                                                                      ServerException {
         URL url;
         String location = storage.getLocation();
         if (location.startsWith("http://") || location.startsWith("https://")) {
@@ -71,6 +73,7 @@ public class ZipProjectImporter implements ProjectImporter {
                 }
             }
         }
+
         if (url == null) {
             throw new IOException(String.format("Can't find %s", location));
         }
@@ -85,7 +88,6 @@ public class ZipProjectImporter implements ProjectImporter {
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public ImporterCategory getCategory() {
         return ImporterCategory.ARCHIVE;

@@ -31,7 +31,6 @@
         <module>che-core-client-gwt-workspace</module>
         <module>che-core-client-gwt-project</module>
         <module>che-core-client-gwt-user</module>
-        <module>che-core-client-gwt-vfs</module>
         <module>che-core-client-gwt-factory</module>
         <module>che-core-client-gwt-git</module>
         <module>che-core-client-gwt-ssh</module>

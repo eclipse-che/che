@@ -31,7 +31,7 @@ public class TypedRegionImpl extends RegionImpl implements TypedRegion {
         fType = type;
     }
 
-    /* @see org.eclipse.jface.text.ITypedRegion#getType() */
+    /* @see org.eclipse.jface.text.ITypedRegion#getProjectType() */
     public String getType() {
         return fType;
     }

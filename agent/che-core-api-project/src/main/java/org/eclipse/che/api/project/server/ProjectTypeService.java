@@ -19,7 +19,6 @@ import io.swagger.annotations.ApiResponses;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 
@@ -58,8 +57,8 @@ public class ProjectTypeService extends Service {
     @Produces(MediaType.APPLICATION_JSON)
     @GenerateLink(rel = Constants.LINK_REL_PROJECT_TYPES)
     @ApiOperation(value = "Get project types",
-                  responseContainer = "List",
-                  response = ProjectTypeDto.class)
+            responseContainer = "List",
+            response = ProjectTypeDto.class)
     @ApiResponses(@ApiResponse(code = 200, message = "Project types successfully fetched"))
     public List<ProjectTypeDto> getProjectTypes() {
         return registry.getProjectTypes()
@@ -75,7 +74,6 @@ public class ProjectTypeService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested project type entity"),
                    @ApiResponse(code = 404, message = "The project type with such id doesn't exist")})
     public ProjectTypeDto getProjectType(@ApiParam("Project type id") @PathParam("id") String id) throws NotFoundException {
-        final ProjectTypeDef projectType = registry.getProjectType(id);
-        return toTypeDefinition(projectType);
+        return toTypeDefinition(registry.getProjectType(id));
     }
 }

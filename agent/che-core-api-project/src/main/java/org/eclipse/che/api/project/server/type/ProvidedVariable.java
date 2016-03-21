@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.type;
 
-import org.eclipse.che.api.project.server.ValueProviderFactory;
-
 /**
  * @author gazarenkov
  */
@@ -19,7 +17,10 @@ public class ProvidedVariable extends Variable {
 
     protected ValueProviderFactory valueProviderFactory = null;
 
-    public ProvidedVariable(String projectType, String name, String description, boolean required,
+    public ProvidedVariable(String projectType,
+                            String name,
+                            String description,
+                            boolean required,
                             ValueProviderFactory valueProviderFactory) {
         super(projectType, name, description, required);
         this.valueProviderFactory = valueProviderFactory;

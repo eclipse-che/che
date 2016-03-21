@@ -210,7 +210,6 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
             currentProject.setRootProject(rootConfig);
             browserQueryFieldRenderer.setProjectName(rootConfig.getName());
         }
-
         eventBus.fireEvent(new CurrentProjectChangedEvent(currentProject.getProjectConfig()));
     }
 

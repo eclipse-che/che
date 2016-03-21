@@ -15,8 +15,6 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
-import org.eclipse.che.api.vfs.gwt.client.VfsServiceClient;
-import org.eclipse.che.api.vfs.shared.dto.Item;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -24,21 +22,14 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
-import org.eclipse.che.test.GwtReflectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -72,17 +63,10 @@ public class LocalZipImporterPagePresenterTest {
 
     private static final String RESPONSE = "<pre style=\"word-wrap: break-word; white-space: pre-wrap;\">" + PARSED_RESPONSE + "</pre>";
 
-    @Captor
-    private ArgumentCaptor<AsyncRequestCallback<Item>> callbackCaptorForItem;
-
     @Mock
     private ProjectServiceClient          projectServiceClient;
     @Mock
-    private VfsServiceClient              vfsServiceClient;
-    @Mock
     private DtoFactory                    dtoFactory;
-    @Mock
-    private DialogFactory                 dialogFactory;
     @Mock
     private AppContext                    appContext;
     @Mock
@@ -108,9 +92,7 @@ public class LocalZipImporterPagePresenterTest {
                                                       appContext,
                                                       "extPath",
                                                       eventBus,
-                                                      vfsServiceClient,
                                                       projectServiceClient,
-                                                      dialogFactory,
                                                       projectNotificationSubscriber);
     }
 
@@ -223,38 +205,12 @@ public class LocalZipImporterPagePresenterTest {
     }
 
     @Test
-    public void onImportClickedWhenProjectWithSameNameAlreadyExistsTest() {
-        when(view.getProjectName()).thenReturn(PROJECT_NAME);
-        MessageDialog dialog = mock(MessageDialog.class);
-        when(dialogFactory.createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class))).thenReturn(dialog);
-
-        presenter.onImportClicked();
-
-        verify(vfsServiceClient).getItemByPath(anyString(), eq(PROJECT_NAME), callbackCaptorForItem.capture());
-        AsyncRequestCallback<Item> callback = callbackCaptorForItem.getValue();
-        GwtReflectionUtils.callOnSuccess(callback, mock(Item.class));
-
-        verify(view).setEnabledImportButton(eq(false));
-        verify(dialogFactory).createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class));
-        verify(dialog).show();
-        verify(view, never()).submit();
-        verify(view, never()).setLoaderVisibility(anyBoolean());
-        verify(view, never()).setInputsEnableState(anyBoolean());
-    }
-
-    @Test
     public void onImportClickedWhenShouldImportAndOpenProjectTest() {
         when(view.getProjectName()).thenReturn(PROJECT_NAME);
         MessageDialog dialog = mock(MessageDialog.class);
-        when(dialogFactory.createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class))).thenReturn(dialog);
 
         presenter.onImportClicked();
 
-        verify(vfsServiceClient).getItemByPath(anyString(), eq(PROJECT_NAME), callbackCaptorForItem.capture());
-        AsyncRequestCallback<Item> itemCallback = callbackCaptorForItem.getValue();
-        GwtReflectionUtils.callOnFailure(itemCallback, mock(Throwable.class));
-
-        verify(dialogFactory, never()).createMessageDialog(anyString(), anyString(), any(ConfirmCallback.class));
         verify(dialog, never()).show();
         verify(projectNotificationSubscriber).subscribe(eq(PROJECT_NAME));
         verify(view).setEncoding(eq(FormPanel.ENCODING_MULTIPART));

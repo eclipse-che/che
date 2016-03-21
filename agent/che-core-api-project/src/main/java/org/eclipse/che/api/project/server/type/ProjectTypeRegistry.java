@@ -12,7 +12,6 @@ package org.eclipse.che.api.project.server.type;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.project.type.Attribute;
-import org.eclipse.che.api.project.server.ProjectTypeConstraintException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,28 +26,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Registry for Project Type definitions on server
- *
- * All the Project Types definitions should be registered here
+ * <p>All the Project Types definitions should be registered here
  *
  * @author gazarenkov
  */
 @Singleton
 public class ProjectTypeRegistry {
 
-    public static final ProjectTypeDef BASE_TYPE = new BaseProjectType();
-
-    public static final ChildToParentComparator CHILD_TO_PARENT_COMPARATOR = new ChildToParentComparator();
-
     private static final Logger LOG = LoggerFactory.getLogger(ProjectTypeRegistry.class);
 
-    private static final Pattern NAME_PATTERN = Pattern.compile("[^a-zA-Z0-9-_.]");
+    public static final  ProjectTypeDef          BASE_TYPE                  = new BaseProjectType();
+    public static final  ChildToParentComparator CHILD_TO_PARENT_COMPARATOR = new ChildToParentComparator();
+    private static final Pattern                 NAME_PATTERN               = Pattern.compile("[^a-zA-Z0-9-_.]");
 
-    private final Map<String, ProjectTypeDef> projectTypes = new HashMap<>();
-
-    private Map<String, ProjectTypeDef> validatedData = new HashMap<>();
+    private final Map<String, ProjectTypeDef> projectTypes;
+    private final Map<String, ProjectTypeDef> validatedData;
 
     /**
      * Initialises Set of Project Type definitions
@@ -57,18 +53,17 @@ public class ProjectTypeRegistry {
      */
     @Inject
     public ProjectTypeRegistry(Set<ProjectTypeDef> types) {
+        projectTypes = new HashMap<>();
+        validatedData = new HashMap<>();
 
         validate(types);
 
         for (ProjectTypeDef type : validatedData.values()) {
-
             try {
                 init(type);
-
             } catch (ProjectTypeConstraintException e) {
                 LOG.error(e.getMessage());
             }
-
         }
     }
 
@@ -80,7 +75,6 @@ public class ProjectTypeRegistry {
      * @throws ProjectTypeConstraintException
      */
     public void registerProjectType(ProjectTypeDef projectType) throws ProjectTypeConstraintException {
-
         if (isNameValid(projectType) && isParentValid(projectType, validatedData)) {
             validatedData.put(projectType.getId(), projectType);
             init(projectType);
@@ -92,7 +86,11 @@ public class ProjectTypeRegistry {
      * @return project type by id
      */
     public ProjectTypeDef getProjectType(String id) throws NotFoundException {
-        return projectTypes.get(id);
+        final ProjectTypeDef pt = projectTypes.get(id);
+        if (pt == null) {
+            throw new NotFoundException("Project Type not found: " + id);
+        }
+        return pt;
     }
 
     /**
@@ -102,25 +100,16 @@ public class ProjectTypeRegistry {
         return projectTypes.values();
     }
 
-
     /**
      * @param comparator
      * @return all project types sorted with specified comparator
      * @see ProjectTypeRegistry.ChildToParentComparator
      */
     public List<ProjectTypeDef> getProjectTypes(Comparator<ProjectTypeDef> comparator) {
-
-        List<ProjectTypeDef> list = new ArrayList<>();
-
-        for (ProjectTypeDef pt : projectTypes.values()) {
-            list.add(pt);
-        }
-
+        List<ProjectTypeDef> list = projectTypes.values().stream().collect(Collectors.toList());
         Collections.sort(list, comparator);
-
         return list;
     }
-
 
     /**
      * project type comparator which sorts collection of project types in child-to-parent order
@@ -138,7 +127,6 @@ public class ProjectTypeRegistry {
         }
     }
 
-
     /**
      * Validates incoming set of Project Type definitions
      * and forms preliminary collection of validated data to be initialized
@@ -146,32 +134,25 @@ public class ProjectTypeRegistry {
      * @param types
      */
     protected final void validate(Collection<? extends ProjectTypeDef> types) {
-
         Map<String, ProjectTypeDef> pass1 = new HashMap<>();
 
         if (!types.contains(BASE_TYPE)) {
             pass1.put(BASE_TYPE.getId(), BASE_TYPE);
         }
 
-        for (ProjectTypeDef type : types) {
-
-            if (isNameValid(type))
-                pass1.put(type.getId(), type);
-
-        }
+        types.stream()
+             .filter(this::isNameValid)
+             .forEach(type -> pass1.put(type.getId(), type));
 
         // look for parents
-        for (ProjectTypeDef type : pass1.values()) {
-
-            if (isParentValid(type, pass1))
-                validatedData.put(type.getId(), type);
-
-        }
-
+        pass1.values()
+             .stream()
+             .filter(type -> isParentValid(type, pass1))
+             .forEach(type -> validatedData.put(type.getId(), type));
     }
 
     /**
-     * Checks if incomimg Project Type definition has valid ID (Pattern.compile("[^a-zA-Z0-9-_.]")
+     * Checks if incoming Project Type definition has valid ID (Pattern.compile("[^a-zA-Z0-9-_.]")
      * and display name (should not be null or empty)
      *
      * @param type
@@ -187,19 +168,16 @@ public class ProjectTypeRegistry {
             valid = false;
         }
 
-
         if (type.getDisplayName() == null || type.getDisplayName().isEmpty()) {
             LOG.error("Could not register Project Type with null or empty display name: " + type.getId());
             valid = false;
         }
 
         for (Attribute attr : type.getAttributes()) {
-
             // ID spelling (no spaces, only alphanumeric)
             if (NAME_PATTERN.matcher(attr.getName()).find()) {
                 LOG.error("Could not register Project Type with invalid attribute Name (only Alphanumeric, dash and underscore allowed): " +
-                          attr.getClass().getName() + " ID: '" + attr.getId() + "'"
-                         );
+                          attr.getClass().getName() + " ID: '" + attr.getId() + "'");
                 valid = false;
             }
         }
@@ -231,9 +209,7 @@ public class ProjectTypeRegistry {
         }
 
         return contains;
-
     }
-
 
     /**
      * validates and initializes concrete project type
@@ -242,37 +218,29 @@ public class ProjectTypeRegistry {
      * @throws ProjectTypeConstraintException
      */
     protected final void init(ProjectTypeDef type) throws ProjectTypeConstraintException {
-
         initRecursively(type, type.getId());
 
         this.projectTypes.put(type.getId(), type);
 
         LOG.debug("Project Type registered: " + type.getId());
-
     }
-
 
     /**
      * initializes all the attributes defined in myType and its ancestors recursively
      *
      * @param myType
      * @param typeId
-     *         - temporary type for recursive (started with initial type)
+     *         temporary type for recursive (started with initial type)
      * @throws ProjectTypeConstraintException
      */
-    private final void initRecursively(ProjectTypeDef myType, String typeId)
-            throws ProjectTypeConstraintException {
-
+    private final void initRecursively(ProjectTypeDef myType, String typeId) throws ProjectTypeConstraintException {
         ProjectTypeDef type = validatedData.get(typeId);
 
-        for (String supertypeId : type.getParents()) {
+        for (String superTypeId : type.getParents()) {
+            myType.addAncestor(superTypeId);
 
-            myType.addAncestor(supertypeId);
-
-            ProjectTypeDef supertype = validatedData.get(supertypeId);
-
+            ProjectTypeDef supertype = validatedData.get(superTypeId);
             for (Attribute attr : supertype.getAttributes()) {
-
                 // check attribute names
                 for (Attribute attr2 : myType.getAttributes()) {
                     if (attr.getName().equals(attr2.getName()) && !attr.getProjectType().equals(attr2.getProjectType())) {
@@ -284,9 +252,7 @@ public class ProjectTypeRegistry {
                 }
                 myType.addAttributeDefinition(attr);
             }
-            initRecursively(myType, supertypeId);
+            initRecursively(myType, superTypeId);
         }
-
     }
-
 }

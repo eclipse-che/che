@@ -23,7 +23,6 @@ public class VirtualFileInfo {
     private String           path;
     private String           name;
     private String           displayName;
-    private String           mediaType;
     private String           contentUrl;
     private String           content;
     private HasProjectConfig project;
@@ -45,11 +44,6 @@ public class VirtualFileInfo {
     /** get display name */
     public String getDisplayName() {
         return displayName;
-    }
-
-    /** get media type */
-    public String getMediaType() {
-        return mediaType;
     }
 
     /**
@@ -140,19 +134,6 @@ public class VirtualFileInfo {
          */
         public Builder setDisplayName(String displayName) {
             VirtualFileInfo.this.displayName = displayName;
-
-            return this;
-        }
-
-        /**
-         * Set display name.
-         *
-         * @param mediaType
-         *         media type
-         * @return builder
-         */
-        public Builder setMediaType(String mediaType) {
-            VirtualFileInfo.this.mediaType = mediaType;
 
             return this;
         }

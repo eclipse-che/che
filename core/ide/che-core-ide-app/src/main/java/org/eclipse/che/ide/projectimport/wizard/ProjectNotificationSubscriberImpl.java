@@ -14,11 +14,8 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -52,8 +49,7 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
     private final CoreLocalizationConstant locale;
     private final NotificationManager      notificationManager;
     private final String                   workspaceId;
-    private       WsAgentStateController   wsAgentStateController;
-    private       Promise<MessageBus>      messageBusPromise;
+    private final Promise<MessageBus>      messageBusPromise;
 
     private String                      wsChannel;
     private String                      projectName;
@@ -64,32 +60,17 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
     public ProjectNotificationSubscriberImpl(CoreLocalizationConstant locale,
                                              AppContext appContext,
                                              NotificationManager notificationManager,
-                                             final WsAgentStateController wsAgentStateController,
-                                             EventBus eventBus) {
+                                             WsAgentStateController wsAgentStateController) {
         this.locale = locale;
         this.notificationManager = notificationManager;
-        this.wsAgentStateController = wsAgentStateController;
         this.workspaceId = appContext.getWorkspace().getId();
-
-
+        this.messageBusPromise = wsAgentStateController.getMessageBus();
         this.logErrorHandler = new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 Log.error(ProjectNotificationSubscriberImpl.class, error);
             }
         };
-
-        eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
-            @Override
-            public void onWsAgentStarted(final WsAgentStateEvent event) {
-                messageBusPromise = wsAgentStateController.getMessageBus();
-            }
-
-            @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-
-            }
-        });
     }
 
     @Override
@@ -100,9 +81,6 @@ public class ProjectNotificationSubscriberImpl implements ProjectNotificationSub
 
     @Override
     public void subscribe(final String projectName, final StatusNotification existingNotification) {
-        if (messageBusPromise == null) {
-            messageBusPromise = wsAgentStateController.getMessageBus();
-        }
         this.projectName = projectName;
         this.wsChannel = "importProject:output:" + workspaceId + ":" + projectName;
         this.notification = existingNotification;

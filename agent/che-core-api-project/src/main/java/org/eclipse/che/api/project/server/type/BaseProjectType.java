@@ -23,5 +23,4 @@ public class BaseProjectType extends ProjectTypeDef {
     public BaseProjectType() {
         super(ID, "Blank", true, false);
     }
-
 }
