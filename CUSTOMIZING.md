@@ -1,29 +1,24 @@
 Eclipse Che is a platform for creating distributed developer tooling. There are numerous ways to extend, modify, and customize Eclipse Che. This document itemizes all of the resources available for customizing Che. We have documentation pages, tutorials, and specifications.
 
-#### Add New Commands
+#### Commands
 A command is a process that is injected into your workspace. It's outputs are streamed into the console. Commands have type and you can create, save, update and delete commands from within the IDE. You can create templates that have sample projects with default commands that are pre-populated in the IDE. Commands can reference macros that intelligently navigate the project tree or current selections.
-* [Create Commands in the IDE](https://eclipse-che.readme.io/docs/commands)
-* [Command Macro List](https://eclipse-che.readme.io/docs/commands#macros)
+* [Create Commands](https://eclipse-che.readme.io/docs/commands)
+* [Command Macros](https://eclipse-che.readme.io/docs/commands#macros)
 
-#### Custom Templates
+#### Templates
 A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are loaded based upon the type of stack selected. You can add your own templates to the default Che distribution.
 * TODO: Reference Template Docs
 
-#### Create Custom Stacks
+#### Stacks
+A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack. Tags define how the stack is presented in the stack library and also filters out the available project templates that a user sees when creating a project.
+* [Custom Stacks](https://eclipse-che.readme.io/docs/environments#custom-stacks)
+* * TODO: Remove custom stacks from environments page and create dedicated stacks page.
+* * TODO: Include adding custom stacks into the dedicated stacks docs page.
+* [Che's Default Stacks](https://github.com/codenvy/dockerfiles)
+* [Stacks Created by Community](https://github.com/eclipse/che/pull/570)
+* * TODO: Update this link to point to wiki page that can be updated by community
 
-* Guide to create a custom stack [Docs](https://eclipse-che.readme.io/docs/environments#custom-stacks)
-* List of default Che's stacks [Repository](https://github.com/codenvy/dockerfiles)
-* File to update to register custom stacks in Che [Repository](https://github.com/eclipse/che/blob/master/core/ide/che-core-ide-stacks/src/main/resources/predefined-stacks.json)
-
-**Existing contributions:**
-* Sample TomEE's stacks with custom commands [Pull Request](https://github.com/eclipse/che/pull/570)
-
-#### Install Software Stacks
-
->COMING SOON
-
-
-#### Create Server-Side Extensions
+#### Server-Side Extensions
 1. Documentation
 
 >COMING SOON
