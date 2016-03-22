@@ -197,32 +197,34 @@ public abstract class MavenServerWrapper extends RmiObjectWrapper<MavenServer> {
         }
     }
 
+    //TODO enable notification after MavenServerProgressNotifier reworked
     private static class MavenServerProgressNotifierWrapper implements MavenServerProgressNotifier {
 
         private MavenProgressNotifier delegate;
 
         public MavenServerProgressNotifierWrapper(MavenProgressNotifier delegate) {
-            this.delegate = delegate;
+//            this.delegate = delegate;
         }
 
         @Override
         public void setText(String text) throws RemoteException {
-            delegate.setText(text);
+//            delegate.setText(text);
         }
 
         @Override
         public void setPercent(double percent) throws RemoteException {
-            delegate.setPercent(percent);
+//            delegate.setPercent(percent);
         }
 
         @Override
         public void setPercentUndefined(boolean undefined) throws RemoteException {
-            delegate.setPercentUndefined(undefined);
+//            delegate.setPercentUndefined(undefined);
         }
 
         @Override
         public boolean isCanceled() throws RemoteException {
-            return delegate.isCanceled();
+//            return delegate.isCanceled();
+            return false;
         }
     }
 }
