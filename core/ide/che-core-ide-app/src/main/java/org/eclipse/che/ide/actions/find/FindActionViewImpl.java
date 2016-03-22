@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.actions.find;
 
+import com.google.gwt.user.client.ui.FlowPanel;
 import elemental.dom.Element;
 import elemental.dom.Node;
 import elemental.html.TableCellElement;
@@ -52,6 +53,7 @@ import org.eclipse.che.ide.util.input.KeyMapUtil;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -59,6 +61,9 @@ import java.util.Map;
  * @author Dmitry Shnurenko
  */
 public class FindActionViewImpl extends PopupPanel implements FindActionView {
+
+    interface FindActionViewImplUiBinder extends UiBinder<DockLayoutPanel, FindActionViewImpl> {
+    }
 
     private final AutoCompleteResources.Css css;
 
@@ -75,6 +80,7 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
             delegate.onActionSelected(itemData);
         }
     };
+
     private final SimpleList.ListItemRenderer<Action>  listItemRenderer =
             new SimpleList.ListItemRenderer<Action>() {
                 @Override
@@ -125,15 +131,27 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
                     return Elements.createTRElement();
                 }
             };
+
     @UiField
-    TextBox  nameField;
+    TextBox                              nameField;
+
     @UiField
-    CheckBox includeNonMenu;
+    CheckBox                             includeNonMenu;
+
     private ActionDelegate               delegate;
     private Resources                    resources;
     private KeyBindingAgent              keyBindingAgent;
     private ActionManager                actionManager;
-    private PopupPanel                   popupPanel;
+
+    @UiField
+    DockLayoutPanel                      layoutPanel;
+
+    @UiField
+    FlowPanel                            actionsPanel;
+
+    @UiField
+    HTML                                 actionsContainer;
+
     private SimpleList<Action>           list;
     private Map<Action, String>          actions;
     private Provider<PerspectiveManager> perspectiveManager;
@@ -162,14 +180,13 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         setAutoHideEnabled(true);
         setAnimationEnabled(true);
 
-        popupPanel = new PopupPanel();
+        layoutPanel.setWidgetHidden(actionsPanel, true);
+        layoutPanel.setHeight("60px");
+
         addCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
                 delegate.onClose();
-                if (popupPanel.isShowing()) {
-                    popupPanel.hide();
-                }
             }
         });
 
@@ -194,7 +211,17 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
     @Override
     public void show() {
         super.show();
-        center();
+
+        if (nameField.getValue() != null && nameField.getValue().trim().isEmpty()) {
+            hideActions();
+        }
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                center();
+            }
+        });
     }
 
     @Override
@@ -205,40 +232,50 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
     @Override
     public void showActions(Map<Action, String> actions) {
         this.actions = actions;
-        if (popupPanel.isShowing()) {
-            popupPanel.hide();
-        }
-        popupPanel.clear();
-        HTML container = new HTML();
-        popupPanel.add(container);
+
+        actionsContainer.getElement().setInnerHTML("");
+
         TableElement itemHolder = Elements.createTableElement();
         itemHolder.setClassName(css.items());
-        HTML html = new HTML();
-        html.setStyleName(css.container());
-        html.getElement().appendChild(((com.google.gwt.dom.client.Element)itemHolder));
-        container.getElement().appendChild(html.getElement());
-        list = SimpleList.create((SimpleList.View)container.getElement().cast(), (Element)html.getElement(), itemHolder,
-                                 resources.defaultSimpleListCss(), listItemRenderer, eventDelegate);
-        html.getElement().getStyle().setOverflow(Style.Overflow.AUTO);
-        ((Element)html.getElement()).getStyle().setProperty("max-height", "200px");
-        list.render(new ArrayList<>(actions.keySet()));
-        popupPanel.setWidth("400px");
+        actionsContainer.getElement().appendChild(((com.google.gwt.dom.client.Element) itemHolder));
 
-        popupPanel.setPopupPositionAndShow(new PositionCallback() {
-            @Override
-            public void setPosition(int offsetWidth, int offsetHeight) {
-                popupPanel.setPopupPosition(getPopupLeft(), getPopupTop() + getOffsetHeight());
-            }
-        });
+        list = SimpleList.create((SimpleList.View)actionsContainer.getElement().cast(), (Element)actionsContainer.getElement(), itemHolder,
+                resources.defaultSimpleListCss(), listItemRenderer, eventDelegate);
+
+        list.render(new ArrayList<>(actions.keySet()));
+
         if (!actions.isEmpty()) {
             list.getSelectionModel().setSelectedItem(0);
+        }
+
+        layoutPanel.setWidgetHidden(actionsPanel, false);
+        layoutPanel.setHeight("250px");
+
+        if (isVisible()) {
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    center();
+                }
+            });
         }
     }
 
     @Override
     public void hideActions() {
-        if (popupPanel.isShowing()) {
-            popupPanel.hide();
+        actions = new HashMap<>();
+        actionsContainer.getElement().setInnerHTML("");
+
+        layoutPanel.setWidgetHidden(actionsPanel, true);
+        layoutPanel.setHeight("60px");
+
+        if (isVisible()) {
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    center();
+                }
+            });
         }
     }
 
@@ -251,29 +288,38 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
     void handleKeyDown(KeyDownEvent event) {
         switch (event.getNativeKeyCode()) {
             case KeyCodes.KEY_UP:
-                if (popupPanel.isShowing()) {
-                    if (list.getSelectionModel().getSelectedIndex() == 0) {
-                        list.getSelectionModel().setSelectedItem(list.getSelectionModel().size() - 1);
-                    } else {
-                        list.getSelectionModel().selectPrevious();
-                    }
-                }
+                event.stopPropagation();
+                event.preventDefault();
+                list.getSelectionModel().selectPrevious();
                 return;
+
             case KeyCodes.KEY_DOWN:
-                if (popupPanel.isShowing()) {
-                    if (list.getSelectionModel().getSelectedIndex() == list.getSelectionModel().size() - 1) {
-                        list.getSelectionModel().setSelectedItem(0);
-                    } else {
-                        list.getSelectionModel().selectNext();
-                    }
-                }
+                event.stopPropagation();
+                event.preventDefault();
+                list.getSelectionModel().selectNext();
                 return;
+
+            case KeyCodes.KEY_PAGEUP:
+                event.stopPropagation();
+                event.preventDefault();
+                list.getSelectionModel().selectPreviousPage();
+                return;
+
+            case KeyCodes.KEY_PAGEDOWN:
+                event.stopPropagation();
+                event.preventDefault();
+                list.getSelectionModel().selectNextPage();
+                return;
+
             case KeyCodes.KEY_ENTER:
-                if (popupPanel.isShowing()) {
-                    delegate.onActionSelected(list.getSelectionModel().getSelectedItem());
-                }
+                event.stopPropagation();
+                event.preventDefault();
+                delegate.onActionSelected(list.getSelectionModel().getSelectedItem());
                 return;
+
             case KeyCodes.KEY_ESCAPE:
+                event.stopPropagation();
+                event.preventDefault();
                 hide();
                 return;
         }
@@ -286,7 +332,4 @@ public class FindActionViewImpl extends PopupPanel implements FindActionView {
         });
     }
 
-    interface FindActionViewImplUiBinder
-            extends UiBinder<DockLayoutPanel, FindActionViewImpl> {
-    }
 }
