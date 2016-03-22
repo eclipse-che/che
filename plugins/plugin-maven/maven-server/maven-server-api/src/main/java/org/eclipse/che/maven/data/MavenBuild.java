@@ -13,6 +13,8 @@ package org.eclipse.che.maven.data;
 import java.util.List;
 
 /**
+ * Data class for maven build config.
+ *
  * @author Evgen Vidolob
  */
 public class MavenBuild extends MavenBuildBase {

@@ -14,6 +14,8 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
+ * Data class for maven artifact id, contains group id, artifact id and version.
+ *
  * @author Evgen Vidolob
  */
 public class MavenKey implements Serializable {

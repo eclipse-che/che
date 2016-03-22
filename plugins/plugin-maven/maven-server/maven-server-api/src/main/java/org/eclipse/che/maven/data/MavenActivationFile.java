@@ -13,6 +13,8 @@ package org.eclipse.che.maven.data;
 import java.io.Serializable;
 
 /**
+ * Data class for maven file activation.
+ *
  * @author Evgen Vidolob
  */
 public class MavenActivationFile implements Serializable {

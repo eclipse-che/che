@@ -11,6 +11,8 @@
 package org.eclipse.che.maven.data;
 
 /**
+ * Data class for maven profile.
+ *
  * @author Evgen Vidolob
  */
 public class MavenProfile extends MavenModelBase {

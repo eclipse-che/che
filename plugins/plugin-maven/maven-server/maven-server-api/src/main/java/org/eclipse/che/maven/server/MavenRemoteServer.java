@@ -17,6 +17,9 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
+ * Main interface for maven server.
+ * Before using this interface you must configure maven server via {@link #configure(MavenServerLogger, MavenServerDownloadListener)};
+ *
  * @author Evgen Vidolob
  */
 public interface MavenRemoteServer extends Remote {
@@ -26,6 +29,4 @@ public interface MavenRemoteServer extends Remote {
     MavenServer createServer(MavenSettings settings) throws RemoteException;
 
     MavenModel interpolateModel(MavenModel model, File projectDir) throws RemoteException;
-
-    MavenModel assembleModelInheritance(MavenModel model, MavenModel parent) throws RemoteException;
 }

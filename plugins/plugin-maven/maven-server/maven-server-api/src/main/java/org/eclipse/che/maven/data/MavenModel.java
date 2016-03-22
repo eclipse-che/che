@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Data class for maven model.
+ *
  * @author Evgen Vidolob
  */
 public class MavenModel extends MavenModelBase {

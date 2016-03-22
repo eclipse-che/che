@@ -15,6 +15,8 @@ import java.io.Serializable;
 import java.util.Properties;
 
 /**
+ * Setting for maven server. Contains path to maven, local repository path etc.
+ *
  * @author Evgen Vidolob
  */
 public class MavenSettings implements Serializable {

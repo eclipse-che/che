@@ -36,22 +36,18 @@ import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
+import org.apache.maven.model.building.DefaultModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.interpolation.ModelInterpolator;
+import org.apache.maven.model.interpolation.StringSearchModelInterpolator;
 import org.apache.maven.plugin.LegacySupport;
-import org.apache.maven.project.DefaultDependencyResolutionRequest;
-import org.apache.maven.project.DefaultProjectBuilderConfiguration;
-import org.apache.maven.project.DependencyResolutionException;
 import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.InvalidProjectModelException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.project.ProjectBuilderConfiguration;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.project.ProjectDependenciesResolver;
 import org.apache.maven.project.ProjectUtils;
-import org.apache.maven.project.interpolation.AbstractStringBasedModelInterpolator;
-import org.apache.maven.project.interpolation.ModelInterpolationException;
-import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.project.validation.ModelValidationResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
@@ -60,19 +56,16 @@ import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;
 import org.apache.maven.settings.building.SettingsBuilder;
 import org.apache.maven.settings.building.SettingsBuildingException;
 import org.apache.maven.settings.building.SettingsBuildingRequest;
-import org.apache.maven.shared.dependency.tree.DependencyNode;
 import org.apache.maven.shared.dependency.tree.DependencyTreeResolutionListener;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.BaseLoggerManager;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.internal.impl.DefaultArtifactResolver;
 import org.eclipse.aether.internal.impl.DefaultRepositorySystem;
-import org.eclipse.aether.repository.LocalRepositoryManager;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
@@ -92,7 +85,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -128,7 +120,8 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
 
 
     public MavenServerImpl(MavenSettings settings) throws RemoteException {
-        configureLog4j(settings.getLoggingLevel());
+        BasicConfigurator.configure();
+        Logger.getRootLogger().setLevel(getLog4jLogLevel(settings.getLoggingLevel()));
         File mavenHome = settings.getMavenHome();
         if (mavenHome != null) {
             System.setProperty("maven.home", mavenHome.getPath());
@@ -152,7 +145,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
 
         //maven 3.2.2 has org.apache.maven.cli.MavenCli$CliRequest class
         //but maven 3.3.3 has org.apache.maven.cli.CliRequest so try to support both classes
-        Class cliRequestClass;
+        Class<?> cliRequestClass;
         SettingsBuilder settingsBuilder = null;
         try {
             cliRequestClass = MavenCli.class.getClassLoader().loadClass("org.apache.maven.cli.CliRequest");
@@ -226,32 +219,11 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
     }
 
     private static Model internalInterpolate(Model model, File projectDir) throws RemoteException {
-//        ModelInterpolator interpolator = new StringSearchModelInterpolator();
-//        ModelBuildingRequest request = new DefaultModelBuildingRequest();
-//        Model result = interpolator.interpolateModel(model, projectDir, request, req -> {
-//            System.out.println(req.getMessage());
-//        });
-//        return result;
-        try {
-            AbstractStringBasedModelInterpolator interpolator =
-                    new org.apache.maven.project.interpolation.StringSearchModelInterpolator(new DefaultPathTranslator());
-            interpolator.initialize();
-
-            Properties props = new Properties(); //MavenServerUtil.collectSystemProperties();
-            ProjectBuilderConfiguration config = new DefaultProjectBuilderConfiguration().setExecutionProperties(props);
-            config.setBuildStartTime(new Date());
-
-            model = interpolator.interpolate(model, projectDir, config, false);
-        } catch (ModelInterpolationException e) {
-            MavenServerContext.getLogger().warning(e);
-        } catch (InitializationException e) {
-            MavenServerContext.getLogger().error(e);
-        }
-        return model;
-    }
-
-    public static MavenModel assembleModelInheritance(MavenModel model, MavenModel parent) {
-        return null;
+        ModelInterpolator interpolator = new StringSearchModelInterpolator();
+        ModelBuildingRequest request = new DefaultModelBuildingRequest();
+        return interpolator.interpolateModel(model, projectDir, request, req -> {
+            System.out.println(req.getMessage());
+        });
     }
 
     private Settings getSettings(SettingsBuilder builder, MavenSettings settings, Properties systemProperties, Properties userProperties)
@@ -277,11 +249,6 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             result.setLocalRepository(new File(System.getProperty("user.home"), ".m2/repository").getPath());
         }
         return result;
-    }
-
-    private void configureLog4j(int loggingLevel) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(getLog4jLogLevel(loggingLevel));
     }
 
     private Level getLog4jLogLevel(int level) {
@@ -370,7 +337,8 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
                               MavenTerminal mavenTerminal,
                               MavenServerProgressNotifier notifier,
                               boolean alwaysUpdateSnapshot) throws RemoteException {
-        updateContainer();
+
+        container.addComponent(getMavenComponent(ArtifactResolver.class, "che"), ArtifactResolver.ROLE);
         ArtifactResolver artifactResolver = getMavenComponent(ArtifactResolver.class);
         if (artifactResolver instanceof CheArtifactResolver) {
             ((CheArtifactResolver)artifactResolver).setWorkspaceCache(cache, failOnUnresolvedDependency);
@@ -381,33 +349,6 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
         updateSnapshots = updateSnapshots || alwaysUpdateSnapshot;
         terminalLogger.setTerminal(mavenTerminal);
         mavenProgressNotifier = new MavenServerProgressNotifierImpl(notifier);
-    }
-
-//    @Override
-//    public MavenArtifact resolveArtifact(MavenArtifactKey artifactKey) throws RemoteException {
-//        Artifact artifact = getMavenComponent(ArtifactFactory.class)
-//                .createArtifactWithClassifier(artifactKey.getGroupId(), artifactKey.getArtifactId(), artifactKey.getVersion(),
-//                                              artifactKey.getPackaging(), artifactKey.getClassifier());
-//        MavenExecutionRequest request = new DefaultMavenExecutionRequest();
-//        try {
-//            MavenExecutionRequestPopulator requestPopulator = getMavenComponent(MavenExecutionRequestPopulator.class);
-//            requestPopulator.populateFromSettings(request, settings);
-//            requestPopulator.populateDefaults(request);
-//        } catch (MavenExecutionRequestPopulationException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        try {
-//            getMavenComponent(ArtifactResolver.class).resolve(artifact, request.getRemoteRepositories(), localRepo);
-//        } catch (ArtifactResolutionException | ArtifactNotFoundException e) {
-//            MavenServerContext.getLogger().info(e);
-//        }
-//        return MavenModelUtil.convertArtifact(artifact, localRepository);
-//    }
-
-    private void updateContainer() {
-        //container.addComponent(getMavenComponent(ArtifactFactory.class, "che"), ArtifactFactory.ROLE);
-        container.addComponent(getMavenComponent(ArtifactResolver.class, "che"), ArtifactResolver.ROLE);
     }
 
     @Override
@@ -421,7 +362,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
         DependencyTreeResolutionListener listener = new DependencyTreeResolutionListener(terminalLogger);
         MavenResult mavenResult = internalResolveProject(pom, activeProfiles, inactiveProfiles, Collections.singletonList(listener));
 
-        return createResult(pom, mavenResult, listener.getRootNode());
+        return createResult(pom, mavenResult);
     }
 
     @Override
@@ -494,7 +435,7 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
         return localRepository;
     }
 
-    private MavenServerResult createResult(File pom, MavenResult mavenResult, DependencyNode rootNode) throws RemoteException {
+    private MavenServerResult createResult(File pom, MavenResult mavenResult) throws RemoteException {
         List<MavenProjectProblem> problems = new ArrayList<>();
         Set<MavenKey> unresolvedArtifacts = new HashSet<>();
         validate(pom, mavenResult.getExceptions(), problems);
@@ -521,15 +462,8 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             validate(project.getFile(), Collections.singletonList(e), problems);
         }
 
-        RemoteMavenProjectRef ref = new RemoteMavenProjectRef(project);
-        try {
-            UnicastRemoteObject.exportObject(ref, 0);
-        } catch (RemoteException e) {
-            throw new RuntimeRemoteException(e);
-        }
-
         List<String> activeProfiles = getActiveProfiles(project);
-        MavenProjectInfo projectInfo = new MavenProjectInfo(model, null, ref, activeProfiles);
+        MavenProjectInfo projectInfo = new MavenProjectInfo(model, null, activeProfiles);
 
 
         return new MavenServerResult(projectInfo, problems, unresolvedArtifacts);
@@ -627,56 +561,6 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
             }
         });
         return reference.get();
-    }
-
-    private void resolveAsModule(Artifact artifact) {
-        MavenWorkspaceCache cache = this.workspaceCache;
-        if (cache == null) {
-            return;
-        }
-
-        MavenWorkspaceCache.Entry entry = cache.findEntry(MavenModelUtil.keyFor(artifact));
-        if (entry == null) {
-            return;
-        }
-
-        artifact.setResolved(true);
-        artifact.setFile(entry.getFile(artifact.getType()));
-        artifact.selectVersion(entry.getKey().getVersion());
-
-    }
-
-    // method from DefaultProjectBuilder#resolveDependencies(MavenProject, org.sonatype.aether.RepositorySystemSession)
-    private DependencyResolutionResult resolveDependencies(MavenProject project, RepositorySystemSession session) {
-        DependencyResolutionResult result;
-        try {
-            ProjectDependenciesResolver dependenciesResolver = getMavenComponent(ProjectDependenciesResolver.class);
-            DefaultDependencyResolutionRequest resolutionRequest = new DefaultDependencyResolutionRequest(project, session);
-            result = dependenciesResolver.resolve(resolutionRequest);
-        } catch (DependencyResolutionException e) {
-            result = e.getResult();
-        }
-
-        Set<Artifact> artifacts = new LinkedHashSet<>();
-        if (result.getDependencyGraph() != null) {
-            RepositoryUtils.toArtifacts(artifacts,
-                                        result.getDependencyGraph().getChildren(),
-                                        Collections.singletonList(project.getArtifact().getId()),
-                                        null);
-
-            // Maven 2.x quirk: an artifact always points at the local repo, regardless whether resolved or not
-            LocalRepositoryManager lrm = session.getLocalRepositoryManager();
-            for (Artifact artifact : artifacts) {
-                if (!artifact.isResolved()) {
-                    String path = lrm.getPathForLocalArtifact(RepositoryUtils.toArtifact(artifact));
-                    artifact.setFile(new File(lrm.getRepository().getBasedir(), path));
-                }
-            }
-        }
-        project.setResolvedArtifacts(artifacts);
-        project.setArtifacts(artifacts);
-
-        return result;
     }
 
     private void loadExtensions(MavenProject project, List<Exception> exceptions) {

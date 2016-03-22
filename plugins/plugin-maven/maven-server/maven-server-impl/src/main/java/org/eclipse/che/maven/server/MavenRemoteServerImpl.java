@@ -50,15 +50,6 @@ public class MavenRemoteServerImpl extends MavenRmiObject implements MavenRemote
     }
 
     @Override
-    public MavenModel assembleModelInheritance(MavenModel model, MavenModel parent) throws RemoteException {
-        try {
-            return MavenServerImpl.assembleModelInheritance(model, parent);
-        } catch (Exception e) {
-            throw getRuntimeException(e);
-        }
-    }
-
-    @Override
     public void unreferenced() {
         System.exit(0);
     }

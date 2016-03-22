@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Data class for maven base build config
+ *
  * @author Evgen Vidolob
  */
 public class MavenBuildBase implements Serializable {

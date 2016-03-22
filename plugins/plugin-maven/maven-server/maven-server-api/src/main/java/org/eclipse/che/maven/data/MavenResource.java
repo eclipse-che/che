@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Data class for maven resource.
+ *
  * @author Evgen Vidolob
  */
 public class MavenResource implements Serializable {

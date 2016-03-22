@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Data class. Contains maven project model and active profiles.
+ *
  * @author Evgen Vidolob
  */
 public class MavenProjectInfo implements Serializable {
@@ -24,11 +26,9 @@ public class MavenProjectInfo implements Serializable {
 
     private final MavenModel          mavenModel;
     private final Map<String, String> mavenMap;
-    private final MavenProjectRef     mavenProjectRef;
     private final List<String>        activeProfiles;
 
-    public MavenProjectInfo(MavenModel mavenModel, Map<String, String> mavenMap, MavenProjectRef ref, List<String> activeProfiles) {
-        mavenProjectRef = ref;
+    public MavenProjectInfo(MavenModel mavenModel, Map<String, String> mavenMap, List<String> activeProfiles) {
         this.mavenModel = mavenModel;
         this.mavenMap = mavenMap;
         this.activeProfiles = activeProfiles;
@@ -44,9 +44,5 @@ public class MavenProjectInfo implements Serializable {
 
     public List<String> getActiveProfiles() {
         return activeProfiles;
-    }
-
-    public MavenProjectRef getMavenProjectRef() {
-        return mavenProjectRef;
     }
 }

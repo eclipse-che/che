@@ -16,6 +16,8 @@ import java.text.MessageFormat;
 import java.util.Objects;
 
 /**
+ * Data class form maven project problem.
+ *
  * @author Evgen Vidolob
  */
 public class MavenProjectProblem implements Serializable {

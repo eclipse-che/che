@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Contains result of invocation of maven server.
+ *
  * @author Evgen Vidolob
  */
 public class MavenServerResult implements Serializable {
