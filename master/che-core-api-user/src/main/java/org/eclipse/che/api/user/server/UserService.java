@@ -58,6 +58,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -88,6 +89,9 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Api(value = "/user", description = "User manager")
 @Path("/user")
 public class UserService extends Service {
+
+    private static final Pattern VALID_USER_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]*[a-zA-Z0-9]");
+
     @VisibleForTesting
     static final String USER_SELF_CREATION_ALLOWED = "user.self.creation.allowed";
 
@@ -457,19 +461,26 @@ public class UserService extends Service {
         if (userDescriptor == null) {
             throw new BadRequestException("User Descriptor required");
         }
-        if (isNullOrEmpty(userDescriptor.getName())) {
-            throw new BadRequestException("User name required");
-        }
         if (isNullOrEmpty(userDescriptor.getEmail())) {
             throw new BadRequestException("User email required");
         }
-        final User user = new User().withName(userDescriptor.getName())
+        checkUserName(userDescriptor.getName());
+        final User user = new User().withName(userDescriptor.getName().toLowerCase())
                                     .withEmail(userDescriptor.getEmail());
         if (userDescriptor.getPassword() != null) {
             checkPassword(userDescriptor.getPassword());
             user.setPassword(userDescriptor.getPassword());
         }
         return user;
+    }
+
+    private void checkUserName(String name) throws BadRequestException {
+        if (isNullOrEmpty(name)) {
+            throw new BadRequestException("User name required");
+        }
+        if (!VALID_USER_NAME.matcher(name.toLowerCase()).matches()) {
+            throw new BadRequestException("User name must consist of URL allowed characters");
+        }
     }
 
     private User fromToken(String token) throws UnauthorizedException, ConflictException {

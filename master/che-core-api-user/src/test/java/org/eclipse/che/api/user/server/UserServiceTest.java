@@ -4,13 +4,12 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -37,6 +36,7 @@ import org.everrest.core.tools.ResourceLauncher;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -173,6 +173,23 @@ public class UserServiceTest {
         verify(profileDao).create(any(Profile.class));
     }
 
+    @Test(dataProvider = "validUserNames")
+    public void shouldBeAbleToCreateNewUserWithValidUserName(String name) throws Exception {
+        final String email = "test_user@email.com";
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName(name)
+                                                 .withEmail(email);
+        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+
+        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
+
+        assertEquals(response.getStatus(), CREATED.getStatusCode());
+        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
+        assertEquals(descriptor.getName(), name.toLowerCase());
+        assertEquals(descriptor.getEmail(), email);
+    }
+
     @Test
     public void shouldBeAbleToCreateNewUserWithEmail() throws Exception {
         final String name = "name";
@@ -307,6 +324,21 @@ public class UserServiceTest {
     @Test
     public void shouldThrowForbiddenExceptionWhenCreatingUserBasedOnEntityWhichContainsNullEmail() throws Exception {
         final UserDescriptor newUser = DtoFactory.getInstance().createDto(UserDescriptor.class);
+        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+
+        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
+
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
+        verify(userDao, never()).create(any(User.class));
+        verify(profileDao, never()).create(any(Profile.class));
+    }
+
+    @Test(dataProvider = "invalidUserNames")
+    public void shouldThrowForbiddenExceptionWhenCreatingUserBasedOnEntityWhichContainsInvalidUserName(String name) throws Exception {
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName(name)
+                                                 .withEmail("test@mail.com");
         when(securityContext.isUserInRole("system/admin")).thenReturn(true);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
@@ -583,6 +615,31 @@ public class UserServiceTest {
         final Map<String, String> settings = (Map<String, String>)response.getEntity();
         assertEquals(settings.size(), 1);
         assertEquals(settings.get(UserService.USER_SELF_CREATION_ALLOWED), "true");
+    }
+
+    @DataProvider(name = "validUserNames")
+    public static Object[][] validUserNames() {
+        return new Object[][]{{"test"},
+                              {"TEST"},
+                              {"123test"},
+                              {"te-st"},
+                              {"test.123"},
+                              {"TeSt123"}
+        };
+    }
+
+    @DataProvider(name = "invalidUserNames")
+    public static Object[][] invalidUserNames() {
+        return new Object[][]{{"TE ST"},
+                              {""},
+                              {"(test)"},
+                              {"TEST/TEST"},
+                              {"$TEST"},
+                              {"TEST%"},
+                              {"test;"},
+                              {"-test"},
+                              {"test-"}
+        };
     }
 
     private User createUser() throws NotFoundException, ServerException {
