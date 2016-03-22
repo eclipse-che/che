@@ -1,5 +1,6 @@
 .workspace-status-indicator-circle
   span
+    width 20px
     text-shadow: 0 0 1px #000
 
   .workspace-status-stopped
@@ -11,7 +12,17 @@
   .workspace-status-running
     color #46af00
 
-  .workspace-status-starting, .workspace-status-stopping
+  .workspace-status-starting .spinner
+    width 20px
+    height 20px
+    font-size 8px
+
+    div
+      width 2px
+      border-radius 0
+      margin-right 0
+
+  .workspace-status-stopping
     color #5f8ae6
 
   .workspace-status-error
