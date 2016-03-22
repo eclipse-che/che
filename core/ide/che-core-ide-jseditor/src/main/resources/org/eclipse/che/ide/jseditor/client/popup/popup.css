@@ -70,8 +70,7 @@
     border-left: 1px solid transparent;
 }
 
-.item[selected="true"],
-.item:FOCUS {
+.item[selected="true"] {
     background: completionPopupSelectedItemBackgroundColor !important;
 }
 

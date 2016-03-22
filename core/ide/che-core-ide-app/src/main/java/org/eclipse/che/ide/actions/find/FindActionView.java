@@ -19,6 +19,7 @@ import java.util.Map;
  * @author Evgen Vidolob
  */
 public interface FindActionView extends View<FindActionView.ActionDelegate> {
+
     void focusOnInput();
 
     void show();
@@ -33,7 +34,7 @@ public interface FindActionView extends View<FindActionView.ActionDelegate> {
 
     boolean getCheckBoxState();
 
-    public interface ActionDelegate {
+    interface ActionDelegate {
 
         void nameChanged(String name, boolean checkBoxState);
 
@@ -41,4 +42,5 @@ public interface FindActionView extends View<FindActionView.ActionDelegate> {
 
         void onActionSelected(Action action);
     }
+
 }

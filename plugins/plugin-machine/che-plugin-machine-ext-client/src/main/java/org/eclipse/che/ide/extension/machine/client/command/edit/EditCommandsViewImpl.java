@@ -113,8 +113,6 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     private CommandType                                  selectType;
     private String                                       filterTextValue;
 
-    @UiField
-    FocusPanel                  focusPanel;
     @UiField(provided = true)
     MachineLocalizationConstant machineLocale;
     @UiField
@@ -400,7 +398,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
 
     @Override
     public void show() {
-        super.show(focusPanel);
+        super.show();
         configurationName.setText("");
         configurationPreviewUrl.setText("");
         trackFocusForWidgets();

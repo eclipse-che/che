@@ -119,37 +119,37 @@
             margin-right: 6px;
         }
     </ui:style>
-    <g:FocusPanel ui:field="focusPanel" tabIndex="0">
-        <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.commandPanel}">
-            <g:west size="380">
-                <g:DockLayoutPanel unit="PX" addStyleNames="{style.leftPart}">
-                    <g:north size="30">
-                        <g:FlowPanel addStyleNames="{style.filter}">
-                            <g:TextBox ui:field="filterInputField" tabIndex="0"/>
-                        </g:FlowPanel>
-                    </g:north>
-                    <g:center>
-                        <g:SimplePanel ui:field="categoriesPanel" addStyleNames="{style.categories}" debugId="commandWizard"/>
-                    </g:center>
-                </g:DockLayoutPanel>
-            </g:west>
-            <g:center>
-                <g:FlowPanel addStyleNames="{style.rightPart}">
-                    <g:FlowPanel>
-                        <g:Label width="200px" text="Command Definition" addStyleNames="{style.title}"/>
+
+    <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.commandPanel}">
+        <g:west size="380">
+            <g:DockLayoutPanel unit="PX" addStyleNames="{style.leftPart}">
+                <g:north size="30">
+                    <g:FlowPanel addStyleNames="{style.filter}">
+                        <g:TextBox ui:field="filterInputField" tabIndex="0"/>
                     </g:FlowPanel>
-                    <g:FlowPanel ui:field="savePanel" addStyleNames="{style.commandDefinitionHeader}">
-                        <g:Label width="50px" text="{machineLocale.editCommandsViewNameText}" addStyleNames="{style.label}"/>
-                        <g:TextBox width="100%" height="14px" ui:field="configurationName" tabIndex="0"/>
-                    </g:FlowPanel>
-                    <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.commandDefinitionBody}"/>
-                    <g:FlowPanel ui:field="previewUrlPanel" addStyleNames="{style.commandDefinitionHeader}">
-                        <g:Label width="auto" text="Preview URL" addStyleNames="{style.label}"/>
-                        <g:TextBox width="100%" height="14px" ui:field="configurationPreviewUrl" tabIndex="0"/>
-                    </g:FlowPanel>
-                    <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
+                </g:north>
+                <g:center>
+                    <g:SimplePanel ui:field="categoriesPanel" addStyleNames="{style.categories}" debugId="commandWizard"/>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:west>
+        <g:center>
+            <g:FlowPanel addStyleNames="{style.rightPart}">
+                <g:FlowPanel>
+                    <g:Label width="200px" text="Command Definition" addStyleNames="{style.title}"/>
                 </g:FlowPanel>
-            </g:center>
-        </g:DockLayoutPanel>
-    </g:FocusPanel>
+                <g:FlowPanel ui:field="savePanel" addStyleNames="{style.commandDefinitionHeader}">
+                    <g:Label width="50px" text="{machineLocale.editCommandsViewNameText}" addStyleNames="{style.label}"/>
+                    <g:TextBox width="100%" height="14px" ui:field="configurationName" tabIndex="0"/>
+                </g:FlowPanel>
+                <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.commandDefinitionBody}"/>
+                <g:FlowPanel ui:field="previewUrlPanel" addStyleNames="{style.commandDefinitionHeader}">
+                    <g:Label width="auto" text="Preview URL" addStyleNames="{style.label}"/>
+                    <g:TextBox width="100%" height="14px" ui:field="configurationPreviewUrl" tabIndex="0"/>
+                </g:FlowPanel>
+                <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+
 </ui:UiBinder>
