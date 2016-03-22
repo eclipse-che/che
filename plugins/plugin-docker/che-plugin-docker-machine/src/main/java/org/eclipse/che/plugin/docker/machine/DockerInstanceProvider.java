@@ -452,7 +452,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         final String containerName = userName + '_' + workspaceId + '_' + displayName + '_';
 
         // removing all not allowed characters + generating random name suffix
-        return NameGenerator.generate(containerName.replaceAll("[^a-zA-Z0-9_-]+", ""), 5);
+        return NameGenerator.generate(containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", ""), 5);
     }
 
     /**

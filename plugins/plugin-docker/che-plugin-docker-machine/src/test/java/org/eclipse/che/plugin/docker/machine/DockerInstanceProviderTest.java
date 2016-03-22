@@ -1173,7 +1173,7 @@ public class DockerInstanceProviderTest {
     public void shouldGenerateValidNameForContainerFromPrefixWithValidCharacters() throws Exception {
         final String userName = "user";
         final String displayName = "displayName";
-        final String expectedPrefix = String.format("%s_%s_%s_", userName, WORKSPACE_ID, displayName);
+        final String expectedPrefix = String.format("%s_%s_%s_", userName, WORKSPACE_ID.toLowerCase(), displayName.toLowerCase());
 
         final String containerName = dockerInstanceProvider.generateContainerName(WORKSPACE_ID, displayName);
 
@@ -1184,11 +1184,11 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldGenerateValidNameForContainerFromPrefixWithInvalidCharacters() throws Exception {
         final String userName = "{use}r+";
-        final String displayName = "displ{[ayName@";
+        final String displayName = "displ{[ay Name@";
         EnvironmentContext.getCurrent().setUser(new UserImpl(userName, "id", "token", emptyList(), false));
-        final String expectedPrefix = String.format("%s_%s_%s_", "user", "WORKSPACE_ID", "displayName");
+        final String expectedPrefix = String.format("%s_%s_%s_", "user", "thisiswsid", "displayname");
 
-        final String containerName = dockerInstanceProvider.generateContainerName("WORKSPACE_ID", displayName);
+        final String containerName = dockerInstanceProvider.generateContainerName("This is wsId", displayName);
 
         assertTrue(containerName.startsWith(expectedPrefix),
                    "Unexpected container name " + containerName + " while expected " + expectedPrefix + "*");
