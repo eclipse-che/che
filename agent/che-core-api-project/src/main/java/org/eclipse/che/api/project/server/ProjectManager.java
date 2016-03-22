@@ -117,7 +117,12 @@ public final class ProjectManager {
             }
         };
         fileWatchNotifier.addNotificationListener(defaultListener);
-        fileWatcher.startup();
+        try {
+            fileWatcher.startup();
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            fileWatchNotifier.removeNotificationListener(defaultListener);
+        }
     }
 
     @PreDestroy
