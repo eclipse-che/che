@@ -378,12 +378,10 @@ public final class ProjectManager {
         final String apath = ProjectRegistry.absolutizePath(path);
 
         // delete item
-        VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
-        if (item == null) {
-            return;
+        final VirtualFile item = vfs.getRoot().getChild(Path.of(apath));
+        if (item != null) {
+            item.delete();
         }
-
-        item.delete();
 
         // delete child projects
         projectRegistry.removeProjects(apath);
