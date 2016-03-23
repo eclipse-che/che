@@ -76,7 +76,7 @@ public class MavenTaskExecutor {
                 restTasks = queue.size();
             }
 
-            notifier.setPercent(taskDone / (restTasks + taskDone));
+            notifier.setPercent((double)taskDone / (double)(restTasks + taskDone));
             try {
                 task.perform();
             } catch (Throwable throwable) {

@@ -38,6 +38,7 @@
             background-color: statusPanelColor;
             border-top: #232323 1px solid;
             overflow: hidden;
+            z-index: 1;
         }
 
     </ui:style>
@@ -53,23 +54,23 @@
         </g:north>
 
         <g:north size="34">
-            <g:SimplePanel width="100%" ui:field="toolbarPanel" addStyleNames="{style.toolbarPanel}"/>
+            <g:SimplePanel width="100%" ui:field="toolbarPanel" addStyleNames="{style.toolbarPanel}" debugId="toolbarPanel"/>
         </g:north>
 
         <g:north size="1">
-            <g:SimplePanel width="100%" height="1" ui:field="noToolbarPanel" addStyleNames="{style.noToolbarPanel}"/>
+            <g:SimplePanel width="100%" height="1" ui:field="noToolbarPanel" addStyleNames="{style.noToolbarPanel}" debugId="noToolbarPanel"/>
         </g:north>
 
         <g:south size="18">
-            <g:SimplePanel width="100%" ui:field="statusPanel" addStyleNames="{style.statusPanel}"/>
+            <g:SimplePanel width="100%" ui:field="statusPanel" addStyleNames="{style.statusPanel}" debugId="statusPanel"/>
         </g:south>
 
         <g:south size="41"> <!-- the valid size is 41, was 22 -->
-            <g:SimplePanel width="100%" ui:field="actionsPanel" addStyleNames="{style.actionsPanel}"/>
+            <g:SimplePanel width="100%" ui:field="actionsPanel" addStyleNames="{style.actionsPanel}" debugId="actionPanel"/>
         </g:south>
 
         <g:center>
-            <g:SimpleLayoutPanel debugId="perspectivePanel" ui:field="perspectivePanel" width="100%" height="100%"/>
+            <g:SimpleLayoutPanel ui:field="perspectivePanel" width="100%" height="100%" debugId="perspectivePanel"/>
         </g:center>
 
     </g:DockLayoutPanel>

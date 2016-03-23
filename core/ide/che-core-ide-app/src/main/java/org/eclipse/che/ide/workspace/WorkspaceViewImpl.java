@@ -62,7 +62,7 @@ public class WorkspaceViewImpl extends LayoutPanel implements WorkspaceView {
         getElement().setId("codenvyIdeWorkspaceViewImpl");
         ideMainDockPanel.setWidgetHidden(noToolbarPanel, true);
         ideMainDockPanel.setWidgetHidden(actionsPanel, true);
-        ideMainDockPanel.setWidgetHidden(statusPanel, true);
+        ideMainDockPanel.setWidgetHidden(statusPanel, false);
     }
 
     /** {@inheritDoc} */

@@ -73,7 +73,7 @@ public class ArtifactTransferListener implements TransferListener {
                 notifier.setPercentUndefined(true);
             } else {
                 notifier.setPercentUndefined(false);
-                notifier.setPercent(transferEvent.getTransferredBytes() / contentLength);
+                notifier.setPercent((double)transferEvent.getTransferredBytes() / (double)contentLength);
             }
         } catch (RemoteException e) {
             throw new RuntimeRemoteException(e);

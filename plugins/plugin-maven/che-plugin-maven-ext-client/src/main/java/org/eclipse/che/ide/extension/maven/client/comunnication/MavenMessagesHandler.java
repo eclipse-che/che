@@ -24,17 +24,16 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
-import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.extension.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.ide.extension.maven.shared.dto.ProjectsUpdateMessage;
 import org.eclipse.che.ide.extension.maven.shared.dto.StartStopNotification;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -46,35 +45,42 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Handler which receives messages from the maven server.
+ *
  * @author Evgen Vidolob
+ * @author Valeriy Svydenko
  */
 @Singleton
 public class MavenMessagesHandler {
 
-    private final EventBus                 eventBus;
-    private final NotificationManager      notificationManager;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final ProjectServiceClient     projectServiceClient;
-    private final AppContext               context;
-    private final PomEditorReconciler      pomEditorReconciler;
-    private       Notification             notification;
+    private final EventBus                  eventBus;
+    private final NotificationManager       notificationManager;
+    private final ProjectServiceClient      projectServiceClient;
+    private final AppContext                context;
+    private final BackgroundLoaderPresenter dependencyResolver;
+    private final PomEditorReconciler       pomEditorReconciler;
 
     @Inject
     public MavenMessagesHandler(EventBus eventBus,
                                 NotificationManager notificationManager,
-                                final DtoFactory factory,
-                                final ProjectExplorerPresenter projectExplorer,
+                                DtoFactory factory,
                                 ProjectServiceClient projectServiceClient,
                                 AppContext context,
+                                BackgroundLoaderPresenter dependencyResolver,
                                 PomEditorReconciler pomEditorReconciler,
-                                final WsAgentStateController agentStateController) {
+                                WsAgentStateController agentStateController) {
         this.eventBus = eventBus;
 
         this.notificationManager = notificationManager;
-        this.projectExplorer = projectExplorer;
         this.projectServiceClient = projectServiceClient;
         this.context = context;
+        this.dependencyResolver = dependencyResolver;
         this.pomEditorReconciler = pomEditorReconciler;
+
+        handleOperations(factory, agentStateController);
+    }
+
+    private void handleOperations(final DtoFactory factory, final WsAgentStateController agentStateController) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
@@ -108,6 +114,7 @@ public class MavenMessagesHandler {
                                 }
                             });
                         } catch (WebSocketException e) {
+                            dependencyResolver.hide();
                             Log.error(getClass(), e);
                         }
                     }
@@ -116,21 +123,17 @@ public class MavenMessagesHandler {
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
-
+                dependencyResolver.hide();
             }
         });
-
-
     }
+
 
     private void handleStartStop(StartStopNotification dto) {
         if (dto.isStart()) {
-            notification = notificationManager.notify("Maven", "", StatusNotification.Status.PROGRESS, true);
+            dependencyResolver.show();
         } else {
-            if (notification instanceof StatusNotification) {
-                ((StatusNotification)notification).setStatus(StatusNotification.Status.SUCCESS);
-            }
-            notification = null;
+            dependencyResolver.hide();
         }
     }
 
@@ -170,12 +173,10 @@ public class MavenMessagesHandler {
     }
 
     private void handleNotification(NotificationMessage message) {
-        if (notification != null) {
-            notification.setContent(message.getText());
-            notification.notifyObservers();
+        if (message.getPercent() != 0) {
+            dependencyResolver.updateProgressBar((int)(message.getPercent() * 100));
         } else {
-            Log.error(getClass(), "Notification is null.", message);
+            dependencyResolver.setProgressLabel(message.getText());
         }
-
     }
 }
