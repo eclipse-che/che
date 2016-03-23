@@ -1152,6 +1152,10 @@ export class CreateProjectCtrl {
   }
 
   downloadLogs() {
-    window.open('data:text/csv,' + encodeURIComponent(this.getCreationSteps()[this.getCurrentProgressStep()].logs));
+    let logs = '';
+    this.getCreationSteps().forEach((step) => {
+      logs += step.logs + '\n';
+    });
+    window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 }

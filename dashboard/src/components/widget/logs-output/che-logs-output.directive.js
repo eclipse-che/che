@@ -20,14 +20,62 @@ export class CheLogsOutput {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
+  constructor($timeout) {
+    this.$timeout = $timeout;
     this.restrict = 'E';
     this.templateUrl = 'components/widget/logs-output/che-logs-output.html';
 
     // scope values
     this.scope = {
       title: '@cheTitle',
-      text: '@cheText'
+      rawText: '=cheRawText',
+      scrollback: '@?cheScrollback',
+      refreshTime: '@?cheRefreshTime'
+    };
+  }
+
+  link ($scope, element) {
+    if (isNaN(parseInt($scope.scrollback,10))) {
+      $scope.scrollback = 100;
+    }
+    if (isNaN(parseInt($scope.refreshTime,10))) {
+      $scope.refreshTime = 500;
+    }
+
+    let timeoutPromise,
+      wait = false,
+      updateNeeded = false;
+    $scope.$watch(() => {return $scope.rawText}, () => {
+      if (wait) {
+        updateNeeded = true;
+        return;
+      }
+
+      processText();
+      wait = true;
+
+      timeoutPromise = this.$timeout(() => {
+        if (updateNeeded) {
+          processText();
+        }
+        wait = false;
+      }, $scope.refreshTime);
+    });
+    $scope.$on('$destroy', () => {
+      this.$timeout.cancel(timeoutPromise);
+    });
+
+    let processText = () => {
+      let lines = $scope.rawText.split(/\n/);
+      let removeUntilIdx = lines.length - $scope.scrollback;
+      if (removeUntilIdx > 0) {
+        lines.splice(0, removeUntilIdx);
+        $scope.text = lines.join('\n');
+        $scope.text = removeUntilIdx + ' lines are hidden...\n\n' + $scope.text;
+      }
+      else {
+        $scope.text = $scope.rawText;
+      }
     };
   }
 }
