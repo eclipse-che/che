@@ -70,7 +70,9 @@ public class ClasspathEntryHelper {
             attributes.put(ClasspathManager.ARTIFACT_ID_ATTRIBUTE, artifactKey.getArtifactId());
             attributes.put(ClasspathManager.VERSION_ATTRIBUTE, artifactKey.getVersion());
             attributes.put(ClasspathManager.PACKAGING_ATTRIBUTE, artifactKey.getPackaging());
-            attributes.put(ClasspathManager.CLASSIFIER_ATTRIBUTE, artifactKey.getClassifier());
+            if(artifactKey.getClassifier() != null) {
+                attributes.put(ClasspathManager.CLASSIFIER_ATTRIBUTE, artifactKey.getClassifier());
+            }
         }
 
         IClasspathAttribute[] attributesArray = new IClasspathAttribute[attributes.size()];
