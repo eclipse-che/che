@@ -69,7 +69,9 @@
                 </div>
                 <div class="che-accordion-body" ng-show="$index>0 && $index<createProjectCtrl.getCreationSteps().length-1">
                   <che-logs-output che-title="{{createProjectCtrl.getCreationSteps()[$index].inProgressText}}"
-                                che-text="{{createProjectCtrl.getCreationSteps()[$index].logs}}"></che-logs-output>
+                                   che-raw-text="createProjectCtrl.getCreationSteps()[$index].logs"
+                                   che-scrollback="100"
+                                   che-refresh-time="500"></che-logs-output>
                 </div>
               </che-accordion>
             </div>
@@ -96,9 +98,9 @@
                                       che-button-title="Open project in IDE"></che-button-primary>
                 </div>
               </div>
-              <div layout="column" layout-align="end end"
-                   ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError">
+              <div layout="column" layout-align="end end">
                 <che-button-danger che-button-title="Retry"
+                                   ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError"
                                    ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
                 <che-link class="create-project-download-logs-link"
                           ng-click="createProjectCtrl.downloadLogs()"
