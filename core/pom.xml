@@ -30,8 +30,8 @@
         <module>che-core-api-dto-maven-plugin</module>
         <module>che-core-api-core</module>
         <module>che-core-api-model</module>
-        <module>../master</module>
-        <module>../agent</module>
+        <module>../wsmaster</module>
+        <module>../wsagent</module>
         <module>platform-api</module>
         <module>platform-api-client-gwt</module>
         <module>ide</module>
