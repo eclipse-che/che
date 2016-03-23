@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -25,22 +24,19 @@ import org.eclipse.che.ide.preferences.PreferencesPresenter;
 public class ShowPreferencesAction extends Action {
 
     private final PreferencesPresenter presenter;
-    private final AnalyticsEventLogger eventLogger;
+
     private final AppContext           appContext;
 
     @Inject
-    public ShowPreferencesAction(Resources resources, PreferencesPresenter presenter,
-                                 AnalyticsEventLogger eventLogger, AppContext appContext) {
+    public ShowPreferencesAction(Resources resources, PreferencesPresenter presenter, AppContext appContext) {
         super("Preferences", "Preferences", null, resources.preferences());
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         presenter.showPreferences();
     }
 

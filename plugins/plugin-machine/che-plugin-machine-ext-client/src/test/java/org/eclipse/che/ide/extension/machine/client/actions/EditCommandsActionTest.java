@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -21,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
 /** @author Artem Zatsarynnyi */
@@ -34,8 +32,6 @@ public class EditCommandsActionTest {
     private MachineResources            resources;
     @Mock
     private EditCommandsPresenter       editCommandsPresenter;
-    @Mock
-    private AnalyticsEventLogger        eventLogger;
     @Mock
     private ActionEvent                 event;
 
@@ -53,7 +49,6 @@ public class EditCommandsActionTest {
     public void actionShouldBePerformed() throws Exception {
         action.actionPerformed(event);
 
-        verify(eventLogger).log(eq(action));
         verify(editCommandsPresenter).show();
     }
 }

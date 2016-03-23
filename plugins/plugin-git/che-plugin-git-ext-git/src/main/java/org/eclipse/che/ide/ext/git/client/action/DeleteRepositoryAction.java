@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -27,7 +26,6 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 @Singleton
 public class DeleteRepositoryAction extends GitAction {
     private final DeleteRepositoryPresenter presenter;
-    private final AnalyticsEventLogger      eventLogger;
     private final DialogFactory             dialogFactory;
     private       GitLocalizationConstant   constant;
 
@@ -36,20 +34,17 @@ public class DeleteRepositoryAction extends GitAction {
                                   AppContext appContext,
                                   GitResources resources,
                                   GitLocalizationConstant constant,
-                                  AnalyticsEventLogger eventLogger,
                                   ProjectExplorerPresenter projectExplorer,
                                   DialogFactory dialogFactory) {
         super(constant.deleteControlTitle(), constant.deleteControlPrompt(), resources.deleteRepo(), appContext, projectExplorer);
         this.presenter = presenter;
         this.constant = constant;
-        this.eventLogger = eventLogger;
         this.dialogFactory = dialogFactory;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         dialogFactory.createConfirmDialog(constant.deleteGitRepositoryTitle(),
                                           constant.deleteGitRepositoryQuestion(getActiveProject().getRootProject().getName()),
                                           new ConfirmCallback() {

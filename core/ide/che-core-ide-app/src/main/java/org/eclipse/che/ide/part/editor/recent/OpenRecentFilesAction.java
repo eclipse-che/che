@@ -13,7 +13,6 @@ package org.eclipse.che.ide.part.editor.recent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -32,15 +31,12 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class OpenRecentFilesAction extends AbstractPerspectiveAction {
 
     private final RecentFileList       recentFileList;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
     public OpenRecentFilesAction(RecentFileList recentFileList,
-                                 AnalyticsEventLogger eventLogger,
                                  CoreLocalizationConstant locale) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), locale.openRecentFileTitle(), locale.openRecentFileDescription(), null, null);
         this.recentFileList = recentFileList;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
@@ -52,7 +48,6 @@ public class OpenRecentFilesAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         recentFileList.getRecentViewDialog().show();
     }
 }

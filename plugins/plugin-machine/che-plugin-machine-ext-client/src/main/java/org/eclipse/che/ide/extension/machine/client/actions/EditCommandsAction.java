@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -34,13 +33,11 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class EditCommandsAction extends AbstractPerspectiveAction {
 
     private final EditCommandsPresenter editCommandsPresenter;
-    private final AnalyticsEventLogger  eventLogger;
 
     @Inject
     public EditCommandsAction(EditCommandsPresenter editCommandsPresenter,
                               MachineLocalizationConstant localizationConstant,
-                              MachineResources resources,
-                              AnalyticsEventLogger eventLogger) {
+                              MachineResources resources) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               localizationConstant.editCommandsControlTitle(),
               localizationConstant.editCommandsControlDescription(),
@@ -48,7 +45,6 @@ public class EditCommandsAction extends AbstractPerspectiveAction {
               resources.editCommands());
 
         this.editCommandsPresenter = editCommandsPresenter;
-        this.eventLogger = eventLogger;
     }
 
     @Override
@@ -57,7 +53,6 @@ public class EditCommandsAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         editCommandsPresenter.show();
     }
 

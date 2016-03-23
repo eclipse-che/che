@@ -34,6 +34,5 @@
     <inherits name="com.google.common.base.Base"/>
     <inherits name="com.google.common.collect.Collect"/>
     <inherits name="org.eclipse.che.api.Git"/>
-    <inherits name="org.eclipse.che.api.Analytics"/>
     <inherits name="org.eclipse.che.api.Factory"/>
 </module>

@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.jdi.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
@@ -32,8 +31,6 @@ import static org.mockito.Mockito.verify;
 public class RemoteDebugActionTest {
     @Mock
     private RemoteDebugPresenter            presenter;
-    @Mock
-    private AnalyticsEventLogger            eventLogger;
     @Mock
     private JavaRuntimeResources            resources;
     @Mock
@@ -56,7 +53,6 @@ public class RemoteDebugActionTest {
     public void actionShouldBePerformed() {
         action.actionPerformed(actionEvent);
 
-        verify(eventLogger).log(action);
         verify(presenter).showDialog();
     }
 }

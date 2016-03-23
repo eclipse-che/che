@@ -11,8 +11,6 @@
 package org.eclipse.che.ide.client;
 
 import elemental.client.Browser;
-import elemental.events.Event;
-import elemental.events.EventListener;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
@@ -28,12 +26,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-import org.eclipse.che.ide.analytics.AnalyticsEventLoggerExt;
-import org.eclipse.che.ide.analytics.AnalyticsSessions;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -43,7 +38,6 @@ import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -59,7 +53,6 @@ public class BootstrapController {
     private final Provider<WorkspacePresenter> workspaceProvider;
     private final ExtensionInitializer         extensionInitializer;
     private final EventBus                     eventBus;
-    private final AnalyticsEventLoggerExt      analyticsEventLoggerExt;
     private final ProductInfoDataProvider      productInfoDataProvider;
     private final Provider<AppStateManager>    appStateManagerProvider;
     private final AppContext                   appContext;
@@ -68,7 +61,6 @@ public class BootstrapController {
     public BootstrapController(Provider<WorkspacePresenter> workspaceProvider,
                                ExtensionInitializer extensionInitializer,
                                EventBus eventBus,
-                               AnalyticsEventLoggerExt analyticsEventLoggerExt,
                                ProductInfoDataProvider productInfoDataProvider,
                                Provider<AppStateManager> appStateManagerProvider,
                                AppContext appContext,
@@ -76,7 +68,6 @@ public class BootstrapController {
         this.workspaceProvider = workspaceProvider;
         this.extensionInitializer = extensionInitializer;
         this.eventBus = eventBus;
-        this.analyticsEventLoggerExt = analyticsEventLoggerExt;
         this.productInfoDataProvider = productInfoDataProvider;
         this.appStateManagerProvider = appStateManagerProvider;
         this.appContext = appContext;
@@ -177,13 +168,10 @@ public class BootstrapController {
 
         Document.get().setTitle(productInfoDataProvider.getDocumentTitle());
 
-        final AnalyticsSessions analyticsSessions = new AnalyticsSessions();
-
         // Bind browser's window events
         Window.addWindowClosingHandler(new Window.ClosingHandler() {
             @Override
             public void onWindowClosing(Window.ClosingEvent event) {
-                onWindowClose(analyticsSessions);
                 eventBus.fireEvent(WindowActionEvent.createWindowClosingEvent(event));
             }
         });
@@ -191,62 +179,12 @@ public class BootstrapController {
         Window.addCloseHandler(new CloseHandler<Window>() {
             @Override
             public void onClose(CloseEvent<Window> event) {
-                onWindowClose(analyticsSessions);
                 eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent());
             }
         });
 
         elemental.html.Window window = Browser.getWindow();
 
-        window.addEventListener(Event.FOCUS, new EventListener() {
-            @Override
-            public void handleEvent(Event evt) {
-                onSessionUsage(analyticsSessions, false);
-            }
-        }, true);
-
-        window.addEventListener(Event.BLUR, new EventListener() {
-            @Override
-            public void handleEvent(Event evt) {
-                onSessionUsage(analyticsSessions, false);
-            }
-        }, true);
-
-        onSessionUsage(analyticsSessions, true); // This is necessary to forcibly print the very first event
-    }
-
-    private void onSessionUsage(AnalyticsSessions analyticsSessions, boolean force) {
-        if (analyticsSessions.getIdleUsageTime() > 600000) { // 10 min
-            analyticsSessions.makeNew();
-            logSessionUsageEvent(analyticsSessions, true);
-        } else {
-            logSessionUsageEvent(analyticsSessions, force);
-            analyticsSessions.updateUsageTime();
-        }
-    }
-
-    private void onWindowClose(AnalyticsSessions analyticsSessions) {
-        if (analyticsSessions.getIdleUsageTime() <= 60000) { // 1 min
-            logSessionUsageEvent(analyticsSessions, true);
-            analyticsSessions.updateUsageTime();
-        }
-    }
-
-    private void logSessionUsageEvent(AnalyticsSessions analyticsSessions, boolean force) {
-        if (force || analyticsSessions.getIdleLogTime() > 60000) { // 1 min, don't log frequently than once per minute
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("SESSION-ID", analyticsSessions.getId());
-
-            analyticsEventLoggerExt.logEvent("session-usage", parameters);
-
-            UsersWorkspace workspace = appContext.getWorkspace();
-
-            if (workspace != null && workspace.isTemporary()) {
-                analyticsEventLoggerExt.logEvent("session-usage", parameters);
-            }
-
-            analyticsSessions.updateLogTime();
-        }
     }
 
     /**

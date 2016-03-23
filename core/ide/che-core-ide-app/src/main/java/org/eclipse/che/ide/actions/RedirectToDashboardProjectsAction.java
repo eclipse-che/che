@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -27,19 +26,14 @@ public class RedirectToDashboardProjectsAction extends Action {
 
     private static final String REDIRECT_URL = "/dashboard/#/projects";
 
-    private final AnalyticsEventLogger     eventLogger;
-
     @Inject
-    public RedirectToDashboardProjectsAction(CoreLocalizationConstant localization,
-                                             AnalyticsEventLogger eventLogger) {
+    public RedirectToDashboardProjectsAction(CoreLocalizationConstant localization) {
         super(localization.actionRedirectToDashboardProjectsTitle(), localization.actionRedirectToDashboardProjectsDescription(), null, null);
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         Window.open(REDIRECT_URL, "_blank", "");
     }
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -40,8 +39,6 @@ public class ExecuteSelectedCommandActionTest {
     @Mock
     private CommandManager              commandManager;
     @Mock
-    private AnalyticsEventLogger        eventLogger;
-    @Mock
     private ActionEvent                 event;
 
     @Mock
@@ -66,7 +63,6 @@ public class ExecuteSelectedCommandActionTest {
     public void actionShouldBePerformed() throws Exception {
         action.actionPerformed(event);
 
-        verify(eventLogger).log(eq(action));
         verify(commandManager).execute(eq(command));
     }
 }

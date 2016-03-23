@@ -12,7 +12,6 @@ package org.eclipse.che.ide.part.editor.actions;
 
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -35,18 +34,15 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
 
     protected EditorAgent          editorAgent;
     protected EventBus             eventBus;
-    protected AnalyticsEventLogger eventLogger;
 
     public EditorAbstractAction(String tooltip,
                                 String description,
                                 SVGResource icon,
                                 EditorAgent editorAgent,
-                                EventBus eventBus,
-                                AnalyticsEventLogger eventLogger) {
+                                EventBus eventBus) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), tooltip, description, null, icon);
         this.editorAgent = editorAgent;
         this.eventBus = eventBus;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */

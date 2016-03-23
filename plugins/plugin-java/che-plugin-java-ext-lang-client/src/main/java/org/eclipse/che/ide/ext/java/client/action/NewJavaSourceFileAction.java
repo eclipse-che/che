@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.java.client.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -37,7 +36,6 @@ public class NewJavaSourceFileAction extends ProjectAction {
     private static final String MAVEN = "maven";
 
     private final AppContext                 appContext;
-    private final AnalyticsEventLogger       eventLogger;
     private       ProjectExplorerPresenter   projectExplorer;
     private       NewJavaSourceFilePresenter newJavaSourceFilePresenter;
 
@@ -46,18 +44,16 @@ public class NewJavaSourceFileAction extends ProjectAction {
                                    NewJavaSourceFilePresenter newJavaSourceFilePresenter,
                                    JavaLocalizationConstant constant,
                                    JavaResources resources,
-                                   AnalyticsEventLogger eventLogger,
                                    AppContext appContext) {
         super(constant.actionNewClassTitle(), constant.actionNewClassDescription(), resources.javaFile());
         this.newJavaSourceFilePresenter = newJavaSourceFilePresenter;
         this.projectExplorer = projectExplorer;
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
+
         newJavaSourceFilePresenter.showDialog();
     }
 

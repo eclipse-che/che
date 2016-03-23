@@ -14,7 +14,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
@@ -44,12 +43,10 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
 
     public static final String SHOW_HIDDEN_FILES_PARAM_ID = "showHiddenFiles";
     private final AppContext               appContext;
-    private final AnalyticsEventLogger     eventLogger;
     private final ProjectExplorerPresenter projectExplorerPresenter;
 
     @Inject
     public ShowHiddenFilesAction(AppContext appContext,
-                                 AnalyticsEventLogger eventLogger,
                                  CoreLocalizationConstant localizationConstant,
                                  ProjectExplorerPresenter projectExplorerPresenter,
                                  Resources resources) {
@@ -59,7 +56,6 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
               null,
               resources.showHiddenFiles());
         this.appContext = appContext;
-        this.eventLogger = eventLogger;
         this.projectExplorerPresenter = projectExplorerPresenter;
     }
 
@@ -70,8 +66,6 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         boolean isShow = projectExplorerPresenter.isShowHiddenFiles();
         projectExplorerPresenter.showHiddenFiles(!isShow);
     }

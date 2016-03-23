@@ -12,7 +12,6 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -34,23 +33,19 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class ExportConfigAction extends AbstractPerspectiveAction {
     private final AppContext                  appContext;
-    private final AnalyticsEventLogger        eventLogger;
     private final String                      exportConfigURL;
 
     @Inject
     public ExportConfigAction(CoreLocalizationConstant locale,
-                              AppContext appContext,
-                              AnalyticsEventLogger eventLogger) {
+                              AppContext appContext) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), locale.exportConfigText(), null, null, null);
         this.appContext = appContext;
-        this.eventLogger = eventLogger;
         this.exportConfigURL = "/api/workspace/" + appContext.getWorkspaceId();
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         downloadFile(exportConfigURL, appContext.getWorkspace().getConfig().getName());
     }
 

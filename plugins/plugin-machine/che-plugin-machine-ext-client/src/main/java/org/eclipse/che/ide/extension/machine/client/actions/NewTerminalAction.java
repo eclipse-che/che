@@ -12,7 +12,6 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -35,14 +34,12 @@ public class NewTerminalAction extends AbstractPerspectiveAction {
     private final ConsolesPanelPresenter consolesPanelPresenter;
     private final AppContext             appContext;
     private final WorkspaceAgent         workspaceAgent;
-    private final AnalyticsEventLogger   eventLogger;
 
     @Inject
     public NewTerminalAction(AppContext appContext,
                              MachineLocalizationConstant locale,
                              ConsolesPanelPresenter consolesPanelPresenter,
-                             WorkspaceAgent workspaceAgent,
-                             AnalyticsEventLogger eventLogger) {
+                             WorkspaceAgent workspaceAgent) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.newTerminalTitle(),
               locale.newTerminalDescription(),
@@ -51,7 +48,6 @@ public class NewTerminalAction extends AbstractPerspectiveAction {
         this.consolesPanelPresenter = consolesPanelPresenter;
         this.appContext = appContext;
         this.workspaceAgent = workspaceAgent;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
@@ -63,7 +59,6 @@ public class NewTerminalAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(@NotNull ActionEvent event) {
-        eventLogger.log(this);
         consolesPanelPresenter.onAddTerminal(appContext.getDevMachineId());
         workspaceAgent.setActivePart(consolesPanelPresenter);
     }

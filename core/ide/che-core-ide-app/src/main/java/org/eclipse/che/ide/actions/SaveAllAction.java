@@ -14,7 +14,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
@@ -31,19 +30,16 @@ import java.util.List;
 public class SaveAllAction extends ProjectAction {
 
     private final EditorAgent          editorAgent;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
-    public SaveAllAction(EditorAgent editorAgent, Resources resources, AnalyticsEventLogger eventLogger) {
+    public SaveAllAction(EditorAgent editorAgent, Resources resources) {
         super("Save All", "Save all changes for project", resources.save());
         this.editorAgent = editorAgent;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         save(editorAgent.getOpenedEditors());
     }
 

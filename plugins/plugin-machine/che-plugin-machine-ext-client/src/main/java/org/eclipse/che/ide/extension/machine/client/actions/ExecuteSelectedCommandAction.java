@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -35,14 +34,12 @@ public class ExecuteSelectedCommandAction extends AbstractPerspectiveAction {
 
     private final SelectCommandComboBoxReady selectCommandAction;
     private final CommandManager             commandManager;
-    private final AnalyticsEventLogger       eventLogger;
 
     @Inject
     public ExecuteSelectedCommandAction(MachineLocalizationConstant localizationConstant,
                                         MachineResources resources,
                                         SelectCommandComboBoxReady selectCommandAction,
-                                        CommandManager commandManager,
-                                        AnalyticsEventLogger eventLogger) {
+                                        CommandManager commandManager) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               localizationConstant.executeSelectedCommandControlTitle(),
               localizationConstant.executeSelectedCommandControlDescription(),
@@ -50,7 +47,6 @@ public class ExecuteSelectedCommandAction extends AbstractPerspectiveAction {
               resources.execute());
         this.selectCommandAction = selectCommandAction;
         this.commandManager = commandManager;
-        this.eventLogger = eventLogger;
     }
 
     @Override
@@ -60,8 +56,6 @@ public class ExecuteSelectedCommandAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         final CommandConfiguration command = selectCommandAction.getSelectedCommand();
         if (command != null) {
             commandManager.execute(command);

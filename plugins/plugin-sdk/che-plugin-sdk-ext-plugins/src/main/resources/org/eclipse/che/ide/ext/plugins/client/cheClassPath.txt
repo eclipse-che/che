@@ -35,10 +35,6 @@
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-account/src/main/java:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-account/src/main/resources:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-account/target/generated-sources/dto:\
-/projects/che-core/platform-api-client-gwt/che-core-client-gwt-analytics/src/main/resources:\
-/projects/che-core/platform-api-client-gwt/che-core-client-gwt-analytics/target/generated-sources/dto:\
-/projects/che-core/platform-api/che-core-api-analytics/src/main/java:\
-/projects/che-core/platform-api/che-core-api-analytics/target/generated-sources/dto:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-auth/src/main/java:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-auth/src/main/resources:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-auth/target/generated-sources/dto:\
@@ -208,8 +204,6 @@
 /home/user/.m2/repository/org/apache/tika/tika-core/1.11/tika-core-1.11.jar:\
 /projects/che-core/platform-api/che-core-api-workspace/target/classes:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-account/target/classes:\
-/projects/che-core/platform-api-client-gwt/che-core-client-gwt-analytics/target/classes:\
-/projects/che-core/platform-api/che-core-api-analytics/target/classes:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-auth/target/classes:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-core/target/classes:\
 /projects/che-core/platform-api-client-gwt/che-core-client-gwt-factory/target/classes:\

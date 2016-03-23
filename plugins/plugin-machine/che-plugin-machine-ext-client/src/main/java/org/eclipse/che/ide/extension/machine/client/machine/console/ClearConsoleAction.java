@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.machine.console;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -30,21 +29,18 @@ public class ClearConsoleAction extends Action {
 
     private final MachineConsolePresenter presenter;
     private final AppContext              appContext;
-    private final AnalyticsEventLogger    eventLogger;
 
     @Inject
     public ClearConsoleAction(MachineConsolePresenter presenter,
                               AppContext appContext,
                               MachineResources resources,
-                              MachineLocalizationConstant localizationConstant,
-                              AnalyticsEventLogger eventLogger) {
+                              MachineLocalizationConstant localizationConstant) {
         super(localizationConstant.clearConsoleControlTitle(),
               localizationConstant.clearConsoleControlDescription(),
               null,
               resources.clear());
         this.presenter = presenter;
         this.appContext = appContext;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
@@ -56,7 +52,7 @@ public class ClearConsoleAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
+
         presenter.clear();
     }
 }

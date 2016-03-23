@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
-import java.util.Collections;
-
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
@@ -24,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Collections;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -46,8 +44,6 @@ public class RunCommandActionTest {
     private CommandManager              commandManager;
     @Mock
     private MachineLocalizationConstant locale;
-    @Mock
-    private AnalyticsEventLogger        eventLogger;
     @Mock
     private ActionEvent                 event;
     @Mock
@@ -76,7 +72,6 @@ public class RunCommandActionTest {
         when(event.getParameters()).thenReturn(Collections.singletonMap(NAME_PROPERTY, "MCI")); 
         action.actionPerformed(event);
 
-        verify(eventLogger).log(action);
         verify(commandManager).execute(eq(command));
     }
 }

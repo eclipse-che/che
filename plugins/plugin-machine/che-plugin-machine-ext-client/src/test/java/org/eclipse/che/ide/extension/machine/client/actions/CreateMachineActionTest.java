@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachinePresenter;
@@ -32,8 +31,6 @@ public class CreateMachineActionTest {
     private MachineLocalizationConstant locale;
     @Mock
     private CreateMachinePresenter      createMachinePresenter;
-    @Mock
-    private AnalyticsEventLogger        eventLogger;
     @Mock
     private ActionEvent                 event;
 

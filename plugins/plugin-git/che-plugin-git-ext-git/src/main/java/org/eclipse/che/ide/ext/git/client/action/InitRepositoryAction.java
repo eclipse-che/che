@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
@@ -29,7 +28,6 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class InitRepositoryAction extends GitAction {
     private final InitRepositoryPresenter presenter;
-    private final AnalyticsEventLogger    eventLogger;
     private final DialogFactory           dialogFactory;
     private       GitLocalizationConstant constant;
 
@@ -38,12 +36,10 @@ public class InitRepositoryAction extends GitAction {
                                 GitResources resources,
                                 GitLocalizationConstant constant,
                                 AppContext appContext,
-                                AnalyticsEventLogger eventLogger,
                                 ProjectExplorerPresenter projectExplorer,
                                 DialogFactory dialogFactory) {
         super(constant.initControlTitle(), constant.initControlPrompt(), resources.initRepo(), appContext, projectExplorer);
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
         this.constant = constant;
         this.dialogFactory = dialogFactory;
     }
@@ -51,7 +47,7 @@ public class InitRepositoryAction extends GitAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
+
 
         dialogFactory.createConfirmDialog(constant.createTitle(),
                                           constant.messagesInitRepoQuestion(appContext.getCurrentProject().getRootProject().getName()),

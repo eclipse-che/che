@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
@@ -42,7 +41,6 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
 
     private final Resources                resources;
     private final CoreLocalizationConstant constant;
-    private final AnalyticsEventLogger     eventLogger;
     private final PerspectiveManager       perspectiveManager;
 
     private FlowPanel buttonPanel;
@@ -52,13 +50,11 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
     @Inject
     public ExpandEditorAction(Resources resources,
                               PerspectiveManager perspectiveManager,
-                              CoreLocalizationConstant constant,
-                              AnalyticsEventLogger eventLogger) {
+                              CoreLocalizationConstant constant) {
         super(constant.actionExpandEditorTitle(), null, null, null, FontAwesome.EXPAND);
         this.resources = resources;
         this.perspectiveManager = perspectiveManager;
         this.constant = constant;
-        this.eventLogger = eventLogger;
     }
 
     @Override
@@ -106,8 +102,6 @@ public class ExpandEditorAction extends Action implements CustomComponentAction 
      * Expands or restores the editor.
      */
     public void toggleExpand() {
-        eventLogger.log(this);
-
         Perspective activePerspective = perspectiveManager.getActivePerspective();
         if (activePerspective != null) {
             expanded = !expanded;

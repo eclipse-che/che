@@ -10,15 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.help.client;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
-import org.eclipse.che.ide.api.action.Action;
-import org.eclipse.che.ide.api.action.ActionEvent;
-
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
 
 /**
  * Redirect to support window
@@ -28,23 +26,18 @@ import org.eclipse.che.ide.api.ProductInfoDataProvider;
  */
 @Singleton
 public class RedirectToSupportAction extends Action {
-
-    private final AnalyticsEventLogger    eventLogger;
     private final ProductInfoDataProvider productInfoDataProvider;
 
     @Inject
     public RedirectToSupportAction(HelpExtensionLocalizationConstant locale,
                                    ProductInfoDataProvider productInfoDataProvider,
-                                   AnalyticsEventLogger eventLogger,
                                    AboutResources resources) {
         super(productInfoDataProvider.getSupportTitle(), locale.actionRedirectToSupportDescription(), null, resources.getSupport());
-        this.eventLogger = eventLogger;
         this.productInfoDataProvider = productInfoDataProvider;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         Window.open(productInfoDataProvider.getSupportLink(), "_blank", null);
     }
 }

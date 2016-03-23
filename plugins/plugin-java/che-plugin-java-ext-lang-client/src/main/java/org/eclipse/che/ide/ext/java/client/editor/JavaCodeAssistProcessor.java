@@ -14,7 +14,6 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.icon.Icon;
@@ -46,7 +45,6 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
     private static Map<String, SVGResource>   svgs;
 
     private final EditorPartPresenter  editor;
-    private final AnalyticsEventLogger eventLogger;
     private final JavaResources        resources;
     private final RefactoringUpdater   refactoringUpdater;
 
@@ -62,15 +60,13 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
                                    final JavaResources javaResources,
                                    RefactoringUpdater refactoringUpdater,
                                    EditorAgent editorAgent,
-                                   DtoUnmarshallerFactory unmarshallerFactory,
-                                   final AnalyticsEventLogger eventLogger) {
+                                   DtoUnmarshallerFactory unmarshallerFactory) {
         this.editor = editor;
         this.client = client;
         this.resources = javaResources;
         this.refactoringUpdater = refactoringUpdater;
         this.editorAgent = editorAgent;
         this.unmarshallerFactory = unmarshallerFactory;
-        this.eventLogger = eventLogger;
         if (images == null) {
             initImages(javaResources);
         }
@@ -155,7 +151,6 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
         if (errorMessage != null) {
             return;
         }
-        this.eventLogger.log(this, "Autocompleting");
         final VirtualFile file = editor.getEditorInput().getFile();
         final String projectPath = file.getProject().getProjectConfig().getPath();
         String fqn = JavaSourceFolderUtil.getFQNForFile(file);
