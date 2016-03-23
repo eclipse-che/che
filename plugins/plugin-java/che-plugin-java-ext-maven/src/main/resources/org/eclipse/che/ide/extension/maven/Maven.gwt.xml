@@ -22,8 +22,6 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.ext.java.Java"/>
     <inherits name="org.eclipse.che.ide.extension.machine.Machine"/>
-    <!--<inherits name='org.eclipse.che.api.Builder'/>-->
-    <!--<inherits name="org.eclipse.che.ide.extension.builder.Builder"/>-->
 
     <source path="client"/>
     <source path="shared"/>

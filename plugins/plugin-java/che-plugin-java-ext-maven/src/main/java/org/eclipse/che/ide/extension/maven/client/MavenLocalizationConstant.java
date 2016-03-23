@@ -20,25 +20,6 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface MavenLocalizationConstant extends Messages {
 
-    /* Actions */
-
-    @Key("action.createMavenModule.text")
-    String actionCreateMavenModuleText();
-
-    @Key("action.createMavenModule.description")
-    String actionCreateMavenModuleDescription();
-
-
-    @Key("maven.build.updateSnapshot")
-    @DefaultMessage("Update Snapshot (-U,--update-snapshots)")
-    String updateSnapshot();
-
-    @Key("maven.build.updateSnapshot.desc")
-    @DefaultMessage("Forces a check for updated releases \n" +
-                    "and snapshots on remote repositories")
-    String updateSnapshotDesc();
-
-
     /* MavenCommandPageView */
     @Key("view.mavenCommandPage.commandLine.text")
     String mavenCommandPageViewCommandLineText();
@@ -48,7 +29,4 @@ public interface MavenLocalizationConstant extends Messages {
 
     @Key("maven.page.groupIdTooltip")
     String mavenPageGroupIdTooltip();
-
-    @Key("maven.create.module.multy.selection.error")
-    String mavenCreateModuleMultySelectionError();
 }
