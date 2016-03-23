@@ -12,7 +12,6 @@ package org.eclipse.che.ide.newresource;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -67,7 +66,6 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
     protected final InputValidator           folderNameValidator;
     protected final String                   title;
     protected       ProjectServiceClient     projectServiceClient;
-    protected       AnalyticsEventLogger     eventLogger;
     protected       DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     protected       DialogFactory            dialogFactory;
     protected       CoreLocalizationConstant coreLocalizationConstant;
@@ -101,10 +99,6 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (eventLogger != null) {
-            eventLogger.log(this);
-        }
-
         InputDialog inputDialog = dialogFactory.createInputDialog(
                 coreLocalizationConstant.newResourceTitle(title),
                 coreLocalizationConstant.newResourceLabel(title.toLowerCase()),
@@ -278,13 +272,11 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
 
     @Inject
     private void init(ProjectServiceClient projectServiceClient,
-                      AnalyticsEventLogger eventLogger,
                       DtoUnmarshallerFactory dtoUnmarshallerFactory,
                       DialogFactory dialogFactory,
                       CoreLocalizationConstant coreLocalizationConstant,
                       ProjectExplorerPresenter projectExplorer) {
         this.projectServiceClient = projectServiceClient;
-        this.eventLogger = eventLogger;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.dialogFactory = dialogFactory;
         this.coreLocalizationConstant = coreLocalizationConstant;

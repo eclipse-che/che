@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -39,17 +38,14 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class ReopenClosedFileAction extends AbstractPerspectiveAction implements FileEventHandler {
 
     private final EventBus             eventBus;
-    private final AnalyticsEventLogger eventLogger;
 
     private VirtualFile lastClosed;
 
     @Inject
-    public ReopenClosedFileAction(EventBus eventBus, CoreLocalizationConstant locale, AnalyticsEventLogger eventLogger) {
+    public ReopenClosedFileAction(EventBus eventBus, CoreLocalizationConstant locale) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), locale.editorTabReopenClosedTab(), locale.editorTabReopenClosedTabDescription(), null,
               null);
         this.eventBus = eventBus;
-        this.eventLogger = eventLogger;
-
         eventBus.addHandler(FileEvent.TYPE, this);
     }
 
@@ -72,7 +68,6 @@ public class ReopenClosedFileAction extends AbstractPerspectiveAction implements
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         eventBus.fireEvent(new FileEvent(lastClosed, OPEN));
     }
 }

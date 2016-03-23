@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.actions.find;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Action fo find action action
@@ -30,21 +27,17 @@ import com.google.inject.Singleton;
 public class FindActionAction extends Action {
 
     private       FindActionPresenter  presenter;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
     public FindActionAction(FindActionPresenter presenter,
                             CoreLocalizationConstant localization,
-                            AnalyticsEventLogger eventLogger,
                             Resources resources) {
         super(localization.actionFindActionDescription(), localization.actionFindActionTitle(), null, resources.findActions());
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         presenter.show();
     }
 }

@@ -79,7 +79,7 @@ public class NewPackageAction extends AbstractNewResourceAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
+
 
         InputDialog inputDialog = dialogFactory.createInputDialog("New " + title, "Name:", new InputCallback() {
             @Override

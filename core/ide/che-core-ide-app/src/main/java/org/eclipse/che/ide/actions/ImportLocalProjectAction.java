@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -36,13 +35,11 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class ImportLocalProjectAction extends AbstractPerspectiveAction {
 
     private final LocalZipImporterPagePresenter presenter;
-    private final AnalyticsEventLogger          eventLogger;
     private final AppContext                    appContext;
 
     @Inject
     public ImportLocalProjectAction(LocalZipImporterPagePresenter presenter,
                                     CoreLocalizationConstant locale,
-                                    AnalyticsEventLogger eventLogger,
                                     Resources resources,
                                     AppContext appContext) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
@@ -51,14 +48,12 @@ public class ImportLocalProjectAction extends AbstractPerspectiveAction {
               null,
               resources.importProject());
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
-        eventLogger.log(this);
         presenter.show();
     }
 

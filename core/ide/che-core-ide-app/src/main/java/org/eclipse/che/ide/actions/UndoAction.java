@@ -12,7 +12,6 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -36,22 +35,17 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class UndoAction extends AbstractPerspectiveAction {
 
     private       EditorAgent          editorAgent;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
     public UndoAction(EditorAgent editorAgent,
                       CoreLocalizationConstant localization,
-                      AnalyticsEventLogger eventLogger,
                       Resources resources) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.undoName(), localization.undoDescription(), null, resources.undo());
         this.editorAgent = editorAgent;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
         if (activeEditor != null && activeEditor instanceof UndoableEditor) {

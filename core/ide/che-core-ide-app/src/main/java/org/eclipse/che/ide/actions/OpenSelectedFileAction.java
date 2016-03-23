@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -33,25 +32,20 @@ public class OpenSelectedFileAction extends Action {
     private final AppContext               appContext;
     private final ProjectExplorerPresenter projectExplorer;
     private final EventBus                 eventBus;
-    private final AnalyticsEventLogger     eventLogger;
 
     @Inject
     public OpenSelectedFileAction(AppContext appContext,
                                   ProjectExplorerPresenter projectExplorer,
                                   EventBus eventBus,
-                                  AnalyticsEventLogger eventLogger,
                                   Resources resources) {
         super("Open", null, null, resources.defaultFile());
         this.appContext = appContext;
         this.projectExplorer = projectExplorer;
         this.eventBus = eventBus;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         Selection<?> selection = projectExplorer.getSelection();
         Object headElement = selection.getHeadElement();
 

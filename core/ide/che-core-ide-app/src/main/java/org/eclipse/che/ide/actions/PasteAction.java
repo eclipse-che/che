@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -48,7 +47,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class PasteAction extends Action {
 
-    private final AnalyticsEventLogger     eventLogger;
     private final CoreLocalizationConstant localization;
     private final AppContext               appContext;
     private final DialogFactory            dialogFactory;
@@ -72,7 +70,6 @@ public class PasteAction extends Action {
 
     @Inject
     public PasteAction(Resources resources,
-                       AnalyticsEventLogger eventLogger,
                        CoreLocalizationConstant localization,
                        AppContext appContext,
                        DialogFactory dialogFactory,
@@ -81,7 +78,6 @@ public class PasteAction extends Action {
                        ProjectExplorerPresenter projectExplorer,
                        RenameItemAction renameItemAction) {
         super(localization.pasteItemsActionText(), localization.pasteItemsActionDescription(), null, resources.paste());
-        this.eventLogger = eventLogger;
         this.localization = localization;
         this.appContext = appContext;
         this.dialogFactory = dialogFactory;
@@ -177,8 +173,6 @@ public class PasteAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         if (!canPaste()) {
             return;
         }

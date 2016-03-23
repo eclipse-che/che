@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
@@ -28,22 +27,18 @@ import org.eclipse.che.ide.api.action.Presentation;
  * @author Oleksii Orel
  */
 public class RedirectToDashboardAction extends Action implements CustomComponentAction {
-    private final AnalyticsEventLogger          eventLogger;
     private final DashboardLocalizationConstant constant;
     private final DashboardResources            resources;
 
     @Inject
     public RedirectToDashboardAction(DashboardLocalizationConstant constant,
-                                     DashboardResources resources,
-                                     AnalyticsEventLogger eventLogger) {
+                                     DashboardResources resources) {
         this.constant = constant;
         this.resources = resources;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
     }
 
     @Override

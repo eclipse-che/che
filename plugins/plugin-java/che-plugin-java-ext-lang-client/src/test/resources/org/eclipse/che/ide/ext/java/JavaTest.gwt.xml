@@ -23,7 +23,6 @@
     <inherits name="com.google.gwt.webworker.WebWorker"/>
     <inherits name="org.eclipse.che.api.Project"/>
     <inherits name="org.eclipse.che.ide.jseditor.JsEditor"/>
-    <inherits name="org.eclipse.che.api.Analytics"/>
 
     <source path="client"/>
     <source path="shared"/>

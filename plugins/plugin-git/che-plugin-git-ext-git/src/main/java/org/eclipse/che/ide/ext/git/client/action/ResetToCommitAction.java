@@ -13,36 +13,31 @@ package org.eclipse.che.ide.ext.git.client.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitPresenter;
-import org.eclipse.che.ide.ui.FontAwesome;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.ui.FontAwesome;
 
 /** @author Andrey Plotnikov */
 @Singleton
 public class ResetToCommitAction extends GitAction {
     private final ResetToCommitPresenter presenter;
-    private final AnalyticsEventLogger   eventLogger;
 
     @Inject
     public ResetToCommitAction(ResetToCommitPresenter presenter,
                                AppContext appContext,
                                GitLocalizationConstant constant,
-                               AnalyticsEventLogger eventLogger,
                                ProjectExplorerPresenter projectExplorer) {
         super(constant.resetToCommitControlTitle(), constant.resetToCommitControlPrompt(), FontAwesome.BAN, appContext,
               projectExplorer);
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         presenter.showDialog();
     }
 }

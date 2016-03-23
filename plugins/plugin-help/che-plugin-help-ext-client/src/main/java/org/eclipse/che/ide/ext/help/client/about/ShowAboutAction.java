@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.help.client.about;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.help.client.AboutResources;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Action for showing About application information.
@@ -27,20 +26,18 @@ import com.google.inject.Singleton;
 public class ShowAboutAction extends Action {
 
     private final AboutPresenter       presenter;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
-    public ShowAboutAction(AboutPresenter presenter, AboutLocalizationConstant locale, AnalyticsEventLogger eventLogger,
+    public ShowAboutAction(AboutPresenter presenter,
+                           AboutLocalizationConstant locale,
                            AboutResources resources) {
         super(locale.aboutControlTitle(), "Show about application", null, resources.about());
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         presenter.showAbout();
     }
 
