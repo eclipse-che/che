@@ -69,6 +69,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
@@ -276,11 +277,28 @@ public class DockerConnector {
         doTag(image, repository, tag, dockerDaemonUri);
     }
 
-    public void push(String repository,
-                     String tag,
-                     String registry,
-                     final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        doPush(repository, tag, registry, progressMonitor, dockerDaemonUri);
+    /**
+     * Push docker image to the registry
+     *
+     * @param repository
+     *         full repository name to be applied to newly created image
+     * @param tag
+     *         tag of the image
+     * @param registry
+     *         registry url
+     * @param progressMonitor
+     *         ProgressMonitor for images creation process
+     * @return digest of just pushed image
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     * @throws InterruptedException
+     *         if push process was interrupted
+     */
+    public String push(String repository,
+                       String tag,
+                       String registry,
+                       final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+        return doPush(repository, tag, registry, progressMonitor, dockerDaemonUri);
     }
 
     /**
@@ -933,16 +951,17 @@ public class DockerConnector {
         }
     }
 
-    protected void doPush(final String repository,
-                          final String tag,
-                          final String registry,
-                          final ProgressMonitor progressMonitor,
-                          final URI dockerDaemonUri) throws IOException, InterruptedException {
+    protected String doPush(final String repository,
+                            final String tag,
+                            final String registry,
+                            final ProgressMonitor progressMonitor,
+                            final URI dockerDaemonUri) throws IOException, InterruptedException {
         final List<Pair<String, ?>> headers = new ArrayList<>(3);
         headers.add(Pair.of("Content-Type", MediaType.TEXT_PLAIN));
         headers.add(Pair.of("Content-Length", 0));
         headers.add(Pair.of("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader()));
         final String fullRepo = registry != null ? registry + "/" + repository : repository;
+        final ValueHolder<String> digestHolder = new ValueHolder<>();
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -971,11 +990,21 @@ public class DockerConnector {
                     @Override
                     public void run() {
                         try {
+                            String digestPrefix = firstNonNull(tag, "latest") + ": digest: ";
                             ProgressStatus progressStatus;
                             while ((progressStatus = progressReader.next()) != null && exceptionHolder.get() == null) {
                                 progressMonitor.updateProgress(progressStatus);
                                 if (progressStatus.getError() != null) {
                                     exceptionHolder.set(progressStatus.getError());
+                                }
+                                String status = progressStatus.getStatus();
+                                // Here we find string with digest which has following format:
+                                // <tag>: digest: <digest> size: <size>
+                                // for example:
+                                // latest: digest: sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size: 62189
+                                if (status != null && status.startsWith(digestPrefix)) {
+                                    String digest = status.substring(digestPrefix.length(), status.indexOf(" ", digestPrefix.length()));
+                                    digestHolder.set(digest);
                                 }
                             }
                         } catch (IOException e) {
@@ -994,12 +1023,19 @@ public class DockerConnector {
                 if (exceptionHolder.get() != null) {
                     throw new DockerException(exceptionHolder.get(), 500);
                 }
+                if (digestHolder.get() == null) {
+                    LOG.error("Docker image {}:{} was successfully pushed, but its digest wasn't obtained",
+                              fullRepo,
+                              firstNonNull(tag, "latest"));
+                    throw new DockerException("Docker image was successfully pushed, but its digest wasn't obtained", 500);
+                }
                 final IOException ioe = errorHolder.get();
                 if (ioe != null) {
                     throw ioe;
                 }
             }
         }
+        return digestHolder.get();
     }
 
     protected String doCommit(String container,

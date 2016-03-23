@@ -194,18 +194,21 @@ public class DockerInstance extends AbstractInstance {
             // !! We SHOULD NOT pause container before commit because all execs will fail
             // to push image to private registry it should be tagged with registry in repo name
             // https://docs.docker.com/reference/api/docker_remote_api_v1.16/#push-an-image-on-the-registry
-            docker.commit(container, registry + "/" + repository, null, comment, owner);
+            docker.commit(container, registry + '/' + repository, "latest", comment, owner);
             //TODO fix this workaround. Docker image is not visible after commit when using swarm
             Thread.sleep(2000);
 
             final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
-            docker.push(repository, null, registry, currentProgressStatus -> {
+            String digest = docker.push(repository, "latest", registry, currentProgressStatus -> {
                 try {
                     outputConsumer.writeLine(progressLineFormatter.format(currentProgressStatus));
                 } catch (IOException ignored) {
                 }
             });
-            return new DockerInstanceKey(repository, registry);
+
+            docker.removeImage(registry + '/' + repository, false);
+
+            return new DockerInstanceKey(repository, "latest", registry, digest);
         } catch (IOException e) {
             throw new MachineException(e);
         } catch (InterruptedException e) {

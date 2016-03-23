@@ -42,6 +42,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.UriBuilder;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -164,7 +166,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldPullDockerImageOnInstanceCreationFromSnapshot() throws Exception {
         String repo = "repo";
-        String tag = "tag";
+        String tag = "latest";
         String registry = "localhost:1234";
 
 
@@ -179,8 +181,8 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(dockerInstanceProvider).generateContainerName(WORKSPACE_ID, DISPLAY_NAME);
         String repo = "repo1";
-        String registry = "registry1";
         String tag = "tag1";
+        String registry = "registry1";
 
 
         createInstanceFromSnapshot(repo, tag, registry);
@@ -1584,7 +1586,7 @@ public class DockerInstanceProviderTest {
     }
 
     private void createInstanceFromSnapshot(String repo, String tag, String registry) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(getMachineBuilder().build(), new DockerInstanceKey(repo, tag, "imageId", registry));
+        createInstanceFromSnapshot(getMachineBuilder().build(), new DockerInstanceKey(repo, tag, registry, "digest"));
     }
 
     private void createInstanceFromRecipe(Machine machine) throws Exception {
@@ -1626,8 +1628,8 @@ public class DockerInstanceProviderTest {
     private void createInstanceFromSnapshot(Machine machine) throws NotFoundException, MachineException {
         dockerInstanceProvider.createInstance(new DockerInstanceKey("repo",
                                                                     "tag",
-                                                                    "imageId",
-                                                                    "localhost:1234"),
+                                                                    "registry",
+                                                                    "digest"),
                                               machine,
                                               LineConsumer.DEV_NULL);
     }

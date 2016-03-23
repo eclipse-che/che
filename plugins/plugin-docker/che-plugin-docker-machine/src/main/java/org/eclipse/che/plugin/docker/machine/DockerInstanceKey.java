@@ -23,23 +23,15 @@ import org.eclipse.che.api.machine.server.spi.InstanceKey;
 public class DockerInstanceKey extends InstanceKeyImpl {
     public static final String REPOSITORY = "repository";
     public static final String TAG        = "tag";
-    public static final String ID         = "id";
     public static final String REGISTRY   = "registry";
+    public static final String DIGEST     = "digest";
 
     public DockerInstanceKey(InstanceKey key) {
         super(key);
     }
 
-    public DockerInstanceKey(String repository, String tag, String id, String registry) {
-        super(ImmutableMap.of(REPOSITORY, repository, TAG, tag, ID, id, REGISTRY, registry));
-    }
-
-    public DockerInstanceKey(String repository, String id, String registry) {
-        super(ImmutableMap.of(REPOSITORY, repository, ID, id, REGISTRY, registry));
-    }
-
-    public DockerInstanceKey(String repository,  String registry) {
-        super(ImmutableMap.of(REPOSITORY, repository, REGISTRY, registry));
+    public DockerInstanceKey(String repository, String tag, String registry, String digest) {
+        super(ImmutableMap.of(REPOSITORY, repository, TAG, tag, REGISTRY, registry, DIGEST, digest));
     }
 
     public String getRepository() {
@@ -50,12 +42,12 @@ public class DockerInstanceKey extends InstanceKeyImpl {
         return getFields().get(TAG);
     }
 
-    public String getImageId() {
-        return getFields().get(ID);
-    }
-
     public String getRegistry() {
         return getFields().get(REGISTRY);
+    }
+
+    public String getDigest() {
+        return getFields().get(DIGEST);
     }
 
     /**
@@ -74,6 +66,11 @@ public class DockerInstanceKey extends InstanceKeyImpl {
             fullRepoId.append(':').append(getTag());
         }
         return fullRepoId.toString();
+    }
+
+    @Override
+    public String toString() {
+        return getFields().toString();
     }
 
 }
