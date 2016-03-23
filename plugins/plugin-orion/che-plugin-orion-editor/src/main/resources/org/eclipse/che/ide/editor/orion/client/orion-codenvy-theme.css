@@ -169,22 +169,36 @@
     color: mainFontColor;
     font-family: mainFontFamily;
     border: 1px solid black;
-    padding: 5px;
     border-radius: 0px;
+    parring-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 24px;
 }
 .orionCodenvy .textViewFindButton.checked {
     color: buttonFontColor;
 }
+
 .orionCodenvy .textViewFindCloseButton {
-    height: 18px;
-    padding: 4px 8px;
     border: 1px solid transparent;
     background: transparent url(data:image/gif;base64,R0lGODlhEAAQAJEAAAAAAP///4CAgP///yH5BAEAAAMALAAAAAAQABAAAAIdnI+py+1vhECSyTluu9px+HkctnSdUh0pxLYuVAAAOw==) no-repeat;
+    min-width: 18px;
+    min-height: 18px;
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    right: 5px;
+    top: 8px;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    opacity: 0.8;
 }
+
 .orionCodenvy .textViewFindCloseButton:hover {
-    /* from Core.css gwt:TextButton:hover */
-    border: 1px solid tabBorderColor;
+    opacity: 1;
 }
+
 .contentassist {
     background-color: completionPopupBackgroundColor;
     font-size:9pt;
