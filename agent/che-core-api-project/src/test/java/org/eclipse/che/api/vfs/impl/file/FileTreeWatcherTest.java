@@ -36,6 +36,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -248,7 +249,7 @@ public class FileTreeWatcherTest {
 
         Thread.sleep(500);
 
-        verify(notificationHandler).started(eq(testDirectory));
+        verify(notificationHandler, timeout(10000)).started(eq(testDirectory));
     }
 
     @Test
@@ -264,7 +265,7 @@ public class FileTreeWatcherTest {
         fileWatcherTestTree.createFile("");
         Thread.sleep(5000);
 
-        verify(notificationHandler).errorOccurred(eq(testDirectory), eq(error));
+        verify(notificationHandler, timeout(10000)).errorOccurred(eq(testDirectory), eq(error));
     }
 
     private FileWatcherNotificationHandler aNotificationHandler() {
