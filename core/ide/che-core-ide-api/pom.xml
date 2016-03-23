@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.0.0-RC14-SNAPSHOT</version>
+        <version>4.0.0-RC14</version>
     </parent>
     <artifactId>che-core-ide-api</artifactId>
     <packaging>jar</packaging>
