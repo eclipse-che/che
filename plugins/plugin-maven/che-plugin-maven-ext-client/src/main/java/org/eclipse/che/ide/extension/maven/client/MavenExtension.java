@@ -38,6 +38,7 @@ import org.eclipse.che.ide.extension.maven.client.actions.CreateMavenModuleActio
 import org.eclipse.che.ide.extension.maven.client.actions.GetEffectivePomAction;
 import org.eclipse.che.ide.extension.maven.client.actions.UpdateDependencyAction;
 import org.eclipse.che.ide.extension.maven.client.comunnication.MavenMessagesHandler;
+import org.eclipse.che.ide.extension.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.ide.extension.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.ide.extension.maven.client.editor.PomEditorProvider;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
@@ -53,6 +54,7 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_BUILD_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL;
 
 /**
  * Maven extension entry point.
@@ -153,6 +155,7 @@ public class MavenExtension {
     private void prepareActions(ActionManager actionManager,
                                 UpdateDependencyAction updateDependencyAction,
                                 CreateMavenModuleAction createMavenModuleAction,
+                                DependencyResolverAction dependencyResolverAction,
                                 GetEffectivePomAction getEffectivePomAction) {
         // register actions
         actionManager.registerAction("updateDependency", updateDependencyAction);
@@ -171,6 +174,10 @@ public class MavenExtension {
         DefaultActionGroup buildContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_BUILD_CONTEXT_MENU);
         buildContextMenuGroup.addSeparator();
         buildContextMenuGroup.addAction(updateDependencyAction);
+
+        // add resolver widget on right part of bottom panel
+        final DefaultActionGroup rightStatusPanelGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);
+        rightStatusPanelGroup.add(dependencyResolverAction);
     }
 
     @Inject

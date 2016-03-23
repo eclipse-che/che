@@ -329,9 +329,9 @@ public class WorkspaceTest extends BaseTest {
 
         List<MavenArtifact> dependencies = mavenProject.getDependencies();
         assertThat(dependencies).isNotNull().hasSize(3);
-        assertThat(dependencies).onProperty("artifactId").containsExactly("junit", "hamcrest-core", "testArtifact");
-        assertThat(dependencies).onProperty("groupId").containsExactly("junit", "org.hamcrest", "test");
-        assertThat(dependencies).onProperty("version").containsExactly("4.12", "1.3", "42");
+        assertThat(dependencies).onProperty("artifactId").contains("junit", "hamcrest-core", "testArtifact");
+        assertThat(dependencies).onProperty("groupId").contains("junit", "org.hamcrest", "test");
+        assertThat(dependencies).onProperty("version").contains("4.12", "1.3", "42");
 
         List<File> depFiles = dependencies.stream().map(MavenArtifact::getFile).collect(Collectors.toList());
         List<String> paths = depFiles.stream().map(File::getAbsolutePath).collect(Collectors.toList());

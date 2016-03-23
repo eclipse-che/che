@@ -204,7 +204,7 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
 
         parameters.getClassPath().addAll(classPath);
 
-        parameters.getVmParameters().add("-Xmx256m");
+        parameters.getVmParameters().add("-Xmx512m");
 
         return parameters;
     }

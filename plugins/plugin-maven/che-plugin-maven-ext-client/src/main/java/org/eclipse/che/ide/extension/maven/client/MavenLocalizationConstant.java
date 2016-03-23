@@ -66,4 +66,13 @@ public interface MavenLocalizationConstant extends Messages {
 
     @Key("maven.class.download.failed")
     String mavenClassDownloadFailed(String fqn);
+
+    @Key("loader.action.name")
+    String loaderActionName();
+
+    @Key("loader.action.description")
+    String loaderActionDescription();
+
+    @Key("window.loader.title")
+    String windowLoaderTitle();
 }
