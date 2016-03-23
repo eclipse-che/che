@@ -446,13 +446,6 @@ export class CreateProjectCtrl {
       let importPromise = this.cheAPI.getProject().importProject(workspaceId, projectName, projectData.source);
 
       importPromise.then(() => {
-        // add commands if there are some that have been defined
-        let commands = projectData.project.commands;
-        if (commands && commands.length > 0) {
-          this.addCommand(workspaceId, projectName, commands, 0, deferredAddCommand);
-        } else {
-          deferredAddCommand.resolve('no commands to add');
-        }
         deferredImport.resolve();
       }, (error) => {
         deferredImport.reject(error);
@@ -516,6 +509,13 @@ export class CreateProjectCtrl {
                   projectDetails.type = firstMatchingType;
                   let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
                   updateProjectPromise.then(() => {
+                    // add commands if there are some that have been defined
+                    let commands = projectData.project.commands;
+                    if (commands && commands.length > 0) {
+                      this.addCommand(workspaceId, projectName, commands, 0, deferredAddCommand);
+                    } else {
+                      deferredAddCommand.resolve('no commands to add');
+                    }
                     deferredResolve.resolve();
                   });
                 } else {
