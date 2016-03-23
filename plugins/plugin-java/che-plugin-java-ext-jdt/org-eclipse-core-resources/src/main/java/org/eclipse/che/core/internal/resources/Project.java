@@ -297,13 +297,14 @@ public class Project extends Container implements IProject {
     }
 
     @Override
-    public void setDescription(IProjectDescription iProjectDescription, IProgressMonitor iProgressMonitor) throws CoreException {
-        throw new UnsupportedOperationException();
+    public void setDescription(IProjectDescription description, IProgressMonitor monitor) throws CoreException {
+        // funnel all operations to central method
+        setDescription(description, IResource.KEEP_HISTORY, monitor);
     }
 
     @Override
     public void setDescription(IProjectDescription iProjectDescription, int i, IProgressMonitor iProgressMonitor) throws CoreException {
-        throw new UnsupportedOperationException();
+        //ignore
     }
 
     @Override
