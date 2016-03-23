@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lifecycleMappingMetadata>
+  <pluginExecutions>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <versionRange>1.8</versionRange>
+        <goals>
+          <goal>run</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <ignore />
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <versionRange>1.4.0</versionRange>
+        <goals>
+          <goal>java</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <ignore />
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <groupId>com.google.code.sortpom</groupId>
+        <artifactId>maven-sortpom-plugin</artifactId>
+        <versionRange>2.3.0</versionRange>
+        <goals>
+          <goal>verify</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <ignore />
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <groupId>org.eclipse.che.core</groupId>
+        <artifactId>che-core-api-dto-maven-plugin</artifactId>
+        <versionRange>4.0.0-RC14-SNAPSHOT</versionRange>
+        <goals>
+          <goal>generate</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <ignore />
+      </action>
+    </pluginExecution>
+    <pluginExecution>
+      <pluginExecutionFilter>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <versionRange>3.3</versionRange>
+        <goals>
+          <goal>testCompile</goal>
+          <goal>compile</goal>
+        </goals>
+      </pluginExecutionFilter>
+      <action>
+        <configurator>
+          <id>org.eclipse.m2e.jdt.javaConfigurator</id>
+        </configurator>
+      </action>
+    </pluginExecution>
+  </pluginExecutions>
+</lifecycleMappingMetadata>
