@@ -72,7 +72,6 @@ public class RenameRefactoringTest extends RefactoringTest {
         assertThat(refactoring).isNotNull();
         assertThat(refactoring.getSessionId()).isNotNull().isNotEmpty();
         assertThat(refactoring.getLinkedModeModel()).isNotNull();
-        assertThat(refactoring.isMastShowWizard()).isFalse();
     }
 
     @Test
@@ -108,7 +107,6 @@ public class RenameRefactoringTest extends RefactoringTest {
         assertThat(refactoring).isNotNull();
         assertThat(refactoring.getSessionId()).isNotNull().isNotEmpty();
         assertThat(refactoring.getLinkedModeModel()).isNull();
-        assertThat(refactoring.isMastShowWizard()).isTrue();
         assertThat(refactoring.getWizardType()).isEqualTo(RenameRefactoringSession.RenameWizard.PACKAGE);
     }
 
@@ -138,7 +136,6 @@ public class RenameRefactoringTest extends RefactoringTest {
         assertThat(refactoring).isNotNull();
         assertThat(refactoring.getSessionId()).isNotNull().isNotEmpty();
         assertThat(refactoring.getLinkedModeModel()).isNull();
-        assertThat(refactoring.isMastShowWizard()).isTrue();
         assertThat(refactoring.getWizardType()).isEqualTo(RenameRefactoringSession.RenameWizard.TYPE);
     }
 

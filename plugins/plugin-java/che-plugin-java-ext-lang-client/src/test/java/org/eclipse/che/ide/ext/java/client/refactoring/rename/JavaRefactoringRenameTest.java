@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
-import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
@@ -55,9 +54,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,7 +86,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alexander Andrinko
  */
-@RunWith(GwtMockitoTestRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class JavaRefactoringRenameTest {
 
     private static final String TEXT                 = "some text for test";
@@ -163,19 +164,11 @@ public class JavaRefactoringRenameTest {
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>             refactoringErrorCaptor;
 
+    @InjectMocks
     private JavaRefactoringRename refactoringRename;
 
     @Before
     public void setUp() {
-        refactoringRename = new JavaRefactoringRename(renamePresenter,
-                                                      refactoringUpdater,
-                                                      locale,
-                                                      refactoringServiceClient,
-                                                      dtoFactory,
-                                                      eventBus,
-                                                      dialogFactory,
-                                                      notificationManager);
-
         when(dtoFactory.createDto(CreateRenameRefactoring.class)).thenReturn(createRenameRefactoringDto);
         when(dtoFactory.createDto(LinkedRenameRefactoringApply.class)).thenReturn(linkedRenameRefactoringApplyDto);
         when(textEditor.getEditorInput()).thenReturn(editorInput);
@@ -234,14 +227,13 @@ public class JavaRefactoringRenameTest {
     @Test
     public void renameRefactoringShouldBeAppliedSuccessAndShowWizard() throws OperationException {
         when(result.getSeverity()).thenReturn(OK);
-        when(session.isMastShowWizard()).thenReturn(true);
 
         refactoringRename.refactor(textEditor);
+        refactoringRename.refactor(textEditor);
 
-        verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
-        verify(createRenamePromise).then(renameRefCaptor.capture());
+        verify(refactoringServiceClient, times(2)).createRenameRefactoring(createRenameRefactoringDto);
+        verify(createRenamePromise, times(2)).then(renameRefCaptor.capture());
         renameRefCaptor.getValue().apply(session);
-        verify(session).isMastShowWizard();
         verify(renamePresenter).show(session);
     }
 
@@ -251,7 +243,6 @@ public class JavaRefactoringRenameTest {
         MessageDialog dialog = Mockito.mock(MessageDialog.class);
 
         when(result.getSeverity()).thenReturn(OK);
-        when(session.isMastShowWizard()).thenReturn(true);
         when(locale.renameRename()).thenReturn("renameTitle");
         when(locale.renameOperationUnavailable()).thenReturn("renameBody");
         when(dialogFactory.createMessageDialog(anyString(), anyString(), anyObject())).thenReturn(dialog);
@@ -352,8 +343,7 @@ public class JavaRefactoringRenameTest {
         verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);
         verify(createRenamePromise).then(renameRefCaptor.capture());
         renameRefCaptor.getValue().apply(session);
-        verify(session).isMastShowWizard();
-        verify(session, times(2)).getLinkedModeModel();
+        verify(session).getLinkedModeModel();
 
         verify(linkedMode).addListener(inputArgumentCaptor.capture());
         inputArgumentCaptor.getValue().onLinkedModeExited(true, 0, 1);
