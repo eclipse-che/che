@@ -13,13 +13,10 @@ package org.eclipse.che.wsagent.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
-
-import javax.inject.Singleton;
 
 /** @author andrew00x */
 @DynaModule
@@ -27,10 +24,6 @@ public class ApiServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
-
-        bind(CheCorsFilter.class).in(Singleton.class);
-        filter("/*").through(CheCorsFilter.class);
-
         filter("/ext/*").through(SingleEnvironmentFilter.class);
 //        serve("/ext/*").with(GuiceEverrestServlet.class);
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);

@@ -12,9 +12,9 @@ package org.eclipse.che.ide.projectimport.local;
 
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -40,30 +40,30 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
     private final LocalZipImporterPageView      view;
     private final DtoFactory                    dtoFactory;
     private final String                        workspaceId;
+    private final String                        extPath;
     private final EventBus                      eventBus;
     private final ProjectServiceClient          projectServiceClient;
     private final ProjectNotificationSubscriber projectNotificationSubscriber;
-    private final WsAgentUrlProvider            urlProvider;
 
     @Inject
     public LocalZipImporterPagePresenter(LocalZipImporterPageView view,
                                          DtoFactory dtoFactory,
                                          CoreLocalizationConstant locale,
                                          AppContext appContext,
+                                         @Named("cheExtensionPath") String extPath,
                                          EventBus eventBus,
                                          ProjectServiceClient projectServiceClient,
-                                         ProjectNotificationSubscriber projectNotificationSubscriber,
-                                         WsAgentUrlProvider urlProvider) {
+                                         ProjectNotificationSubscriber projectNotificationSubscriber) {
         this.view = view;
-        this.view.setDelegate(this);
         this.locale = locale;
         this.dtoFactory = dtoFactory;
         this.workspaceId = appContext.getWorkspace().getId();
+        this.extPath = extPath;
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.projectServiceClient = projectServiceClient;
         this.projectNotificationSubscriber = projectNotificationSubscriber;
-        this.urlProvider = urlProvider;
+        this.view.setDelegate(this);
     }
 
     public void show() {
@@ -129,7 +129,7 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
         projectNotificationSubscriber.subscribe(projectName);
 
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(urlProvider.get() + "/project/" + workspaceId + "/upload/zipproject/" + projectName + "?force=false");
+        view.setAction(extPath + "/project/" + workspaceId + "/upload/zipproject/" + projectName + "?force=false");
         view.submit();
         showProcessing(true);
     }
