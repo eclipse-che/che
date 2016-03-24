@@ -67,12 +67,6 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
     @Override
     public void closeDialog() {
         this.hide();
-        footer.onClose();
-    }
-
-    @Override
-    protected void onClose() {
-        footer.onClose();
     }
 
     @Override
@@ -91,12 +85,12 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
 
     @Override
     public boolean isOkButtonInFocus() {
-        return footer.isOkButtonInFocus();
+        return isWidgetFocused(footer.okButton);
     }
 
     @Override
     public boolean isCancelButtonInFocus() {
-        return footer.isCancelButtonInFocus();
+        return isWidgetFocused(footer.cancelButton);
     }
 
     /** The UI binder interface for this components. */

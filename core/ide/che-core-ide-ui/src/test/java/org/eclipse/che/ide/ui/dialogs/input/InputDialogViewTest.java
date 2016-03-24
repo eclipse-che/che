@@ -47,18 +47,4 @@ public class InputDialogViewTest extends BaseTest {
 
         verify(footer).setDelegate(eq(actionDelegate));
     }
-
-    @Test
-    public void onCloseTest() {
-        view.onClose();
-
-        verify(footer).onClose();
-    }
-
-    @Test
-    public void closeDialogTest() {
-        view.closeDialog();
-
-        verify(footer).onClose();
-    }
 }

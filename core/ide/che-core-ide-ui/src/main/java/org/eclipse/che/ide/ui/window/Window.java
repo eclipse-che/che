@@ -21,6 +21,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -196,6 +197,13 @@ public abstract class Window implements IsWidget {
      */
     public void focusLastFocusedElement() {
         view.focusLastFocusedElement();
+    }
+
+    /**
+     * Returns {@code true} if widget is in the focus and {@code false} - otherwise.
+     */
+    public boolean isWidgetFocused(FocusWidget widget) {
+        return view.isElementFocused(widget.getElement());
     }
 
     /**

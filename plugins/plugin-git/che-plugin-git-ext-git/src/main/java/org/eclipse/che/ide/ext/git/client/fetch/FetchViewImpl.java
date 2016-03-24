@@ -16,6 +16,7 @@ import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -36,7 +37,7 @@ import java.util.List;
 /**
  * The implementation of {@link FetchView}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class FetchViewImpl extends Window implements FetchView {
@@ -97,6 +98,18 @@ public class FetchViewImpl extends Window implements FetchView {
             }
         });
         addButtonToFooter(btnFetch);
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnFetch)) {
+            delegate.onFetchClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+        }
     }
 
     /** {@inheritDoc} */
@@ -173,8 +186,14 @@ public class FetchViewImpl extends Window implements FetchView {
 
     /** {@inheritDoc} */
     @Override
-    public void setEnableFetchButton(boolean enabled) {
+    public void setEnableFetchButton(final boolean enabled) {
         btnFetch.setEnabled(enabled);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                btnFetch.setFocus(enabled);
+            }
+        });
     }
 
     /** {@inheritDoc} */

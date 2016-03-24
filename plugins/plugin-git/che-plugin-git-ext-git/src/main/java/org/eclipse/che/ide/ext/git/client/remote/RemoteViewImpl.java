@@ -57,13 +57,14 @@ public class RemoteViewImpl extends Window implements RemoteView {
     @UiField(provided = true)
     CellTable<Remote> repositories;
 
-    private Remote                  selectedObject;
+    private       Remote                  selectedObject;
     @UiField(provided = true)
-    final   GitResources            res;
+    final         GitResources            res;
     @UiField(provided = true)
-    final   GitLocalizationConstant locale;
-    private ActionDelegate          delegate;
-    private boolean                 isShown;
+    final         GitLocalizationConstant locale;
+    private       ActionDelegate          delegate;
+    private       boolean                 isShown;
+    private final DialogFactory           dialogFactory;
 
     /** Create view. */
     @Inject
@@ -73,6 +74,7 @@ public class RemoteViewImpl extends Window implements RemoteView {
                              final DialogFactory dialogFactory) {
         this.res = resources;
         this.locale = locale;
+        this.dialogFactory = dialogFactory;
         this.ensureDebugId("git-remotes-remotes-window");
 
         initRepositoriesTable(ideResources);
@@ -104,17 +106,38 @@ public class RemoteViewImpl extends Window implements RemoteView {
 
             @Override
             public void onClick(ClickEvent event) {
-                dialogFactory.createConfirmDialog(locale.deleteRemoteRepositoryTitle(),
-                                                  locale.deleteRemoteRepositoryQuestion(selectedObject.getName()),
-                                                  new ConfirmCallback() {
-                                                      @Override
-                                                      public void accepted() {
-                                                          delegate.onDeleteClicked();
-                                                      }
-                                                  }, null).show();
+                onDeleteClicked();
             }
         });
         addButtonToFooter(btnDelete);
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnClose)) {
+            delegate.onCloseClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnAdd)) {
+            delegate.onAddClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnDelete)) {
+            onDeleteClicked();
+        }
+    }
+
+    private void onDeleteClicked() {
+        dialogFactory.createConfirmDialog(locale.deleteRemoteRepositoryTitle(),
+                                          locale.deleteRemoteRepositoryQuestion(selectedObject.getName()),
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  delegate.onDeleteClicked();
+                                              }
+                                          }, null).show();
     }
 
     /**
@@ -195,7 +218,7 @@ public class RemoteViewImpl extends Window implements RemoteView {
     @Override
     public void showDialog() {
         this.isShown = true;
-        this.show();
+        this.show(btnAdd);
     }
 
     /** {@inheritDoc} */

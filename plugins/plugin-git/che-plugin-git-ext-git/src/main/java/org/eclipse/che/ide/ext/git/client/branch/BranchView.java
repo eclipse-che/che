@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * The view of {@link BranchPresenter}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 public interface BranchView extends View<BranchView.ActionDelegate> {
     /** Needs for delegate some function into Branch view. */
@@ -85,13 +85,6 @@ public interface BranchView extends View<BranchView.ActionDelegate> {
 
     /** Close dialog. */
     void close();
-
-    /**
-     * Returns whether the view is shown.
-     *
-     * @return <code>true</code> if the view is shown, and
-     *         <code>false</code> otherwise
-     */
 
     /** Show dialog. */
     void showDialogIfClosed();

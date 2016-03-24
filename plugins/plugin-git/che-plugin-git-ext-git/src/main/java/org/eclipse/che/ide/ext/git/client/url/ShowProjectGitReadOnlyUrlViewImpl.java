@@ -91,6 +91,13 @@ public class ShowProjectGitReadOnlyUrlViewImpl extends Window implements ShowPro
         buttonBuilder.withResourceWidget(localUrl).build();
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnClose)) {
+            delegate.onCloseClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setLocaleUrl(@NotNull String url) {
@@ -126,7 +133,7 @@ public class ShowProjectGitReadOnlyUrlViewImpl extends Window implements ShowPro
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.show();
+        this.show(btnClose);
     }
 
     /** {@inheritDoc} */

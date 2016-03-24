@@ -31,7 +31,7 @@ import javax.validation.constraints.NotNull;
 /**
  * The implementation of {@link AddRemoteRepositoryView}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepositoryView {
@@ -88,6 +88,18 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
         addButtonToFooter(btnOk);
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnOk)) {
+            delegate.onOkClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @NotNull
     @Override
@@ -129,7 +141,7 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.show();
+        this.show(name);
     }
 
     /** {@inheritDoc} */
@@ -143,8 +155,4 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
         delegate.onValueChanged();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }
