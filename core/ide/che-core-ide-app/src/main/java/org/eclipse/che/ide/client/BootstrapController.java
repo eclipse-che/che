@@ -28,6 +28,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
+import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -55,7 +56,6 @@ public class BootstrapController {
     private final ProductInfoDataProvider      productInfoDataProvider;
     private final Provider<AppStateManager>    appStateManagerProvider;
     private final AppContext                   appContext;
-    private final Provider<DevMachineLauncher> devMachineLauncherProvider;
 
     @Inject
     public BootstrapController(Provider<WorkspacePresenter> workspaceProvider,
@@ -64,15 +64,13 @@ public class BootstrapController {
                                ProductInfoDataProvider productInfoDataProvider,
                                Provider<AppStateManager> appStateManagerProvider,
                                AppContext appContext,
-                               DtoRegistrar dtoRegistrar,
-                               Provider<DevMachineLauncher> devMachineLauncherProvider) {
+                               DtoRegistrar dtoRegistrar) {
         this.workspaceProvider = workspaceProvider;
         this.extensionInitializer = extensionInitializer;
         this.eventBus = eventBus;
         this.productInfoDataProvider = productInfoDataProvider;
         this.appStateManagerProvider = appStateManagerProvider;
         this.appContext = appContext;
-        this.devMachineLauncherProvider = devMachineLauncherProvider;
 
         appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
         dtoRegistrar.registerDtoProviders();
@@ -89,13 +87,8 @@ public class BootstrapController {
     private void startWsAgentComponents(EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
             @Override
-            public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-                devMachineLauncherProvider.get().startDevMachine(new DevMachineLauncher.MachineStartedCallback() {
-                    @Override
-                    public void onStarted() {
-                        startWsAgentComponents(components.values().iterator());
-                    }
-                });
+            public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+                startWsAgentComponents(components.values().iterator());
             }
         });
     }

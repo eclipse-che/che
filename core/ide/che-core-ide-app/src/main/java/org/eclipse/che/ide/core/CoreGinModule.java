@@ -33,7 +33,6 @@ import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClientImpl;
 import org.eclipse.che.api.machine.gwt.client.RecipeServiceClient;
 import org.eclipse.che.api.machine.gwt.client.RecipeServiceClientImpl;
-import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.project.gwt.client.ProjectImportersServiceClient;
 import org.eclipse.che.api.project.gwt.client.ProjectImportersServiceClientImpl;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
@@ -422,8 +421,6 @@ public class CoreGinModule extends AbstractGinModule {
 
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
-
-        bind(WsAgentUrlProvider.class).to(WsAgentURLProviderImpl.class).in(Singleton.class);
     }
 
     /** Configures binding for Editor API */
@@ -466,10 +463,10 @@ public class CoreGinModule extends AbstractGinModule {
         return partAgentPresenter.getPartStackHandler();
     }
 
-    @Named("ws.agent.path")
     @Provides
+    @Named("cheExtensionPath")
     @Singleton
-    public String wsAgentPath() {
-        return Config.getWsAgentPath();
+    protected String getJavaCAPath() {
+        return Config.getCheExtensionPath();
     }
 }

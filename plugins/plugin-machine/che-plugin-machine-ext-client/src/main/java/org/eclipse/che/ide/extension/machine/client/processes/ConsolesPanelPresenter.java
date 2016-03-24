@@ -26,13 +26,15 @@ import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
+import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -62,6 +64,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter.TerminalStateListener;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -78,10 +82,8 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 @Singleton
 public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPanelView.ActionDelegate,
-                                                                     HasView,
-                                                                     ProcessFinishedHandler,
-                                                                     OutputConsole.ConsoleOutputListener,
-                                                                     WorkspaceStoppedHandler {
+        HasView, ProcessFinishedHandler, OutputConsole.ConsoleOutputListener, WorkspaceStartedHandler, WorkspaceStoppedHandler {
+
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
     public static final String SSH_PORT = "22";
@@ -100,12 +102,12 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     private final WorkspaceAgent              workspaceAgent;
     private final CommandTypeRegistry         commandTypeRegistry;
 
-    ProcessTreeNode rootNode;
-    ProcessTreeNode selectedTreeNode;
+    ProcessTreeNode                rootNode;
+    ProcessTreeNode                selectedTreeNode;
     Map<String, TerminalPresenter> terminals = new HashMap<>();
 
-    Map<String, OutputConsole> consoles        = new HashMap<>();
-    Map<OutputConsole, String> consoleCommands = new HashMap<>();
+    Map<String, OutputConsole>     consoles = new HashMap<>();
+    Map<OutputConsole, String>     consoleCommands = new HashMap<>();
 
     @Inject
     public ConsolesPanelPresenter(ConsolesPanelView view,
@@ -153,6 +155,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         });
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
@@ -274,13 +277,12 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
             commandId = processTreeNode.getId();
             view.hideProcessOutput(commandId);
         } else {
-            ProcessTreeNode commandNode =
-                    new ProcessTreeNode(COMMAND_NODE, machineTreeNode, outputConsoleTitle, outputConsole.getTitleIcon(), null);
+            ProcessTreeNode commandNode = new ProcessTreeNode(COMMAND_NODE, machineTreeNode, outputConsoleTitle, outputConsole.getTitleIcon(), null);
             commandId = commandNode.getId();
             view.addProcessNode(commandNode);
             addChildToMachineNode(commandNode, machineTreeNode);
         }
-
+        
         updateCommandOutput(commandId, outputConsole);
 
         resfreshStopButtonState(commandId);
@@ -319,7 +321,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
             onAddTerminal(selectedTreeNode.getId());
         } else {
             if (selectedTreeNode.getParent() != null &&
-                selectedTreeNode.getParent().getType() == MACHINE_NODE) {
+                    selectedTreeNode.getParent().getType() == MACHINE_NODE) {
                 onAddTerminal(selectedTreeNode.getParent().getId());
             }
         }
@@ -500,14 +502,14 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         int neighborIndex = processIndex > 0 ? processIndex - 1 : processIndex + 1;
         ProcessTreeNode neighborNode = view.getNodeByIndex(neighborIndex);
         String neighborNodeId = neighborNode.getId();
-
+        
         removeChildFromMachineNode(node, parentNode);
         view.selectNode(neighborNode);
         resfreshStopButtonState(neighborNodeId);
         view.showProcessOutput(neighborNodeId);
         view.hideProcessOutput(processId);
     }
-
+    
     private void resfreshStopButtonState(String selectedNodeId) {
         if (selectedNodeId == null) {
             return;
@@ -584,6 +586,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         if (command != null) {
             view.markProcessHasOutput(command);
         }
+    }
+
+    @Override
+    public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
     }
 
     @Override

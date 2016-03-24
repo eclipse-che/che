@@ -43,6 +43,6 @@ public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedHandler> {
     /** {@inheritDoc} */
     @Override
     protected void dispatch(WorkspaceStartedHandler handler) {
-        handler.onWorkspaceStarted(this);
+        handler.onWorkspaceStarted(workspace);
     }
 }

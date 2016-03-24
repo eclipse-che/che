@@ -15,12 +15,12 @@ package org.eclipse.che.api.machine.shared;
  */
 public class Constants {
 
-    public static final String LINK_REL_REMOVE_RECIPE          = "remove recipe";
-    public static final String LINK_REL_GET_RECIPE_SCRIPT      = "get recipe script";
-    public static final String LINK_REL_CREATE_RECIPE          = "create recipe";
-    public static final String LINK_REL_GET_RECIPES_BY_CREATOR = "get created recipes";
-    public static final String LINK_REL_SEARCH_RECIPES         = "search recipes";
-    public static final String LINK_REL_UPDATE_RECIPE          = "update recipe";
+    public static final String LINK_REL_REMOVE_RECIPE              = "remove recipe";
+    public static final String LINK_REL_GET_RECIPE_SCRIPT          = "get recipe script";
+    public static final String LINK_REL_CREATE_RECIPE              = "create recipe";
+    public static final String LINK_REL_GET_RECIPES_BY_CREATOR     = "get created recipes";
+    public static final String LINK_REL_SEARCH_RECIPES             = "search recipes";
+    public static final String LINK_REL_UPDATE_RECIPE              = "update recipe";
 
     public static final String LINK_REL_GET_MACHINE                = "get machine";
     public static final String LINK_REL_GET_MACHINES               = "get machines";
@@ -36,12 +36,10 @@ public class Constants {
     public static final String LINK_REL_GET_MACHINE_LOGS_CHANNEL   = "get machine logs channel";
     public static final String LINK_REL_GET_MACHINE_STATUS_CHANNEL = "get machine status channel";
 
-    public static final String WSAGENT_REFERENCE       = "wsagent";
-    public static final String WSAGENT_DEBUG_REFERENCE = "wsagent.debug";
+    public static final String WSAGENT_REFERENCE                   = "wsagent";
+    public static final String WSAGENT_DEBUG_REFERENCE             = "wsagent.debug";
 
-    public static final String TERMINAL_REFERENCE = "terminal";
-
-    public static final String WS_AGENT_PORT = "4401/tcp";
+    public static final String TERMINAL_REFERENCE                  = "terminal";
 
     private Constants() {
     }
