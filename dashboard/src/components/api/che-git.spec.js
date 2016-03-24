@@ -79,7 +79,7 @@ describe('CheGit', function () {
       factory.fetchLocalUrl(workspaceId, projectPath);
 
       // expecting GETs
-      httpBackend.expectGET('/api/ext/git/' + workspaceId + '/read-only-url?projectPath=' + encodeURIComponent(projectPath));
+      httpBackend.expectGET('/api/git/' + workspaceId + '/read-only-url?projectPath=' + encodeURIComponent(projectPath));
 
       // flush command
       httpBackend.flush();
@@ -122,7 +122,7 @@ describe('CheGit', function () {
       factory.fetchRemoteUrlArray(workspaceId, projectPath);
 
       // expecting POSTs
-      httpBackend.expectPOST('/api/ext/git/' + workspaceId + '/remote-list?projectPath=' + encodeURIComponent(projectPath));
+      httpBackend.expectPOST('/api/git/' + workspaceId + '/remote-list?projectPath=' + encodeURIComponent(projectPath));
 
       // flush command
       httpBackend.flush();

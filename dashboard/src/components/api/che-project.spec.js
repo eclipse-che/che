@@ -139,7 +139,7 @@ describe('CheProject', function () {
       factory.fetchProjectDetails(testProjectDetails.workspaceId, '/' + testProjectDetails.name);
 
       // expecting GET
-      httpBackend.expectGET('/api/ext/project/' + testProjectDetails.workspaceId + '/' + testProjectDetails.name);
+      httpBackend.expectGET('/api/project/' + testProjectDetails.workspaceId + '/' + testProjectDetails.name);
 
       // flush command
       httpBackend.flush();

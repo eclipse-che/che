@@ -63,17 +63,17 @@ export class CheProject {
     this.resolveMap = new Map();
 
     // remote call
-    this.remoteProjectsAPI = this.$resource('/api/ext/project/:workspaceId', {workspaceId: '@id'}, {
-      import: {method: 'POST', url: '/api/ext/project/:workspaceId/import/:path'},
-      create: {method: 'POST', url: '/api/ext/project/:workspaceId?name=:path'},
-      details: {method: 'GET', url: '/api/ext/project/:workspaceId/:path'},
-      estimate: {method: 'GET', url: '/api/ext/project/:workspaceId/estimate/:path?type=:type'},
-      getPermissions: {method: 'GET', url: '/api/ext/project/:workspaceId/permissions/:path', isArray: true},
-      updatePermissions: {method: 'POST', url: '/api/ext/project/:workspaceId/permissions/:path', isArray: true},
-      rename: {method: 'POST', url: '/api/ext/project/:workspaceId/rename/:path?name=:name'},
-      remove: {method: 'DELETE', url: '/api/ext/project/:workspaceId/:path'},
-      resolve: {method: 'GET', url: '/api/ext/project/:workspaceId/resolve/:path', isArray: true},
-      update: {method: 'PUT', url: '/api/ext/project/:workspaceId/:path'}
+    this.remoteProjectsAPI = this.$resource('/api/project/:workspaceId', {workspaceId: '@id'}, {
+      import: {method: 'POST', url: '/api/project/:workspaceId/import/:path'},
+      create: {method: 'POST', url: '/api/project/:workspaceId?name=:path'},
+      details: {method: 'GET', url: '/api/project/:workspaceId/:path'},
+      estimate: {method: 'GET', url: '/api/project/:workspaceId/estimate/:path?type=:type'},
+      getPermissions: {method: 'GET', url: '/api/project/:workspaceId/permissions/:path', isArray: true},
+      updatePermissions: {method: 'POST', url: '/api/project/:workspaceId/permissions/:path', isArray: true},
+      rename: {method: 'POST', url: '/api/project/:workspaceId/rename/:path?name=:name'},
+      remove: {method: 'DELETE', url: '/api/project/:workspaceId/:path'},
+      resolve: {method: 'GET', url: '/api/project/:workspaceId/resolve/:path', isArray: true},
+      update: {method: 'PUT', url: '/api/project/:workspaceId/:path'}
     });
   }
 
