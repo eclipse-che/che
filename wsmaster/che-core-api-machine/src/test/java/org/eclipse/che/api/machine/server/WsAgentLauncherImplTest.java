@@ -23,6 +23,7 @@ import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -51,7 +52,7 @@ public class WsAgentLauncherImplTest {
     private static final String     MACHINE_ID                    = "machineId";
     private static final String     WS_AGENT_START_CMD_LINE       = "cmdLine";
     private static final String     WS_AGENT_API_ENDPOINT_PATH    = "/some/path/";
-    private static final String     WS_AGENT_PORT                 = WsAgentLauncherImpl.WS_AGENT_PORT;
+    private static final String     WS_AGENT_PORT                 = Constants.WS_AGENT_PORT;
     private static final long       WS_AGENT_MAX_START_TIME_MS    = 1000;
     private static final long       WS_AGENT_PING_DELAY_MS        = 1;
     private static final int        WS_AGENT_PING_CONN_TIMEOUT_MS = 1;

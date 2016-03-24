@@ -13,6 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.machine;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.shared.Constants;
@@ -22,7 +23,6 @@ import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.Server;
-import org.eclipse.che.ide.util.Config;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -39,11 +39,16 @@ public class Machine {
 
     private final MachineDto    descriptor;
     private final EntityFactory entityFactory;
+    private final String        wsAgentPath;
 
     private String activeTabName;
 
     @Inject
-    public Machine(MachineLocalizationConstant locale, EntityFactory entityFactory, @Assisted MachineDto descriptor) {
+    public Machine(@Named("ws.agent.path") String wsAgentPath,
+                   MachineLocalizationConstant locale,
+                   EntityFactory entityFactory,
+                   @Assisted MachineDto descriptor) {
+        this.wsAgentPath = wsAgentPath;
         this.entityFactory = entityFactory;
         this.descriptor = descriptor;
 
@@ -98,7 +103,7 @@ public class Machine {
 
         boolean isSecureConnection = Window.Location.getProtocol().equals("https:");
 
-        return (isSecureConnection ? "wss" : "ws") + extUrl + Config.getCheExtensionPath() + "/ws";
+        return (isSecureConnection ? "wss" : "ws") + extUrl + wsAgentPath + "/ws";
     }
 
     /**

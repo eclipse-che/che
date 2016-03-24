@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,6 @@ import java.net.HttpURLConnection;
 public class WsAgentLauncherImpl implements WsAgentLauncher {
     public static final String WS_AGENT_PROCESS_START_COMMAND = "machine.ws_agent.run_command";
     public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
-    public static final String WS_AGENT_PORT                  = "4401/tcp";
 
     private static final Logger LOG                             = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
@@ -110,7 +110,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     private HttpJsonRequest createPingRequest(Machine devMachine) {
         final String wsAgentPingUrl = UriBuilder.fromUri(devMachine.getRuntime()
                                                                    .getServers()
-                                                                   .get(WS_AGENT_PORT)
+                                                                   .get(Constants.WS_AGENT_PORT)
                                                                    .getUrl())
                                                 .replacePath(wsAgentPingPath)
                                                 .build()
