@@ -266,7 +266,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         pm.createProject(pc, null);
         assertNotNull(projectRegistry.getProject("/nothing/inner"));
-        assertNull(projectRegistry.getProject("/nothing"));
+        assertNotNull(projectRegistry.getProject("/nothing"));
         assertNotNull(pm.getProjectsRoot().getChildFolder("/nothing"));
 
     }
