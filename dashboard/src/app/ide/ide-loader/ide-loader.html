@@ -19,7 +19,9 @@
             </div>
             <div class="che-accordion-body" ng-show="$index>0 && $index<ideLoaderCtrl.getSteps().length-1">
               <che-logs-output che-title="{{ideLoaderCtrl.getSteps()[$index].inProgressText}}"
-                               che-text="{{ideLoaderCtrl.getSteps()[$index].logs}}"></che-logs-output>
+                               che-text="ideLoaderCtrl.getSteps()[$index].logs"
+                               che-scrollback="100"
+                               che-refresh-time="500"></che-logs-output>
             </div>
           </che-accordion>
         </div>
@@ -34,7 +36,6 @@
         </div>
         <div flex="50" layout="column" layout-align="end end">
           <che-link ng-click="ideLoaderCtrl.downloadLogs()" che-link-text="Problem? download logs"
-                    ng-show="ideLoaderCtrl.getSteps()[ideLoaderCtrl.getCurrentStep()].hasError"
                     class="ide-loader-download-link"></che-link>
         </div>
       </div>
