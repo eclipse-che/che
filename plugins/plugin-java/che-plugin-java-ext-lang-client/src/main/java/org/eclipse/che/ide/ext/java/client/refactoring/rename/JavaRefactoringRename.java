@@ -119,43 +119,61 @@ public class JavaRefactoringRename implements FileEventHandler {
             return;
         }
 
-        linkedEditor = (HasLinkedMode)textEditorPresenter;
-
-        if (!isActiveLinkedEditor) {
+        if (isActiveLinkedEditor) {
+            createRenameSession();
+        } else {
             textEditor = textEditorPresenter;
+
+            createLinkedRenameSession();
         }
 
-        final CreateRenameRefactoring createRenameRefactoring = createRenameRefactoringDto(textEditor);
+        isActiveLinkedEditor = !isActiveLinkedEditor;
 
+        linkedEditor = (HasLinkedMode)textEditorPresenter;
         textEditorPresenter.setFocus();
+    }
 
-        Promise<RenameRefactoringSession> createRenamePromise = refactoringServiceClient.createRenameRefactoring(createRenameRefactoring);
+    private void createRenameSession() {
+        final CreateRenameRefactoring refactoringSession = createRenameRefactoringDto(textEditor, false);
+
+        Promise<RenameRefactoringSession> createRenamePromise = refactoringServiceClient.createRenameRefactoring(refactoringSession);
         createRenamePromise.then(new Operation<RenameRefactoringSession>() {
             @Override
             public void apply(RenameRefactoringSession session) throws OperationException {
-                if (session.isMastShowWizard() || isActiveLinkedEditor) {
-                    renamePresenter.show(session);
-                    if (mode != null) {
-                        mode.exitLinkedMode(false);
-                    }
-                } else if (session.getLinkedModeModel() != null && textEditor instanceof HasLinkedMode) {
-                    isActiveLinkedEditor = true;
-                    activateLinkedModeIntoEditor(session, textEditor.getDocument());
-                } else {
-                    notificationManager.notify(locale.failedToRename(),
-                                               locale.renameErrorEditor(),
-                                               FAIL,
-                                               true,
-                                               textEditor.getEditorInput().getFile().getProject().getProjectConfig());
+                renamePresenter.show(session);
+                if (mode != null) {
+                    mode.exitLinkedMode(false);
                 }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                dialogFactory.createMessageDialog(locale.renameRename(), locale.renameOperationUnavailable(), null).show();
-                if (mode != null) {
-                    mode.exitLinkedMode(false);
-                }
+                showError();
+            }
+        });
+    }
+
+    private void showError() {
+        dialogFactory.createMessageDialog(locale.renameRename(), locale.renameOperationUnavailable(), null).show();
+        if (mode != null) {
+            mode.exitLinkedMode(false);
+        }
+    }
+
+    private void createLinkedRenameSession() {
+        final CreateRenameRefactoring refactoringSession = createRenameRefactoringDto(textEditor, true);
+
+        Promise<RenameRefactoringSession> createRenamePromise = refactoringServiceClient.createRenameRefactoring(refactoringSession);
+        createRenamePromise.then(new Operation<RenameRefactoringSession>() {
+            @Override
+            public void apply(RenameRefactoringSession session) throws OperationException {
+                activateLinkedModeIntoEditor(session, textEditor.getDocument());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                isActiveLinkedEditor = false;
+                showError();
             }
         });
     }
@@ -163,7 +181,7 @@ public class JavaRefactoringRename implements FileEventHandler {
     @Override
     public void onFileOperation(FileEvent event) {
         if (event.getOperationType() == CLOSE && textEditor != null && textEditor.getDocument() != null &&
-                textEditor.getDocument().getFile().getPath().equals(event.getFile().getPath())) {
+            textEditor.getDocument().getFile().getPath().equals(event.getFile().getPath())) {
             isActiveLinkedEditor = false;
         }
     }
@@ -309,11 +327,11 @@ public class JavaRefactoringRename implements FileEventHandler {
     }
 
     @NotNull
-    private CreateRenameRefactoring createRenameRefactoringDto(TextEditor editor) {
+    private CreateRenameRefactoring createRenameRefactoringDto(TextEditor editor, boolean isActiveLinkedMode) {
         CreateRenameRefactoring dto = dtoFactory.createDto(CreateRenameRefactoring.class);
 
         dto.setOffset(editor.getCursorOffset());
-        dto.setRefactorLightweight(!isActiveLinkedEditor);
+        dto.setRefactorLightweight(isActiveLinkedMode);
 
         String fqn = JavaSourceFolderUtil.getFQNForFile(editor.getEditorInput().getFile());
         dto.setPath(fqn);

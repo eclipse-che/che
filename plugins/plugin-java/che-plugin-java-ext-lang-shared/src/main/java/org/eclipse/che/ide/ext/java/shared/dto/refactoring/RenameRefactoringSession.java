@@ -22,13 +22,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.LinkedModeModel;
 public interface RenameRefactoringSession extends RefactoringSession {
 
     /**
-     * if true caller must show rename wizard according to the wizard type
-     */
-    boolean isMastShowWizard();
-
-    void setMastShowWizard(boolean showWizard);
-
-    /**
      * Rename refactoring wizard type
      * @return the wizard type
      */
