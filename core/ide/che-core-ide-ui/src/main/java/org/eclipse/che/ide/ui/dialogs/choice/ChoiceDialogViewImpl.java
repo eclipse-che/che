@@ -55,11 +55,6 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
     }
 
     @Override
-    protected void onClose() {
-        footer.onClose();
-    }
-
-    @Override
     protected void onEnterClicked() {
         delegate.onEnterClicked();
     }
@@ -72,7 +67,6 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
     @Override
     public void closeDialog() {
         this.hide();
-        footer.onClose();
     }
 
     @Override
@@ -101,17 +95,17 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
 
     @Override
     public boolean isFirstButtonInFocus() {
-        return footer.isFirstButtonInFocus();
+        return isWidgetFocused(footer.firstChoiceButton);
     }
 
     @Override
     public boolean isSecondButtonInFocus() {
-        return footer.isSecondButtonInFocus();
+        return isWidgetFocused(footer.secondChoiceButton);
     }
 
     @Override
     public boolean isThirdButtonInFocus() {
-        return footer.isThirdButtonInFocus();
+        return isWidgetFocused(footer.thirdChoiceButton);
     }
 
     /** The UI binder interface for this components. */

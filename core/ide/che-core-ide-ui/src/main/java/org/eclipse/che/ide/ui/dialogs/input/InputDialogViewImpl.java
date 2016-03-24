@@ -80,11 +80,6 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     }
 
     @Override
-    protected void onClose() {
-        footer.onClose();
-    }
-
-    @Override
     protected void onEnterClicked() {
         delegate.onEnterClicked();
     }
@@ -97,7 +92,6 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     @Override
     public void closeDialog() {
         this.hide();
-        footer.onClose();
     }
 
     @Override
@@ -139,12 +133,12 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
 
     @Override
     public boolean isOkButtonInFocus() {
-        return footer.isOkButtonInFocus();
+        return isWidgetFocused(footer.okButton);
     }
 
     @Override
     public boolean isCancelButtonInFocus() {
-        return footer.isCancelButtonInFocus();
+        return isWidgetFocused(footer.cancelButton);
     }
 
     @UiHandler("value")

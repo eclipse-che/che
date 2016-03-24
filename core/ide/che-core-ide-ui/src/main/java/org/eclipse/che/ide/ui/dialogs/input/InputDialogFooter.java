@@ -12,8 +12,6 @@ package org.eclipse.che.ide.ui.dialogs.input;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
 
-import org.eclipse.che.ide.ui.WidgetFocusTracker;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -53,16 +51,11 @@ public class InputDialogFooter implements IsWidget {
 
     /** The action delegate. */
     private       ActionDelegate     actionDelegate;
-    private final WidgetFocusTracker widgetFocusTracker;
 
     @Inject
-    public InputDialogFooter(final @NotNull UILocalizationConstant messages, WidgetFocusTracker widgetFocusTracker) {
+    public InputDialogFooter(final @NotNull UILocalizationConstant messages) {
         this.messages = messages;
         rootPanel = uiBinder.createAndBindUi(this);
-
-        this.widgetFocusTracker = widgetFocusTracker;
-        widgetFocusTracker.subscribe(okButton);
-        widgetFocusTracker.subscribe(cancelButton);
 
         okButton.addStyleName(resources.windowCss().primaryButton());
         okButton.getElement().setId("askValue-dialog-ok");
@@ -105,21 +98,6 @@ public class InputDialogFooter implements IsWidget {
 
     Button getOkButton() {
         return okButton;
-    }
-
-    /** Returns {@code true} if OK button is in the focus and {@code false} - otherwise. */
-    boolean isOkButtonInFocus() {
-        return widgetFocusTracker.isWidgetFocused(okButton);
-    }
-
-    /** Returns {@code true} if Cancel button is in the focus and {@code false} - otherwise. */
-    boolean isCancelButtonInFocus() {
-        return widgetFocusTracker.isWidgetFocused(cancelButton);
-    }
-
-    public void onClose() {
-        widgetFocusTracker.unSubscribe(okButton);
-        widgetFocusTracker.unSubscribe(cancelButton);
     }
 
     @Override

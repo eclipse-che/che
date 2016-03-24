@@ -28,6 +28,9 @@ public class ProjectProblemDialog extends Window {
     @UiField
     SimplePanel message;
 
+    Button configureButton;
+    Button keepBlankButton;
+
     /**
      * Creates new dialog.
      *
@@ -46,14 +49,14 @@ public class ProjectProblemDialog extends Window {
         message.addStyleName(resources.windowCss().label());
         message.getElement().setInnerHTML(question);
 
-        Button configureButton = createButton("Configure...", "problem-dialog-configure", new ClickHandler() {
+        configureButton = createButton("Configure...", "problem-dialog-configure", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 handler.onConfigure();
                 onClose();
             }
         });
-        Button keepBlankButton = createPrimaryButton("Keep Blank", "problem-dialog-keepBlank", new ClickHandler() {
+        keepBlankButton = createPrimaryButton("Keep Blank", "problem-dialog-keepBlank", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 handler.onKeepBlank();
@@ -67,8 +70,16 @@ public class ProjectProblemDialog extends Window {
     /** {@inheritDoc} */
     @Override
     protected void onEnterClicked() {
-        handler.onConfigure();
-        onClose();
+        if (isWidgetFocused(configureButton)) {
+            handler.onConfigure();
+            onClose();
+            return;
+        }
+
+        if (isWidgetFocused(keepBlankButton)) {
+            handler.onKeepBlank();
+            onClose();
+        }
     }
 
     @Override

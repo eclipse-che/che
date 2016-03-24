@@ -87,6 +87,18 @@ public class RemoveFromIndexViewImpl extends Window implements RemoveFromIndexVi
         addButtonToFooter(btnCancel);
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnRemove)) {
+            delegate.onRemoveClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setMessage(@NotNull String message) {
@@ -114,7 +126,7 @@ public class RemoveFromIndexViewImpl extends Window implements RemoveFromIndexVi
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.show();
+        this.show(btnRemove);
     }
 
     /** {@inheritDoc} */
