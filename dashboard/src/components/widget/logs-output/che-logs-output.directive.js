@@ -28,7 +28,7 @@ export class CheLogsOutput {
     // scope values
     this.scope = {
       title: '@cheTitle',
-      rawText: '=cheRawText',
+      rawText: '=cheText',
       scrollback: '@?cheScrollback',
       refreshTime: '@?cheRefreshTime'
     };
@@ -66,6 +66,9 @@ export class CheLogsOutput {
     });
 
     let processText = () => {
+      if (!$scope.rawText || !$scope.rawText.length){
+        return;
+      }
       let lines = $scope.rawText.split(/\n/);
       let removeUntilIdx = lines.length - $scope.scrollback;
       if (removeUntilIdx > 0) {

@@ -45,7 +45,11 @@ class IdeLoaderCtrl {
   }
 
   downloadLogs() {
-    window.open('data:text/csv,' + encodeURIComponent(this.getSteps()[this.getCurrentStep()].logs));
+    let logs = '';
+    this.getSteps().forEach((step) => {
+      logs += step.logs + '\n';
+    });
+    window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 }
 
