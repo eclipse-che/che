@@ -457,28 +457,27 @@ public class JavadocContentAccess2 {
      *         unexpected problem
      */
     private static String findAttachedDocInHierarchy(final IMethod method) throws JavaModelException {
-//		IType type = method.getDeclaringType();
-//		ITypeHierarchy hierarchy = SuperTypeHierarchyCache.getTypeHierarchy(type);
-//		final MethodOverrideTester tester = SuperTypeHierarchyCache.getMethodOverrideTester(type);
-//
-//		return (String)new InheritDocVisitor() {
-//			@Override
-//			public Object visit(IType currType) throws JavaModelException {
-//				IMethod overridden = tester.findOverriddenMethodInType(currType, method);
-//				if (overridden == null)
-//					return InheritDocVisitor.CONTINUE;
-//
-//				if (overridden.getOpenable().getBuffer() == null) { // only if no source available
-//					//TODO: BaseURL for method can be wrong for attached Javadoc from overridden
-//					// (e.g. when overridden is from rt.jar). Fix would be to add baseURL here.
-//					String attachedJavadoc = overridden.getAttachedJavadoc(null);
-//					if (attachedJavadoc != null)
-//						return attachedJavadoc;
-//				}
-//				return CONTINUE;
-//			}
-//		}.visitInheritDoc(type, hierarchy);
-        throw new UnsupportedOperationException();
+		IType type = method.getDeclaringType();
+		ITypeHierarchy hierarchy = SuperTypeHierarchyCache.getTypeHierarchy(type);
+		final MethodOverrideTester tester = SuperTypeHierarchyCache.getMethodOverrideTester(type);
+
+		return (String)new InheritDocVisitor() {
+			@Override
+			public Object visit(IType currType) throws JavaModelException {
+				IMethod overridden = tester.findOverriddenMethodInType(currType, method);
+				if (overridden == null)
+					return InheritDocVisitor.CONTINUE;
+
+				if (overridden.getOpenable().getBuffer() == null) { // only if no source available
+					//TODO: BaseURL for method can be wrong for attached Javadoc from overridden
+					// (e.g. when overridden is from rt.jar). Fix would be to add baseURL here.
+					String attachedJavadoc = overridden.getAttachedJavadoc(null);
+					if (attachedJavadoc != null)
+						return attachedJavadoc;
+				}
+				return CONTINUE;
+			}
+		}.visitInheritDoc(type, hierarchy);
     }
 
     private static void appendEscaped(StringBuffer buf, String text) {
