@@ -47,7 +47,7 @@ public class ProjectTypeComponent implements WsAgentComponent {
 
     @Override
     public void start(final Callback<WsAgentComponent, Exception> callback) {
-        projectTypeService.getProjectTypes(appContext.getWorkspace().getId()).then(new Operation<List<ProjectTypeDto>>() {
+        projectTypeService.getProjectTypes(appContext.getWorkspaceId()).then(new Operation<List<ProjectTypeDto>>() {
             @Override
             public void apply(List<ProjectTypeDto> arg) throws OperationException {
                 projectTypeRegistry.registerAll(arg);

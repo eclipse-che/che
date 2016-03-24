@@ -11,16 +11,11 @@
 package org.eclipse.che.ide.util;
 
 /**
- * A smattering of useful methods.
- *
- * @author Dmytro Nochevnov
- * @author Vitaliy Guliy
  * @author Dmitry Shnurenko
  */
-
 public class Config {
 
-    public static native String getCheExtensionPath() /*-{
+    public static native String getWsAgentPath() /*-{
         try {
             return $wnd.IDE.config.cheExtensionPath;
         } catch (e) {

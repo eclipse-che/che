@@ -12,7 +12,6 @@ package org.eclipse.che.api.git.gwt.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
@@ -48,6 +47,7 @@ import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -85,7 +85,7 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class GitServiceClientImpl implements GitServiceClient{
+public class GitServiceClientImpl implements GitServiceClient {
     public static final String ADD               = "/add";
     public static final String BRANCH_LIST       = "/branch-list";
     public static final String CHECKOUT          = "/checkout";
@@ -119,26 +119,27 @@ public class GitServiceClientImpl implements GitServiceClient{
     private final DtoFactory             dtoFactory;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
-    private final String                 extPath;
+    private final WsAgentUrlProvider     urlProvider;
 
     @Inject
-    protected GitServiceClientImpl(@Named("cheExtensionPath") String extPath,
-                                   LoaderFactory loaderFactory,
+    protected GitServiceClientImpl(LoaderFactory loaderFactory,
                                    WsAgentStateController wsAgentStateController,
                                    DtoFactory dtoFactory,
                                    AsyncRequestFactory asyncRequestFactory,
-                                   DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        this.extPath = extPath;
+                                   DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                   WsAgentUrlProvider urlProvider) {
         this.loader = loaderFactory.newLoader();
         this.wsAgentStateController = wsAgentStateController;
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+        this.urlProvider = urlProvider;
     }
 
     /** {@inheritDoc} */
     @Override
-    public void init(String workspaceId, ProjectConfigDto project, boolean bare, final RequestCallback<Void> callback) throws WebSocketException {
+    public void init(String workspaceId, ProjectConfigDto project, boolean bare, final RequestCallback<Void> callback)
+            throws WebSocketException {
         InitRequest initRequest = dtoFactory.createDto(InitRequest.class);
         initRequest.setBare(bare);
         initRequest.setWorkingDir(project.getName());
@@ -193,7 +194,7 @@ public class GitServiceClientImpl implements GitServiceClient{
     /** {@inheritDoc} */
     @Override
     public void statusText(String workspaceId, ProjectConfigDto project, StatusFormat format, AsyncRequestCallback<String> callback) {
-        String url = extPath + "/git/" + workspaceId + STATUS;
+        String url = urlProvider.get() + "/git/" + workspaceId + STATUS;
         String params = "?projectPath=" + project.getPath() + "&format=" + format;
 
         asyncRequestFactory.createPostRequest(url + params, null)
@@ -238,7 +239,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                                                 .withMessage(message)
                                                 .withAmend(amend)
                                                 .withAll(all);
-        String url = extPath + "/git/" + workspaceId + COMMIT + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + COMMIT + "?projectPath=" + project.getPath();
 
         asyncRequestFactory.createPostRequest(url, commitRequest).loader(loader).send(callback);
     }
@@ -255,7 +256,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                                                 .withAmend(amend)
                                                 .withAll(false)
                                                 .withFiles(files);
-        String url = extPath + "/git/" + workspaceId + COMMIT + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + COMMIT + "?projectPath=" + project.getPath();
 
         asyncRequestFactory.createPostRequest(url, commitRequest).loader(loader).send(callback);
     }
@@ -270,7 +271,7 @@ public class GitServiceClientImpl implements GitServiceClient{
         ConfigRequest configRequest = dtoFactory.createDto(ConfigRequest.class)
                                                 .withGetAll(all)
                                                 .withConfigEntry(entries);
-        String url = extPath + "/git/" + workspaceId + CONFIG + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + CONFIG + "?projectPath=" + project.getPath();
 
         asyncRequestFactory.createPostRequest(url, configRequest).loader(loader).send(callback);
     }
@@ -284,7 +285,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                      boolean force,
                      AsyncRequestCallback<PushResponse> callback) {
         PushRequest pushRequest = dtoFactory.createDto(PushRequest.class).withRemote(remote).withRefSpec(refSpec).withForce(force);
-        String url = extPath + "/git/" + workspaceId + PUSH + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + PUSH + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, pushRequest).send(callback);
     }
 
@@ -294,7 +295,8 @@ public class GitServiceClientImpl implements GitServiceClient{
                                             .withRemote(remote)
                                             .withRefSpec(refSpec)
                                             .withForce(force);
-        return asyncRequestFactory.createPostRequest(extPath + "/git/" + wsId + PUSH + "?projectPath=" + project.getPath(), pushRequest)
+        return asyncRequestFactory.createPostRequest(urlProvider.get() + "/git/" + wsId + PUSH +
+                                                     "?projectPath=" + project.getPath(), pushRequest)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(PushResponse.class));
     }
 
@@ -309,7 +311,7 @@ public class GitServiceClientImpl implements GitServiceClient{
         if (remoteName != null) {
             remoteListRequest.setRemote(remoteName);
         }
-        String url = extPath + "/git/" + workspaceId + REMOTE_LIST + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + REMOTE_LIST + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, remoteListRequest).loader(loader).send(callback);
     }
 
@@ -320,7 +322,7 @@ public class GitServiceClientImpl implements GitServiceClient{
         if (remoteName != null) {
             remoteListRequest.setRemote(remoteName);
         }
-        String url = extPath + "/git/" + workspaceId + REMOTE_LIST + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + REMOTE_LIST + "?projectPath=" + project.getPath();
         return asyncRequestFactory.createPostRequest(url, remoteListRequest)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(Remote.class));
@@ -333,14 +335,14 @@ public class GitServiceClientImpl implements GitServiceClient{
                            @Nullable String remoteMode,
                            AsyncRequestCallback<List<Branch>> callback) {
         BranchListRequest branchListRequest = dtoFactory.createDto(BranchListRequest.class).withListMode(remoteMode);
-        String url = extPath + "/git/" + workspaceId + BRANCH_LIST + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + BRANCH_LIST + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchListRequest).send(callback);
     }
 
     @Override
     public Promise<Status> status(String workspaceId, ProjectConfigDto project) {
         final String params = "?projectPath=" + project.getPath() + "&format=" + PORCELAIN;
-        final String url = extPath + "/git/" + workspaceId + STATUS + params;
+        final String url = urlProvider.get() + "/git/" + workspaceId + STATUS + params;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .loader(loader)
                                   .header(CONTENTTYPE, APPLICATION_JSON)
@@ -352,7 +354,7 @@ public class GitServiceClientImpl implements GitServiceClient{
     @Override
     public void status(String workspaceId, ProjectConfigDto project, AsyncRequestCallback<Status> callback) {
         String params = "?projectPath=" + project.getPath() + "&format=" + PORCELAIN;
-        String url = extPath + "/git/" + workspaceId + STATUS + params;
+        String url = urlProvider.get() + "/git/" + workspaceId + STATUS + params;
         asyncRequestFactory.createPostRequest(url, null).loader(loader)
                            .header(CONTENTTYPE, APPLICATION_JSON)
                            .header(ACCEPT, APPLICATION_JSON)
@@ -367,7 +369,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                              boolean force,
                              AsyncRequestCallback<String> callback) {
         BranchDeleteRequest branchDeleteRequest = dtoFactory.createDto(BranchDeleteRequest.class).withName(name).withForce(force);
-        String url = extPath + "/git/" + workspaceId + BRANCH_DELETE + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + BRANCH_DELETE + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchDeleteRequest).loader(loader).send(callback);
     }
 
@@ -379,7 +381,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                              String newName,
                              AsyncRequestCallback<String> callback) {
         String params = "?projectPath=" + project.getPath() + "&oldName=" + oldName + "&newName=" + newName;
-        String url = extPath + "/git/" + workspaceId + BRANCH_RENAME + params;
+        String url = urlProvider.get() + "/git/" + workspaceId + BRANCH_RENAME + params;
         asyncRequestFactory.createPostRequest(url, null).loader(loader)
                            .header(CONTENTTYPE, MimeType.APPLICATION_FORM_URLENCODED)
                            .send(callback);
@@ -387,9 +389,10 @@ public class GitServiceClientImpl implements GitServiceClient{
 
     /** {@inheritDoc} */
     @Override
-    public void branchCreate(String workspaceId, ProjectConfigDto project, String name, String startPoint, AsyncRequestCallback<Branch> callback) {
+    public void branchCreate(String workspaceId, ProjectConfigDto project, String name, String startPoint,
+                             AsyncRequestCallback<Branch> callback) {
         BranchCreateRequest branchCreateRequest = dtoFactory.createDto(BranchCreateRequest.class).withName(name).withStartPoint(startPoint);
-        String url = extPath + "/git/" + workspaceId + BRANCH_CREATE + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + BRANCH_CREATE + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchCreateRequest).loader(loader).header(ACCEPT, APPLICATION_JSON).send(callback);
     }
 
@@ -399,7 +402,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                          ProjectConfigDto project,
                          CheckoutRequest checkoutRequest,
                          AsyncRequestCallback<String> callback) {
-        String url = extPath + "/git/" + workspaceId + CHECKOUT + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + CHECKOUT + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, checkoutRequest).loader(loader).send(callback);
     }
 
@@ -411,7 +414,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                        boolean cached,
                        AsyncRequestCallback<String> callback) {
         RmRequest rmRequest = dtoFactory.createDto(RmRequest.class).withItems(items).withCached(cached).withRecursively(true);
-        String url = extPath + "/git/" + workspaceId + REMOVE + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + REMOVE + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, rmRequest).loader(loader).send(callback);
     }
 
@@ -430,15 +433,16 @@ public class GitServiceClientImpl implements GitServiceClient{
         if (filePattern != null) {
             resetRequest.setFilePattern(filePattern);
         }
-        String url = extPath + "/git/" + workspaceId + RESET + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + RESET + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, resetRequest).loader(loader).send(callback);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void log(String workspaceId, ProjectConfigDto project, List<String> fileFilter, boolean isTextFormat, @NotNull AsyncRequestCallback<LogResponse> callback) {
+    public void log(String workspaceId, ProjectConfigDto project, List<String> fileFilter, boolean isTextFormat,
+                    @NotNull AsyncRequestCallback<LogResponse> callback) {
         LogRequest logRequest = dtoFactory.createDto(LogRequest.class).withFileFilter(fileFilter);
-        String url = extPath + "/git/" + workspaceId + LOG + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + LOG + "?projectPath=" + project.getPath();
         if (isTextFormat) {
             asyncRequestFactory.createPostRequest(url, logRequest).send(callback);
         } else {
@@ -454,7 +458,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                           String repositoryURL,
                           AsyncRequestCallback<String> callback) {
         RemoteAddRequest remoteAddRequest = dtoFactory.createDto(RemoteAddRequest.class).withName(name).withUrl(repositoryURL);
-        String url = extPath + "/git/" + workspaceId + REMOTE_ADD + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + REMOTE_ADD + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, remoteAddRequest).loader(loader).send(callback);
     }
 
@@ -464,7 +468,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                              ProjectConfigDto project,
                              String name,
                              AsyncRequestCallback<String> callback) {
-        String url = extPath + "/git/" + workspaceId + REMOTE_DELETE + '/' + name + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + REMOTE_DELETE + '/' + name + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, null).loader(loader).send(callback);
     }
 
@@ -498,7 +502,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                      String remote,
                      AsyncRequestCallback<PullResponse> callback) {
         PullRequest pullRequest = dtoFactory.createDto(PullRequest.class).withRemote(remote).withRefSpec(refSpec);
-        String url = extPath + "/git/" + workspaceId + PULL + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + PULL + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, pullRequest).send(callback);
     }
 
@@ -531,7 +535,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                                 String version,
                                 @NotNull AsyncRequestCallback<ShowFileContentResponse> callback) {
         ShowFileContentRequest showRequest = dtoFactory.createDto(ShowFileContentRequest.class).withFile(file).withVersion(version);
-        String url = extPath + "/git/" + workspaceId + SHOW + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + SHOW + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, showRequest).loader(loader).send(callback);
     }
 
@@ -567,7 +571,7 @@ public class GitServiceClientImpl implements GitServiceClient{
      *         callback
      */
     private void diff(String workspaceId, DiffRequest diffRequest, @NotNull String projectPath, AsyncRequestCallback<String> callback) {
-        String url = extPath + "/git/" + workspaceId + DIFF + "?projectPath=" + projectPath;
+        String url = urlProvider.get() + "/git/" + workspaceId + DIFF + "?projectPath=" + projectPath;
         asyncRequestFactory.createPostRequest(url, diffRequest).loader(loader).send(callback);
     }
 
@@ -578,7 +582,7 @@ public class GitServiceClientImpl implements GitServiceClient{
                       String commit,
                       AsyncRequestCallback<MergeResult> callback) {
         MergeRequest mergeRequest = dtoFactory.createDto(MergeRequest.class).withCommit(commit);
-        String url = extPath + "/git/" + workspaceId + MERGE + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + MERGE + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, mergeRequest).loader(loader)
                            .header(ACCEPT, APPLICATION_JSON)
                            .send(callback);
@@ -587,21 +591,21 @@ public class GitServiceClientImpl implements GitServiceClient{
     /** {@inheritDoc} */
     @Override
     public void getGitReadOnlyUrl(String workspaceId, ProjectConfigDto project, AsyncRequestCallback<String> callback) {
-        String url = extPath + "/git/" + workspaceId + RO_URL + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + RO_URL + "?projectPath=" + project.getPath();
         asyncRequestFactory.createGetRequest(url).send(callback);
     }
 
     /** {@inheritDoc} */
     @Override
     public void getCommitters(String workspaceId, ProjectConfigDto project, AsyncRequestCallback<Commiters> callback) {
-        String url = extPath + "/git/" + workspaceId + COMMITERS + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + COMMITERS + "?projectPath=" + project.getPath();
         asyncRequestFactory.createGetRequest(url).header(ACCEPT, APPLICATION_JSON).send(callback);
     }
 
     /** {@inheritDoc} */
     @Override
     public void deleteRepository(String workspaceId, ProjectConfigDto project, AsyncRequestCallback<Void> callback) {
-        String url = extPath + "/git/" + workspaceId + DELETE_REPOSITORY + "?projectPath=" + project.getPath();
+        String url = urlProvider.get() + "/git/" + workspaceId + DELETE_REPOSITORY + "?projectPath=" + project.getPath();
         asyncRequestFactory.createGetRequest(url).loader(loader)
                            .header(CONTENTTYPE, APPLICATION_JSON).header(ACCEPT, TEXT_PLAIN)
                            .send(callback);
@@ -610,8 +614,7 @@ public class GitServiceClientImpl implements GitServiceClient{
     /** {@inheritDoc} */
     @Override
     public void getUrlVendorInfo(String workspaceId, @NotNull String vcsUrl, @NotNull AsyncRequestCallback<GitUrlVendorInfo> callback) {
-        asyncRequestFactory.createGetRequest(extPath + "/git/" + workspaceId + "/git-service/info?vcsurl=" + vcsUrl)
-                           .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON).send(
-                callback);
+        asyncRequestFactory.createGetRequest(urlProvider.get() + "/git/" + workspaceId + "/git-service/info?vcsurl=" + vcsUrl)
+                           .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON).send(callback);
     }
 }
