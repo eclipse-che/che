@@ -12,8 +12,8 @@ package org.eclipse.che.api.project.gwt.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -41,17 +41,17 @@ public class ProjectTypeServiceClientImpl implements ProjectTypeServiceClient {
     private final LoaderFactory          loaderFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    private final String                 extPath;
+    private final WsAgentUrlProvider     urlProvider;
 
     @Inject
-    protected ProjectTypeServiceClientImpl(@Named("cheExtensionPath") String extPath,
-                                           LoaderFactory loaderFactory,
+    protected ProjectTypeServiceClientImpl(LoaderFactory loaderFactory,
                                            AsyncRequestFactory asyncRequestFactory,
-                                           DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        this.extPath = extPath;
+                                           DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                           WsAgentUrlProvider urlProvider) {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+        this.urlProvider = urlProvider;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ProjectTypeServiceClientImpl implements ProjectTypeServiceClient {
     }
 
     private void getProjectTypes(String workspaceId, @NotNull AsyncCallback<List<ProjectTypeDto>> callback) {
-        final String url = extPath + "/project-type/" + workspaceId;
+        final String url = urlProvider.get() + "/project-type/" + workspaceId;
         asyncRequestFactory.createGetRequest(url)
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Getting info about registered project types..."))
@@ -92,7 +92,7 @@ public class ProjectTypeServiceClientImpl implements ProjectTypeServiceClient {
     }
 
     private void getProjectType(@NotNull String workspaceId, @NotNull String id, @NotNull AsyncCallback<ProjectTypeDto> callback) {
-        final String url = extPath + "/project-type/" + workspaceId + '/' + id;
+        final String url = urlProvider.get() + "/project-type/" + workspaceId + '/' + id;
         asyncRequestFactory.createGetRequest(url)
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Getting info about project type..."))

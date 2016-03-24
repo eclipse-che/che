@@ -26,9 +26,10 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
@@ -41,8 +42,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -247,8 +246,8 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     /** {@inheritDoc} */
     @Override
-    public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
-        showMachines(workspace.getId());
+    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+        showMachines(event.getWorkspace().getId());
     }
 
     /** {@inheritDoc} */

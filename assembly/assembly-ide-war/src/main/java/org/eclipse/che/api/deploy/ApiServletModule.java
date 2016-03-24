@@ -12,16 +12,12 @@ package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
 
-import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.api.local.CheGuiceEverrestServlet;
-import org.eclipse.che.api.machine.server.proxy.MachineExtensionProxyServlet;
 import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.websockets.WSConnectionTracker;
 
 import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
 
 /** @author andrew00x */
 @DynaModule
@@ -30,29 +26,8 @@ public class ApiServletModule extends ServletModule {
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
 
-        final Map<String, String> corsFilterParams = new HashMap<>();
-        corsFilterParams.put("cors.allowed.origins", "*");
-        corsFilterParams.put("cors.allowed.methods", "GET," +
-                                                     "POST," +
-                                                     "HEAD," +
-                                                     "OPTIONS," +
-                                                     "PUT," +
-                                                     "DELETE");
-        corsFilterParams.put("cors.allowed.headers", "Content-Type," +
-                                                     "X-Requested-With," +
-                                                     "accept," +
-                                                     "Origin," +
-                                                     "Access-Control-Request-Method," +
-                                                     "Access-Control-Request-Headers");
-        corsFilterParams.put("cors.support.credentials", "true");
-        // preflight cache is available for 10 minutes
-        corsFilterParams.put("cors.preflight.maxage", "10");
-        bind(CorsFilter.class).in(Singleton.class);
-        filter("/*").through(CorsFilter.class, corsFilterParams);
-
         bind(SingleEnvironmentFilter.class).in(Singleton.class);
         filter("/*").through(SingleEnvironmentFilter.class);
-        serve("/ext/*").with(MachineExtensionProxyServlet.class);
         serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(CheGuiceEverrestServlet.class);
         install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
     }

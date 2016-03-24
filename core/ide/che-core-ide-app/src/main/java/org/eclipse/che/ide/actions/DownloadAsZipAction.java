@@ -12,8 +12,8 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -40,20 +40,18 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class DownloadAsZipAction extends AbstractPerspectiveAction {
-
-    private final String BASE_URL;
-
     private final AppContext               appContext;
-    private       DownloadContainer        downloadContainer;
+    private final DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
+    private final WsAgentUrlProvider       urlProvider;
 
     @Inject
-    public DownloadAsZipAction(@Named("cheExtensionPath") String extPath,
-                               AppContext appContext,
+    public DownloadAsZipAction(AppContext appContext,
                                CoreLocalizationConstant locale,
                                Resources resources,
                                DownloadContainer downloadContainer,
-                               ProjectExplorerPresenter projectExplorer) {
+                               ProjectExplorerPresenter projectExplorer,
+                               WsAgentUrlProvider urlProvider) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
               locale.downloadProjectAsZipName(),
               locale.downloadProjectAsZipDescription(),
@@ -62,14 +60,13 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
         this.appContext = appContext;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
-
-        BASE_URL = extPath + "/project/" + appContext.getWorkspace().getId() + "/export/";
+        this.urlProvider = urlProvider;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        String url = BASE_URL + getPath();
+        String url = urlProvider.get() + "/project/" + appContext.getWorkspaceId() + "/export/" + getPath();
         downloadContainer.setUrl(url);
     }
 
