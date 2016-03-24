@@ -209,12 +209,6 @@
             <fileMode>755</fileMode>
         </file>
         <file>
-            <source>${project.basedir}/src/assembly/tomcat/bin/setenv.sh</source>
-            <outputDirectory>tomcat/bin</outputDirectory>
-            <destName>setenv.sh</destName>
-            <fileMode>755</fileMode>
-        </file>
-        <file>
             <source>${project.basedir}/src/assembly/tomcat/conf/server.xml</source>
             <outputDirectory>tomcat/conf</outputDirectory>
             <destName>server.xml</destName>
