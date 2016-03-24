@@ -1002,6 +1002,7 @@ public class ProjectServiceTest {
         Assert.assertTrue(folder.isFolder());
     }
 
+    // any folder created in the root of the workspace automatically becomes project
     @Test
     public void testCreateFolderInRoot() throws Exception {
         String folder = "my_folder";
@@ -1011,7 +1012,7 @@ public class ProjectServiceTest {
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 201, "Error: " + response.getEntity());
         ItemReference fileItem = (ItemReference)response.getEntity();
-        assertEquals(fileItem.getType(), "folder");
+        assertEquals(fileItem.getType(), "project");
         assertEquals(fileItem.getName(), folder);
         assertEquals(fileItem.getPath(), "/" + folder);
         validateFolderLinks(fileItem);
