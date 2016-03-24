@@ -25,8 +25,8 @@ export class CheRemoteProject {
 
     // remote call
     this.remoteProjectsAPI = this.$resource('', {workspaceId: '@id'}, {
-      import: {method: 'POST', url: authData.url + '/api/ext/project/:workspaceId/import/:path?token=' + authData.token},
-      update: {method: 'PUT', url: authData.url + '/api/ext/project/:workspaceId/:path?token=' + authData.token}
+      import: {method: 'POST', url: authData.url + '/api/project/:workspaceId/import/:path?token=' + authData.token},
+      update: {method: 'PUT', url: authData.url + '/api/project/:workspaceId/:path?token=' + authData.token}
     });
 
   }

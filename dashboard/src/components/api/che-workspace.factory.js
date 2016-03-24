@@ -316,7 +316,7 @@ export class CheWorkspace {
       contextPath = 'api';
     }
 
-    return 'ws://' + wsagentServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
+    return 'ws://' + wsagentServerAddress + '/' + contextPath + '/ws/' + workspaceId;
 
   }
 
