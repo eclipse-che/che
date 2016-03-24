@@ -52,10 +52,13 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
@@ -391,6 +394,63 @@ public class GithubImporterPagePresenterTest {
         presenter.projectDescriptionChanged(description);
 
         verify(dataObject).setDescription(eq(description));
+    }
+
+    @Test
+    public void keepDirectorySelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("directory");
+
+        presenter.keepDirectorySelected(true);
+
+        assertEquals("directory", parameters.get("keepDirectory"));
+        verify(dataObject).withType("blank");
+        verify(view).highlightDirectoryNameField(eq(false));
+        verify(view).focusDirectoryNameFiend();
+    }
+
+    @Test
+    public void keepDirectoryUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("keepDirectory", "directory");
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.keepDirectorySelected(false);
+
+        assertTrue(parameters.isEmpty());
+        verify(dataObject).withType(eq(null));
+        verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void keepDirectoryNameChangedAndKeepDirectorySelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("directory");
+        when(view.keepDirectory()).thenReturn(true);
+
+        presenter.keepDirectoryNameChanged("directory");
+
+        assertEquals("directory", parameters.get("keepDirectory"));
+        verify(dataObject, never()).setPath(any());
+        verify(dataObject).withType(eq("blank"));
+        verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void keepDirectoryNameChangedAndKeepDirectoryUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("keepDirectory", "directory");
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.keepDirectory()).thenReturn(false);
+
+        presenter.keepDirectoryNameChanged("directory");
+
+        assertTrue(parameters.isEmpty());
+        verify(dataObject, never()).setPath(any());
+        verify(dataObject).withType(eq(null));
+        verify(view).highlightDirectoryNameField(eq(false));
     }
 
     @Test

@@ -338,7 +338,7 @@ public class GitProjectImporter implements ProjectImporter {
         final List<Branch> remotes = git.branchList(dtoFactory.createDto(BranchListRequest.class)
                                                               .withListMode(BranchListRequest.LIST_REMOTE));
         final Optional<Branch> first = remotes.stream()
-                                              .filter(br -> branchName.equals(br.getDisplayName()))
+                                              .filter(br -> branchName.equals(br.getName().substring(br.getName().lastIndexOf("/") + 1)))
                                               .findFirst();
         if (!first.isPresent()) {
             throw new GitException("Failed to get remote branch name", FAILED_CHECKOUT);
