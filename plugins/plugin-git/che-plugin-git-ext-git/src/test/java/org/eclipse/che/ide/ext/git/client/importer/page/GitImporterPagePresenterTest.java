@@ -23,8 +23,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -243,13 +247,61 @@ public class GitImporterPagePresenterTest {
         verify(dataObject).setDescription(eq(description));
     }
 
-    /**
-     * Directory name field must become enabled when Keep directory is checked.
-     */
     @Test
     public void keepDirectorySelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("directory");
+
         presenter.keepDirectorySelected(true);
-        verify(view).enableDirectoryNameField(true);
+
+        assertEquals("directory", parameters.get("keepDirectory"));
+        verify(dataObject).withType("blank");
+        verify(view).highlightDirectoryNameField(eq(false));
+        verify(view).focusDirectoryNameFiend();
+    }
+
+    @Test
+    public void keepDirectoryUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("keepDirectory", "directory");
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.keepDirectorySelected(false);
+
+        assertTrue(parameters.isEmpty());
+        verify(dataObject).withType(eq(null));
+        verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void keepDirectoryNameChangedAndKeepDirectorySelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("directory");
+        when(view.keepDirectory()).thenReturn(true);
+
+        presenter.keepDirectoryNameChanged("directory");
+
+        assertEquals("directory", parameters.get("keepDirectory"));
+        verify(dataObject, never()).setPath(any());
+        verify(dataObject).withType(eq("blank"));
+        verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void keepDirectoryNameChangedAndKeepDirectoryUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("keepDirectory", "directory");
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.keepDirectory()).thenReturn(false);
+
+        presenter.keepDirectoryNameChanged("directory");
+
+        assertTrue(parameters.isEmpty());
+        verify(dataObject, never()).setPath(any());
+        verify(dataObject).withType(eq(null));
+        verify(view).highlightDirectoryNameField(eq(false));
     }
 
     /**
@@ -259,15 +311,6 @@ public class GitImporterPagePresenterTest {
     public void branchSelectedTest() {
         presenter.branchSelected(true);
         verify(view).enableBranchNameField(true);
-    }
-
-    /**
-     * Directory name field must become disabled when Keep directory is unchecked.
-     */
-    @Test
-    public void keepDirectoryNotSelectedTest() {
-        presenter.keepDirectorySelected(false);
-        verify(view).enableDirectoryNameField(false);
     }
 
     /**
