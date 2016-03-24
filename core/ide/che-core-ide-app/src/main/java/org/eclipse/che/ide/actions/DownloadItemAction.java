@@ -12,8 +12,8 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -37,20 +37,18 @@ public class DownloadItemAction extends Action {
 
     private final DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
-    private final WsAgentUrlProvider       urlProvider;
 
     @Inject
-    public DownloadItemAction(AppContext appContext,
+    public DownloadItemAction(@Named("cheExtensionPath") String extPath,
+                              AppContext appContext,
                               CoreLocalizationConstant locale,
                               DownloadContainer downloadContainer,
-                              ProjectExplorerPresenter projectExplorer,
-                              WsAgentUrlProvider urlProvider) {
+                              ProjectExplorerPresenter projectExplorer) {
         super(locale.downloadItemName(), locale.downloadItemDescription());
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
-        this.urlProvider = urlProvider;
 
-        BASE_URL = "/project/" + appContext.getWorkspace().getId() + "/export/";
+        BASE_URL = extPath + "/project/" + appContext.getWorkspace().getId() + "/export/";
     }
 
     /** {@inheritDoc} */
@@ -90,9 +88,9 @@ public class DownloadItemAction extends Action {
         String path = normalizePath(node.getStorablePath());
 
         if (node instanceof FileReferenceNode) {
-            return urlProvider.get() + BASE_URL + "file/" + path;
+            return BASE_URL + "file/" + path;
         }
-        return urlProvider.get() + BASE_URL + path;
+        return BASE_URL + path;
     }
 
     private String normalizePath(String path) {

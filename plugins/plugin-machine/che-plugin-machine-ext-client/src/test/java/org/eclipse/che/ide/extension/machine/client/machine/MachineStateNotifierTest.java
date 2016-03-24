@@ -16,8 +16,6 @@ import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -29,6 +27,8 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
+import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,8 +85,6 @@ public class MachineStateNotifierTest {
     private UsersWorkspaceDto                  workspace;
     @Mock
     private StatusNotification                 notification;
-    @Mock
-    private WorkspaceStartedEvent              event;
 
     @Captor
     private ArgumentCaptor<StatusNotification>      notificationCaptor;
@@ -108,7 +106,7 @@ public class MachineStateNotifierTest {
         when(machine.getConfig()).thenReturn(machineConfig);
 
         verify(eventBus).addHandler(eq(WorkspaceStartedEvent.TYPE), startWorkspaceHandlerCaptor.capture());
-        startWorkspaceHandlerCaptor.getValue().onWorkspaceStarted(event);
+        startWorkspaceHandlerCaptor.getValue().onWorkspaceStarted(workspace);
     }
 
     @Test

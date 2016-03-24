@@ -13,8 +13,8 @@ package org.eclipse.che.ide.ext.java.client.refactoring.service;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -58,20 +58,18 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final String                 pathToService;
     private final MessageLoader          loader;
-    private final WsAgentUrlProvider     urlProvider;
 
     @Inject
     public RefactoringServiceClientImpl(AsyncRequestFactory asyncRequestFactory,
                                         DtoUnmarshallerFactory unmarshallerFactory,
+                                        @Named("cheExtensionPath") String extPath,
                                         AppContext appContext,
-                                        LoaderFactory loaderFactory,
-                                        WsAgentUrlProvider urlProvider) {
+                                        LoaderFactory loaderFactory) {
         this.asyncRequestFactory = asyncRequestFactory;
         this.unmarshallerFactory = unmarshallerFactory;
         this.loader = loaderFactory.newLoader();
-        this.urlProvider = urlProvider;
 
-        this.pathToService = "/jdt/" + appContext.getWorkspace().getId() + "/refactoring/";
+        this.pathToService = extPath + "/jdt/" + appContext.getWorkspace().getId() + "/refactoring/";
     }
 
     /** {@inheritDoc} */
@@ -81,7 +79,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
             @Override
             public void makeCall(AsyncCallback<String> callback) {
 
-                asyncRequestFactory.createPostRequest(urlProvider.get() + pathToService + "move/create", moveRefactoring)
+                asyncRequestFactory.createPostRequest(pathToService + "move/create", moveRefactoring)
                                    .header(ACCEPT, TEXT_PLAIN)
                                    .header(CONTENT_TYPE, APPLICATION_JSON)
                                    .loader(loader)
@@ -93,7 +91,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RenameRefactoringSession> createRenameRefactoring(final CreateRenameRefactoring settings) {
-        final String url = urlProvider.get() + pathToService + "rename/create";
+        final String url = pathToService + "rename/create";
         return newPromise(new AsyncPromiseHelper.RequestCall<RenameRefactoringSession>() {
             @Override
             public void makeCall(AsyncCallback<RenameRefactoringSession> callback) {
@@ -109,7 +107,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringResult> applyLinkedModeRename(final LinkedRenameRefactoringApply refactoringApply) {
-        final String url = urlProvider.get() + pathToService + "rename/linked/apply";
+        final String url = pathToService + "rename/linked/apply";
         return newPromise(new AsyncPromiseHelper.RequestCall<RefactoringResult>() {
             @Override
             public void makeCall(AsyncCallback<RefactoringResult> callback) {
@@ -125,7 +123,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringStatus> setDestination(final ReorgDestination destination) {
-        final String url = urlProvider.get() + pathToService + "set/destination";
+        final String url = pathToService + "set/destination";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<RefactoringStatus>() {
             @Override
@@ -143,7 +141,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> setMoveSettings(final MoveSettings settings) {
-        final String url = urlProvider.get() + pathToService + "set/move/setting";
+        final String url = pathToService + "set/move/setting";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
@@ -161,7 +159,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<ChangeCreationResult> createChange(final RefactoringSession session) {
-        final String url = urlProvider.get() + pathToService + "create/change";
+        final String url = pathToService + "create/change";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<ChangeCreationResult>() {
             @Override
@@ -179,7 +177,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringPreview> getRefactoringPreview(final RefactoringSession session) {
-        final String url = urlProvider.get() + pathToService + "get/preview";
+        final String url = pathToService + "get/preview";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<RefactoringPreview>() {
             @Override
@@ -197,7 +195,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringResult> applyRefactoring(final RefactoringSession session) {
-        final String url = urlProvider.get() + pathToService + "apply";
+        final String url = pathToService + "apply";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<RefactoringResult>() {
             @Override
@@ -215,7 +213,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> changeChangeEnabledState(final ChangeEnabledState state) {
-        final String url = urlProvider.get() + pathToService + "change/enabled";
+        final String url = pathToService + "change/enabled";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
@@ -233,7 +231,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<ChangePreview> getChangePreview(final RefactoringChange change) {
-        final String url = urlProvider.get() + pathToService + "change/preview";
+        final String url = pathToService + "change/preview";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<ChangePreview>() {
             @Override
@@ -251,7 +249,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<RefactoringStatus> validateNewName(final ValidateNewName newName) {
-        final String url = urlProvider.get() + pathToService + "rename/validate/name";
+        final String url = pathToService + "rename/validate/name";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<RefactoringStatus>() {
             @Override
@@ -269,7 +267,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> setRenameSettings(final RenameSettings settings) {
-        final String url = urlProvider.get() + pathToService + "set/rename/settings";
+        final String url = pathToService + "set/rename/settings";
 
         return newPromise(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
@@ -286,7 +284,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
 
     @Override
     public Promise<Void> reindexProject(String projectPath) {
-        final String url = urlProvider.get() + pathToService + "reindex?projectpath=" + projectPath;
+        final String url = pathToService + "reindex?projectpath=" + projectPath;
 
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)

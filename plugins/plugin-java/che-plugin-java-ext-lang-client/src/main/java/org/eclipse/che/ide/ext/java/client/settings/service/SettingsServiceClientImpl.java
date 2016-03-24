@@ -11,8 +11,8 @@
 package org.eclipse.che.ide.ext.java.client.settings.service;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.JsonSerializable;
@@ -32,23 +32,23 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  */
 public class SettingsServiceClientImpl implements SettingsServiceClient {
 
+    private final String              extPath;
     private final AsyncRequestFactory asyncRequestFactory;
     private final String              workspaceId;
-    private final WsAgentUrlProvider  urlProvider;
 
     @Inject
     public SettingsServiceClientImpl(AppContext appContext,
                                      AsyncRequestFactory asyncRequestFactory,
-                                     WsAgentUrlProvider urlProvider) {
-        this.workspaceId = appContext.getWorkspaceId();
+                                     @Named("cheExtensionPath") String extPath) {
+        this.extPath = extPath;
+        this.workspaceId = appContext.getWorkspace().getId();
         this.asyncRequestFactory = asyncRequestFactory;
-        this.urlProvider = urlProvider;
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<Void> applyCompileParameters(@NotNull final Map<String, String> parameters) {
-        String url = urlProvider.get() + "/jdt/" + workspaceId + "/compiler-settings/set";
+        String url = extPath + "/jdt/" + workspaceId + "/compiler-settings/set";
 
         JsonSerializable data = new JsonSerializable() {
             @Override
@@ -66,7 +66,7 @@ public class SettingsServiceClientImpl implements SettingsServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Map<String, String>> getCompileParameters() {
-        String url = urlProvider.get() + "/jdt/" + workspaceId + "/compiler-settings/all";
+        String url = extPath + "/jdt/" + workspaceId + "/compiler-settings/all";
 
         return asyncRequestFactory.createGetRequest(url)
                                   .header(ACCEPT, APPLICATION_JSON)

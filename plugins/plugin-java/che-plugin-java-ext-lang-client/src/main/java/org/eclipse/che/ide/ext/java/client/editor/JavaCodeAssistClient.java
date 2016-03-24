@@ -13,8 +13,8 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
-import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -46,34 +46,35 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 @Singleton
 public class JavaCodeAssistClient {
 
+    private final String                 machineExtPath;
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final String                 workspaceId;
     private final MessageLoader          loader;
-    private final WsAgentUrlProvider     urlProvider;
 
     @Inject
-    public JavaCodeAssistClient(DtoUnmarshallerFactory unmarshallerFactory,
+    public JavaCodeAssistClient(@Named("cheExtensionPath") String machineExtPath,
+                                DtoUnmarshallerFactory unmarshallerFactory,
                                 AppContext appContext,
                                 LoaderFactory loaderFactory,
-                                AsyncRequestFactory asyncRequestFactory,
-                                WsAgentUrlProvider urlProvider) {
-        this.workspaceId = appContext.getWorkspaceId();
+                                AsyncRequestFactory asyncRequestFactory) {
+        this.machineExtPath = machineExtPath;
+        this.workspaceId = appContext.getWorkspace().getId();
         this.unmarshallerFactory = unmarshallerFactory;
         this.loader = loaderFactory.newLoader();
         this.asyncRequestFactory = asyncRequestFactory;
-        this.urlProvider = urlProvider;
     }
 
     public void computeProposals(String projectPath, String fqn, int offset, String contents, AsyncRequestCallback<Proposals> callback) {
-        String url = urlProvider.get() + "/jdt/" + workspaceId + "/code-assist/compute/completion" + "/?projectpath=" +
-                     projectPath + "&fqn=" + fqn + "&offset=" + offset;
+        String url =
+                machineExtPath + "/jdt/" + workspaceId + "/code-assist/compute/completion" + "/?projectpath=" +
+                projectPath + "&fqn=" + fqn + "&offset=" + offset;
         asyncRequestFactory.createPostRequest(url, null).data(contents).send(callback);
     }
 
     public void computeAssistProposals(String projectPath, String fqn, int offset, List<Problem> problems,
                                        AsyncRequestCallback<Proposals> callback) {
-        String url = urlProvider.get() + "/jdt/" + workspaceId + "/code-assist/compute/assist" + "/?projectpath=" +
+        String url = machineExtPath + "/jdt/" + workspaceId + "/code-assist/compute/assist" + "/?projectpath=" +
                      projectPath + "&fqn=" + fqn + "&offset=" + offset;
         List<Problem> prob = new ArrayList<>();
         prob.addAll(problems);
@@ -82,7 +83,7 @@ public class JavaCodeAssistClient {
 
 
     public void applyProposal(String sessionId, int index, boolean insert, final AsyncCallback<ProposalApplyResult> callback) {
-        String url = urlProvider.get() + "/jdt/" + workspaceId + "/code-assist/apply/completion/?sessionid=" +
+        String url = machineExtPath + "/jdt/" + workspaceId + "/code-assist/apply/completion/?sessionid=" +
                      sessionId + "&index=" + index + "&insert=" + insert;
         Unmarshallable<ProposalApplyResult> unmarshaller =
                 unmarshallerFactory.newUnmarshaller(ProposalApplyResult.class);
@@ -100,7 +101,7 @@ public class JavaCodeAssistClient {
     }
 
     public String getProposalDocUrl(int id, String sessionId) {
-        return urlProvider.get() + "/jdt/" + workspaceId + "/code-assist/compute/info?sessionid=" + sessionId +
+        return machineExtPath + "/jdt/" + workspaceId + "/code-assist/compute/info?sessionid=" + sessionId +
                "&index=" + id;
     }
 
@@ -120,7 +121,7 @@ public class JavaCodeAssistClient {
         return newPromise(new AsyncPromiseHelper.RequestCall<List<Change>>() {
             @Override
             public void makeCall(AsyncCallback<List<Change>> callback) {
-                String url = urlProvider.get() + "/code-formatting/" + workspaceId + "/format?offset=" + offset +
+                String url = machineExtPath + "/code-formatting/" + workspaceId + "/format?offset=" + offset +
                              "&length=" + length;
                 asyncRequestFactory.createPostRequest(url, null)
                                    .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
@@ -149,7 +150,7 @@ public class JavaCodeAssistClient {
      * @return list of imports which have conflicts
      */
     public Promise<List<ConflictImportDTO>> organizeImports(String projectPath, String fqn) {
-        String url = urlProvider.get() +
+        String url = machineExtPath +
                      "/jdt/" +
                      workspaceId +
                      "/code-assist/organize-imports?projectpath=" + projectPath +
@@ -169,7 +170,7 @@ public class JavaCodeAssistClient {
      *         fully qualified name of the java file
      */
     public Promise<Void> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
-        String url = urlProvider.get() +
+        String url = machineExtPath +
                      "/jdt/" +
                      workspaceId +
                      "/code-assist/apply-imports?projectpath=" + projectPath +
