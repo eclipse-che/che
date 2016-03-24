@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ui.dialogs.input;
 
 import org.eclipse.che.ide.ui.UILocalizationConstant;
-import org.eclipse.che.ide.ui.WidgetFocusTracker;
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,8 +34,6 @@ public class InputDialogFooterTest extends BaseTest {
     private UILocalizationConstant uiLocalizationConstant;
     @Mock
     private ActionDelegate         actionDelegate;
-    @Mock
-    private WidgetFocusTracker     widgetFocusTracker;
     @InjectMocks
     private InputDialogFooter      footer;
 
@@ -61,19 +58,4 @@ public class InputDialogFooterTest extends BaseTest {
         verify(actionDelegate).cancelled();
     }
 
-    @Test
-    public void shouldUnsubscribeFromWidgetFocusTracker() throws Exception {
-        footer.onClose();
-
-        verify(widgetFocusTracker).unSubscribe(footer.cancelButton);
-        verify(widgetFocusTracker).unSubscribe(footer.okButton);
-    }
-
-    @Test
-    public void shouldSubscribeToWidgetFocusTracker() throws Exception {
-        new InputDialogFooter(uiLocalizationConstant, widgetFocusTracker);
-
-        verify(widgetFocusTracker).subscribe(footer.cancelButton);
-        verify(widgetFocusTracker).subscribe(footer.okButton);
-    }
 }

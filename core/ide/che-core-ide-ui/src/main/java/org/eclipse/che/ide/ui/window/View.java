@@ -338,4 +338,8 @@ class View extends Composite {
         }
         return false;
     }
+
+    public native boolean isElementFocused(Element element) /*-{
+        return $doc.activeElement == element;
+    }-*/;
 }

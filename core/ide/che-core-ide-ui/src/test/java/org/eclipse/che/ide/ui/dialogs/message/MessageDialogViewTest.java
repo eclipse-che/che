@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.eclipse.che.ide.ui.dialogs.message.MessageDialogView.ActionDelegate;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

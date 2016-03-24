@@ -18,6 +18,7 @@ import org.eclipse.che.ide.ui.window.Window;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -110,6 +111,18 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
             }
         });
         addButtonToFooter(btnReset);
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnReset)) {
+            delegate.onResetClicked();
+        }
     }
 
     /** Add description to buttons. */
@@ -271,8 +284,14 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
 
     /** {@inheritDoc} */
     @Override
-    public void setEnableResetButton(boolean enabled) {
+    public void setEnableResetButton(final boolean enabled) {
         btnReset.setEnabled(enabled);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                btnReset.setFocus(enabled);
+            }
+        });
     }
 
     /** {@inheritDoc} */
@@ -293,8 +312,4 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
         this.delegate = delegate;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

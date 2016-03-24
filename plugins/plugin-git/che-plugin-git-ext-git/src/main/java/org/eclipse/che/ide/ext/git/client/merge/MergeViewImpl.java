@@ -171,6 +171,18 @@ public class MergeViewImpl extends Window implements MergeView {
         addButtonToFooter(btnMerge);
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnMerge)) {
+            delegate.onMergeClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setLocalBranches(@NotNull List<Reference> references) {
@@ -207,11 +219,6 @@ public class MergeViewImpl extends Window implements MergeView {
     @Override
     public void showDialog() {
         this.show();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
     }
 
 }

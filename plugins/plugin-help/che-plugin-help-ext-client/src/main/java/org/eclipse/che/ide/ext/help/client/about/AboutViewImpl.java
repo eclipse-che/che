@@ -92,8 +92,12 @@ public class AboutViewImpl extends Window implements AboutView {
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.show();
-        btnOk.setFocus(true);
+        this.show(btnOk);
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        delegate.onOkClicked();
     }
 
     /** {@inheritDoc} */
@@ -112,10 +116,5 @@ public class AboutViewImpl extends Window implements AboutView {
     @Override
     public void setTime(String time) {
         this.buildTime.setText(time);
-    }
-
-    @Override
-    protected void onClose() {
-        //do nothing 
     }
 }

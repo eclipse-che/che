@@ -31,7 +31,7 @@ import javax.validation.constraints.NotNull;
 /**
  * The implementation of {@link AddToIndexView}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class AddToIndexViewImpl extends Window implements AddToIndexView {
@@ -87,6 +87,18 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
         addButtonToFooter(btnCancel);
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnAdd)) {
+            delegate.onAddClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setMessage(@NotNull String message, @NotNull List<String> items) {
@@ -128,7 +140,7 @@ public class AddToIndexViewImpl extends Window implements AddToIndexView {
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.show();
+        this.show(btnAdd);
     }
 
     /** {@inheritDoc} */

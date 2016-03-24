@@ -42,7 +42,7 @@ import static com.google.gwt.user.client.ui.HasHorizontalAlignment.ALIGN_LEFT;
 /**
  * The implementation of {@link ResetFilesPresenter}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class ResetFilesViewImpl extends Window implements ResetFilesView {
@@ -141,6 +141,18 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
         indexFiles.addStyleName(resources.gitCSS().cells());
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnReset)) {
+            delegate.onResetClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setIndexedFiles(@NotNull List<IndexFile> indexedFiles) {
@@ -161,7 +173,7 @@ public class ResetFilesViewImpl extends Window implements ResetFilesView {
     /** {@inheritDoc} */
     @Override
     public void showDialog() {
-        this.show();
+        this.show(btnReset);
     }
 
     /** {@inheritDoc} */
