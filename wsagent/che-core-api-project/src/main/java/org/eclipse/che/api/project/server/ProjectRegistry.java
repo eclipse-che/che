@@ -25,6 +25,8 @@ import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
  */
 @Singleton
 public class ProjectRegistry {
+    private static final Logger LOG = LoggerFactory.getLogger(ProjectRegistry.class);
 
     private final Map<String, RegisteredProject> projects;
     private final WorkspaceHolder                workspaceHolder;
@@ -79,24 +82,19 @@ public class ProjectRegistry {
         for (ProjectConfig projectConfig : projectConfigs) {
             final String path = projectConfig.getPath();
             final VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
-            final FolderEntry projFolder = ((vf == null) ? null : new FolderEntry(vf, this));
-            putProject(projectConfig, projFolder, false, false);
+            final FolderEntry projectFolder = ((vf == null) ? null : new FolderEntry(vf, this));
+            putProject(projectConfig, projectFolder, false, false);
         }
 
-        // unconfigured folders on root
-        for (FolderEntry folder : root.getChildFolders()) {
-            if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
-                putProject(null, folder, true, false);
-            }
-        }
+        initUnconfiguredFolders();
 
         initialized = true;
 
         for (RegisteredProject project : projects.values()) {
-
             // only for projects with sources
-            if(project.getBaseFolder() != null)
-                 fireInitHandlers(project);
+            if(project.getBaseFolder() != null) {
+                fireInitHandlers(project);
+            }
         }
     }
 
@@ -106,7 +104,6 @@ public class ProjectRegistry {
     public String getWorkspaceId() {
         return workspaceHolder.getWorkspace().getId();
     }
-
 
     /**
      * @return id of workspace this project belongs to
@@ -121,6 +118,8 @@ public class ProjectRegistry {
     public List<RegisteredProject> getProjects() {
         checkInitializationState();
 
+        initUnconfiguredFolders();
+
         return new ArrayList<>(projects.values());
     }
 
@@ -132,6 +131,8 @@ public class ProjectRegistry {
     public RegisteredProject getProject(String projectPath) {
         checkInitializationState();
 
+        initUnconfiguredFolders();
+
         return projects.get(absolutizePath(projectPath));
     }
 
@@ -142,6 +143,8 @@ public class ProjectRegistry {
      */
     public List<String> getProjects(String parentPath) {
         checkInitializationState();
+
+        initUnconfiguredFolders();
 
         final Path root = Path.of(absolutizePath(parentPath));
 
@@ -167,9 +170,10 @@ public class ProjectRegistry {
         // otherwise try to find matched parent
         Path test;
         while ((test = Path.of(path).getParent()) != null) {
-            RegisteredProject project = projects.get(test.toString());
-            if (project != null)
+            final RegisteredProject project = projects.get(test.toString());
+            if (project != null) {
                 return project;
+            }
 
             path = test.toString();
         }
@@ -366,6 +370,19 @@ public class ProjectRegistry {
      */
     static String absolutizePath(String path) {
         return (path.startsWith("/")) ? path : "/".concat(path);
+    }
+
+    /** Try to initialize projects from unconfigured folders on root. */
+    private void initUnconfiguredFolders() {
+        try {
+            for (FolderEntry folder : root.getChildFolders()) {
+                if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
+                    putProject(null, folder, true, false);
+                }
+            }
+        } catch (ServerException | ConflictException | NotFoundException e) {
+            LOG.warn(e.getLocalizedMessage());
+        }
     }
 
     /**
