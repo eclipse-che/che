@@ -20,7 +20,7 @@ class IdeSvc {
      * Default constructor that is using resource
      * @ngInject for Dependency injection
      */
-    constructor (cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory) {
+    constructor (cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q) {
         this.cheAPI = cheAPI;
         this.$rootScope = $rootScope;
         this.lodash = lodash;
@@ -33,6 +33,7 @@ class IdeSvc {
         this.ideLoaderSvc = ideLoaderSvc;
         this.$location = $location;
         this.routeHistory = routeHistory;
+        this.$q = $q;
 
         this.ideParams = new Map();
 
@@ -47,6 +48,8 @@ class IdeSvc {
             {text: 'Inject and start workspace agent', inProgressText : 'Injecting and starting workspace agent', logs: '', hasError: false},
             {text: 'View IDE', inProgressText : 'Opening IDE', logs: '', hasError: false}
         ];
+      
+      this.preventRedirection = false;
     }
 
     init() {
@@ -86,8 +89,10 @@ class IdeSvc {
     }
 
 
-    startIde() {
-        this.ideLoaderSvc.addLoader();
+    startIde(noIdeLoader) {
+        if (!noIdeLoader) {
+            this.ideLoaderSvc.addLoader();
+        }
 
         this.currentStep = 1;
 
@@ -111,8 +116,13 @@ class IdeSvc {
                 });
             }
         });
-        this.$timeout(() => {this.startWorkspace(bus, this.selectedWorkspace);}, 1000);
 
+        let defer = this.$q.defer();
+        this.$timeout(() => {
+            let startWorkspacePromise = this.startWorkspace(bus, this.selectedWorkspace);
+            startWorkspacePromise.then(() => {defer.resolve()}, (error) => {defer.reject(error)});
+        }, 1000);
+        return defer.promise;
     }
 
 
@@ -207,6 +217,8 @@ class IdeSvc {
             });
 
         });
+
+        return startWorkspacePromise;
     }
 
 
@@ -251,12 +263,19 @@ class IdeSvc {
     }
 
     openIde(skipLoader) {
+        this.$timeout(() => {
+            this.currentStep = 3;
+        },0);
+
+        if (this.$rootScope.loadingIDE === false || this.preventRedirection) {
+            return;
+        }
+
         if (skipLoader) {
             this.ideLoaderSvc.addLoader();
             this.$rootScope.hideIdeLoader = true;
         }
 
-        this.currentStep = 3;
         let inDevMode = this.userDashboardConfig.developmentMode;
         let randVal = Math.floor((Math.random()*1000000)+1);
         let appendUrl = '?uid=' + randVal;
@@ -342,6 +361,14 @@ class IdeSvc {
         }
         return '';
     }
+  
+  setPreventRedirection(preventRedirection) {
+    this.preventRedirection = preventRedirection;
+  }
+  
+  getPreventRedirection() {
+    return this.preventRedirection;
+  }
 
 }
 

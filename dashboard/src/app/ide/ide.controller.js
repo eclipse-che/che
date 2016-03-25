@@ -81,13 +81,22 @@ class IdeCtrl {
 
       let promise = cheWorkspace.fetchWorkspaces();
 
+      if ($routeParams.showLogs) {
+        routeHistory.popCurrentPath();
+
+        // remove action from path
+        $location.url('/ide/' + this.selectedWorkspaceName, false);
+        $location.replace();
+
+        this.ideSvc.setPreventRedirection($routeParams.showLogs);
+      }
+
       promise.then(() => {
         this.updateData();
       }, () => {
         this.updateData();
       });
     }
-
 
   }
 
@@ -122,8 +131,14 @@ class IdeCtrl {
     }
 
     if (this.selectedWorkspace) {
+      if (this.ideSvc.getPreventRedirection() && 'STARTING' === this.selectedWorkspace.status) {
+        this.$rootScope.hideIdeLoader = false;
+        this.ideLoaderSvc.addLoader();
+      }
+
       // now, check if workspace has been started or not
-      if ('RUNNING' === this.selectedWorkspace.status) {
+      else if ('RUNNING' === this.selectedWorkspace.status) {
+        this.ideSvc.setPreventRedirection(false);
         this.ideSvc.init();
         this.ideSvc.openIde();
       } else if ('STOPPED' === this.selectedWorkspace.status) {

@@ -20,12 +20,14 @@ export class WorkspaceDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification) {
+  constructor($rootScope, $route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification, ideSvc) {
+    this.$rootScope = $rootScope;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.cheWorkspace = cheWorkspace;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
+    this.ideSvc = ideSvc;
 
     this.workspaceId = $route.current.params.workspaceId;
 
@@ -129,8 +131,10 @@ export class WorkspaceDetailsCtrl {
   }
 
   runWorkspace() {
-    let promise = this.cheAPI.getWorkspace().startWorkspace(this.workspaceId, this.workspaceDetails.config.defaultEnv);
-
+    this.ideSvc.init();
+    this.ideSvc.setSelectedWorkspace(this.workspaceDetails);
+    this.$rootScope.loadingIDE = false;
+    let promise = this.ideSvc.startIde(true);
     promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
       console.log('error', error);

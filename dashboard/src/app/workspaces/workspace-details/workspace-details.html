@@ -42,7 +42,13 @@
           </div>
           <div layout="row">
             <che-label-container flex layout="row" che-label-name="State">
-              <workspace-status-indicator che-status="workspaceDetailsCtrl.workspaceDetails.status"></workspace-status-indicator>
+              <div layout="row">
+                <workspace-status-indicator che-status="workspaceDetailsCtrl.workspaceDetails.status"
+                                            layout-align="start start"></workspace-status-indicator>
+                <che-link che-link-text="Show more" ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}?showLogs" che-no-padding-
+                          layout-align="end start"
+                          ng-show="workspaceDetailsCtrl.workspaceDetails.status === 'STARTING'"></che-link>
+              </div>
             </che-label-container>
             <div flex="none" flex-offset="5" layout="column" layout-align="end end">
               <che-button-default ng-disabled="(workspaceDetailsCtrl.workspaceDetails.status !== 'STOPPED')"
