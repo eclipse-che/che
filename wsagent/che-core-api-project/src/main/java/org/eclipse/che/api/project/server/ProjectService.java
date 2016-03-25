@@ -29,11 +29,9 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
-import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.MoveOptions;
@@ -81,7 +79,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.project.server.DtoConverter.toProjectConfig;
+import static javax.ws.rs.HttpMethod.DELETE;
+import static javax.ws.rs.HttpMethod.GET;
+import static javax.ws.rs.HttpMethod.PUT;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.eclipse.che.api.core.util.LinksHelper.createLink;
+import static org.eclipse.che.api.project.server.Constants.LINK_REL_CHILDREN;
+import static org.eclipse.che.api.project.server.Constants.LINK_REL_DELETE;
+import static org.eclipse.che.api.project.server.Constants.LINK_REL_GET_CONTENT;
+import static org.eclipse.che.api.project.server.Constants.LINK_REL_TREE;
+import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_CONTENT;
+import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_PROJECT;
+import static org.eclipse.che.api.project.server.DtoConverter.asDto;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Project API.
@@ -99,8 +109,8 @@ public class ProjectService extends Service {
     private static final Logger LOG  = LoggerFactory.getLogger(ProjectService.class);
     private static final Tika   TIKA = new Tika();
 
-    private ProjectManager      projectManager;
-    private EventService        eventService;
+    private ProjectManager projectManager;
+    private EventService   eventService;
 
     @Inject
     public ProjectService(ProjectManager projectManager, EventService eventService) {
@@ -111,8 +121,8 @@ public class ProjectService extends Service {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets list of projects in root folder",
-            response = ProjectConfigDto.class,
-            responseContainer = "List")
+                  response = ProjectConfigDto.class,
+                  responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 500, message = "Server error")})
     @GenerateLink(rel = Constants.LINK_REL_GET_PROJECTS)
@@ -123,9 +133,7 @@ public class ProjectService extends Service {
                                                                                            ForbiddenException {
         return projectManager.getProjects()
                              .stream()
-                             .map(registeredProject -> toProjectConfig(registeredProject,
-                                                                       workspace,
-                                                                       getServiceContext().getServiceUriBuilder()))
+                             .map(p -> injectProjectLinks(asDto(p), workspace))
                              .collect(Collectors.toList());
     }
 
@@ -133,7 +141,7 @@ public class ProjectService extends Service {
     @Path("/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gets project by ID of workspace and project's path",
-            response = ProjectConfigDto.class)
+                  response = ProjectConfigDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
@@ -145,14 +153,14 @@ public class ProjectService extends Service {
                                                                               ForbiddenException,
                                                                               ServerException,
                                                                               ConflictException {
-        return toProjectConfig(projectManager.getProject(path), workspace, getServiceContext().getServiceUriBuilder());
+        return injectProjectLinks(asDto(projectManager.getProject(path)), workspace);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Creates new project",
-            response = ProjectConfigDto.class)
+                  response = ProjectConfigDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "Operation is forbidden"),
                    @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
@@ -169,14 +177,14 @@ public class ProjectService extends Service {
                                                                                                                        ServerException,
                                                                                                                        NotFoundException {
         final RegisteredProject project = projectManager.createProject(projectConfig, null);
-        final ProjectConfigDto configDto = toProjectConfig(project, workspace, getServiceContext().getServiceUriBuilder());
+        final ProjectConfigDto configDto = asDto(project);
 
         eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));
 
         // TODO this throws NPE
         //logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
 
-        return configDto;
+        return injectProjectLinks(configDto, workspace);
     }
 
     @PUT
@@ -184,7 +192,7 @@ public class ProjectService extends Service {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Updates existing project",
-            response = ProjectConfigDto.class)
+                  response = ProjectConfigDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Operation is forbidden"),
@@ -202,14 +210,15 @@ public class ProjectService extends Service {
         if (path != null) {
             projectConfigDto.setPath(path);
         }
-        return toProjectConfig(projectManager.updateProject(projectConfigDto), workspace, getServiceContext().getServiceUriBuilder());
+
+        return asDto(projectManager.updateProject(projectConfigDto));
     }
 
     @DELETE
     @Path("/{path:.*}")
     @ApiOperation(value = "Delete a resource",
-            notes = "Delete resources. If you want to delete a single project, specify project name. If a folder or file needs to " +
-                    "be deleted a path to the requested resource needs to be specified")
+                  notes = "Delete resources. If you want to delete a single project, specify project name. If a folder or file needs to " +
+                          "be deleted a path to the requested resource needs to be specified")
     @ApiResponses({@ApiResponse(code = 204, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -225,7 +234,7 @@ public class ProjectService extends Service {
     @Path("/estimate/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Estimates if the folder supposed to be project of certain type",
-            response = Map.class)
+                  response = Map.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
@@ -284,8 +293,8 @@ public class ProjectService extends Service {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Import resource",
-            notes = "Import resource. JSON with a designated importer and project location is sent. It is possible to import from " +
-                    "VCS or ZIP")
+                  notes = "Import resource. JSON with a designated importer and project location is sent. It is possible to import from " +
+                          "VCS or ZIP")
     @ApiResponses({@ApiResponse(code = 204, message = ""),
                    @ApiResponse(code = 401, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 403, message = "Forbidden operation"),
@@ -312,7 +321,7 @@ public class ProjectService extends Service {
     @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Create file",
-            notes = "Create a new file in a project. If file type isn't specified the server will resolve its type.")
+                  notes = "Create a new file in a project. If file type isn't specified the server will resolve its type.")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -332,23 +341,25 @@ public class ProjectService extends Service {
         }
 
         final FileEntry newFile = parent.createFile(fileName, content);
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final ItemReference fileReference = DtoConverter.toItemReference(newFile, workspace, uriBuilder.clone());
-        final URI location = uriBuilder.clone().path(getClass(), "getFile").build(workspace, newFile.getPath().toString().substring(1));
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.CREATED,
                                                           workspace, projectPath(newFile.getPath().toString()),
                                                           newFile.getPath().toString(),
                                                           false));
 
-        return Response.created(location).entity(fileReference).build();
+        final URI location = getServiceContext().getServiceUriBuilder().clone()
+                                                .path(getClass(), "getFile")
+                                                .build(workspace, newFile.getPath().toString().substring(1));
+        return Response.created(location)
+                       .entity(injectFileLinks(asDto(newFile), workspace))
+                       .build();
     }
 
     @POST
     @Path("/folder/{path:.*}")
     @Produces({MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Create a folder",
-            notes = "Create a folder is a specified project")
+                  notes = "Create a folder is a specified project")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -362,11 +373,9 @@ public class ProjectService extends Service {
                                                                         ServerException,
                                                                         NotFoundException {
         final FolderEntry newFolder = projectManager.getProjectsRoot().createFolder(path);
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final ItemReference folderReference = DtoConverter.toItemReference(newFolder, workspace, uriBuilder.clone());
-        final URI location = uriBuilder.clone()
-                                       .path(getClass(), "getChildren")
-                                       .build(workspace, newFolder.getPath().toString().substring(1));
+        final URI location = getServiceContext().getServiceUriBuilder().clone()
+                                                .path(getClass(), "getChildren")
+                                                .build(workspace, newFolder.getPath().toString().substring(1));
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.CREATED,
                                                           workspace,
@@ -374,7 +383,9 @@ public class ProjectService extends Service {
                                                           newFolder.getPath().toString(),
                                                           true));
 
-        return Response.created(location).entity(folderReference).build();
+        return Response.created(location)
+                       .entity(injectFolderLinks(asDto(newFolder), workspace))
+                       .build();
     }
 
     @POST
@@ -382,7 +393,7 @@ public class ProjectService extends Service {
     @Consumes({MediaType.MULTIPART_FORM_DATA})
     @Produces({MediaType.TEXT_HTML})
     @ApiOperation(value = "Upload a file",
-            notes = "Upload a new file")
+                  notes = "Upload a new file")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -410,8 +421,8 @@ public class ProjectService extends Service {
     @Consumes({MediaType.MULTIPART_FORM_DATA})
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upload zip folder",
-            notes = "Upload folder from local zip",
-            response = Response.class)
+                  notes = "Upload folder from local zip",
+                  response = Response.class)
     @ApiResponses({@ApiResponse(code = 200, message = ""),
                    @ApiResponse(code = 401, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 403, message = "Forbidden operation"),
@@ -436,7 +447,7 @@ public class ProjectService extends Service {
     }
 
     @ApiOperation(value = "Get file content",
-            notes = "Get file content by its name")
+                  notes = "Get file content by its name")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -455,7 +466,7 @@ public class ProjectService extends Service {
     @Path("/file/{path:.*}")
     @Consumes({MediaType.MEDIA_TYPE_WILDCARD})
     @ApiOperation(value = "Update file",
-            notes = "Update an existing file with new content")
+                  notes = "Update an existing file with new content")
     @ApiResponses({@ApiResponse(code = 200, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -486,7 +497,7 @@ public class ProjectService extends Service {
     @Path("/copy/{path:.*}")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Copy resource",
-            notes = "Copy resource to a new location which is specified in a query parameter")
+                  notes = "Copy resource to a new location which is specified in a query parameter")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -537,7 +548,7 @@ public class ProjectService extends Service {
     @Path("/move/{path:.*}")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Move resource",
-            notes = "Move resource to a new location which is specified in a query parameter")
+                  notes = "Move resource to a new location which is specified in a query parameter")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -583,8 +594,8 @@ public class ProjectService extends Service {
     @Consumes({MediaType.MULTIPART_FORM_DATA})
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upload zip project",
-            notes = "Upload project from local zip",
-            response = ProjectConfigDto.class)
+                  notes = "Upload project from local zip",
+                  response = ProjectConfigDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = ""),
                    @ApiResponse(code = 401, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 403, message = "Forbidden operation"),
@@ -648,7 +659,7 @@ public class ProjectService extends Service {
     @Path("/import/{path:.*}")
     @Consumes(ExtMediaType.APPLICATION_ZIP)
     @ApiOperation(value = "Import zip",
-            notes = "Import resources as zip")
+                  notes = "Import resources as zip")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -688,7 +699,7 @@ public class ProjectService extends Service {
     @Path("/export/{path:.*}")
     @Produces(ExtMediaType.APPLICATION_ZIP)
     @ApiOperation(value = "Download ZIP",
-            notes = "Export resource as zip. It can be an entire project or folder")
+                  notes = "Export resource as zip. It can be an entire project or folder")
     @ApiResponses({@ApiResponse(code = 201, message = ""),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -734,9 +745,9 @@ public class ProjectService extends Service {
     @Path("/children/{parent:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get project children items",
-            notes = "Request all children items for a project, such as files and folders",
-            response = ItemReference.class,
-            responseContainer = "List")
+                  notes = "Request all children items for a project, such as files and folders",
+                  response = ItemReference.class,
+                  responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -755,12 +766,11 @@ public class ProjectService extends Service {
 
         final List<VirtualFileEntry> children = folder.getChildren();
         final ArrayList<ItemReference> result = new ArrayList<>(children.size());
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         for (VirtualFileEntry child : children) {
             if (child.isFile()) {
-                result.add(DtoConverter.toItemReference((FileEntry)child, workspace, uriBuilder.clone()));
+                result.add(injectFileLinks(asDto((FileEntry)child), workspace));
             } else {
-                result.add(DtoConverter.toItemReference((FolderEntry)child, workspace, uriBuilder.clone()));
+                result.add(injectFolderLinks(asDto((FolderEntry)child), workspace));
             }
         }
 
@@ -771,8 +781,8 @@ public class ProjectService extends Service {
     @Path("/tree/{parent:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get project tree",
-            notes = "Get project tree. Depth is specified in a query parameter",
-            response = TreeElement.class)
+                  notes = "Get project tree. Depth is specified in a query parameter",
+                  response = TreeElement.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -789,18 +799,16 @@ public class ProjectService extends Service {
                                                                                                                ForbiddenException,
                                                                                                                ServerException {
         final FolderEntry folder = projectManager.asFolder(path);
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
 
-        return DtoFactory.newDto(TreeElement.class)
-                         .withNode(DtoConverter.toItemReference(folder, workspace, uriBuilder.clone()))
-                         .withChildren(getTree(folder, workspace, depth, includeFiles, uriBuilder));
+        return newDto(TreeElement.class).withNode(injectFolderLinks(asDto(folder), workspace))
+                                        .withChildren(getTree(folder, workspace, depth, includeFiles));
     }
 
     @GET
     @Path("/item/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get file or folder",
-            response = ItemReference.class)
+                  response = ItemReference.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -810,34 +818,27 @@ public class ProjectService extends Service {
                                  @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
                                  @PathParam("path") String path) throws NotFoundException,
                                                                         ForbiddenException,
-                                                                        ServerException,
-                                                                        ValueStorageException,
-                                                                        ProjectTypeConstraintException {
+                                                                        ServerException {
         final VirtualFileEntry entry = projectManager.getProjectsRoot().getChild(path);
 
         if (entry == null) {
             throw new NotFoundException("Project " + path + " was not found");
         }
 
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-
-        final ItemReference item;
         if (entry.isFile()) {
-            item = DtoConverter.toItemReference((FileEntry)entry, workspace, uriBuilder.clone());
+            return injectFileLinks(asDto((FileEntry)entry), workspace);
         } else {
-            item = DtoConverter.toItemReference((FolderEntry)entry, workspace, uriBuilder.clone());
+            return injectFolderLinks(asDto((FolderEntry)entry), workspace);
         }
-
-        return item;
     }
 
     @GET
     @Path("/search/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Search for resources",
-            notes = "Search for resources applying a number of search filters as query parameters",
-            response = ItemReference.class,
-            responseContainer = "List")
+                  notes = "Search for resources applying a number of search filters as query parameters",
+                  response = ItemReference.class,
+                  responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
@@ -888,14 +889,13 @@ public class ProjectService extends Service {
         final int length = maxItems > 0 ? Math.min(result.getTotalHits(), maxItems) : result.getTotalHits();
         final List<ItemReference> items = new ArrayList<>(length);
         final FolderEntry root = projectManager.getProjectsRoot();
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
 
         List<SearchResultEntry> entries = result.getResults();
         for (int i = skipCount; i < length; i++) {
             final VirtualFileEntry child = root.getChild(entries.get(i).getFilePath());
 
             if (child != null && child.isFile()) {
-                items.add(DtoConverter.toItemReference((FileEntry)child, workspace, uriBuilder.clone()));
+                items.add(injectFileLinks(asDto((FileEntry)child), workspace));
             }
         }
 
@@ -942,8 +942,7 @@ public class ProjectService extends Service {
     private List<TreeElement> getTree(FolderEntry folder,
                                       String workspace,
                                       int depth,
-                                      boolean includeFiles,
-                                      UriBuilder uriBuilder) throws ServerException, NotFoundException {
+                                      boolean includeFiles) throws ServerException, NotFoundException {
         if (depth == 0) {
             return null;
         }
@@ -959,12 +958,11 @@ public class ProjectService extends Service {
         final List<TreeElement> nodes = new ArrayList<>(children.size());
         for (VirtualFileEntry child : children) {
             if (child.isFolder()) {
-                nodes.add(DtoFactory.newDto(TreeElement.class)
-                                    .withNode(DtoConverter.toItemReference((FolderEntry)child, workspace, uriBuilder.clone()))
-                                    .withChildren(getTree((FolderEntry)child, workspace, depth - 1, includeFiles, uriBuilder)));
+                nodes.add(newDto(TreeElement.class)
+                                  .withNode(injectFolderLinks(asDto((FolderEntry)child), workspace))
+                                  .withChildren(getTree((FolderEntry)child, workspace, depth - 1, includeFiles)));
             } else {
-                nodes.add(DtoFactory.newDto(TreeElement.class)
-                                    .withNode(DtoConverter.toItemReference((FileEntry)child, workspace, uriBuilder.clone())));
+                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry)child), workspace)));
             }
         }
 
@@ -1068,5 +1066,101 @@ public class ProjectService extends Service {
                                                                                                                         ServerException {
         int stripNum = skipFirstLevel ? 1 : 0;
         parent.unzip(in, overwrite, stripNum);
+    }
+
+    private ItemReference injectFileLinks(ItemReference itemReference, String workspace) {
+        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
+        final List<Link> links = new ArrayList<>();
+        final String relPath = itemReference.getPath().substring(1);
+
+        links.add(createLink(GET,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "getFile")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             APPLICATION_JSON,
+                             LINK_REL_GET_CONTENT));
+        links.add(createLink(PUT,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "updateFile")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             MediaType.WILDCARD,
+                             null,
+                             LINK_REL_UPDATE_CONTENT));
+        links.add(createLink(DELETE,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "delete")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             LINK_REL_DELETE));
+
+        return itemReference.withLinks(links);
+    }
+
+    private ItemReference injectFolderLinks(ItemReference itemReference, String workspace) {
+        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
+        final List<Link> links = new ArrayList<>();
+        final String relPath = itemReference.getPath().substring(1);
+
+        links.add(createLink(GET,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "getChildren")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             APPLICATION_JSON,
+                             LINK_REL_CHILDREN));
+        links.add(createLink(GET,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "getTree")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             APPLICATION_JSON,
+                             LINK_REL_TREE));
+        links.add(createLink(DELETE,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "delete")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             LINK_REL_DELETE));
+
+        return itemReference.withLinks(links);
+    }
+
+    private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig, String workspace) {
+        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
+        final List<Link> links = new ArrayList<>();
+        final String relPath = projectConfig.getPath().substring(1);
+
+        links.add(createLink(PUT,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "updateProject")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             APPLICATION_JSON,
+                             APPLICATION_JSON,
+                             LINK_REL_UPDATE_PROJECT));
+        links.add(createLink(GET,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "getChildren")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             APPLICATION_JSON,
+                             LINK_REL_CHILDREN));
+        links.add(createLink(GET,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "getTree")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             APPLICATION_JSON,
+                             LINK_REL_TREE));
+        links.add(createLink(DELETE,
+                             uriBuilder.clone()
+                                       .path(ProjectService.class, "delete")
+                                       .build(workspace, relPath)
+                                       .toString(),
+                             LINK_REL_DELETE));
+
+        return projectConfig.withLinks(links);
     }
 }

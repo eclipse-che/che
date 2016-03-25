@@ -101,7 +101,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.HttpMethod.DELETE;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -297,9 +296,24 @@ public class ProjectServiceTest {
         }
 
         @Override
-        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
-            workspace.setProjects(persistedProjects);
+        void addProject(RegisteredProject project) throws ServerException {
+            if (!project.isDetected()) {
+                workspace.addProject(project);
+            }
+        }
+
+        @Override
+        public void updateProject(RegisteredProject project) throws ServerException {
+            if (!project.isDetected()) {
+                workspace.updateProject(project);
+            }
+        }
+
+        @Override
+        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
+            projects.stream()
+                    .filter(project -> !project.isDetected())
+                    .forEach(workspace::removeProject);
         }
     }
 

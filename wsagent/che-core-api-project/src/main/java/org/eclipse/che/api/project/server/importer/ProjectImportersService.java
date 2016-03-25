@@ -52,7 +52,7 @@ public class ProjectImportersService extends Service {
     public ProjectImporterData getImportersData() {
         final List<ProjectImporterDescriptor> importers = importersRegistry.getImporters()
                                                                            .stream()
-                                                                           .map(DtoConverter::toImporterDescriptor)
+                                                                           .map(DtoConverter::asDto)
                                                                            .collect(Collectors.toList());
         return newDto(ProjectImporterData.class).withImporters(importers).withConfiguration(configuration);
     }

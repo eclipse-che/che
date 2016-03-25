@@ -31,7 +31,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.project.server.DtoConverter.toTypeDefinition;
+import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 
 /**
  * ProjectTypeService
@@ -63,7 +63,7 @@ public class ProjectTypeService extends Service {
     public List<ProjectTypeDto> getProjectTypes() {
         return registry.getProjectTypes()
                        .stream()
-                       .map(DtoConverter::toTypeDefinition)
+                       .map(DtoConverter::asDto)
                        .collect(Collectors.toList());
     }
 
@@ -74,6 +74,6 @@ public class ProjectTypeService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested project type entity"),
                    @ApiResponse(code = 404, message = "The project type with such id doesn't exist")})
     public ProjectTypeDto getProjectType(@ApiParam("Project type id") @PathParam("id") String id) throws NotFoundException {
-        return toTypeDefinition(registry.getProjectType(id));
+        return asDto(registry.getProjectType(id));
     }
 }

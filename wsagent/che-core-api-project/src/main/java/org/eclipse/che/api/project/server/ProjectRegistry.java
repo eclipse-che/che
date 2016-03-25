@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -72,11 +73,7 @@ public class ProjectRegistry {
     public void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
         final UsersWorkspace workspace = workspaceHolder.getWorkspace();
 
-        List<? extends ProjectConfig> projectConfigs = workspace.getConfig().getProjects();
-
-        if (projectConfigs == null) {
-            projectConfigs = new ArrayList<>();
-        }
+        List<? extends ProjectConfig> projectConfigs = new ArrayList<>(workspace.getConfig().getProjects());
 
         // take all the projects from ws's config
         for (ProjectConfig projectConfig : projectConfigs) {
@@ -204,11 +201,15 @@ public class ProjectRegistry {
                                                           ConflictException,
                                                           NotFoundException {
         final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
-        projects.put(project.getPath(), project);
+        Optional<RegisteredProject> updatedProjectOptional = Optional.ofNullable(projects.put(project.getPath(), project));
 
         // check whether it isn't during #initProjects()
         if (initialized) {
-            workspaceHolder.updateProjects(projects.values());
+            if (updatedProjectOptional.isPresent()) {
+                workspaceHolder.updateProject(project);
+            } else {
+                workspaceHolder.addProject(project);
+            }
         }
 
         return project;
@@ -219,12 +220,15 @@ public class ProjectRegistry {
      *
      * @param path
      *         from where to remove
+     * @throws ServerException
      */
     void removeProjects(String path) throws ServerException {
-        projects.remove(path);
-        getProjects(path).forEach(projects::remove);
+        List<RegisteredProject> removed = new ArrayList<>();
+        Optional.ofNullable(projects.remove(path)).ifPresent(removed::add);
+        getProjects(path).forEach(p -> Optional.ofNullable(projects.remove(p))
+                                               .ifPresent(removed::add));
 
-        workspaceHolder.updateProjects(projects.values());
+        workspaceHolder.removeProjects(removed);
     }
 
     /*  ------------------------------------------ */
