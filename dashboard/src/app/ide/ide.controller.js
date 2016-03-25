@@ -20,7 +20,7 @@ class IdeCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor (ideSvc, $routeParams, ideLoaderSvc, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
+  constructor(ideSvc, $routeParams, ideLoaderSvc, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
     this.ideSvc = ideSvc;
     this.ideIFrameSvc = ideIFrameSvc;
     this.$rootScope = $rootScope;
@@ -36,7 +36,7 @@ class IdeCtrl {
     // search the selected workspace
     let workspace = $routeParams.workspaceName;
     if (!workspace) {
-        this.selectedWorkspaceName = null;
+      this.selectedWorkspaceName = null;
     } else {
       this.selectedWorkspaceName = workspace;
     }
@@ -111,12 +111,10 @@ class IdeCtrl {
     obj.key = array[0];
     obj.value = array[1];
     return obj;
-
   }
 
   displayIDE() {
     this.ideSvc.displayIDE();
-
   }
 
   updateData() {
@@ -150,13 +148,8 @@ class IdeCtrl {
     } else {
       this.$rootScope.hideIdeLoader = true;
       this.$rootScope.hideLoader = true;
-
     }
-
   }
-
-
-
 }
 
 export default IdeCtrl;

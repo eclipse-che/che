@@ -21,11 +21,10 @@ class IdeLoaderCtrl {
    * @ngInject for Dependency injection
    */
   constructor(ideSvc, $rootScope, $location) {
-    this.ideSvc= ideSvc;
+    this.ideSvc = ideSvc;
     this.$rootScope = $rootScope;
     this.$location = $location;
   }
-
 
   getSteps() {
     return this.ideSvc.steps;
@@ -58,6 +57,5 @@ class IdeLoaderCtrl {
     this.ideSvc.openIde(true);
   }
 }
-
 
 export default IdeLoaderCtrl;
