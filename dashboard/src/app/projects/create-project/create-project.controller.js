@@ -120,34 +120,24 @@ export class CreateProjectCtrl {
         default:
           $location.path('/create-project');
       }
-
     }
 
-    this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
-
-    if (this.workspaces.length > 0) {
-      this.updateData();
+    if (cheStack.getStacks().length) {
+      this.updateWorkspaces();
     } else {
-      // fetch workspaces when initializing
-      let promise = cheAPI.getWorkspace().fetchWorkspaces();
-      promise.then(() => {
-          this.updateData();
-        },
-        (error) => {
-          // etag handling so also retrieve last data that were fetched before
-          if (error.status === 304) {
-            // ok
-            this.updateData();
-            return;
-          }
-          this.state = 'error';
-        });
+      cheStack.fetchStacks().then(() => {
+        this.updateWorkspaces();
+      }, (error) => {
+        if (error.status === 304) {
+          this.updateWorkspaces();
+          return;
+        }
+        this.state = 'error';
+      });
     }
 
     // selected current tab
     this.currentTab = '';
-
-
     // all forms that we have
     this.forms = new Map();
 
@@ -183,6 +173,26 @@ export class CreateProjectCtrl {
     this.defaultWorkspaceName = null;
   }
 
+  /**
+   * Fetch workspaces when initializing
+   */
+  updateWorkspaces() {
+    this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
+      // fetch workspaces when initializing
+    let promise = this.cheAPI.getWorkspace().fetchWorkspaces();
+    promise.then(() => {
+        this.updateData();
+      },
+      (error) => {
+        // retrieve last data that were fetched before
+        if (error.status === 304) {
+          // ok
+          this.updateData();
+          return;
+        }
+        this.state = 'error';
+      });
+  }
 
   /**
    * Gets default project JSON used for import data
@@ -204,6 +214,7 @@ export class CreateProjectCtrl {
    * Fetching operation has been done, so get workspaces and websocket connection
    */
   updateData() {
+    this.workspaceResource = this.workspaces.length > 0 ? 'existing-workspace' : 'from-stack';
     //if create project in progress and workspace have started
     if (this.createProjectSvc.isCreateProjectInProgress() && this.createProjectSvc.getCurrentProgressStep() > 0) {
       let workspaceName = this.createProjectSvc.getWorkspaceOfProject();
@@ -218,6 +229,12 @@ export class CreateProjectCtrl {
         this.resetCreateProgress();
       }
     } else {
+      let preselectWorkspaceId = this.$location.search().workspaceId;
+      if (preselectWorkspaceId) {
+        this.workspaceSelected = this.lodash.find(this.workspaces, (workspace) => {
+          return workspace.id === preselectWorkspaceId;
+        });
+      }
       // generate project name
       this.generateProjectName(true);
     }
@@ -321,7 +338,6 @@ export class CreateProjectCtrl {
 
 
   startWorkspace(bus, workspace) {
-
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
@@ -740,21 +756,27 @@ export class CreateProjectCtrl {
     this.createProjectSvc.createPopup();
 
     // logic to decide if we create workspace based on a stack or reuse existing workspace
-    var option;
-    this.stack = null;
-    if (this.stackTab === 'ready-to-go') {
-      option = 'create-workspace';
-      this.stack = this.readyToGoStack;
-    } else if (this.stackTab === 'stack-library') {
-      if (this.stackLibraryOption === 'existing-workspace') {
-        option = 'reuse-workspace';
-      } else {
-        this.stack = this.stackLibraryUser;
-        option = 'create-workspace';
-      }
-    } else if (this.stackTab === 'custom-stack') {
+    let option;
+
+    if (this.workspaceResource === 'existing-workspace') {
+      option = 'reuse-workspace';
+      this.recipeUrl = null;
       this.stack = null;
-      option = 'create-workspace';
+    } else {
+      switch (this.stackTab) {
+        case 'ready-to-go':
+          option = 'create-workspace';
+          this.stack = this.readyToGoStack;
+          break;
+        case 'stack-library':
+          option = 'create-workspace';
+          this.stack = this.stackLibraryUser;
+          break;
+        case 'custom-stack':
+          option = 'create-workspace';
+          this.stack = null;
+          break;
+      }
     }
     // check workspace is selected
     if (option === 'create-workspace') {
@@ -788,37 +810,27 @@ export class CreateProjectCtrl {
           });
         }
       }
-
-
     } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
-
       // Now that the container is started, wait for the extension server. For this, needs to get runtime details
       let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(this.workspaceSelected.id);
-
       promiseRuntime.then(() => {
         let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.workspaceSelected.id);
-
         // Get bus
         let websocketStream = this.$websocket(websocketUrl);
-
         // on success, create project
         websocketStream.onOpen(() => {
           let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
-
           // mode
           this.createProjectInWorkspace(this.workspaceSelected.id, this.projectName, this.importProjectData, bus);
         });
-
       }, (error) => {
         if (error.data.message) {
           this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
         }
         this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       });
-
     }
-
     // do we have projects ?
     let projects = this.cheAPI.getProject().getAllProjects();
     if (projects.length > 1) {
@@ -826,7 +838,6 @@ export class CreateProjectCtrl {
       this.createProjectSvc.showPopup();
       this.$location.path('/projects');
     }
-
   }
 
   /**
@@ -835,19 +846,15 @@ export class CreateProjectCtrl {
   createWorkspace() {
     this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
     creationPromise.then((workspace) => {
-
       // init message bus if not there
       if (this.workspaces.length === 0) {
         this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
       }
-
       // recipe url
       let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
-
       // subscribe to workspace events
       let workspaceChannel = 'workspace:' + workspace.id;
       this.listeningChannels.push(workspaceChannel);
@@ -865,7 +872,6 @@ export class CreateProjectCtrl {
               .ok('OK')
           );
         }
-
 
         if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id) {
           this.createProjectSvc.setCurrentProgressStep(2);
@@ -1020,34 +1026,28 @@ export class CreateProjectCtrl {
 
   setStackTab(stackTab) {
     this.stackTab = stackTab;
-
-    let currentStack = null;
-    if (this.stackTab === 'ready-to-go') {
-      currentStack = this.readyToGoStack;
-    } else if (this.stackTab === 'stack-library' && this.stackLibraryOption === 'new-workspace') {
-      currentStack = this.stackLibraryUser;
-    }
-    this.updateCurrentStack(currentStack);
-
-    this.checkDisabledWorkspace();
   }
 
   /**
-   * Use of an existing workspace
-   * @param workspace the workspace to use
+   * Update data for selected workspace
    */
-  cheStackLibraryWorkspaceSelecter(workspace) {
-    this.workspaceSelected = workspace;
-    this.setWorkspaceName(workspace.config.name);
-    this.stackLibraryOption = 'existing-workspace';
+  onWorkspaceChange() {
+    if (!this.workspaceSelected) {
+      return;
+    }
+    this.setWorkspaceName(this.workspaceSelected.config.name);
     let stack = null;
-    if (workspace.config.attributes && workspace.config.attributes.stackId) {
-      let stackId = workspace.config.attributes.stackId;
-      stack = this.cheStack.getStackById(stackId);
+    if (this.workspaceSelected.config.attributes && this.workspaceSelected.config.attributes.stackId) {
+      stack = this.cheStack.getStackById(this.workspaceSelected.config.attributes.stackId);
     }
     this.updateCurrentStack(stack);
-    this.generateProjectName(true);
-    this.checkDisabledWorkspace();
+    let findEnvironment = this.lodash.find(this.workspaceSelected.config.environments, (environment) => {
+      return environment.name === this.workspaceSelected.config.defaultEnv;
+    });
+    if (findEnvironment) {
+      this.workspaceRam = findEnvironment.machineConfigs[0].limits.ram;
+    }
+    this.updateWorkspaceStatus(true);
   }
 
   /**
@@ -1055,20 +1055,26 @@ export class CreateProjectCtrl {
    * @param stack the stack to use
    */
   cheStackLibrarySelecter(stack) {
-    this.stackLibraryUser = stack;
-    this.stackLibraryOption = 'new-workspace';
-
+    if (this.workspaceResource === 'existing-workspace') {
+      return;
+    }
+    if (this.stackTab === 'ready-to-go') {
+      this.readyToGoStack = angular.copy(stack);
+    } else if (this.stackTab === 'stack-library') {
+      this.stackLibraryUser = angular.copy(stack);
+    }
     this.updateCurrentStack(stack);
-    this.checkDisabledWorkspace();
+    this.updateWorkspaceStatus(false);
   }
 
-  checkDisabledWorkspace() {
-    let val = this.stackLibraryOption === 'existing-workspace' && this.stackTab === 'stack-library';
-    // if workspace can be configured, generate a new workspace name
-    if (!val) {
+  updateWorkspaceStatus(isExistingWorkspace) {
+    if (isExistingWorkspace) {
+      this.stackLibraryOption = 'existing-workspace';
+    } else {
+      this.stackLibraryOption = 'new-workspace';
       this.generateWorkspaceName();
     }
-    this.$rootScope.$broadcast('chePanel:disabled', {id: 'create-project-workspace', disabled: val});
+    this.$rootScope.$broadcast('chePanel:disabled', {id: 'create-project-workspace', disabled: isExistingWorkspace});
   }
 
   /**
@@ -1081,26 +1087,16 @@ export class CreateProjectCtrl {
     if (!stack) {
       return;
     }
-    if (this.stackTab === 'ready-to-go') {
-      this.readyToGoStack = stack;
-    }
     this.templatesChoice = 'templates-samples';
     this.generateProjectName(true);
-    this.importProjectData.project.description = '';
-
     // Enable wizard only if
     // - ready-to-go-stack with PT
     // - custom stack
-    if (stack != null && 'general' === stack.scope) {
-      if ('Java' === stack.name) {
-        this.enableWizardProject = true;
-      } else {
-        this.enableWizardProject = false;
-      }
-    } else {
+    if (stack === null || 'general' !== stack.scope) {
       this.enableWizardProject = true;
+      return;
     }
-
+    this.enableWizardProject  = 'Java' === stack.name;
   }
 
   selectWizardProject() {

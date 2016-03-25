@@ -27,7 +27,6 @@ import {ReadyToGoStacks} from './create-workspace/select-stack/ready-to-go-stack
 import {WorkspaceRecipeCtrl} from './create-workspace/select-stack/recipe/workspace-recipe.controller';
 import {WorkspaceRecipe} from './create-workspace/select-stack/recipe/workspace-recipe.directive';
 import {CheStackLibrarySelecter} from './create-workspace/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.directive';
-import {CheStackLibraryWorkspaceSelecter} from './create-workspace/select-stack/stack-library/stack-library-workspace-selecter/che-stack-library-workspace-selecter.directive';
 import {CreateProjectStackLibraryCtrl} from './create-workspace/select-stack/stack-library/create-project-stack-library.controller';
 import {CreateProjectStackLibrary} from './create-workspace/select-stack/stack-library/create-project-stack-library.directive';
 import {WorkspaceSelectStackCtrl} from './create-workspace/select-stack/workspace-select-stack.controller';
@@ -79,8 +78,6 @@ export class WorkspacesConfig {
 
     register.controller('ReadyToGoStacksCtrl', ReadyToGoStacksCtrl);
     register.directive('readyToGoStacks', ReadyToGoStacks);
-
-    register.directive('cheStackLibraryWorkspaceSelecter', CheStackLibraryWorkspaceSelecter);
 
     register.controller('CreateProjectStackLibraryCtrl', CreateProjectStackLibraryCtrl);
 

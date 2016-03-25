@@ -43,19 +43,19 @@ export class ChePanel {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict='E';
-    this.replace= true;
-    this.transclude= true;
+  constructor() {
+    this.restrict = 'E';
+    this.replace = true;
+    this.transclude = true;
     this.bindToController = true;
-
 
     this.controller = 'ChePanelCtrl';
     this.controllerAs = 'chePanelCtrl';
 
     this.scope = {
       svgIcon: '@cheTitleSvgIcon',
-      title:'@cheTitle',
+      tooltip: '@?cheTooltip',
+      title: '@cheTitle',
       disabled: '@cheDisabled'
     };
   }
@@ -94,7 +94,7 @@ export class ChePanel {
    * @param attrs
    * @returns {string} the template
    */
-  template( element, attrs){
+  template(element, attrs) {
 
     var template = '<md-card class="che-panel" md-theme="default">'
       + '<div layout="row" class="che-panel-titlebox" layout-align="start center">'
@@ -105,34 +105,30 @@ export class ChePanel {
       template = template + '<span class="che-panel-title-icon ' + attrs['cheTitleIcon'] + '"></span>';
     }
     if (attrs['cheTitleSvgIcon']) {
-      template = template + '<md-icon md-svg-src="' +  '{{chePanelCtrl.svgIcon}}' + '"></md-icon>';
+      template = template + '<md-icon md-svg-src="' + '{{chePanelCtrl.svgIcon}}' + '"></md-icon>';
     }
-
 
     template = template + '{{chePanelCtrl.title}}</div>';
     if (attrs['cheTooltip']) {
-      template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" tooltip="' + attrs['cheTooltip'] + '"></i></div>';
+      template = template + '<div><i class="fa fa-info-circle che-panel-title-tooltip-icon" tooltip-placement="right" tooltip="{{chePanelCtrl.tooltip}}"></i></div>';
     }
 
-      template = template + '<div flex layout="column"><div class="che-panel-title-top">&nbsp;</div><div class="che-panel-title-bottom">&nbsp;</div></div>';
+    template = template + '<div flex layout="column"><div class="che-panel-title-top">&nbsp;</div><div class="che-panel-title-bottom">&nbsp;</div></div>';
 
 
     if (attrs['cheToggle']) {
-     template = template +'<i class="{{chePanelCtrl.getToggleIcon()}}" ng-click="chePanelCtrl.toggle()"></i>';
+      template = template + '<i class="{{chePanelCtrl.getToggleIcon()}}" ng-click="chePanelCtrl.toggle()"></i>';
     }
-
 
     template = template
     + '</div>'
-    +  '<md-card-content class="che-panel-content" ng-hide="chePanelCtrl.isCollapsed()">'
-    +  '<ng-transclude></ng-transclude>'
-    +  '</md-card-content>'
-    +  '<div class="che-panel-glass" ng-show="chePanelCtrl.disabled"></div>'
-    +  '</md-card>';
+    + '<md-card-content class="che-panel-content" ng-hide="chePanelCtrl.isCollapsed()">'
+    + '<ng-transclude></ng-transclude>'
+    + '</md-card-content>'
+    + '<div class="che-panel-glass" ng-show="chePanelCtrl.disabled"></div>'
+    + '</md-card>';
 
     return template;
   }
-
-
 
 }
