@@ -91,7 +91,7 @@ export class CreateProjectSamplesCtrl {
     if ($first && createProjectCtrl.selectSourceOption === 'select-source-new') {
       this.$timeout(() => {
         this.selectTemplate(template, createProjectCtrl);
-      }, 1000);
+      });
     }
   }
 
@@ -102,8 +102,7 @@ export class CreateProjectSamplesCtrl {
    * @returns length of keys
    */
   getItemsSize(items) {
-    return Object.keys(items).length;
-
+    return items && Object.keys(items).length;
   }
 
 }

@@ -14,40 +14,39 @@
 
 <md-content md-scroll-y flex md-theme="maincontent-theme">
   <ng-form name="workspaceInformationForm">
-
     <che-panel id="create-project-source-id" che-title="Select Source"
-                che-tooltip="Create workspace from a recipe, stack or by importing workspace configuration">
+               che-tooltip="Create workspace from a recipe, stack or by importing workspace configuration">
       <md-radio-group ng-model="createWorkspaceCtrl.selectSourceOption">
         <md-radio-button value="select-source-recipe">Workspace using recipe</md-radio-button>
         <md-radio-button value="select-source-import">Import an existing workspace configuration</md-radio-button>
       </md-radio-group>
     </che-panel>
-
     <che-panel che-title="Import workspace" ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-import'">
 
       <ui-codemirror class="workspace-editor" ui-codemirror="createWorkspaceCtrl.editorOptions"
                      ng-model="createWorkspaceCtrl.importWorkspace"></ui-codemirror>
 
     </che-panel>
-    <che-workspace-select-stack ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-recipe'"
-                                 che-tab-name="tabName"
-                                 che-on-tab-change="createWorkspaceCtrl.setStackTab(tabName)"
-                                 che-stack="stack"
-                                 che-stack-change="createWorkspaceCtrl.cheStackLibrarySelecter(stack)"
-                                 che-recipe-script="createWorkspaceCtrl.recipeScript"
-                                 che-recipe-url="createWorkspaceCtrl.recipeUrl"></che-workspace-select-stack>
-
-
+    <che-panel che-title="Select Stack"
+               che-tooltip="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
+      <che-workspace-select-stack ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-recipe'"
+                                  che-tab-name="tabName"
+                                  che-on-tab-change="createWorkspaceCtrl.setStackTab(tabName)"
+                                  che-stack="stack"
+                                  che-stack-change="createWorkspaceCtrl.cheStackLibrarySelecter(stack)"
+                                  che-recipe-script="createWorkspaceCtrl.recipeScript"
+                                  che-recipe-url="createWorkspaceCtrl.recipeUrl"/>
+    </che-panel>
     <che-panel che-title="Information">
       <che-input che-form="workspaceInformationForm"
-                  che-name="name"
-                  che-label-name="Name"
-                  che-place-holder="Name of the workspace"
-                  ng-model="createWorkspaceCtrl.workspaceName"
-                  required
-                  ng-minlength="3"
-                  ng-maxlength="20"
-                  ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                 che-name="name"
+                 che-label-name="Name"
+                 che-place-holder="Name of the workspace"
+                 ng-model="createWorkspaceCtrl.workspaceName"
+                 required
+                 ng-minlength="3"
+                 ng-maxlength="20"
+                 ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
         <div ng-message="required">A name is required.</div>
         <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin
           letters or underscores
@@ -58,12 +57,10 @@
       <che-workspace-ram-allocation-slider ng-model="createWorkspaceCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
     </che-panel>
   </ng-form>
-
   <che-button-primary id="create-project-button-import"
-                       che-button-title="Create Workspace"
-                       ng-click="createWorkspaceCtrl.createWorkspace()"
-                       ng-disabled="workspaceInformationForm.$invalid">
+                      che-button-title="Create Workspace"
+                      ng-click="createWorkspaceCtrl.createWorkspace()"
+                      ng-disabled="workspaceInformationForm.$invalid">
   </che-button-primary>
-
 </md-content>
 

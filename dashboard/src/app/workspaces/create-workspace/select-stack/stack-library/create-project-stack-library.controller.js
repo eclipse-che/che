@@ -32,7 +32,6 @@ export class CreateProjectStackLibraryCtrl {
     this.allStackTags = [];
     this.filteredStackIds = [];
 
-    this.createChoice = 'new-workspace';
     this.onChoice();
 
     let promiseStack = cheStack.fetchStacks();
@@ -46,28 +45,9 @@ export class CreateProjectStackLibraryCtrl {
           this.updateDataStacks();
         }
       });
-    if (this.isWorkspaces) {
-      let promiseWorkspaces = cheWorkspace.fetchWorkspaces();
-      promiseWorkspaces.then(() => {
-          this.updateDataWorkspaces();
-        },
-        (error) => {
-          // etag handling so also retrieve last data that were fetched before
-          if (error.status === 304) {
-            // ok
-            this.updateDataWorkspaces();
-          }
-        });
-    }
 
     $scope.$on('event:selectStackId', (event, data) => {
       this.selectedStackId = data;
-      this.createChoice = 'new-workspace';
-    });
-
-    $scope.$on('event:selectWorkspaceId', (event, data) => {
-      this.selectedWorkspaceId = data;
-      this.createChoice = 'existing-workspace';
     });
 
     // create array of id of stacks which contain selected tags
@@ -113,25 +93,13 @@ export class CreateProjectStackLibraryCtrl {
   }
 
   /**
-   * Select workspace by Id
-   */
-  setWorkspaceSelectionById(workspaceId) {
-    this.selectedWorkspaceId = workspaceId;
-    this.onChoice();
-  }
-
-  /**
    * Callback when item has been select
    */
   onChoice() {
     if (!this.selectedStackId) {
       return;
     }
-    if (this.createChoice === 'new-workspace') {
-      this.$scope.$emit('event:selectStackId', this.selectedStackId);
-    } else if (this.createChoice === 'existing-workspace') {
-      this.$scope.$emit('event:selectWorkspaceId', this.selectedWorkspaceId);
-    }
+    this.$scope.$emit('event:selectStackId', this.selectedStackId);
   }
 
   /**
@@ -147,18 +115,6 @@ export class CreateProjectStackLibraryCtrl {
       this.allStackTags = this.allStackTags.concat(stack.tags);
     });
     this.allStackTags = this.lodash.uniq(this.allStackTags);
-  }
-
-  /**
-   * Update workspaces' data
-   */
-  updateDataWorkspaces() {
-    this.workspaces.length = 0;
-    var remoteWorkspaces = this.cheWorkspace.getWorkspaces();
-    // remote workspaces are
-    remoteWorkspaces.forEach((workspace) => {
-      this.workspaces.push(workspace);
-    });
   }
 
   /**

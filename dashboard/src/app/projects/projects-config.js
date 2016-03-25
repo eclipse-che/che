@@ -23,6 +23,8 @@ import {AddSecretKeyNotificationCtrl} from './create-project/add-ssh-key-notific
 import {NoGithubOauthDialogController} from './create-project/github/oauth-dialog/no-github-oauth-dialog.controller';
 import {CreateProjectSamplesCtrl} from './create-project/samples/create-project-samples.controller';
 import {CreateProjectSamples} from './create-project/samples/create-project-samples.directive';
+import {CreateProjectWorkspacesController} from './create-project/workspaces/create-project-workspaces.controller';
+import {CreateProjectWorkspaces} from './create-project/workspaces/create-project-workspaces.directive';
 
 import {CreateProjectSamplesFilter} from './create-project/samples/create-project-samples.filter';
 import {CreateProjectSamplesNameFilter} from './create-project/samples/create-project-samples-name.filter';
@@ -66,6 +68,9 @@ export class ProjectsConfig {
 
     register.controller('CreateProjectSamplesCtrl', CreateProjectSamplesCtrl);
     register.directive('createProjectSamples', CreateProjectSamples);
+
+    register.controller('CreateProjectWorkspacesController', CreateProjectWorkspacesController);
+    register.directive('createProjectWorkspaces', CreateProjectWorkspaces);
 
     register.directive('createProjectZip', CreateProjectZip);
 

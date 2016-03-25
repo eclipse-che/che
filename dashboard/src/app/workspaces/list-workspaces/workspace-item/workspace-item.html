@@ -16,7 +16,7 @@
          ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <div class="workspace-item-name" flex="20" >
             <span>{{workspaceItemCtrl.workspace.config.name}}</span>
-            <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.config.temporary"></i>
+            <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
         </div>
         <div class="workspace-item-details" flex="10">
           <workspace-status-indicator che-status="workspaceItemCtrl.workspace.status"></workspace-status-indicator>
