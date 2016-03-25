@@ -20,7 +20,7 @@ class IdeSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q) {
+  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q, $log) {
     this.cheAPI = cheAPI;
     this.$rootScope = $rootScope;
     this.lodash = lodash;
@@ -34,6 +34,7 @@ class IdeSvc {
     this.$location = $location;
     this.routeHistory = routeHistory;
     this.$q = $q;
+    this.$log = $log;
 
     this.ideParams = new Map();
 
@@ -173,7 +174,7 @@ class IdeSvc {
               .ok('OK')
           );
         }
-        console.log('Status channel of workspaceID', workspaceId, message);
+        this.$log.log('Status channel of workspaceID', workspaceId, message);
       });
 
       bus.subscribe(agentChannel, (message) => {
@@ -234,7 +235,7 @@ class IdeSvc {
         }, 1000);
       } else {
         this.steps[this.currentStep].hasError = true;
-        console.log('error when starting remote extension', error);
+        this.$log.error('error when starting remote extension', error);
         // need to show the error
         this.$mdDialog.show(
           this.$mdDialog.alert()
