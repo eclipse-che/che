@@ -159,9 +159,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
     @Test
     public void testSerializeProject() throws Exception {
-
-        ProjectConfig config =
-                           DtoConverter.toProjectConfig(pm.getProject("/fromConfig"), workspaceHolder.getWorkspace().getId(), null);
+        ProjectConfig config = DtoConverter.asDto(pm.getProject("/fromConfig"));
 
         assertEquals("/fromConfig", config.getPath());
         assertEquals("primary1", config.getType());

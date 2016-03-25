@@ -439,9 +439,6 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         pm.createProject(pc, null);
 
-        workspaceHolder.updateProjects(projectRegistry.getProjects());
-
-
         // SPECS:
         // Only persisted variables should be persisted (no constants, no provided variables)
 
@@ -467,8 +464,6 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
         projectRegistry.putProject(pc1, null, true, true);
         projectRegistry.putProject(pc2, null, true, false);
-
-        workspaceHolder.updateProjects(projectRegistry.getProjects());
 
         // SPECS:
         // Only persisted projects should be persisted (no detected)
