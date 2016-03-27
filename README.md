@@ -95,9 +95,11 @@ These repositories are for the core project hosted at `http://github.com/eclipse
 /che/assembly/assembly-ide-war                            # Creates the IDE.war from plug-ins & core
 /che/assembly/assembly-machine-war                        # Creates the agent WAR from plug-ins & core
 /che/assembly/assembly-machine-server                     # Creates the agent server that goes into ws
-/che/core                                                 # Platform APIs
+/che/core                                                 # Libraries shared among server, agents, and plugins
 /che/dashboard                                            # AngularJS app for managing Che
 /che/plugins                                              # IDE & agent plug-ins
+/che/wsmaster                                             # Libraries used by the Che server
+/che/wsagent                                              # Libraries used by agents installed into workspaces
 
 /che-lib                                                  # Forked dependencies that require mods
 /che-lib/swagger
