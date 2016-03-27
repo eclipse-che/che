@@ -18,65 +18,47 @@ A stack is the configuration of a runtime that can be used to power a workspace.
 * [Stacks Created by Community](https://github.com/eclipse/che/pull/570)
 * * TODO: Update this link to point to wiki page that can be updated by community
 
+#### Extension Development
+An extension is a set of code and resources that are packaged into a plugin that alter the behavior of the system. Extensions can be IDE extensions, workspace extensions (they are injected into the workspace agent running within each workspace), or Che extensions (injected into the Che server). Extensions are authored in Java and maven, and then packaged into JAR / ZIP files for deployment into Eclipse Che.
+* [Developing Extensions](https://eclipse-che.readme.io/docs/developing-extensions)
+* [Workspace Extension Tutorial](https://eclipse-che.readme.io/docs/developing-extensions#server-side-extension-example)
+* [IDE Extension Tutorial](https://eclipse-che.readme.io/docs/developing-extensions#ide-extension-example)
+* [Authoring Extensions in Che](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-the-che-ide)
+* [Authoring Extensions in Eclipse](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-the-eclipse-ide)
+* [Authoring Extensions in IntelliJ](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-intellij-ide)
+* [Extensions Packaged With Che](https://github.com/eclipse/che/tree/master/plugins)
+* [Extension SDK JavaDoc](https://eclipse-che.readme.io/v4.0/docs/java-class-reference)
+
+#### IDE Extensions
+IDE extensions are compiled into JavaScript with other extensions to create a single, JavaScript application. You can package many extensions together into a single JavaScript application. The JavaScript application is cross-browser optimized. You can debug extensions and perform execution traces from within the browser of extension code. IDE extensions can invoke REST services that are running within the Che server or within a workspace. Che provides default workspace REST APIs or you can provide your own with workspace extensions.
+* * TODO: Invoking Workspace APIs
+* * TODO: Invoking Che APIs
+* * TODO: Register Project Type
+* * TODO: Menus
+* * [Events](https://eclipse-che.readme.io/docs/events)
+* * [Actions & Commands](https://github.com/benoitf/ide-plugin-demo)
+* * TODO: Panels 
+* * TODO: Popups
+* * TODO: Wizards
+* * TODO: Editors
+
 #### Server-Side Extensions
-1. Documentation
+Server-side extensions are libraries that are deployed into the workspace agent when the workspace is activated. Che deploys some standard server-side extensions that expose the Workspace REST API to the outside world. You can author extensions that modify or extend this API with your own services. New workspace APIs are exposed as JAX-RS services and you use dependency injection to define the API interfaces.
+* * TODO: JAX-RS Conventions
+* * TODO: Adding Custom Services into Workspace Agent
 
->COMING SOON
+#### Workspace REST API
+IDE extensions have access to a default set of workspace APIs that are deployed within each workspace. These APIs are available through a Swagger configuration. 
+* [Swagger Configuration of APIs](https://eclipse-che.readme.io/docs/rest-api)
+* [Authentication](https://eclipse-che.readme.io/docs/authentication)
+* [Workspaces](https://eclipse-che.readme.io/docs/create-workspaces-and-projects)
+* [Projects](https://eclipse-che.readme.io/docs/api-projects)
+* [Project Types](https://eclipse-che.readme.io/docs/custom-project-types)
+* [File Acces](https://eclipse-che.readme.io/docs/edit-build-and-run)
+* [Events](https://eclipse-che.readme.io/docs/events)
 
-2. REST API
- * Access the Workspace Master APIs [Docs](https://eclipse-che.readme.io/docs/rest-api)
- * Authentication [Docs](https://eclipse-che.readme.io/docs/authentication)
- * Workspaces [Docs](https://eclipse-che.readme.io/docs/create-workspaces-and-projects)
- * Projects [Docs](https://eclipse-che.readme.io/docs/api-projects)
- * Project Types [Docs](https://eclipse-che.readme.io/docs/custom-project-types)
- * Files [Docs](https://eclipse-che.readme.io/docs/edit-build-and-run)
- * Events [Docs](https://eclipse-che.readme.io/docs/events)
-
-3. Add New REST API
-  * Create a Server-Side Extension Example [Docs](https://eclipse-che.readme.io/docs/developing-extensions#server-side-extension-example)
-
-4. Workspace Agents
-
->COMING SOON
-
-#### Create IDE Extensions
-**1. Documentation**
-  * Extension Directory Structure [Docs](https://eclipse-che.readme.io/docs/developing-extensions#extension-directory-structure)
-  * Extension Loading Sequence [Docs](https://eclipse-che.readme.io/docs/developing-extensions#loading-sequence)
-  * Dependency Injection [Docs](https://eclipse-che.readme.io/docs/developing-extensions#dependency-injection)
-  * Author Extensions Using the Che IDE [Docs](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-the-che-ide)
-  * Author Extensions Using the Eclipse IDE [Docs](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-the-eclipse-ide)
-  * Author Extension Using IntelliJ IDE [Docs](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-intellij-ide)
-
-**2. Existing Extensions**
-  * Extensions packaged with Che [Repository](https://github.com/eclipse/che/tree/master/plugins)
-  * Simple Client Extension Example [Docs](https://eclipse-che.readme.io/docs/developing-extensions#ide-extension-example)
-
-**3. JavaDoc**
-
-* How to get the JavaDoc for Che & GWT classes [Docs](https://eclipse-che.readme.io/v4.0/docs/java-class-reference)
-
-**4. Registering Project Type**
->COMING SOON
-
-**5. Menus**
->COMING SOON
-
-**6. Events**
- * Events [Docs](https://eclipse-che.readme.io/docs/events)
-
-**7. Actions & Commands**
- * Sample Extension for Jetty [Repository](https://github.com/benoitf/ide-plugin-demo)
- 
-**8. Panels**
->COMING SOON
-
-**9. Popups**
->COMING SOON
-
-**10. Wizards**
->COMING SOON
-
-#### Packaging Plug-Ins Into Assemblies
-1. Documentation
-  * Package Extensions and Build Assemblies [Docs](https://eclipse-che.readme.io/docs/developing-extensions#package-extensions)
+#### Plug-Ins and Assemblies
+A plugin is a set of extensions (both IDE and workspace extensions) along with their collective reosurces that are packaged into a single deployable unit, usually as a JAR or ZIP file. An assembly is a set of plug-ins combined with the Eclipse Che core that is assembled into a re-distributable set of binaries. A new assembly can fundamentally alter the Che branding. Che can create assemblies packaged as a desktop IDE or as a new Che server.
+* [Plugin Development](https://eclipse-che.readme.io/docs/plug-ins)
+* [Drag and Drop Plugins](https://eclipse-che.readme.io/v1.0/docs/developing-plugins) FYI - Not yet updated for 4.x
+* [Assemblies](https://eclipse-che.readme.io/docs/assemblies)
