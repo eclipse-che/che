@@ -32,12 +32,11 @@ An extension is a set of code and resources that are packaged into a plugin that
 #### IDE Extensions
 IDE extensions are compiled into JavaScript with other extensions to create a single, JavaScript application. You can package many extensions together into a single JavaScript application. The JavaScript application is cross-browser optimized. You can debug extensions and perform execution traces from within the browser of extension code. IDE extensions can invoke REST services that are running within the Che server or within a workspace. Che provides default workspace REST APIs or you can provide your own with workspace extensions.
 * [Invoking Workspace REST APIs](https://eclipse-che.readme.io/v4.0/docs/calling-workspace-apis)
-* * TODO: Invoking Che APIs
 * [Actions](https://eclipse-che.readme.io/docs/actions)
+* [Commands](https://github.com/benoitf/ide-plugin-demo)
 * * TODO: Register Project Type
 * * TODO: Menus
-* * [Events](https://eclipse-che.readme.io/docs/events)
-* * [Actions & Commands](https://github.com/benoitf/ide-plugin-demo)
+* [Events](https://eclipse-che.readme.io/docs/events)
 * * TODO: Panels 
 * * TODO: Popups
 * * TODO: Wizards
