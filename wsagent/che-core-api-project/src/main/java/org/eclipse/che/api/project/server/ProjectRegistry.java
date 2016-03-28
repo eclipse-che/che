@@ -200,7 +200,7 @@ public class ProjectRegistry {
                                  boolean detected) throws ServerException,
                                                           ConflictException,
                                                           NotFoundException {
-        final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
+        final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, projectTypeRegistry);
         Optional<RegisteredProject> updatedProjectOptional = Optional.ofNullable(projects.put(project.getPath(), project));
 
         // check whether it isn't during #initProjects()
@@ -210,6 +210,9 @@ public class ProjectRegistry {
             } else {
                 workspaceHolder.addProject(project);
             }
+        } else if (config == null) {
+            // initializing project from unconfigured folder during #initProjects()
+            workspaceHolder.addProject(project);
         }
 
         return project;
