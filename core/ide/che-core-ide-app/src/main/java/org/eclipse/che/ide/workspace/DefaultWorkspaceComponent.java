@@ -110,7 +110,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Com
                         for (WorkspaceDto workspace : workspaces) {
                             if (wsNameFromBrowser.equals(workspace.getConfig().getName())) {
                                 Log.info(getClass(), "Starting workspace " + workspace.getConfig().getName());
-                                startWorkspaceById(workspace);
+                                startWorkspaceById(workspace, callback);
                                 return;
                             }
                         }
@@ -138,7 +138,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Com
         } else {
             for(WorkspaceDto workspace : workspaces) {
                 if (workspace.getId().equals(recentWorkspaceId)) {
-                    startWorkspaceById(workspace);
+                    startWorkspaceById(workspace, callback);
                     return;
                 }
             }

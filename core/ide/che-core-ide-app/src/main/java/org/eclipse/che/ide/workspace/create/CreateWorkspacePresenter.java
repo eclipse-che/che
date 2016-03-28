@@ -94,8 +94,6 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     /**
      * Shows special dialog window which allows set up workspace which will be created.
      *
-     * @param callback
-     *         callback which is necessary to notify that workspace component started or failed
      * @param workspaces
      *         list of existing workspaces
      */
@@ -214,7 +212,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
                 DefaultWorkspaceComponent component = wsComponentProvider.get();
-                component.startWorkspaceById(workspace);
+                component.startWorkspaceById(workspace, callback);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

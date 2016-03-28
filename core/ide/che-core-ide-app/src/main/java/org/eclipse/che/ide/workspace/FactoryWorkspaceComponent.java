@@ -60,9 +60,9 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
-                                     FactoryServiceClient factoryServiceClient,
                                      CreateWorkspacePresenter createWorkspacePresenter,
                                      StartWorkspacePresenter startWorkspacePresenter,
+                                     FactoryServiceClient factoryServiceClient,
                                      CoreLocalizationConstant locale,
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
