@@ -10,6 +10,7 @@
  */
 'use strict';
 
+import {CheAccordion} from './accordion/che-accordion.directive';
 import {CheButtonPrimary} from './button/che-button-primary.directive';
 import {CheButtonDanger} from './button/che-button-danger.directive';
 import {CheButtonDefault} from './button/che-button-default.directive';
@@ -37,6 +38,8 @@ import {CheList} from './list/che-list.directive';
 import {CheListItem} from './list/che-list-item.directive';
 import {CheListTitle} from './list/che-list-title.directive';
 import {CheListItemChecked} from './list/che-list-item-checked.directive';
+import {CheLoader} from './loader/che-loader.directive';
+import {CheLoaderCrane} from './loader/che-loader-crane.directive';
 import {ChePanelCtrl} from './panel/che-panel.controller';
 import {ChePanel} from './panel/che-panel.directive';
 import {CheSearch} from './search/che-search.directive';
@@ -46,6 +49,7 @@ import {CheSelecter} from './selecter/che-selecter.directive';
 import {CheSimpleSelecterCtrl} from './simple-selecter/che-simple-selecter.controller';
 import {CheSimpleSelecter} from './simple-selecter/che-simple-selecter.directive';
 import {CheSlider} from './slider/che-slider.directive';
+import {CheLogsOutput} from './logs-output/che-logs-output.directive';
 import {CheTextInfo} from './text-info/che-text-info.directive';
 import {CheToggleCtrl} from './toggle-button/che-toggle.controller';
 import {CheToggleButton} from './toggle-button/che-toggle-button.directive';
@@ -57,8 +61,11 @@ export class WidgetConfig {
 
   constructor(register) {
 
-    //box
-    register.directive('cheButtonPrimary', CheButtonPrimary)
+    // accordion
+    register.directive('cheAccordion', CheAccordion)
+
+      // button
+      .directive('cheButtonPrimary', CheButtonPrimary)
       .directive('cheButtonDanger', CheButtonDanger)
       .directive('cheButtonDefault', CheButtonDefault)
       .directive('cheButtonNotice', CheButtonNotice)
@@ -92,6 +99,9 @@ export class WidgetConfig {
       .directive('cheList', CheList)
       .directive('cheListItem', CheListItem)
 
+      .directive('cheLoader', CheLoader)
+      .directive('cheLoaderCrane', CheLoaderCrane)
+
       .controller('ChePanelCtrl', ChePanelCtrl)
       .directive('chePanel', ChePanel)
 
@@ -106,6 +116,9 @@ export class WidgetConfig {
       .directive('cheSimpleSelecter', CheSimpleSelecter)
 
       .directive('cheSlider', CheSlider)
+
+      .directive('cheLogsOutput', CheLogsOutput)
+
       .directive('cheTextInfo', CheTextInfo)
 
       .controller('CheToggleCtrl', CheToggleCtrl)

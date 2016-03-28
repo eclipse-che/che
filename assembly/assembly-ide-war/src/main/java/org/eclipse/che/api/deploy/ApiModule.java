@@ -37,7 +37,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
-import org.eclipse.che.everrest.CodenvyAsynchronousJobPool;
+import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.everrest.ETagResponseFilter;
 import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
@@ -89,7 +89,7 @@ public class ApiModule extends AbstractModule {
         bind(WorkspaceMessenger.class).asEagerSingleton();
 
 
-        bind(AsynchronousJobPool.class).to(CodenvyAsynchronousJobPool.class);
+        bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(WSocketEventBusServer.class);
@@ -114,7 +114,7 @@ public class ApiModule extends AbstractModule {
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.dev_machine.machine_servers"));
-        machineServers.addBinding().toInstance(new ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http"));
+        machineServers.addBinding().toInstance(new ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http", null));
 
         bind(RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
@@ -126,6 +126,7 @@ public class ApiModule extends AbstractModule {
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
+                          "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
 
         install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());

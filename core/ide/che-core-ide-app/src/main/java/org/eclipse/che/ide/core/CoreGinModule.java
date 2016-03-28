@@ -23,7 +23,6 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.api.account.gwt.client.AccountServiceClient;
 import org.eclipse.che.api.account.gwt.client.AccountServiceClientImpl;
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.auth.client.OAuthServiceClient;
 import org.eclipse.che.api.auth.client.OAuthServiceClientImpl;
 import org.eclipse.che.api.factory.gwt.client.FactoryServiceClient;
@@ -54,8 +53,6 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.actions.ActionManagerImpl;
 import org.eclipse.che.ide.actions.find.FindActionView;
 import org.eclipse.che.ide.actions.find.FindActionViewImpl;
-import org.eclipse.che.ide.analytics.AnalyticsEventLoggerExt;
-import org.eclipse.che.ide.analytics.DummyAnalyticsLoger;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -166,7 +163,6 @@ import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.RestContextProvider;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.selection.SelectionAgentImpl;
-import org.eclipse.che.ide.settings.common.SettingsPagePresenter;
 import org.eclipse.che.ide.statepersistance.OpenedFilesPersistenceComponent;
 import org.eclipse.che.ide.statepersistance.PersistenceComponent;
 import org.eclipse.che.ide.statepersistance.ShowHiddenFilesPersistenceComponent;
@@ -263,13 +259,12 @@ public class CoreGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(PartStackView.class, PartStackViewImpl.class).build(PartStackViewFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStack.class, PartStackPresenter.class).build(PartStackPresenterFactory.class));
 
-        bind(PreferencesManager.class).to(PreferencesManagerImpl.class).in(Singleton.class);
+        bind(PreferencesManager.class).to(PreferencesManagerImpl.class);
+        GinMultibinder.newSetBinder(binder(), PreferencesManager.class).addBinding().to(PreferencesManagerImpl.class);
+
         bind(NotificationManager.class).to(NotificationManagerImpl.class).in(Singleton.class);
         bind(ThemeAgent.class).to(ThemeAgentImpl.class).in(Singleton.class);
         bind(FileTypeRegistry.class).to(FileTypeRegistryImpl.class).in(Singleton.class);
-
-        bind(AnalyticsEventLogger.class).to(DummyAnalyticsLoger.class).in(Singleton.class);
-        bind(AnalyticsEventLoggerExt.class).to(DummyAnalyticsLoger.class).in(Singleton.class);
 
         GinMultibinder.newSetBinder(binder(), OAuth2Authenticator.class).addBinding().to(DefaultOAuthAuthenticatorImpl.class);
 
@@ -423,8 +418,6 @@ public class CoreGinModule extends AbstractGinModule {
         bind(LoaderView.class).to(LoaderViewImpl.class).in(Singleton.class);
 
         bind(HotKeysDialogView.class).to(HotKeysDialogViewImpl.class).in(Singleton.class);
-
-        GinMultibinder.newSetBinder(binder(), SettingsPagePresenter.class);
 
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));

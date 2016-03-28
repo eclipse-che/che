@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -36,18 +35,17 @@ public class CloseAllAction extends EditorAbstractAction {
     @Inject
     public CloseAllAction(EditorAgent editorAgent,
                           EventBus eventBus,
-                          CoreLocalizationConstant locale,
-                          AnalyticsEventLogger eventLogger) {
-        super(locale.editorTabCloseAll(), locale.editorTabCloseAllDescription(), null, editorAgent, eventBus, eventLogger);
+                          CoreLocalizationConstant locale) {
+        super(locale.editorTabCloseAll(), locale.editorTabCloseAllDescription(), null, editorAgent, eventBus);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
+
         List<VirtualFile> toClose = new ArrayList<>();
 
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
             toClose.add(editor.getEditorInput().getFile());
         }
 

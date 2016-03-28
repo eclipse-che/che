@@ -41,9 +41,16 @@ class IdeLoaderCtrl {
 
   cancelLoad() {
     this.$rootScope.hideIdeLoader = true;
-    this.$location.path('#/');
+    this.$location.path('/');
   }
 
+  downloadLogs() {
+    let logs = '';
+    this.getSteps().forEach((step) => {
+      logs += step.logs + '\n';
+    });
+    window.open('data:text/csv,' + encodeURIComponent(logs));
+  }
 }
 
 

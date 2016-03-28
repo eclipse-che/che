@@ -10,33 +10,37 @@
  *******************************************************************************/
 package org.eclipse.che.ide.preferences;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.user.gwt.client.UserProfileServiceClient;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The implementation of {@link PreferencesManager}.
+ * The implementation of {@link PreferencesManager} for managing user preference.
  *
  * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
  */
 @Singleton
 public class PreferencesManagerImpl implements PreferencesManager {
-    private Map<String, String>      persistedPreferences;
-    private Map<String, String>      changedPreferences;
-    private UserProfileServiceClient userProfileService;
+    private final UserProfileServiceClient      userProfileService;
+    private final Map<String, String>           changedPreferences;
+
+    private Map<String, String> persistedPreferences;
 
     /**
-     * Create preferences.
+     * Create preferences manager
      *
      * @param userProfileService
+     *         user preference service client
      */
     @Inject
     protected PreferencesManagerImpl(UserProfileServiceClient userProfileService) {
@@ -47,6 +51,7 @@ public class PreferencesManagerImpl implements PreferencesManager {
 
     /** {@inheritDoc} */
     @Override
+    @Nullable
     public String getValue(String preference) {
         if (changedPreferences.containsKey(preference)) {
             return changedPreferences.get(preference);
@@ -62,34 +67,30 @@ public class PreferencesManagerImpl implements PreferencesManager {
 
     /** {@inheritDoc} */
     @Override
-    public void flushPreferences(final AsyncCallback<Map<String, String>> callback) {
-        Map<String, String> attributes = new HashMap<String, String>();
-        attributes.putAll(changedPreferences);
+    public Promise<Void> flushPreferences() {
+        if (changedPreferences.isEmpty()) {
+            return Promises.resolve(null);
+        }
 
-        userProfileService.updatePreferences(attributes, new AsyncRequestCallback<Map<String, String>>() {
+        return userProfileService.updatePreferences(changedPreferences).thenPromise(new Function<Map<String,String>, Promise<Void>>() {
             @Override
-            protected void onSuccess(Map<String, String> result) {
+            public Promise<Void> apply(Map<String,String> result) throws FunctionException {
                 persistedPreferences.putAll(changedPreferences);
                 changedPreferences.clear();
-                callback.onSuccess(result);
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                callback.onFailure(exception);
-                Log.error(PreferencesManagerImpl.class, exception);
+                return Promises.resolve(null);
             }
         });
     }
 
-    /**
-     * Reads preferences from input map.
-     *
-     * @param preferences
-     */
-    public void load(Map<String, String> preferences) {
-        if (preferences != null) {
-            persistedPreferences.putAll(preferences);
-        }
+    /** {@inheritDoc} */
+    @Override
+    public Promise<Map<String, String>> loadPreferences() {
+        return userProfileService.getPreferences().then(new Function<Map<String, String>, Map<String, String>>() {
+            @Override
+            public Map<String, String> apply(Map<String, String> preferences) throws FunctionException {
+                persistedPreferences = preferences;
+                return preferences;
+            }
+        });
     }
 }

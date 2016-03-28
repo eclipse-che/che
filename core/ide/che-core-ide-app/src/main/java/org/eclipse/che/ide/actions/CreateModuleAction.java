@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -22,11 +21,12 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Artem Zatsarynnyi
@@ -37,25 +37,21 @@ public class CreateModuleAction extends AbstractPerspectiveAction {
 
     private final AppContext               appContext;
     private final ProjectWizardPresenter   wizard;
-    private final AnalyticsEventLogger     eventLogger;
     private final ProjectExplorerPresenter projectExplorer;
 
     @Inject
     public CreateModuleAction(AppContext appContext,
                               NodesResources resources,
                               ProjectWizardPresenter wizard,
-                              AnalyticsEventLogger eventLogger,
                               ProjectExplorerPresenter projectExplorer) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), "Create Module...", "Create module from existing folder", null, resources.moduleFolder());
         this.appContext = appContext;
         this.wizard = wizard;
-        this.eventLogger = eventLogger;
         this.projectExplorer = projectExplorer;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         FolderReferenceNode folderNode = getResourceBasedNode();
         if (folderNode != null) {
             wizard.show(folderNode.getData());

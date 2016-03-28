@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
@@ -40,7 +39,6 @@ import java.util.List;
  */
 @Singleton
 public class CutAction extends Action {
-    private final AnalyticsEventLogger     eventLogger;
     private       ProjectExplorerPresenter projectExplorer;
     private       AppContext               appContext;
 
@@ -50,7 +48,6 @@ public class CutAction extends Action {
 
     @Inject
     public CutAction(Resources resources,
-                     AnalyticsEventLogger eventLogger,
                      ProjectExplorerPresenter projectExplorer,
                      CoreLocalizationConstant localization,
                      AppContext appContext,
@@ -59,7 +56,6 @@ public class CutAction extends Action {
                      EventBus eventBus) {
         super(localization.cutItemsActionText(), localization.cutItemsActionDescription(), null, resources.cut());
         this.projectExplorer = projectExplorer;
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
         this.pasteAction = pasteAction;
         this.agent = agent;
@@ -123,7 +119,6 @@ public class CutAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
 
         if (!canMoveSelection()) {
             return;

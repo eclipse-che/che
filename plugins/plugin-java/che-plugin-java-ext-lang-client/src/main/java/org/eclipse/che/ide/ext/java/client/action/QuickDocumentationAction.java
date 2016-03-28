@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.java.client.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -32,13 +31,10 @@ public class QuickDocumentationAction extends JavaEditorAction {
 
     private QuickDocumentation quickDocumentation;
 
-    private final AnalyticsEventLogger eventLogger;
-
     @Inject
     public QuickDocumentationAction(JavaLocalizationConstant constant,
                                     QuickDocumentation quickDocumentation,
                                     EditorAgent editorAgent,
-                                    AnalyticsEventLogger eventLogger,
                                     JavaResources resources,
                                     FileTypeRegistry fileTypeRegistry) {
         super(constant.actionQuickdocTitle(),
@@ -47,12 +43,10 @@ public class QuickDocumentationAction extends JavaEditorAction {
               editorAgent,
               fileTypeRegistry);
         this.quickDocumentation = quickDocumentation;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if(activeEditor == null){
             return;

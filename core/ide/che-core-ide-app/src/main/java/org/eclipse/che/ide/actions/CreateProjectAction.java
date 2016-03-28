@@ -13,8 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
-import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -28,7 +26,6 @@ import java.util.Map;
 
 import static org.eclipse.che.api.project.shared.Constants.BLANK_ID;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -39,23 +36,19 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class CreateProjectAction extends AbstractPerspectiveAction {
 
     private final ProjectWizardPresenter wizard;
-    private final AnalyticsEventLogger   eventLogger;
     private final DtoFactory dtoFactory;
 
     @Inject
     public CreateProjectAction(Resources resources,
                                ProjectWizardPresenter wizard,
-                               AnalyticsEventLogger eventLogger,
                                DtoFactory dtoFactory) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), "Create Project...", "Create new project", null, resources.newProject());
         this.wizard = wizard;
-        this.eventLogger = eventLogger;
         this.dtoFactory = dtoFactory;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         final Map<String, String> parameters = e.getParameters();
         if (parameters != null && !parameters.isEmpty()) {
             final ProjectConfigDto dataObject = dtoFactory.createDto(ProjectConfigDto.class);

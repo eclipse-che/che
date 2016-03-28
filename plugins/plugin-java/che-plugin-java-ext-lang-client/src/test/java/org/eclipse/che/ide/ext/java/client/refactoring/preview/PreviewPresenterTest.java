@@ -45,8 +45,6 @@ import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NavigableMap;
-import java.util.TreeMap;
 
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 import static org.mockito.Matchers.any;
@@ -120,8 +118,8 @@ public class PreviewPresenterTest {
 
     @Before
     public void setUp() throws Exception {
-        NavigableMap<String, EditorPartPresenter> editors = new TreeMap<>();
-        editors.put("", editor);
+        List<EditorPartPresenter> editors = new ArrayList<>();
+        editors.add(editor);
         when(editorAgent.getActiveEditor()).thenReturn(activeEditor);
         when(dtoFactory.createDto(RefactoringSession.class)).thenReturn(refactoringSession);
         when(dtoFactory.createDto(ChangeEnabledState.class)).thenReturn(changeEnableState);

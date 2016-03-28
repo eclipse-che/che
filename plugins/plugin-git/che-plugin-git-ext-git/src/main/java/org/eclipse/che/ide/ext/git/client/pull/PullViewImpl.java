@@ -16,6 +16,7 @@ import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,7 +35,7 @@ import java.util.List;
 /**
  * The implementation of {@link PullView}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class PullViewImpl extends Window implements PullView {
@@ -91,6 +92,18 @@ public class PullViewImpl extends Window implements PullView {
             }
         });
         addButtonToFooter(btnPull);
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnPull)) {
+            delegate.onPullClicked();
+        }
     }
 
     /** {@inheritDoc} */
@@ -154,8 +167,14 @@ public class PullViewImpl extends Window implements PullView {
 
     /** {@inheritDoc} */
     @Override
-    public void setEnablePullButton(boolean enabled) {
+    public void setEnablePullButton(final boolean enabled) {
         btnPull.setEnabled(enabled);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                btnPull.setFocus(enabled);
+            }
+        });
     }
 
     /** {@inheritDoc} */
@@ -209,8 +228,4 @@ public class PullViewImpl extends Window implements PullView {
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-    }
 }

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -41,8 +40,6 @@ public class DestroyMachineActionTest {
     private ActionEvent                 event;
     @Mock
     private MachineManager              machineManager;
-    @Mock
-    private AnalyticsEventLogger        eventLogger;
     @Mock
     private DialogFactory               dialogFactory;
 

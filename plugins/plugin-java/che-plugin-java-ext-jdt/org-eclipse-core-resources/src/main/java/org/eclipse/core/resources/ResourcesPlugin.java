@@ -31,7 +31,7 @@ import javax.annotation.PostConstruct;
  */
 @Singleton
 public class ResourcesPlugin {
-    private static final Logger    LOG       = LoggerFactory.getLogger(ResourcesPlugin.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResourcesPlugin.class);
 
     /**
      * Common prefix for workspace preference names.

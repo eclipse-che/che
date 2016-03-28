@@ -23,22 +23,17 @@ export class WorkspaceSelectStack {
   constructor() {
     this.restrict = 'E';
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/workspace-select-stack.html';
-    this.replace = false;
-
+    this.replace = true;
+    this.bindToController = true;
     this.controller = 'WorkspaceSelectStackCtrl';
     this.controllerAs = 'workspaceSelectStackCtrl';
 
-    this.bindToController = true;
-
     // scope values
     this.scope = {
-      isWorkspaces: '@cheIsWorkspaces',
       tabName: '=cheTabName',
       onTabChange: '&cheOnTabChange',
       stack: '=cheStack',
       onStackChange: '&cheStackChange',
-      workspace: '=cheWorkspace',
-      onWorkspaceChange: '&cheWorkspaceChange',
       recipeScript: '=cheRecipeScript',
       recipeUrl: '=cheRecipeUrl'
     };

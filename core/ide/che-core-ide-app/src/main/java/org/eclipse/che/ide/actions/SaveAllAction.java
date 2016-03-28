@@ -14,7 +14,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
@@ -24,8 +23,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /** @author Evgen Vidolob */
@@ -33,22 +30,17 @@ import java.util.List;
 public class SaveAllAction extends ProjectAction {
 
     private final EditorAgent          editorAgent;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
-    public SaveAllAction(EditorAgent editorAgent, Resources resources, AnalyticsEventLogger eventLogger) {
+    public SaveAllAction(EditorAgent editorAgent, Resources resources) {
         super("Save All", "Save all changes for project", resources.save());
         this.editorAgent = editorAgent;
-        this.eventLogger = eventLogger;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-        Collection<EditorPartPresenter> values = editorAgent.getOpenedEditors().values();
-        List<EditorPartPresenter> editors = new ArrayList<>(values);
-        save(editors);
+        save(editorAgent.getOpenedEditors());
     }
 
     private void save(final List<EditorPartPresenter> editors) {
@@ -82,9 +74,8 @@ public class SaveAllAction extends ProjectAction {
     /** {@inheritDoc} */
     @Override
     public void updateProjectAction(ActionEvent e) {
-//        e.getPresentation().setVisible(true);
         boolean hasDirtyEditor = false;
-        for (EditorPartPresenter editor : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
             if(editor instanceof EditorWithAutoSave) {
                 if (((EditorWithAutoSave)editor).isAutoSaveEnabled()) {
                     continue;

@@ -12,7 +12,6 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -33,24 +32,20 @@ public class RunCommandAction extends Action {
 
     private final SelectCommandComboBoxReady  selectCommandAction;
     private final CommandManager              commandManager;
-    private final AnalyticsEventLogger        eventLogger;
     private final MachineLocalizationConstant localizationConstant;
 
 
     @Inject
     public RunCommandAction(SelectCommandComboBoxReady selectCommandAction,
                             MachineLocalizationConstant localizationConstant,
-                            CommandManager commandManager,
-                            AnalyticsEventLogger eventLogger) {
+                            CommandManager commandManager) {
         this.selectCommandAction = selectCommandAction;
         this.localizationConstant = localizationConstant;
         this.commandManager = commandManager;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
-
         if (event.getParameters() == null) {
             Log.error(getClass(), localizationConstant.runCommandEmptyParamsMessage());
             return;
@@ -61,8 +56,6 @@ public class RunCommandAction extends Action {
             Log.error(getClass(), localizationConstant.runCommandEmptyNameMessage());
             return;
         }
-
-        eventLogger.log(this);
 
         final CommandConfiguration command = selectCommandAction.getCommandByName(name);
         if (command != null) {

@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import org.eclipse.che.api.machine.shared.Group;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -93,6 +92,10 @@ public class ActionManagerImpl implements ActionManager {
         DefaultActionGroup runGroup = new DefaultActionGroup("Run", true, this);
         registerAction(IdeActions.GROUP_RUN, runGroup);
         mainMenu.add(runGroup);
+
+        DefaultActionGroup profileGroup = new DefaultActionGroup("Profile", true, this);
+        registerAction(IdeActions.GROUP_PROFILE, profileGroup);
+        mainMenu.add(profileGroup);
 
         DefaultActionGroup helpGroup = new DefaultActionGroup("Help", true, this);
         registerAction(IdeActions.GROUP_HELP, helpGroup);

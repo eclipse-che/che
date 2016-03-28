@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-ext-jdt-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.0.0-RC14-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>org.eclipse.core.resources</artifactId>
     <packaging>jar</packaging>
@@ -49,10 +49,6 @@
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.core</groupId>-->
-        <!--<artifactId>che-core-api-model</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project</artifactId>

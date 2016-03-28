@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
 
-import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,11 +27,8 @@ import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
 import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-
-import static com.google.common.collect.Maps.transformEntries;
+import java.util.Set;
 
 /**
  * Provide mapping internal port, i.e. ${server.port.8080} to 127.0.0.1:21212.
@@ -48,13 +44,13 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
     private final CommandPropertyValueProviderRegistry commandPropertyRegistry;
     private final AppContext                           appContext;
 
-    private Collection<CommandPropertyValueProvider> providers;
+    private Set<CommandPropertyValueProvider> providers;
 
     private final Operation<MachineDto> registerProviders = new Operation<MachineDto>() {
         @Override
         public void apply(MachineDto machine) throws OperationException {
             providers = getProviders(machine);
-            commandPropertyRegistry.register(Sets.newHashSet(providers));
+            commandPropertyRegistry.register(providers);
         }
     };
 
@@ -80,26 +76,17 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
         }
     }
 
-    private Collection<CommandPropertyValueProvider> getProviders(MachineDto machine) {
-        EntryTransformer<String, ServerDto, CommandPropertyValueProvider> machineToProvider =
-                new EntryTransformer<String, ServerDto, CommandPropertyValueProvider>() {
-                    @Override
-                    public CommandPropertyValueProvider transformEntry(String internalPort, ServerDto serverConfiguration) {
-                        return new AddressProvider(internalPort, serverConfiguration.getAddress());
-                    }
-                };
+    private Set<CommandPropertyValueProvider> getProviders(MachineDto machine) {
+        Set<CommandPropertyValueProvider> providers = Sets.newHashSet();
+        for (Map.Entry<String, ServerDto> entry : machine.getRuntime().getServers().entrySet()) {
+            providers.add(new AddressProvider(entry.getKey(), entry.getValue().getAddress()));
 
-        Map<String, CommandPropertyValueProvider> providers = transformEntries(machine.getRuntime().getServers(), machineToProvider);
-        Map<String, CommandPropertyValueProvider> providersWithNoTcpAliases = new HashMap<>();
-        for (Map.Entry<String, CommandPropertyValueProvider> providerEntry : providers.entrySet()) {
-            if (providerEntry.getKey().endsWith("/tcp")) {
-                providersWithNoTcpAliases.put(providerEntry.getKey().substring(0, providerEntry.getKey().length() - 4),
-                                              providerEntry.getValue());
+            if (entry.getKey().endsWith("/tcp")) {
+                providers.add(new AddressProvider(entry.getKey().substring(0, entry.getKey().length() - 4), entry.getValue().getAddress()));
             }
         }
-        providersWithNoTcpAliases.putAll(providers);
 
-        return providersWithNoTcpAliases.values();
+        return providers;
     }
 
     @Override

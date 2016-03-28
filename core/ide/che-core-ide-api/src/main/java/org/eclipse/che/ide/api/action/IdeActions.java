@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.action;
 /**
  * @author Evgen Vidolob
  * @author Vlad Zhukovskyi
- **/
+ */
 public interface IdeActions {
     String GROUP_MAIN_MENU      = "mainMenu";
     String GROUP_WORKSPACE      = "workspaceGroup";
@@ -21,6 +21,7 @@ public interface IdeActions {
     String GROUP_EDIT           = "editGroup";
     String GROUP_ASSISTANT      = "assistantGroup";
     String GROUP_RUN            = "runGroup";
+    String GROUP_PROFILE        = "profileGroup";
     String GROUP_FILE_NEW       = "newGroup";
     String GROUP_CODE           = "codeGroup";
     String GROUP_IMPORT_PROJECT = "importProjectGroup";

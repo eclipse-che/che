@@ -12,12 +12,13 @@ package org.eclipse.che.plugin.docker.ext.client.manage;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.user.gwt.client.UserProfileServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.StringMapUnmarshaller;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.Base64;
@@ -116,8 +117,8 @@ public class CredentialsPreferencesPresenter extends AbstractPreferencePagePrese
                                        @Override
                                        public void saved(AuthConfig authConfig) {
                                            addAuthConfig(authConfig);
-            }
-        });
+                                       }
+                                   });
         inputDialog.setData(authConfig);
         inputDialog.show();
     }
@@ -155,15 +156,15 @@ public class CredentialsPreferencesPresenter extends AbstractPreferencePagePrese
     private void updateAuthConfigs(AuthConfigs authConfigs) {
         HashMap<String, String> preferences = new HashMap<>();
         preferences.put(AUTH_PREFERENCE_NAME, Base64.encode(dtoFactory.toJson(authConfigs)));
-        userProfileServiceClient.updatePreferences(preferences, new AsyncRequestCallback<Map<String, String>>(new StringMapUnmarshaller()) {
+        userProfileServiceClient.updatePreferences(preferences).then(new Operation<Map<String, String>>() {
             @Override
-            protected void onSuccess(Map<String, String> result) {
+            public void apply(Map<String, String> result) throws OperationException {
                 appContext.getCurrentUser().setPreferences(result);
                 refreshCredentials();
             }
-
+        }).catchError(new Operation<PromiseError>() {
             @Override
-            protected void onFailure(Throwable exception) {
+            public void apply(PromiseError arg) throws OperationException {
 
             }
         });

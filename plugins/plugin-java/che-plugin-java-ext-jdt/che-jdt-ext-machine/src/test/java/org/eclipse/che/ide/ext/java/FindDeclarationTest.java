@@ -21,6 +21,8 @@ import static org.fest.assertions.Assertions.assertThat;
 /**
  * @author Evgen Vidolob
  */
+// TODO: rework after new Project API
+@Ignore
 public class FindDeclarationTest extends BaseTest {
 
     private JavaNavigation navigation = new JavaNavigation(new SourcesFromBytecodeGenerator());

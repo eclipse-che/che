@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -36,14 +35,12 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class ProjectConfigurationAction extends AbstractPerspectiveAction {
 
-    private final AnalyticsEventLogger eventLogger;
     private final EventBus             eventBus;
     private final AppContext           appContext;
 
     @Inject
     public ProjectConfigurationAction(AppContext appContext,
                                       CoreLocalizationConstant localization,
-                                      AnalyticsEventLogger eventLogger,
                                       Resources resources,
                                       EventBus eventBus) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
@@ -51,7 +48,6 @@ public class ProjectConfigurationAction extends AbstractPerspectiveAction {
               localization.actionProjectConfigurationDescription(),
               null,
               resources.projectConfiguration());
-        this.eventLogger = eventLogger;
         this.eventBus = eventBus;
         this.appContext = appContext;
     }
@@ -61,8 +57,6 @@ public class ProjectConfigurationAction extends AbstractPerspectiveAction {
         if (appContext.getCurrentProject() == null) {
             return;
         }
-
-        eventLogger.log(this);
         eventBus.fireEvent(new ConfigureProjectEvent(appContext.getCurrentProject().getProjectConfig()));
     }
 

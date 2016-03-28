@@ -117,20 +117,16 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         MessageBus.ReadyState readyState = messageBus.getReadyState();
         Log.info(getClass(), readyState.toString());
         //need to make sure ready state equals 1 (OPEN) in same situations after opening it still equals 0 (CONNECTING)
-        if (!readyState.equals(MessageBus.ReadyState.OPEN)) {
-            new Timer() {
-                @Override
-                public void run() {
-                    Log.info(getClass(), messageBus.getReadyState());
-                    if (messageBus.getReadyState().equals(MessageBus.ReadyState.OPEN)) {
-                        cancel();
-                        started();
-                    }
+        new Timer() {
+            @Override
+            public void run() {
+                Log.info(getClass(), messageBus.getReadyState());
+                if (messageBus.getReadyState().equals(MessageBus.ReadyState.OPEN)) {
+                    cancel();
+                    started();
                 }
-            }.scheduleRepeating(100);
-        } else {
-            started();
-        }
+            }
+        }.scheduleRepeating(300);
     }
 
     private void started() {
@@ -201,10 +197,13 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
      * Try to connect via WebSocket connection
      */
     private void checkWsConnection() {
+        if (messageBus != null) {
+            messageBus.cancelReconnection();
+        }
         messageBus = messageBusProvider.createMachineMessageBus(wsUrl);
+
         messageBus.addOnCloseHandler(this);
         messageBus.addOnCloseHandler(this);
         messageBus.addOnOpenHandler(this);
-
     }
 }

@@ -24,7 +24,7 @@
     </che-list>
     <div class="workspace-projects-list-side" ng-class="{ 'workspace-projects-list-side-big': workspaceDetailsProjectsCtrl.widthGtSm() }"
           layout-gt-sm="column" layout-align="end center">
-      <a ng-href="#/create-project" href="#/create-project">
+      <a ng-href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspaceId}}" href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspaceId}}">
         <md-button class="md-fab" ng-class="{ 'md-fab-bottom-right': !workspaceDetailsProjectsCtrl.widthGtSm() }"
                  aria-label="add project">
         <span class="fa fa-plus"></span>

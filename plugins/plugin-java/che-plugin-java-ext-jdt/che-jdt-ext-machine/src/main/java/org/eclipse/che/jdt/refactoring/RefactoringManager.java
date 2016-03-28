@@ -128,7 +128,8 @@ public class RefactoringManager {
     /**
      * Create move refactoring session.
      *
-     * @param javaElements the java elements
+     * @param javaElements
+     *         the java elements
      * @return the ID of the refactoring session
      */
     public String createMoveRefactoringSession(IJavaElement[] javaElements) throws JavaModelException, RefactoringException {
@@ -198,8 +199,11 @@ public class RefactoringManager {
     /**
      * Sets move refactoring settings.
      * update references, update qualified names, files pattern
-     * @param settings the move refactoring settings
-     * @throws RefactoringException when move refactoring session not found.
+     *
+     * @param settings
+     *         the move refactoring settings
+     * @throws RefactoringException
+     *         when move refactoring session not found.
      */
     public void setMoveSettings(MoveSettings settings) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(settings.getSessionId());
@@ -217,9 +221,12 @@ public class RefactoringManager {
 
     /**
      * Get refactoring preview tree.
-     * @param sessionId id of the refactoring session
+     *
+     * @param sessionId
+     *         id of the refactoring session
      * @return refactoring preview
-     * @throws RefactoringException  when refactoring session not found.
+     * @throws RefactoringException
+     *         when refactoring session not found.
      */
     public RefactoringPreview getRefactoringPreview(String sessionId) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(sessionId);
@@ -229,9 +236,12 @@ public class RefactoringManager {
 
     /**
      * Create refactoring change and return status of creating changes.
-     * @param sessionId id of the refactoring session
+     *
+     * @param sessionId
+     *         id of the refactoring session
      * @return change creations result
-     * @throws RefactoringException when refactoring session not found.
+     * @throws RefactoringException
+     *         when refactoring session not found.
      */
     public ChangeCreationResult createChange(String sessionId) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(sessionId);
@@ -240,9 +250,12 @@ public class RefactoringManager {
 
     /**
      * Apply refactoring.
-     * @param sessionId id of the refactoring session
+     *
+     * @param sessionId
+     *         id of the refactoring session
      * @return refactoring result
-     * @throws RefactoringException  when refactoring session not found.
+     * @throws RefactoringException
+     *         when refactoring session not found.
      */
     public RefactoringResult applyRefactoring(String sessionId) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(sessionId);
@@ -258,13 +271,20 @@ public class RefactoringManager {
     /**
      * Create rename refactoring. It can create two rename refactoring types.
      * First is linked mode rename refactoring, second is classic rename refactoring with wizard.
-     * @param element element to rename
-     * @param cu compilation unit which element belongs. null if element is IPackageFragment.
-     * @param offset cursor position inside editor, used only for linked mode
-     * @param lightweight if true try to create linked mode refactoring
+     *
+     * @param element
+     *         element to rename
+     * @param cu
+     *         compilation unit which element belongs. null if element is IPackageFragment.
+     * @param offset
+     *         cursor position inside editor, used only for linked mode
+     * @param lightweight
+     *         if true try to create linked mode refactoring
      * @return rename refactoring session
-     * @throws CoreException when impossible to create RenameSupport
-     * @throws RefactoringException when we don't support renaming provided element
+     * @throws CoreException
+     *         when impossible to create RenameSupport
+     * @throws RefactoringException
+     *         when we don't support renaming provided element
      */
     public RenameRefactoringSession createRenameRefactoring(IJavaElement element,
                                                             ICompilationUnit cu,
@@ -281,11 +301,7 @@ public class RefactoringManager {
             RenameLinkedModeRefactoringSession refactoringSession =
                     new RenameLinkedModeRefactoringSession(element, cu, offset);
             LinkedModeModel model = refactoringSession.getModel();
-            if (model == null) {
-                //we don't find edits for this element, so show wizard
-                session.setMastShowWizard(true);
-            } else {
-                session.setMastShowWizard(false);
+            if (model != null) {
                 session.setLinkedModeModel(model);
             }
             sessions.put(id, refactoringSession);
@@ -295,7 +311,6 @@ public class RefactoringManager {
             if (renameSupport != null && renameSupport.preCheck().isOK()) {
                 RenameRefactoring refactoring = renameSupport.getfRefactoring();
                 RenameSession renameSession = new RenameSession(refactoring);
-                session.setMastShowWizard(true);
                 sessions.put(id, renameSession);
                 return session;
 
@@ -333,10 +348,14 @@ public class RefactoringManager {
 
     /**
      * Apply linked mode rename refactoring.
-     * @param apply  contains new element name
+     *
+     * @param apply
+     *         contains new element name
      * @return refactoring result
-     * @throws RefactoringException  when refactoring session not found.
-     * @throws CoreException when impossible to apply rename refactoring
+     * @throws RefactoringException
+     *         when refactoring session not found.
+     * @throws CoreException
+     *         when impossible to apply rename refactoring
      */
     public RefactoringResult applyLinkedRename(LinkedRenameRefactoringApply apply)
             throws RefactoringException, CoreException {
@@ -360,8 +379,11 @@ public class RefactoringManager {
 
     /**
      * Set rename refactoring wizard setting. This settings common for all 8 rename wizards.
-     * @param settings refactoring wizard settings
-     * @throws RefactoringException when refactoring session not found or corresponding session is not RenameSession.
+     *
+     * @param settings
+     *         refactoring wizard settings
+     * @throws RefactoringException
+     *         when refactoring session not found or corresponding session is not RenameSession.
      */
     public void setRenameSettings(RenameSettings settings) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(settings.getSessionId());
@@ -374,9 +396,12 @@ public class RefactoringManager {
 
     /**
      * Validate new name for rename refactoring. Uses from wizard.
-     * @param newName the new element name
+     *
+     * @param newName
+     *         the new element name
      * @return validation status
-     * @throws RefactoringException when corresponding session is not RenameSession.
+     * @throws RefactoringException
+     *         when corresponding session is not RenameSession.
      */
     public RefactoringStatus renameValidateNewName(ValidateNewName newName) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(newName.getSessionId());
@@ -389,8 +414,11 @@ public class RefactoringManager {
 
     /**
      * Include/exclude refactoring change from refactoring
-     * @param state updating state
-     * @throws RefactoringException when refactoring session not found.
+     *
+     * @param state
+     *         updating state
+     * @throws RefactoringException
+     *         when refactoring session not found.
      */
     public void changeChangeEnabled(ChangeEnabledState state) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(state.getSessionId());
@@ -399,9 +427,12 @@ public class RefactoringManager {
 
     /**
      * generate preview for refactoring change
-     * @param change the refactoring change
+     *
+     * @param change
+     *         the refactoring change
      * @return refactoring change preview
-     * @throws RefactoringException when refactoring session or change not found.
+     * @throws RefactoringException
+     *         when refactoring session or change not found.
      */
     public ChangePreview getChangePreview(RefactoringChange change) throws RefactoringException {
         RefactoringSession session = getRefactoringSession(change.getSessionId());

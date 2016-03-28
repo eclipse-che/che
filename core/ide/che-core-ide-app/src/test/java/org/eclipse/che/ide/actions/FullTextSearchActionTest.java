@@ -12,7 +12,6 @@ package org.eclipse.che.ide.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -38,8 +37,6 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class FullTextSearchActionTest {
     @Mock
-    private AnalyticsEventLogger    eventLogger;
-    @Mock
     private ActionEvent             actionEvent;
     @Mock
     private FullTextSearchPresenter fullTextSearchPresenter;
@@ -58,7 +55,6 @@ public class FullTextSearchActionTest {
     public void actionShouldBePerformed() {
         fullTextSearchAction.actionPerformed(actionEvent);
 
-        verify(eventLogger).log(fullTextSearchAction);
         verify(fullTextSearchPresenter).showDialog();
     }
 

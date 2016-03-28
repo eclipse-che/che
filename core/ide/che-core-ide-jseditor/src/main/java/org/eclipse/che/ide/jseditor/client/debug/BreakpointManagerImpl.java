@@ -50,6 +50,7 @@ import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.node.ItemReferenceBasedNode;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -362,14 +363,7 @@ public class BreakpointManagerImpl implements BreakpointManager, LineChangeActio
 
     @Nullable
     private EditorPartPresenter getEditorForFile(String path) {
-        final Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-        for (final String key : openedEditors.keySet()) {
-            final EditorPartPresenter editor = openedEditors.get(key);
-            if (path.equals(editor.getEditorInput().getFile().getPath())) {
-                return editor;
-            }
-        }
-        return null;
+        return editorAgent.getOpenedEditor(Path.valueOf(path));
     }
 
     @Nullable

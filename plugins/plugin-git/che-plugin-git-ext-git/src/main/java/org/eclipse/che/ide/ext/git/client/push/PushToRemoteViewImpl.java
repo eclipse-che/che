@@ -15,6 +15,7 @@ import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ui.window.Window;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -87,6 +88,18 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
         addButtonToFooter(btnPush);
     }
 
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnPush)) {
+            delegate.onPushClicked();
+        }
+    }
+
     /** {@inheritDoc} */
     @NotNull
     @Override
@@ -154,8 +167,14 @@ public class PushToRemoteViewImpl extends Window implements PushToRemoteView {
 
     /** {@inheritDoc} */
     @Override
-    public void setEnablePushButton(boolean enabled) {
+    public void setEnablePushButton(final boolean enabled) {
         btnPush.setEnabled(enabled);
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                btnPush.setFocus(enabled);
+            }
+        });
     }
 
     /** {@inheritDoc} */

@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -36,12 +35,10 @@ public class FullTextSearchAction extends AbstractPerspectiveAction {
 
     private final FullTextSearchPresenter presenter;
     private final AppContext              appContext;
-    private final AnalyticsEventLogger    eventLogger;
 
     @Inject
     public FullTextSearchAction(FullTextSearchPresenter presenter,
                                 AppContext appContext,
-                                AnalyticsEventLogger eventLogger,
                                 Resources resources,
                                 CoreLocalizationConstant locale) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
@@ -51,7 +48,6 @@ public class FullTextSearchAction extends AbstractPerspectiveAction {
               resources.find());
         this.presenter = presenter;
         this.appContext = appContext;
-        this.eventLogger = eventLogger;
     }
 
     @Override
@@ -61,7 +57,6 @@ public class FullTextSearchAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         presenter.showDialog();
     }
 }

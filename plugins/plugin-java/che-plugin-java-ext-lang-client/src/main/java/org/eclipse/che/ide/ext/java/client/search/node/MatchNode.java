@@ -41,6 +41,7 @@ import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.eclipse.che.ide.util.dom.Elements;
@@ -140,7 +141,7 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
     @Override
     public void actionPerformed() {
         if (compilationUnit != null) {
-            EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditors().get(compilationUnit.getPath());
+            EditorPartPresenter editorPartPresenter = editorAgent.getOpenedEditor(Path.valueOf(compilationUnit.getPath()));
             if (editorPartPresenter != null) {
                 editorAgent.activateEditor(editorPartPresenter);
                 fileOpened(editorPartPresenter);

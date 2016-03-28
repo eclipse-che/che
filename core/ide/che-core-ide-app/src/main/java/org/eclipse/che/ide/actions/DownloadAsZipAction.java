@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -44,7 +43,6 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
 
     private final String BASE_URL;
 
-    private final AnalyticsEventLogger     eventLogger;
     private final AppContext               appContext;
     private       DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
@@ -54,7 +52,6 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
                                AppContext appContext,
                                CoreLocalizationConstant locale,
                                Resources resources,
-                               AnalyticsEventLogger eventLogger,
                                DownloadContainer downloadContainer,
                                ProjectExplorerPresenter projectExplorer) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
@@ -63,7 +60,6 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
               null,
               resources.downloadZip());
         this.appContext = appContext;
-        this.eventLogger = eventLogger;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
 
@@ -73,8 +69,6 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         String url = BASE_URL + getPath();
         downloadContainer.setUrl(url);
     }

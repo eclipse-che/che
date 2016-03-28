@@ -13,7 +13,6 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
@@ -30,18 +29,15 @@ import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 public class SaveAction extends ProjectAction {
 
     private final EditorAgent          editorAgent;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
-    public SaveAction(Resources resources, EditorAgent editorAgent, AnalyticsEventLogger eventLogger) {
+    public SaveAction(Resources resources, EditorAgent editorAgent) {
         super("Save", "Save changes for current file", resources.save());
         this.editorAgent = editorAgent;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         editorAgent.getActiveEditor().doSave();
     }
 

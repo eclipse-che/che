@@ -28,18 +28,21 @@ export class ReadyToGoStacksCtrl {
     this.stacks = [];
     this.stack = null;
 
-    let promiseStack = cheStack.fetchStacks();
-    promiseStack.then(() => {
-        this.updateData();
-      },
-      (error) => {
-        // etag handling so also retrieve last data that were fetched before
-        if (error.status === 304) {
-          // ok
+    if(cheStack.getStacks().length) {
+      this.updateData();
+    } else {
+      let promiseStack = cheStack.fetchStacks();
+      promiseStack.then(() => {
           this.updateData();
-        }
-      });
-
+        },
+        (error) => {
+          // etag handling so also retrieve last data that were fetched before
+          if (error.status === 304) {
+            // ok
+            this.updateData();
+          }
+        });
+    }
   }
 
   //TODO should change che-simple-selecter widget

@@ -12,7 +12,6 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -43,8 +42,6 @@ public class NewTerminalActionTest {
     @Mock
     private ConsolesPanelPresenter      consolesPanelPresenter;
     @Mock
-    private AnalyticsEventLogger        eventLogger;
-    @Mock
     private MachineLocalizationConstant locale;
 
     @Mock(answer = RETURNS_DEEP_STUBS)
@@ -65,7 +62,6 @@ public class NewTerminalActionTest {
 
         action.actionPerformed(actionEvent);
 
-        verify(eventLogger).log(action);
         verify(appContext).getDevMachineId();
         verify(consolesPanelPresenter).onAddTerminal(eq(MACHINE_ID));
         verify(workspaceAgent).setActivePart(eq(consolesPanelPresenter));
@@ -88,7 +84,6 @@ public class NewTerminalActionTest {
 
         verify(actionEvent.getPresentation()).setEnabled(eq(false));
 
-        verify(eventLogger, never()).log(action);
         verify(consolesPanelPresenter, never()).onAddTerminal(eq(MACHINE_ID));
         verify(workspaceAgent, never()).setActivePart(eq(consolesPanelPresenter));
     }

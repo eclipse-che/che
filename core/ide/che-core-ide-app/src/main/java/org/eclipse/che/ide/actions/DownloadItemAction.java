@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -36,7 +35,6 @@ public class DownloadItemAction extends Action {
 
     private final String BASE_URL;
 
-    private final AnalyticsEventLogger     eventLogger;
     private final DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
 
@@ -44,11 +42,9 @@ public class DownloadItemAction extends Action {
     public DownloadItemAction(@Named("cheExtensionPath") String extPath,
                               AppContext appContext,
                               CoreLocalizationConstant locale,
-                              AnalyticsEventLogger eventLogger,
                               DownloadContainer downloadContainer,
                               ProjectExplorerPresenter projectExplorer) {
         super(locale.downloadItemName(), locale.downloadItemDescription());
-        this.eventLogger = eventLogger;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
 
@@ -58,8 +54,6 @@ public class DownloadItemAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         Selection<?> selection = projectExplorer.getSelection();
         if (selection.isEmpty() || selection.getAllElements().size() > 1) {
             return;

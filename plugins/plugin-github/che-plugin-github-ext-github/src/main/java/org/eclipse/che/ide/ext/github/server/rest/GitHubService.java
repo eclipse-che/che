@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.github.server.rest;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
@@ -32,18 +33,23 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.HttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
 import java.util.List;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -192,11 +198,27 @@ public class GitHubService {
     @GET
     @Path("pullrequests/{user}/{repository}")
     @Produces(MediaType.APPLICATION_JSON)
-    public GitHubPullRequestList listPullRequestsByRepository(@PathParam("user") String user, @PathParam("repository") String repository)
+    public GitHubPullRequestList listPullRequestsByRepository(@PathParam("user") String user,
+                                                              @PathParam("repository") String repository,
+                                                              @QueryParam("head") String head)
             throws ApiException {
         try {
-            return gitHubDTOFactory.createPullRequestsList(gitHubFactory.connect().getUser(user).getRepository(repository)
-                                                                        .listPullRequests(GHIssueState.OPEN));
+            final GitHub github = gitHubFactory.connect();
+            // Workaround for adding head parameter to the request
+            // TODO remove after update to 1.73 library version
+            github.setConnector(new HttpConnector() {
+                @Override
+                public HttpURLConnection connect(URL url) throws IOException {
+                    final String sourceUrl = url.toString();
+                    if (sourceUrl.contains("pulls")) {
+                        return DEFAULT.connect(URI.create(url.toString() + "&head=" + head).toURL());
+                    }
+                    return DEFAULT.connect(url);
+                }
+            });
+            return gitHubDTOFactory.createPullRequestsList(github.getUser(user)
+                                                                 .getRepository(repository)
+                                                                 .listPullRequests(GHIssueState.OPEN));
         } catch (IOException e) {
             LOG.error("Getting list of pull request by repositories", e);
             throw new ServerException(e.getMessage());
@@ -230,6 +252,36 @@ public class GitHubService {
         } catch (Exception e) {
             LOG.error("Creating  pull request fail", e);
             throw new ServerException(e.getMessage());
+        }
+    }
+
+    @PUT
+    @Path("pullrequest/{user}/{repository}/{pullRequestId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public GitHubPullRequest updatePullRequest(@PathParam("user")
+                                               String user,
+                                               @PathParam("repository")
+                                               String repository,
+                                               @PathParam("pullRequestId")
+                                               String pullRequestId,
+                                               GitHubPullRequest pullRequest) throws ServerException,
+                                                                                     UnauthorizedException {
+        try {
+            final GHPullRequest ghPullRequest = gitHubFactory.connect()
+                                                             .getUser(user)
+                                                             .getRepository(repository)
+                                                             .getPullRequest(Integer.valueOf(pullRequestId));
+            final String body = pullRequest.getBody();
+            if (body != null && !body.equals(ghPullRequest.getBody())) {
+                ghPullRequest.setBody(body);
+            }
+            final String title = pullRequest.getTitle();
+            if (title != null && !title.equals(ghPullRequest.getTitle())) {
+                ghPullRequest.setTitle(title);
+            }
+            return gitHubDTOFactory.createPullRequest(ghPullRequest);
+        } catch (IOException ioEx) {
+            throw new ServerException(ioEx.getMessage());
         }
     }
 

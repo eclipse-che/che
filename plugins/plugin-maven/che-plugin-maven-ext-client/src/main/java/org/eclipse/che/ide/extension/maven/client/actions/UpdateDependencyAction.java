@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.maven.client.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -34,24 +33,20 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class UpdateDependencyAction extends AbstractPerspectiveAction {
 
     private final AppContext           appContext;
-    private final AnalyticsEventLogger eventLogger;
     private final DependenciesUpdater  dependenciesUpdater;
 
     @Inject
     public UpdateDependencyAction(AppContext appContext,
-                                  AnalyticsEventLogger eventLogger,
                                   JavaResources resources,
                                   DependenciesUpdater dependenciesUpdater) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), "Update Dependencies", "Update Dependencies", null, resources.updateDependencies());
         this.appContext = appContext;
-        this.eventLogger = eventLogger;
         this.dependenciesUpdater = dependenciesUpdater;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         dependenciesUpdater.updateDependencies(appContext.getCurrentProject().getProjectConfig());
     }
 

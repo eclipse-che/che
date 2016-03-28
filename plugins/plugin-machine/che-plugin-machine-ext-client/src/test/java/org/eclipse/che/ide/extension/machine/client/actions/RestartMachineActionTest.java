@@ -12,7 +12,6 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -46,8 +45,6 @@ public class RestartMachineActionTest {
     private MachineManager              machineManager;
     @Mock
     private MachineLocalizationConstant locale;
-    @Mock
-    private AnalyticsEventLogger        eventLogger;
 
     //additional mocks
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -107,7 +104,6 @@ public class RestartMachineActionTest {
 
         action.actionPerformed(event);
 
-        verify(eventLogger).log(action);
         verify(machineManager).restartMachine(machine);
     }
 }

@@ -49,7 +49,6 @@ class FindUsagesViewImpl extends BaseView<FindUsagesView.ActionDelegate> impleme
         this.nodeFactory = nodeFactory;
         setTitle(localizationConstant.findUsagesPartTitle());
         DockLayoutPanel panel = new DockLayoutPanel(Style.Unit.PX);
-        panel.addWest(new FlowPanel(), 22);
 
         NodeStorage storage = new NodeStorage(new NodeUniqueKeyProvider() {
             @Override

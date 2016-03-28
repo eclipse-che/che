@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
@@ -40,7 +39,6 @@ import java.util.List;
  */
 @Singleton
 public class CopyAction extends Action {
-    private final AnalyticsEventLogger     eventLogger;
     private       ProjectExplorerPresenter projectExplorer;
     private       AppContext               appContext;
 
@@ -50,7 +48,6 @@ public class CopyAction extends Action {
 
     @Inject
     public CopyAction(Resources resources,
-                      AnalyticsEventLogger eventLogger,
                       ProjectExplorerPresenter projectExplorer,
                       CoreLocalizationConstant localization,
                       AppContext appContext,
@@ -59,7 +56,6 @@ public class CopyAction extends Action {
                       EventBus eventBus) {
         super(localization.copyItemsActionText(), localization.copyItemsActionDescription(), null, resources.copy());
         this.projectExplorer = projectExplorer;
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
         this.pasteAction = pasteAction;
         this.agent = agent;
@@ -123,8 +119,6 @@ public class CopyAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         if (!canCopySelection()) {
             return;
         }

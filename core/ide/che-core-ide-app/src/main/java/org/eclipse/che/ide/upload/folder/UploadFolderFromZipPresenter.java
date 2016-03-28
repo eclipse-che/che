@@ -159,7 +159,7 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
     }
 
     private void updateOpenedEditors() {
-        for (EditorPartPresenter partPresenter : editorAgent.getOpenedEditors().values()) {
+        for (EditorPartPresenter partPresenter : editorAgent.getOpenedEditors()) {
             String filePath = partPresenter.getEditorInput().getFile().getPath();
             String path = ((HasStorablePath)getResourceBasedNode()).getStorablePath();
             if (filePath.contains(path)) {

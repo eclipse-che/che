@@ -61,6 +61,7 @@ export class CheSearch {
         element.addClass('search-component-flex');
         element.find('input').focus();
       } else {
+        $scope.valueModel = '';
         if ($scope.replaceElement) {
           let replaceElement = angular.element('#' + $scope.replaceElement);
           replaceElement.removeClass('search-replace-element-hidden');

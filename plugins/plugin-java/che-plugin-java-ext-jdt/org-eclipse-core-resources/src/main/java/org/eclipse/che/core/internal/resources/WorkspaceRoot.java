@@ -11,8 +11,12 @@
 
 package org.eclipse.che.core.internal.resources;
 
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -23,6 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,24 +112,22 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         return result;
     }
 
-    // TODO: rework after new Project API
     @Override
     public IProject[] getProjects() {
-        ProjectRegistry manager = workspace.getProjectRegistry();
+        ProjectRegistry projectRegistry = workspace.getProjectRegistry();
         List<IProject> projects = new ArrayList<>();
-//        try {
-        List<RegisteredProject> rootProjects = new ArrayList<>();
-        rootProjects = manager.getProjects();
-        for (RegisteredProject rootProject : rootProjects) {
+        try {
+            List<RegisteredProject> rootProjects = projectRegistry.getProjects();
+            for (RegisteredProject rootProject : rootProjects) {
                 Project project = new Project(new Path(rootProject.getPath()), workspace);
 
                 projects.add(project);
 
 //                addAllModules(projects, rootProject, manager);
             }
-//        } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
-//            LOG.error(e.getMessage(), e);
-//        }
+        } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
+            LOG.error(e.getMessage(), e);
+        }
 
         return projects.toArray(new IProject[projects.size()]);
     }

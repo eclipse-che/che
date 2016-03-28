@@ -16,10 +16,8 @@ import org.eclipse.che.plugin.docker.client.connection.CloseConnectionInputStrea
 import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -34,26 +32,29 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Anton Korneta
+ * @author Mykola Morhun
  */
 @Listeners(MockitoTestNGListener.class)
 public class DockerConnectorTest {
 
-    @Mock
-    private DockerConnectorConfiguration dockerConnectorConfiguration;
-
-    @Mock
-    private DockerConnectionFactory dockerConnectionFactory;
-
-    @InjectMocks
     private DockerConnector dockerConnector;
 
     @Mock
-    private DockerConnection dockerConnection;
+    private DockerConnectorConfiguration dockerConnectorConfiguration;
     @Mock
-    private DockerResponse   dockerResponse;
+    private DockerConnectionFactory      dockerConnectionFactory;
+    @Mock
+    private DockerConnection             dockerConnection;
+    @Mock
+    private DockerResponse               dockerResponse;
+    @Mock
+    private ProgressMonitor              progressMonitor;
+    @Mock
+    private InitialAuthConfig            initialAuthConfig;
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -64,6 +65,9 @@ public class DockerConnectorTest {
         when(dockerConnection.query(any(), anyVararg())).thenReturn(dockerConnection);
         when(dockerConnection.path(anyString())).thenReturn(dockerConnection);
         when(dockerConnection.request()).thenReturn(dockerResponse);
+        when(dockerConnectorConfiguration.getAuthConfigs()).thenReturn(initialAuthConfig);
+
+        dockerConnector = new DockerConnector(dockerConnectorConfiguration, dockerConnectionFactory);
     }
 
     @Test
@@ -75,7 +79,7 @@ public class DockerConnectorTest {
 
         String response = CharStreams.toString(new InputStreamReader(dockerConnector.getResource("id", "path")));
 
-        Assert.assertEquals(response, resource);
+        assertEquals(response, resource);
     }
 
     @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 500, message: Error")
@@ -107,4 +111,24 @@ public class DockerConnectorTest {
 
         dockerConnector.putResource("id", "path", source, false);
     }
+
+    @Test
+    public void shouldParseDigestFromDockerPushOutput() throws IOException, InterruptedException {
+        String digest = "hash:1234567890";
+        String repository = "repository";
+        String tag = "tag";
+        String registry = "registry";
+
+        String dockerPushOutput = "{\"progress\":\"[=====>              ] 25%\"}\n" +
+                                  "{\"status\":\"Image already exists\"}\n" +
+                                  "{\"progress\":\"[===============>    ] 75%\"}\n" +
+                                  "{\"status\":\"" + tag + ": digest: " + digest + " size: 12345\"}";
+
+        when(initialAuthConfig.getAuthConfigHeader()).thenReturn("authHeader");
+        when(dockerResponse.getStatus()).thenReturn(200);
+        when(dockerResponse.getInputStream()).thenReturn(new ByteArrayInputStream(dockerPushOutput.getBytes()));
+
+        assertEquals(digest, dockerConnector.push(repository, tag, registry, progressMonitor));
+    }
+
 }

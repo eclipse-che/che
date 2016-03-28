@@ -170,10 +170,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
     public void onMergeClicked() {
         view.close();
 
-        final List<EditorPartPresenter> openedEditors = new ArrayList<>();
-        for (EditorPartPresenter partPresenter : editorAgent.getOpenedEditors().values()) {
-            openedEditors.add(partPresenter);
-        }
         final GitOutputConsole console = gitOutputConsoleFactory.create(MERGE_COMMAND_NAME);
         service.merge(workspaceId, appContext.getCurrentProject().getRootProject(), selectedReference.getDisplayName(),
                       new AsyncRequestCallback<MergeResult>(dtoUnmarshallerFactory.newUnmarshaller(MergeResult.class)) {
@@ -182,7 +178,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                               console.print(formMergeMessage(result));
                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
                               notificationManager.notify(formMergeMessage(result), appContext.getCurrentProject().getRootProject());
-                              refreshProject(openedEditors);
+                              refreshProject(editorAgent.getOpenedEditors());
                           }
 
                           @Override

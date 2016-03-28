@@ -33,7 +33,7 @@ package org.eclipse.che.ide.actions;
 //    private final VfsServiceClient     vfsServiceClient;
 //    private final DtoFactory           dtoFactory;
 //    private final AppContext           appContext;
-//    private final AnalyticsEventLogger eventLogger;
+//
 //
 //    @Inject
 //    public FindReplaceAction(VfsServiceClient vfsServiceClient,
@@ -43,12 +43,12 @@ package org.eclipse.che.ide.actions;
 //        this.vfsServiceClient = vfsServiceClient;
 //        this.dtoFactory = dtoFactory;
 //        this.appContext = appContext;
-//        this.eventLogger = eventLogger;
+//
 //    }
 //
 //    @Override
 //    public void actionPerformed(ActionEvent event) {
-//        eventLogger.log(this);
+//
 //
 //        if (appContext.getCurrentProject() == null || appContext.getCurrentProject().getRootProject() == null) {
 //            Log.error(getClass(), "Can not run find/replace without opened project\n");

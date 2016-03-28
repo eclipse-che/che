@@ -20,6 +20,8 @@ import org.eclipse.che.ide.actions.CloseCurrentFile;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
 import org.eclipse.che.ide.actions.CopyAction;
+import org.eclipse.che.ide.actions.RedirectToDashboardProjectsAction;
+import org.eclipse.che.ide.actions.RedirectToDashboardWorkspacesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.CreateModuleAction;
 import org.eclipse.che.ide.actions.CreateProjectAction;
@@ -46,7 +48,6 @@ import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.SaveAction;
 import org.eclipse.che.ide.actions.SaveAllAction;
-import org.eclipse.che.ide.actions.SettingsAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.SwitchLeftTabAction;
@@ -126,9 +127,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private ShowPreferencesAction showPreferencesAction;
-
-    @Inject
-    private SettingsAction settingsAction;
 
     @Inject
     private FindActionAction findActionAction;
@@ -277,6 +275,12 @@ public class StandardComponentInitializer {
 
     @Inject
     private ShowReferenceAction showReferenceAction;
+
+    @Inject
+    private RedirectToDashboardProjectsAction redirectToDashboardProjectsAction;
+
+    @Inject
+    private RedirectToDashboardWorkspacesAction redirectToDashboardWorkspacesAction;
 
     @Inject
     @Named("XMLFileType")
@@ -495,15 +499,20 @@ public class StandardComponentInitializer {
         saveGroup.add(saveAction);
         saveGroup.add(saveAllAction);
 
+        //Compose Profile menu
+        DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_PROFILE);
+        actionManager.registerAction("redirectToDashboardProjectsAction", redirectToDashboardProjectsAction);
+        actionManager.registerAction("redirectToDashboardWorkspacesAction", redirectToDashboardWorkspacesAction);
+        actionManager.registerAction("showPreferences", showPreferencesAction);
+        profileGroup.add(redirectToDashboardProjectsAction);
+        profileGroup.add(redirectToDashboardWorkspacesAction);
+
+        profileGroup.addSeparator();
+        profileGroup.add(showPreferencesAction);
+
         // Compose Help menu
         DefaultActionGroup helpGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_HELP);
         helpGroup.addSeparator();
-
-        actionManager.registerAction("showPreferences", showPreferencesAction);
-        helpGroup.add(showPreferencesAction);
-
-        actionManager.registerAction("setupProjectAction", settingsAction);
-        helpGroup.add(settingsAction);
 
         // Compose main context menu
         DefaultActionGroup resourceOperation = new DefaultActionGroup(actionManager);

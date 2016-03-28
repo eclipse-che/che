@@ -50,6 +50,9 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
     private Tree           tree;
     private ActionDelegate delegate;
 
+    Button acceptButton;
+    Button cancelButton;
+
     @UiField
     DockLayoutPanel treeContainer;
 
@@ -95,27 +98,34 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
 
         handler.bind(tree);
 
-        Button cancel = createButton(locale.cancel(), "select-path-cancel-button", new ClickHandler() {
+        cancelButton = createButton(locale.cancel(), "select-path-cancel-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 hide();
             }
         });
 
-        Button ok = createPrimaryButton(locale.ok(), "select-path-ok-button", new ClickHandler() {
+        acceptButton = createPrimaryButton(locale.ok(), "select-path-ok-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 acceptButtonClicked();
             }
         });
 
-        addButtonToFooter(ok);
-        addButtonToFooter(cancel);
+        addButtonToFooter(acceptButton);
+        addButtonToFooter(cancelButton);
     }
 
     @Override
     protected void onEnterClicked() {
-        acceptButtonClicked();
+        if (isWidgetFocused(acceptButton)) {
+            acceptButtonClicked();
+            return;
+        }
+
+        if (isWidgetFocused(cancelButton)) {
+            hide();
+        }
     }
 
     @Override

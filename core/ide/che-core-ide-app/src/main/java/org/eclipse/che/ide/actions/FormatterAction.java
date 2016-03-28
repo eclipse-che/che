@@ -12,7 +12,6 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -38,11 +37,12 @@ public class FormatterAction extends AbstractPerspectiveAction {
 
     private final AppContext           appContext;
     private final EditorAgent          editorAgent;
-    private final AnalyticsEventLogger eventLogger;
 
     @Inject
-    public FormatterAction(AppContext appContext, EditorAgent editorAgent, CoreLocalizationConstant localization,
-                           AnalyticsEventLogger eventLogger, Resources resources) {
+    public FormatterAction(AppContext appContext,
+                           EditorAgent editorAgent,
+                           CoreLocalizationConstant localization,
+                           Resources resources) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
               localization.formatName(),
               localization.formatDescription(),
@@ -50,12 +50,10 @@ public class FormatterAction extends AbstractPerspectiveAction {
               resources.format());
         this.appContext = appContext;
         this.editorAgent = editorAgent;
-        this.eventLogger = eventLogger;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         final EditorPartPresenter editor = editorAgent.getActiveEditor();
         HandlesTextOperations handlesOperations;
         if (editor instanceof HandlesTextOperations) {

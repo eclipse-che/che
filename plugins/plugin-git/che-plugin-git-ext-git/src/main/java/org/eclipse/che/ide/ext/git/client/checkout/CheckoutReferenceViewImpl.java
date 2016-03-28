@@ -111,6 +111,10 @@ public class CheckoutReferenceViewImpl extends Window implements CheckoutReferen
 
     @Override
     protected void onEnterClicked() {
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+            return;
+        }
         delegate.onEnterClicked();
     }
 }

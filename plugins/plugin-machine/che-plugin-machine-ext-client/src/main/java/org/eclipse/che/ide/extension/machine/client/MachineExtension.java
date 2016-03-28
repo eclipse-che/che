@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
-import org.eclipse.che.ide.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.actions.StopMachineAction;
 import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -33,6 +32,7 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
+import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;

@@ -42,6 +42,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.UriBuilder;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -164,7 +166,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldPullDockerImageOnInstanceCreationFromSnapshot() throws Exception {
         String repo = "repo";
-        String tag = "tag";
+        String tag = "latest";
         String registry = "localhost:1234";
 
 
@@ -179,8 +181,8 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(dockerInstanceProvider).generateContainerName(WORKSPACE_ID, DISPLAY_NAME);
         String repo = "repo1";
-        String registry = "registry1";
         String tag = "tag1";
+        String registry = "registry1";
 
 
         createInstanceFromSnapshot(repo, tag, registry);
@@ -242,8 +244,8 @@ public class DockerInstanceProviderTest {
                                                       "machineType",
                                                       machineSource,
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
-                                                      asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                      asList(new ServerConfImpl("ref1", "8080", "https", null),
+                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
                                                       Collections.singletonMap("key1", "value1")),
                                 "machineId",
                                 WORKSPACE_ID,
@@ -276,8 +278,8 @@ public class DockerInstanceProviderTest {
                                                       "machineType",
                                                       machineSource,
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
-                                                      asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol")),
+                                                      asList(new ServerConfImpl("ref1", "8080", "https", null),
+                                                             new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
                                                       Collections.singletonMap("key1", "value1")),
                                 "machineId",
                                 WORKSPACE_ID,
@@ -395,14 +397,14 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeCommonAndDevPortsToContainerOnDevInstanceCreationFromRecipe() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
 
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https"),
-                                                                new ServerConfImpl("reference4", "8083", "sftp")));
+        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https", null),
+                                                                new ServerConfImpl("reference4", "8083", "sftp", null)));
         expectedExposedPorts.addAll(devServers.stream()
                                               .map(ServerConf::getPort)
                                               .collect(Collectors.toList()));
@@ -437,8 +439,8 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromRecipe() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
@@ -473,14 +475,14 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeCommonAndDevPortsToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
 
-        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https"),
-                                                                new ServerConfImpl("reference4", "8083", "sftp")));
+        final Set<ServerConf> devServers = new HashSet<>(asList(new ServerConfImpl("reference3", "8082", "https", null),
+                                                                new ServerConfImpl("reference4", "8083", "sftp", null)));
         expectedExposedPorts.addAll(devServers.stream()
                                               .map(ServerConf::getPort)
                                               .collect(Collectors.toList()));
@@ -515,8 +517,8 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldExposeOnlyCommonPortsToContainerOnNonDevInstanceCreationFromSnapshot() throws Exception {
         List<String> expectedExposedPorts = new ArrayList<>();
-        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                                   new ServerConfImpl("reference2", "8081", "ftp")));
+        final Set<ServerConf> commonServers = new HashSet<>(asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                                   new ServerConfImpl("reference2", "8081", "ftp", null)));
         expectedExposedPorts.addAll(commonServers.stream()
                                                  .map(ServerConf::getPort)
                                                  .collect(Collectors.toList()));
@@ -552,8 +554,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnNonDevInstanceCreationFromSnapshot() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -592,8 +594,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnNonDevInstanceCreationFromRecipe() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -632,8 +634,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromSnapshot() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -672,8 +674,8 @@ public class DockerInstanceProviderTest {
     public void shouldAddServersConfsPortsFromMachineConfigToExposedPortsOnDevInstanceCreationFromRecipe() throws Exception {
         // given
         List<String> expectedExposedPorts = new ArrayList<>();
-        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http"),
-                                                        new ServerConfImpl("reference2", "8081", "ftp"));
+        final List<ServerConf> serversFromConf = asList(new ServerConfImpl("reference1", "8080", "http", null),
+                                                        new ServerConfImpl("reference2", "8081", "ftp", null));
         expectedExposedPorts.addAll(serversFromConf.stream()
                                                    .map(ServerConf::getPort)
                                                    .collect(Collectors.toList()));
@@ -711,7 +713,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromRecipe() throws Exception {
         final String expectedHostPathOfProjects = "/tmp/projects";
-        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects"};
+        String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects:Z"};
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -746,7 +748,7 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldBindProjectsFSVolumeToContainerOnDevInstanceCreationFromSnapshot() throws Exception {
         final String expectedHostPathOfProjects = "/tmp/projects";
-        final String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects"};
+        final String[] expectedVolumes = new String[] {expectedHostPathOfProjects + ":/projects:Z"};
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -855,7 +857,7 @@ public class DockerInstanceProviderTest {
         final ArrayList<String> expectedVolumes = new ArrayList<>();
         expectedVolumes.addAll(devVolumes);
         expectedVolumes.addAll(commonVolumes);
-        expectedVolumes.add(expectedHostPathOfProjects + ":/projects");
+        expectedVolumes.add(expectedHostPathOfProjects + ":/projects:Z");
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -897,7 +899,7 @@ public class DockerInstanceProviderTest {
         final ArrayList<String> expectedVolumes = new ArrayList<>();
         expectedVolumes.addAll(devVolumes);
         expectedVolumes.addAll(commonVolumes);
-        expectedVolumes.add(expectedHostPathOfProjects + ":/projects");
+        expectedVolumes.add(expectedHostPathOfProjects + ":/projects:Z");
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
@@ -1173,7 +1175,7 @@ public class DockerInstanceProviderTest {
     public void shouldGenerateValidNameForContainerFromPrefixWithValidCharacters() throws Exception {
         final String userName = "user";
         final String displayName = "displayName";
-        final String expectedPrefix = String.format("%s_%s_%s_", userName, WORKSPACE_ID, displayName);
+        final String expectedPrefix = String.format("%s_%s_%s_", userName, WORKSPACE_ID.toLowerCase(), displayName.toLowerCase());
 
         final String containerName = dockerInstanceProvider.generateContainerName(WORKSPACE_ID, displayName);
 
@@ -1184,11 +1186,11 @@ public class DockerInstanceProviderTest {
     @Test
     public void shouldGenerateValidNameForContainerFromPrefixWithInvalidCharacters() throws Exception {
         final String userName = "{use}r+";
-        final String displayName = "displ{[ayName@";
+        final String displayName = "displ{[ay Name@";
         EnvironmentContext.getCurrent().setUser(new UserImpl(userName, "id", "token", emptyList(), false));
-        final String expectedPrefix = String.format("%s_%s_%s_", "user", "WORKSPACE_ID", "displayName");
+        final String expectedPrefix = String.format("%s_%s_%s_", "user", "thisiswsid", "displayname");
 
-        final String containerName = dockerInstanceProvider.generateContainerName("WORKSPACE_ID", displayName);
+        final String containerName = dockerInstanceProvider.generateContainerName("This is wsId", displayName);
 
         assertTrue(containerName.startsWith(expectedPrefix),
                    "Unexpected container name " + containerName + " while expected " + expectedPrefix + "*");
@@ -1584,7 +1586,7 @@ public class DockerInstanceProviderTest {
     }
 
     private void createInstanceFromSnapshot(String repo, String tag, String registry) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(getMachineBuilder().build(), new DockerInstanceKey(repo, tag, "imageId", registry));
+        createInstanceFromSnapshot(getMachineBuilder().build(), new DockerInstanceKey(repo, tag, registry, "digest"));
     }
 
     private void createInstanceFromRecipe(Machine machine) throws Exception {
@@ -1626,8 +1628,8 @@ public class DockerInstanceProviderTest {
     private void createInstanceFromSnapshot(Machine machine) throws NotFoundException, MachineException {
         dockerInstanceProvider.createInstance(new DockerInstanceKey("repo",
                                                                     "tag",
-                                                                    "imageId",
-                                                                    "localhost:1234"),
+                                                                    "registry",
+                                                                    "digest"),
                                               machine,
                                               LineConsumer.DEV_NULL);
     }
@@ -1655,9 +1657,14 @@ public class DockerInstanceProviderTest {
                                                                             "machineType",
                                                                             new MachineSourceImpl("source type", "source location"),
                                                                             new LimitsImpl(MEMORY_LIMIT_MB),
-                                                                            asList(new ServerConfImpl("ref1", "8080", "https"),
-                                                                                   new ServerConfImpl("ref2", "9090/udp",
-                                                                                                      "someprotocol")),
+                                                                            asList(new ServerConfImpl("ref1",
+                                                                                                      "8080",
+                                                                                                      "https",
+                                                                                                      null),
+                                                                                   new ServerConfImpl("ref2",
+                                                                                                      "9090/udp",
+                                                                                                      "someprotocol",
+                                                                                                      null)),
                                                                             Collections.singletonMap("key1", "value1")));
     }
 }

@@ -85,6 +85,8 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("control.terminal.create.description")
     String newTerminalDescription();
 
+    @Key("control.connect.ssh")
+    String connectViaSSH();
 
     /* Messages */
     @Key("messages.noDevMachine")

@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -33,15 +32,13 @@ public class PinEditorTabAction extends EditorAbstractAction {
     @Inject
     public PinEditorTabAction(EditorAgent editorAgent,
                               EventBus eventBus,
-                              CoreLocalizationConstant locale,
-                              AnalyticsEventLogger eventLogger) {
-        super(locale.editorTabPin(), locale.editorTabPinDescription(), null, editorAgent, eventBus, eventLogger);
+                              CoreLocalizationConstant locale) {
+        super(locale.editorTabPin(), locale.editorTabPinDescription(), null, editorAgent, eventBus);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         eventBus.fireEvent(new PinEditorTabEvent(getEditorFile(e), !isPinned(e)));
     }
 

@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
+import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -338,7 +339,6 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
     }
 
-    // TODO rework in accordance with v2 docker registry API
     @Override
     public void removeInstanceSnapshot(InstanceKey instanceKey) throws SnapshotException {
         // use registry API directly because docker doesn't have such API yet
@@ -347,27 +347,30 @@ public class DockerInstanceProvider implements InstanceProvider {
         String registry = dockerInstanceKey.getRegistry();
         String repository = dockerInstanceKey.getRepository();
         if (registry == null || repository == null) {
+            LOG.error("Failed to remove instance snapshot: invalid instance key: {}", instanceKey);
             throw new SnapshotException("Snapshot removing failed. Snapshot attributes are not valid");
         }
 
-        StringBuilder sb = new StringBuilder("http://");// TODO make possible to use https here
-        sb.append(registry).append("/v1/repositories/");
-        sb.append(repository);
-        sb.append("/");// do not remove! Doesn't work without this slash
         try {
-            final HttpURLConnection conn = (HttpURLConnection)new URL(sb.toString()).openConnection();
+            URL url = UriBuilder.fromUri("http://" + registry) // TODO make possible to use https here
+                                .path("/v2/{repository}/manifests/{digest}")
+                                .build(repository, dockerInstanceKey.getDigest())
+                                .toURL();
+            final HttpURLConnection conn = (HttpURLConnection)url.openConnection();
             try {
                 conn.setConnectTimeout(30 * 1000);
                 conn.setRequestMethod("DELETE");
-                // fixme add auth header for secured registry
-//                conn.setRequestProperty("Authorization", authHeader);
+                // TODO add auth header for secured registry
+                // conn.setRequestProperty("Authorization", authHeader);
                 final int responseCode = conn.getResponseCode();
                 if ((responseCode / 100) != 2) {
                     InputStream in = conn.getErrorStream();
                     if (in == null) {
                         in = conn.getInputStream();
                     }
-                    LOG.error(IoUtil.readAndCloseQuietly(in));
+                    LOG.error("An error occurred while deleting snapshot with url: {}\nError stream: {}",
+                              url,
+                              IoUtil.readAndCloseQuietly(in));
                     throw new SnapshotException("Internal server error occurs. Can't remove snapshot");
                 }
             } finally {
@@ -390,7 +393,7 @@ public class DockerInstanceProvider implements InstanceProvider {
             if (machine.getConfig().isDev()) {
                 portsToExpose = new HashMap<>(devMachinePortsToExpose);
 
-                final String projectFolderVolume = String.format("%s:%s",
+                final String projectFolderVolume = String.format("%s:%s:Z",
                                                                  workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
                                                                  projectFolderPath);
                 volumes = ObjectArrays.concat(devMachineSystemVolumes,
@@ -452,7 +455,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         final String containerName = userName + '_' + workspaceId + '_' + displayName + '_';
 
         // removing all not allowed characters + generating random name suffix
-        return NameGenerator.generate(containerName.replaceAll("[^a-zA-Z0-9_-]+", ""), 5);
+        return NameGenerator.generate(containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", ""), 5);
     }
 
     /**

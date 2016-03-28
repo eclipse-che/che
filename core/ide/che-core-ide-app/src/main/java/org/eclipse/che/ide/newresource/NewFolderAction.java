@@ -43,7 +43,7 @@ public class NewFolderAction extends AbstractNewResourceAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
+
 
         InputDialog inputDialog = dialogFactory.createInputDialog(
                 localizationConstant.newResourceTitle(localizationConstant.actionNewFolderTitle()),

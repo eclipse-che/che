@@ -85,7 +85,7 @@ export class CheToolbar {
     var searchModel = attrs.cheSearchModel;
 
     var dropdownMenu = attrs.cheDropdownMenu;
-    var id = title.replace(' ', '_');
+    var id = title.replace(/[\W\s]/g, '_');
     var theme = attrs.theme;
 
     if (!theme) {

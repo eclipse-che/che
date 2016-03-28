@@ -154,14 +154,7 @@ public class BranchViewImpl extends Window implements BranchView {
 
             @Override
             public void onClick(ClickEvent event) {
-                dialogFactory.createConfirmDialog(locale.branchDelete(),
-                                                  locale.branchDeleteAsk(branches.getSelectionModel().getSelectedItem().getName()),
-                                                  new ConfirmCallback() {
-                                                      @Override
-                                                      public void accepted() {
-                                                          delegate.onDeleteClicked();
-                                                      }
-                                                  }, null).show();
+                onDeleteClicked();
             }
         });
         addButtonToFooter(btnDelete);
@@ -183,6 +176,44 @@ public class BranchViewImpl extends Window implements BranchView {
             }
         });
         addButtonToFooter(btnCheckout);
+    }
+
+    private void onDeleteClicked() {
+        dialogFactory.createConfirmDialog(locale.branchDelete(),
+                                          locale.branchDeleteAsk(branches.getSelectionModel().getSelectedItem().getName()),
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  delegate.onDeleteClicked();
+                                              }
+                                          }, null).show();
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnClose)) {
+            delegate.onCloseClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnRename)) {
+            delegate.onRenameClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnDelete)) {
+            onDeleteClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCreate)) {
+            delegate.onCreateClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCheckout)) {
+            delegate.onCheckoutClicked();
+        }
     }
 
     /** {@inheritDoc} */
@@ -228,12 +259,7 @@ public class BranchViewImpl extends Window implements BranchView {
     @Override
     public void showDialogIfClosed() {
         if (!super.isShowing()) {
-            this.show();
+            this.show(btnCreate);
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
     }
 }

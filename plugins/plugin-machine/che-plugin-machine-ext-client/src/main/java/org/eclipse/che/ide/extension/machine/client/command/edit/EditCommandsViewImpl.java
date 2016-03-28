@@ -49,7 +49,6 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.ui.WidgetFocusTracker;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
@@ -74,7 +73,6 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
 
     private final EditCommandResources     commandResources;
     private final IconRegistry             iconRegistry;
-    private final WidgetFocusTracker       widgetFocusTracker;
     private final CoreLocalizationConstant coreLocale;
     private final Label                    hintLabel;
     private       Button                   cancelButton;
@@ -113,8 +111,6 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     private CommandType                                  selectType;
     private String                                       filterTextValue;
 
-    @UiField
-    FocusPanel                  focusPanel;
     @UiField(provided = true)
     MachineLocalizationConstant machineLocale;
     @UiField
@@ -139,13 +135,11 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
                                    EditCommandResources commandResources,
                                    MachineLocalizationConstant machineLocale,
                                    CoreLocalizationConstant coreLocale,
-                                   IconRegistry iconRegistry,
-                                   WidgetFocusTracker widgetFocusTracker) {
+                                   IconRegistry iconRegistry) {
         this.commandResources = commandResources;
         this.machineLocale = machineLocale;
         this.coreLocale = coreLocale;
         this.iconRegistry = iconRegistry;
-        this.widgetFocusTracker = widgetFocusTracker;
 
         selectConfiguration = null;
         categories = new HashMap<>();
@@ -400,16 +394,14 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
 
     @Override
     public void show() {
-        super.show(focusPanel);
+        super.show();
         configurationName.setText("");
         configurationPreviewUrl.setText("");
-        trackFocusForWidgets();
     }
 
     @Override
     public void close() {
         this.hide();
-        unTrackFocusForWidgets();
     }
 
     @Override
@@ -510,27 +502,16 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     @Override
     protected void onClose() {
         setSelectedConfiguration(selectConfiguration);
-        unTrackFocusForWidgets();
     }
 
     @Override
     public boolean isCancelButtonInFocus() {
-        return widgetFocusTracker.isWidgetFocused(cancelButton);
+        return isWidgetFocused(cancelButton);
     }
 
     @Override
     public boolean isCloseButtonInFocus() {
-        return widgetFocusTracker.isWidgetFocused(closeButton);
-    }
-
-    private void trackFocusForWidgets() {
-        widgetFocusTracker.subscribe(cancelButton);
-        widgetFocusTracker.subscribe(closeButton);
-    }
-
-    private void unTrackFocusForWidgets() {
-        widgetFocusTracker.unSubscribe(cancelButton);
-        widgetFocusTracker.unSubscribe(closeButton);
+        return isWidgetFocused(closeButton);
     }
 
     interface EditCommandsViewImplUiBinder extends UiBinder<Widget, EditCommandsViewImpl> {

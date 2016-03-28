@@ -75,15 +75,19 @@ public class PropertyWidgetImpl extends Composite implements PropertyWidget {
 
     @UiHandler("property")
     public void onPropertyChanged(@SuppressWarnings("UnusedParameters") ChangeEvent event) {
-        String selectedValue = getSelectedValue();
-
-        delegate.onPropertyChanged(optionId.toString(), selectedValue);
+        delegate.onPropertyChanged();
     }
 
-    private String getSelectedValue() {
+    @Override
+    public String getSelectedValue() {
         int index = property.getSelectedIndex();
 
         return index != -1 ? property.getValue(index) : "";
+    }
+
+    @Override
+    public ErrorWarningsOptions getOptionId() {
+        return optionId;
     }
 
     /** {@inheritDoc} */

@@ -277,14 +277,14 @@ public class ContentAssistWidget implements EventListener {
         textEditor.getTextView().setAction("cheContentAssistNextPage", new Action() {
             @Override
             public void onAction() {
-                throw new UnsupportedOperationException("cheContentAssistNextPage");
+                selectNext(listElement.getParentElement().getOffsetHeight() / listElement.getFirstElementChild().getOffsetHeight() - 1);
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistPreviousPage", new Action() {
             @Override
             public void onAction() {
-                throw new UnsupportedOperationException("cheContentAssistPreviousPage");
+                selectPrevious(listElement.getParentElement().getOffsetHeight() / listElement.getFirstElementChild().getOffsetHeight() - 1);
             }
         });
 
@@ -334,6 +334,20 @@ public class ContentAssistWidget implements EventListener {
         }
     }
 
+    private void selectPrevious(int offset) {
+        Element element = selectedElement;
+
+        for (int i = 0; i < offset; i++) {
+            Element previousElement = element.getPreviousElementSibling();
+            if (previousElement == null) {
+                break;
+            }
+            element = previousElement;
+        }
+
+        selectElement(element);
+    }
+
     private void selectNext() {
         Element nextElement = selectedElement.getNextElementSibling();
         if (nextElement != null) {
@@ -341,6 +355,20 @@ public class ContentAssistWidget implements EventListener {
         } else {
             selectElement(listElement.getFirstElementChild());
         }
+    }
+
+    private void selectNext(int offset) {
+        Element element = selectedElement;
+
+        for (int i = 0; i < offset; i++) {
+            Element nextElement = element.getNextElementSibling();
+            if (nextElement == null) {
+                break;
+            }
+            element = nextElement;
+        }
+
+        selectElement(element);
     }
 
     private void selectElement(Element element) {
@@ -548,6 +576,16 @@ public class ContentAssistWidget implements EventListener {
 
                 case KeyCodes.KEY_UP:
                     selectPrevious();
+                    evt.preventDefault();
+                    break;
+
+                case KeyCodes.KEY_PAGEUP:
+                    selectPrevious(listElement.getParentElement().getOffsetHeight() / listElement.getFirstElementChild().getOffsetHeight() - 1);
+                    evt.preventDefault();
+                    break;
+
+                case KeyCodes.KEY_PAGEDOWN:
+                    selectNext(listElement.getParentElement().getOffsetHeight() / listElement.getFirstElementChild().getOffsetHeight() - 1);
                     evt.preventDefault();
                     break;
 

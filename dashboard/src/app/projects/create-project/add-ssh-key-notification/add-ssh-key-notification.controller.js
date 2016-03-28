@@ -11,7 +11,7 @@
 'use strict';
 
 /**
- * This class is handling the controller for the add secret key
+ * This class is handling the controller for the secret key error notification
  * @author Oleksii Orel
  */
 export class AddSecretKeyNotificationCtrl {
@@ -20,44 +20,33 @@ export class AddSecretKeyNotificationCtrl {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, cheAPI, lodash) {
+  constructor($mdDialog, $location, cheAPI, lodash) {
     this.$mdDialog = $mdDialog;
+    this.$location = $location;
     this.cheAPI = cheAPI;
     this.lodash = lodash;
 
-    this.configURL = '#/workspaces';
+    this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
+    this.workspace = this.workspacesById.get(this.workspaceId);
 
-    // fetch workspaces when initializing
-    let promise = cheAPI.getWorkspace().fetchWorkspaces();
-    promise.then(() => {
-      this.updateConfigURL(this.workspaceId);
-    }, (error) => {
-      if (error.status === 304) {
-        this.updateConfigURL(this.workspaceId);
-      }
-    });
+    if (!this.workspace) {
+      cheAPI.getWorkspace().fetchWorkspaces().then(() => {
+        this.workspace = this.workspacesById.get(this.workspaceId);
+      });
+    }
 
   }
 
   /**
-   * Update config url.
-   * @param workspaceId - the ID of the current workspace
+   * Redirect to IDE preferences.
    */
-  updateConfigURL(workspaceId) {
-    let workspaces = this.cheAPI.getWorkspace().getWorkspaces();
-
-    let findWorkspace = this.lodash.find(workspaces, (workspace) => {
-      return workspace.id === workspaceId;
-    });
-
-    if (findWorkspace) {
-      let findLink = this.lodash.find(findWorkspace.links, (link) => {
-        return link.rel === 'ide url';
-      });
-      if (findLink) {
-        this.configURL = findLink.href + '?action=showPreferences';
-      }
+  redirectToConfig() {
+    if (!this.workspace) {
+      return false;
     }
+    this.$location.path('ide/' + this.workspace.config.name).search({action: 'showPreferences'});
+    this.$mdDialog.hide();
+    return true;
   }
 
   /**

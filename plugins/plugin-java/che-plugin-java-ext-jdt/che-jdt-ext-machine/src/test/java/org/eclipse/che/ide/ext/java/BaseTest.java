@@ -10,25 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java;
 
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.WorkspaceHolder;
-import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
-import org.eclipse.che.api.project.server.type.ProjectTypeDef;
-import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
-import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
-import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.jdt.javadoc.JavaElementLinks;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -42,15 +24,8 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
-import java.nio.file.PathMatcher;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Evgen Vidolob
@@ -68,71 +43,11 @@ public abstract class BaseTest {
     protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set");
     protected static FileBuffersPlugin
                                      fileBuffersPlugin = new FileBuffersPlugin();
-    protected final static String INDEX_PATH = wsPath + "/fs_index";
-
-    protected static TestWorkspaceHolder workspaceHolder;
-
-    protected static File root;
-
-    protected static ProjectManager pm;
-
-    protected static LocalVirtualFileSystemProvider vfsProvider;
-
-    protected static ProjectRegistry projectRegistry;
-
-    protected static FileWatcherNotificationHandler fileWatcherNotificationHandler;
-
-    protected static FileTreeWatcher fileTreeWatcher;
-
-    protected static ProjectTypeRegistry projectTypeRegistry;
-
-    protected static ProjectHandlerRegistry projectHandlerRegistry;
-
-    protected static ProjectImporterRegistry importerRegistry;
 
     static {
-
-
-        try {
-            if (workspaceHolder == null)
-                workspaceHolder = new TestWorkspaceHolder();
-
-            if (root == null)
-                root = new File(wsPath);
-
-            File indexDir = new File(INDEX_PATH);
-
-            Set<PathMatcher> filters = new HashSet<>();
-            filters.add(path -> true);
-            FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
-
-            vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
-
-
-            projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
-            projectTypeRegistry.registerProjectType(new TestProjectType());
-
-            projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
-
-            projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
-            projectRegistry.initProjects();
-
-            importerRegistry = new ProjectImporterRegistry(new HashSet<>());
-
-            fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
-            fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
-
-            pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                    importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
-            plugin = new ResourcesPlugin("target/index", workspacePath, projectRegistry, pm);
-            plugin.start();
-            javaPlugin.start();
-        } catch (Throwable e){
-            e.printStackTrace();
-        }
+        plugin.start();
+        javaPlugin.start();
     }
-
-
 
 
     public BaseTest() {
@@ -174,38 +89,5 @@ public abstract class BaseTest {
 
     }
 
-    protected static class TestProjectType extends ProjectTypeDef {
-
-        protected TestProjectType() {
-            super("test", "test", true, true);
-        }
-    }
-
-    protected static class TestWorkspaceHolder extends WorkspaceHolder {
-
-        //ArrayList <RegisteredProject> updatedProjects = new ArrayList<>();
-
-        protected TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")));
-        }
-
-
-        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class)
-                            .withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")
-                                                  .withProjects(projects)));
-        }
-
-        @Override
-        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
-            workspace.setProjects(persistedProjects);
-            //setProjects(new ArrayList<>(projects));
-        }
-    }
 
 }

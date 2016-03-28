@@ -34,12 +34,11 @@ let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngT
   'ngDropdowns', 'ngLodash', 'angularCharts', 'ngClipboard', 'uuid4', 'angularFileUpload']);
 
 
-
 // add a global resolve flag on all routes (user needs to be resolved first)
-initModule.config(['$routeProvider', function ($routeProvider) {
-  $routeProvider.accessWhen = function(path, route) {
+initModule.config(['$routeProvider', ($routeProvider) => {
+  $routeProvider.accessWhen = (path, route) => {
     route.resolve || (route.resolve = {});
-    route.resolve.app = ['cheBranding', '$q', 'cheProfile', 'cheUser', function (cheBranding, $q, cheProfile, cheUser) {
+    route.resolve.app = ['cheBranding', '$q', 'cheProfile', 'cheUser', (cheBranding, $q, cheProfile, cheUser) => {
       var deferred = $q.defer();
 
       cheUser.fetchUser().then(() => {
@@ -63,9 +62,9 @@ initModule.config(['$routeProvider', function ($routeProvider) {
     return $routeProvider.when(path, route);
   };
 
-  $routeProvider.accessOtherWise = function(route) {
+  $routeProvider.accessOtherWise = (route) => {
     route.resolve || (route.resolve = {});
-    route.resolve.app = ['$q', 'cheProfile', 'cheUser', function ($q, cheProfile, cheUser) {
+    route.resolve.app = ['$q', 'cheProfile', 'cheUser', ($q, cheProfile, cheUser) => {
       var deferred = $q.defer();
 
       cheUser.fetchUser().then(() => {
@@ -95,7 +94,7 @@ var DEV = false;
 
 
 // config routes
-initModule.config(['$routeProvider', function ($routeProvider) {
+initModule.config(['$routeProvider', ($routeProvider) => {
   // add demo page
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
@@ -108,12 +107,11 @@ initModule.config(['$routeProvider', function ($routeProvider) {
 }]);
 
 
-
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', 'routingRedirect', 'cheUser', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory',
-  function ($rootScope, $location, routingRedirect, cheUser, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory) {
+initModule.run(['$rootScope', '$location', 'routingRedirect', 'cheUser', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService',
+  ($rootScope, $location, routingRedirect, cheUser, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService) => {
 
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
@@ -123,10 +121,10 @@ initModule.run(['$rootScope', '$location', 'routingRedirect', 'cheUser', '$timeo
     cheIdeFetcher;
     routeHistory;
 
-    $rootScope.$on('$viewContentLoaded', function() {
+    $rootScope.$on('$viewContentLoaded', () => {
       ideIFrameSvc.addIFrame();
-
-      $timeout(function() {
+      cheUIElementsInjectorService.injectAll();
+      $timeout(() => {
         if (!$rootScope.hideLoader) {
           if (!$rootScope.wantTokeepLoader) {
             $rootScope.hideLoader = true;
@@ -160,14 +158,13 @@ initModule.run(['$rootScope', '$location', 'routingRedirect', 'cheUser', '$timeo
   }]);
 
 
-
 // add interceptors
-initModule.factory('ETagInterceptor', function ($window, $cookies, $q) {
+initModule.factory('ETagInterceptor', ($window, $cookies, $q) => {
 
   var etagMap = {};
 
   return {
-    request: function(config) {
+    request: (config) => {
       // add IfNoneMatch request on the che api if there is an existing eTag
       if ('GET' === config.method) {
         if (config.url.indexOf('/api') === 0) {
@@ -180,7 +177,7 @@ initModule.factory('ETagInterceptor', function ($window, $cookies, $q) {
       }
       return config || $q.when(config);
     },
-    response: function(response) {
+    response: (response) => {
 
       // if response is ok, keep ETag
       if ('GET' === response.config.method) {
@@ -189,7 +186,7 @@ initModule.factory('ETagInterceptor', function ($window, $cookies, $q) {
           if (responseEtag) {
             if (response.config.url.indexOf('/api') === 0) {
 
-              etagMap[response.config.url] =  responseEtag;
+              etagMap[response.config.url] = responseEtag;
             }
           }
         }
@@ -201,12 +198,10 @@ initModule.factory('ETagInterceptor', function ($window, $cookies, $q) {
 });
 
 
-
-
-initModule.config(function($mdThemingProvider, jsonColors) {
+initModule.config(($mdThemingProvider, jsonColors) => {
 
   var cheColors = angular.fromJson(jsonColors);
-  var getColor = function(key) {
+  var getColor = (key) => {
     var color = cheColors[key];
     if (!color) {
       // return a flashy red color if color is undefined
@@ -223,12 +218,11 @@ initModule.config(function($mdThemingProvider, jsonColors) {
 
   var cheMap = $mdThemingProvider.extendPalette('indigo', {
     '500': getColor('$dark-menu-color'),
-    '300' : 'D0D0D0'
+    '300': 'D0D0D0'
   });
   $mdThemingProvider.definePalette('che', cheMap);
 
-  var cheDangerMap = $mdThemingProvider.extendPalette('red', {
-  });
+  var cheDangerMap = $mdThemingProvider.extendPalette('red', {});
   $mdThemingProvider.definePalette('cheDanger', cheDangerMap);
 
   var cheWarningMap = $mdThemingProvider.extendPalette('orange', {
@@ -237,20 +231,18 @@ initModule.config(function($mdThemingProvider, jsonColors) {
   $mdThemingProvider.definePalette('cheWarning', cheWarningMap);
 
   var cheDefaultMap = $mdThemingProvider.extendPalette('blue', {
-    'A400'  : getColor('$che-medium-blue-color')
+    'A400': getColor('$che-medium-blue-color')
   });
   $mdThemingProvider.definePalette('cheDefault', cheDefaultMap);
 
   var cheNoticeMap = $mdThemingProvider.extendPalette('blue', {
-    'A400'  : getColor('$mouse-gray-color')
+    'A400': getColor('$mouse-gray-color')
   });
   $mdThemingProvider.definePalette('cheNotice', cheNoticeMap);
 
 
-
-
   var cheAccentMap = $mdThemingProvider.extendPalette('blue', {
-    '700' : getColor('$che-medium-blue-color'),
+    '700': getColor('$che-medium-blue-color'),
     'A400': getColor('$che-medium-blue-color'),
     'A200': getColor('$che-medium-blue-color'),
     'contrastDefaultColor': 'light'
@@ -259,27 +251,27 @@ initModule.config(function($mdThemingProvider, jsonColors) {
 
 
   var cheNavyPalette = $mdThemingProvider.extendPalette('purple', {
-    '500' : getColor('$che-navy-color'),
+    '500': getColor('$che-navy-color'),
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheNavyPalette', cheNavyPalette);
 
 
   var toolbarPrimaryPalette = $mdThemingProvider.extendPalette('purple', {
-    '500' : getColor('$che-white-color'),
+    '500': getColor('$che-white-color'),
     'contrastDefaultColor': 'dark'
   });
   $mdThemingProvider.definePalette('toolbarPrimaryPalette', toolbarPrimaryPalette);
 
   var toolbarAccentPalette = $mdThemingProvider.extendPalette('purple', {
-    'A200' : 'EF6C00',
-    '700' : 'E65100',
+    'A200': 'EF6C00',
+    '700': 'E65100',
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('toolbarAccentPalette', toolbarAccentPalette);
 
   var cheGreyPalette = $mdThemingProvider.extendPalette('grey', {
-    'A100' : 'efefef',
+    'A100': 'efefef',
     'contrastDefaultColor': 'light'
   });
   $mdThemingProvider.definePalette('cheGrey', cheGreyPalette);
@@ -345,7 +337,7 @@ initModule.constant('userDashboardConfig', {
   developmentMode: DEV
 });
 
-initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', function ($routeProvider, $locationProvider, $httpProvider) {
+initModule.config(['$routeProvider', '$locationProvider', '$httpProvider', ($routeProvider, $locationProvider, $httpProvider) => {
   // Add the ETag interceptor for Che API
   $httpProvider.interceptors.push('ETagInterceptor');
 }]);

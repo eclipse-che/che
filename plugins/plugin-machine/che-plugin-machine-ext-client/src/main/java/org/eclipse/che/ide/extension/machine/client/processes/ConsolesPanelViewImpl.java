@@ -283,11 +283,12 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     }
 
     @Override
-    public void selectNode(final @NotNull ProcessTreeNode node) {
+    public void selectNode(final ProcessTreeNode node) {
         SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
         if (node == null) {
             selectionModel.clearSelections();
+            return;
         } else {
             selectionModel.setTreeActive(true);
             selectionModel.clearSelections();

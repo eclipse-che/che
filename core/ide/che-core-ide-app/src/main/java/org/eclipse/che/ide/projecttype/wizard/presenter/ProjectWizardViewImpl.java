@@ -14,12 +14,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -49,7 +45,6 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
     Button      previousStepButton;
     Button      saveButton;
 
-    private HandlerRegistration nativePreviewHandlerRegistration = null;
     private boolean        isCreatingNewProject;
     private ActionDelegate delegate;
 
@@ -125,31 +120,37 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
         }
 
         show();
+    }
 
-        if (nativePreviewHandlerRegistration == null) {
-            nativePreviewHandlerRegistration = Event.addNativePreviewHandler(new Event.NativePreviewHandler() {
-                @Override
-                public void onPreviewNativeEvent(Event.NativePreviewEvent event) {
-                    if (event.getTypeInt() == Event.ONKEYUP &&
-                        event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-                        if (nextStepButton.isEnabled()) {
-                            delegate.onNextClicked();
-                        } else if (saveButton.isEnabled()) {
-                            delegate.onSaveClicked();
-                        }
-                    }
-                }
-            });
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(saveButton)) {
+            delegate.onSaveClicked();
+            return;
+        }
+
+        if (isWidgetFocused(nextStepButton)) {
+            delegate.onNextClicked();
+            return;
+        }
+
+        if (isWidgetFocused(previousStepButton)) {
+            delegate.onBackClicked();
+            return;
+        }
+
+        if (nextStepButton.isEnabled()) {
+            delegate.onNextClicked();
+            return;
+        }
+
+        if (saveButton.isEnabled()) {
+            delegate.onSaveClicked();
         }
     }
 
     @Override
     public void close() {
-        if (nativePreviewHandlerRegistration != null) {
-            nativePreviewHandlerRegistration.removeHandler();
-            nativePreviewHandlerRegistration = null;
-        }
-
         hide();
         setLoaderVisibility(false);
     }

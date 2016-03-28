@@ -129,9 +129,6 @@ public interface Resources extends Tree.Resources,
     @Source("actions/importGroup.svg")
     SVGResource importProjectGroup();
 
-    @Source("actions/settings.svg")
-    SVGResource settings();
-
     @Source("actions/upload-file.svg")
     SVGResource uploadFile();
 

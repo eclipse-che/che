@@ -34,7 +34,7 @@ import javax.validation.constraints.NotNull;
 /**
  * The implementation of {@link CommitView}.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class CommitViewImpl extends Window implements CommitView {
@@ -113,6 +113,18 @@ public class CommitViewImpl extends Window implements CommitView {
 
         addButtonToFooter(btnCommit);
         addButtonToFooter(btnCancel);
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(btnCommit)) {
+            delegate.onCommitClicked();
+            return;
+        }
+
+        if (isWidgetFocused(btnCancel)) {
+            delegate.onCancelClicked();
+        }
     }
 
     /** {@inheritDoc} */
@@ -244,10 +256,5 @@ public class CommitViewImpl extends Window implements CommitView {
             this.message.setValue("");
             this.setEnableCommitButton(false);
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
     }
 }

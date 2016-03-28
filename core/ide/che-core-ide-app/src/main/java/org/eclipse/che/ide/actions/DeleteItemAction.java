@@ -17,7 +17,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
@@ -52,7 +51,6 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +69,6 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class DeleteItemAction extends AbstractPerspectiveAction implements PromisableAction {
-    private final AnalyticsEventLogger     eventLogger;
     private final SelectionAgent           selectionAgent;
     private final DeleteNodeHandler        deleteNodeHandler;
     private final AppContext               appContext;
@@ -87,7 +84,6 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
 
     @Inject
     public DeleteItemAction(Resources resources,
-                            AnalyticsEventLogger eventLogger,
                             SelectionAgent selectionAgent,
                             DeleteNodeHandler deleteNodeHandler,
                             CoreLocalizationConstant localization,
@@ -104,7 +100,6 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
               null,
               resources.delete());
         this.selectionAgent = selectionAgent;
-        this.eventLogger = eventLogger;
         this.deleteNodeHandler = deleteNodeHandler;
         this.appContext = appContext;
         this.projectExplorer = projectExplorer;
@@ -120,8 +115,6 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
-
         final Selection<?> selection = selectionAgent.getSelection();
 
         if (selection == null || selection.isEmpty()) {
