@@ -143,10 +143,24 @@ public class WsAgentTestBase {
         }
 
         @Override
-        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
-            workspace.setProjects(persistedProjects);
-            //setProjects(new ArrayList<>(projects));
+        void addProject(RegisteredProject project) throws ServerException {
+            if (!project.isDetected()) {
+                workspace.addProject(project);
+            }
+        }
+
+        @Override
+        public void updateProject(RegisteredProject project) throws ServerException {
+            if (!project.isDetected()) {
+                workspace.updateProject(project);
+            }
+        }
+
+        @Override
+        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
+            projects.stream()
+                    .filter(project -> !project.isDetected())
+                    .forEach(workspace::removeProject);
         }
     }
 
