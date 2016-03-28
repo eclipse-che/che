@@ -38,6 +38,8 @@ class IdeSvc {
         this.currentStep = 0;
         this.selectedWorkspace = null;
 
+        this.listeningChannels = [];
+
         this.steps = [
             {text: 'Initialize', inProgressText : 'Initializing', logs: '', hasError: false},
             {text: 'Start workspace master', inProgressText : 'Starting workspace master', logs: '', hasError: false},
@@ -90,9 +92,10 @@ class IdeSvc {
 
         // recipe url
         let bus = this.cheAPI.getWebsocket().getBus(this.selectedWorkspace.id);
-
+        let workspaceChannel = 'workspace:' + this.selectedWorkspace.id;
+        this.listeningChannels.push(workspaceChannel);
         // subscribe to workspace events
-        bus.subscribe('workspace:' + this.selectedWorkspace.id, (message) => {
+        bus.subscribe(workspaceChannel, (message) => {
 
             if (message.eventType === 'RUNNING' && message.workspaceId === this.selectedWorkspace.id) {
 
@@ -132,11 +135,11 @@ class IdeSvc {
 
             let workspaceId = data.id;
 
+            this.listeningChannels.push(statusChannel);
             // for now, display log of status channel in case of errors
             bus.subscribe(statusChannel, (message) => {
-                if (message.eventType === 'DESTROYED' && message.workspaceId === data.id) {
+                if (message.eventType === 'DESTROYED' && message.workspaceId === data.id && !this.$rootScope.showIDE) {
                     this.steps[this.currentStep].hasError = true;
-
                     // need to show the error
                     this.$mdDialog.show(
                         this.$mdDialog.alert()
@@ -160,6 +163,7 @@ class IdeSvc {
                 console.log('Status channel of workspaceID', workspaceId, message);
             });
 
+            this.listeningChannels.push(agentChannel);
             bus.subscribe(agentChannel, (message) => {
               if (this.currentStep < 2) {
                 this.currentStep = 2;
@@ -186,6 +190,7 @@ class IdeSvc {
                 }
             });
 
+            this.listeningChannels.push(outputChannel);
             bus.subscribe(outputChannel, (message) => {
                 if (this.steps[this.currentStep].logs.length > 0) {
                     this.steps[this.currentStep].logs = this.steps[this.currentStep].logs + '\n' + message;
@@ -206,7 +211,7 @@ class IdeSvc {
         // on success, create project
         websocketStream.onOpen(() => {
             this.openIde();
-
+            this.cleanupChannels(websocketStream);
         });
 
         // on error, retry to connect or after a delay, abort
@@ -215,6 +220,7 @@ class IdeSvc {
             if (this.websocketReconnect > 0) {
                 this.$timeout(() => {this.connectToExtensionServer(websocketURL, workspaceId);}, 1000);
             } else {
+                this.cleanupChannels(websocketStream);
                 this.steps[this.currentStep].hasError = true;
                 console.log('error when starting remote extension', error);
                 // need to show the error
@@ -277,12 +283,28 @@ class IdeSvc {
             this.$rootScope.hideLoader = true;
             this.$rootScope.loadingIDE = false;
 
-
         }, 2000);
 
 
     }
 
+    /**
+     * Cleanup the websocket channels (unsubscribe)
+     */
+    cleanupChannels(websocketStream) {
+      if (websocketStream != null) {
+        websocketStream.close();
+      }
+
+      let workspaceBus = this.cheAPI.getWebsocket().getBus(this.selectedWorkspace.id);
+
+      if (workspaceBus != null) {
+        this.listeningChannels.forEach((channel) => {
+          workspaceBus.unsubscribe(channel);
+        });
+        this.listeningChannels.length = 0;
+      }
+    }
 
     /**
      * Gets link from a workspace
