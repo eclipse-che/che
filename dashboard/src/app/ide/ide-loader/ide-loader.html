@@ -13,7 +13,7 @@
            layout-align-gt-sm="start center">
         <div class="ide-loader-working-log">
           <che-accordion ng-repeat="step in ideLoaderCtrl.getSteps()" che-index="{{$index}}"
-                         che-open-condition="(!!ideLoaderCtrl.getSteps()[$index].logs && $index === ideLoaderCtrl.getCurrentStep())"
+                         che-open-condition="($index === ideLoaderCtrl.getCurrentStep() && !!ideLoaderCtrl.getSteps()[$index].logs)"
                          ng-class="{'che-accordion-active': ($index === ideLoaderCtrl.getCurrentStep()),
                                     'che-accordion-error': ideLoaderCtrl.getSteps()[$index].hasError}">
             <div class="che-accordion-title">
