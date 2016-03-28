@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
+ *
  * @author Evgen Vidolob
  */
+//I have no idea why addProject, updateProject and removeProjects is package private,
+// but I need to override WorkspaceHolder to use him in tests
 public class TestWorkspaceHolder extends WorkspaceHolder {
     public TestWorkspaceHolder() throws ServerException {
         super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")

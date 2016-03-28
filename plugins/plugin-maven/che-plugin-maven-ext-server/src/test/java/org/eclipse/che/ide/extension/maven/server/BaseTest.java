@@ -19,8 +19,7 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.project.server.WorkspaceHolder;
+import org.eclipse.che.api.project.server.TestWorkspaceHolder;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -30,11 +29,7 @@ import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -48,14 +43,11 @@ import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.nio.file.PathMatcher;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 
 /**
@@ -113,8 +105,7 @@ public abstract class BaseTest {
     @BeforeMethod
     protected void initProjectApi() throws Exception {
         mavenServerManager = new MavenServerManager(mavenServerPath);
-        if (workspaceHolder == null)
-            workspaceHolder = new TestWorkspaceHolder();
+        workspaceHolder = new TestWorkspaceHolder();
 
         if (root == null)
             root = new File(wsPath);
@@ -244,33 +235,6 @@ public abstract class BaseTest {
 
         protected MavenProjectType() {
             super("maven", "maven", true, true);
-        }
-    }
-
-    protected static class TestWorkspaceHolder extends WorkspaceHolder {
-
-        //ArrayList <RegisteredProject> updatedProjects = new ArrayList<>();
-
-        protected TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")));
-        }
-
-
-        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class)
-                            .withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")
-                                                  .withProjects(projects)));
-        }
-
-        @Override
-        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
-            workspace.setProjects(persistedProjects);
-            //setProjects(new ArrayList<>(projects));
         }
     }
 

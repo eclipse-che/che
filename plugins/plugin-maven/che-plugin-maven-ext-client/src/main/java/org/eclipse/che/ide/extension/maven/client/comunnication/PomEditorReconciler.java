@@ -17,14 +17,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.editor.ProblemRequester;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.extension.maven.shared.dto.MavenProblem;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
 import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,32 +64,33 @@ public class PomEditorReconciler {
         addProblems();
     }
 
-    private void addProblems() {Map<String, EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-        for (String pomPath : pomToProblem.keySet()) {
-            if (openedEditors.containsKey(pomPath)) {
-                EditorPartPresenter editorPartPresenter = openedEditors.get(pomPath);
-                if (editorPartPresenter instanceof ConfigurableTextEditor) {
-                    ConfigurableTextEditor textEditor = (ConfigurableTextEditor)editorPartPresenter;
-                    AnnotationModel annotationModel = textEditor.getConfiguration().getAnnotationModel();
-                    if (annotationModel instanceof ProblemRequester) {
-                        ProblemRequester problemRequester = (ProblemRequester)annotationModel;
-                        try {
-                            problemRequester.beginReporting();
-                            List<MavenProblem> mavenProblems = pomToProblem.get(pomPath);
-                            if (mavenProblems != null) {
-                                Document document = textEditor.getDocument();
-                                for (MavenProblem mavenProblem : mavenProblems) {
-                                    problemRequester.acceptProblem(convertToProblem(mavenProblem, document));
-                                }
-                            }
-                        } finally {
-                            problemRequester.endReporting();
-                        }
-                    }
-
-                }
-            }
-        }
+    private void addProblems() {
+//        List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
+//        for (String pomPath : pomToProblem.keySet()) {
+//            if (openedEditors.containsKey(pomPath)) {
+//                EditorPartPresenter editorPartPresenter = openedEditors.get(pomPath);
+//                if (editorPartPresenter instanceof ConfigurableTextEditor) {
+//                    ConfigurableTextEditor textEditor = (ConfigurableTextEditor)editorPartPresenter;
+//                    AnnotationModel annotationModel = textEditor.getConfiguration().getAnnotationModel();
+//                    if (annotationModel instanceof ProblemRequester) {
+//                        ProblemRequester problemRequester = (ProblemRequester)annotationModel;
+//                        try {
+//                            problemRequester.beginReporting();
+//                            List<MavenProblem> mavenProblems = pomToProblem.get(pomPath);
+//                            if (mavenProblems != null) {
+//                                Document document = textEditor.getDocument();
+//                                for (MavenProblem mavenProblem : mavenProblems) {
+//                                    problemRequester.acceptProblem(convertToProblem(mavenProblem, document));
+//                                }
+//                            }
+//                        } finally {
+//                            problemRequester.endReporting();
+//                        }
+//                    }
+//
+//                }
+//            }
+//        }
     }
 
     private Problem convertToProblem(MavenProblem mavenProblem, Document document) {

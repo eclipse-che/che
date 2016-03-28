@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.maven.client.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.analytics.client.logger.AnalyticsEventLogger;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
@@ -38,14 +37,12 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class CreateMavenModuleAction extends AbstractPerspectiveAction {
 
-    private final AnalyticsEventLogger       eventLogger;
     private final AppContext                 appContext;
     private final CreateMavenModulePresenter presenter;
 
     @Inject
     public CreateMavenModuleAction(MavenLocalizationConstant constant,
                                    CreateMavenModulePresenter presenter,
-                                   AnalyticsEventLogger eventLogger,
                                    AppContext appContext,
                                    MavenResources mavenResources) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
@@ -54,13 +51,11 @@ public class CreateMavenModuleAction extends AbstractPerspectiveAction {
               null,
               mavenResources.maven());
         this.presenter = presenter;
-        this.eventLogger = eventLogger;
         this.appContext = appContext;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventLogger.log(this);
         if (appContext.getCurrentProject() != null) {
             presenter.showDialog(appContext.getCurrentProject());
         }
