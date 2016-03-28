@@ -19,10 +19,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.TableResources;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -93,7 +95,13 @@ public class ServerViewImpl extends Composite implements ServerView {
     /** {@inheritDoc} */
     @Override
     public void setServers(@NotNull List<Server> servers) {
-        this.servers.setRowData(servers);
+        List<Server> list = new ArrayList<>();
+        for (Server server : servers) {
+           if (!Constants.TERMINAL_REFERENCE.equals(server.getRef())){//TODO: temporary hide terminal URL  
+               list.add(server);
+           }
+        }
+        this.servers.setRowData(list);
     }
 
 }
