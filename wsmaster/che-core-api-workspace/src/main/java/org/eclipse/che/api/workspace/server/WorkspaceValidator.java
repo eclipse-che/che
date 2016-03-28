@@ -11,20 +11,21 @@
 package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 /**
- * Interface for workspace config validations.
+ * Interface for workspace validations.
  *
  * <p>This interface doesn't declare any validation constrains
  * because the validation itself is implementation specific.
  *
  * @author Yevhenii Voevodin
  */
-public interface WorkspaceConfigValidator {
+public interface WorkspaceValidator {
 
     /**
-     * Checks that workspace is valid.
+     * Checks that workspace configuration is valid.
      *
      * @param config
      *         workspace configuration for validation
@@ -32,4 +33,14 @@ public interface WorkspaceConfigValidator {
      *         in the case of constrain violation
      */
     void validate(WorkspaceConfig config) throws BadRequestException;
+
+    /**
+     * Checks that workspace is valid.
+     *
+     * @param workspace
+     *         workspace configuration for validation
+     * @throws BadRequestException
+     *         in the case of constrain violation
+     */
+    void validate(Workspace workspace) throws BadRequestException;
 }

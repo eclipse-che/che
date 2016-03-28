@@ -13,7 +13,7 @@ package org.eclipse.che.ide.connection;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedEvent;
 import org.eclipse.che.ide.util.loging.Log;
@@ -44,7 +44,7 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
 
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
             @Override
-            public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+            public void onWorkspaceStarted(WorkspaceDto workspace) {
                 messageBus = messageBusProvider.getMessageBus();
 
                 messageBus.addOnCloseHandler(WsConnectionListener.this);

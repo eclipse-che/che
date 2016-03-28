@@ -25,8 +25,8 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
@@ -124,7 +124,7 @@ public class MavenProjectTypeTest {
 
     @Test
     public void testMavenProject() throws Exception {
-        UsersWorkspaceDto usersWorkspaceMock = mock(UsersWorkspaceDto.class);
+        WorkspaceDto usersWorkspaceMock = mock(WorkspaceDto.class);
         WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
         when(httpJsonRequestFactory.fromLink(eq(DtoFactory.newDto(Link.class)
                                                           .withMethod("GET")
@@ -135,7 +135,7 @@ public class MavenProjectTypeTest {
                                                           .withHref("/workspace/" + "/project"))))
                 .thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
-        when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
+        when(httpJsonResponse.asDto(WorkspaceDto.class)).thenReturn(usersWorkspaceMock);
         final ProjectConfigDto projectConfig = DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                                          .withName("project")
                                                          .withPath("/myProject")

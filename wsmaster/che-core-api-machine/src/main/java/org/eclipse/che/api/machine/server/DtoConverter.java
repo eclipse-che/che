@@ -40,7 +40,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 /**
  * Helps to convert to/from DTOs related to workspace.
  *
- * @author Eugene Voevodin
+ * @author Yevhenii Voevodin
  */
 public final class DtoConverter {
     /**
@@ -133,7 +133,7 @@ public final class DtoConverter {
                                         .withCreationDate(snapshot.getCreationDate())
                                         .withDev(snapshot.isDev())
                                         .withId(snapshot.getId())
-                                        .withOwner(snapshot.getOwner())
+                                        .withNamespace(snapshot.getNamespace())
                                         .withWorkspaceId(snapshot.getWorkspaceId())
                                         .withLinks(null);
     }

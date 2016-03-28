@@ -25,7 +25,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
@@ -119,13 +119,13 @@ public class MachinePanelPresenterTest {
     @Mock
     private MachineTreeNode           machineNode2;
     @Mock
-    private UsersWorkspaceDto         workspaceDto;
+    private WorkspaceDto              workspaceDto;
     @Mock
     private MachineStateEvent         stateEvent;
     @Mock
     private AppContext                appContext;
     @Mock
-    private UsersWorkspaceDto     usersWorkspaceDto;
+    private WorkspaceDto              usersWorkspaceDto;
 
     @Captor
     private ArgumentCaptor<Operation<List<MachineDto>>> operationMachineStateCaptor;

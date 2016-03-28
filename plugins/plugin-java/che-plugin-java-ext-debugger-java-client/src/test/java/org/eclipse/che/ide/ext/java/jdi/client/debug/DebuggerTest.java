@@ -17,7 +17,7 @@ import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -95,33 +95,33 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private FqnResolverFactory                  resolverFactory;
     @Mock
-    private AsyncCallback<Breakpoint>           asyncCallbackBreakpoint;
+    private AsyncCallback<Breakpoint> asyncCallbackBreakpoint;
     @Mock
-    private ProjectConfigDto                    project;
+    private ProjectConfigDto          project;
     @Mock
-    private AsyncCallback<Void>                 asyncCallbackVoid;
+    private AsyncCallback<Void>       asyncCallbackVoid;
     @Mock
-    private AppContext                          appContext;
+    private AppContext                appContext;
     @Mock
-    private CurrentProject                      currentProject;
+    private CurrentProject            currentProject;
     @Mock
-    private EditorAgent                         editorAgent;
+    private EditorAgent               editorAgent;
     @Mock
-    private MessageBusProvider                  messageBusProvider;
+    private MessageBusProvider        messageBusProvider;
     @Mock
-    private UsersWorkspaceDto                   workspace;
+    private WorkspaceDto              workspace;
     @Mock
-    private LocalStorageProvider                localStorageProvider;
+    private LocalStorageProvider      localStorageProvider;
     @Mock
-    private LocalStorage                        localStorage;
+    private LocalStorage              localStorage;
     @Mock
-    private DebuggerInfo                        debuggerInfo;
+    private DebuggerInfo              debuggerInfo;
     @Mock
-    private DebuggerManager                     debuggerManager;
+    private DebuggerManager           debuggerManager;
     @Mock
-    private Debugger                            debugger;
+    private Debugger                  debugger;
     @Mock
-    private FileTypeRegistry                    fileTypeRegistry;
+    private FileTypeRegistry          fileTypeRegistry;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler> extServerStateHandlerCaptor;

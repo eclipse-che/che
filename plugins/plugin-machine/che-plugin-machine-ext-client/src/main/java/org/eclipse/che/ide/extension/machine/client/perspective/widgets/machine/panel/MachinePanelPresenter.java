@@ -28,7 +28,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
@@ -247,7 +247,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
     /** {@inheritDoc} */
     @Override
-    public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+    public void onWorkspaceStarted(WorkspaceDto workspace) {
         showMachines(workspace.getId());
     }
 

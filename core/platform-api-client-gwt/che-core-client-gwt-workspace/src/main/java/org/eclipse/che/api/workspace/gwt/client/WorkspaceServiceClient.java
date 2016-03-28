@@ -18,8 +18,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.RuntimeWorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 
 import java.util.List;
@@ -38,27 +37,20 @@ public interface WorkspaceServiceClient {
      *         the configuration to create the new workspace
      * @param account
      *         the account id related to this operation
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#create(WorkspaceConfigDto, String)
      */
-    Promise<UsersWorkspaceDto> create(WorkspaceConfigDto newWorkspace, String account);
+    Promise<WorkspaceDto> create(WorkspaceConfigDto newWorkspace, String account);
 
     /**
      * Gets users workspace by id.
      *
      * @param wsId
      *         workspace ID
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#getById(String) (Integer, Integer)
      */
-    Promise<UsersWorkspaceDto> getUsersWorkspace(String wsId);
-
-    /**
-     * Gets runtime workspace by id.
-     *
-     * @param wsId
-     *         workspace ID
-     * @return a promise that resolves to the {@link RuntimeWorkspaceDto}, or rejects with an error
-     */
-    Promise<RuntimeWorkspaceDto> getRuntimeWorkspace(String wsId);
+    Promise<WorkspaceDto> getWorkspace(String wsId);
 
     /**
      * Gets all workspaces of current user.
@@ -67,31 +59,22 @@ public interface WorkspaceServiceClient {
      *         the number of the items to skip
      * @param limit
      *         the limit of the items in the response, default is 30
-     * @return a promise that will provide a list of {@link UsersWorkspaceDto}s, or rejects with an error
+     * @return a promise that will provide a list of {@link WorkspaceDto}, or rejects with an error
+     * @see #getWorkspaces(int, int)
      */
-    Promise<List<UsersWorkspaceDto>> getWorkspaces(int skip, int limit);
-
-    /**
-     * Gets all runtime workspaces of current user.
-     *
-     * @param skip
-     *         the number of the items to skip
-     * @param limit
-     *         the limit of the items in the response, default is 30
-     * @return a promise that will provide a list of {@link RuntimeWorkspaceDto}s, or rejects with an error
-     */
-    Promise<List<RuntimeWorkspaceDto>> getRuntimeWorkspaces(int skip, int limit);
+    Promise<List<WorkspaceDto>> getWorkspaces(int skip, int limit);
 
     /**
      * Updates workspace.
      *
      * @param wsId
      *         workspace ID
-     * @param newCfg
+     * @param update
      *         the new configuration to update the workspace
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#update(String, WorkspaceDto)
      */
-    Promise<UsersWorkspaceDto> update(String wsId, WorkspaceConfigDto newCfg);
+    Promise<WorkspaceDto> update(String wsId, WorkspaceDto update);
 
     /**
      * Removes workspace.
@@ -99,6 +82,7 @@ public interface WorkspaceServiceClient {
      * @param wsId
      *         workspace ID
      * @return a promise that will resolve when the workspace has been removed, or rejects with an error
+     * @see WorkspaceService#delete(String)
      */
     Promise<Void> delete(String wsId);
 
@@ -109,9 +93,10 @@ public interface WorkspaceServiceClient {
      *         the configuration to start the workspace from
      * @param accountId
      *         the account id related to this operation
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#startFromConfig(WorkspaceConfigDto, Boolean, String)
      */
-    Promise<RuntimeWorkspaceDto> startTemporary(WorkspaceConfigDto cfg, String accountId);
+    Promise<WorkspaceDto> startFromConfig(WorkspaceConfigDto cfg, boolean isTemporary, String accountId);
 
     /**
      * Starts workspace based on workspace id and environment.
@@ -120,20 +105,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param envName
      *         the name of the workspace environment that should be used for start
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#startById(String, String, String)
      */
-    Promise<UsersWorkspaceDto> startById(String id, String envName);
-
-    /**
-     * Starts workspace based on workspace name and environment.
-     *
-     * @param name
-     *         the name of the workspace to start
-     * @param envName
-     *         the name of the workspace environment that should be used for start
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
-     */
-    Promise<UsersWorkspaceDto> startByName(String name, String envName);
+    Promise<WorkspaceDto> startById(String id, String envName);
 
     /**
      * Stops running workspace.
@@ -141,6 +116,7 @@ public interface WorkspaceServiceClient {
      * @param wsId
      *         workspace ID
      * @return a promise that will resolve when the workspace has been stopped, or rejects with an error
+     * @see WorkspaceService#stop(String)
      */
     Promise<Void> stop(String wsId);
 
@@ -160,17 +136,18 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param newCommand
      *         the new workspace command
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#addCommand(String, CommandDto)
      */
-    Promise<UsersWorkspaceDto> addCommand(String wsId, CommandDto newCommand);
+    Promise<WorkspaceDto> addCommand(String wsId, CommandDto newCommand);
 
     /**
      * Updates command.
      *
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#updateCommand(String, CommandDto)
      */
-    Promise<UsersWorkspaceDto> updateCommand(String wsId, CommandDto commandUpdate);
+    Promise<WorkspaceDto> updateCommand(String wsId, CommandDto commandUpdate);
 
     /**
      * Removes command from workspace.
@@ -179,9 +156,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param commandName
      *         the name of the command to remove
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#deleteCommand(String, String)
      */
-    Promise<UsersWorkspaceDto> deleteCommand(String wsId, String commandName);
+    Promise<WorkspaceDto> deleteCommand(String wsId, String commandName);
 
     /**
      * Adds environment to workspace.
@@ -190,9 +168,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param newEnv
      *         the new environment
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#addEnvironment(String, EnvironmentDto)
      */
-    Promise<UsersWorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv);
+    Promise<WorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv);
 
     /**
      * Updates environment.
@@ -201,9 +180,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param environmentUpdate
      *         the environment to update
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#updateEnvironment(String, EnvironmentDto)
      */
-    Promise<UsersWorkspaceDto> updateEnvironment(String wsId, EnvironmentDto environmentUpdate);
+    Promise<WorkspaceDto> updateEnvironment(String wsId, EnvironmentDto environmentUpdate);
 
     /**
      * Removes environment.
@@ -212,9 +192,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param envName
      *         the name of the environment to remove
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#deleteEnvironment(String, String)
      */
-    Promise<UsersWorkspaceDto> deleteEnvironment(String wsId, String envName);
+    Promise<WorkspaceDto> deleteEnvironment(String wsId, String envName);
 
     /**
      * Adds project configuration to workspace.
@@ -223,9 +204,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param newProject
      *         the new project
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#addProject(String, ProjectConfigDto)
      */
-    Promise<UsersWorkspaceDto> addProject(String wsId, ProjectConfigDto newProject);
+    Promise<WorkspaceDto> addProject(String wsId, ProjectConfigDto newProject);
 
     /**
      * Updates project configuration.
@@ -234,9 +216,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param newEnv
      *         the new project configuration
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#updateProject(String, ProjectConfigDto)
      */
-    Promise<UsersWorkspaceDto> updateProject(String wsId, ProjectConfigDto newEnv);
+    Promise<WorkspaceDto> updateProject(String wsId, ProjectConfigDto newEnv);
 
     /**
      * Removes project from workspace.
@@ -245,9 +228,10 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param projectName
      *         the name of the project to remove
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#deleteProject(String, String)
      */
-    Promise<UsersWorkspaceDto> deleteProject(String wsId, String projectName);
+    Promise<WorkspaceDto> deleteProject(String wsId, String projectName);
 
     /**
      * Creates machine in workspace.
@@ -257,6 +241,7 @@ public interface WorkspaceServiceClient {
      * @param machineConfig
      *         the new machine configuration
      * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
+     * @see WorkspaceService#createMachine(String, MachineConfigDto)
      */
     Promise<MachineDto> createMachine(String wsId, MachineConfigDto machineConfig);
 
@@ -266,6 +251,7 @@ public interface WorkspaceServiceClient {
      * @param workspaceId
      *         workspace ID
      * @return a promise that will provide a list of {@link SnapshotDto}s, or rejects with an error
+     * @see WorkspaceService#getSnapshot(String)
      */
     Promise<List<SnapshotDto>> getSnapshot(String workspaceId);
 
@@ -275,6 +261,7 @@ public interface WorkspaceServiceClient {
      * @param workspaceId
      *         workspace ID
      * @return a promise that will resolve when the snapshot has been created, or rejects with an error
+     * @see WorkspaceService#createSnapshot(String)
      */
     Promise<Void> createSnapshot(String workspaceId);
 
@@ -287,7 +274,8 @@ public interface WorkspaceServiceClient {
      *         the name of the workspace environment to recover from
      * @param accountId
      *         the account id related to this operation
-     * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#recoverWorkspace(String, String, String)
      */
-    Promise<UsersWorkspaceDto> recoverWorkspace(String workspaceId, String envName, String accountId);
+    Promise<WorkspaceDto> recoverWorkspace(String workspaceId, String envName, String accountId);
 }

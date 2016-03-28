@@ -10,33 +10,33 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto;
 
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
 /**
- * @author andrew00x
+ * @author Alexander Garagatyi
  */
 @DTO
-public interface UsersWorkspaceDto extends UsersWorkspace, Hyperlinks {
+public interface WorkspaceRuntimeDto extends WorkspaceRuntime, Hyperlinks {
+
+    WorkspaceRuntimeDto withActiveEnv(String activeEnvName);
 
     @Override
-    WorkspaceConfigDto getConfig();
+    MachineDto getDevMachine();
 
-    UsersWorkspaceDto withConfig(WorkspaceConfigDto config);
-
-    UsersWorkspaceDto withId(String id);
-
-    UsersWorkspaceDto withOwner(String owner);
-
-    UsersWorkspaceDto withStatus(WorkspaceStatus status);
-
-    UsersWorkspaceDto withTemporary(boolean isTemporary);
+    WorkspaceRuntimeDto withDevMachine(MachineDto machine);
 
     @Override
-    UsersWorkspaceDto withLinks(List<Link> links);
+    List<MachineDto> getMachines();
+
+    WorkspaceRuntimeDto withMachines(List<MachineDto> machines);
+
+    WorkspaceRuntimeDto withRootFolder(String rootFolder);
+
+    WorkspaceRuntimeDto withLinks(List<Link> links);
 }

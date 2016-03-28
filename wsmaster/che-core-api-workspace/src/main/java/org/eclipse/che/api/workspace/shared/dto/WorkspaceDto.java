@@ -10,48 +10,42 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto;
 
-import org.eclipse.che.api.core.model.workspace.RuntimeWorkspace;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author Alexander Garagatyi
+ * @author Yevhenii Voevodin
  */
 @DTO
-public interface RuntimeWorkspaceDto extends RuntimeWorkspace, Hyperlinks {
+public interface WorkspaceDto extends Workspace, Hyperlinks {
 
     @Override
     WorkspaceConfigDto getConfig();
 
-    RuntimeWorkspaceDto withConfig(WorkspaceConfigDto config);
-
-    RuntimeWorkspaceDto withId(String id);
-
-    RuntimeWorkspaceDto withOwner(String owner);
-
-    RuntimeWorkspaceDto withStatus(WorkspaceStatus status);
-
-    RuntimeWorkspaceDto withTemporary(boolean isTemporary);
-
-    RuntimeWorkspaceDto withActiveEnv(String activeEnvName);
+    WorkspaceDto withConfig(WorkspaceConfigDto config);
 
     @Override
-    MachineDto getDevMachine();
+    WorkspaceRuntimeDto getRuntime();
 
-    RuntimeWorkspaceDto withDevMachine(MachineDto machine);
+    WorkspaceDto withRuntime(WorkspaceRuntimeDto runtime);
+
+    WorkspaceDto withId(String id);
+
+    WorkspaceDto withNamespace(String owner);
+
+    WorkspaceDto withStatus(WorkspaceStatus status);
+
+    WorkspaceDto withTemporary(boolean isTemporary);
+
+    WorkspaceDto withAttributes(Map<String, String> attributes);
 
     @Override
-    List<MachineDto> getMachines();
-
-    RuntimeWorkspaceDto withMachines(List<MachineDto> machines);
-
-    RuntimeWorkspaceDto withRootFolder(String rootFolder);
-
-    @Override
-    RuntimeWorkspaceDto withLinks(List<Link> links);
+    WorkspaceDto withLinks(List<Link> links);
 }

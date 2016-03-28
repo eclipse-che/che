@@ -12,6 +12,7 @@ package org.eclipse.che.api.core.model.workspace;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public interface Environment {
      * Returns the recipe (the main script) to define this environment (compose, kubernetes pod).
      * Type of this recipe defines engine for composing machines network runtime
      */
+    @Nullable
     Recipe getRecipe();
 
     /**

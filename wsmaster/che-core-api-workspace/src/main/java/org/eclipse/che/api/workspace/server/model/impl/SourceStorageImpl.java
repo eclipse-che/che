@@ -16,12 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-//TODO move?
-
 /**
  * Data object for {@link SourceStorage}.
  *
- * @author Eugene Voevodin
+ * @author Yevhenii Voevodin
  */
 public class SourceStorageImpl implements SourceStorage {
 

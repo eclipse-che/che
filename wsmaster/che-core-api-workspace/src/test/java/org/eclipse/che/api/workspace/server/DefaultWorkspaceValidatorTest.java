@@ -15,6 +15,7 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -33,17 +34,17 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
- * Tests for {@link WorkspaceConfigValidator} and {@link DefaultWorkspaceConfigValidator}
+ * Tests for {@link WorkspaceValidator} and {@link DefaultWorkspaceValidator}
  *
  * @author Alexander Reshetnyak
  */
-public class DefaultWorkspaceConfigValidatorTest {
+public class DefaultWorkspaceValidatorTest {
 
-    private WorkspaceConfigValidator wsValidator;
+    private WorkspaceValidator wsValidator;
 
     @BeforeClass
     public void prepare() throws Exception {
-        wsValidator = new DefaultWorkspaceConfigValidator();
+        wsValidator = new DefaultWorkspaceValidator();
     }
 
     @Test
@@ -117,34 +118,29 @@ public class DefaultWorkspaceConfigValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name 'null' is not valid")
     public void shouldFailValidationIfAttributeNameIsNull() throws Exception {
-        final WorkspaceConfigDto config = createConfig();
-        config.getAttributes()
-              .put(null, "value1");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        workspace.getAttributes().put(null, "value1");
 
 
-        wsValidator.validate(config);
+        wsValidator.validate(workspace);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name '' is not valid")
     public void shouldFailValidationIfAttributeNameIsEmpty() throws Exception {
-        final WorkspaceConfigDto config = createConfig();
-        config.getAttributes()
-              .put("", "value1");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        workspace.getAttributes().put("", "value1");
 
-
-        wsValidator.validate(config);
+        wsValidator.validate(workspace);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name '.*' is not valid")
     public void shouldFailValidationIfAttributeNameStartsWithWordCodenvy() throws Exception {
-        final WorkspaceConfigDto config = createConfig();
-        config.getAttributes()
-              .put("codenvy_key", "value1");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        workspace.getAttributes().put("codenvy_key", "value1");
 
-
-        wsValidator.validate(config);
+        wsValidator.validate(workspace);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -537,8 +533,6 @@ public class DefaultWorkspaceConfigValidatorTest {
                                                 .withCommandLine("mvn clean install")
                                                 .withAttributes(new HashMap<>(singletonMap("cmd-attribute-name", "cmd-attribute-value"))));
         workspaceConfigDto.setCommands(commandDtos);
-
-        workspaceConfigDto.withAttributes(new HashMap<>(singletonMap("ws-attribute-name", "ws-attribute-value")));
 
         return workspaceConfigDto;
     }

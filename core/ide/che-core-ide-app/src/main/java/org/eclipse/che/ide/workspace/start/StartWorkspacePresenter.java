@@ -15,7 +15,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
@@ -41,9 +42,9 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     private final CreateWorkspacePresenter            createWorkspacePresenter;
     private final BrowserQueryFieldRenderer           browserQueryFieldRenderer;
 
-    private UsersWorkspaceDto              selectedWorkspace;
+    private WorkspaceDto                   selectedWorkspace;
     private Callback<Component, Exception> callback;
-    private List<UsersWorkspaceDto>        workspaces;
+    private List<WorkspaceDto>        workspaces;
 
     @Inject
     public StartWorkspacePresenter(StartWorkspaceView view,
@@ -68,7 +69,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
      * @param workspaces
      *         available workspaces which will be displayed
      */
-    public void show(List<UsersWorkspaceDto> workspaces, Callback<Component, Exception> callback) {
+    public void show(List<WorkspaceDto> workspaces, Callback<Component, Exception> callback) {
         this.callback = callback;
         this.workspaces = workspaces;
 
@@ -78,7 +79,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
 
         createWsWidgets(workspaces);
 
-        for (UsersWorkspaceDto workspace : workspaces) {
+        for (WorkspaceDto workspace : workspaces) {
             if (workspaceName.equals(workspace.getConfig().getName())) {
                 selectedWorkspace = workspace;
 
@@ -91,8 +92,8 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
         view.show();
     }
 
-    private void createWsWidgets(List<UsersWorkspaceDto> workspaces) {
-        for (UsersWorkspaceDto workspace : workspaces) {
+    private void createWsWidgets(List<WorkspaceDto> workspaces) {
+        for (WorkspaceDto workspace : workspaces) {
             WorkspaceWidget widget = widgetFactory.create(workspace);
             widget.setDelegate(this);
 
@@ -102,7 +103,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
 
     /** {@inheritDoc} */
     @Override
-    public void onWorkspaceSelected(UsersWorkspaceDto workspace) {
+    public void onWorkspaceSelected(WorkspaceDto workspace) {
         selectedWorkspace = workspace;
 
         String wsName = workspace.getConfig().getDefaultEnv();

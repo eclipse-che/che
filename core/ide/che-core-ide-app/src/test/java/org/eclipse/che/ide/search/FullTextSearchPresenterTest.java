@@ -19,7 +19,7 @@ import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -68,9 +68,9 @@ public class FullTextSearchPresenterTest {
     private PromiseError                 promiseError;
 
     @Mock
-    private AppContext           appContext;
+    private AppContext   appContext;
     @Mock
-    private UsersWorkspaceDto    workspaceDto;
+    private WorkspaceDto workspaceDto;
 
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>        operationErrorCapture;

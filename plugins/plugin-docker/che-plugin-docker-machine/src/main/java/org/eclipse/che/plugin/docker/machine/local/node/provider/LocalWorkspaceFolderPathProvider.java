@@ -14,10 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
@@ -110,9 +109,9 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
             String wsName;
             try {
                 WorkspaceManager workspaceManager = this.workspaceManager.get();
-                final UsersWorkspace workspace = workspaceManager.getWorkspace(workspaceId);
+                final Workspace workspace = workspaceManager.getWorkspace(workspaceId);
                 wsName = workspace.getConfig().getName();
-            } catch (BadRequestException | NotFoundException | ServerException e) {
+            } catch (NotFoundException | ServerException e) {
                 //should never happens
                 LOG.error(e.getMessage());
                 throw new RuntimeException(e.getMessage());

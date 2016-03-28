@@ -65,17 +65,17 @@ public interface SnapshotDao {
     void saveSnapshot(SnapshotImpl snapshot) throws SnapshotException;
 
     /**
-     * Find snapshots by owner, workspace, project
+     * Find snapshots by namespaces, workspace, project
      *
-     * @param owner
-     *         id of the owner of desired snapshot
+     * @param namespace
+     *         snapshot namespace(e.g. owner).
      * @param workspaceId
      *         workspace specified in desired snapshot, optional
      * @return list of snapshot that satisfy provided queries, or empty list if no desired snapshots found
      * @throws SnapshotException
      *         if error occurs
      */
-    List<SnapshotImpl> findSnapshots(String owner, String workspaceId) throws SnapshotException;
+    List<SnapshotImpl> findSnapshots(String namespace, String workspaceId) throws SnapshotException;
 
     /**
      * Remove snapshot by id

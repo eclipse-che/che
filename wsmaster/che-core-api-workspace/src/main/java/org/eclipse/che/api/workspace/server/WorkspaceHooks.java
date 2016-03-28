@@ -13,10 +13,8 @@ package org.eclipse.che.api.workspace.server;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.commons.annotation.Nullable;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Generic interface for methods called on particular workspace events if some additional actions needed.
@@ -46,9 +44,9 @@ public interface WorkspaceHooks {
      * @throws NullPointerException
      *         when either {@code workspace} or {@code envName} is null
      */
-    void beforeStart(@NotNull UsersWorkspace workspace, @NotNull String envName, @Nullable String accountId) throws NotFoundException,
-                                                                                                                    ForbiddenException,
-                                                                                                                    ServerException;
+    void beforeStart(Workspace workspace, String envName, @Nullable String accountId) throws NotFoundException,
+                                                                                             ForbiddenException,
+                                                                                             ServerException;
 
     /**
      * Called before creating workspace.
@@ -62,7 +60,7 @@ public interface WorkspaceHooks {
      * @throws ServerException
      *         when any other error occurs
      */
-    void beforeCreate(@NotNull UsersWorkspace workspace, @Nullable String accountId) throws NotFoundException, ServerException;
+    void beforeCreate(Workspace workspace, @Nullable String accountId) throws NotFoundException, ServerException;
 
     /**
      * Called after workspace is created.
@@ -74,7 +72,7 @@ public interface WorkspaceHooks {
      * @throws ServerException
      *         when any other error occurs
      */
-    void afterCreate(@NotNull UsersWorkspace workspace, @Nullable String accountId) throws ServerException;
+    void afterCreate(Workspace workspace, @Nullable String accountId) throws ServerException;
 
     /**
      * Called after workspace is removed.
@@ -84,5 +82,5 @@ public interface WorkspaceHooks {
      * @throws ServerException
      *         when any error occurs
      */
-    void afterRemove(@NotNull String workspaceId) throws ServerException;
+    void afterRemove(String workspaceId) throws ServerException;
 }

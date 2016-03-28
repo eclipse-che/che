@@ -15,7 +15,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -48,11 +48,11 @@ public class StopWorkspaceActionTest {
     private NotificationManager      notificationManager;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private ActionEvent       actionEvent;
+    private ActionEvent   actionEvent;
     @Mock
-    private UsersWorkspaceDto workspace;
+    private WorkspaceDto  workspace;
     @Mock
-    private Promise<Void>     voidPromise;
+    private Promise<Void> voidPromise;
 
     @Captor
     private ArgumentCaptor<Operation<Void>> operationCaptor;

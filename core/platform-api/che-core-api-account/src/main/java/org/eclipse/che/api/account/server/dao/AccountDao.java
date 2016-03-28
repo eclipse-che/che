@@ -13,7 +13,7 @@ package org.eclipse.che.api.account.server.dao;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -124,7 +124,7 @@ public interface AccountDao {
     List<Member> getByMember(String userId) throws NotFoundException, ServerException;
 
     /**
-     * Gets account which contains {@link UsersWorkspace workspace} with given identifier.
+     * Gets account which contains {@link Workspace workspace} with given identifier.
      *
      * @param workspaceId
      *         workspace identifier

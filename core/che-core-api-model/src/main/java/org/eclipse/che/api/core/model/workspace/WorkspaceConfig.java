@@ -12,14 +12,15 @@ package org.eclipse.che.api.core.model.workspace;
 
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Defines workspace configuration.
  *
  * @author gazarenkov
+ * @author Yevhenii Voevodin
  */
 public interface WorkspaceConfig {
 
@@ -29,14 +30,15 @@ public interface WorkspaceConfig {
     String getName();
 
     /**
-     * Returns description of workspace. It is optional.
+     * Returns description of workspace.
      */
+    @Nullable
     String getDescription();
 
     /**
      * Returns default environment name.
      * It is mandatory, implementation should guarantee that environment
-     * with returned name exists for current workspace config
+     * with returned name exists for current workspace config.
      */
     String getDefaultEnv();
 
@@ -59,11 +61,4 @@ public interface WorkspaceConfig {
      * Workspace must contain at least 1 default environment and may contain N environments
      */
     List<? extends Environment> getEnvironments();
-
-    /**
-     * Returns workspace attributes, if workspace doesn't have any attributes empty map will be returned.
-     * Workspace attribute is an additional information about workspace which may be stored as key-value.
-     * It is optional, workspace may contain 0 or N attributes
-     */
-    Map<String, String> getAttributes();
 }

@@ -24,7 +24,7 @@ import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import java.util.Map;
@@ -90,7 +90,7 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
     }
 
     @Override
-    public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+    public void onWorkspaceStarted(WorkspaceDto workspace) {
         registerProviders();
     }
 

@@ -25,8 +25,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
@@ -91,7 +91,7 @@ public class CreateWorkspacePresenterTest {
     @Mock
     private Promise<List<RecipeDescriptor>> recipesPromise;
     @Mock
-    private Promise<UsersWorkspaceDto>      userWsPromise;
+    private Promise<WorkspaceDto>           userWsPromise;
     @Mock
     private RecipeDescriptor                recipeDescriptor;
     @Mock
@@ -111,12 +111,12 @@ public class CreateWorkspacePresenterTest {
     @Mock
     private CommandDto         commandDto;
     @Mock
-    private UsersWorkspaceDto  usersWorkspaceDto;
+    private WorkspaceDto  usersWorkspaceDto;
 
     @Captor
     private ArgumentCaptor<Operation<List<RecipeDescriptor>>> recipeOperation;
     @Captor
-    private ArgumentCaptor<Operation<UsersWorkspaceDto>>      workspaceOperation;
+    private ArgumentCaptor<Operation<WorkspaceDto>>      workspaceOperation;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>           errorOperation;
 
@@ -144,7 +144,7 @@ public class CreateWorkspacePresenterTest {
 
         when(dtoFactory.createDto(WorkspaceConfigDto.class)).thenReturn(workspaceConfigDto);
 
-        when(dtoFactory.createDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceDto);
+        when(dtoFactory.createDto(WorkspaceDto.class)).thenReturn(usersWorkspaceDto);
 
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
 
@@ -293,7 +293,7 @@ public class CreateWorkspacePresenterTest {
 
     private void clickOnCreateButton() {
         when(workspaceClient.create(Matchers.<WorkspaceConfigDto>anyObject(), anyString())).thenReturn(userWsPromise);
-        when(userWsPromise.then(Matchers.<Operation<UsersWorkspaceDto>>anyObject())).thenReturn(userWsPromise);
+        when(userWsPromise.then(Matchers.<Operation<WorkspaceDto>>anyObject())).thenReturn(userWsPromise);
         when(userWsPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(userWsPromise);
         when(recipeServiceClient.getRecipes(anyInt(), anyInt())).thenReturn(recipesPromise);
 

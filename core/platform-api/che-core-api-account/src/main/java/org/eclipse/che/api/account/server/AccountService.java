@@ -29,7 +29,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.annotations.Required;
@@ -39,8 +39,8 @@ import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -593,7 +593,7 @@ public class AccountService extends Service {
     public AccountDescriptor registerWorkspace(@PathParam("accountId") String accountId, @PathParam("workspaceId") String workspaceId)
             throws NotFoundException, ServerException, BadRequestException, ConflictException {
         Account account = accountDao.getById(accountId);
-        UsersWorkspace workspace = workspaceManager.getWorkspace(workspaceId);
+        Workspace workspace = workspaceManager.getWorkspace(workspaceId);
         if (accountDao.isWorkspaceRegistered(workspaceId)) {
             throw new ConflictException("Workspace '" + workspaceId + "' already registered in another account");
         }
@@ -611,7 +611,7 @@ public class AccountService extends Service {
     public AccountDescriptor unregisterWorkspace(@PathParam("accountId") String accountId, @PathParam("workspaceId") String workspaceId)
             throws NotFoundException, ServerException, BadRequestException, ConflictException {
         Account account = accountDao.getById(accountId);
-        UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
+        WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
         if (!account.getWorkspaces().remove(workspace)) {
             throw new ConflictException(format("Workspace '%s' is not registered in account '%s'", workspaceId, accountId));
         }
@@ -686,10 +686,10 @@ public class AccountService extends Service {
         account.getAttributes().remove("codenvy:creditCardToken");
         account.getAttributes().remove("codenvy:billing.date");
 
-        List<UsersWorkspaceDto> workspaces = account.getWorkspaces()
-                                                    .stream()
-                                                    .map(DtoConverter::asDto)
-                                                    .collect(toList());
+        List<WorkspaceDto> workspaces = account.getWorkspaces()
+                                               .stream()
+                                               .map(DtoConverter::asDto)
+                                               .collect(toList());
         return DtoFactory.getInstance().createDto(AccountDescriptor.class)
                          .withId(account.getId())
                          .withName(account.getName())
