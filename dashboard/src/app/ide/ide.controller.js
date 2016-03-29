@@ -43,6 +43,7 @@ class IdeCtrl {
 
     let ideAction = $routeParams.action;
     let ideParams = $routeParams.ideParams;
+    let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(this.selectedWorkspaceName);
     if (ideAction) {
       // send action
       this.ideSvc.setIDEAction(ideAction);
@@ -51,7 +52,7 @@ class IdeCtrl {
       routeHistory.popCurrentPath();
 
       // remove action from path
-      $location.url('/ide/' + this.selectedWorkspaceName, false);
+      $location.url(selectedWorkspaceIdeUrl, false);
 
     } else if (ideParams) {
       let params = new Map();
@@ -74,7 +75,7 @@ class IdeCtrl {
       routeHistory.popCurrentPath();
 
       // remove action from path
-      $location.url('/ide/' + this.selectedWorkspaceName, false);
+      $location.url(selectedWorkspaceIdeUrl, false);
 
     } else {
       this.ideIFrameSvc.addIFrame();
@@ -85,7 +86,7 @@ class IdeCtrl {
         routeHistory.popCurrentPath();
 
         // remove action from path
-        $location.url('/ide/' + this.selectedWorkspaceName, false);
+        $location.url(selectedWorkspaceIdeUrl, false);
         $location.replace();
 
         this.ideSvc.setPreventRedirection($routeParams.showLogs);
@@ -132,10 +133,7 @@ class IdeCtrl {
       if (this.ideSvc.getPreventRedirection() && 'STARTING' === this.selectedWorkspace.status) {
         this.$rootScope.hideIdeLoader = false;
         this.ideLoaderSvc.addLoader();
-      }
-
-      // now, check if workspace has been started or not
-      else if ('RUNNING' === this.selectedWorkspace.status) {
+      } else if ('RUNNING' === this.selectedWorkspace.status) {
         this.ideSvc.setPreventRedirection(false);
         this.ideSvc.init();
         this.ideSvc.openIde();
