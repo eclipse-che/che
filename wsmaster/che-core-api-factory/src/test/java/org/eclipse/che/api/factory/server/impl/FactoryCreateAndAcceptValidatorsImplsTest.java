@@ -70,7 +70,7 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
         doNothing().when(spy)
                    .validateProjectActions(any(Factory.class));
         doNothing().when(workspaceConfigValidator)
-                   .validate(any(WorkspaceConfig.class));
+                   .validateConfig(any(WorkspaceConfig.class));
 
         //main invoke
         spy.validateOnCreate(factory);

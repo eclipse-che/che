@@ -102,7 +102,7 @@ public class EditCommandsPresenterTest {
         when(commandsPromise.then((Function<List<CommandDto>, List<CommandConfiguration>>)anyObject()))
                 .thenReturn(commandConfigurationPromise);
         when(commandConfigurationPromise.then((Operation<List<CommandConfiguration>>)anyObject())).thenReturn(commandConfigurationPromise);
-        when(workspaceServiceClient.updateCommand(anyString(), anyObject())).thenReturn(workspacePromise);
+        when(workspaceServiceClient.updateCommand(anyString(), anyString(), anyObject())).thenReturn(workspacePromise);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class EditCommandsPresenterTest {
         verify(view).setCloseButtonInFocus();
 
         verify(view, never()).close();
-        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyObject());
+        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyString(), anyObject());
         verify(workspaceServiceClient, never()).deleteCommand(anyString(), anyString());
     }
 
@@ -144,7 +144,7 @@ public class EditCommandsPresenterTest {
 
         verify(view).close();
         verify(workspaceServiceClient, never()).getCommands(anyString());
-        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyObject());
+        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyString(), anyObject());
         verify(workspaceServiceClient, never()).deleteCommand(anyString(), anyString());
     }
 
@@ -170,7 +170,7 @@ public class EditCommandsPresenterTest {
         presenter.onEnterClicked();
 
         verify(dtoFactory).createDto(CommandDto.class);
-        verify(workspaceServiceClient).updateCommand(eq(WORKSPACE_ID), eq(command));
+        verify(workspaceServiceClient).updateCommand(eq(WORKSPACE_ID), anyString(), eq(command));
         verify(workspacePromise).then(workspaceCaptor.capture());
         workspaceCaptor.getValue().apply(workspace);
 

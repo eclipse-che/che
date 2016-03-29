@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Example;
+import io.swagger.annotations.ExampleProperty;
 
 import com.google.common.collect.Maps;
 
@@ -68,8 +70,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.lang.String.copyValueOf;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -140,6 +144,12 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response create(@ApiParam(value = "The configuration to create the new workspace", required = true)
                            WorkspaceConfigDto config,
+                           @ApiParam(value = "Workspace attribute defined in 'attrName:attrValue' format. " +
+                                             "The first ':' is considered as attribute name and value separator",
+                                     examples = @Example({@ExampleProperty("stackId:stack123"),
+                                                          @ExampleProperty("attrName:value-with:colon")}))
+                           @QueryParam("attribute")
+                           List<String> attrsList,
                            @ApiParam("The account id related to this operation")
                            @QueryParam("account")
                            String accountId) throws ConflictException,
@@ -148,9 +158,14 @@ public class WorkspaceService extends Service {
                                                     ForbiddenException,
                                                     NotFoundException {
         requiredNotNull(config, "Workspace configuration required");
-        validator.validate(config);
+        final Map<String, String> attributes = parseAttrs(attrsList);
+        validator.validateAttributes(attributes);
+        validator.validateConfig(config);
         return Response.status(201)
-                       .entity(injectLinks(asDto(workspaceManager.createWorkspace(config, getCurrentUserId(), accountId))))
+                       .entity(injectLinks(asDto(workspaceManager.createWorkspace(config,
+                                                                                  getCurrentUserId(),
+                                                                                  attributes,
+                                                                                  accountId))))
                        .build();
     }
 
@@ -190,10 +205,14 @@ public class WorkspaceService extends Service {
                                             @ApiParam("The limit of the items in the response, default is 30")
                                             @DefaultValue("30")
                                             @QueryParam("maxItems")
-                                            Integer maxItems) throws ServerException, BadRequestException {
+                                            Integer maxItems,
+                                            @ApiParam("Workspace status")
+                                            @QueryParam("status")
+                                            String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
         return workspaceManager.getWorkspaces(getCurrentUserId())
                                .stream()
+                               .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> injectLinks(asDto(workspace)))
                                .collect(toList());
     }
@@ -222,7 +241,7 @@ public class WorkspaceService extends Service {
                                                            ConflictException {
         requiredNotNull(update, "Workspace configuration");
         ensureUserIsWorkspaceOwner(id);
-        validator.validate(update);
+        validator.validateWorkspace(update);
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, update)));
     }
 
@@ -311,7 +330,7 @@ public class WorkspaceService extends Service {
                                                                  ConflictException {
         requiredNotNull(cfg, "Workspace configuration");
         permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), "accountId", accountId);
-        validator.validate(cfg);
+        validator.validateConfig(cfg);
         return injectLinks(asDto(workspaceManager.startWorkspace(cfg,
                                                                  getCurrentUserId(),
                                                                  firstNonNull(isTemporary, false),
@@ -446,6 +465,7 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
+        validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
     }
 
@@ -476,11 +496,12 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Command update");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig().getCommands().removeIf(cmd -> cmd.getName().equals(cmdName))) {
+        final List<CommandImpl> commands = workspace.getConfig().getCommands();
+        if (!commands.removeIf(cmd -> cmd.getName().equals(cmdName))) {
             throw new NotFoundException("Workspace " + id + " doesn't contain command " + cmdName);
         }
-        workspace.getConfig().getCommands().add(new CommandImpl(update));
-        validator.validate(workspace.getConfig());
+        commands.add(new CommandImpl(update));
+        validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
     }
 
@@ -535,13 +556,8 @@ public class WorkspaceService extends Service {
         requiredNotNull(newEnvironment, "New environment");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (workspace.getConfig()
-                     .getEnvironments()
-                     .stream()
-                     .anyMatch(env -> env.getName().equals(newEnvironment.getName()))) {
-            throw new ConflictException("Environment '" + newEnvironment.getName() + "' already exists");
-        }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(newEnvironment));
+        validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
@@ -572,14 +588,12 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Environment description");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig()
-                      .getEnvironments()
-                      .stream()
-                      .anyMatch(env -> env.getName().equals(envName))) {
+        final List<EnvironmentImpl> environments = workspace.getConfig().getEnvironments();
+        if (!environments.stream().anyMatch(env -> env.getName().equals(envName))) {
             throw new NotFoundException("Workspace " + id + " doesn't contain environment " + envName);
         }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(update));
-        validator.validate(workspace.getConfig());
+        validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
@@ -635,6 +649,7 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
+        validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
@@ -665,11 +680,12 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Project config");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig().getProjects().removeIf(project -> project.getPath().equals(path))) {
+        final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
+        if (!projects.removeIf(project -> project.getPath().equals(path))) {
             throw new NotFoundException("Workspace " + id + " doesn't contain project " + path);
         }
-        workspace.getConfig().getProjects().add(new ProjectConfigImpl(update));
-        validator.validate(workspace.getConfig());
+        projects.add(new ProjectConfigImpl(update));
+        validator.validateConfig(workspace.getConfig());
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
@@ -919,6 +935,23 @@ public class WorkspaceService extends Service {
                                                       APPLICATION_JSON,
                                                       "get workspace's snapshot");
         return snapshotDto.withLinks(asList(machineLink, workspaceCfgLink, runtimeWorkspaceLink, workspaceSnapshotLink));
+    }
+
+    private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {
+        if (attributes == null) {
+            return emptyMap();
+        }
+        final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
+        for (String attribute : attributes) {
+            final int colonIdx = attribute.indexOf(':');
+            if (colonIdx == -1) {
+                throw new BadRequestException("Attribute '" + attribute + "' is not valid, " +
+                                              "it should contain name and value separated with colon. " +
+                                              "For example: attributeName:attributeValue");
+            }
+            res.put(attribute.substring(0, colonIdx), attribute.substring(colonIdx + 1));
+        }
+        return res;
     }
 
     private static String getCurrentUserId() {

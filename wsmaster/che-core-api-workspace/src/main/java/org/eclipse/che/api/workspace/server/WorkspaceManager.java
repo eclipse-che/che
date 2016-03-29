@@ -41,12 +41,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATED;
@@ -107,8 +110,6 @@ public class WorkspaceManager {
      *         when either {@code config} or {@code owner} is null
      * @throws NotFoundException
      *         when account with given id was not found
-     * @throws ForbiddenException
-     *         when user doesn't have access to create workspace
      * @throws ConflictException
      *         when any conflict occurs (e.g Workspace with such name already exists for {@code owner})
      * @throws ServerException
@@ -118,13 +119,57 @@ public class WorkspaceManager {
      */
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
                                          String namespace,
-                                         @Nullable String accountId) throws ForbiddenException,
-                                                                            ServerException,
+                                         @Nullable String accountId) throws ServerException,
                                                                             ConflictException,
                                                                             NotFoundException {
         requireNonNull(config, "Required non-null config");
         requireNonNull(namespace, "Required non-null namespace");
-        return normalizeState(doCreateWorkspace(config, namespace, false, accountId));
+        return normalizeState(doCreateWorkspace(config,
+                                                namespace,
+                                                emptyMap(),
+                                                false,
+                                                accountId));
+    }
+
+    /**
+     * Creates a new {@link Workspace} instance based on
+     * the given configuration and the instance attributes.
+     *
+     * @param config
+     *         the workspace config to create the new workspace instance
+     * @param namespace
+     *         workspace name is unique in this namespace
+     * @param attributes
+     *         workspace instance attributes
+     * @param accountId
+     *         the account id, which is used to verify if the user has required
+     *         permissions to create the new workspace
+     * @return new workspace instance
+     * @throws NullPointerException
+     *         when either {@code config} or {@code owner} is null
+     * @throws NotFoundException
+     *         when account with given id was not found
+     * @throws ConflictException
+     *         when any conflict occurs (e.g Workspace with such name already exists for {@code owner})
+     * @throws ServerException
+     *         when any other error occurs
+     * @see WorkspaceHooks#beforeCreate(Workspace, String)
+     * @see WorkspaceHooks#afterCreate(Workspace, String)
+     */
+    public WorkspaceImpl createWorkspace(WorkspaceConfig config,
+                                         String namespace,
+                                         Map<String, String> attributes,
+                                         @Nullable String accountId) throws ServerException,
+                                                                            NotFoundException,
+                                                                            ConflictException {
+        requireNonNull(config, "Required non-null config");
+        requireNonNull(namespace, "Required non-null namespace");
+        requireNonNull(attributes, "Required non-null attributes");
+        return normalizeState(doCreateWorkspace(config,
+                                                namespace,
+                                                attributes,
+                                                false,
+                                                accountId));
     }
 
     /**
@@ -303,7 +348,11 @@ public class WorkspaceManager {
                                                                            ConflictException {
         requireNonNull(config, "Required non-null configuration");
         requireNonNull(namespace, "Required non-null namespace");
-        final WorkspaceImpl workspace = doCreateWorkspace(config, namespace, isTemporary, accountId);
+        final WorkspaceImpl workspace = doCreateWorkspace(config,
+                                                          namespace,
+                                                          emptyMap(),
+                                                          isTemporary,
+                                                          accountId);
         performAsyncStart(workspace, workspace.getConfig().getDefaultEnv(), false, accountId);
         return normalizeState(workspace);
     }
@@ -523,6 +572,7 @@ public class WorkspaceManager {
 
     private WorkspaceImpl doCreateWorkspace(WorkspaceConfig config,
                                             String namespace,
+                                            Map<String, String> attributes,
                                             boolean isTemporary,
                                             @Nullable String accountId) throws NotFoundException,
                                                                                ServerException,
@@ -531,6 +581,7 @@ public class WorkspaceManager {
                                                      .generateId()
                                                      .setConfig(config)
                                                      .setNamespace(namespace)
+                                                     .setAttributes(attributes)
                                                      .setTemporary(isTemporary)
                                                      .build();
         hooks.beforeCreate(workspace, accountId);

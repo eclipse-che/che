@@ -243,19 +243,20 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> updateCommand(final String wsId, final CommandDto commandUpdate) {
+    public Promise<WorkspaceDto> updateCommand(final String wsId, final String commandName, final CommandDto commandUpdate) {
         return newPromise(new RequestCall<WorkspaceDto>() {
             @Override
             public void makeCall(AsyncCallback<WorkspaceDto> callback) {
-                updateCommand(wsId, commandUpdate, callback);
+                updateCommand(wsId, commandUpdate, commandName, callback);
             }
         });
     }
 
     private void updateCommand(@NotNull final String wsId,
                                @NotNull final CommandDto commandUpdate,
+                               final String commandName,
                                @NotNull AsyncCallback<WorkspaceDto> callback) {
-        final String url = baseHttpUrl + '/' + wsId + "/command";
+        final String url = baseHttpUrl + '/' + wsId + "/command/" + commandName;
         asyncRequestFactory.createRequest(PUT, url, commandUpdate, false)
                            .header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -289,7 +290,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> updateEnvironment(String wsId, EnvironmentDto environmentUpdate) {
+    public Promise<WorkspaceDto> updateEnvironment(String wsId, String envName, EnvironmentDto environmentUpdate) {
         return null;
     }
 
@@ -304,7 +305,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> updateProject(String wsId, ProjectConfigDto newEnv) {
+    public Promise<WorkspaceDto> updateProject(String wsId, String path, ProjectConfigDto newEnv) {
         return null;
     }
 

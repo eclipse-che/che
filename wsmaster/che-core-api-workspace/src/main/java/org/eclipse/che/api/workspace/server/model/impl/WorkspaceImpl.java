@@ -172,6 +172,7 @@ public class WorkspaceImpl implements Workspace {
         private boolean             isTemporary;
         private WorkspaceStatus     status;
         private WorkspaceConfigImpl config;
+        private Map<String, String> attributes;
 
         private WorkspaceImplBuilder() {}
 
@@ -183,6 +184,7 @@ public class WorkspaceImpl implements Workspace {
                 workspace.setStatus(status);
             }
             workspace.setTemporary(isTemporary);
+            workspace.setAttributes(attributes);
             return workspace;
         }
 
@@ -213,6 +215,11 @@ public class WorkspaceImpl implements Workspace {
 
         public WorkspaceImplBuilder setStatus(WorkspaceStatus status) {
             this.status = status;
+            return this;
+        }
+
+        public WorkspaceImplBuilder setAttributes(Map<String, String> attributes) {
+            this.attributes = attributes;
             return this;
         }
     }

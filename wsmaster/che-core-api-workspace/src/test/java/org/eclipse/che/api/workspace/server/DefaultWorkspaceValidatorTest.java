@@ -52,7 +52,7 @@ public class DefaultWorkspaceValidatorTest {
         final WorkspaceConfigDto config = createConfig();
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -62,7 +62,7 @@ public class DefaultWorkspaceValidatorTest {
         config.withName(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(dataProvider = "invalidNameProvider",
@@ -75,7 +75,7 @@ public class DefaultWorkspaceValidatorTest {
         config.withName(name);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @DataProvider(name = "invalidNameProvider")
@@ -97,7 +97,7 @@ public class DefaultWorkspaceValidatorTest {
         config.withName(name);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @DataProvider(name = "validNameProvider")
@@ -122,7 +122,7 @@ public class DefaultWorkspaceValidatorTest {
         workspace.getAttributes().put(null, "value1");
 
 
-        wsValidator.validate(workspace);
+        wsValidator.validateWorkspace(workspace);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -131,7 +131,7 @@ public class DefaultWorkspaceValidatorTest {
         final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
         workspace.getAttributes().put("", "value1");
 
-        wsValidator.validate(workspace);
+        wsValidator.validateWorkspace(workspace);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -140,7 +140,7 @@ public class DefaultWorkspaceValidatorTest {
         final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
         workspace.getAttributes().put("codenvy_key", "value1");
 
-        wsValidator.validate(workspace);
+        wsValidator.validateWorkspace(workspace);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -150,7 +150,7 @@ public class DefaultWorkspaceValidatorTest {
         config.setDefaultEnv(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -160,7 +160,7 @@ public class DefaultWorkspaceValidatorTest {
         config.setDefaultEnv("");
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -170,7 +170,7 @@ public class DefaultWorkspaceValidatorTest {
         config.setEnvironments(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -184,7 +184,7 @@ public class DefaultWorkspaceValidatorTest {
                                                                          .getMachineConfigs()));
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -198,19 +198,7 @@ public class DefaultWorkspaceValidatorTest {
                                                                          .getMachineConfigs()));
 
 
-        wsValidator.validate(config);
-    }
-
-    @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Recipe of environment '.*' in workspace with name '.*' has unsupported type '.*'")
-    public void shouldFailValidationIfEnvironmentRecipeTypeIsNotDocker() throws Exception {
-        final WorkspaceConfigDto config = createConfig();
-        config.getEnvironments()
-              .get(0)
-              .withRecipe(newDto(RecipeDto.class).withType("kubernetes"));
-
-
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test
@@ -221,7 +209,7 @@ public class DefaultWorkspaceValidatorTest {
               .withRecipe(newDto(RecipeDto.class).withType("docker"));
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -233,7 +221,7 @@ public class DefaultWorkspaceValidatorTest {
               .withMachineConfigs(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -248,7 +236,7 @@ public class DefaultWorkspaceValidatorTest {
               .forEach(machine -> machine.withDev(false));
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -267,7 +255,7 @@ public class DefaultWorkspaceValidatorTest {
               .add(devMachine.get().withName("other-name"));
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -281,7 +269,7 @@ public class DefaultWorkspaceValidatorTest {
               .withName(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -295,7 +283,7 @@ public class DefaultWorkspaceValidatorTest {
               .withName("");
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -309,7 +297,7 @@ public class DefaultWorkspaceValidatorTest {
               .withSource(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -323,7 +311,7 @@ public class DefaultWorkspaceValidatorTest {
               .withType(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -337,11 +325,11 @@ public class DefaultWorkspaceValidatorTest {
               .withType("compose");
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Workspace .* contains command with null or empty name")
+          expectedExceptionsMessageRegExp = "Workspace contains command with null or empty name")
     public void shouldFailValidationIfCommandNameIsNull() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getCommands()
@@ -349,11 +337,11 @@ public class DefaultWorkspaceValidatorTest {
               .withName(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Workspace .* contains command with null or empty name")
+          expectedExceptionsMessageRegExp = "Workspace contains command with null or empty name")
     public void shouldFailValidationIfCommandNameIsEmpty() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getCommands()
@@ -361,11 +349,11 @@ public class DefaultWorkspaceValidatorTest {
               .withName(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Command line required for command .* in workspace .*")
+          expectedExceptionsMessageRegExp = "Command line required for command '.*'")
     public void shouldFailValidationIfCommandLineIsNull() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getCommands()
@@ -373,11 +361,11 @@ public class DefaultWorkspaceValidatorTest {
               .withCommandLine(null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Command line required for command .* in workspace .*")
+          expectedExceptionsMessageRegExp = "Command line required for command '.*'")
     public void shouldFailValidationIfCommandLineIsEmpty() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getCommands()
@@ -385,7 +373,7 @@ public class DefaultWorkspaceValidatorTest {
               .withCommandLine("");
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -401,7 +389,7 @@ public class DefaultWorkspaceValidatorTest {
               .add(newDto(ServerConfDto.class).withPort(invalidPort));
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @DataProvider(name = "invalidPortProvider")
@@ -445,7 +433,7 @@ public class DefaultWorkspaceValidatorTest {
                                               .withProtocol(invalidProtocol));
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @DataProvider(name = "invalidProtocolProvider")
@@ -470,7 +458,7 @@ public class DefaultWorkspaceValidatorTest {
               .put(null, "value");
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -485,7 +473,7 @@ public class DefaultWorkspaceValidatorTest {
               .put("", "value");
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     @Test(expectedExceptions = BadRequestException.class,
@@ -500,7 +488,7 @@ public class DefaultWorkspaceValidatorTest {
               .put("key", null);
 
 
-        wsValidator.validate(config);
+        wsValidator.validateConfig(config);
     }
 
     private static WorkspaceConfigDto createConfig() {

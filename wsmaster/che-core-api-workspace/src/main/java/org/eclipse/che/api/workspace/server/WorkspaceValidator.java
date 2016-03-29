@@ -14,6 +14,8 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
+import java.util.Map;
+
 /**
  * Interface for workspace validations.
  *
@@ -25,16 +27,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 public interface WorkspaceValidator {
 
     /**
-     * Checks that workspace configuration is valid.
-     *
-     * @param config
-     *         workspace configuration for validation
-     * @throws BadRequestException
-     *         in the case of constrain violation
-     */
-    void validate(WorkspaceConfig config) throws BadRequestException;
-
-    /**
      * Checks that workspace is valid.
      *
      * @param workspace
@@ -42,5 +34,25 @@ public interface WorkspaceValidator {
      * @throws BadRequestException
      *         in the case of constrain violation
      */
-    void validate(Workspace workspace) throws BadRequestException;
+    void validateWorkspace(Workspace workspace) throws BadRequestException;
+
+    /**
+     * Checks that workspace configuration is valid.
+     *
+     * @param config
+     *         workspace configuration for validation
+     * @throws BadRequestException
+     *         in the case of constrain violation
+     */
+    void validateConfig(WorkspaceConfig config) throws BadRequestException;
+
+    /**
+     * Checks that workspace instance attributes are valid.
+     *
+     * @param attributes
+     *         workspace instance attributes
+     * @throws BadRequestException
+     *         in the case of constrain violation
+     */
+    void validateAttributes(Map<String, String> attributes) throws BadRequestException;
 }

@@ -43,6 +43,6 @@ public class FactoryCreateValidatorImpl extends FactoryBaseValidator implements 
         validateAccountId(factory);
         validateCurrentTimeAfterSinceUntil(factory);
         validateProjectActions(factory);
-        workspaceConfigValidator.validate(factory.getWorkspace());
+        workspaceConfigValidator.validateConfig(factory.getWorkspace());
     }
 }

@@ -150,7 +150,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
                                                 .withAttributes(selectedConfiguration.getAttributes());
 
         if (editedCommandOriginName.trim().equals(selectedConfiguration.getName())) {
-            return workspaceServiceClient.updateCommand(workspaceId, commandDto);
+            return workspaceServiceClient.updateCommand(workspaceId, selectedConfiguration.getName(), commandDto);
         } else {
             onNameChanged();
             //generate a new unique name if input one already exists

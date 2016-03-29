@@ -145,9 +145,9 @@ public interface WorkspaceServiceClient {
      * Updates command.
      *
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#updateCommand(String, CommandDto)
+     * @see WorkspaceService#updateCommand(String, String, CommandDto)
      */
-    Promise<WorkspaceDto> updateCommand(String wsId, CommandDto commandUpdate);
+    Promise<WorkspaceDto> updateCommand(String wsId, String commandName, CommandDto commandUpdate);
 
     /**
      * Removes command from workspace.
@@ -181,9 +181,9 @@ public interface WorkspaceServiceClient {
      * @param environmentUpdate
      *         the environment to update
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#updateEnvironment(String, EnvironmentDto)
+     * @see WorkspaceService#updateEnvironment(String, String, EnvironmentDto)
      */
-    Promise<WorkspaceDto> updateEnvironment(String wsId, EnvironmentDto environmentUpdate);
+    Promise<WorkspaceDto> updateEnvironment(String wsId, String envName, EnvironmentDto environmentUpdate);
 
     /**
      * Removes environment.
@@ -217,9 +217,9 @@ public interface WorkspaceServiceClient {
      * @param newEnv
      *         the new project configuration
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#updateProject(String, ProjectConfigDto)
+     * @see WorkspaceService#updateProject(String, String, ProjectConfigDto)
      */
-    Promise<WorkspaceDto> updateProject(String wsId, ProjectConfigDto newEnv);
+    Promise<WorkspaceDto> updateProject(String wsId, String path, ProjectConfigDto newEnv);
 
     /**
      * Removes project from workspace.
