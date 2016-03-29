@@ -157,7 +157,7 @@ public class WorkspaceService extends Service {
                                                     BadRequestException,
                                                     ForbiddenException,
                                                     NotFoundException {
-        requiredNotNull(config, "Workspace configuration required");
+        requiredNotNull(config, "Workspace configuration");
         final Map<String, String> attributes = parseAttrs(attrsList);
         validator.validateAttributes(attributes);
         validator.validateConfig(config);
