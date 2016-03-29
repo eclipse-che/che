@@ -1,5 +1,79 @@
 # Change Log
 
+## [Unreleased](https://github.com/eclipse/che/tree/HEAD)
+
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0...HEAD)
+
+**Issues with no labels:**
+
+- Provide horizontal navigation for 'Go to line' feature [\#910](https://github.com/eclipse/che/issues/910)
+
+## [4.0.0](https://github.com/eclipse/che/tree/4.0.0) (2016-03-29)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC14...4.0.0)
+
+**Issues with 'enhancement' label:**
+
+- Missing java quick fix [\#299](https://github.com/eclipse/che/issues/299)
+
+**Issues fixed with 'bugs' label:**
+
+- Rename widget \(refactoring\) does not close in specified cases [\#906](https://github.com/eclipse/che/issues/906)
+- Github: Workspace undefined successfully created [\#893](https://github.com/eclipse/che/issues/893)
+- Cannot create custom stack from Dashboard [\#872](https://github.com/eclipse/che/issues/872)
+- Github: The swagger api is not displayed correct in the nightly build [\#858](https://github.com/eclipse/che/issues/858)
+- Can not configure maven project in Che [\#852](https://github.com/eclipse/che/issues/852)
+- Project configuration is failed after import maven project  [\#827](https://github.com/eclipse/che/issues/827)
+- No set commands after create template project on dashboard [\#826](https://github.com/eclipse/che/issues/826)
+- Node sample does not complete NPM dependencies [\#825](https://github.com/eclipse/che/issues/825)
+- intellisense breaks after rename [\#823](https://github.com/eclipse/che/issues/823)
+- Unexpected message 'Unable to start workspace' after stop workspace [\#820](https://github.com/eclipse/che/issues/820)
+
+**Issues with no labels:**
+
+- Security [\#877](https://github.com/eclipse/che/issues/877)
+- Test [\#871](https://github.com/eclipse/che/issues/871)
+- Bad Dockerfile link on website [\#840](https://github.com/eclipse/che/issues/840)
+- Add a project type for every ready-to-go stack [\#839](https://github.com/eclipse/che/issues/839)
+- Unfinished loading while open http://localhost:8080 [\#838](https://github.com/eclipse/che/issues/838)
+- How do I do a git checkout from sourceforget.net using password [\#836](https://github.com/eclipse/che/issues/836)
+- Notify user in IDE of unavailable workspace [\#833](https://github.com/eclipse/che/issues/833)
+- Bring Che plugin-examples into Che 4 [\#824](https://github.com/eclipse/che/issues/824)
+- getting dependencies error while running pom [\#817](https://github.com/eclipse/che/issues/817)
+- Unable to run mvn clean install successfully for sample project of che-ide-extending  [\#816](https://github.com/eclipse/che/issues/816)
+- Test for tasktop [\#815](https://github.com/eclipse/che/issues/815)
+- Test for tasktop [\#814](https://github.com/eclipse/che/issues/814)
+- when creating workspace following error occurs at step 2 starting workspace master [\#810](https://github.com/eclipse/che/issues/810)
+- Che Workspace Port Configuration [\#808](https://github.com/eclipse/che/issues/808)
+- Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon. [\#794](https://github.com/eclipse/che/issues/794)
+- how can I get the same workspace which I was working on when I restart Che server. [\#779](https://github.com/eclipse/che/issues/779)
+- dashboard in docker [\#96](https://github.com/eclipse/che/issues/96)
+
+**Pull requests merged:**
+
+- Fixing wrong merge: [\#892](https://github.com/eclipse/che/pull/892) ([vparfonov](https://github.com/vparfonov))
+- Revert "CHE-553: add ability to view logs on start workspace" [\#888](https://github.com/eclipse/che/pull/888) ([ashumilova](https://github.com/ashumilova))
+- Hide terminal URL [\#876](https://github.com/eclipse/che/pull/876) ([vparfonov](https://github.com/vparfonov))
+- CHE-894: fix creating custom stack from Dashboard [\#875](https://github.com/eclipse/che/pull/875) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-891: Initialize projects from unconfigured folders on starting WS… [\#869](https://github.com/eclipse/che/pull/869) ([azatsarynnyy](https://github.com/azatsarynnyy))
+- CHE-883: cleanup websocket channels when ide is opened [\#851](https://github.com/eclipse/che/pull/851) ([ashumilova](https://github.com/ashumilova))
+- CHE-553: add ability to view logs on start workspace [\#829](https://github.com/eclipse/che/pull/829) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-867: Do not overwrite whole workspace's configuration when saving… [\#819](https://github.com/eclipse/che/pull/819) ([azatsarynnyy](https://github.com/azatsarynnyy))
+- Remove GA label [\#809](https://github.com/eclipse/che/pull/809) ([riuvshin](https://github.com/riuvshin))
+- CHE-157: show attached documentation in the method hierarchy [\#805](https://github.com/eclipse/che/pull/805) ([svor](https://github.com/svor))
+- Remove added by mistake setenv.sh [\#804](https://github.com/eclipse/che/pull/804) ([vparfonov](https://github.com/vparfonov))
+- CHE-525: Fix unexpected error message after refactoring [\#801](https://github.com/eclipse/che/pull/801) ([dimasnurenko](https://github.com/dimasnurenko))
+- fix logs output on workspace start [\#800](https://github.com/eclipse/che/pull/800) ([akurinnoy](https://github.com/akurinnoy))
+- Revert "CHE-708: Add CORS Filter" [\#799](https://github.com/eclipse/che/pull/799) ([dimasnurenko](https://github.com/dimasnurenko))
+- CHE-872: Fix keep directory when importing a project [\#798](https://github.com/eclipse/che/pull/798) ([vinokurig](https://github.com/vinokurig))
+- Initialize projects from unconfigured folders while getting projects [\#793](https://github.com/eclipse/che/pull/793) ([azatsarynnyy](https://github.com/azatsarynnyy))
+- CHE-15 'Close' button on find/replace panel should be square [\#791](https://github.com/eclipse/che/pull/791) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Schedule annotation documentation [\#788](https://github.com/eclipse/che/pull/788) ([skabashnyuk](https://github.com/skabashnyuk))
+- Exclude tests [\#787](https://github.com/eclipse/che/pull/787) ([vparfonov](https://github.com/vparfonov))
+- Remove 'Create Maven module' feature [\#784](https://github.com/eclipse/che/pull/784) ([azatsarynnyy](https://github.com/azatsarynnyy))
+- CHE-766. Correct handling of pressing 'enter' on some dialogs [\#782](https://github.com/eclipse/che/pull/782) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- CHE-434: improve experience to create a new project in an existing wo… [\#772](https://github.com/eclipse/che/pull/772) ([olexii4](https://github.com/olexii4))
+- CHE-708: Add CORS Filter [\#767](https://github.com/eclipse/che/pull/767) ([dimasnurenko](https://github.com/dimasnurenko))
+
 ## [4.0.0-RC14](https://github.com/eclipse/che/tree/4.0.0-RC14) (2016-03-23)
 [Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC13...4.0.0-RC14)
 
