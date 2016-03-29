@@ -10,38 +10,110 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
-import org.eclipse.che.ide.api.parts.PartPresenter;
-import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.workspace.WorkBenchPartControllerImpl;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Presenter for the {@link SubversionOutputConsoleView}.
  */
-@Singleton
-public class SubversionOutputConsolePresenter extends BasePresenter implements SubversionOutputConsoleView.ActionDelegate {
+public class SubversionOutputConsolePresenter implements SubversionOutputConsoleView.ActionDelegate, SubversionOutputConsole {
 
-    private final SubversionOutputConsoleView view;
-    private final String title;
+    private final SubversionExtensionResources resources;
+    private final SubversionOutputConsoleView  view;
+    private final String                       title;
+
+    private final List<ConsoleOutputListener> outputListeners = new ArrayList<>();
 
     @Inject
-    public SubversionOutputConsolePresenter(final SubversionExtensionLocalizationConstants constants, final SubversionOutputConsoleView view) {
-        this.title = constants.subversionLabel();
+    public SubversionOutputConsolePresenter(final SubversionExtensionLocalizationConstants constants,
+                                            final SubversionExtensionResources resources,
+                                            final SubversionOutputConsoleView view,
+                                            final AppContext appContext,
+                                            @Assisted String title) {
         this.view = view;
-
-        this.view.setTitle(title);
         this.view.setDelegate(this);
+
+        this.title = title;
+        this.resources = resources;
+
+        String projectName = appContext.getCurrentProject().getRootProject().getName();
+
+        view.print(constants.consoleProjectName(projectName) + "\n");
+    }
+
+    @Override
+    public void go(final AcceptsOneWidget container) {
+        container.setWidget(this.view);
+    }
+
+    public void print(@NotNull final String text) {
+        final String[] lines = text.split("\n");
+        for (String line : lines) {
+            view.print(line.isEmpty() ? " " : line);
+        }
+        view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
+    }
+
+    /**
+     * Print colored text in console.
+     *
+     * @param text
+     *         text that need to be shown
+     * @param color
+     */
+    @Override
+    public void print(@NotNull String text, @NotNull String color) {
+        view.print(text, color);
+        view.scrollBottom();
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
+    }
+
+    /**
+     * Print executed command in console.
+     *
+     * @param text
+     *         command text
+     */
+    @Override
+    public void printCommand(@NotNull String text) {
+        view.printPredefinedStyle(text, "font-weight: bold; font-style: italic;");
+
+        for (ConsoleOutputListener outputListener : outputListeners) {
+            outputListener.onConsoleOutput(this);
+        }
+    }
+
+    /**
+     * Print error in console.
+     *
+     * @param text
+     *         text that need to be shown as error
+     */
+    @Override
+    public void printError(@NotNull String text) {
+        print(text, Style.getGitConsoleErrorColor());
+    }
+
+    public void clear() {
+        view.clear();
     }
 
     @Override
@@ -50,74 +122,54 @@ public class SubversionOutputConsolePresenter extends BasePresenter implements S
     }
 
     @Override
-    public void onOpen() {
-        super.onOpen();
-
-        Scheduler.get().scheduleFixedDelay(new Scheduler.RepeatingCommand() {
-            @Override
-            public boolean execute() {
-                view.scrollBottom();
-
-                return false;
-            }
-        }, WorkBenchPartControllerImpl.DURATION);
-    }
-
-    public void print(@NotNull final String text) {
-        final String[] lines = text.split("\n");
-
-        for (final String line : lines) {
-            view.print(line.isEmpty() ? " " : line);
-        }
-
-        performPostOutputActions();
-    }
-
-    public void clear() {
-        view.clear();
+    public void onScrollClicked() {
+        view.scrollBottom();
     }
 
     @Override
     public String getTitle() { return title; }
 
+    /**
+     * Returns the title SVG image resource of this console.
+     *
+     * @return the title SVG image resource
+     */
     @Override
-    public void setVisible(boolean isVisible) {
-        view.setVisible(isVisible);
+    public SVGResource getTitleIcon() {
+        return resources.outputIcon();
     }
 
+    /**
+     * Checks whether the console is finished outputting or not.
+     */
     @Override
-    public IsWidget getView() {
-        return view;
+    public boolean isFinished() {
+        return true;
     }
 
-    @Nullable
+    /**
+     * Stop process.
+     */
     @Override
-    public ImageResource getTitleImage() { return null; }
+    public void stop() {
 
-    @Override
-    public SVGResource getTitleSVGImage() {
-        return null;
     }
 
-    @Nullable
+    /**
+     * Called when console is closed.
+     */
     @Override
-    public String getTitleToolTip() {
-        return "Displays Subversion command output";
+    public void close() {
+        outputListeners.clear();
     }
 
+    /**
+     * Adds an output listener.
+     *
+     * @param listener
+     */
     @Override
-    public void go(final AcceptsOneWidget container) {
-        container.setWidget(this.view);
+    public void addOutputListener(ConsoleOutputListener listener) {
+        outputListeners.add(listener);
     }
-
-    private void performPostOutputActions() {
-        final PartPresenter activePart = partStack.getActivePart();
-
-        if (activePart == null || !activePart.equals(this)) {
-            partStack.setActivePart(this);
-        }
-
-        view.scrollBottom();
-    }
-
 }

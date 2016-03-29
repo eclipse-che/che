@@ -22,8 +22,10 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -82,16 +84,15 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
     @Inject
     protected CopyPresenter(AppContext appContext,
-                            EventBus eventBus,
-                            SubversionOutputConsolePresenter console,
-                            WorkspaceAgent workspaceAgent,
+                            SubversionOutputConsoleFactory consoleFactory,
+                            ConsolesPanelPresenter consolesPanelPresenter,
                             CopyView view,
                             NotificationManager notificationManager,
                             SubversionClientService service,
                             DtoUnmarshallerFactory dtoUnmarshallerFactory,
                             SubversionExtensionLocalizationConstants constants,
                             final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.view = view;
         this.notificationManager = notificationManager;
         this.service = service;
@@ -147,7 +148,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                      new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
                          @Override
                          protected void onSuccess(CLIOutputResponse result) {
-                             printResponse(result.getCommand(), result.getOutput(), result.getErrOutput());
+                             printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandCopy());
 
                              notification.setTitle(constants.copyNotificationSuccessful());
                              notification.setStatus(SUCCESS);

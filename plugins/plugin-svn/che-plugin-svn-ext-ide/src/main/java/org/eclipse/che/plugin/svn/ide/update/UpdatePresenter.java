@@ -15,18 +15,17 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -48,13 +47,13 @@ public class UpdatePresenter extends SubversionActionPresenter {
     public UpdatePresenter(final AppContext appContext,
                            final DtoUnmarshallerFactory dtoUnmarshallerFactory,
                            final EventBus eventBus,
-                           final SubversionOutputConsolePresenter console,
+                           final SubversionOutputConsoleFactory consoleFactory,
                            final SubversionClientService service,
-                           final WorkspaceAgent workspaceAgent,
+                           final ConsolesPanelPresenter consolesPanelPresenter,
                            final SubversionExtensionLocalizationConstants constants,
                            final NotificationManager notificationManager,
                            final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.eventBus = eventBus;
         this.constants = constants;
@@ -84,7 +83,8 @@ public class UpdatePresenter extends SubversionActionPresenter {
                                dtoUnmarshallerFactory.newUnmarshaller(CLIOutputWithRevisionResponse.class)) {
                            @Override
                            protected void onSuccess(final CLIOutputWithRevisionResponse response) {
-                               printResponse(response.getCommand(), response.getOutput(), response.getErrOutput());
+                               printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
+                                             constants.commandUpdate());
 
                                notification.setTitle(constants.updateSuccessful(Long.toString(response.getRevision())));
                                notification.setStatus(SUCCESS);

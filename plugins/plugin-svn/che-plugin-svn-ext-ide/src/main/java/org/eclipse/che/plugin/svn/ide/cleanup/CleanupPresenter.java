@@ -17,9 +17,11 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.PathTypeFilter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -46,14 +48,13 @@ public class CleanupPresenter extends SubversionActionPresenter {
     @Inject
     protected CleanupPresenter(final AppContext appContext,
                                final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                               final EventBus eventBus,
                                final NotificationManager notificationManager,
-                               final SubversionOutputConsolePresenter console,
+                               final SubversionOutputConsoleFactory consoleFactory,
+                               final ConsolesPanelPresenter consolesPanelPresenter,
                                final SubversionExtensionLocalizationConstants constants,
                                final SubversionClientService service,
-                               final WorkspaceAgent workspaceAgent,
                                final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -78,7 +79,7 @@ public class CleanupPresenter extends SubversionActionPresenter {
                                  @Override
                                  protected void onSuccess(final CLIOutputResponse result) {
 
-                                     printResponse(result.getCommand(), result.getOutput(), result.getErrOutput());
+                                     printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandCleanup());
 
                                      notificationManager.notify(constants.cleanupSuccessful());
                                  }

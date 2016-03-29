@@ -18,8 +18,10 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -47,14 +49,13 @@ public class AddPresenter extends SubversionActionPresenter {
     @Inject
     protected AddPresenter(final AppContext appContext,
                            final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                           final EventBus eventBus,
                            final NotificationManager notificationManager,
-                           final SubversionOutputConsolePresenter console,
+                           final SubversionOutputConsoleFactory consoleFactory,
                            final SubversionExtensionLocalizationConstants constants,
                            final SubversionClientService service,
-                           final WorkspaceAgent workspaceAgent,
+                           final ConsolesPanelPresenter consolesPanelPresenter,
                            final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -77,7 +78,7 @@ public class AddPresenter extends SubversionActionPresenter {
                         @Override
                         protected void onSuccess(final CLIOutputResponse response) {
 
-                            printResponse(response.getCommand(), response.getOutput(), response.getErrOutput());
+                            printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandAdd());
 
                             if (response.getErrOutput() == null || response.getErrOutput().size() == 0) {
                                 notification.setTitle(constants.addSuccessful());

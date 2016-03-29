@@ -49,13 +49,13 @@ import com.google.inject.Singleton;
 @Extension(title = "Subversion", version = "1.0.0")
 public class SubversionExtension {
 
-    public final String FILE_COMMAND_GROUP          = "SvnFileCommandGroup";
-    public final String REMOTE_COMMAND_GROUP        = "SvnRemoteCommandGroup";
-    public final String REPOSITORY_COMMAND_GROUP    = "SvnRepositoryCommandGroup";
-    public final String ADD_COMMAND_GROUP           = "SvnAddCommandGroup";
-    public final String MISCELLANEOUS_COMMAND_GROUP = "SvnMiscellaneousCommandGroup";
-    public final String CREDENTIALS_COMMAND_GROUP   = "SvnCredentialsCommandGroup";
-    public final String SVN_GROUP_MAIN_MENU;
+    private final String FILE_COMMAND_GROUP          = "SvnFileCommandGroup";
+    private final String REMOTE_COMMAND_GROUP        = "SvnRemoteCommandGroup";
+    private final String REPOSITORY_COMMAND_GROUP    = "SvnRepositoryCommandGroup";
+    private final String ADD_COMMAND_GROUP           = "SvnAddCommandGroup";
+    private final String MISCELLANEOUS_COMMAND_GROUP = "SvnMiscellaneousCommandGroup";
+    private final String CREDENTIALS_COMMAND_GROUP   = "SvnCredentialsCommandGroup";
+    private final String SVN_GROUP_MAIN_MENU;
 
     @Inject
     public SubversionExtension(final ActionManager actionManager,

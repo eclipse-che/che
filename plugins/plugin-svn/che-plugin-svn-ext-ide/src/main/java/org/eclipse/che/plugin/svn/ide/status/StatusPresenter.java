@@ -12,19 +12,18 @@ package org.eclipse.che.plugin.svn.ide.status;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import java.util.List;
 
@@ -44,14 +43,13 @@ public class StatusPresenter extends SubversionActionPresenter {
     @Inject
     protected StatusPresenter(final AppContext appContext,
                               final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                              final EventBus eventBus,
                               final NotificationManager notificationManager,
-                              final SubversionOutputConsolePresenter console,
+                              final SubversionOutputConsoleFactory consoleFactory,
                               final SubversionClientService service,
                               final SubversionExtensionLocalizationConstants constants,
-                              final WorkspaceAgent workspaceAgent,
+                              final ConsolesPanelPresenter consolesPanelPresenter,
                               final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -71,7 +69,8 @@ public class StatusPresenter extends SubversionActionPresenter {
                        new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
                            @Override
                            protected void onSuccess(final CLIOutputResponse response) {
-                               printResponse(response.getCommand(), response.getOutput(), response.getErrOutput());
+                               printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
+                                             constants.commandStatus());
                            }
 
                            @Override

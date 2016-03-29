@@ -60,7 +60,7 @@ public class MovePresenterTest extends BaseSubversionPresenterTest {
         super.setUp();
 
         presenter =
-                new MovePresenter(appContext, eventBus, subversionOutputConsolePresenter, workspaceAgent, projectExplorerPart, view,
+                new MovePresenter(appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart, view,
                                   treeStructureProvider, notificationManager, service, dtoUnmarshallerFactory, constants);
     }
 
