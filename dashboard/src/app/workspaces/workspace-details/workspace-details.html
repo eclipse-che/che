@@ -9,7 +9,7 @@
 <md-progress-linear md-mode="indeterminate" ng-show="workspaceDetailsCtrl.loading"></md-progress-linear>
 
 <md-content md-scroll-y flex ng-if="workspaceDetailsCtrl.workspaceDetails"
-            md-theme="maincontent-theme">
+             md-theme="maincontent-theme">
   <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex">
     <md-tab>
       <md-tab-label>
@@ -19,55 +19,45 @@
       <md-tab-body>
         <che-panel che-title="Workspace Information" class="workspace-details-content workspace-details-information">
           <div layout="row" flex>
-            <ng-form flex layout="column" name="workspaceInformationForm">
-              <che-input che-form="workspaceInformationForm"
-                         che-name="name"
-                         che-label-name="Name"
-                         che-place-holder="Name of the workspace"
-                         ng-model="workspaceDetailsCtrl.newName"
-                         required
-                         ng-maxlength="128"
-                         ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-                <div ng-message="required">A name is required.</div>
-                <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-                <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-                <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-              </che-input>
-            </ng-form>
-            <div flex="none" flex-offset="5" layout="column" layout-align="end end">
-              <che-button-primary
-                ng-disabled="(workspaceInformationForm.$invalid || workspaceDetailsCtrl.newName === workspaceDetailsCtrl.workspaceDetails.config.name)"
-                che-button-title="Rename" name="updateButton"
-                ng-click="workspaceDetailsCtrl.renameWorkspace(workspaceInformationForm.$valid)"></che-button-primary>
+              <ng-form flex layout="column" name="workspaceInformationForm">
+                <che-input che-form="workspaceInformationForm"
+                            che-name="name"
+                            che-label-name="Name"
+                            che-place-holder="Name of the workspace"
+                            ng-model="workspaceDetailsCtrl.newName"
+                            required
+                            ng-maxlength="128"
+                            ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                  <div ng-message="required">A name is required.</div>
+                  <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+                  <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+                  <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+                </che-input>
+              </ng-form>
+              <div flex="none" flex-offset="5" layout="column" layout-align="end end">
+                <che-button-primary ng-disabled="(workspaceInformationForm.$invalid || workspaceDetailsCtrl.newName === workspaceDetailsCtrl.workspaceDetails.config.name)"
+                                     che-button-title="Rename" name="updateButton" ng-click="workspaceDetailsCtrl.renameWorkspace(workspaceInformationForm.$valid)"></che-button-primary>
 
-            </div>
+              </div>
           </div>
           <div layout="row">
             <che-label-container flex layout="row" che-label-name="State">
-              <div layout="row">
-                <workspace-status-indicator che-status="workspaceDetailsCtrl.workspaceDetails.status"
-                                            layout-align="start start"></workspace-status-indicator>
-                <che-link che-link-text="Show more"
-                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}?showLogs" che-no-padding-
-                          layout-align="end start"
-                          ng-show="workspaceDetailsCtrl.workspaceDetails.status === 'STARTING'"></che-link>
-              </div>
+              <workspace-status-indicator che-status="workspaceDetailsCtrl.workspaceDetails.status"></workspace-status-indicator>
             </che-label-container>
             <div flex="none" flex-offset="5" layout="column" layout-align="end end">
               <che-button-default ng-disabled="(workspaceDetailsCtrl.workspaceDetails.status !== 'STOPPED')"
-                                  ng-show="(workspaceDetailsCtrl.workspaceDetails.status === 'STOPPED' || workspaceDetailsCtrl.workspaceDetails.status === 'STARTING')"
-                                  che-button-title="Run" name="runButton"
-                                  ng-click="workspaceDetailsCtrl.runWorkspace()"></che-button-default>
+                                   ng-show="(workspaceDetailsCtrl.workspaceDetails.status === 'STOPPED' || workspaceDetailsCtrl.workspaceDetails.status === 'STARTING')"
+                                   che-button-title="Run" name="runButton"
+                                   ng-click="workspaceDetailsCtrl.runWorkspace()"></che-button-default>
               <che-button-default ng-disabled="(workspaceDetailsCtrl.workspaceDetails.status !== 'RUNNING')"
-                                  ng-show="(workspaceDetailsCtrl.workspaceDetails.status === 'RUNNING' || workspaceDetailsCtrl.workspaceDetails.status === 'STOPPING')"
-                                  che-button-title="Stop" name="stopButton"
-                                  ng-click="workspaceDetailsCtrl.stopWorkspace()"></che-button-default>
+                                   ng-show="(workspaceDetailsCtrl.workspaceDetails.status === 'RUNNING' || workspaceDetailsCtrl.workspaceDetails.status === 'STOPPING')"
+                                   che-button-title="Stop" name="stopButton"
+                                   ng-click="workspaceDetailsCtrl.stopWorkspace()"></che-button-default>
             </div>
           </div>
-          </div>
+        </div>
         </che-panel>
-        <export-workspace workspace-id="{{workspaceDetailsCtrl.workspaceId}}"
-                          workspace-details="workspaceDetailsCtrl.workspaceDetails"></export-workspace>
+          <export-workspace workspace-id="{{workspaceDetailsCtrl.workspaceId}}" workspace-details="workspaceDetailsCtrl.workspaceDetails"></export-workspace>
         <che-panel che-title="Delete Workspace" class="workspace-details-content">
           <div layout="row" flex layout-align="space-around start">
             <label flex="15" class="workspace-details-description">
@@ -82,7 +72,7 @@
         </che-panel>
       </md-tab-body>
     </md-tab>
-    <md-tab>
+    <md-tab >
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_inbox_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Projects</span>
@@ -93,6 +83,7 @@
     </md-tab>
   </md-tabs>
 </md-content>
+
 
 <md-content ng-show="workspaceDetailsCtrl.invalidWorkspace">
   {{workspaceDetailsCtrl.invalidWorkspace}}

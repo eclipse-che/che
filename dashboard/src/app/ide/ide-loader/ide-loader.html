@@ -13,13 +13,11 @@
            layout-align-gt-sm="start center">
         <div class="ide-loader-working-log">
           <che-accordion ng-repeat="step in ideLoaderCtrl.getSteps()" che-index="{{$index}}"
-                         che-open-condition="($index === ideLoaderCtrl.getCurrentStep() && !!ideLoaderCtrl.getSteps()[$index].logs)"
-                         ng-class="{'che-accordion-active': ($index === ideLoaderCtrl.getCurrentStep()),
-                                    'che-accordion-error': ideLoaderCtrl.getSteps()[$index].hasError}">
+                         che-current-step="{{ideLoaderCtrl.getCurrentStep()}}">
             <div class="che-accordion-title">
               <span>{{ideLoaderCtrl.getSteps()[$index].text}}{{$index < ideLoaderCtrl.getCurrentStep() ? ' ... completed' : ''}}</span>
             </div>
-            <div class="che-accordion-body" ng-show="ideLoaderCtrl.getSteps()[$index].logs.length > 0">
+            <div class="che-accordion-body" ng-show="$index>0 && $index<ideLoaderCtrl.getSteps().length-1">
               <che-logs-output che-title="{{ideLoaderCtrl.getSteps()[$index].inProgressText}}"
                                che-text="ideLoaderCtrl.getSteps()[$index].logs"
                                che-scrollback="100"
@@ -37,9 +35,6 @@
                     class="ide-loader-back-link"></che-link>
         </div>
         <div flex="50" layout="column" layout-align="end end">
-          <che-button-default ng-show="ideLoaderCtrl.getCurrentStep() === ideLoaderCtrl.getSteps().length - 1"
-                              che-button-title="Open IDE" name="openIde"
-                              ng-click="ideLoaderCtrl.openRunningIde()"></che-button-default>
           <che-link ng-click="ideLoaderCtrl.downloadLogs()" che-link-text="Problem? download logs"
                     class="ide-loader-download-link"></che-link>
         </div>

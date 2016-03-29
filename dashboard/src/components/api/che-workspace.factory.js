@@ -320,7 +320,4 @@ export class CheWorkspace {
 
   }
 
-  getIdeUrl(workspaceName) {
-    return '/ide/' + workspaceName;
-  }
 }

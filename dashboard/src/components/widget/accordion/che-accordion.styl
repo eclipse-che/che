@@ -1,6 +1,5 @@
 $pane-title-color = #a5a5a5
 $active-pane-title-color = #393939
-$error-pane-title-color = brown
 
 .che-accordion
   .che-accordion-body, .che-accordion-title
@@ -21,14 +20,11 @@ $error-pane-title-color = brown
     transition all 0.5s
     transform translateZ(0)
 
-.che-accordion.che-accordion-active
+.che-accordion.active
   .che-accordion-title
     color $active-pane-title-color
-.che-accordion.che-accordion-error
-  .che-accordion-title
-    color $error-pane-title-color !important
 
-.che-accordion.che-accordion-closed
+.che-accordion.closed
   .che-accordion-title
     transition transform 0.5s
     transform-origin left bottom
