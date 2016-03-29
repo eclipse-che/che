@@ -27,7 +27,9 @@ class IdeLoaderSvc {
     this.isLoaderAdded = false;
     this.$timeout = $timeout;
     this.$compile = $compile;
+
   }
+
 
   addLoader() {
     if (!this.isLoaderAdded) {
@@ -43,6 +45,8 @@ class IdeLoaderSvc {
       $target.append(insertHtml);
     }
   }
+
+
 }
 
 export default IdeLoaderSvc;

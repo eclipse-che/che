@@ -21,10 +21,11 @@ class IdeLoaderCtrl {
    * @ngInject for Dependency injection
    */
   constructor(ideSvc, $rootScope, $location) {
-    this.ideSvc = ideSvc;
+    this.ideSvc= ideSvc;
     this.$rootScope = $rootScope;
     this.$location = $location;
   }
+
 
   getSteps() {
     return this.ideSvc.steps;
@@ -50,12 +51,7 @@ class IdeLoaderCtrl {
     });
     window.open('data:text/csv,' + encodeURIComponent(logs));
   }
-
-  openRunningIde() {
-    this.ideSvc.setPreventRedirection(false);
-    this.ideSvc.init();
-    this.ideSvc.openIde(true);
-  }
 }
+
 
 export default IdeLoaderCtrl;
