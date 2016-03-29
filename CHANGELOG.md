@@ -1,12 +1,19 @@
 # Change Log
 
-## [Unreleased](https://github.com/eclipse/che/tree/HEAD)
+## [4.0.1](https://github.com/eclipse/che/tree/4.0.1) (2016-03-29)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0...4.0.1)
 
-[Full Changelog](https://github.com/eclipse/che/compare/4.0.0...HEAD)
+**Issues fixed with 'bugs' label:**
+
+- Cannot launch a workspace after stopping tomcat with Che [\#913](https://github.com/eclipse/che/issues/913)
 
 **Issues with no labels:**
 
 - Provide horizontal navigation for 'Go to line' feature [\#910](https://github.com/eclipse/che/issues/910)
+
+**Pull requests merged:**
+
+- CHE-901: use ConcurrentHashMap for projects in ProjectRegistry [\#914](https://github.com/eclipse/che/pull/914) ([vparfonov](https://github.com/vparfonov))
 
 ## [4.0.0](https://github.com/eclipse/che/tree/4.0.0) (2016-03-29)
 [Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC14...4.0.0)
