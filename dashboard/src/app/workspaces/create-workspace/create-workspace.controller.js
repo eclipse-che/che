@@ -72,9 +72,11 @@ export class CreateWorkspaceCtrl {
    * @param stack  the selected stack
    */
   cheStackLibrarySelecter(stack) {
-    this.recipeUrl = null;
-    this.isCustomStack = false;
-    if (this.stack !== stack && stack.workspaceConfig && stack.workspaceConfig.name) {
+    if (stack) {
+      this.isCustomStack = false;
+      this.recipeUrl = null;
+    }
+    if (this.stack !== stack && stack && stack.workspaceConfig && stack.workspaceConfig.name) {
       this.setWorkspaceName(stack.workspaceConfig.name);
     } else {
       this.generateWorkspaceName();

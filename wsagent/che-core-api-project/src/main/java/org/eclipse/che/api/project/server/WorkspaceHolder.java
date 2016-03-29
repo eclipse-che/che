@@ -121,7 +121,6 @@ public class WorkspaceHolder {
             return;
         }
 
-        // TODO workspace.addProject(project); but replace
         workspace.updateProject(project);
 
         final String href = UriBuilder.fromUri(apiEndpoint)
