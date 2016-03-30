@@ -22,7 +22,6 @@ import java.lang.annotation.Target;
  *
  * @author Mykola Morhun
  */
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD, ElementType.TYPE})
 @BindingAnnotation

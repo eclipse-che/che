@@ -106,7 +106,7 @@ public class EvaluateExpressionTest extends BaseTest {
         when(view.getExpression()).thenReturn(EXPRESSION);
         when(promise.then(any(Operation.class))).thenReturn(promise);
 
-        when(debuggerManager.getDebugger()).thenReturn(debugger);
+        when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
 
         presenter.showDialog();
         presenter.onEvaluateClicked();
@@ -121,7 +121,7 @@ public class EvaluateExpressionTest extends BaseTest {
         when(debugger.evaluateExpression(view.getExpression())).thenReturn(promise);
         when(promise.then((Operation)anyObject())).thenReturn(promise);
         when(promise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(promise);
-        when(debuggerManager.getDebugger()).thenReturn(debugger);
+        when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
         when(promiseError.getMessage()).thenReturn(FAIL_REASON);
 
         presenter.showDialog();

@@ -18,34 +18,34 @@ import org.eclipse.che.dto.shared.DTO;
  * @author andrew00x
  */
 @DTO
-public interface DebuggerInfo {
+public interface JavaDebuggerInfo {
     String getHost();
 
     void setHost(String host);
 
-    DebuggerInfo withHost(String host);
+    JavaDebuggerInfo withHost(String host);
 
     int getPort();
 
     void setPort(int port);
 
-    DebuggerInfo withPort(int port);
+    JavaDebuggerInfo withPort(int port);
 
     String getId();
 
     void setId(String id);
 
-    DebuggerInfo withId(String id);
+    JavaDebuggerInfo withId(String id);
 
     String getVmName();
 
     void setVmName(String vmName);
 
-    DebuggerInfo withVmName(String vmName);
+    JavaDebuggerInfo withVmName(String vmName);
 
     String getVmVersion();
 
     void setVmVersion(String vmVersion);
 
-    DebuggerInfo withVmVersion(String vmVersion);
+    JavaDebuggerInfo withVmVersion(String vmVersion);
 }

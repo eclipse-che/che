@@ -10,20 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import com.google.gwt.event.shared.EventHandler;
-
 /**
- * Handles {@link DebuggerStateEvent}.
- *
  * @author Anatoliy Bazko
  */
-public interface DebuggerStateEventHandler extends EventHandler {
+public interface DebuggerManagerObservable {
 
     /**
-     * On debugger state changed
-     *
-     * @param event
-     *         the event
+     * Adds observer.
      */
-    void onStateChanged(DebuggerStateEvent event);
+    void addObserver(DebuggerManagerObserver observer);
+
+    /**
+     * Removes observer.
+     */
+    void removeObserver(DebuggerManagerObserver observer);
+
 }

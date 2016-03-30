@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.client.debug.expression;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Presenter for evaluating an expression.
@@ -62,9 +62,10 @@ public class EvaluateExpressionPresenter implements EvaluateExpressionView.Actio
     /** {@inheritDoc} */
     @Override
     public void onEvaluateClicked() {
-        Debugger debugger = debuggerManager.getDebugger();
+        Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null) {
             view.setEnableEvaluateButton(false);
+
             debugger.evaluateExpression(view.getExpression()).then(new Operation<String>() {
                 @Override
                 public void apply(String result) throws OperationException {

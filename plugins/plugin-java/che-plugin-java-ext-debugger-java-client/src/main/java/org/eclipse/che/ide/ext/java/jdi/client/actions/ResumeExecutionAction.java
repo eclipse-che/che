@@ -14,10 +14,8 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.debug.BreakpointManager;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.ide.debug.DebuggerState;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
 
@@ -29,22 +27,19 @@ import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
 public class ResumeExecutionAction extends Action {
 
     private final DebuggerManager   debuggerManager;
-    private final BreakpointManager breakpointManager;
 
     @Inject
     public ResumeExecutionAction(DebuggerManager debuggerManager,
                                  JavaRuntimeLocalizationConstant locale,
-                                 JavaRuntimeResources resources,
-                                 BreakpointManager breakpointManager) {
+                                 JavaRuntimeResources resources) {
         super(locale.resumeExecution(), locale.resumeExecutionDescription(), null, resources.resumeExecution());
 
         this.debuggerManager = debuggerManager;
-        this.breakpointManager = breakpointManager;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Debugger debugger = debuggerManager.getDebugger();
+        Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null) {
             debugger.resume();
         }
@@ -52,11 +47,8 @@ public class ResumeExecutionAction extends Action {
 
     @Override
     public void update(ActionEvent e) {
-        Debugger debugger = debuggerManager.getDebugger();
-
-        e.getPresentation().setEnabled(debugger != null &&
-                                       debugger.getDebuggerState() == DebuggerState.CONNECTED &&
-                                       breakpointManager.getCurrentBreakpoint() != null);
+        Debugger debugger = debuggerManager.getActiveDebugger();
+        e.getPresentation().setEnabled(debugger != null && debugger.isSuspended());
     }
 
 }

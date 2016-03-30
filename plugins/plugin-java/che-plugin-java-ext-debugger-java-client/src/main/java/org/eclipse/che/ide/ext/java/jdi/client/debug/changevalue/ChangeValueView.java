@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
  */
 public interface ChangeValueView extends View<ChangeValueView.ActionDelegate> {
     /** Needs for delegate some function into ChangeValue view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
         void onCancelClicked();
 

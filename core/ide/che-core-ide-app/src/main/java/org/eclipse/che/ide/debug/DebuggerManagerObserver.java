@@ -10,11 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
- * Represents current state of debugger
+ * @author Anatoliy Bazko
  */
-public enum DebuggerState {
-    INITIALIZED,
-    DISCONNECTED,
-    CONNECTED
+public interface DebuggerManagerObserver extends DebuggerObserver {
+
+    /**
+     * Event happens when new active debugger is set.
+     */
+    void onActiveDebuggerChanged(@Nullable Debugger activeDebugger);
 }

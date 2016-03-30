@@ -18,7 +18,7 @@ import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
 
 /**
- * Action which allows show / hide debugger panel
+ * Action which allows show / hide debugger panel.
  *
  * @author Mykola Morhun
  */
@@ -28,7 +28,7 @@ public class ShowHideDebuggerPanelAction extends Action {
 
     @Inject
     public ShowHideDebuggerPanelAction(DebuggerPresenter debuggerPresenter,
-                                  JavaRuntimeLocalizationConstant locale) {
+                                       JavaRuntimeLocalizationConstant locale) {
         super(locale.showHideDebuggerPanel(), locale.showHideDebuggerPanelDescription(), null, null);
 
         this.debuggerPresenter = debuggerPresenter;

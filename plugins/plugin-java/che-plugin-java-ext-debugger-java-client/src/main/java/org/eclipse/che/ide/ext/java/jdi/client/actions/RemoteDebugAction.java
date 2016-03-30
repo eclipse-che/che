@@ -37,6 +37,7 @@ public class RemoteDebugAction extends Action {
                              JavaRuntimeLocalizationConstant locale,
                              JavaRuntimeResources resources) {
         super(locale.connectToRemote(), locale.connectToRemoteDescription(), null, resources.debug());
+
         this.presenter = presenter;
     }
 
