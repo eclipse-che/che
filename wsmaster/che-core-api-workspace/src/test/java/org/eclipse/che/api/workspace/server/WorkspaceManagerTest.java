@@ -22,6 +22,7 @@ import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -84,6 +85,8 @@ public class WorkspaceManagerTest {
     @Mock
     private MachineManager                     client;
     @Mock
+    private UserManager                        userManager;
+    @Mock
     private WorkspaceHooks                     workspaceHooks;
     @Mock
     private MachineManager                     machineManager;
@@ -96,7 +99,8 @@ public class WorkspaceManagerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        workspaceManager = spy(new WorkspaceManager(workspaceDao, registry, workspaceConfigValidator, eventService, machineManager));
+        workspaceManager =
+                spy(new WorkspaceManager(workspaceDao, registry, workspaceConfigValidator, eventService, machineManager, userManager));
         workspaceManager.setHooks(workspaceHooks);
 
         when(workspaceDao.create(any(UsersWorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -160,6 +164,28 @@ public class WorkspaceManagerTest {
 
         assertEquals(result, workspace);
     }
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
+        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getConfig().getName(), workspace.getOwner())).thenReturn(workspace);
+        when(registry.get(any())).thenThrow(new NotFoundException(""));
+        when(userManager.getByName(anyString())).thenReturn(new org.eclipse.che.api.user.server.dao.User().withId(workspace.getOwner()));
+
+        final UsersWorkspaceImpl result = workspaceManager.getWorkspace(workspace.getOwner() + ":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
+        final UsersWorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getConfig().getName(), workspace.getOwner())).thenReturn(workspace);
+        when(registry.get(any())).thenThrow(new NotFoundException(""));
+
+        final UsersWorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
 
     @Test
     public void getWorkspaceByNameShouldReturnWorkspaceWithStatusEqualToItsRuntimeStatus() throws Exception {

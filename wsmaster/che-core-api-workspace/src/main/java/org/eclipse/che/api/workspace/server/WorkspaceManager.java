@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -74,6 +75,7 @@ public class WorkspaceManager {
     private final EventService             eventService;
     private final ExecutorService          executor;
     private final MachineManager           machineManager;
+    private final UserManager              userManager;
 
     private WorkspaceHooks hooks = new NoopWorkspaceHooks();
 
@@ -82,12 +84,14 @@ public class WorkspaceManager {
                             RuntimeWorkspaceRegistry workspaceRegistry,
                             WorkspaceConfigValidator workspaceConfigValidator,
                             EventService eventService,
-                            MachineManager machineManager) {
+                            MachineManager machineManager,
+                            UserManager userManager) {
         this.workspaceDao = workspaceDao;
         this.workspaceRegistry = workspaceRegistry;
         this.configValidator = workspaceConfigValidator;
         this.eventService = eventService;
         this.machineManager = machineManager;
+        this.userManager = userManager;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
@@ -145,6 +149,36 @@ public class WorkspaceManager {
     }
 
     /**
+     * Gets workspace by composite key.
+     *
+     * <p> Key rules:
+     * <ul>
+     * <li>If it doesn't contain <b>:</b> character then that key is id(e.g. workspace123456)
+     * <li>If it contains <b>:</b> character then that key is combination of user name and workspace name
+     * <li><b></>:workspace_name</b> is valid abstract key and user will be detected from Environment.
+     * <li><b>user_name:</b> is not valid abstract key
+     * </ul>
+     *
+     * <p>Returned instance always permanent(non-temporary), contains websocket channels
+     * and with either {@link WorkspaceStatus#STOPPED} status or status defined by its runtime(if exists).
+     *
+     * @param key
+     *         composite key
+     * @return the workspace instance
+     * @throws BadRequestException
+     *         when {@code key} is null
+     * @throws NotFoundException
+     *         when workspace doesn't exist
+     * @throws ServerException
+     *         when any server error occurs
+     */
+    public UsersWorkspaceImpl getWorkspace(String key) throws NotFoundException, ServerException, BadRequestException {
+        requiredNotNull(key, "Required non-null workspace key");
+        return normalizeState(getByKey(key));
+    }
+
+
+    /**
      * Gets workspace by its id.
      *
      * <p>Returned instance always permanent(non-temporary), contains websocket channels
@@ -160,7 +194,7 @@ public class WorkspaceManager {
      * @throws ServerException
      *         when any server error occurs
      */
-    public UsersWorkspaceImpl getWorkspace(String workspaceId) throws NotFoundException, ServerException, BadRequestException {
+    public UsersWorkspaceImpl getWorkspaceById(String workspaceId) throws NotFoundException, ServerException, BadRequestException {
         requiredNotNull(workspaceId, "Required non-null workspace id");
         return normalizeState(workspaceDao.get(workspaceId));
     }
@@ -693,6 +727,21 @@ public class WorkspaceManager {
         if (object == null) {
             throw new BadRequestException(message);
         }
+    }
+
+    /*
+    * Get workspace using composite key.
+    *
+    */
+    private UsersWorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
+        String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
+        if (parts.length == 1) {
+            return workspaceDao.get(key);
+        }
+        final String userName = parts[0];
+        final String wsName = parts[1];
+        final String ownerId = userName.isEmpty() ? getCurrentUserId() : userManager.getByName(userName).getId();
+        return workspaceDao.get(wsName, ownerId);
     }
 
     /**

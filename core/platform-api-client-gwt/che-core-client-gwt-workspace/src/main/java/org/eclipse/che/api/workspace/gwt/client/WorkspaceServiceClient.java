@@ -15,6 +15,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -43,13 +44,13 @@ public interface WorkspaceServiceClient {
     Promise<UsersWorkspaceDto> create(WorkspaceConfigDto newWorkspace, String account);
 
     /**
-     * Gets users workspace by id.
+     * Gets users workspace by key.
      *
-     * @param wsId
-     *         workspace ID
+     * @param key
+     *         workspace key. See {@link WorkspaceManager#getWorkspace(String key)} for examples.
      * @return a promise that resolves to the {@link UsersWorkspaceDto}, or rejects with an error
      */
-    Promise<UsersWorkspaceDto> getUsersWorkspace(String wsId);
+    Promise<UsersWorkspaceDto> getUsersWorkspace(String key);
 
     /**
      * Gets runtime workspace by id.
