@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.permission.PermissionManager;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -29,16 +30,26 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.user.UserImpl;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.dto.shared.DTO;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
+import org.everrest.core.impl.provider.JsonEntityProvider;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,6 +59,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
@@ -58,7 +70,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
 
 /**
  * Tests for {@link WorkspaceService}.
@@ -74,6 +85,8 @@ public class WorkspaceServiceTest {
     private static final LinkedList<String> ROLES   = new LinkedList<>(singleton("user"));
     @SuppressWarnings("unused")
     private static final EnvironmentFilter  FILTER  = new EnvironmentFilter();
+    @SuppressWarnings("unused")
+    private static final DtoBodyReader      READER  = new DtoBodyReader();
 
     @Mock
     private WorkspaceManager   manager;
@@ -95,7 +108,7 @@ public class WorkspaceServiceTest {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType("application/json")
-                                         .body(configDto)
+                                         .body(configDto.toString())
                                          .when()
                                          .post(SECURE_PATH + "/workspace" +
                                                "?attribute=stackId:stack123" +
@@ -141,7 +154,73 @@ public class WorkspaceServiceTest {
         assertEquals(unwrapError(response), "Workspace configuration required");
     }
 
-    
+    @Test
+    public void shouldGetWorkspaceById() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(manager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+    }
+
+    @Test
+    public void shouldGetWorkspaces() throws Exception {
+        final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
+        final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
+        when(manager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(unwrapDtoList(response, WorkspaceDto.class).stream()
+                                                                .map(WorkspaceImpl::new)
+                                                                .collect(toList()),
+                     asList(workspace1, workspace2));
+    }
+
+    @Test
+    public void shouldGetWorkspacesByStatus() throws Exception {
+        final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
+        final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
+        when(manager.getWorkspaces(USER_ID)).thenReturn(asList(workspace1, workspace2));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace?status=starting");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(unwrapDtoList(response, WorkspaceDto.class).stream()
+                                                                .map(WorkspaceImpl::new)
+                                                                .collect(toList()),
+                     singletonList(workspace2));
+    }
+
+    @Test
+    public void shouldUpdateTheWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(manager.updateWorkspace(workspace.getId(), workspace)).thenReturn(workspace);
+        final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(workspaceDto)
+                                         .when()
+                                         .put(SECURE_PATH + "/workspace/" + workspace.getId());
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(unwrapDto(response, WorkspaceDto.class), workspace);
+        verify(validator).validateWorkspace(workspace);
+    }
 
     private static String unwrapError(Response response) {
         return unwrapDto(response, ServiceError.class).getMessage();
@@ -157,12 +236,17 @@ public class WorkspaceServiceTest {
                          .collect(toList());
     }
 
-    private static WorkspaceImpl createWorkspace(WorkspaceConfig configDto) {
+    private static WorkspaceImpl createWorkspace(WorkspaceConfig configDto, WorkspaceStatus status) {
         return WorkspaceImpl.builder()
                             .setConfig(configDto)
                             .generateId()
-                            .setNamespace("namespace")
+                            .setNamespace(USER_ID)
+                            .setStatus(status)
                             .build();
+    }
+
+    private static WorkspaceImpl createWorkspace(WorkspaceConfig configDto) {
+        return createWorkspace(configDto, WorkspaceStatus.STOPPED);
     }
 
     private static WorkspaceConfigDto createConfigDto() {
@@ -195,6 +279,22 @@ public class WorkspaceServiceTest {
 
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext.getCurrent().setUser(new UserImpl("user", USER_ID, "token", ROLES, false));
+        }
+    }
+
+    @Provider
+    public static class DtoBodyReader extends JsonEntityProvider {
+        @Override
+        public Object readFrom(Class type,
+                               Type genericType,
+                               Annotation[] annotations,
+                               MediaType mediaType,
+                               MultivaluedMap httpHeaders,
+                               InputStream entityStream) throws IOException {
+            if (type.isAnnotationPresent(DTO.class)) {
+                return DtoFactory.getInstance().createDtoFromJson(entityStream, type);
+            }
+            return super.readFrom(type, genericType, annotations, mediaType, httpHeaders, entityStream);
         }
     }
 }

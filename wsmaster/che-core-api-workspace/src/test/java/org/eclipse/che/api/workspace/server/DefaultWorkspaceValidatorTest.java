@@ -329,7 +329,7 @@ public class DefaultWorkspaceValidatorTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Workspace contains command with null or empty name")
+          expectedExceptionsMessageRegExp = "Workspace ws-name contains command with null or empty name")
     public void shouldFailValidationIfCommandNameIsNull() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getCommands()
@@ -341,7 +341,7 @@ public class DefaultWorkspaceValidatorTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Workspace contains command with null or empty name")
+          expectedExceptionsMessageRegExp = "Workspace ws-name contains command with null or empty name")
     public void shouldFailValidationIfCommandNameIsEmpty() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getCommands()
