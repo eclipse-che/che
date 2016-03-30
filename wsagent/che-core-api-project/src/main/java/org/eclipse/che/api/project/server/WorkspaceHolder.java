@@ -176,7 +176,7 @@ public class WorkspaceHolder {
      */
     private UsersWorkspaceDto workspaceDto(String wsId) throws ServerException {
         final String href = UriBuilder.fromUri(apiEndpoint)
-                                      .path(WorkspaceService.class).path(WorkspaceService.class, "getById")
+                                      .path(WorkspaceService.class).path(WorkspaceService.class, "getByKey")
                                       .build(wsId).toString();
         try {
             return httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(UsersWorkspaceDto.class);
