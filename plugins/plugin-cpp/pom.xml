@@ -14,30 +14,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
+        <artifactId>che-plugin-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
         <version>4.1.0-RC1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.plugin</groupId>
-    <artifactId>che-plugin-parent</artifactId>
-    <version>4.1.0-RC1-SNAPSHOT</version>
+    <artifactId>che-plugin-cpp-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che Plugin :: Parent</name>
+    <name>Che Plugin :: C/C++ :: Parent</name>
     <modules>
-        <module>plugin-help</module>
-        <module>plugin-docker</module>
-        <module>plugin-web</module>
-        <module>plugin-machine</module>
-        <module>plugin-java</module>
-        <module>plugin-sdk</module>
-        <module>plugin-orion</module>
-        <module>plugin-git</module>
-        <module>plugin-github</module>
-        <module>plugin-dashboard</module>
-        <module>plugin-gwt</module>
-        <module>plugin-python</module>
-        <module>plugin-svn</module>
-        <module>plugin-cpp</module>
+        <module>che-plugin-cpp-lang-shared</module>
+        <module>che-plugin-cpp-lang-server</module>
+        <module>che-plugin-cpp-lang-ide</module>
     </modules>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.che.core</groupId>
+                    <artifactId>che-core-api-dto-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>
