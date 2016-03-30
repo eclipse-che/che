@@ -34,6 +34,8 @@ public interface WorkspaceConfigDto extends WorkspaceConfig, Hyperlinks {
 
     WorkspaceConfigDto withName(String name);
 
+    void setName(String name);
+
     @Override
     @FactoryParameter(obligation = MANDATORY)
     String getDefaultEnv();

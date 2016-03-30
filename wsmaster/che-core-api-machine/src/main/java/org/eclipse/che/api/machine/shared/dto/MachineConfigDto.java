@@ -70,10 +70,14 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
     @Override
     List<ServerConfDto> getServers();
 
+    void setServers(List<ServerConfDto> servers);
+
     MachineConfigDto withServers(List<ServerConfDto> servers);
 
     @Override
     Map<String, String> getEnvVariables();
+
+    void setEnvVariables(Map<String, String> envVariables);
 
     MachineConfigDto withEnvVariables(Map<String, String> envVariables);
 

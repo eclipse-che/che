@@ -29,20 +29,34 @@ public interface WorkspaceDto extends Workspace, Hyperlinks {
     @Override
     WorkspaceConfigDto getConfig();
 
+    void setConfig(WorkspaceConfigDto config);
+
     WorkspaceDto withConfig(WorkspaceConfigDto config);
 
     @Override
     WorkspaceRuntimeDto getRuntime();
 
+    void setRuntime(WorkspaceRuntimeDto runtime);
+
     WorkspaceDto withRuntime(WorkspaceRuntimeDto runtime);
+
+    void setId(String id);
 
     WorkspaceDto withId(String id);
 
+    void setNamespace(String namespace);
+
     WorkspaceDto withNamespace(String owner);
+
+    void setStatus(WorkspaceStatus status);
 
     WorkspaceDto withStatus(WorkspaceStatus status);
 
+    void setTemporary(boolean isTemporary);
+
     WorkspaceDto withTemporary(boolean isTemporary);
+
+    void setAttributes(Map<String, String> attributes);
 
     WorkspaceDto withAttributes(Map<String, String> attributes);
 

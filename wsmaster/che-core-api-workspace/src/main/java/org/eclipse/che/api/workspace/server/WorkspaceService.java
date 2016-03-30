@@ -498,7 +498,7 @@ public class WorkspaceService extends Service {
         ensureUserIsWorkspaceOwner(workspace);
         final List<CommandImpl> commands = workspace.getConfig().getCommands();
         if (!commands.removeIf(cmd -> cmd.getName().equals(cmdName))) {
-            throw new NotFoundException("Workspace " + id + " doesn't contain command " + cmdName);
+            throw new NotFoundException(format("Workspace '%s' doesn't contain command '%s'", id, cmdName));
         }
         commands.add(new CommandImpl(update));
         validator.validateConfig(workspace.getConfig());
@@ -590,7 +590,7 @@ public class WorkspaceService extends Service {
         ensureUserIsWorkspaceOwner(workspace);
         final List<EnvironmentImpl> environments = workspace.getConfig().getEnvironments();
         if (!environments.stream().anyMatch(env -> env.getName().equals(envName))) {
-            throw new NotFoundException("Workspace " + id + " doesn't contain environment " + envName);
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(update));
         validator.validateConfig(workspace.getConfig());
@@ -618,7 +618,7 @@ public class WorkspaceService extends Service {
                                                          ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig().getEnvironments().removeIf(e -> e.getName().equals(envName))) {
+        if (workspace.getConfig().getEnvironments().removeIf(e -> e.getName().equals(envName))) {
             workspaceManager.updateWorkspace(id, workspace);
         }
     }
@@ -681,8 +681,11 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
-        if (!projects.removeIf(project -> project.getPath().equals(path))) {
-            throw new NotFoundException("Workspace " + id + " doesn't contain project " + path);
+        final String normalizedPath = '/' + path;
+        if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain project with path '%s'",
+                                               id,
+                                               normalizedPath));
         }
         projects.add(new ProjectConfigImpl(update));
         validator.validateConfig(workspace.getConfig());
@@ -690,7 +693,7 @@ public class WorkspaceService extends Service {
     }
 
     @DELETE
-    @Path("/{id}/project/{name}")
+    @Path("/{id}/project/{path:.*}")
     @RolesAllowed("user")
     @ApiOperation(value = "Remove the project from the workspace",
                   notes = "This operation can be performed only by the workspace owner")
@@ -702,15 +705,16 @@ public class WorkspaceService extends Service {
                               @PathParam("id")
                               String id,
                               @ApiParam("The name of the project to remove")
-                              @PathParam("name")
-                              String projectName) throws ServerException,
+                              @PathParam("path")
+                              String path) throws ServerException,
                                                          BadRequestException,
                                                          NotFoundException,
                                                          ConflictException,
                                                          ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (workspace.getConfig().getProjects().removeIf(project -> project.getName().equals(projectName))) {
+        final String normalizedPath = '/' + path;
+        if (workspace.getConfig().getProjects().removeIf(project -> project.getPath().equals(normalizedPath))) {
             workspaceManager.updateWorkspace(id, workspace);
         }
     }

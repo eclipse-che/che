@@ -23,10 +23,14 @@ public interface ServerDto extends Server {
     @Override
     String getProtocol();
 
+    void setProtocol(String protocol);
+
     ServerDto withProtocol(String protocol);
 
     @Override
     String getPath();
+
+    void setPath(String path);
 
     ServerDto withPath(String path);
 

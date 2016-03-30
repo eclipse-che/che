@@ -24,17 +24,25 @@ import java.util.List;
 @DTO
 public interface WorkspaceRuntimeDto extends WorkspaceRuntime, Hyperlinks {
 
+    void setActiveEnv(String activeEnv);
+
     WorkspaceRuntimeDto withActiveEnv(String activeEnvName);
 
     @Override
     MachineDto getDevMachine();
+
+    void setDevMachine(MachineDto machine);
 
     WorkspaceRuntimeDto withDevMachine(MachineDto machine);
 
     @Override
     List<MachineDto> getMachines();
 
+    void setMachines(List<MachineDto> list);
+
     WorkspaceRuntimeDto withMachines(List<MachineDto> machines);
+
+    void setRootFolder(String rootFolder);
 
     WorkspaceRuntimeDto withRootFolder(String rootFolder);
 
