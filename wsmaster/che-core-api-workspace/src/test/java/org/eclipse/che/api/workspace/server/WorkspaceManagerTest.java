@@ -47,6 +47,8 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.workspace.server.WorkspaceManager.CREATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
@@ -121,6 +123,7 @@ public class WorkspaceManagerTest {
         assertEquals(workspace.getConfig(), cfg);
         assertFalse(workspace.isTemporary());
         assertEquals(workspace.getStatus(), STOPPED);
+        assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
         verify(workspaceHooks).beforeCreate(workspace, "account");
         verify(workspaceHooks).afterCreate(workspace, "account");
         verify(workspaceDao).create(workspace);
@@ -233,6 +236,7 @@ public class WorkspaceManagerTest {
         assertEquals(updated.getAttributes(), workspace.getAttributes());
         assertFalse(updated.isTemporary());
         assertEquals(workspace.getConfig(), updated.getConfig());
+        assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
     @Test
@@ -278,6 +282,7 @@ public class WorkspaceManagerTest {
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
         verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv(), "account");
+        assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
     @Test(expectedExceptions = ConflictException.class,
@@ -382,6 +387,7 @@ public class WorkspaceManagerTest {
         workspaceManager.stopWorkspace(workspace.getId());
 
         verify(runtimes, timeout(2000)).stop(workspace.getId());
+        assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
     @Test

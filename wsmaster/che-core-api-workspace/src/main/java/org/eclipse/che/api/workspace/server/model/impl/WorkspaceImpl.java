@@ -44,10 +44,27 @@ public class WorkspaceImpl implements Workspace {
     private WorkspaceRuntimeImpl runtime;
 
     public WorkspaceImpl(String id, String namespace, WorkspaceConfig config) {
+        this(id, namespace, config, null, null, false, STOPPED);
+    }
+
+    public WorkspaceImpl(String id,
+                         String namespace,
+                         WorkspaceConfig config,
+                         WorkspaceRuntime runtime,
+                         Map<String, String> attributes,
+                         boolean isTemporary,
+                         WorkspaceStatus status) {
         this.id = id;
         this.namespace = namespace;
         this.config = new WorkspaceConfigImpl(config);
-        this.status = STOPPED;
+        if (runtime  != null) {
+            this.runtime = new WorkspaceRuntimeImpl(runtime);
+        }
+        if (attributes != null) {
+            this.attributes = new HashMap<>(attributes);
+        }
+        this.status = firstNonNull(status, STOPPED);
+        this.isTemporary = isTemporary;
     }
 
     public WorkspaceImpl(Workspace workspace) {
@@ -172,20 +189,13 @@ public class WorkspaceImpl implements Workspace {
         private boolean             isTemporary;
         private WorkspaceStatus     status;
         private WorkspaceConfigImpl config;
+        private WorkspaceRuntimeImpl runtime;
         private Map<String, String> attributes;
 
         private WorkspaceImplBuilder() {}
 
         public WorkspaceImpl build() {
-            final WorkspaceImpl workspace = new WorkspaceImpl(id,
-                                                              namespace,
-                                                              config);
-            if (status != null) {
-                workspace.setStatus(status);
-            }
-            workspace.setTemporary(isTemporary);
-            workspace.setAttributes(attributes);
-            return workspace;
+            return new WorkspaceImpl(id, namespace, config, runtime, attributes, isTemporary, status);
         }
 
         public WorkspaceImplBuilder generateId() {
@@ -220,6 +230,11 @@ public class WorkspaceImpl implements Workspace {
 
         public WorkspaceImplBuilder setAttributes(Map<String, String> attributes) {
             this.attributes = attributes;
+            return this;
+        }
+
+        public WorkspaceImplBuilder setRuntime(WorkspaceRuntimeImpl runtime) {
+            this.runtime = runtime;
             return this;
         }
     }

@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +48,7 @@ import java.util.concurrent.Executors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
@@ -65,7 +65,13 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  */
 @Singleton
 public class WorkspaceManager {
+
     private static final Logger LOG = LoggerFactory.getLogger(WorkspaceManager.class);
+
+    /** This attribute describes time when workspace was created. */
+    public static final String CREATED_ATTRIBUTE_NAME = "created";
+    /** This attribute describes time when workspace was last update or started/stopped/recovered. */
+    public static final String UPDATED_ATTRIBUTE_NAME = "updated";
 
     private final WorkspaceDao      workspaceDao;
     private final WorkspaceRuntimes runtimes;
@@ -259,6 +265,7 @@ public class WorkspaceManager {
         requireNonNull(update, "Required non-null workspace update");
         final WorkspaceImpl workspace = workspaceDao.get(id);
         workspace.setConfig(new WorkspaceConfigImpl(update.getConfig()));
+        update.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspace.setAttributes(update.getAttributes());
         return normalizeState(workspaceDao.update(workspace));
     }
@@ -486,7 +493,7 @@ public class WorkspaceManager {
     WorkspaceImpl performAsyncStart(WorkspaceImpl workspace,
                                     String envName,
                                     boolean recover,
-                                    @Nullable String accountId) throws ConflictException, NotFoundException {
+                                    @Nullable String accountId) throws ConflictException, NotFoundException, ServerException {
         if (envName != null && !workspace.getConfig()
                                          .getEnvironments()
                                          .stream()
@@ -508,6 +515,10 @@ public class WorkspaceManager {
         } catch (NotFoundException ignored) {
             // it is okay if workspace does not exist
         }
+
+        workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+        workspaceDao.update(workspace);
+
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
@@ -542,6 +553,9 @@ public class WorkspaceManager {
                 final WorkspaceImpl workspace = workspaceDao.get(wsId);
                 if (workspace.isTemporary()) {
                     workspaceDao.remove(wsId);
+                } else {
+                    workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
+                    workspaceDao.update(workspace);
                 }
                 LOG.info("Workspace '{}:{}' stopped by user '{}'",
                          workspace.getNamespace(),
@@ -584,6 +598,7 @@ public class WorkspaceManager {
                                                      .setAttributes(attributes)
                                                      .setTemporary(isTemporary)
                                                      .build();
+        workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         hooks.beforeCreate(workspace, accountId);
         workspaceDao.create(workspace);
         hooks.afterCreate(workspace, accountId);

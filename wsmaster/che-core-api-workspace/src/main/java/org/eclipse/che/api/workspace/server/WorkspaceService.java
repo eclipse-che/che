@@ -40,6 +40,7 @@ import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -70,7 +71,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static java.lang.String.copyValueOf;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -80,16 +80,17 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_SNAPSHOTS;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_RUNTIME_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.STOP_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -707,10 +708,10 @@ public class WorkspaceService extends Service {
                               @ApiParam("The name of the project to remove")
                               @PathParam("path")
                               String path) throws ServerException,
-                                                         BadRequestException,
-                                                         NotFoundException,
-                                                         ConflictException,
-                                                         ForbiddenException {
+                                                  BadRequestException,
+                                                  NotFoundException,
+                                                  ConflictException,
+                                                  ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         final String normalizedPath = '/' + path;
@@ -824,7 +825,7 @@ public class WorkspaceService extends Service {
                                        .build(workspace.getId())
                                        .toString(),
                              APPLICATION_JSON,
-                             "get workspace's snapshot"));
+                             LINK_REL_GET_SNAPSHOT));
 
         //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
         final URI ideUri = uriBuilder.clone()
@@ -859,19 +860,14 @@ public class WorkspaceService extends Service {
                                                                        channelParameter));
         // add links for running workspace
         if (workspace.getStatus() == RUNNING) {
-            links.add(createLink("GET",
-                                 uriBuilder.clone()
-                                           .path(getClass(), "getRuntimeWorkspaceById")
-                                           .build(workspace.getId())
-                                           .toString(),
-                                 APPLICATION_JSON,
-                                 LINK_REL_GET_RUNTIME_WORKSPACE));
-            links.add(createLink("DELETE",
-                                 uriBuilder.clone()
-                                           .path(getClass(), "stop")
-                                           .build(workspace.getId())
-                                           .toString(),
-                                 STOP_WORKSPACE));
+            workspace.getRuntime()
+                     .getLinks()
+                     .add(createLink("DELETE",
+                                     uriBuilder.clone()
+                                               .path(getClass(), "stop")
+                                               .build(workspace.getId())
+                                               .toString(),
+                                     LINK_REL_STOP_WORKSPACE));
 
             if (workspace.getRuntime() != null && workspace.getRuntime().getDevMachine() != null) {
                 workspace.getRuntime()
@@ -937,7 +933,7 @@ public class WorkspaceService extends Service {
                                                                 .build(snapshotDto.getWorkspaceId())
                                                                 .toString(),
                                                       APPLICATION_JSON,
-                                                      "get workspace's snapshot");
+                                                      LINK_REL_GET_SNAPSHOT);
         return snapshotDto.withLinks(asList(machineLink, workspaceCfgLink, runtimeWorkspaceLink, workspaceSnapshotLink));
     }
 

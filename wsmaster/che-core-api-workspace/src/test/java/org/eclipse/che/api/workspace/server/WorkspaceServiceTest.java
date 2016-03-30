@@ -11,23 +11,30 @@
 package org.eclipse.che.api.workspace.server;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.permission.PermissionManager;
+import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -44,21 +51,39 @@ import org.everrest.core.RequestFilter;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static com.jayway.restassured.RestAssured.given;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyNavigableMap;
+import static java.util.Collections.emptySortedMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_SNAPSHOTS;
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -72,6 +97,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests for {@link WorkspaceService}.
@@ -556,6 +584,64 @@ public class WorkspaceServiceTest {
         verify(wsManager).updateWorkspace(any(), any());
     }
 
+    @Test
+    public void testWorkspaceLinks() throws Exception {
+        // given
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
+        final MachineConfigImpl devCfg = workspace.getConfig()
+                                                  .getEnvironment(workspace.getConfig().getDefaultEnv())
+                                                  .get()
+                                                  .getMachineConfigs()
+                                                  .iterator()
+                                                  .next();
+        runtime.setDevMachine(new MachineImpl(devCfg,
+                                              "machine123",
+                                              workspace.getId(),
+                                              workspace.getConfig().getDefaultEnv(),
+                                              USER_ID,
+                                              MachineStatus.RUNNING,
+                                              new MachineRuntimeInfoImpl(emptyMap(),
+                                                                         emptyMap(),
+                                                                         singletonMap("8080/https", new ServerImpl("wsagent",
+                                                                                                                   "8080",
+                                                                                                                   "https",
+                                                                                                                   "path1",
+                                                                                                                   "url")))));
+        runtime.getMachines().add(runtime.getDevMachine());
+        workspace.setStatus(RUNNING);
+        workspace.setRuntime(runtime);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        // when
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/" + workspace.getId());
+
+        // then
+        assertEquals(response.getStatusCode(), 200);
+        final WorkspaceDto workspaceDto = unwrapDto(response, WorkspaceDto.class);
+        final Set<String> actualRels = workspaceDto.getLinks()
+                                                   .stream()
+                                                   .map(Link::getRel)
+                                                   .collect(toSet());
+        final Set<String> expectedRels = new HashSet<>(asList(LINK_REL_START_WORKSPACE,
+                                                              LINK_REL_REMOVE_WORKSPACE,
+                                                              GET_ALL_USER_WORKSPACES,
+                                                              LINK_REL_GET_SNAPSHOT,
+                                                              LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL,
+                                                              WSAGENT_REFERENCE,
+                                                              "ide url"));
+        assertTrue(actualRels.equals(expectedRels), format("Links difference: '%s'. \n" +
+                                                           "Returned links: '%s', \n" +
+                                                           "Expected links: '%s'.",
+                                                           Sets.symmetricDifference(actualRels, expectedRels),
+                                                           actualRels.toString(),
+                                                           expectedRels.toString()));
+        assertNotNull(workspaceDto.getRuntime().getLink(LINK_REL_STOP_WORKSPACE), "Runtime doesn't contain stop link");
+    }
+
     private static String unwrapError(Response response) {
         return unwrapDto(response, ServiceError.class).getMessage();
     }
@@ -604,7 +690,7 @@ public class WorkspaceServiceTest {
                                                               .setName("dev-machine")
                                                               .setType("docker")
                                                               .setSource(new MachineSourceImpl("location", "recipe"))
-                                                              .setServers(asList(new ServerConfImpl("ref1",
+                                                              .setServers(asList(new ServerConfImpl("wsagent",
                                                                                                     "8080",
                                                                                                     "https",
                                                                                                     "path1"),
