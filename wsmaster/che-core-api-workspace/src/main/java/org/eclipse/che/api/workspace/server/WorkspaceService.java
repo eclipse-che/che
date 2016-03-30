@@ -944,7 +944,7 @@ public class WorkspaceService extends Service {
         } else {
             links.add(createLink("GET",
                                  uriBuilder.clone()
-                                           .path(getClass(), "getById")
+                                           .path(getClass(), "getByKey")
                                            .build(workspace.getId())
                                            .toString(),
                                  APPLICATION_JSON,
