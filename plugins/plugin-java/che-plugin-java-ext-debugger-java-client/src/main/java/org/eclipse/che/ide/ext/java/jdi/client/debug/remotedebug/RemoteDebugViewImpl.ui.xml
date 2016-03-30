@@ -30,7 +30,7 @@
         .hostTextBox {
             float: left;
             margin-left: 12px;
-            width: 158px;
+            width: 148px;
         }
 
         .portComboBox {

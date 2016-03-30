@@ -10,20 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import com.google.gwt.event.shared.EventHandler;
-
 /**
- * Handles {@link BreakpointStateEventHandler}.
- *
  * @author Anatoliy Bazko
  */
-public interface BreakpointStateEventHandler extends EventHandler {
+public interface BreakpointManagerObservable {
 
     /**
-     * On breakpoint state changed
-     *
-     * @param event
-     *         the event
+     * Adds observer.
      */
-    void onStateChanged(BreakpointStateEvent event);
+    void addObserver(BreakpointManagerObserver observer);
+
+    /**
+     * Removes observer.
+     */
+    void removeObserver(BreakpointManagerObserver observer);
+
 }

@@ -10,27 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import java.util.List;
-
 /**
- * Breakpoint manager.
- *
  * @author Anatoliy Bazko
  */
-public interface BreakpointManager extends BreakpointManagerObservable {
+public interface DebuggerObservable {
 
     /**
-     * Toggle / untoggle breakpoint.
+     * Adds observer.
      */
-    void changeBreakpointState(int lineNumber);
+    void addObserver(DebuggerObserver observer);
 
     /**
-     * @return all breakpoints
+     * Removes observer.
      */
-    List<Breakpoint> getBreakpointList();
+    void removeObserver(DebuggerObserver observer);
 
-    /**
-     * Removes all breakpoints.
-     */
-    void deleteAllBreakpoints();
 }

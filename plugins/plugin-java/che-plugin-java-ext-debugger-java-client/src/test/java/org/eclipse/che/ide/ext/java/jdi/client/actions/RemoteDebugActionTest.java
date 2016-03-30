@@ -36,10 +36,6 @@ public class RemoteDebugActionTest {
     @Mock
     private JavaRuntimeLocalizationConstant locale;
 
-    //additional mocks
-    @Mock(answer = RETURNS_DEEP_STUBS)
-    private ActionEvent actionEvent;
-
     @InjectMocks
     private RemoteDebugAction action;
 
@@ -51,8 +47,7 @@ public class RemoteDebugActionTest {
 
     @Test
     public void actionShouldBePerformed() {
-        action.actionPerformed(actionEvent);
-
+        action.actionPerformed(null);
         verify(presenter).showDialog();
     }
 }

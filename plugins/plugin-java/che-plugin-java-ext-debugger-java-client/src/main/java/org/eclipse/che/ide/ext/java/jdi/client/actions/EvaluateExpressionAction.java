@@ -15,11 +15,10 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.debug.BreakpointManager;
-import org.eclipse.che.ide.debug.DebuggerState;
+import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
-import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.expression.EvaluateExpressionPresenter;
 
 /**
@@ -30,21 +29,18 @@ import org.eclipse.che.ide.ext.java.jdi.client.debug.expression.EvaluateExpressi
 @Singleton
 public class EvaluateExpressionAction extends Action {
 
-    private final DebuggerPresenter           debuggerPresenter;
+    private final DebuggerManager             debuggerManager;
     private final EvaluateExpressionPresenter evaluateExpressionPresenter;
-    private final BreakpointManager           breakpointManager;
 
     @Inject
-    public EvaluateExpressionAction(DebuggerPresenter presenter,
+    public EvaluateExpressionAction(DebuggerManager debuggerManager,
                                     EvaluateExpressionPresenter evaluateExpressionPresenter,
                                     JavaRuntimeLocalizationConstant locale,
-                                    JavaRuntimeResources resources,
-                                    BreakpointManager breakpointManager) {
+                                    JavaRuntimeResources resources) {
         super(locale.evaluateExpression(), locale.evaluateExpressionDescription(), null, resources.evaluateExpression());
 
-        this.debuggerPresenter = presenter;
+        this.debuggerManager = debuggerManager;
         this.evaluateExpressionPresenter = evaluateExpressionPresenter;
-        this.breakpointManager = breakpointManager;
     }
 
     @Override
@@ -54,8 +50,8 @@ public class EvaluateExpressionAction extends Action {
 
     @Override
     public void update(ActionEvent e) {
-        e.getPresentation().setEnabled(debuggerPresenter.getDebuggerState() == DebuggerState.CONNECTED &&
-                                       breakpointManager.getCurrentBreakpoint() != null);
+        Debugger debugger = debuggerManager.getActiveDebugger();
+        e.getPresentation().setEnabled(debugger != null && debugger.isSuspended());
     }
 
 }

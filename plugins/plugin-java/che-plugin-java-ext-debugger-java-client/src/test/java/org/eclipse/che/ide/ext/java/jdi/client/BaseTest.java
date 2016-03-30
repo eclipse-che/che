@@ -17,7 +17,7 @@ import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerInfo;
+import org.eclipse.che.ide.ext.java.jdi.shared.JavaDebuggerInfo;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.junit.Before;
@@ -39,7 +39,7 @@ public abstract class BaseTest {
     @Mock
     protected DebuggerServiceClient           service;
     @Mock
-    protected DebuggerInfo                    debuggerInfo;
+    protected JavaDebuggerInfo                javaDebuggerInfo;
     @Mock
     protected JavaRuntimeLocalizationConstant constants;
     @Mock
@@ -59,6 +59,6 @@ public abstract class BaseTest {
 
     @Before
     public void setUp() {
-        when(debuggerInfo.getId()).thenReturn(DEBUGGER_ID);
+        when(javaDebuggerInfo.getId()).thenReturn(DEBUGGER_ID);
     }
 }

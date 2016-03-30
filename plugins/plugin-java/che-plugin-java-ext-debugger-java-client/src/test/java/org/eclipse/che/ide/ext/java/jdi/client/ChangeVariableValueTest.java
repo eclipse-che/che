@@ -113,7 +113,7 @@ public class ChangeVariableValueTest extends BaseTest {
 
     @Test
     public void testChangeValueRequest() throws Exception {
-        when(debuggerManager.getDebugger()).thenReturn(debugger);
+        when(debuggerManager.getActiveDebugger()).thenReturn(debugger);
         when(view.getValue()).thenReturn(VAR_VALUE);
         when(debuggerVariable.getVariablePath()).thenReturn(variablePath);
         when(variablePath.getPath()).thenReturn(new ArrayList<>());
