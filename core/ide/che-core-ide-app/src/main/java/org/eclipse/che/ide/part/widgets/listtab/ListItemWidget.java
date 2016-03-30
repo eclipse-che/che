@@ -15,13 +15,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.api.parts.PartStackView;
-import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;
 
@@ -45,7 +43,7 @@ public class ListItemWidget extends Composite implements ListItem {
     Label title;
 
     @UiField
-    SVGImage closeIcon;
+    FlowPanel closeButton;
 
     private ActionDelegate delegate;
 
@@ -67,22 +65,24 @@ public class ListItemWidget extends Composite implements ListItem {
                 }
             }
         }, ClickEvent.getType());
+
+        closeButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                clickEvent.stopPropagation();
+                clickEvent.preventDefault();
+
+                if (delegate != null) {
+                    delegate.onCloseButtonClicked(ListItemWidget.this);
+                }
+            }
+        }, ClickEvent.getType());
     }
 
     /** {@inheritDoc} */
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    @UiHandler("closeIcon")
-    public void onCloseButtonClicked(@SuppressWarnings("UnusedParameters") ClickEvent event) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        if (delegate != null) {
-            delegate.onCloseButtonClicked(this);
-        }
     }
 
     @Override
