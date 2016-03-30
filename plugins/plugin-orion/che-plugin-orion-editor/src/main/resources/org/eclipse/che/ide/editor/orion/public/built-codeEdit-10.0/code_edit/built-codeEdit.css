@@ -401,6 +401,10 @@
 .meta.tag {
 	color: #3f7f7f;
 }
+.meta .preprocessor {
+    color: #A4A4A4;
+}
+
 .punctuation-definition-comment {
 	color: #3f5fbf;
 }

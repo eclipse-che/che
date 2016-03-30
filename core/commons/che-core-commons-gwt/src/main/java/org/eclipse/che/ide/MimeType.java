@@ -67,7 +67,10 @@ public interface MimeType {
     String TEXT_CSS = "text/css";
 
     /** "text/x-c" */
-    String TEXT_C = "text/x-c";
+    String TEXT_C = "text/x-csrc";
+
+    /** "text/x-c" */
+    String TEXT_CPP = "text/x-c++src";
 
     /** "text/x-h" */
     String TEXT_H = "text/x-h";
