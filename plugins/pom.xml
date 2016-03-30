@@ -36,5 +36,6 @@
         <module>plugin-github</module>
         <module>plugin-dashboard</module>
         <module>plugin-gwt</module>
+        <module>plugin-python</module>
     </modules>
 </project>
