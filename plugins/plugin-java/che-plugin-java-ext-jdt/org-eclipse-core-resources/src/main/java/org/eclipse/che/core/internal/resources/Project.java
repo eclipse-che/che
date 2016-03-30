@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.content.IContentTypeMatcher;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -136,7 +137,12 @@ public class Project extends Container implements IProject {
 
             @Override
             public String[] getNatureIds() {
-                return new String[]{"org.eclipse.jdt.core.javanature"};
+                Map<String, List<String>> attributes = workspace.getProjectRegistry().getProject(path.toString()).getAttributes();
+                String language = "";
+                if (attributes.containsKey("language")) {
+                    language = attributes.get("language").get(0);
+                }
+                return "java".equals(language) ? new String[]{"org.eclipse.jdt.core.javanature"} : new String[]{language};
             }
 
             @Override
@@ -146,6 +152,12 @@ public class Project extends Container implements IProject {
 
             @Override
             public boolean hasNature(String s) {
+                String[] natureIds = getNatureIds();
+                for (String id : natureIds) {
+                    if (s.equals(id)) {
+                        return true;
+                    }
+                }
                 return false;
             }
 
@@ -251,12 +263,7 @@ public class Project extends Container implements IProject {
 
     @Override
     public boolean hasNature(String s) throws CoreException {
-        //TODO we suppose that now only java projects
-        if(s.equals("org.eclipse.jdt.core.javanature")){
-            return true;
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        return getDescription().hasNature(s);
     }
 
     @Override
