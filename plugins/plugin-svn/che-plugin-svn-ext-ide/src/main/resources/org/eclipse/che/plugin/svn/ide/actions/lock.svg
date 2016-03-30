@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The icon can be used freely in both personal and commercial projects with no attribution required, but always appreciated. 
+You may NOT sub-license, resell, rent, redistribute or otherwise transfer the icon without express written permission from iconmonstr.com -->
+
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="512px" height="512px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+<path id="lock-13-icon" d="M256,90.001c91.74,0,166,74.243,166,166c0,91.74-74.243,165.998-166,165.998
+	c-91.741,0-166-74.241-166-165.998C90,164.259,164.243,90.001,256,90.001 M256,50.001c-113.771,0-206,92.229-206,206
+	s92.229,205.998,206,205.998c113.771,0,206-92.227,206-205.998S369.771,50.001,256,50.001L256,50.001z M201.225,227.537v-31.585
+	c0-30.755,25.021-55.776,55.775-55.776s55.775,25.021,55.775,55.776v31.585h-25.2v-31.585c0-16.859-13.716-30.576-30.575-30.576
+	s-30.575,13.717-30.575,30.576v31.585H201.225z M182.409,242.656v105.169h149.182V242.656H182.409z"/>
+</svg>

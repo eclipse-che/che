@@ -482,7 +482,17 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-svn-ext-subversion</artifactId>
+                <artifactId>che-plugin-svn-ext-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-svn-ext-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-svn-ext-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -37,5 +37,6 @@
         <module>plugin-dashboard</module>
         <module>plugin-gwt</module>
         <module>plugin-python</module>
+        <module>plugin-svn</module>
     </modules>
 </project>
