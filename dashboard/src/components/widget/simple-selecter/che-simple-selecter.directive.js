@@ -39,7 +39,7 @@ export class CheSimpleSelecter {
       isFirst : '=cheIsFirst',
       value: '=cheValue',
       name: '@cheName',
-      icon: '@cheIcon',
+      iconSrc: '@?cheIconSrc',
       callbackController: '=cheCallbackController' /* object with a cheSimpleSelecter(name) function, called when the selecter is selector or the select value changes */
     };
 
