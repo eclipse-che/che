@@ -24,7 +24,9 @@
     <name>Che Plugin :: Github :: Parent</name>
     <modules>
         <module>che-plugin-github-oauth2</module>
-        <module>che-plugin-github-ext-github</module>
         <module>che-plugin-github-provider-github</module>
+        <module>che-plugin-github-ide</module>
+        <module>che-plugin-github-server</module>
+        <module>che-plugin-github-shared</module>
     </modules>
 </project>
