@@ -14,7 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
+import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 
 import javax.validation.constraints.NotNull;
 
@@ -27,32 +29,39 @@ import java.util.Map;
  */
 @Singleton
 public class ChangedListPresenter implements ChangedListView.ActionDelegate {
-    private final ChangedListView  view;
-    private final ComparePresenter comparePresenter;
+    private final ChangedListView         view;
+    private final GitLocalizationConstant locale;
+    private final ComparePresenter        comparePresenter;
 
-    private String file;
-    private String state;
-    private String revision;
+    private Map<String, Status> changedFiles;
+    private String              file;
+    private String              revision;
+    private Status              status;
+    private boolean             treeViewEnabled;
 
     @Inject
     public ChangedListPresenter(ChangedListView view,
-                                ComparePresenter comparePresenter) {
+                                ComparePresenter comparePresenter,
+                                GitLocalizationConstant locale) {
         this.comparePresenter = comparePresenter;
         this.view = view;
+        this.locale = locale;
         this.view.setDelegate(this);
     }
 
     /**
-     * Show window with changed files list.
+     * Show window with changed files.
      *
      * @param changedFiles
-     *         Map with files and their state
+     *         Map with files and their status
      * @param revision
      *         hash of revision or branch
      */
-    public void show(Map<String, String> changedFiles, String revision) {
+    public void show(Map<String, Status> changedFiles, String revision) {
+        this.changedFiles = changedFiles;
         view.showDialog();
-        view.setChanges(changedFiles);
+        viewChangedFiles();
+        view.setEnableExpandCollapseButtons(treeViewEnabled);
         view.setEnableCompareButton(false);
         this.revision = revision;
     }
@@ -66,20 +75,61 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onCompareClicked() {
-        comparePresenter.show(file, state, revision);
+        showCompare();
+    }
+
+    @Override
+    public void onFileNodeDoubleClicked() {
+        showCompare();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onChangeViewModeButtonClicked() {
+        treeViewEnabled = !treeViewEnabled;
+        viewChangedFiles();
+        view.setEnableExpandCollapseButtons(treeViewEnabled);
+    }
+
+    @Override
+    public void onExpandButtonClicked() {
+        view.expandAllDirectories();
+    }
+
+    @Override
+    public void onCollapseButtonClicked() {
+        view.collapseAllDirectories();
     }
 
     /** {@inheritDoc} */
     @Override
     public void onNodeSelected(@NotNull Node node) {
+        if (node instanceof ChangedFolderNode) {
+            view.setEnableCompareButton(false);
+            return;
+        }
         view.setEnableCompareButton(true);
         this.file = node.getName();
-        this.state = ((ChangedNode)node).getState();
+        this.status = ((ChangedFileNode)node).getStatus();
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onNodeUnselected() {
+    public void onNodeNotSelected() {
         view.setEnableCompareButton(false);
+    }
+
+    private void viewChangedFiles() {
+        if (treeViewEnabled) {
+            view.viewChangedFilesAsTree(changedFiles);
+            view.setTextToChangeViewModeButton(locale.changeListRowListViewButtonText());
+        } else {
+            view.viewChangedFilesAsList(changedFiles);
+            view.setTextToChangeViewModeButton(locale.changeListGroupByDirectoryButtonText());
+        }
+    }
+
+    private void showCompare() {
+        comparePresenter.show(file, status, revision);
     }
 }
