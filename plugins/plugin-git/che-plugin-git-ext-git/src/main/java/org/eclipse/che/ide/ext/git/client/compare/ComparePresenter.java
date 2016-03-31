@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
@@ -29,6 +30,8 @@ import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.ADDED;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELETED;
 
 /**
  * Presenter for comparing current files with files from specified revision or branch.
@@ -81,17 +84,17 @@ public class ComparePresenter implements CompareView.ActionDelegate {
      *
      * @param file
      *         file name with its full path
-     * @param state
-     *         state of the file
+     * @param status
+     *         status of the file
      * @param revision
      *         hash of revision or branch
      */
-    public void show(final String file, final String state, final String revision) {
+    public void show(final String file, final Status status, final String revision) {
         this.item = file;
 
-        if (state.startsWith("A")) {
+        if (status.equals(ADDED)) {
             showCompare(file, "", revision);
-        } else if (state.startsWith("D")) {
+        } else if (status.equals(DELETED)) {
             gitService.showFileContent(workspaceId, appContext.getCurrentProject().getRootProject(), file, revision,
                                        new AsyncRequestCallback<ShowFileContentResponse>(
                                                dtoUnmarshallerFactory.newUnmarshaller(ShowFileContentResponse.class)) {
