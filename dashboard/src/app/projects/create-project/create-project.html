@@ -51,18 +51,21 @@
             md-theme="maincontent-theme">
   <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
     <div id="create-project-panel" class="create-project-progress-panel">
-      <che-loader layout="column">
+      <che-loader class="che-loader-panel" layout="column">
         <!--crane and terminals-->
-        <div class="che-loader-animation-panel main-page" layout="row">
-          <div flex="initial" flex-gt-sm="55">
+        <div class="che-loader-animation-panel main-page" layout="row" flex>
+          <div layout="column"
+               hide-xs hide-sm
+               layout-align="end start">
             <che-loader-crane che-all-steps="createProjectCtrl.getCreationSteps()"
                               che-exclude-steps="[createProjectCtrl.getCreationSteps().length-1]"
                               che-step="{{createProjectCtrl.getCurrentProgressStep()}}"
                               che-switch-on-iteration="true">
             </che-loader-crane>
           </div>
-          <div flex="noshrink" flex-gt-sm="45" layout="column" layout-align="center center"
-               layout-align-gt-sm="start center">
+          <div layout="column"
+               layout-align="center center"
+               flex="auto">
             <div class="create-project-working-log">
               <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()" che-index="{{$index}}"
                              che-current-step="{{createProjectCtrl.getCurrentProgressStep()}}">
@@ -80,7 +83,7 @@
           </div>
         </div>
         <!--bottom bar-->
-        <div class="che-loader-bottom-bar">
+        <div class="che-loader-bottom-bar" flex="none">
           <div class="main-page" layout="row" layout-align="center stretch">
             <div flex="50" layout="column" layout-align="end start">
             </div>

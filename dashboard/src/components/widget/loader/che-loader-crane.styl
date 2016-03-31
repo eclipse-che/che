@@ -287,12 +287,18 @@ for $name in $animations-hash
       {1% * $percent}
         {$transform}
 
-.che-loader-crane-wrapper
-  height $crane-height
-  width ($load-jib-1-width + $load-jib-2-width + $load-jib-3-width + $layer-side-length-max + 10px)
-  overflow hidden
+$che-crane-width = ($load-jib-1-width + $load-jib-2-width + $load-jib-3-width + $layer-side-length-max + 10px)
+
+.che-loader-crane-offset-wrapper
   position relative
-  top 50px
+  bottom -100px
+
+.che-loader-crane-scale-wrapper
+  transform-origin top left
+  height $crane-height
+  width $che-crane-width
+  position relative
+  bottom 0
   z-index 2
 
 .che-loader-crane.che-loader-no-animation
@@ -301,10 +307,11 @@ for $name in $animations-hash
 
 .che-loader-crane
   position relative
-  top 0
+  bottom 0
   left 0
   height $crane-height
-  width ($load-jib-1-width + $load-jib-2-width + $load-jib-3-width + $layer-side-length-max)
+  width $che-crane-width
+  overflow hidden
 
   .che-loader-animation
     animation-direction normal
@@ -999,18 +1006,7 @@ for $index, $layer-props in $layers-hash
     .layer-ropes
       animation-name ropes
 
-//navbar 320px
-@media (min-width: 1600px)
-  .che-loader-crane-wrapper
-    transform none
-
-@media (min-width: 960px) and (max-width: 1599px)
-  .che-loader-crane-wrapper
-    transform-origin left top
-    transform scale3D(0.75, 0.75, 0.75)
-
-@media (max-width: 959px)
-  .che-loader-crane-wrapper
+@media (orientation: portrait)
+  .che-loader-crane-scale-wrapper
     transform none
     display none
-
