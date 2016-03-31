@@ -101,8 +101,8 @@ class IdeSvc {
             if (message.eventType === 'RUNNING' && message.workspaceId === this.selectedWorkspace.id) {
 
                 // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-                let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(this.selectedWorkspace.id);
-                promiseRuntime.then(() => {
+                let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.selectedWorkspace.id);
+                promiseWorkspace.then(() => {
                     let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.selectedWorkspace.id);
                     // try to connect
                     this.websocketReconnect = 50;

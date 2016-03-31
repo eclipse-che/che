@@ -579,8 +579,13 @@ public class WorkspaceManager {
         }
     }
 
-    private WorkspaceImpl normalizeState(WorkspaceImpl workspace, RuntimeDescriptor runtime) {
-        workspace.setStatus(runtime == null ? STOPPED : runtime.getRuntimeStatus());
+    private WorkspaceImpl normalizeState(WorkspaceImpl workspace, RuntimeDescriptor descriptor) {
+        if (descriptor != null) {
+            workspace.setStatus(descriptor.getRuntimeStatus());
+            workspace.setRuntime(descriptor.getRuntime());
+        } else {
+            workspace.setStatus(STOPPED);
+        }
         return workspace;
     }
 

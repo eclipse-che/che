@@ -80,7 +80,7 @@ export class WorkspaceDetailsCtrl {
     workspaceNewDetails.config.name = this.newName;
     delete workspaceNewDetails.links;
 
-    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails.config);
+    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails);
     promise.then((data) => {
       this.cheWorkspace.getWorkspacesById().set(this.workspaceId, data);
       this.updateWorkspaceData();

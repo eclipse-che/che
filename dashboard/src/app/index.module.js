@@ -90,7 +90,7 @@ initModule.config(['$routeProvider', ($routeProvider) => {
 
 }]);
 
-var DEV = false;
+var DEV = true;
 
 
 // config routes
@@ -357,4 +357,3 @@ new NavbarConfig(instanceRegister);
 new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
-
