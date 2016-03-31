@@ -813,8 +813,8 @@ export class CreateProjectCtrl {
     } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-      let promiseRuntime = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceSelected.id);
-      promiseRuntime.then(() => {
+      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceSelected.id);
+      promiseWorkspace.then(() => {
         let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.workspaceSelected.id);
         // Get bus
         let websocketStream = this.$websocket(websocketUrl);
@@ -878,8 +878,8 @@ export class CreateProjectCtrl {
 
           this.importProjectData.project.name = this.projectName;
 
-          let promiseRuntime = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
-          promiseRuntime.then(() => {
+          let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+          promiseWorkspace.then(() => {
             let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
             // try to connect
             this.websocketReconnect = 10;
