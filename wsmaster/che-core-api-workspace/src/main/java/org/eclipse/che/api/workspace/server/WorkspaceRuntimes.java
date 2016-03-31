@@ -90,9 +90,7 @@ public class WorkspaceRuntimes {
 
     /**
      * Returns the runtime descriptor describing currently starting/running/stopping
-     * workspace runtime, throws {@link NotFoundException} if workspace with
-     * such id wasn't started and doesn't have runtime in any of
-     * starting/running/stopping states.
+     * workspace runtime.
      *
      * <p>Note that the {@link RuntimeDescriptor#getRuntime()} method
      * returns {@link Optional} which describes just a snapshot copy of
