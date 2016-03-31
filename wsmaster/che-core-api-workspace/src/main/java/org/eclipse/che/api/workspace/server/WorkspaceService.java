@@ -682,7 +682,7 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
-        final String normalizedPath = '/' + path;
+        final String normalizedPath = path.startsWith("/") ? path : '/' + path;
         if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain project with path '%s'",
                                                id,
@@ -714,7 +714,7 @@ public class WorkspaceService extends Service {
                                                   ForbiddenException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        final String normalizedPath = '/' + path;
+        final String normalizedPath = path.startsWith("/") ? path : '/' + path;
         if (workspace.getConfig().getProjects().removeIf(project -> project.getPath().equals(normalizedPath))) {
             workspaceManager.updateWorkspace(id, workspace);
         }
