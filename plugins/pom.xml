@@ -39,5 +39,6 @@
         <module>plugin-python</module>
         <module>plugin-svn</module>
         <module>plugin-cpp</module>
+        <module>plugin-nodejs</module>
     </modules>
 </project>
