@@ -10,8 +10,6 @@
  */
 'use strict';
 
-// TODO remove commented code CHE-718
-
 /**
  * This class is handling the workspace retrieval
  * It sets to the array workspaces the current workspaces which are not temporary
