@@ -156,7 +156,7 @@ public class MavenMessagesHandler {
             }
         }
 
-        pomEditorReconciler.updateProblems(dto.getProblems());
+        pomEditorReconciler.reconcilePoms(updatedProjects);
     }
 
     private Set<String> computeUniqueHiLevelProjects(List<String> updatedProjects) {

@@ -24,7 +24,6 @@ import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.server.rmi.MavenServerManagerTest;
 import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
-import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -71,8 +70,7 @@ public class ClasspathManagerTest extends BaseTest {
         mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
                                             new MavenCommunication() {
                                                 @Override
-                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed,
-                                                                              List<MavenProjectProblem> mavenProjectProblems) {
+                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
 
                                                 }
 

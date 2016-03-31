@@ -129,6 +129,10 @@
             <artifactId>org.eclipse.jdt.ui</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.text</groupId>
+            <artifactId>org.eclipse.text</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-websockets</artifactId>
         </dependency>

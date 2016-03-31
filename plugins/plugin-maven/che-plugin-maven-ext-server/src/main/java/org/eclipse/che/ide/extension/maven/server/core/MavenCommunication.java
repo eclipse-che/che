@@ -16,7 +16,6 @@ import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.shared.MessageType;
 import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
-import org.eclipse.che.maven.data.MavenProjectProblem;
 
 import java.util.List;
 import java.util.Set;
@@ -29,8 +28,7 @@ import java.util.Set;
 @ImplementedBy(MavenWebSocketCommunication.class)
 public interface MavenCommunication {
 
-    void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed,
-                           List<MavenProjectProblem> mavenProjectProblems);
+    void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed);
 
     void sendNotification(NotificationMessage message);
 

@@ -24,7 +24,6 @@ import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManage
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProjectModifications;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
-import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,13 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 
@@ -81,7 +78,7 @@ public class MavenWorkspace {
         manager.addListener(new MavenProjectListener() {
             @Override
             public void projectResolved(MavenProject project, MavenProjectModifications modifications) {
-                communication.sendUpdateMassage(Collections.emptySet(), Collections.emptyList(), project.getProblems());
+//                communication.sendUpdateMassage(Collections.emptySet(), Collections.emptyList());
             }
 
             @Override
@@ -100,7 +97,7 @@ public class MavenWorkspace {
 
                 //TODO schedule resolving tasks
                 List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
-                communication.sendUpdateMassage(updated.keySet(), removed, collectProblems(updatedProjects));
+                communication.sendUpdateMassage(updated.keySet(), removed);
             }
         });
     }
@@ -138,12 +135,12 @@ public class MavenWorkspace {
         });
     }
 
-    private List<MavenProjectProblem> collectProblems(List<MavenProject> updatedProjects) {
-
-        List<MavenProjectProblem> result = new ArrayList<>();
-        result.addAll(updatedProjects.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
-        return result;
-    }
+//    private List<MavenProjectProblem> collectProblems(List<MavenProject> updatedProjects) {
+//
+//        List<MavenProjectProblem> result = new ArrayList<>();
+//        result.addAll(updatedProjects.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
+//        return result;
+//    }
 
     public void update(List<IProject> projects) {
         manager.update(projects, true);

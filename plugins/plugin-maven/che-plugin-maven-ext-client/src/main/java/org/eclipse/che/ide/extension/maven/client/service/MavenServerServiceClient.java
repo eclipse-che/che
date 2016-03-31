@@ -13,6 +13,9 @@ package org.eclipse.che.ide.extension.maven.client.service;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.ext.java.shared.dto.Problem;
+
+import java.util.List;
 
 /**
  * Client for Maven Server API.
@@ -39,4 +42,11 @@ public interface MavenServerServiceClient {
      * @return true if downloading was successful, false otherwise
      */
     Promise<Boolean> downloadSources(String projectPath, String fqn);
+
+    /**
+     * Invokes reconciling for pom.xml file
+     * @param pomPath tha path to pom.xml file
+     * @return list of problems if any
+     */
+    Promise<List<Problem>> reconcilePom(String pomPath);
 }

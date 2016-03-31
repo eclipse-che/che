@@ -28,7 +28,6 @@ import org.eclipse.che.ide.extension.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenKey;
-import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -79,8 +78,7 @@ public class WorkspaceTest extends BaseTest {
         mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
                                             new MavenCommunication() {
                                                 @Override
-                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed,
-                                                                              List<MavenProjectProblem> mavenProjectProblems) {
+                                                public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
 
                                                 }
 

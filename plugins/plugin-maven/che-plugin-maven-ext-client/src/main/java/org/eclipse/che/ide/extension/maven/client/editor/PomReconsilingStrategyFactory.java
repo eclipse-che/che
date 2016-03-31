@@ -8,24 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.maven.shared.dto;
+package org.eclipse.che.ide.extension.maven.client.editor;
 
-import org.eclipse.che.dto.shared.DTO;
-
-import java.util.List;
+import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
+import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
 
 /**
- * Contains changes in project model, after updating maven projects
+ * Factory class for creating PomReconsiligStrategy
+ *
  * @author Evgen Vidolob
  */
-@DTO
-public interface ProjectsUpdateMessage {
+public interface PomReconsilingStrategyFactory {
 
-    List<String> getUpdatedProjects();
-
-    void setUpdatedProjects(List<String> updatedProjects);
-
-    List<String> getDeletedProjects();
-
-    void setDeletedProjects(List<String> deletedProjects);
+    PomReconsilingStrategy create(AnnotationModel annotationModel, EmbeddedTextEditorPresenter<?> editor);
 }
