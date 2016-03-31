@@ -29,5 +29,6 @@
         <module>che-core-api-workspace</module>
         <module>che-core-api-user</module>
         <module>che-core-api-factory</module>
+        <module>che-core-api-ssh</module>
     </modules>
 </project>
