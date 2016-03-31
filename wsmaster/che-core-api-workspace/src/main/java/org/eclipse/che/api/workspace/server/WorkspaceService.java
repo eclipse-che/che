@@ -180,10 +180,10 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public WorkspaceDto getById(@ApiParam("Workspace ID") @PathParam("id") String id) throws NotFoundException,
-                                                                                             ServerException,
-                                                                                             ForbiddenException,
-                                                                                             BadRequestException {
+    public WorkspaceDto getByKey(@ApiParam("Workspace ID") @PathParam("id") String id) throws NotFoundException,
+                                                                                              ServerException,
+                                                                                              ForbiddenException,
+                                                                                              BadRequestException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         return injectLinks(asDto(workspace));

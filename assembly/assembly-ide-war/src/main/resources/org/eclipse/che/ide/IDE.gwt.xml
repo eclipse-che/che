@@ -49,12 +49,16 @@
     <inherits name='org.eclipse.che.ide.ext.dashboard.Dashboard'/>
     <inherits name='org.eclipse.che.ide.ext.ssh.MachineSsh'/>
     <inherits name='org.eclipse.che.ide.ext.git.Git'/>
-    <inherits name='org.eclipse.che.ide.ext.github.GitHub'/>
+    <inherits name="org.eclipse.che.ide.ext.git.ssh.Ssh"/>
+    <inherits name='org.eclipse.che.plugin.github.GitHub'/>
     <inherits name='org.eclipse.che.ide.editor.orion.OrionEditor'/>
     <inherits name="org.eclipse.che.ide.orion.OrionCompare"/>
     <inherits name='org.eclipse.che.env.local.LocalEnvironment'/>
     <inherits name='org.eclipse.che.ide.ext.plugins.PluginsDevelopment'/>
 
+    <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
+    <inherits name='org.eclipse.che.plugin.python.Python'/>
+    <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
 
     <!-- Platform API GWT client dependencies                       -->

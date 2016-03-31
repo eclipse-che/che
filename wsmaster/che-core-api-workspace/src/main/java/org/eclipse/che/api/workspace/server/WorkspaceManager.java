@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -78,6 +79,7 @@ public class WorkspaceManager {
     private final EventService      eventService;
     private final ExecutorService   executor;
     private final MachineManager    machineManager;
+    private final UserManager       userManager;
 
     private WorkspaceHooks hooks = new NoopWorkspaceHooks();
 
@@ -85,11 +87,13 @@ public class WorkspaceManager {
     public WorkspaceManager(WorkspaceDao workspaceDao,
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
-                            MachineManager machineManager) {
+                            MachineManager machineManager,
+                            UserManager userManager) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.eventService = eventService;
         this.machineManager = machineManager;
+        this.userManager = userManager;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
@@ -102,7 +106,7 @@ public class WorkspaceManager {
     }
 
     /**
-     * Creates a new {@link Workspace} instance based on the given configuration.
+     * Creates a new {@link WorkspaceImpl} instance based on the given configuration.
      *
      * @param config
      *         the workspace config to create the new workspace instance
@@ -179,22 +183,32 @@ public class WorkspaceManager {
     }
 
     /**
-     * Gets workspace by its id.
+     * Gets workspace by composite key.
      *
-     * <p>Returned instance status is either {@link WorkspaceStatus#STOPPED}
-     * or  defined by its runtime(if exists).
+     * <p> Key rules:
+     * <ul>
+     * <li>If it doesn't contain <b>:</b> character then that key is id(e.g. workspace123456)
+     * <li>If it contains <b>:</b> character then that key is combination of user name and workspace name
+     * <li><b></>:workspace_name</b> is valid abstract key and user will be detected from Environment.
+     * <li><b>user_name:</b> is not valid abstract key
+     * </ul>
      *
-     * @param workspaceId
-     *         workspace id
+     * <p>Returned instance always permanent(non-temporary), contains websocket channels
+     * and with either {@link WorkspaceStatus#STOPPED} status or status defined by its runtime(if exists).
+     *
+     * @param key
+     *         composite key
      * @return the workspace instance
+     * @throws NullPointerException
+     *         when {@code key} is null
      * @throws NotFoundException
      *         when workspace doesn't exist
      * @throws ServerException
      *         when any server error occurs
      */
-    public WorkspaceImpl getWorkspace(String workspaceId) throws NotFoundException, ServerException {
-        requireNonNull(workspaceId, "Required non-null workspace id");
-        return normalizeState(workspaceDao.get(workspaceId));
+    public WorkspaceImpl getWorkspace(String key) throws NotFoundException, ServerException {
+        requireNonNull(key, "Required non-null workspace key");
+        return normalizeState(getByKey(key));
     }
 
     /**
@@ -612,6 +626,21 @@ public class WorkspaceManager {
                  workspace.getConfig().getName(),
                  sessionUser().getName());
         return workspace;
+    }
+
+    /*
+    * Get workspace using composite key.
+    *
+    */
+    private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
+        String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
+        if (parts.length == 1) {
+            return workspaceDao.get(key);
+        }
+        final String userName = parts[0];
+        final String wsName = parts[1];
+        final String ownerId = userName.isEmpty() ? sessionUser().getId() : userManager.getByName(userName).getId();
+        return workspaceDao.get(wsName, ownerId);
     }
 
     /** No-operations workspace hooks. Each method does nothing */

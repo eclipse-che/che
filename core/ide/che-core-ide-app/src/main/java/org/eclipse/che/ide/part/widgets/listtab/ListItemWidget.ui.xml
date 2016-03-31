@@ -29,13 +29,16 @@
             font-size: 11px;
             font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
             color: openedFilesDropdownListTextColor;
+            position: relative;
         }
 
         .icon {
-            float: left;
             width: 22px;
             height: 20px;
             overflow: hidden;
+            position: absolute;
+            left: 0px;
+            top: 0px;
         }
 
         .icon svg {
@@ -46,33 +49,50 @@
         }
 
         .title {
-            float: left;
             padding-left: 4px;
             cursor: default;
-            max-width: 250px;
             overflow: hidden;
             text-overflow: ellipsis;
+            width: 145px;
+            position: absolute;
+            left: 22px;
+            top: 0px;
+            height: 20px;
+            line-height: 20px;
+            white-space: nowrap;
         }
 
-        .close {
-            float: right;
+        .closePanel {
             width: 22px;
             height: 20px;
             overflow: hidden;
+            position: absolute;
+            right: 0px;
+            top: 0px;
         }
 
-        .close svg {
+        .closeButton {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            position: absolute;
+            left: 4px;
+            top: 3px;
+        }
+
+        .closePanel .closeButton svg {
             width: 6px;
             height: 6px;
-            margin-left: 8px;
-            margin-top: 7px;
-            position: absolute;
             opacity: 0.5;
             display: none;
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            pointer-events: none;
         }
 
-        .close svg g,
-        .close svg path {
+        .closePanel .closeButton svg g,
+        .closePanel .closeButton svg path {
             fill: openedFilesDropdownListCloseButtonColor;
         }
 
@@ -81,21 +101,23 @@
             color: openedFilesDropdownListHoverTextColor;
         }
 
-        .main:HOVER .close svg {
+        .main:HOVER .closePanel .closeButton svg {
             display: block;
         }
 
-        .main:HOVER .close svg:HOVER {
+        .main:HOVER .closePanel .closeButton:HOVER svg {
             opacity: 1;
         }
 
     </ui:style>
 
-    <g:FlowPanel addStyleNames="{style.main}">
+    <g:FlowPanel styleName="{style.main}">
         <g:FlowPanel ui:field="iconPanel" addStyleNames="{style.icon}"></g:FlowPanel>
         <g:Label ui:field="title" styleName="{style.title}" />
-        <g:FlowPanel addStyleNames="{style.close}">
-            <svg:SVGImage ui:field="closeIcon" resource="{resources.closeIcon}"></svg:SVGImage>
+        <g:FlowPanel styleName="{style.closePanel}">
+            <g:FlowPanel ui:field="closeButton" styleName="{style.closeButton}">
+                <svg:SVGImage resource="{resources.closeIcon}" />
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 

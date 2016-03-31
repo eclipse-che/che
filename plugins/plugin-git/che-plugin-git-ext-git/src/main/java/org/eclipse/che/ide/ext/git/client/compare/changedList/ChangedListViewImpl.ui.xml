@@ -14,7 +14,23 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
-    <g:DockLayoutPanel ui:field="changedFilesPanel" unit="PX" width="800px" height="500px"
-                       addStyleNames="{res.gitCSS.simpleListContainer}"
-                       debugId="git-changed-filesPanel"/>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.git.client.GitLocalizationConstant'/>
+    <ui:style>
+        .space {
+            margin-right: 5px;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="800px" height="500px">
+        <g:north size="25">
+            <g:FlowPanel>
+                <g:Button ui:field="changeViewModeButton" width="135px" addStyleNames="{style.space}"/>
+                <g:Button ui:field="expandButton" addStyleNames="{style.space}"/>
+                <g:Button ui:field="collapseButton" addStyleNames="{style.space}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:center>
+            <g:LayoutPanel ui:field="changedFilesPanel" addStyleNames="{res.gitCSS.simpleListContainer}"/>
+        </g:center>
+    </g:DockLayoutPanel>
 </ui:UiBinder>

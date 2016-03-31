@@ -12,6 +12,8 @@ package org.eclipse.che.ide.debug;
 
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 
+import java.util.Objects;
+
 /**
  * Immutable object represents a breakpoint. It isn't designed to be preserved.
  * {@link org.eclipse.che.ide.debug.dto.BreakpointDto} should be used then.
@@ -80,9 +82,6 @@ public class Breakpoint {
         return file;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -93,6 +92,23 @@ public class Breakpoint {
                .append(", path=").append(path)
                .append("]");
         return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Breakpoint)) return false;
+
+        Breakpoint that = (Breakpoint)o;
+
+        return lineNumber == that.lineNumber && Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = lineNumber;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        return result;
     }
 
     public enum Type {

@@ -116,8 +116,8 @@
     font-size: 2px !important;
     cursor: pointer;
     box-sizing: border-box;
-    border-left: 3px solid transparent;
-    border-right: 3px solid transparent;
+    border-left: 1px solid transparent;
+    border-right: 5px solid transparent;
 }
 .textviewTooltip {
     font-family: "Open Sans", sans-serif;
@@ -270,6 +270,9 @@
 }
 .orionCodenvy .meta.tag {
     color: #e8bf55;
+}
+.orionCodenvy .meta.preprocessor {
+    color: #A4A4A4;
 }
 .annotationHTML {
     margin-left: 1px;

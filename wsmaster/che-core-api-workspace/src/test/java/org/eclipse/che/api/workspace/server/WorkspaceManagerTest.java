@@ -20,6 +20,7 @@ import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -87,6 +88,8 @@ public class WorkspaceManagerTest {
     private MachineManager                machineManager;
     @Mock
     private WorkspaceRuntimes             runtimes;
+    @Mock
+    private UserManager                   userManager;
     @Captor
     private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -97,7 +100,8 @@ public class WorkspaceManagerTest {
         workspaceManager = spy(new WorkspaceManager(workspaceDao,
                                                     runtimes,
                                                     eventService,
-                                                    machineManager));
+                                                    machineManager,
+                                                    userManager));
         workspaceManager.setHooks(workspaceHooks);
 
         when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -171,7 +175,27 @@ public class WorkspaceManagerTest {
         workspaceManager.getWorkspace("workspace123");
     }
 
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
+        when(runtimes.get(any())).thenThrow(new NotFoundException(""));
+        when(userManager.getByName(anyString())).thenReturn(new org.eclipse.che.api.user.server.dao.User()
+                                                                    .withId(workspace.getNamespace()));
 
+        final WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
+        when(runtimes.get(any())).thenThrow(new NotFoundException(""));
+
+        final WorkspaceImpl result = workspaceManager.getWorkspace(":" + workspace.getConfig().getName());
+        assertEquals(result, workspace);
+    }
     @Test
     public void shouldBeAbleToGetWorkspacesByOwner() throws Exception {
         // given

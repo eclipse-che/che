@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +62,7 @@ public class ProjectRegistry {
                            VirtualFileSystemProvider vfsProvider,
                            ProjectTypeRegistry projectTypeRegistry,
                            ProjectHandlerRegistry handlers) throws ServerException {
-        this.projects = new HashMap<>();
+        this.projects = new ConcurrentHashMap<>();
         this.workspaceHolder = workspaceHolder;
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.projectTypeRegistry = projectTypeRegistry;
@@ -210,6 +211,9 @@ public class ProjectRegistry {
             } else {
                 workspaceHolder.addProject(project);
             }
+        } else if (config == null) {
+            // initializing project from unconfigured folder during #initProjects()
+            workspaceHolder.addProject(project);
         }
 
         return project;

@@ -20,12 +20,15 @@ export class WorkspaceDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification) {
+  constructor($rootScope, $route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification, ideSvc, $log) {
+    this.$rootScope = $rootScope;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.cheWorkspace = cheWorkspace;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
+    this.ideSvc = ideSvc;
+    this.$log = $log;
 
     this.workspaceId = $route.current.params.workspaceId;
 
@@ -88,7 +91,7 @@ export class WorkspaceDetailsCtrl {
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Rename workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
   }
 
@@ -122,18 +125,20 @@ export class WorkspaceDetailsCtrl {
       this.$location.path('/workspaces');
     }, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Delete workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
 
     return promise;
   }
 
   runWorkspace() {
-    let promise = this.cheAPI.getWorkspace().startWorkspace(this.workspaceId, this.workspaceDetails.config.defaultEnv);
-
+    this.ideSvc.init();
+    this.ideSvc.setSelectedWorkspace(this.workspaceDetails);
+    this.$rootScope.loadingIDE = false;
+    let promise = this.ideSvc.startIde(true);
     promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
   }
 
@@ -142,7 +147,7 @@ export class WorkspaceDetailsCtrl {
 
     promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
   }
 

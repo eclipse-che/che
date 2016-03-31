@@ -31,10 +31,10 @@ import org.eclipse.che.ide.ext.java.jdi.client.actions.StepIntoAction;
 import org.eclipse.che.ide.ext.java.jdi.client.actions.StepOutAction;
 import org.eclipse.che.ide.ext.java.jdi.client.actions.StepOverAction;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
+import org.eclipse.che.ide.ext.java.jdi.client.debug.JavaDebugger;
 import org.eclipse.che.ide.ext.java.jdi.client.fqn.FqnResolverFactory;
 import org.eclipse.che.ide.ext.java.jdi.client.fqn.JavaClassFqnResolver;
 import org.eclipse.che.ide.ext.java.jdi.client.fqn.JavaFqnResolver;
-import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JAVA_CLASS;
@@ -83,6 +83,7 @@ public class JavaRuntimeExtension {
                                 ChangeVariableValueAction changeVariableValueAction,
                                 ShowHideDebuggerPanelAction showHideDebuggerPanelAction,
                                 DebuggerManager debuggerManager,
+                                JavaDebugger javaDebugger,
                                 DebuggerPresenter debuggerPresenter,
                                 FqnResolverFactory resolverFactory,
                                 JavaFqnResolver javaFqnResolver,
@@ -129,7 +130,7 @@ public class JavaRuntimeExtension {
         DefaultActionGroup runContextGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN_CONTEXT_MENU);
         runContextGroup.add(remoteDebugAction);
 
-        debuggerManager.registeredDebugger(MavenAttributes.MAVEN_ID, debuggerPresenter);
+        debuggerManager.registeredDebugger(JavaDebugger.LANGUAGE, javaDebugger);
         resolverFactory.addResolver(TEXT_X_JAVA, javaFqnResolver);
         resolverFactory.addResolver("application/java", javaFqnResolver);
         resolverFactory.addResolver(APPLICATION_JAVA_CLASS, javaClassFqnResolver);

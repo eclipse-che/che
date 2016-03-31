@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
+import org.eclipse.che.ide.ext.git.client.compare.FileStatus;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
@@ -37,6 +38,7 @@ import java.util.Collections;
 
 import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
@@ -186,7 +188,9 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
                                                                           }
                                                                       }).show();
                                 } else {
-                                    comparePresenter.show(result.substring(2), result.substring(0, 1), selectedRevision.getId());
+                                    comparePresenter.show(result.substring(2),
+                                                          defineStatus(result.substring(0, 1)),
+                                                          selectedRevision.getId());
                                 }
                             }
 

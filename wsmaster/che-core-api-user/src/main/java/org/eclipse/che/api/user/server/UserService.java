@@ -31,11 +31,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.annotations.Required;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.api.user.shared.dto.UserInRoleDescriptor;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -56,16 +52,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.status;
-import static org.eclipse.che.api.user.server.Constants.ID_LENGTH;
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_CREATE_USER;
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_CURRENT_USER;
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_USER_BY_EMAIL;
@@ -73,10 +66,8 @@ import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_USER_BY_ID;
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_INROLE;
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_REMOVE_USER_BY_ID;
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_PASSWORD;
-import static org.eclipse.che.api.user.server.Constants.PASSWORD_LENGTH;
 import static org.eclipse.che.api.user.server.DtoConverter.toDescriptor;
 import static org.eclipse.che.api.user.server.LinksInjector.injectLinks;
-import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -91,21 +82,15 @@ public class UserService extends Service {
     @VisibleForTesting
     static final String USER_SELF_CREATION_ALLOWED = "user.self.creation.allowed";
 
-    private final UserDao        userDao;
-    private final UserProfileDao profileDao;
-    private final PreferenceDao  preferenceDao;
+    private final UserManager    userManager;
     private final TokenValidator tokenValidator;
     private final boolean        userSelfCreationAllowed;
 
     @Inject
-    public UserService(UserDao userDao,
-                       UserProfileDao profileDao,
-                       PreferenceDao preferenceDao,
+    public UserService(UserManager userManager,
                        TokenValidator tokenValidator,
                        @Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed) {
-        this.userDao = userDao;
-        this.profileDao = profileDao;
-        this.preferenceDao = preferenceDao;
+        this.userManager = userManager;
         this.tokenValidator = tokenValidator;
         this.userSelfCreationAllowed = userSelfCreationAllowed;
     }
@@ -176,16 +161,7 @@ public class UserService extends Service {
         }
 
         final User user = context.isUserInRole("system/admin") ? fromEntity(userDescriptor) : fromToken(token);
-
-        userDao.create(user.withId(generate("user", ID_LENGTH))
-                           .withPassword(firstNonNull(user.getPassword(), generate("", PASSWORD_LENGTH))));
-        profileDao.create(new Profile(user.getId()));
-
-        final Map<String, String> preferences = new HashMap<>(4);
-        preferences.put("temporary", Boolean.toString(isTemporary));
-        preferences.put("codenvy:created", Long.toString(System.currentTimeMillis()));
-        preferenceDao.setPreferences(user.getId(), preferences);
-
+        userManager.create(user, isTemporary);
         return status(CREATED).entity(injectLinks(toDescriptor(user), getServiceContext())).build();
     }
 
@@ -210,7 +186,7 @@ public class UserService extends Service {
                    @ApiResponse(code = 404, message = "Not Found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
     public UserDescriptor getCurrent() throws NotFoundException, ServerException {
-        final User user = userDao.getById(currentUser().getId());
+        final User user = userManager.getById(currentUserId());
         return injectLinks(toDescriptor(user), getServiceContext());
     }
 
@@ -244,12 +220,12 @@ public class UserService extends Service {
                                                        BadRequestException,
                                                        ServerException,
                                                        ConflictException {
+
         checkPassword(password);
 
-        final User user = userDao.getById(currentUser().getId());
+        final User user = userManager.getById(currentUserId());
         user.setPassword(password);
-
-        userDao.update(user);
+        userManager.update(user);
     }
 
     /**
@@ -279,7 +255,7 @@ public class UserService extends Service {
                    @ApiResponse(code = 500, message = "Internal Server Error")})
     public UserDescriptor getById(@ApiParam(value = "User ID") @PathParam("id") String id) throws NotFoundException,
                                                                                                   ServerException {
-        final User user = userDao.getById(id);
+        final User user = userManager.getById(id);
         return injectLinks(toDescriptor(user), getServiceContext());
     }
 
@@ -320,7 +296,7 @@ public class UserService extends Service {
         if (alias == null) {
             throw new BadRequestException("Missed parameter alias");
         }
-        final User user = userDao.getByAlias(alias);
+        final User user = userManager.getByAlias(alias);
         return injectLinks(toDescriptor(user), getServiceContext());
     }
 
@@ -349,7 +325,7 @@ public class UserService extends Service {
     public void remove(@ApiParam(value = "User ID") @PathParam("id") String id) throws NotFoundException,
                                                                                        ServerException,
                                                                                        ConflictException {
-        userDao.remove(id);
+        userManager.remove(id);
     }
 
 
@@ -439,7 +415,7 @@ public class UserService extends Service {
     public UserDescriptor getByName(@ApiParam(value = "User email")
                                     @PathParam("name")
                                     String name) throws NotFoundException, ServerException {
-        final User user = userDao.getByName(name);
+        final User user = userManager.getByName(name);
         return injectLinks(toDescriptor(user), getServiceContext());
     }
 
@@ -479,6 +455,19 @@ public class UserService extends Service {
         return new User().withEmail(tokenValidator.validateToken(token));
     }
 
+    /**
+     * Checks user password conforms some rules:
+     * <ul>
+     * <li> Not null
+     * <li> Must be at least 8 character length
+     * <li> Must contain at least one letter and one digit
+     * </ul>
+     *
+     * @param password
+     *         user's password
+     * @throws BadRequestException
+     *         when password violates any rule
+     */
     private void checkPassword(String password) throws BadRequestException {
         if (password == null) {
             throw new BadRequestException("Password required");
@@ -492,7 +481,7 @@ public class UserService extends Service {
             if (Character.isDigit(passwordChar)) {
                 numOfDigits++;
             }
-            if (Character.isLetter(passwordChar)) {
+            else if (Character.isLetter(passwordChar)) {
                 numOfLetters++;
             }
         }
@@ -501,7 +490,7 @@ public class UserService extends Service {
         }
     }
 
-    private org.eclipse.che.commons.user.User currentUser() {
-        return EnvironmentContext.getCurrent().getUser();
+    private String currentUserId() {
+        return EnvironmentContext.getCurrent().getUser().getId();
     }
 }

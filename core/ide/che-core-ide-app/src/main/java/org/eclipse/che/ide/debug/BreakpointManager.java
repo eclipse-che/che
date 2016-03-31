@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.List;
 
 /**
@@ -19,7 +17,7 @@ import java.util.List;
  *
  * @author Anatoliy Bazko
  */
-public interface BreakpointManager {
+public interface BreakpointManager extends BreakpointManagerObservable {
 
     /**
      * Toggle / untoggle breakpoint.
@@ -27,33 +25,12 @@ public interface BreakpointManager {
     void changeBreakpointState(int lineNumber);
 
     /**
-     * Removes all breakpoints.
-     */
-    void removeAllBreakpoints();
-
-    /**
-     * Indicates if current active file has a breakpoint at giving line.
-     */
-    boolean isCurrentBreakpoint(int lineNumber);
-    
-    /**
-     * Returns current breakpoint.
-     */
-    @Nullable
-    Breakpoint getCurrentBreakpoint();
-
-    /**
      * @return all breakpoints
      */
     List<Breakpoint> getBreakpointList();
 
     /**
-     * If debugger has stopped at specific line then this method is invoked.
+     * Removes all breakpoints.
      */
-    void setCurrentBreakpoint(int lineNumber);
-    
-    /**
-     * Removes current breakpoint mark.
-     */
-    void removeCurrentBreakpoint();
+    void deleteAllBreakpoints();
 }

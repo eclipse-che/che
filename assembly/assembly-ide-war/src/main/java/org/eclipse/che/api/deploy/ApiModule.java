@@ -66,8 +66,6 @@ public class ApiModule extends AbstractModule {
         bind(EverrestDownloadFileResponseFilter.class);
         bind(ETagResponseFilter.class);
 
-//        bind(DockerVersionVerifier.class).asEagerSingleton();
-
         bind(UserService.class);
         bind(UserProfileService.class);
 

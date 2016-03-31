@@ -10,14 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.client.debug.changevalue;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerPresenter;
 import org.eclipse.che.ide.ext.java.jdi.client.debug.DebuggerVariable;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
 
 /**
  * Presenter for changing variables value.
@@ -29,10 +31,9 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
     private final DebuggerManager                 debuggerManager;
     private final ChangeValueView                 view;
     private final DebuggerPresenter               debuggerPresenter;
-    /** Connected debugger information. */
     private final JavaRuntimeLocalizationConstant constant;
-    /** Variable to change its value. */
-    private       DebuggerVariable                debuggerVariable;
+
+    private DebuggerVariable debuggerVariable;
 
     /** Create presenter. */
     @Inject
@@ -49,8 +50,7 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
 
     /** Show dialog. */
     public void showDialog() {
-        this.debuggerVariable = debuggerPresenter.getSelectedVariable();
-
+        debuggerVariable = debuggerPresenter.getSelectedVariable();
         view.setValueTitle(constant.changeValueViewExpressionFieldTitle(debuggerVariable.getName()));
         view.setValue(debuggerVariable.getValue());
         view.focusInValueField();
@@ -68,10 +68,12 @@ public class ChangeValuePresenter implements ChangeValueView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onChangeClicked() {
-        Debugger debugger = debuggerManager.getDebugger();
+        Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null) {
-            final String newValue = view.getValue();
-            debugger.changeVariableValue(debuggerVariable.getVariablePath().getPath(), newValue);
+            List<String> variablePath = debuggerVariable.getVariablePath().getPath();
+            String newValue = view.getValue();
+
+            debugger.changeVariableValue(variablePath, newValue);
         }
 
         view.close();

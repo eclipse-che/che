@@ -189,14 +189,14 @@ export class CheWorkspace {
 
     data.environments.push(envEntry);
 
-    let attrs = convertAttributes(attributes);
+    let attrs = this._convertAttributes(attributes);
 
     let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;
     return promise;
   }
 
   createWorkspaceFromConfig(accountId, workspaceConfig, attributes) {
-    let attrs = convertAttributes(attributes);
+    let attrs = this._convertAttributes(attributes);
     return this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, workspaceConfig).$promise;
   }
 
@@ -206,7 +206,7 @@ export class CheWorkspace {
    * @param attributes object
    * @returns array of attributes
    */
-  convertAttributes(attributes) {
+  _convertAttributes(attributes) {
     let attrs = [];
     for (let attrName in attributes || {}) {
       attrs.push(attrName + ':' + attributes[attrName]);
@@ -309,4 +309,7 @@ export class CheWorkspace {
 
   }
 
+  getIdeUrl(workspaceName) {
+    return '/ide/' + workspaceName;
+  }
 }

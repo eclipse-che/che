@@ -1,0 +1,83 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+  <ui:with field='locale' type='org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants'/>
+  <ui:with field="style" type="org.eclipse.che.plugin.svn.ide.importer.SubversionProjectImporterViewImpl.Style"/>
+  <g:DockLayoutPanel unit="PX" addStyleNames="{style.mainPanel}">
+    <g:north size="380">
+      <g:FlowPanel ui:field="importerPanel">
+        <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+          <g:HTMLPanel addStyleNames="{style.horizontalLine}"/>
+          <g:Label text="{locale.importerImporterInfo}" addStyleNames="{style.label}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="15px" addStyleNames="{style.namePanel}">
+          <g:HTMLPanel debugId="importProject-descriptionArea" ui:field="descriptionArea"
+                       addStyleNames="{style.description}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="37px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.importerProjectUrl}"
+                   addStyleNames="{style.labelPosition}"/>
+          <g:TextBox width="290px" height="14px" ui:field="projectUrl" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="3"
+                     debugId="file-importProject-projectUrl"/>
+          <g:Label ui:field="labelUrlError" width="290px" wordWrap="true" addStyleNames="{style.labelErrorPosition}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="37px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.projectImporterProjectRelativePath}"
+                   addStyleNames="{style.labelPosition}"/>
+          <g:TextBox width="270px" height="14px" ui:field="projectRelativePath" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="4"
+                     debugId="file-importProject-projectRelativePath"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="37px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.askCredentialsUsername}"
+                   addStyleNames="{style.labelPosition}"/>
+          <g:TextBox width="270px" height="14px" ui:field="username" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="4"
+                     debugId="file-importProject-username"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="37px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.askCredentialsPassword}"
+                   addStyleNames="{style.labelPosition}"/>
+          <g:PasswordTextBox width="270px" height="14px" ui:field="password" addStyleNames="{style.inputField} {style.alignRight}" tabIndex="4"
+                     debugId="file-importProject-password"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="20px" addStyleNames="{style.namePanel} {style.marginTop}">
+          <g:HTMLPanel addStyleNames="{style.horizontalLine}"/>
+          <g:Label text="{locale.importerProjectInfo}" addStyleNames="{style.label}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.importerProjectName}"
+                   addStyleNames="{style.labelPosition}"/>
+          <g:TextBox width="290px" height="14px" ui:field="projectName" addStyleNames="{style.inputField} {style.alignRight}"
+                     tabIndex="4"
+                     debugId="file-importProject-projectName" title="{locale.importerProjectNamePrompt}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.importerProjectDescription}"
+                   addStyleNames="{style.labelPosition}"/>
+          <g:TextArea width="290px" height="42px" ui:field="projectDescription" addStyleNames="{style.inputField} {style.alignRight}"
+                      debugId="file-importProject-projectDescription" title="{locale.importerProjectDescriptionPrompt}"
+                      tabIndex="5"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="30px" addStyleNames="{style.namePanel}">
+          <g:Label text="{locale.importerProjectPrivacy}" addStyleNames="{style.labelPosition}"/>
+          <g:RadioButton name="privacy" text="{locale.importerProjectVisibilityPublic}"
+                         addStyleNames="{style.radioButtonPosition}" checked="true"
+                         ui:field="projectPublic" debugId="file-importProject-public" tabIndex="7"/>
+          <g:RadioButton name="privacy" text="{locale.importerProjectVisibilityPrivate}"
+                         addStyleNames="{style.radioButtonPosition}"
+                         ui:field="projectPrivate" debugId="file-importProject-private" tabIndex="6"/>
+        </g:FlowPanel>
+      </g:FlowPanel>
+    </g:north>
+  </g:DockLayoutPanel>
+</ui:UiBinder>

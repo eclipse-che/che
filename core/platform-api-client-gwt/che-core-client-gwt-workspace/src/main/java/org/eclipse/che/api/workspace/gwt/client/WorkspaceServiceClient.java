@@ -38,17 +38,17 @@ public interface WorkspaceServiceClient {
      * @param account
      *         the account id related to this operation
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#create(WorkspaceConfigDto, String)
+     * @see WorkspaceService#create(WorkspaceConfigDto, List, String)
      */
     Promise<WorkspaceDto> create(WorkspaceConfigDto newWorkspace, String account);
 
     /**
-     * Gets users workspace by id.
+     * Gets users workspace by key.
      *
      * @param wsId
      *         workspace ID
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#getById(String) (Integer, Integer)
+     * @see WorkspaceService#getByKey(String) (Integer, Integer)
      */
     Promise<WorkspaceDto> getWorkspace(String wsId);
 

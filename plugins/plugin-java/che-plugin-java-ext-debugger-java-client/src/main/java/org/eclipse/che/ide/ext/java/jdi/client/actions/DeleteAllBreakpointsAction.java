@@ -15,8 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.debug.BreakpointManager;
-import org.eclipse.che.ide.debug.Debugger;
-import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
 
@@ -27,26 +25,20 @@ import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
  */
 public class DeleteAllBreakpointsAction extends Action {
 
-    private final DebuggerManager   debuggerManager;
     private final BreakpointManager breakpointManager;
 
     @Inject
-    public DeleteAllBreakpointsAction(DebuggerManager debuggerManager,
-                                      BreakpointManager breakpointManager,
+    public DeleteAllBreakpointsAction(BreakpointManager breakpointManager,
                                       JavaRuntimeLocalizationConstant locale,
                                       JavaRuntimeResources resources) {
         super(locale.deleteAllBreakpoints(), locale.deleteAllBreakpointsDescription() , null, resources.deleteAllBreakpoints());
 
-        this.debuggerManager = debuggerManager;
         this.breakpointManager = breakpointManager;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Debugger debugger = debuggerManager.getDebugger();
-        if (debugger != null) {
-            debugger.deleteAllBreakpoints();
-        }
+        breakpointManager.deleteAllBreakpoints();
     }
 
     @Override

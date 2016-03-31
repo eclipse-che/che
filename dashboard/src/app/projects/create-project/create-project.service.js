@@ -34,10 +34,10 @@ export class CreateProjectSvc {
 
 
         this.creationSteps = [
-            {text: 'Create and initialize workspace', inProgressText: 'Creating workspace', logs: '', hasError: false},
-            {text: 'Start workspace master', inProgressText: 'Starting workspace master', logs: '', hasError: false},
-            {text: 'Inject and start workspace agent', inProgressText: 'Injecting and starting workspace agent', logs: '', hasError: false},
-            {text: 'Create project', inProgressText: 'Creating project', logs: '', hasError: false},
+            {text: 'Creating and initializing workspace', inProgressText: 'Provision workspace and associating it with the existing user', logs: '', hasError: false},
+            {text: 'Starting workspace runtime', inProgressText: 'Retrieving the stack\'s image and launching it', logs: '', hasError: false},
+            {text: 'Starting workspace agent', inProgressText: 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},
+            {text: 'Creating project', inProgressText: 'Creating and configuring project', logs: '', hasError: false},
             {text: 'Project created', inProgressText: 'Opening project', logs: '', hasError: false}
         ];
 

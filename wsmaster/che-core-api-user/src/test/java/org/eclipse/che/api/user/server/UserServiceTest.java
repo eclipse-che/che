@@ -10,15 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.api.user.shared.dto.UserInRoleDescriptor;
 import org.eclipse.che.commons.json.JsonHelper;
@@ -58,6 +53,8 @@ import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -77,19 +74,15 @@ public class UserServiceTest {
     private final String SERVICE_PATH = BASE_URI + "/user";
 
     @Mock
-    UserProfileDao     profileDao;
-    @Mock
-    UserDao            userDao;
-    @Mock
     TokenValidator     tokenValidator;
     @Mock
     UriInfo            uriInfo;
     @Mock
     EnvironmentContext environmentContext;
     @Mock
-    PreferenceDao      preferenceDao;
-    @Mock
     SecurityContext    securityContext;
+    @Mock
+    UserManager        userManager;
 
     UserService userService;
 
@@ -99,12 +92,10 @@ public class UserServiceTest {
     public void setUp() throws Exception {
         ResourceBinderImpl resources = new ResourceBinderImpl();
         DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        dependencies.addComponent(UserProfileDao.class, profileDao);
-        dependencies.addComponent(UserDao.class, userDao);
+        dependencies.addComponent(UserManager.class, userManager);
         dependencies.addComponent(TokenValidator.class, tokenValidator);
-        dependencies.addComponent(PreferenceDao.class, preferenceDao);
 
-        userService = new UserService(userDao, profileDao, preferenceDao, tokenValidator, true);
+        userService = new UserService(userManager, tokenValidator, true);
         final Field uriField = userService.getClass()
                                           .getSuperclass()
                                           .getDeclaredField("uriInfo");
@@ -169,8 +160,8 @@ public class UserServiceTest {
         final UserDescriptor user = (UserDescriptor)response.getEntity();
         assertEquals(user.getEmail(), userEmail);
         assertEquals(user.getPassword(), "<none>");
-        verify(userDao).create(any(User.class));
-        verify(profileDao).create(any(Profile.class));
+        verify(userManager).create(any(User.class), eq(false));
+
     }
 
     @Test
@@ -206,8 +197,7 @@ public class UserServiceTest {
         final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
         assertEquals(descriptor.getName(), newUser.getName());
         assertEquals(descriptor.getPassword(), "<none>");
-        verify(userDao).create(any(User.class));
-        verify(profileDao).create(any(Profile.class));
+        verify(userManager).create(any(User.class), eq(false));
     }
 
     @Test
@@ -225,8 +215,7 @@ public class UserServiceTest {
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create?token=" + token, null);
 
         assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
-        verify(userDao, never()).create(any(User.class));
-        verify(profileDao, never()).create(any(Profile.class));
+        verify(userManager, never()).create(any(User.class), eq(false));
     }
 
     @Test
@@ -248,8 +237,7 @@ public class UserServiceTest {
         final UserDescriptor user = (UserDescriptor)response.getEntity();
         assertEquals(user.getName(), newUser.getName());
         assertEquals(user.getPassword(), "<none>");
-        verify(userDao).create(any(User.class));
-        verify(profileDao).create(any(Profile.class));
+        verify(userManager).create(any(User.class), eq(false));
     }
 
     @Test
@@ -263,34 +251,16 @@ public class UserServiceTest {
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
 
         assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userDao, never()).create(any(User.class));
-        verify(profileDao, never()).create(any(Profile.class));
+        verify(userManager, never()).create(any(User.class), anyBoolean());
     }
 
-    @Test
-    public void shouldGeneratedPasswordWhenCreatingUserAndItIsMissing() throws Exception {
-        final UserDescriptor newUser = DtoFactory.getInstance()
-                                                 .createDto(UserDescriptor.class)
-                                                 .withName("test")
-                                                 .withEmail("test@mail.com");
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
-        assertEquals(descriptor.getName(), newUser.getName());
-        assertEquals(descriptor.getPassword(), "<none>");
-        verify(userDao).create(any(User.class));
-        verify(profileDao).create(any(Profile.class));
-    }
 
     @Test
     public void shouldThrowUnauthorizedExceptionWhenCreatingUserBasedOnTokenAndItIsNull() throws Exception {
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", null);
 
         assertEquals(response.getStatus(), UNAUTHORIZED.getStatusCode());
-        verify(userDao, never()).create(any(User.class));
-        verify(profileDao, never()).create(any(Profile.class));
+        verify(userManager, never()).create(any(User.class), anyBoolean());
     }
 
     @Test
@@ -300,8 +270,7 @@ public class UserServiceTest {
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", null);
 
         assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userDao, never()).create(any(User.class));
-        verify(profileDao, never()).create(any(Profile.class));
+        verify(userManager, never()).create(any(User.class), anyBoolean());
     }
 
     @Test
@@ -312,8 +281,7 @@ public class UserServiceTest {
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
 
         assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userDao, never()).create(any(User.class));
-        verify(profileDao, never()).create(any(Profile.class));
+        verify(userManager, never()).create(any(User.class), anyBoolean());
     }
 
     @Test
@@ -371,7 +339,7 @@ public class UserServiceTest {
                                                             environmentContext);
 
         assertEquals(response.getStatus(), NO_CONTENT.getStatusCode());
-        verify(userDao).update(user.withPassword(newPassword));
+        verify(userManager).update(user.withPassword(newPassword));
     }
 
     @Test
@@ -390,7 +358,7 @@ public class UserServiceTest {
                                                             environmentContext);
 
         assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userDao, never()).update(user.withPassword(newPassword));
+        verify(userManager, never()).update(user.withPassword(newPassword));
     }
 
     @Test
@@ -409,7 +377,7 @@ public class UserServiceTest {
                                                             environmentContext);
 
         assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userDao, never()).update(user.withPassword(newPassword));
+        verify(userManager, never()).update(user.withPassword(newPassword));
     }
 
     @Test
@@ -428,7 +396,7 @@ public class UserServiceTest {
                                                             environmentContext);
 
         assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userDao, never()).update(user.withPassword(newPassword));
+        verify(userManager, never()).update(user.withPassword(newPassword));
     }
 
     @Test
@@ -438,7 +406,7 @@ public class UserServiceTest {
         final ContainerResponse response = makeRequest(HttpMethod.DELETE, SERVICE_PATH + "/" + testUser.getId(), null);
 
         assertEquals(response.getStatus(), NO_CONTENT.getStatusCode());
-        verify(userDao).remove(testUser.getId());
+        verify(userManager).remove(testUser.getId());
     }
 
 
@@ -478,7 +446,6 @@ public class UserServiceTest {
         assertEquals(userInRoleDescriptor.getScope(), "system");
         assertEquals(userInRoleDescriptor.getScopeId(), "");
     }
-
 
     /**
      * Check the current user has the temp_user role
@@ -588,8 +555,8 @@ public class UserServiceTest {
     private User createUser() throws NotFoundException, ServerException {
         final User testUser = new User().withId("test_id")
                                         .withEmail("test@email");
-        when(userDao.getById(testUser.getId())).thenReturn(testUser);
-        when(userDao.getByAlias(testUser.getEmail())).thenReturn(testUser);
+        when(userManager.getById(testUser.getId())).thenReturn(testUser);
+        when(userManager.getByAlias(testUser.getEmail())).thenReturn(testUser);
         return testUser;
     }
 

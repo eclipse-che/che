@@ -124,13 +124,12 @@ public class WorkspaceHolder {
             return;
         }
 
-        // TODO workspace.addProject(project); but replace
         workspace.updateProject(project);
 
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "updateProject")
-                                      .build(workspace.getId()).toString();
+                                      .build(workspace.getId(), project.getPath()).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).usePutMethod().setBody(asDto(project)).request();
         } catch (IOException | ApiException e) {
@@ -165,7 +164,7 @@ public class WorkspaceHolder {
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "deleteProject")
-                                      .build(workspace.getId(), project.getName()).toString();
+                                      .build(workspace.getId(), project.getPath()).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).useDeleteMethod().request();
         } catch (IOException | ApiException e) {
@@ -180,7 +179,7 @@ public class WorkspaceHolder {
      */
     private WorkspaceDto workspaceDto(String wsId) throws ServerException {
         final String href = UriBuilder.fromUri(apiEndpoint)
-                                      .path(WorkspaceService.class).path(WorkspaceService.class, "getById")
+                                      .path(WorkspaceService.class).path(WorkspaceService.class, "getByKey")
                                       .build(wsId).toString();
         try {
             return httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
