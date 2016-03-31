@@ -24,21 +24,17 @@ import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
  * @author Evgen Vidolob
  */
 public class JsEditorProvider implements EditorProvider {
-    private final DefaultEditorProvider editorProvider;
-    private final NotificationManager   notificationManager;
-
-    /**
-     * JS editor configuration.
-     */
-    private JsEditorConfigurationProvider jsEditorConfigurationProvider;
+    private final DefaultEditorProvider         editorProvider;
+    private final NotificationManager           notificationManager;
+    private final JsEditorConfigurationProvider configurationProvider;
 
     @Inject
     public JsEditorProvider(final DefaultEditorProvider editorProvider,
                             NotificationManager notificationManager,
-                            JsEditorConfigurationProvider jsEditorConfigurationProvider) {
+                            JsEditorConfigurationProvider configurationProvider) {
         this.editorProvider = editorProvider;
         this.notificationManager = notificationManager;
-        this.jsEditorConfigurationProvider = jsEditorConfigurationProvider;
+        this.configurationProvider = configurationProvider;
     }
 
     @Override
@@ -54,7 +50,7 @@ public class JsEditorProvider implements EditorProvider {
     @Override
     public EditorPartPresenter getEditor() {
         ConfigurableTextEditor textEditor = editorProvider.getEditor();
-        textEditor.initialize(jsEditorConfigurationProvider.get(), notificationManager);
+        textEditor.initialize(configurationProvider.get(), notificationManager);
         return textEditor;
     }
 }
