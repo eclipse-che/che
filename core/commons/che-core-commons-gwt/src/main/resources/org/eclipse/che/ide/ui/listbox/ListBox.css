@@ -37,6 +37,7 @@
 
 .listBox input {
     font-size: inherit;
+    height: 18px;
     font-weight: inherit !important;
     vertical-align: bottom;
     white-space: nowrap;
@@ -45,7 +46,6 @@
     padding-left: 8px;
     display: inline;
     border: none;
-    height: 100%;
     width: literal("calc(100% - 32px)");
     outline: none;
 }

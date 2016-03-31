@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Example;
+import io.swagger.annotations.ExampleProperty;
 
 import com.google.common.collect.Maps;
 
@@ -72,6 +74,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -154,20 +157,25 @@ public class WorkspaceService extends Service {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/{key}")
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
-    @ApiOperation(value = "Get the workspace by the id",
-                  notes = "This operation can be performed only by the workspace owner")
+    @ApiOperation(value = "Get the workspace by the composite key",
+                  notes = "Composite key can be just workspace ID or in the " +
+                          "username:workspace_name form, where username is optional (e.g :workspace_name is valid key too.")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
-                   @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
+                   @ApiResponse(code = 404, message = "The workspace by specified key does not exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto getById(@ApiParam("Workspace ID") @PathParam("id") String id) throws NotFoundException,
-                                                                                                  ServerException,
-                                                                                                  ForbiddenException,
-                                                                                                  BadRequestException {
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    public UsersWorkspaceDto getByKey(@ApiParam(value = "Composite key", examples = @Example({@ExampleProperty("workspace12345678"),
+                                                                                              @ExampleProperty("username:workspace_name"),
+                                                                                              @ExampleProperty(":workspace_name")})) @PathParam("key") String key)
+            throws NotFoundException,
+                   ServerException,
+                   ForbiddenException,
+                   BadRequestException {
+        validateKey(key);
+        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(key);
         ensureUserIsWorkspaceOwner(workspace);
         return injectLinks(asDto(workspace));
     }
@@ -182,6 +190,7 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified name does not exist for current user "),
                    @ApiResponse(code = 403, message = "The user is not the workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
+    @Deprecated
     public UsersWorkspaceDto getByName(@ApiParam("The workspace name") @PathParam("name") String name) throws ServerException,
                                                                                                               BadRequestException,
                                                                                                               NotFoundException,
@@ -935,7 +944,7 @@ public class WorkspaceService extends Service {
         } else {
             links.add(createLink("GET",
                                  uriBuilder.clone()
-                                           .path(getClass(), "getById")
+                                           .path(getClass(), "getByKey")
                                            .build(workspace.getId())
                                            .toString(),
                                  APPLICATION_JSON,
@@ -1041,6 +1050,28 @@ public class WorkspaceService extends Service {
     private void requiredNotNull(Object object, String subject) throws BadRequestException {
         if (object == null) {
             throw new BadRequestException(subject + " required");
+        }
+    }
+
+    /*
+    * Validate composite key.
+    *
+    */
+    private void validateKey(String key) throws BadRequestException {
+        String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
+        switch (parts.length) {
+            case 1: {
+                return; // consider it's id
+            }
+            case 2: {
+                if (parts[1].isEmpty()) {
+                    throw new BadRequestException("Wrong composite key format - workspace name required to be set.");
+                }
+                break;
+            }
+            default: {
+                throw new BadRequestException(format("Wrong composite key %s. Format should be 'username:workspace_name'. ", key));
+            }
         }
     }
 }

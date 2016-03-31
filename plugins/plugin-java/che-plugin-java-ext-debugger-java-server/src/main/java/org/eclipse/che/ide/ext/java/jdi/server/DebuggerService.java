@@ -14,7 +14,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
 import org.eclipse.che.ide.ext.java.jdi.shared.BreakPointList;
 import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerEventList;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerInfo;
+import org.eclipse.che.ide.ext.java.jdi.shared.JavaDebuggerInfo;
 import org.eclipse.che.ide.ext.java.jdi.shared.StackFrameDump;
 import org.eclipse.che.ide.ext.java.jdi.shared.UpdateVariableRequest;
 import org.eclipse.che.ide.ext.java.jdi.shared.Value;
@@ -39,10 +39,10 @@ public class DebuggerService {
     @GET
     @Path("connect")
     @Produces(MediaType.APPLICATION_JSON)
-    public DebuggerInfo create(@QueryParam("host") String host,
+    public JavaDebuggerInfo create(@QueryParam("host") String host,
                                @QueryParam("port") int port) throws DebuggerException {
         Debugger d = Debugger.newInstance(host, port);
-        return DtoFactory.getInstance().createDto(DebuggerInfo.class)
+        return DtoFactory.getInstance().createDto(JavaDebuggerInfo.class)
                          .withHost(d.getHost())
                          .withPort(d.getPort())
                          .withId(d.id)

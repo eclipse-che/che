@@ -29,7 +29,7 @@ import java.util.List;
  */
 public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
     /** Needs for delegate some function into Debugger view. */
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate extends BaseActionDelegate {
         /** Performs any actions appropriate in response to the user having pressed the expand button in variables tree. */
         void onExpandVariablesTree();
 

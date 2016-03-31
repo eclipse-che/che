@@ -110,6 +110,9 @@ public interface JavaRuntimeLocalizationConstant extends com.google.gwt.i18n.cli
     @Key("debugger.disconnected.description")
     String debuggerDisconnectedDescription(String address);
 
+    @Key("debugger.already.connected")
+    String debuggerAlreadyConnected();
+
     @Key("failed.to.connect.to.remote.debugger.title")
     String failedToConnectToRemoteDebuggerTitle();
 

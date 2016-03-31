@@ -1,16 +1,19 @@
 <div class="ide-loader" layout="column" layout-align="center center">
   <che-loader layout="column" layout-align="center center">
     <!--crane and terminals-->
-    <div class="che-loader-animation-panel main-page" layout="row">
-      <div flex="initial" flex-gt-sm="60">
+    <div class="che-loader-animation-panel main-page" layout="row" flex>
+      <div layout="column"
+           hide-xs hide-sm
+           layout-align="end start">
         <che-loader-crane che-all-steps="ideLoaderCtrl.getSteps()"
                           che-exclude-steps="[ideLoaderCtrl.getSteps().length-1]"
                           che-step="{{ideLoaderCtrl.getCurrentStep()}}"
                           che-switch-on-iteration="true">
         </che-loader-crane>
       </div>
-      <div flex="noshrink" flex-gt-sm="40" layout="column" layout-align="center center"
-           layout-align-gt-sm="start center">
+      <div layout="column"
+           layout-align="center center"
+           flex="auto">
         <div class="ide-loader-working-log">
           <che-accordion ng-repeat="step in ideLoaderCtrl.getSteps()" che-index="{{$index}}"
                          che-current-step="{{ideLoaderCtrl.getCurrentStep()}}">
@@ -28,7 +31,7 @@
       </div>
     </div>
     <!--bottom bar-->
-    <div class="che-loader-bottom-bar">
+    <div class="che-loader-bottom-bar" flex="none">
       <div layout="row" layout-align="center stretch" class="main-page">
         <div flex="50" layout="column" layout-align="end start">
           <che-link ng-click="ideLoaderCtrl.cancelLoad()" che-link-text="&larr; Back to dashboard"
@@ -42,5 +45,5 @@
     </div>
   </che-loader>
 
-  <div layout="row" layout-align="center center"><img class="ide-loader-logo" src="{{branding.favicon}}"/></div>
+  <div layout="row" layout-align="center center" flex="none"><img class="ide-loader-logo" src="{{branding.favicon}}"/></div>
 </div>

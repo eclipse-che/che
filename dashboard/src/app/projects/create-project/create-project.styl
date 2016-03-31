@@ -7,8 +7,6 @@ $item-error-color-bg = $auth-error-color
 $item-output-bg = $cat-gray-color
 $item-output-fg = $dark-menacing-sky-color
 
-
-
 che-button-primary#create-project-button-import button
   margin-top 30px
   margin-left 24px
@@ -32,20 +30,6 @@ md-select.create-project-select
   padding-right 24px
   padding-bottom 25px
 
-
-.create-project-progress-panel li
-  list-style-type none
-
-.create-project-progress-panel .create-project-progress-done
-  color white
-
-.create-project-progress-panel .create-project-progress-wait
-  color $label-info-color
-
-
-.create-project-progress-panel .che-panel-title.ng-binding
-  color white
-
 .create-project-progress-panel
   margin-left 24px
   margin-top 32px
@@ -53,93 +37,6 @@ md-select.create-project-select
   margin-right 24px
   background-color #fff
   box-shadow 0 2px 6px 0 rgba(0,0,0,0.4)
-
-.create-project-progress-panel-top
-  background-position center
-  background-size cover
-  background-repeat no-repeat
-  background-position-x 0
-  background-position-y bottom
-  background-image url('../assets/images/bg-intermediate-screen.svg')
-  height 220px
-  padding-left 40px
-  padding-right 40px
-
-.create-project-progress-panel-top md-progress-linear
-  height 5px
-
-.create-project-progress-panel-bottom
-  padding 20px
-
-.create-project-panel-progress-items
-  height 50px
-  line-height 50px
-  color white
-  border-radius 25px
-
-.create-project-panel-progress-item-number
-  background-color white
-  color black
-  margin-left 5px
-  margin-right 20px
-  border-radius 20px
-  width 40px
-  height 40px
-  text-align center
-  line-height 40px
-
-.create-project-panel-progress-item-number-in-progress
-  animation pulse 5s infinite
-
-@keyframes pulse {
-  0% {
-    background-color white
-    color black
-  }
-  50% {
-    background-color $item-enabled-color-bg
-    color white
-  }
-  100% {
-    background-color white
-    color black
-  }
-}
-
-.create-project-panel-progress-title
-  font-size 1.5em
-  font-weight 800
-  color $item-enabled-color-fg
-
-.create-project-panel-progress-item-link
-  width 8px
-  margin-left 20px
-
-
-.create-project-panel-progress-items,.create-project-panel-progress-item-link, .create-project-panel-progress-lastitem
-  margin-top -1px
-  background $item-disabled-color-bg
-
-.create-project-panel-progress-items-enabled,.create-project-panel-progress-item-link-enabled, .create-project-panel-progress-lastitem-enabled
-  background $item-enabled-color-bg
-
-.create-project-panel-progress-lastitem
-  color white
-
-.create-project-panel-progress-item-output
-  margin 10px
-  margin-right 20px
-  background-color $background-color
-  color $item-output-fg
-  border none
-  font-family "Open Sans", sans-serif
-
-.create-project-panel-progress-items-error, .create-project-panel-progress-item-link-error, .create-project-panel-progress-lastitem-error
-  background $item-error-color-bg
-
-.create-project-panel-progress-items che-button-danger
-  margin-right 20px
-
 
 .create-project-header-steps-step
   width 120px
@@ -149,7 +46,6 @@ md-select.create-project-select
   border-width 2px
   border-style solid
   che-border-radius(2px)
-
 
 .create-project-header-steps-step-active
   border-color $primary-color
@@ -184,14 +80,6 @@ md-select.create-project-select
 
 .create-project-header-steps-link-active
   background-color $primary-color
-
-.create-project-progress-loader-icon
-  fill $background-color
-  width 120px
-  height 120px
-
-.create-project-progress-widget-progress
-  height 120px
 
 .create-project-minimize-icon
   font-size 40px

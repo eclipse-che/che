@@ -41,10 +41,10 @@ class IdeSvc {
         this.listeningChannels = [];
 
         this.steps = [
-            {text: 'Initialize', inProgressText : 'Initializing', logs: '', hasError: false},
-            {text: 'Start workspace master', inProgressText : 'Starting workspace master', logs: '', hasError: false},
-            {text: 'Inject and start workspace agent', inProgressText : 'Injecting and starting workspace agent', logs: '', hasError: false},
-            {text: 'View IDE', inProgressText : 'Opening IDE', logs: '', hasError: false}
+            {text: 'Initializing workspace', inProgressText : 'Provision workspace and associating it with the existing user', logs: '', hasError: false},
+            {text: 'Starting workspace runtime', inProgressText : 'Retrieving the stack\'s image and launching it', logs: '', hasError: false},
+            {text: 'Starting workspace agent', inProgressText : 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},
+            {text: 'Open IDE', inProgressText : 'Opening IDE', logs: '', hasError: false}
         ];
     }
 

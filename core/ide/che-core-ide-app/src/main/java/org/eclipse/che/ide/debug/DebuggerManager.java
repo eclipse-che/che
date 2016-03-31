@@ -14,9 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.app.AppContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,36 +27,73 @@ import java.util.Map;
  * @author Anatoliy Bazko
  */
 @Singleton
-public class DebuggerManager {
-    private final AppContext appContext;
-
-    private Map<String, Debugger> debuggers;
-    private Debugger debugger;
+public class DebuggerManager implements DebuggerManagerObservable {
+    private Debugger                      activeDebugger;
+    private Map<String, Debugger>         debuggers;
+    private List<DebuggerManagerObserver> observers;
 
     @Inject
-    protected DebuggerManager(AppContext appContext) {
-        this.appContext = appContext;
+    protected DebuggerManager() {
         this.debuggers = new HashMap<>();
+        this.observers = new ArrayList<>();
     }
 
     /**
-     * Register new debugger for the specified project type ID.
-     * TODO: don't link debugger with project.
-     *
-     * @param projectTypeId
-     * @param debugger
+     * Register new debugger for the given language.
      */
-    public void registeredDebugger(String projectTypeId, Debugger debugger) {
-        debuggers.put(projectTypeId, debugger);
-        setDebugger(debugger);
+    public void registeredDebugger(String language, Debugger debugger) {
+        debuggers.put(language, debugger);
     }
 
-    public void setDebugger(Debugger debugger) {
-        this.debugger = debugger;
-    }
-
+    /**
+     * Gets {@link Debugger} for the given language.
+     */
     @Nullable
-    public Debugger getDebugger() {
-        return debugger;
+    public Debugger getDebugger(String language) {
+        return debuggers.get(language);
+    }
+
+    /**
+     * Sets new active debugger.
+     * Resubscriber all {@link DebuggerObserver} to listen to events from new {@link Debugger}
+     *
+     * @param debugger
+     *         debugger is being used
+     */
+    public void setActiveDebugger(Debugger debugger) {
+        if (activeDebugger != null) {
+            for (DebuggerManagerObserver observer : observers) {
+                activeDebugger.removeObserver(observer);
+            }
+        }
+
+        activeDebugger = debugger;
+
+        if (activeDebugger != null) {
+            for (DebuggerManagerObserver observer : observers) {
+                activeDebugger.addObserver(observer);
+                observer.onActiveDebuggerChanged(activeDebugger);
+            }
+        }
+    }
+
+    /**
+     * @return {@link Debugger} is currently being used
+     */
+    @Nullable
+    public Debugger getActiveDebugger() {
+        return activeDebugger;
+    }
+
+    // Active debugger events
+
+    @Override
+    public void addObserver(DebuggerManagerObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(DebuggerManagerObserver observer) {
+        observers.remove(observer);
     }
 }

@@ -271,6 +271,9 @@
 .orionCodenvy .meta.tag {
     color: #e8bf55;
 }
+.orionCodenvy .meta.preprocessor {
+    color: #A4A4A4;
+}
 .annotationHTML {
     margin-left: 1px;
 }

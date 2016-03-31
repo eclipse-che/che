@@ -16,7 +16,6 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.ide.debug.DebuggerState;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeResources;
 
@@ -39,7 +38,7 @@ public class DisconnectDebuggerAction extends Action {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Debugger debugger = debuggerManager.getDebugger();
+        Debugger debugger = debuggerManager.getActiveDebugger();
         if (debugger != null) {
             debugger.disconnectDebugger();
         }
@@ -47,8 +46,8 @@ public class DisconnectDebuggerAction extends Action {
 
     @Override
     public void update(ActionEvent e) {
-        Debugger debugger = debuggerManager.getDebugger();
-        e.getPresentation().setEnabled(debugger != null && debugger.getDebuggerState() == DebuggerState.CONNECTED);
+        Debugger debugger = debuggerManager.getActiveDebugger();
+        e.getPresentation().setEnabled(debugger != null && debugger.isConnected());
     }
 
 }

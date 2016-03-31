@@ -14,10 +14,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
+import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -37,15 +41,22 @@ import java.io.File;
  */
 @Singleton
 public class ProjectListeners {
-
     private static final Logger LOG = LoggerFactory.getLogger(ProjectListeners.class);
-    private final File workspace;
+
+    private final File                workspace;
+    private final ProjectRegistry     projectRegistry;
+    private final ProjectTypeRegistry projectTypeRegistry;
 
     @Inject
-    public ProjectListeners(@Named("che.user.workspaces.storage") String workspacePath, EventService eventService) {
+    public ProjectListeners(@Named("che.user.workspaces.storage") String workspacePath,
+                            EventService eventService,
+                            ProjectRegistry projectRegistry,
+                            ProjectTypeRegistry projectTypeRegistry) {
+        this.projectRegistry = projectRegistry;
+        this.projectTypeRegistry = projectTypeRegistry;
         workspace = new File(workspacePath);
         eventService.subscribe(new ProjectCreated());
-        eventService.subscribe(new EventSubscriber<ProjectItemModifiedEvent>(){
+        eventService.subscribe(new EventSubscriber<ProjectItemModifiedEvent>() {
             @Override
             public void onEvent(ProjectItemModifiedEvent event) {
                 handleEvent(event);
@@ -55,6 +66,9 @@ public class ProjectListeners {
 
     public void handleEvent(ProjectItemModifiedEvent event) {
         final String eventPath = event.getPath();
+        if (!isJavaProject(event.getProject())) {
+            return;
+        }
         try {
             JavaModelManager.getJavaModelManager().deltaState.resourceChanged(
                     new ResourceChangedEvent(workspace, event));
@@ -76,16 +90,28 @@ public class ProjectListeners {
     }
 
     private class ProjectCreated implements EventSubscriber<ProjectCreatedEvent> {
-
         @Override
         public void onEvent(ProjectCreatedEvent event) {
+            if (!isJavaProject(event.getProjectPath())) {
+                return;
+            }
             try {
-                JavaModelManager.getJavaModelManager().deltaState.resourceChanged(
-                        new ResourceChangedEvent(workspace, event));
+                JavaModelManager.getJavaModelManager().deltaState.resourceChanged(new ResourceChangedEvent(workspace, event));
             } catch (Throwable t) {
                 //catch all exceptions that may be happened
                 LOG.error("Can't update java model " + event.getProjectPath(), t);
             }
+        }
+    }
+
+    private boolean isJavaProject(String projectPath) {
+        ProjectConfig project = projectRegistry.getProject(projectPath);
+        String type = project.getType();
+        try {
+            return projectTypeRegistry.getProjectType(type).isTypeOf("java");
+        } catch (NotFoundException e) {
+            LOG.error("Can't find project " + projectPath, e);
+            return false;
         }
     }
 }
