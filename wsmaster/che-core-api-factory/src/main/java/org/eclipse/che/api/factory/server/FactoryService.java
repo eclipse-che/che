@@ -33,7 +33,7 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -557,8 +557,8 @@ public class FactoryService extends Service {
                                    String path)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
         final String userId = EnvironmentContext.getCurrent().getUser().getId();
-        final UsersWorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
-        if (!usersWorkspace.getOwner().equals(userId)) {
+        final WorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
+        if (!usersWorkspace.getNamespace().equals(userId)) {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
         }
         excludeProjectsWithoutLocation(usersWorkspace, path);
@@ -593,7 +593,7 @@ public class FactoryService extends Service {
      * Filters workspace projects, removes projects which don't have location set.
      * If all workspace projects don't have location throws {@link BadRequestException}.
      */
-    private void excludeProjectsWithoutLocation(UsersWorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
+    private void excludeProjectsWithoutLocation(WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
         final boolean notEmptyPath = projectPath != null;
         //Condition for sifting valid project in user's workspace
         Predicate<ProjectConfigImpl> predicate = projectConfig -> !(notEmptyPath && !projectPath.equals(projectConfig.getPath()))

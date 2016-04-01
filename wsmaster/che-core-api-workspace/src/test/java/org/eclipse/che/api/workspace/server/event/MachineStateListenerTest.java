@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -42,7 +42,7 @@ public class MachineStateListenerTest {
     @Mock
     private MachineStatusEvent event;
     @Mock
-    private UsersWorkspaceImpl workspace;
+    private WorkspaceImpl      workspace;
 
     @InjectMocks
     private MachineStateListener listener;

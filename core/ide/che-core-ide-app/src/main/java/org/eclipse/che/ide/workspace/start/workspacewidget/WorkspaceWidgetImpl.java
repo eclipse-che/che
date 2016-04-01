@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 /**
  * The class represents workspace widget and contains methods to control
@@ -33,7 +33,7 @@ public class WorkspaceWidgetImpl extends Composite implements WorkspaceWidget, C
 
     private static final WorkspaceWidgetImplUiBinder UI_BINDER = GWT.create(WorkspaceWidgetImplUiBinder.class);
 
-    private final UsersWorkspaceDto workspace;
+    private final WorkspaceDto workspace;
 
     private ActionDelegate delegate;
 
@@ -43,7 +43,7 @@ public class WorkspaceWidgetImpl extends Composite implements WorkspaceWidget, C
     Label status;
 
     @Inject
-    public WorkspaceWidgetImpl(@Assisted UsersWorkspaceDto workspace) {
+    public WorkspaceWidgetImpl(@Assisted WorkspaceDto workspace) {
         this.workspace = workspace;
 
         initWidget(UI_BINDER.createAndBindUi(this));

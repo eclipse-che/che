@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
-
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +53,13 @@ public class MachineStateListener implements EventSubscriber<MachineStatusEvent>
 
         if (event.isDev() && DESTROYED.equals(event.getEventType())) {
             try {
-                UsersWorkspaceImpl currentWorkspace = workspaceManager.getWorkspace(workspaceId);
+                WorkspaceImpl currentWorkspace = workspaceManager.getWorkspace(workspaceId);
 
                 if (RUNNING.equals(currentWorkspace.getStatus())) {
                     workspaceManager.stopWorkspace(workspaceId);
                 }
 
-            } catch (NotFoundException | ServerException | BadRequestException exception) {
+            } catch (NotFoundException | ServerException | ConflictException exception) {
                 LOG.error(exception.getLocalizedMessage(), exception);
             }
         }

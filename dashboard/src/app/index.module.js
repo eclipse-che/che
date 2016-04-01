@@ -357,4 +357,3 @@ new NavbarConfig(instanceRegister);
 new ProjectsConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);
 new DashboardConfig(instanceRegister);
-

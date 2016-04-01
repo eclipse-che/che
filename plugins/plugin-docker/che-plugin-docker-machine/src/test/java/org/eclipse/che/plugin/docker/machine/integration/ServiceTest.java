@@ -237,7 +237,7 @@ public class ServiceTest {
         when(snapshot.getType()).thenReturn("docker");
         when(snapshot.getWorkspaceId()).thenReturn("wsId");
         when(snapshot.getInstanceKey()).thenReturn(pushedImage);
-        when(snapshot.getOwner()).thenReturn(USER);
+        when(snapshot.getNamespace()).thenReturn(USER);
 
         final MachineStateDescriptor machine = machineService
                 .createMachineFromSnapshot(newDto(SnapshotMachineCreationMetadata.class).withSnapshotId(SNAPSHOT_ID));
@@ -317,7 +317,7 @@ public class ServiceTest {
         SnapshotImpl snapshot = mock(SnapshotImpl.class);
         when(snapshotDao.getSnapshot(SNAPSHOT_ID)).thenReturn(snapshot);
         when(snapshot.getType()).thenReturn("docker");
-        when(snapshot.getOwner()).thenReturn(USER);
+        when(snapshot.getNamespace()).thenReturn(USER);
         when(snapshot.getInstanceKey()).thenReturn(pushedImage);
 
         machineService.removeSnapshot(SNAPSHOT_ID);

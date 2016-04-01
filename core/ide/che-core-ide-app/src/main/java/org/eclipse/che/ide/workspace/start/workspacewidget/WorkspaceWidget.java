@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.start.workspacewidget;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.mvp.View;
 
 /**
@@ -27,6 +27,6 @@ public interface WorkspaceWidget extends View<WorkspaceWidget.ActionDelegate> {
          * @param workspace
          *         workspace which was selected
          */
-        void onWorkspaceSelected(UsersWorkspaceDto workspace);
+        void onWorkspaceSelected(WorkspaceDto workspace);
     }
 }

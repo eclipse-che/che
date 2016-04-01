@@ -28,7 +28,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
@@ -99,12 +99,12 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
      * @param workspaces
      *         list of existing workspaces
      */
-    public void show(List<UsersWorkspaceDto> workspaces, final Callback<Component, Exception> callback) {
+    public void show(List<WorkspaceDto> workspaces, final Callback<Component, Exception> callback) {
         this.callback = callback;
 
         workspacesNames.clear();
 
-        for (UsersWorkspaceDto workspace : workspaces) {
+        for (WorkspaceDto workspace : workspaces) {
             workspacesNames.add(workspace.getConfig().getName());
         }
 
@@ -210,9 +210,9 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private void createWorkspace() {
         WorkspaceConfigDto workspaceConfig = getWorkspaceConfig();
 
-        workspaceClient.create(workspaceConfig, null).then(new Operation<UsersWorkspaceDto>() {
+        workspaceClient.create(workspaceConfig, null).then(new Operation<WorkspaceDto>() {
             @Override
-            public void apply(UsersWorkspaceDto workspace) throws OperationException {
+            public void apply(WorkspaceDto workspace) throws OperationException {
                 DefaultWorkspaceComponent component = wsComponentProvider.get();
                 component.startWorkspaceById(workspace);
             }

@@ -22,7 +22,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -132,9 +132,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         onNameChanged();
         selectedConfiguration = view.getSelectedConfiguration();
 
-        updateCommand(selectedConfiguration).then(new Operation<UsersWorkspaceDto>() {
+        updateCommand(selectedConfiguration).then(new Operation<WorkspaceDto>() {
             @Override
-            public void apply(UsersWorkspaceDto arg) throws OperationException {
+            public void apply(WorkspaceDto arg) throws OperationException {
                 commandProcessingCallback = getCommandProcessingCallback();
                 fetchCommands();
                 fireConfigurationUpdated(selectedConfiguration);
@@ -142,7 +142,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         });
     }
 
-    private Promise<UsersWorkspaceDto> updateCommand(final CommandConfiguration selectedConfiguration) {
+    private Promise<WorkspaceDto> updateCommand(final CommandConfiguration selectedConfiguration) {
         final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                 .withName(selectedConfiguration.getName())
                                                 .withCommandLine(selectedConfiguration.toCommandLine())
@@ -150,7 +150,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
                                                 .withAttributes(selectedConfiguration.getAttributes());
 
         if (editedCommandOriginName.trim().equals(selectedConfiguration.getName())) {
-            return workspaceServiceClient.updateCommand(workspaceId, commandDto);
+            return workspaceServiceClient.updateCommand(workspaceId, selectedConfiguration.getName(), commandDto);
         } else {
             onNameChanged();
             //generate a new unique name if input one already exists
@@ -162,9 +162,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
             }
 
             return workspaceServiceClient.deleteCommand(workspaceId, editedCommandOriginName)
-                                         .thenPromise(new Function<UsersWorkspaceDto, Promise<UsersWorkspaceDto>>() {
+                                         .thenPromise(new Function<WorkspaceDto, Promise<WorkspaceDto>>() {
                                              @Override
-                                             public Promise<UsersWorkspaceDto> apply(UsersWorkspaceDto arg) throws FunctionException {
+                                             public Promise<WorkspaceDto> apply(WorkspaceDto arg) throws FunctionException {
                                                  commandDto.setName(newName);
                                                  return workspaceServiceClient.addCommand(workspaceId, commandDto);
                                              }
@@ -205,9 +205,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         final ConfirmCallback saveCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                updateCommand(editedCommand).then(new Operation<UsersWorkspaceDto>() {
+                updateCommand(editedCommand).then(new Operation<WorkspaceDto>() {
                     @Override
-                    public void apply(UsersWorkspaceDto arg) throws OperationException {
+                    public void apply(WorkspaceDto arg) throws OperationException {
                         reset();
                         createCommand(type, customCommand, customName, attributes);
                     }
@@ -270,9 +270,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
                                                 .withCommandLine(customCommand != null ? customCommand : type.getCommandTemplate())
                                                 .withAttributes(attributesToUpdate)
                                                 .withType(type.getId());
-        workspaceServiceClient.addCommand(workspaceId, commandDto).then(new Operation<UsersWorkspaceDto>() {
+        workspaceServiceClient.addCommand(workspaceId, commandDto).then(new Operation<WorkspaceDto>() {
             @Override
-            public void apply(UsersWorkspaceDto arg) throws OperationException {
+            public void apply(WorkspaceDto arg) throws OperationException {
                 fetchCommands();
 
                 final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
@@ -292,9 +292,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         final ConfirmCallback confirmCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                workspaceServiceClient.deleteCommand(workspaceId, selectedConfiguration.getName()).then(new Operation<UsersWorkspaceDto>() {
+                workspaceServiceClient.deleteCommand(workspaceId, selectedConfiguration.getName()).then(new Operation<WorkspaceDto>() {
                     @Override
-                    public void apply(UsersWorkspaceDto arg) throws OperationException {
+                    public void apply(WorkspaceDto arg) throws OperationException {
                         view.selectNextItem();
                         commandProcessingCallback = getCommandProcessingCallback();
                         fetchCommands();
@@ -363,9 +363,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         final ConfirmCallback saveCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                updateCommand(editedCommand).then(new Operation<UsersWorkspaceDto>() {
+                updateCommand(editedCommand).then(new Operation<WorkspaceDto>() {
                     @Override
-                    public void apply(UsersWorkspaceDto arg) throws OperationException {
+                    public void apply(WorkspaceDto arg) throws OperationException {
                         fetchCommands();
                         fireConfigurationUpdated(editedCommand);
                         handleCommandSelection(configuration);

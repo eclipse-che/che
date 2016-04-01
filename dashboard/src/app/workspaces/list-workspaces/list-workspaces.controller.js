@@ -69,7 +69,7 @@ export class ListWorkspacesCtrl {
       //First check the list of already received workspace info:
       if (!this.workspacesById.get(workspace.id)) {
         this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
-          let userWorkspace = this.cheAPI.getWorkspace().getWorkspacesById().get(workspace.id);
+          let userWorkspace = this.cheAPI.getWorkspace().getWorkspaceById(workspace.id);
           this.getWorkspaceInfo(userWorkspace);
           this.userWorkspaces.push(userWorkspace);
         });
@@ -100,8 +100,8 @@ export class ListWorkspacesCtrl {
 
     //No access to runner resources if workspace is locked:
     if (!workspace.isLocked) {
-      let promiseRuntimeConfig = this.cheAPI.getWorkspace().fetchRuntimeConfig(workspace.id);
-      promises.push(promiseRuntimeConfig);
+      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+      promises.push(promiseWorkspace);
     }
 
     this.$q.all(promises).then(() => {

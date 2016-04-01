@@ -17,7 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -95,7 +95,7 @@ public class AppStateManagerTest {
 
     @Before
     public void setUp() {
-        UsersWorkspaceDto usersWorkspaceDto = mock(UsersWorkspaceDto.class);
+        WorkspaceDto usersWorkspaceDto = mock(WorkspaceDto.class);
         when(appContext.getWorkspace()).thenReturn(usersWorkspaceDto);
         when(usersWorkspaceDto.getId()).thenReturn(WS_ID);
         when(preferencesManager.getValue(PREFERENCE_PROPERTY_NAME)).thenReturn(JSON);

@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ModuleCreatedEvent;
@@ -113,7 +113,7 @@ public class ProjectWizardTest {
     @Mock
     private ProjectExplorerPresenter         projectExplorer;
     @Mock
-    private UsersWorkspaceDto                workspace;
+    private WorkspaceDto                     workspace;
     @Mock
     private Unmarshallable<ProjectConfigDto> projectConfigUnmarshallable;
 

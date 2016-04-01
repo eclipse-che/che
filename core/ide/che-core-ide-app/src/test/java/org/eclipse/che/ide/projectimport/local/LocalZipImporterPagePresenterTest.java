@@ -16,7 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
@@ -78,7 +78,7 @@ public class LocalZipImporterPagePresenterTest {
     @Mock
     private LocalZipImporterPageView      view;
     @Mock
-    private UsersWorkspaceDto             workspace;
+    private WorkspaceDto                  workspace;
 
     private LocalZipImporterPagePresenter presenter;
 

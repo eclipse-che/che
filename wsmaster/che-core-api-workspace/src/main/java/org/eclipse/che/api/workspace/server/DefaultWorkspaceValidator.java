@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 import javax.inject.Singleton;
@@ -25,33 +26,25 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
- * Default implementation of {@link WorkspaceConfigValidator}.
+ * Default implementation of {@link WorkspaceValidator}.
  *
  * @author Yevhenii Voevodin
  */
 @Singleton
-public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator {
+public class DefaultWorkspaceValidator implements WorkspaceValidator {
     /* should contain [3, 20] characters, first and last character is letter or digit, available characters {A-Za-z0-9.-_}*/
-    private static final Pattern WS_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
-    private static final Pattern SERVER_PORT = Pattern.compile("[1-9]+[0-9]*/(?:tcp|udp)");
+    private static final Pattern WS_NAME         = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
+    private static final Pattern SERVER_PORT     = Pattern.compile("[1-9]+[0-9]*/(?:tcp|udp)");
     private static final Pattern SERVER_PROTOCOL = Pattern.compile("[a-z][a-z0-9-+.]*");
 
-    /**
-     * Checks that workspace configuration is valid.
-     *
-     * <ul>Validation rules:
-     * <li>Workspace name must not be null & must match {@link #WS_NAME} pattern</li>
-     * <li>Workspace attributes keys must not start with 'codenvy' keyword and must not be empty</li>
-     * <li>Workspace default environment name must not be empty or null</li>
-     * <li>Workspace environment must contain default environment </li>
-     * <li>Environment name must not be null</li>
-     * <li>Each environment must contain at least 1 machine(which is dev), also it must contain exactly one dev machine</li>
-     * <li>Each machine must contain its name and source</li>
-     * <li>Each command name and command line must not be null</li>
-     * </ul>
-     */
     @Override
-    public void validate(WorkspaceConfig config) throws BadRequestException {
+    public void validateWorkspace(Workspace workspace) throws BadRequestException {
+        validateAttributes(workspace.getAttributes());
+        validateConfig(workspace.getConfig());
+    }
+
+    @Override
+    public void validateConfig(WorkspaceConfig config) throws BadRequestException {
         // configuration object itself
         checkNotNull(config.getName(), "Workspace name required");
         checkArgument(WS_NAME.matcher(config.getName()).matches(),
@@ -59,13 +52,6 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
                       "latin letters, underscores, dots, dashes and should start and end only with digits, " +
                       "latin letters or underscores");
 
-        //attributes
-        for (String attributeName : config.getAttributes().keySet()) {
-            //attribute name should not be empty and should not start with codenvy
-            checkArgument(attributeName != null && !attributeName.trim().isEmpty() && !attributeName.toLowerCase().startsWith("codenvy"),
-                          "Attribute name '%s' is not valid",
-                          attributeName);
-        }
 
         //environments
         checkArgument(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
@@ -93,15 +79,19 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
         //TODO
     }
 
+    @Override
+    public void validateAttributes(Map<String, String> attributes) throws BadRequestException {
+        for (String attributeName : attributes.keySet()) {
+            //attribute name should not be empty and should not start with codenvy
+            checkArgument(attributeName != null && !attributeName.trim().isEmpty() && !attributeName.toLowerCase().startsWith("codenvy"),
+                          "Attribute name '%s' is not valid",
+                          attributeName);
+        }
+    }
+
     private void validateEnv(Environment environment, String workspaceName) throws BadRequestException {
         final String envName = environment.getName();
         checkArgument(!isNullOrEmpty(envName), "Environment name should be neither null nor empty");
-
-        checkArgument(environment.getRecipe() == null || "docker".equals(environment.getRecipe().getType()),
-                      "Recipe of environment '%s' in workspace with name '%s' has unsupported type '%s'",
-                      envName,
-                      workspaceName,
-                      environment.getRecipe() != null ? environment.getRecipe().getType() : null);
 
         //machine configs
         checkArgument(!environment.getMachineConfigs().isEmpty(), "Environment '%s' should contain at least 1 machine", envName);
@@ -147,7 +137,7 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
      * Checks that object reference is not null, throws {@link BadRequestException}
      * in the case of null {@code object} with given {@code message}.
      */
-    private void checkNotNull(Object object, String message) throws BadRequestException {
+    private static void checkNotNull(Object object, String message) throws BadRequestException {
         if (object == null) {
             throw new BadRequestException(message);
         }
@@ -158,7 +148,8 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
      *
      * <p>Exception uses error message built from error message template and error message parameters.
      */
-    private void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageParams) throws BadRequestException {
+    private static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageParams)
+            throws BadRequestException {
         if (!expression) {
             throw new BadRequestException(format(errorMessageTemplate, errorMessageParams));
         }
@@ -169,7 +160,7 @@ public class DefaultWorkspaceConfigValidator implements WorkspaceConfigValidator
      *
      * <p>Exception uses error message built from error message template and error message parameters.
      */
-    private void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
+    private static void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
         if (!expression) {
             throw new BadRequestException(errorMessage);
         }

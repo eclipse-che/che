@@ -16,7 +16,7 @@ import com.googlecode.gwt.test.utils.GwtReflectionUtils;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PushResponse;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
@@ -80,7 +80,7 @@ public class PushToRemotePresenterTest extends BaseTest {
     @Mock
     private StatusNotification notification;
     @Mock
-    private UsersWorkspaceDto  workspaceDto;
+    private WorkspaceDto       workspaceDto;
 
     private PushToRemotePresenter presenter;
 

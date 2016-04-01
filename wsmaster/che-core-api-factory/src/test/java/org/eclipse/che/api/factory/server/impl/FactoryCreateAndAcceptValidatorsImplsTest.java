@@ -17,7 +17,7 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.UserDao;
 
-import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
+import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -44,7 +44,7 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     private Factory factory;
 
     @Mock
-    private WorkspaceConfigValidator workspaceConfigValidator;
+    private WorkspaceValidator workspaceConfigValidator;
 
     private FactoryAcceptValidatorImpl acceptValidator;
 
@@ -70,7 +70,7 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
         doNothing().when(spy)
                    .validateProjectActions(any(Factory.class));
         doNothing().when(workspaceConfigValidator)
-                   .validate(any(WorkspaceConfig.class));
+                   .validateConfig(any(WorkspaceConfig.class));
 
         //main invoke
         spy.validateOnCreate(factory);

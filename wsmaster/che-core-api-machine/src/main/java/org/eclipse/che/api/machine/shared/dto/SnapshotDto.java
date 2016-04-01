@@ -26,9 +26,9 @@ public interface SnapshotDto extends Snapshot, Hyperlinks {
 
     SnapshotDto withId(String id);
 
-    void setOwner(String owner);
+    void setNamespace(String owner);
 
-    SnapshotDto withOwner(String owner);
+    SnapshotDto withNamespace(String namespace);
 
     void setType(String type);
 
