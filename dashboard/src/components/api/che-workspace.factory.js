@@ -206,8 +206,10 @@ export class CheWorkspace {
    */
   _convertAttributes(attributes) {
     let attrs = [];
-    for (let attrName in attributes || {}) {
-      attrs.push(attrName + ':' + attributes[attrName]);
+    if (attributes) {
+      for (let attrName in attributes) {
+        attrs.push(attrName + ':' + attributes[attrName]);
+      }
     }
     return attrs;
   }
