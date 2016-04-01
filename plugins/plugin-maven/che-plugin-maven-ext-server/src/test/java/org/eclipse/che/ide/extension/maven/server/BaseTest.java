@@ -30,6 +30,10 @@ import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.ide.ext.java.server.projecttype.JavaPropertiesValueProviderFactory;
+import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectType;
+import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProviderFactory;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -130,7 +134,8 @@ public abstract class BaseTest {
 
         projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new TestProjectType());
-        projectTypeRegistry.registerProjectType(new MavenProjectType());
+        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
+        projectTypeRegistry.registerProjectType(new MavenProjectType(new MavenValueProviderFactory()));
 
         projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
@@ -154,6 +159,7 @@ public abstract class BaseTest {
     @AfterMethod
     public void shutdownMavenServer() throws Exception {
         mavenServerManager.shutdown();
+        JavaModelManager.getJavaModelManager().deltaState.removeExternalElementsToRefresh();
     }
 
     protected FolderEntry createMultimoduleProject() throws ServerException, NotFoundException, ConflictException, ForbiddenException {
@@ -231,12 +237,12 @@ public abstract class BaseTest {
         }
     }
 
-    protected static class MavenProjectType extends ProjectTypeDef {
-
-        protected MavenProjectType() {
-            super("maven", "maven", true, true);
-        }
-    }
+//    protected static class MavenProjectType extends ProjectTypeDef {
+//
+//        protected MavenProjectType() {
+//            super("maven", "maven", true, true);
+//        }
+//    }
 
 
 }

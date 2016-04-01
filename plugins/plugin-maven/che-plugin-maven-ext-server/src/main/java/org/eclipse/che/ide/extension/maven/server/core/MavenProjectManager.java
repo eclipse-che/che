@@ -119,6 +119,7 @@ public class MavenProjectManager {
 
         } finally {
             mavenServer.reset();
+            mavenServer.dispose();
         }
 
     }

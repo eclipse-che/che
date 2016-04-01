@@ -128,6 +128,7 @@ public class MavenServerService {
             return mavenServer.getEffectivePom(pomFile.getVirtualFile().toIoFile(), Collections.emptyList(), Collections.emptyList());
         } finally {
             mavenServer.reset();
+            mavenServer.dispose();
         }
     }
 

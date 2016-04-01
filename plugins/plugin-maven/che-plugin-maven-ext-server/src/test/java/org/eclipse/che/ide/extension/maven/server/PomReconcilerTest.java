@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.maven.server;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectManager;
@@ -27,7 +24,6 @@ import org.testng.annotations.Test;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_ID;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
@@ -57,22 +53,17 @@ public class PomReconcilerTest extends BaseTest {
     @Test
     public void testProblemPosition() throws Exception {
         MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager);
-        String pom = createProjectWithPom("A", "<ss");
+        FolderEntry testProject = createTestProject("A", "");
+        VirtualFileEntry child = testProject.getChild("pom.xml");
+        String newContent = getPomContent("<ss");
+        child.getVirtualFile().updateContent(newContent);
+
         List<Problem> problems = serverService.reconsilePom("/A/pom.xml");
         assertThat(problems).isNotEmpty();
         Problem problem = problems.get(0);
 
-        assertThat(problem.getSourceStart()).isEqualTo(pom.indexOf("<ss") + 3);
-        assertThat(problem.getSourceEnd()).isEqualTo(pom.indexOf("<ss") + 4);
+        assertThat(problem.getSourceStart()).isEqualTo(newContent.indexOf("<ss") + 3);
+        assertThat(problem.getSourceEnd()).isEqualTo(newContent.indexOf("<ss") + 4);
 
-    }
-
-    private String createProjectWithPom(String name, String pomContent)
-            throws ServerException, ConflictException, ForbiddenException, NotFoundException {
-        FolderEntry folder = pm.getProjectsRoot().createFolder(name);
-        String content = getPomContent(pomContent);
-        folder.createFile("pom.xml", content.getBytes());
-        projectRegistry.setProjectType(folder.getPath().toString(),MAVEN_ID, false);
-        return content;
     }
 }

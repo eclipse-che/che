@@ -196,6 +196,7 @@ public class ClasspathManager {
                 return mavenArtifact.isResolved();
             } finally {
                 mavenServer.reset();
+                mavenServer.dispose();
             }
         }
         return false;

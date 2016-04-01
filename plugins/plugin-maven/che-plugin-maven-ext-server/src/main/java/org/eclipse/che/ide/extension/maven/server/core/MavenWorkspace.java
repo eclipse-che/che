@@ -135,13 +135,6 @@ public class MavenWorkspace {
         });
     }
 
-//    private List<MavenProjectProblem> collectProblems(List<MavenProject> updatedProjects) {
-//
-//        List<MavenProjectProblem> result = new ArrayList<>();
-//        result.addAll(updatedProjects.stream().flatMap(project -> project.getProblems().stream()).collect(Collectors.toList()));
-//        return result;
-//    }
-
     public void update(List<IProject> projects) {
         manager.update(projects, true);
         runResolve();

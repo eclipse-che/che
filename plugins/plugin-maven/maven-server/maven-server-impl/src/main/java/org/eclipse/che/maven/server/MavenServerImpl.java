@@ -36,18 +36,19 @@ import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
-import org.apache.maven.model.building.DefaultModelBuildingRequest;
-import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.interpolation.ModelInterpolator;
-import org.apache.maven.model.interpolation.StringSearchModelInterpolator;
 import org.apache.maven.plugin.LegacySupport;
+import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.InvalidProjectModelException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuilderConfiguration;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.project.ProjectUtils;
+import org.apache.maven.project.interpolation.AbstractStringBasedModelInterpolator;
+import org.apache.maven.project.interpolation.ModelInterpolationException;
+import org.apache.maven.project.path.DefaultPathTranslator;
 import org.apache.maven.project.validation.ModelValidationResult;
 import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.settings.Settings;
@@ -62,6 +63,7 @@ import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.BaseLoggerManager;
+import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.internal.impl.DefaultArtifactResolver;
@@ -219,11 +221,22 @@ public class MavenServerImpl extends MavenRmiObject implements MavenServer {
     }
 
     private static Model internalInterpolate(Model model, File projectDir) throws RemoteException {
-        ModelInterpolator interpolator = new StringSearchModelInterpolator();
-        ModelBuildingRequest request = new DefaultModelBuildingRequest();
-        return interpolator.interpolateModel(model, projectDir, request, req -> {
-            System.out.println(req.getMessage());
-        });
+        try {
+            AbstractStringBasedModelInterpolator interpolator =
+                    new org.apache.maven.project.interpolation.StringSearchModelInterpolator(new DefaultPathTranslator());
+            interpolator.initialize();
+
+            Properties props = new Properties(); //MavenServerUtil.collectSystemProperties();
+            ProjectBuilderConfiguration config = new DefaultProjectBuilderConfiguration().setExecutionProperties(props);
+            config.setBuildStartTime(new Date());
+
+            model = interpolator.interpolate(model, projectDir, config, false);
+        } catch (ModelInterpolationException e) {
+            MavenServerContext.getLogger().warning(e);
+        } catch (InitializationException e) {
+            MavenServerContext.getLogger().error(e);
+        }
+        return model;
     }
 
     private Settings getSettings(SettingsBuilder builder, MavenSettings settings, Properties systemProperties, Properties userProperties)
