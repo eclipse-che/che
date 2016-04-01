@@ -17,13 +17,10 @@ import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.plugin.svn.ide.action.AddAction;
-import org.eclipse.che.plugin.svn.ide.action.ApplyPatchAction;
-import org.eclipse.che.plugin.svn.ide.action.BranchTagAction;
 import org.eclipse.che.plugin.svn.ide.action.ChangeCredentialsAction;
 import org.eclipse.che.plugin.svn.ide.action.CleanupAction;
 import org.eclipse.che.plugin.svn.ide.action.CommitAction;
 import org.eclipse.che.plugin.svn.ide.action.CopyAction;
-import org.eclipse.che.plugin.svn.ide.action.CreatePatchAction;
 import org.eclipse.che.plugin.svn.ide.action.DiffAction;
 import org.eclipse.che.plugin.svn.ide.action.ExportAction;
 import org.eclipse.che.plugin.svn.ide.action.LockAction;
@@ -32,7 +29,6 @@ import org.eclipse.che.plugin.svn.ide.action.MergeAction;
 import org.eclipse.che.plugin.svn.ide.action.MoveAction;
 import org.eclipse.che.plugin.svn.ide.action.PropertiesAction;
 import org.eclipse.che.plugin.svn.ide.action.RemoveAction;
-import org.eclipse.che.plugin.svn.ide.action.RenameAction;
 import org.eclipse.che.plugin.svn.ide.action.ResolveAction;
 import org.eclipse.che.plugin.svn.ide.action.RevertAction;
 import org.eclipse.che.plugin.svn.ide.action.StatusAction;
@@ -64,12 +60,9 @@ public class SubversionExtension {
     @Inject
     public SubversionExtension(final ActionManager actionManager,
                                final AddAction addAction,
-                               final ApplyPatchAction applyPatchAction,
-                               final BranchTagAction branchTagAction,
                                final ChangeCredentialsAction changeCredentialsAction,
                                final CleanupAction cleanupAction,
                                final CommitAction commitAction,
-                               final CreatePatchAction createPatchAction,
                                final DiffAction diffAction,
                                final ExportAction exportAction,
                                final LockAction lockAction,
@@ -77,7 +70,6 @@ public class SubversionExtension {
                                final MergeAction mergeAction,
                                final PropertiesAction propertiesAction,
                                final RemoveAction removeAction,
-                               final RenameAction renameAction,
                                final ResolveAction resolveAction,
                                final CopyAction copyAction,
                                final MoveAction moveAction,
@@ -164,14 +156,8 @@ public class SubversionExtension {
         repositoryCommandGroup.add(mergeAction);
         actionManager.registerAction("SvnExport", exportAction);
         repositoryCommandGroup.add(exportAction);
-        actionManager.registerAction("SvnBranchTag", branchTagAction);
-        repositoryCommandGroup.add(branchTagAction);
 
         // Commands for miscellany
-        actionManager.registerAction("SvnCreatePatch", createPatchAction);
-        miscellaneousCommandGroup.add(createPatchAction);
-        actionManager.registerAction("SvnApplyPatch", applyPatchAction);
-        // miscellaneousCommandGroup.add(applyPatchAction);
         actionManager.registerAction("SvnProperties", propertiesAction);
         miscellaneousCommandGroup.add(propertiesAction);
 
@@ -182,8 +168,6 @@ public class SubversionExtension {
         addCommandGroup.add(removeAction);
         actionManager.registerAction("SvnRevert", revertAction);
         addCommandGroup.add(revertAction);
-        actionManager.registerAction("SvnRename", renameAction);
-        addCommandGroup.add(renameAction);
         actionManager.registerAction("SvnLock", lockAction);
         addCommandGroup.add(lockAction);
         actionManager.registerAction("SvnUnlock", unlockAction);
