@@ -51,7 +51,7 @@ import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
 @DynaModule
-public class ApiModule extends AbstractModule {
+public class WsMasterModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(WorkspaceService.class);
@@ -126,8 +126,6 @@ public class ApiModule extends AbstractModule {
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
-
-        install(new org.eclipse.che.plugin.docker.machine.ext.LocalStorageModule());
 
         bind(WorkspaceConfigValidator.class).to(org.eclipse.che.api.workspace.server.DefaultWorkspaceConfigValidator.class);
         bind(MachineStateListener.class).asEagerSingleton();
