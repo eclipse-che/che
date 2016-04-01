@@ -165,7 +165,6 @@ public class FactoryBuilderTest {
                                             .withEnvVariables(singletonMap("key1", "value1"));
         WorkspaceConfigDto workspaceConfig = dto.createDto(WorkspaceConfigDto.class)
                                                 .withProjects(singletonList(project))
-                                                .withAttributes(singletonMap("key", "value"))
                                                 .withCommands(singletonList(dto.createDto(CommandDto.class)
                                                                                .withName("command1")
                                                                                .withType("maven")

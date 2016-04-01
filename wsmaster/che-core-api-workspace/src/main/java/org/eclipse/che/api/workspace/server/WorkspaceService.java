@@ -175,19 +175,23 @@ public class WorkspaceService extends Service {
     @Path("/{key}")
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
-    @ApiOperation(value = "Get the workspace by the key",
+    @ApiOperation(value = "Get the workspace by the composite key",
                   notes = "Composite key can be just workspace ID or in the " +
-                          "username:workspace_name form, where username is optional (e.g :workspace_name is valid key too.")
+                          "namespace:workspace_name form, where namespace is optional (e.g :workspace_name is valid key too.")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public WorkspaceDto getByKey(@ApiParam("Workspace ID") @PathParam("key") String id) throws NotFoundException,
-                                                                                               ServerException,
-                                                                                               ForbiddenException,
-                                                                                               BadRequestException {
-        validateKey(id);
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    public WorkspaceDto getByKey(@ApiParam(value = "Composite key",
+                                           examples = @Example({@ExampleProperty("workspace12345678"),
+                                                                @ExampleProperty("namespace:workspace_name"),
+                                                                @ExampleProperty(":workspace_name")}))
+                                 @PathParam("key") String key) throws NotFoundException,
+                                                                      ServerException,
+                                                                      ForbiddenException,
+                                                                      BadRequestException {
+        validateKey(key);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
         ensureUserIsWorkspaceOwner(workspace);
         return injectLinks(asDto(workspace));
     }

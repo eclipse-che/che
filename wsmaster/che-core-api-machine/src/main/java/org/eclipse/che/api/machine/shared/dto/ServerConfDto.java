@@ -18,11 +18,19 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface ServerConfDto extends ServerConf {
+    void setRef(String ref);
+
     ServerConfDto withRef(String ref);
+
+    void setPort(String port);
 
     ServerConfDto withPort(String port);
 
+    void setProtocol(String protocol);
+
     ServerConfDto withProtocol(String protocol);
+
+    void setPath(String path);
 
     ServerConfDto withPath(String path);
 }

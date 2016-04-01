@@ -382,9 +382,9 @@ public class DebuggerTest extends BaseTest {
     public void testAddBreakpoint() throws Exception {
         doReturn(promiseVoid).when(service).addBreakpoint(DEBUGGER_ID, jdiBreakpoint);
         doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>)any());
-        
+
         debugger.addBreakpoint(file, LINE_NUMBER);
-        
+
         verify(location).setLineNumber(LINE_NUMBER + 1);
         verify(location).setClassName(FQN);
 
@@ -395,7 +395,7 @@ public class DebuggerTest extends BaseTest {
         operationVoidCaptor.getValue().apply(null);
         verify(observer).onBreakpointAdded(breakpointCaptor.capture());
         assertEquals(breakpointCaptor.getValue(), TEST_BREAKPOINT);
-        
+
         verify(promiseVoid).catchError(operationPromiseErrorCaptor.capture());
         operationPromiseErrorCaptor.getValue().apply(promiseError);
         verify(promiseError).getMessage();

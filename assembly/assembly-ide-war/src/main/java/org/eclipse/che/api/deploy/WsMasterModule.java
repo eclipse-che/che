@@ -33,7 +33,8 @@ import org.eclipse.che.api.project.server.template.ProjectTemplateService;
 import org.eclipse.che.api.ssh.server.SshService;
 import org.eclipse.che.api.user.server.UserProfileService;
 import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.workspace.server.WorkspaceConfigValidator;
+import org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator;
+import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.event.MachineStateListener;
 import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
@@ -127,7 +128,8 @@ public class WsMasterModule extends AbstractModule {
                           "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
 
-        bind(WorkspaceConfigValidator.class).to(org.eclipse.che.api.workspace.server.DefaultWorkspaceConfigValidator.class);
+
+        bind(WorkspaceValidator.class).to(DefaultWorkspaceValidator.class);
         bind(MachineStateListener.class).asEagerSingleton();
         bind(org.eclipse.che.api.machine.server.WsAgentLauncher.class).to(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.class);
     }

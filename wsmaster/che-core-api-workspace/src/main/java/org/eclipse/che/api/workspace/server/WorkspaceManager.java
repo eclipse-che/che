@@ -193,11 +193,8 @@ public class WorkspaceManager {
      * <li><b>user_name:</b> is not valid abstract key
      * </ul>
      *
-     * <p>Returned instance always permanent(non-temporary), contains websocket channels
-     * and with either {@link WorkspaceStatus#STOPPED} status or status defined by its runtime(if exists).
-     *
      * @param key
-     *         composite key
+     *         composite key(e.g. workspace 'id' or 'namespace:name')
      * @return the workspace instance
      * @throws NullPointerException
      *         when {@code key} is null

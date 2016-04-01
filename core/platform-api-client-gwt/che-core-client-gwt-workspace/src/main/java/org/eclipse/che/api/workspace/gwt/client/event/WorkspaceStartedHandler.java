@@ -12,7 +12,7 @@ package org.eclipse.che.api.workspace.gwt.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 /**
  * Provides method which is called when workspace started.
@@ -27,5 +27,5 @@ public interface WorkspaceStartedHandler extends EventHandler {
      * @param workspace
      *         workspace which was started
      */
-    void onWorkspaceStarted(UsersWorkspaceDto workspace);
+    void onWorkspaceStarted(WorkspaceDto workspace);
 }

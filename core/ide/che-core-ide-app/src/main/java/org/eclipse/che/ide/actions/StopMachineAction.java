@@ -12,7 +12,7 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -56,7 +56,7 @@ public class StopMachineAction extends Action {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
-        final UsersWorkspaceDto workspace = appContext.getWorkspace();
+        final WorkspaceDto workspace = appContext.getWorkspace();
 
         workspaceService.stop(workspace.getId());
     }

@@ -16,8 +16,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.user.gwt.client.UserProfileServiceClient;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -68,18 +68,18 @@ public class MachineInfoPresenterTest {
     @Mock
     private Unmarshallable<ProfileDescriptor> profileUnmarshaller;
     @Mock
-    private Unmarshallable<UsersWorkspaceDto> wsUnmarshaller;
+    private Unmarshallable<WorkspaceDto>      wsUnmarshaller;
     @Mock
     private ProfileDescriptor                 profileDescriptor;
     @Mock
-    private UsersWorkspaceDto                 wsDescriptor;
+    private WorkspaceDto                 wsDescriptor;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private Promise<UsersWorkspaceDto>        promise;
+    private Promise<WorkspaceDto>        promise;
 
     @Captor
     private ArgumentCaptor<AsyncRequestCallback<ProfileDescriptor>> profileCaptor;
     @Captor
-    private ArgumentCaptor<AsyncRequestCallback<UsersWorkspaceDto>> wsCaptor;
+    private ArgumentCaptor<AsyncRequestCallback<WorkspaceDto>> wsCaptor;
 
     @InjectMocks
     private MachineInfoPresenter presenter;
@@ -89,12 +89,12 @@ public class MachineInfoPresenterTest {
         when(machine.getWorkspaceId()).thenReturn(SOME_TEXT);
 
         when(unmarshallerFactory.newUnmarshaller(ProfileDescriptor.class)).thenReturn(profileUnmarshaller);
-        when(unmarshallerFactory.newUnmarshaller(UsersWorkspaceDto.class)).thenReturn(wsUnmarshaller);
+        when(unmarshallerFactory.newUnmarshaller(WorkspaceDto.class)).thenReturn(wsUnmarshaller);
     }
 
     @Test
     public void infoShouldBeUpdated() {
-        when(wsService.getUsersWorkspace(SOME_TEXT)).thenReturn(promise);
+        when(wsService.getWorkspace(SOME_TEXT)).thenReturn(promise);
 
         presenter.update(machine);
 
@@ -102,7 +102,7 @@ public class MachineInfoPresenterTest {
 
         verify(userProfile).getCurrentProfile(Matchers.<AsyncRequestCallback<ProfileDescriptor>>anyObject());
         verify(machine).getWorkspaceId();
-        verify(wsService).getUsersWorkspace(eq(SOME_TEXT));
+        verify(wsService).getWorkspace(eq(SOME_TEXT));
 
         verify(view).updateInfo(machine);
     }
@@ -114,7 +114,7 @@ public class MachineInfoPresenterTest {
         attributes.put(MachineInfoPresenter.LAST_NAME_KEY, "lastName");
 
         when(profileDescriptor.getAttributes()).thenReturn(attributes);
-        when(wsService.getUsersWorkspace(SOME_TEXT)).thenReturn(promise);
+        when(wsService.getWorkspace(SOME_TEXT)).thenReturn(promise);
 
         presenter.update(machine);
 
@@ -139,7 +139,7 @@ public class MachineInfoPresenterTest {
         attributes.put(MachineInfoPresenter.EMAIL_KEY, "email");
 
         when(profileDescriptor.getAttributes()).thenReturn(attributes);
-        when(wsService.getUsersWorkspace(SOME_TEXT)).thenReturn(promise);
+        when(wsService.getWorkspace(SOME_TEXT)).thenReturn(promise);
 
         presenter.update(machine);
 
@@ -163,11 +163,11 @@ public class MachineInfoPresenterTest {
         WorkspaceConfigDto wsConfigDto = mock(WorkspaceConfigDto.class);
         when(wsDescriptor.getConfig()).thenReturn(wsConfigDto);
         when(wsConfigDto.getName()).thenReturn(SOME_TEXT);
-        when(wsService.getUsersWorkspace(SOME_TEXT)).thenReturn(promise);
+        when(wsService.getWorkspace(SOME_TEXT)).thenReturn(promise);
 
         presenter.update(machine);
 
-        verify(wsService).getUsersWorkspace(eq(SOME_TEXT));
+        verify(wsService).getWorkspace(eq(SOME_TEXT));
 
         verify(machine).getWorkspaceId();
 //        verify(wsDescriptor).getName();
