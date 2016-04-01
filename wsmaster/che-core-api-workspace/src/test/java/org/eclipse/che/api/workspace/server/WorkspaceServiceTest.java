@@ -51,7 +51,6 @@ import org.everrest.core.RequestFilter;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -66,8 +65,6 @@ import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptyNavigableMap;
-import static java.util.Collections.emptySortedMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -75,7 +72,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_SNAPSHOTS;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
@@ -83,7 +79,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSP
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -97,7 +92,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -632,7 +626,8 @@ public class WorkspaceServiceTest {
                                                               LINK_REL_GET_SNAPSHOT,
                                                               LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL,
                                                               WSAGENT_REFERENCE,
-                                                              "ide url"));
+                                                              "ide url",
+                                                              "self link"));
         assertTrue(actualRels.equals(expectedRels), format("Links difference: '%s'. \n" +
                                                            "Returned links: '%s', \n" +
                                                            "Expected links: '%s'.",

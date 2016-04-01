@@ -798,6 +798,12 @@ public class WorkspaceService extends Service {
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final List<Link> links = new ArrayList<>();
         // add common workspace links
+        links.add(createLink("GET",
+                             uriBuilder.clone()
+                                       .path(getClass(), "getByKey")
+                                       .build(workspace.getId())
+                                       .toString(),
+                             "self link"));
         links.add(createLink("POST",
                              uriBuilder.clone()
                                        .path(getClass(), "startById")
