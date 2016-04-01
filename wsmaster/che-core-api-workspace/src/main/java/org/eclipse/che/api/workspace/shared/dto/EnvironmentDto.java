@@ -11,6 +11,7 @@
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.dto.shared.DTO;
@@ -30,9 +31,13 @@ public interface EnvironmentDto extends Environment {
 
     EnvironmentDto withName(String name);
 
+    void setName(String name);
+
     @Override
     @FactoryParameter(obligation = OPTIONAL)
     RecipeDto getRecipe();
+
+    void setRecipe(RecipeDto recipe);
 
     EnvironmentDto withRecipe(RecipeDto recipe);
 
@@ -45,6 +50,8 @@ public interface EnvironmentDto extends Environment {
     MachineConfigDto devMachine();
 
     EnvironmentDto withMachineConfigs(List<MachineConfigDto> machineConfigs);
+
+    void setMachineConfigs(List<MachineConfigDto> machineConfigs);
 
     class DevMachineResolver {
         public static MachineConfigDto getDevMachine(EnvironmentDto environmentDto) {

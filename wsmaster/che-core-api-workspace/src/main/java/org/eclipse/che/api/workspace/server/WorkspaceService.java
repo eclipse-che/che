@@ -25,11 +25,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.permission.PermissionManager;
-import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.MachineManager;
@@ -41,13 +39,11 @@ import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeWorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.RuntimeWorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.annotation.security.RolesAllowed;
@@ -70,12 +66,13 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -85,13 +82,16 @@ import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_RUNTIME_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LIN_REL_GET_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.STOP_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -105,12 +105,13 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 @Path("/workspace")
 public class WorkspaceService extends Service {
 
-    private final WorkspaceManager  workspaceManager;
-    private final PermissionManager permissionManager;
-    private final MachineManager    machineManager;
+    private final WorkspaceManager   workspaceManager;
+    private final WorkspaceValidator validator;
+    private final PermissionManager  permissionManager;
+    private final MachineManager     machineManager;
     //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
     //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
-    private final String            ideContext;
+    private final String             ideContext;
 
     @Context
     private SecurityContext securityContext;
@@ -118,10 +119,12 @@ public class WorkspaceService extends Service {
     @Inject
     public WorkspaceService(WorkspaceManager workspaceManager,
                             MachineManager machineManager,
+                            WorkspaceValidator validator,
                             @Named("service.workspace.permission_manager") PermissionManager permissionManager,
                             @Named("che.ide.context") String ideContext) {
         this.workspaceManager = workspaceManager;
         this.machineManager = machineManager;
+        this.validator = validator;
         this.permissionManager = permissionManager;
         this.ideContext = ideContext;
     }
@@ -134,7 +137,7 @@ public class WorkspaceService extends Service {
     @ApiOperation(value = "Create a new workspace based on the configuration",
                   notes = "This operation can be performed only by authorized user," +
                           "this user will be the owner of the created workspace",
-                  response = UsersWorkspaceDto.class)
+                  response = WorkspaceConfigDto.class)
     @ApiResponses({@ApiResponse(code = 201, message = "The workspace successfully created"),
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
@@ -143,6 +146,12 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response create(@ApiParam(value = "The configuration to create the new workspace", required = true)
                            WorkspaceConfigDto config,
+                           @ApiParam(value = "Workspace attribute defined in 'attrName:attrValue' format. " +
+                                             "The first ':' is considered as attribute name and value separator",
+                                     examples = @Example({@ExampleProperty("stackId:stack123"),
+                                                          @ExampleProperty("attrName:value-with:colon")}))
+                           @QueryParam("attribute")
+                           List<String> attrsList,
                            @ApiParam("The account id related to this operation")
                            @QueryParam("account")
                            String accountId) throws ConflictException,
@@ -150,9 +159,15 @@ public class WorkspaceService extends Service {
                                                     BadRequestException,
                                                     ForbiddenException,
                                                     NotFoundException {
-        requiredNotNull(config, "Workspace configuration required");
+        requiredNotNull(config, "Workspace configuration");
+        final Map<String, String> attributes = parseAttrs(attrsList);
+        validator.validateAttributes(attributes);
+        validator.validateConfig(config);
         return Response.status(201)
-                       .entity(injectLinks(asDto(workspaceManager.createWorkspace(config, getCurrentUserId(), accountId))))
+                       .entity(injectLinks(asDto(workspaceManager.createWorkspace(config,
+                                                                                  getCurrentUserId(),
+                                                                                  attributes,
+                                                                                  accountId))))
                        .build();
     }
 
@@ -160,42 +175,21 @@ public class WorkspaceService extends Service {
     @Path("/{key}")
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
-    @ApiOperation(value = "Get the workspace by the composite key",
+    @ApiOperation(value = "Get the workspace by the key",
                   notes = "Composite key can be just workspace ID or in the " +
                           "username:workspace_name form, where username is optional (e.g :workspace_name is valid key too.")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
-                   @ApiResponse(code = 404, message = "The workspace by specified key does not exist"),
+                   @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto getByKey(@ApiParam(value = "Composite key", examples = @Example({@ExampleProperty("workspace12345678"),
-                                                                                              @ExampleProperty("username:workspace_name"),
-                                                                                              @ExampleProperty(":workspace_name")})) @PathParam("key") String key)
-            throws NotFoundException,
-                   ServerException,
-                   ForbiddenException,
-                   BadRequestException {
-        validateKey(key);
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(key);
+    public WorkspaceDto getByKey(@ApiParam("Workspace ID") @PathParam("key") String id) throws NotFoundException,
+                                                                                               ServerException,
+                                                                                               ForbiddenException,
+                                                                                               BadRequestException {
+        validateKey(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         return injectLinks(asDto(workspace));
-    }
-
-    @GET
-    @Path("/name/{name}")
-    @RolesAllowed("user")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get the workspace by the name from the workspaces owned by the current user",
-                  notes = "This operation can be performed only by the authorized user")
-    @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested workspace entity"),
-                   @ApiResponse(code = 404, message = "The workspace with specified name does not exist for current user "),
-                   @ApiResponse(code = 403, message = "The user is not the workspace owner"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    @Deprecated
-    public UsersWorkspaceDto getByName(@ApiParam("The workspace name") @PathParam("name") String name) throws ServerException,
-                                                                                                              BadRequestException,
-                                                                                                              NotFoundException,
-                                                                                                              ForbiddenException {
-        return injectLinks(asDto(workspaceManager.getWorkspace(name, getCurrentUserId())));
     }
 
     @GET
@@ -204,21 +198,25 @@ public class WorkspaceService extends Service {
     @GenerateLink(rel = LINK_REL_GET_WORKSPACES)
     @ApiOperation(value = "Get the workspaces owned by the current user",
                   notes = "This operation can be performed only by authorized user",
-                  response = UsersWorkspaceDto.class,
+                  response = WorkspaceDto.class,
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "The workspaces successfully fetched"),
                    @ApiResponse(code = 500, message = "Internal server error occurred during workspaces fetching")})
-    public List<UsersWorkspaceDto> getWorkspaces(@ApiParam("The number of the items to skip")
-                                                 @DefaultValue("0")
-                                                 @QueryParam("skipCount")
-                                                 Integer skipCount,
-                                                 @ApiParam("The limit of the items in the response, default is 30")
-                                                 @DefaultValue("30")
-                                                 @QueryParam("maxItems")
-                                                 Integer maxItems) throws ServerException, BadRequestException {
+    public List<WorkspaceDto> getWorkspaces(@ApiParam("The number of the items to skip")
+                                            @DefaultValue("0")
+                                            @QueryParam("skipCount")
+                                            Integer skipCount,
+                                            @ApiParam("The limit of the items in the response, default is 30")
+                                            @DefaultValue("30")
+                                            @QueryParam("maxItems")
+                                            Integer maxItems,
+                                            @ApiParam("Workspace status")
+                                            @QueryParam("status")
+                                            String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
         return workspaceManager.getWorkspaces(getCurrentUserId())
                                .stream()
+                               .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> injectLinks(asDto(workspace)))
                                .collect(toList());
     }
@@ -236,17 +234,18 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 409, message = "Conflict error occurred during workspace update" +
                                                       "(e.g. Workspace with such name already exists)"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto update(@ApiParam("The workspace id")
-                                    @PathParam("id")
-                                    String id,
-                                    @ApiParam(value = "The workspace update", required = true)
-                                    WorkspaceConfigDto update) throws BadRequestException,
-                                                                      ServerException,
-                                                                      ForbiddenException,
-                                                                      NotFoundException,
-                                                                      ConflictException {
+    public WorkspaceDto update(@ApiParam("The workspace id")
+                               @PathParam("id")
+                               String id,
+                               @ApiParam(value = "The workspace update", required = true)
+                               WorkspaceDto update) throws BadRequestException,
+                                                           ServerException,
+                                                           ForbiddenException,
+                                                           NotFoundException,
+                                                           ConflictException {
         requiredNotNull(update, "Workspace configuration");
         ensureUserIsWorkspaceOwner(id);
+        validator.validateWorkspace(update);
         return injectLinks(asDto(workspaceManager.updateWorkspace(id, update)));
     }
 
@@ -269,51 +268,6 @@ public class WorkspaceService extends Service {
         workspaceManager.removeWorkspace(id);
     }
 
-    @GET
-    @Path("/{id}/runtime")
-    @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
-    @ApiOperation(value = "Get the runtime workspace by the id",
-                  notes = "This operation can be performed only by the authorized user")
-    @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested runtime workspace entity"),
-                   @ApiResponse(code = 404, message = "The runtime workspace with the specified id does not exist"),
-                   @ApiResponse(code = 403, message = "The user is not workspace owner"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public RuntimeWorkspaceDto getRuntimeWorkspaceById(@ApiParam("The workspace id")
-                                                       @PathParam("id")
-                                                       String id) throws ServerException,
-                                                                         BadRequestException,
-                                                                         NotFoundException,
-                                                                         ForbiddenException {
-        final RuntimeWorkspaceImpl runtimeWorkspace = workspaceManager.getRuntimeWorkspace(id);
-        ensureUserIsWorkspaceOwner(runtimeWorkspace);
-        return injectLinks(asDto(runtimeWorkspace));
-    }
-
-    @GET
-    @Path("/runtime")
-    @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
-    @ApiOperation(value = "Get the runtime workspaces owned by current user",
-                  notes = "This operation can be performed only by authorized user",
-                  response = RuntimeWorkspaceDto.class,
-                  responseContainer = "List")
-    @ApiResponses(@ApiResponse(code = 200, message = "Workspaces successfully fetched"))
-    public List<RuntimeWorkspaceDto> getRuntimeWorkspaces(@ApiParam("The number of the items to skip")
-                                                          @DefaultValue("0")
-                                                          @QueryParam("skipCount")
-                                                          Integer skipCount,
-                                                          @ApiParam("The limit of the items in the response, default is 30")
-                                                          @DefaultValue("30")
-                                                          @QueryParam("maxItems")
-                                                          Integer maxItems) throws BadRequestException {
-        //TODO add maxItems & skipCount to manager
-        return workspaceManager.getRuntimeWorkspaces(getCurrentUserId())
-                               .stream()
-                               .map(workspace -> injectLinks(asDto(workspace)))
-                               .collect(toList());
-    }
-
     @POST
     @Path("/{id}/runtime")
     @Produces(APPLICATION_JSON)
@@ -327,19 +281,19 @@ public class WorkspaceService extends Service {
                                                       "The operation is not allowed for the user"),
                    @ApiResponse(code = 409, message = "Any conflict occurs during the workspace start"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto startById(@ApiParam("The workspace id")
-                                       @PathParam("id")
-                                       String workspaceId,
-                                       @ApiParam("The name of the workspace environment that should be used for start")
-                                       @QueryParam("environment")
-                                       String envName,
-                                       @ApiParam("The account id related to this operation")
-                                       @QueryParam("accountId")
-                                       String accountId) throws ServerException,
-                                                                BadRequestException,
-                                                                NotFoundException,
-                                                                ForbiddenException,
-                                                                ConflictException {
+    public WorkspaceDto startById(@ApiParam("The workspace id")
+                                  @PathParam("id")
+                                  String workspaceId,
+                                  @ApiParam("The name of the workspace environment that should be used for start")
+                                  @QueryParam("environment")
+                                  String envName,
+                                  @ApiParam("The account id related to this operation")
+                                  @QueryParam("accountId")
+                                  String accountId) throws ServerException,
+                                                           BadRequestException,
+                                                           NotFoundException,
+                                                           ForbiddenException,
+                                                           ConflictException {
         ensureUserIsWorkspaceOwner(workspaceId);
 
         final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
@@ -347,45 +301,7 @@ public class WorkspaceService extends Service {
         params.put("workspaceId", workspaceId);
         permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), params);
 
-        return injectLinks(asDto(workspaceManager.startWorkspaceById(workspaceId, envName, accountId)));
-    }
-
-    @POST
-    @Path("/name/{name}/runtime")
-    @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
-    @ApiOperation(value = "Start workspace by name",
-                  notes = "This operation can be performed only by the authorized user." +
-                          "The workspace starts asynchronously")
-    @ApiResponses({@ApiResponse(code = 200, message = "The workspace is starting"),
-                   @ApiResponse(code = 400, message = "The workspace name is not valid"),
-                   @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
-                   @ApiResponse(code = 403, message = "The user is not workspace owner." +
-                                                      "The operation is not allowed for the user"),
-                   @ApiResponse(code = 409, message = "Any conflict occurs during the workspace start"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto startByName(@ApiParam("The name of the workspace to start")
-                                         @PathParam("name")
-                                         String name,
-                                         @ApiParam("The name of the workspace environment that should be used for start")
-                                         @QueryParam("environment")
-                                         String envName,
-                                         @ApiParam("The account id related to this operation")
-                                         @QueryParam("accountId")
-                                         String accountId) throws ServerException,
-                                                                  BadRequestException,
-                                                                  NotFoundException,
-                                                                  ForbiddenException,
-                                                                  ConflictException {
-        final UsersWorkspace workspace = workspaceManager.getWorkspace(name, getCurrentUserId());
-        ensureUserIsWorkspaceOwner(workspace);
-
-        final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
-        params.put("accountId", accountId);
-        params.put("workspaceId", workspace.getId());
-        permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), params);
-
-        return injectLinks(asDto(workspaceManager.startWorkspaceByName(name, getCurrentUserId(), envName, accountId)));
+        return injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId)));
     }
 
     @POST
@@ -404,18 +320,25 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 409, message = "Any conflict occurs during the workspace start" +
                                                       "(e.g. workspace with such name already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public RuntimeWorkspaceDto startTemporary(@ApiParam(value = "The configuration to start the workspace from", required = true)
-                                              WorkspaceConfigDto cfg,
-                                              @ApiParam("The account id related to this operation")
-                                              @QueryParam("account")
-                                              String accountId) throws BadRequestException,
-                                                                       ForbiddenException,
-                                                                       NotFoundException,
-                                                                       ServerException,
-                                                                       ConflictException {
+    public WorkspaceDto startFromConfig(@ApiParam(value = "The configuration to start the workspace from", required = true)
+                                        WorkspaceConfigDto cfg,
+                                        @ApiParam("Weather this workspace is temporary or not")
+                                        @QueryParam("temporary")
+                                        Boolean isTemporary,
+                                        @ApiParam("The account id related to this operation")
+                                        @QueryParam("account")
+                                        String accountId) throws BadRequestException,
+                                                                 ForbiddenException,
+                                                                 NotFoundException,
+                                                                 ServerException,
+                                                                 ConflictException {
         requiredNotNull(cfg, "Workspace configuration");
         permissionManager.checkPermission(START_WORKSPACE, getCurrentUserId(), "accountId", accountId);
-        return injectLinks(asDto(workspaceManager.startTemporaryWorkspace(cfg, accountId)));
+        validator.validateConfig(cfg);
+        return injectLinks(asDto(workspaceManager.startWorkspace(cfg,
+                                                                 getCurrentUserId(),
+                                                                 firstNonNull(isTemporary, false),
+                                                                 accountId)));
     }
 
     @POST
@@ -432,19 +355,19 @@ public class WorkspaceService extends Service {
                                                       "The operation is not allowed for the user"),
                    @ApiResponse(code = 409, message = "Any conflict occurs during the workspace start"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto recoverWorkspace(@ApiParam("The workspace id")
-                                              @PathParam("id")
-                                              String workspaceId,
-                                              @ApiParam("The name of the workspace environment to recover from")
-                                              @QueryParam("environment")
-                                              String envName,
-                                              @ApiParam("The account id related to this operation")
-                                              @QueryParam("accountId")
-                                              String accountId) throws BadRequestException,
-                                                                       ForbiddenException,
-                                                                       NotFoundException,
-                                                                       ServerException,
-                                                                       ConflictException {
+    public WorkspaceDto recoverWorkspace(@ApiParam("The workspace id")
+                                         @PathParam("id")
+                                         String workspaceId,
+                                         @ApiParam("The name of the workspace environment to recover from")
+                                         @QueryParam("environment")
+                                         String envName,
+                                         @ApiParam("The account id related to this operation")
+                                         @QueryParam("accountId")
+                                         String accountId) throws BadRequestException,
+                                                                  ForbiddenException,
+                                                                  NotFoundException,
+                                                                  ServerException,
+                                                                  ConflictException {
         ensureUserIsWorkspaceOwner(workspaceId);
 
         final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
@@ -465,10 +388,11 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public void stop(@ApiParam("The workspace id") @PathParam("id") String id) throws BadRequestException,
-                                                                                      ForbiddenException,
+    public void stop(@ApiParam("The workspace id") @PathParam("id") String id) throws ForbiddenException,
                                                                                       NotFoundException,
-                                                                                      ServerException {
+                                                                                      ServerException,
+                                                                                      ConflictException,
+                                                                                      BadRequestException {
         ensureUserIsWorkspaceOwner(id);
         workspaceManager.stopWorkspace(id);
     }
@@ -532,24 +456,25 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace not found"),
                    @ApiResponse(code = 409, message = "The command with such name already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto addCommand(@ApiParam("The workspace id")
-                                        @PathParam("id")
-                                        String id,
-                                        @ApiParam(value = "The new workspace command", required = true)
-                                        CommandDto newCommand) throws ServerException,
-                                                                      BadRequestException,
-                                                                      NotFoundException,
-                                                                      ConflictException,
-                                                                      ForbiddenException {
+    public WorkspaceDto addCommand(@ApiParam("The workspace id")
+                                   @PathParam("id")
+                                   String id,
+                                   @ApiParam(value = "The new workspace command", required = true)
+                                   CommandDto newCommand) throws ServerException,
+                                                                 BadRequestException,
+                                                                 NotFoundException,
+                                                                 ConflictException,
+                                                                 ForbiddenException {
         requiredNotNull(newCommand, "Command");
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
-        return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace.getConfig())));
+        validator.validateConfig(workspace.getConfig());
+        return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
     }
 
     @PUT
-    @Path("/{id}/command")
+    @Path("/{id}/command/{name}")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
@@ -561,22 +486,27 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace or the command not found"),
                    @ApiResponse(code = 409, message = "The Command with such name already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto updateCommand(@ApiParam("The workspace id")
-                                           @PathParam("id") String id,
-                                           @ApiParam(value = "The command update", required = true)
-                                           CommandDto update) throws ServerException,
-                                                                     BadRequestException,
-                                                                     NotFoundException,
-                                                                     ConflictException,
-                                                                     ForbiddenException {
+    public WorkspaceDto updateCommand(@ApiParam("The name of the command")
+                                      @PathParam("name")
+                                      String cmdName,
+                                      @ApiParam("The workspace id")
+                                      @PathParam("id") String id,
+                                      @ApiParam(value = "The command update", required = true)
+                                      CommandDto update) throws ServerException,
+                                                                BadRequestException,
+                                                                NotFoundException,
+                                                                ConflictException,
+                                                                ForbiddenException {
         requiredNotNull(update, "Command update");
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig().getCommands().removeIf(cmd -> cmd.getName().equals(update.getName()))) {
-            throw new NotFoundException("Workspace " + id + " doesn't contain command " + update.getName());
+        final List<CommandImpl> commands = workspace.getConfig().getCommands();
+        if (!commands.removeIf(cmd -> cmd.getName().equals(cmdName))) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain command '%s'", id, cmdName));
         }
-        workspace.getConfig().getCommands().add(new CommandImpl(update));
-        return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace.getConfig())));
+        commands.add(new CommandImpl(update));
+        validator.validateConfig(workspace.getConfig());
+        return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
     }
 
     @DELETE
@@ -598,10 +528,10 @@ public class WorkspaceService extends Service {
                                                          NotFoundException,
                                                          ConflictException,
                                                          ForbiddenException {
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         if (workspace.getConfig().getCommands().removeIf(command -> command.getName().equals(commandName))) {
-            workspaceManager.updateWorkspace(id, workspace.getConfig());
+            workspaceManager.updateWorkspace(id, workspace);
         }
     }
 
@@ -618,30 +548,25 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace not found"),
                    @ApiResponse(code = 409, message = "Environment with such name already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto addEnvironment(@ApiParam("The workspace id")
-                                            @PathParam("id")
-                                            String id,
-                                            @ApiParam(value = "The new environment", required = true)
-                                            EnvironmentDto newEnvironment) throws ServerException,
-                                                                                  BadRequestException,
-                                                                                  NotFoundException,
-                                                                                  ConflictException,
-                                                                                  ForbiddenException {
+    public WorkspaceDto addEnvironment(@ApiParam("The workspace id")
+                                       @PathParam("id")
+                                       String id,
+                                       @ApiParam(value = "The new environment", required = true)
+                                       EnvironmentDto newEnvironment) throws ServerException,
+                                                                             BadRequestException,
+                                                                             NotFoundException,
+                                                                             ConflictException,
+                                                                             ForbiddenException {
         requiredNotNull(newEnvironment, "New environment");
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (workspace.getConfig()
-                     .getEnvironments()
-                     .stream()
-                     .anyMatch(env -> env.getName().equals(newEnvironment.getName()))) {
-            throw new ConflictException("Environment '" + newEnvironment.getName() + "' already exists");
-        }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(newEnvironment));
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace.getConfig())));
+        validator.validateConfig(workspace.getConfig());
+        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
     @PUT
-    @Path("/{id}/environment")
+    @Path("/{id}/environment/{name}")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
@@ -652,26 +577,28 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 403, message = "The user does not have access to update the environment"),
                    @ApiResponse(code = 404, message = "The workspace or the environment not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto updateEnvironment(@ApiParam("The workspace id")
-                                               @PathParam("id")
-                                               String id,
-                                               @ApiParam(value = "The environment update", required = true)
-                                               EnvironmentDto update) throws ServerException,
-                                                                             BadRequestException,
-                                                                             NotFoundException,
-                                                                             ConflictException,
-                                                                             ForbiddenException {
+    public WorkspaceDto updateEnvironment(@ApiParam("The workspace id")
+                                          @PathParam("id")
+                                          String id,
+                                          @ApiParam("The name of the environment")
+                                          @PathParam("name")
+                                          String envName,
+                                          @ApiParam(value = "The environment update", required = true)
+                                          EnvironmentDto update) throws ServerException,
+                                                                        BadRequestException,
+                                                                        NotFoundException,
+                                                                        ConflictException,
+                                                                        ForbiddenException {
         requiredNotNull(update, "Environment description");
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig()
-                      .getEnvironments()
-                      .stream()
-                      .anyMatch(env -> env.getName().equals(update.getName()))) {
-            throw new NotFoundException("Workspace " + id + " doesn't contain environment " + update.getName());
+        final List<EnvironmentImpl> environments = workspace.getConfig().getEnvironments();
+        if (!environments.stream().anyMatch(env -> env.getName().equals(envName))) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(update));
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace.getConfig())));
+        validator.validateConfig(workspace.getConfig());
+        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
     @DELETE
@@ -693,14 +620,10 @@ public class WorkspaceService extends Service {
                                                          NotFoundException,
                                                          ConflictException,
                                                          ForbiddenException {
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        Iterator<EnvironmentImpl> it = workspace.getConfig().getEnvironments().iterator();
-        while (it.hasNext()) {
-            if (it.next().getName().equals(envName)) {
-                it.remove();
-                workspaceManager.updateWorkspace(id, workspace.getConfig());
-            }
+        if (workspace.getConfig().getEnvironments().removeIf(e -> e.getName().equals(envName))) {
+            workspaceManager.updateWorkspace(id, workspace);
         }
     }
 
@@ -717,24 +640,25 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace not found"),
                    @ApiResponse(code = 409, message = "Any conflict error occurs"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto addProject(@ApiParam("The workspace id")
-                                        @PathParam("id")
-                                        String id,
-                                        @ApiParam(value = "The new project", required = true)
-                                        ProjectConfigDto newProject) throws ServerException,
-                                                                            BadRequestException,
-                                                                            NotFoundException,
-                                                                            ConflictException,
-                                                                            ForbiddenException {
+    public WorkspaceDto addProject(@ApiParam("The workspace id")
+                                   @PathParam("id")
+                                   String id,
+                                   @ApiParam(value = "The new project", required = true)
+                                   ProjectConfigDto newProject) throws ServerException,
+                                                                       BadRequestException,
+                                                                       NotFoundException,
+                                                                       ConflictException,
+                                                                       ForbiddenException {
         requiredNotNull(newProject, "New project config");
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
         workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace.getConfig())));
+        validator.validateConfig(workspace.getConfig());
+        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
     @PUT
-    @Path("/{id}/project")
+    @Path("/{id}/project/{path:.*}")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
@@ -745,27 +669,35 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 403, message = "The user does not have access to update the project"),
                    @ApiResponse(code = 404, message = "The workspace or the project not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public UsersWorkspaceDto updateProject(@ApiParam("The workspace id")
-                                           @PathParam("id")
-                                           String id,
-                                           @ApiParam(value = "The project update", required = true)
-                                           ProjectConfigDto update) throws ServerException,
-                                                                           BadRequestException,
-                                                                           NotFoundException,
-                                                                           ConflictException,
-                                                                           ForbiddenException {
+    public WorkspaceDto updateProject(@ApiParam("The workspace id")
+                                      @PathParam("id")
+                                      String id,
+                                      @ApiParam("The path to the project")
+                                      @PathParam("path")
+                                      String path,
+                                      @ApiParam(value = "The project update", required = true)
+                                      ProjectConfigDto update) throws ServerException,
+                                                                      BadRequestException,
+                                                                      NotFoundException,
+                                                                      ConflictException,
+                                                                      ForbiddenException {
         requiredNotNull(update, "Project config");
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (!workspace.getConfig().getProjects().removeIf(project -> project.getName().equals(update.getName()))) {
-            throw new NotFoundException("Workspace " + id + " doesn't contain project " + update.getName());
+        final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
+        final String normalizedPath = path.startsWith("/") ? path : '/' + path;
+        if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
+            throw new NotFoundException(format("Workspace '%s' doesn't contain project with path '%s'",
+                                               id,
+                                               normalizedPath));
         }
-        workspace.getConfig().getProjects().add(new ProjectConfigImpl(update));
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace.getConfig())));
+        projects.add(new ProjectConfigImpl(update));
+        validator.validateConfig(workspace.getConfig());
+        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
     }
 
     @DELETE
-    @Path("/{id}/project/{name}")
+    @Path("/{id}/project/{path:.*}")
     @RolesAllowed("user")
     @ApiOperation(value = "Remove the project from the workspace",
                   notes = "This operation can be performed only by the workspace owner")
@@ -777,16 +709,17 @@ public class WorkspaceService extends Service {
                               @PathParam("id")
                               String id,
                               @ApiParam("The name of the project to remove")
-                              @PathParam("name")
-                              String projectName) throws ServerException,
-                                                         BadRequestException,
-                                                         NotFoundException,
-                                                         ConflictException,
-                                                         ForbiddenException {
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+                              @PathParam("path")
+                              String path) throws ServerException,
+                                                  BadRequestException,
+                                                  NotFoundException,
+                                                  ConflictException,
+                                                  ForbiddenException {
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        if (workspace.getConfig().getProjects().removeIf(project -> project.getName().equals(projectName))) {
-            workspaceManager.updateWorkspace(id, workspace.getConfig());
+        final String normalizedPath = path.startsWith("/") ? path : '/' + path;
+        if (workspace.getConfig().getProjects().removeIf(project -> project.getPath().equals(normalizedPath))) {
+            workspaceManager.updateWorkspace(id, workspace);
         }
     }
 
@@ -818,11 +751,16 @@ public class WorkspaceService extends Service {
         requiredNotNull(machineConfig.getSource().getType(), "Machine source type");
         requiredNotNull(machineConfig.getSource().getLocation(), "Machine source location");
 
-        RuntimeWorkspaceImpl runtimeWorkspace = workspaceManager.getRuntimeWorkspace(workspaceId);
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
+        if (workspace.getRuntime() == null) {
+            throw new NotFoundException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
+        }
 
-        ensureUserIsWorkspaceOwner(runtimeWorkspace);
+        ensureUserIsWorkspaceOwner(workspace);
 
-        final MachineImpl machine = machineManager.createMachineAsync(machineConfig, workspaceId, runtimeWorkspace.getActiveEnv());
+        final MachineImpl machine = machineManager.createMachineAsync(machineConfig,
+                                                                      workspaceId,
+                                                                      workspace.getRuntime().getActiveEnv());
 
         return Response.status(201)
                        .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
@@ -837,9 +775,11 @@ public class WorkspaceService extends Service {
      * <p>{@link SecurityContext#isUserInRole(String)} is not the case,
      * as it works only for 'user', 'tmp-user', 'system/admin', 'system/manager.
      */
-    private void ensureUserIsWorkspaceOwner(String workspaceId)
-            throws ServerException, BadRequestException, ForbiddenException, NotFoundException {
-        final UsersWorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
+    private void ensureUserIsWorkspaceOwner(String workspaceId) throws ServerException,
+                                                                       BadRequestException,
+                                                                       ForbiddenException,
+                                                                       NotFoundException {
+        final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
         ensureUserIsWorkspaceOwner(workspace);
     }
 
@@ -850,18 +790,23 @@ public class WorkspaceService extends Service {
      * <p>{@link SecurityContext#isUserInRole(String)} is not the case,
      * as it works only for 'user', 'tmp-user', 'system/admin', 'system/manager.
      */
-    private void ensureUserIsWorkspaceOwner(UsersWorkspace usersWorkspace) throws ServerException, BadRequestException, ForbiddenException {
+    private void ensureUserIsWorkspaceOwner(WorkspaceImpl usersWorkspace) throws ServerException, BadRequestException, ForbiddenException {
         final String userId = getCurrentUserId();
-        if (!usersWorkspace.getOwner().equals(userId)) {
+        if (!usersWorkspace.getNamespace().equals(userId)) {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private <T extends UsersWorkspace & Hyperlinks> T injectLinks(T workspace) {
+    private WorkspaceDto injectLinks(WorkspaceDto workspace) {
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final List<Link> links = new ArrayList<>();
         // add common workspace links
+        links.add(createLink("GET",
+                             uriBuilder.clone()
+                                       .path(getClass(), "getByKey")
+                                       .build(workspace.getId())
+                                       .toString(),
+                             LINK_REL_SELF));
         links.add(createLink("POST",
                              uriBuilder.clone()
                                        .path(getClass(), "startById")
@@ -889,14 +834,14 @@ public class WorkspaceService extends Service {
                                        .build(workspace.getId())
                                        .toString(),
                              APPLICATION_JSON,
-                             "get workspace's snapshot"));
+                             LINK_REL_GET_SNAPSHOT));
 
         //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
         final URI ideUri = uriBuilder.clone()
                                      .replacePath(ideContext)
                                      .path(workspace.getConfig().getName())
                                      .build();
-        links.add(createLink("GET", ideUri.toString(), TEXT_HTML, "ide url"));
+        links.add(createLink("GET", ideUri.toString(), TEXT_HTML, LINK_REL_IDE_URL));
 
         // add workspace channel link
         final Link workspaceChannelLink = createLink("GET",
@@ -911,79 +856,47 @@ public class WorkspaceService extends Service {
                                                                           .withRequired(true);
 
         links.add(cloneDto(workspaceChannelLink).withRel(LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL)
-                                                .withParameters(singletonList(cloneDto(channelParameter).withDefaultValue("workspace:" + workspace.getId()))));
+                                                .withParameters(singletonList(
+                                                        cloneDto(channelParameter).withDefaultValue("workspace:" + workspace.getId()))));
 
         // add machine channels links to machines configs
-        final WorkspaceConfigDto workspaceConfigDto = (WorkspaceConfigDto)workspace.getConfig();
-        workspaceConfigDto.getEnvironments()
-                          .stream()
-                          .forEach(environmentDto -> injectMachineChannelsLinks(environmentDto,
-                                                                                workspace.getId(),
-                                                                                workspaceChannelLink,
-                                                                                channelParameter));
-
-        // add links for runtime workspace
-        if (RuntimeWorkspaceDto.class.isAssignableFrom(workspace.getClass())) {
-            links.add(createLink("GET",
-                                 uriBuilder.clone()
-                                           .path(getClass(), "getRuntimeWorkspaceById")
-                                           .build(workspace.getId())
-                                           .toString(),
-                                 APPLICATION_JSON,
-                                 "self link"));
-            RuntimeWorkspaceDto runtimeWorkspace = (RuntimeWorkspaceDto)workspace;
-            runtimeWorkspace.getMachines()
-                            .forEach(machineDto -> machineDto.withLinks(
-                                    singletonList(createLink("GET",
-                                                             getServiceContext().getBaseUriBuilder()
-                                                                                .path("/machine/{id}")
-                                                                                .build(machineDto.getId())
-                                                                                .toString(),
-                                                             APPLICATION_JSON,
-                                                             "get machine"))));
-        } else {
-            links.add(createLink("GET",
-                                 uriBuilder.clone()
-                                           .path(getClass(), "getByKey")
-                                           .build(workspace.getId())
-                                           .toString(),
-                                 APPLICATION_JSON,
-                                 "self link"));
-        }
+        workspace.getConfig()
+                 .getEnvironments()
+                 .stream()
+                 .forEach(environmentDto -> injectMachineChannelsLinks(environmentDto,
+                                                                       workspace.getId(),
+                                                                       workspaceChannelLink,
+                                                                       channelParameter));
         // add links for running workspace
         if (workspace.getStatus() == RUNNING) {
-            links.add(createLink("GET",
-                                 uriBuilder.clone()
-                                           .path(getClass(), "getRuntimeWorkspaceById")
-                                           .build(workspace.getId())
-                                           .toString(),
-                                 APPLICATION_JSON,
-                                 LINK_REL_GET_RUNTIME_WORKSPACE));
-            links.add(createLink("DELETE",
-                                 uriBuilder.clone()
-                                           .path(getClass(), "stop")
-                                           .build(workspace.getId())
-                                           .toString(),
-                                 STOP_WORKSPACE));
+            workspace.getRuntime()
+                     .getLinks()
+                     .add(createLink("DELETE",
+                                     uriBuilder.clone()
+                                               .path(getClass(), "stop")
+                                               .build(workspace.getId())
+                                               .toString(),
+                                     LINK_REL_STOP_WORKSPACE));
 
-            if (RuntimeWorkspaceDto.class.isAssignableFrom(workspace.getClass())) {
-                RuntimeWorkspaceDto runtimeWorkspace = (RuntimeWorkspaceDto)workspace;
-                runtimeWorkspace.getDevMachine()
-                                .getRuntime()
-                                .getServers()
-                                .values()
-                                .stream()
-                                .filter(server ->  WSAGENT_REFERENCE.equals(server.getRef()))
-                                .findAny()
-                                .ifPresent(wsAgent -> links.add(createLink("GET",
-                                                                           UriBuilder.fromUri(wsAgent.getUrl())
-                                                                                     .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                                                     .build()
-                                                                                     .toString(),
-                                                                           WSAGENT_REFERENCE)));
+            if (workspace.getRuntime() != null && workspace.getRuntime().getDevMachine() != null) {
+                workspace.getRuntime()
+                         .getDevMachine()
+                         .getRuntime()
+                         .getServers()
+                         .values()
+                         .stream()
+                         .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
+                         .findAny()
+                         .ifPresent(wsAgent -> links.add(createLink("GET",
+                                                                    UriBuilder.fromUri(wsAgent.getUrl())
+                                                                              .scheme("https".equals(ideUri.getScheme()) ? "wss"
+                                                                                                                         : "ws")
+                                                                              .build()
+                                                                              .toString(),
+                                                                    WSAGENT_REFERENCE)));
             }
         }
-        return (T)workspace.withLinks(links);
+        return workspace.withLinks(links);
     }
 
     private void injectMachineChannelsLinks(EnvironmentDto environmentDto,
@@ -1009,28 +922,38 @@ public class WorkspaceService extends Service {
                                                                .toString(),
                                             APPLICATION_JSON,
                                             "get machine");
-        final Link workspaceCfgLink = createLink("GET",
-                                                 uriBuilder.clone()
-                                                           .path(getClass(), "getRuntimeWorkspaceById")
-                                                           .build(snapshotDto.getId())
-                                                           .toString(),
-                                                 APPLICATION_JSON,
-                                                 "get workspace config");
-        final Link runtimeWorkspaceLink = createLink("GET",
-                                                     uriBuilder.clone()
-                                                               .path(getClass(), "getRuntimeWorkspaceById")
-                                                               .build(snapshotDto.getWorkspaceId())
-                                                               .toString(),
-                                                     APPLICATION_JSON,
-                                                     "get runtime workspace");
+        final Link workspaceLink = createLink("GET",
+                                              uriBuilder.clone()
+                                                        .path(getClass(), "getByKey")
+                                                        .build(snapshotDto.getWorkspaceId())
+                                                        .toString(),
+                                              APPLICATION_JSON,
+                                              LIN_REL_GET_WORKSPACE);
         final Link workspaceSnapshotLink = createLink("GET",
                                                       uriBuilder.clone()
                                                                 .path(getClass(), "getSnapshot")
                                                                 .build(snapshotDto.getWorkspaceId())
                                                                 .toString(),
                                                       APPLICATION_JSON,
-                                                      "get workspace's snapshot");
-        return snapshotDto.withLinks(asList(machineLink, workspaceCfgLink, runtimeWorkspaceLink, workspaceSnapshotLink));
+                                                      LINK_REL_SELF);
+        return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
+    }
+
+    private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {
+        if (attributes == null) {
+            return emptyMap();
+        }
+        final Map<String, String> res = Maps.newHashMapWithExpectedSize(attributes.size());
+        for (String attribute : attributes) {
+            final int colonIdx = attribute.indexOf(':');
+            if (colonIdx == -1) {
+                throw new BadRequestException("Attribute '" + attribute + "' is not valid, " +
+                                              "it should contain name and value separated with colon. " +
+                                              "For example: attributeName:attributeValue");
+            }
+            res.put(attribute.substring(0, colonIdx), attribute.substring(colonIdx + 1));
+        }
+        return res;
     }
 
     private static String getCurrentUserId() {
@@ -1054,9 +977,9 @@ public class WorkspaceService extends Service {
     }
 
     /*
-    * Validate composite key.
-    *
-    */
+     * Validate composite key.
+     *
+     */
     private void validateKey(String key) throws BadRequestException {
         String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
         switch (parts.length) {

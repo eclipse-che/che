@@ -15,20 +15,22 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Data object for {@link WorkspaceConfig}.
  *
  * @author Alexander Garagatyi
+ * @author Yevhenii Voevodin
  */
 public class WorkspaceConfigImpl implements WorkspaceConfig {
 
@@ -36,27 +38,26 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         return new WorkspaceConfigImplBuilder();
     }
 
-    private String                       name;
-    private String                       description;
-    private String                       defaultEnvName;
-    private List<CommandImpl>            commands;
-    private List<ProjectConfigImpl>      projects;
-    private List<EnvironmentImpl>        environments;
-    private Map<String, String>          attributes;
+    private String                  name;
+    private String                  description;
+    private String                  defaultEnv;
+    private List<CommandImpl>       commands;
+    private List<ProjectConfigImpl> projects;
+    private List<EnvironmentImpl>   environments;
 
     public WorkspaceConfigImpl(String name,
                                String description,
-                               String defaultEnvironment,
+                               String defaultEnv,
                                List<? extends Command> commands,
                                List<? extends ProjectConfig> projects,
-                               List<? extends Environment> environments,
-                               Map<String, String> attributes) {
+                               List<? extends Environment> environments) {
         this.name = name;
+        this.defaultEnv = defaultEnv;
         this.description = description;
         if (environments != null) {
             this.environments = environments.stream()
                                             .map(EnvironmentImpl::new)
-                                            .collect(Collectors.toList());
+                                            .collect(toList());
         }
         if (commands != null) {
             this.commands = commands.stream()
@@ -68,10 +69,6 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
                                     .map(ProjectConfigImpl::new)
                                     .collect(toList());
         }
-        if (attributes != null) {
-            this.attributes = new HashMap<>(attributes);
-        }
-        setDefaultEnv(defaultEnvironment);
     }
 
     public WorkspaceConfigImpl(WorkspaceConfig workspaceConfig) {
@@ -80,8 +77,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
              workspaceConfig.getDefaultEnv(),
              workspaceConfig.getCommands(),
              workspaceConfig.getProjects(),
-             workspaceConfig.getEnvironments(),
-             workspaceConfig.getAttributes());
+             workspaceConfig.getEnvironments());
     }
 
     @Override
@@ -90,10 +86,11 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = requireNonNull(name, "Non-null name required");
     }
 
     @Override
+    @Nullable
     public String getDescription() {
         return description;
     }
@@ -104,15 +101,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public String getDefaultEnv() {
-        return defaultEnvName;
-    }
-
-    /**
-     * Sets particular environment configured for this workspace  as default
-     * Throws NullPointerException if no Env with incoming name configured
-     */
-    public void setDefaultEnv(String name) {
-        defaultEnvName = name;
+        return defaultEnv;
     }
 
     @Override
@@ -141,26 +130,13 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public List<EnvironmentImpl> getEnvironments() {
-        if (environments == null) {
-            environments = new ArrayList<>();
-        }
         return environments;
     }
 
-    public void setEnvironments(List<EnvironmentImpl> environments) {
-        this.environments = environments;
-    }
-
-    @Override
-    public Map<String, String> getAttributes() {
-        if (attributes == null) {
-            attributes = new HashMap<>();
-        }
-        return attributes;
-    }
-
-    public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
+    public Optional<EnvironmentImpl> getEnvironment(String name) {
+        return getEnvironments().stream()
+                                .filter(env -> env.getName().equals(name))
+                                .findFirst();
     }
 
     @Override
@@ -168,24 +144,22 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         if (this == obj) return true;
         if (!(obj instanceof WorkspaceConfigImpl)) return false;
         final WorkspaceConfigImpl other = (WorkspaceConfigImpl)obj;
-        return Objects.equals(name, other.name) &&
-               Objects.equals(defaultEnvName, other.defaultEnvName) &&
-               getCommands().equals(other.getCommands()) &&
-               getEnvironments().equals(other.getEnvironments()) &&
-               getProjects().equals(other.getProjects()) &&
-               getAttributes().equals(other.getAttributes()) &&
-               Objects.equals(description, other.description);
+        return Objects.equals(name, other.name)
+               && Objects.equals(defaultEnv, other.defaultEnv)
+               && getCommands().equals(other.getCommands())
+               && getEnvironments().equals(other.getEnvironments())
+               && getProjects().equals(other.getProjects())
+               && Objects.equals(description, other.description);
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(name);
-        hash = 31 * hash + Objects.hashCode(defaultEnvName);
+        hash = 31 * hash + Objects.hashCode(defaultEnv);
         hash = 31 * hash + getCommands().hashCode();
         hash = 31 * hash + getEnvironments().hashCode();
         hash = 31 * hash + getProjects().hashCode();
-        hash = 31 * hash + getAttributes().hashCode();
         hash = 31 * hash + Objects.hashCode(description);
         return hash;
     }
@@ -194,10 +168,9 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     public String toString() {
         return "UsersWorkspaceImpl{" +
                ", name='" + name + '\'' +
-               ", defaultEnvName='" + defaultEnvName + '\'' +
+               ", defaultEnv='" + defaultEnv + '\'' +
                ", commands=" + commands +
                ", projects=" + projects +
-               ", attributes=" + attributes +
                ", environments=" + environments +
                ", description='" + description + '\'' +
                '}';
@@ -210,16 +183,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
      */
     public static class WorkspaceConfigImplBuilder {
 
-        protected String                             name;
-        protected String                             defaultEnvName;
-        protected List<? extends Command>            commands;
-        protected List<? extends ProjectConfig>      projects;
-        protected Map<String, String>                attributes;
-        protected List<? extends Environment>        environments;
-        protected String                             description;
+        private String                        name;
+        private String                        defaultEnvName;
+        private List<? extends Command>       commands;
+        private List<? extends ProjectConfig> projects;
+        private List<? extends Environment>   environments;
+        private String                        description;
 
-        WorkspaceConfigImplBuilder() {
-        }
+        private WorkspaceConfigImplBuilder() {}
 
         public WorkspaceConfigImpl build() {
             return new WorkspaceConfigImpl(name,
@@ -227,8 +198,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
                                            defaultEnvName,
                                            commands,
                                            projects,
-                                           environments,
-                                           attributes);
+                                           environments);
         }
 
         public WorkspaceConfigImplBuilder fromConfig(WorkspaceConfig workspaceConfig) {
@@ -238,7 +208,6 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
             this.projects = workspaceConfig.getProjects();
             this.commands = workspaceConfig.getCommands();
             this.environments = workspaceConfig.getEnvironments();
-            this.attributes = workspaceConfig.getAttributes();
             return this;
         }
 
@@ -259,11 +228,6 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
         public WorkspaceConfigImplBuilder setProjects(List<? extends ProjectConfig> projects) {
             this.projects = projects;
-            return this;
-        }
-
-        public WorkspaceConfigImplBuilder setAttributes(Map<String, String> attributes) {
-            this.attributes = attributes;
             return this;
         }
 
