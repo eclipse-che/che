@@ -14,8 +14,8 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Provider;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.WorkspaceComponent;
 import org.eclipse.che.ide.api.component.Component;
@@ -62,7 +62,7 @@ public class StartWorkspacePresenterTest {
 
     //additional mocks
     @Mock
-    private UsersWorkspaceDto              workspaceDto;
+    private WorkspaceDto                   workspaceDto;
     @Mock
     private WorkspaceConfigDto             workspaceConfigDto;
     @Mock
@@ -129,7 +129,7 @@ public class StartWorkspacePresenterTest {
         presenter.onCreateWorkspaceClicked();
 
         verify(view).hide();
-        verify(createWorkspacePresenter).show(Matchers.<List<UsersWorkspaceDto>>anyObject(), eq(callback));
+        verify(createWorkspacePresenter).show(Matchers.<List<WorkspaceDto>>anyObject(), eq(callback));
     }
 
     @Test

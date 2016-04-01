@@ -18,10 +18,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
@@ -54,8 +55,8 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class LocalWorkspaceDaoImpl implements WorkspaceDao {
 
-    private final Map<String, UsersWorkspaceImpl> workspaces;
-    private final LocalStorage                    localStorage;
+    private final Map<String, WorkspaceImpl> workspaces;
+    private final LocalStorage               localStorage;
 
     @Inject
     public LocalWorkspaceDaoImpl(LocalStorageFactory factory) throws IOException {
@@ -67,7 +68,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
 
     @PostConstruct
     public synchronized void loadWorkspaces() {
-        workspaces.putAll(localStorage.loadMap(new TypeToken<Map<String, UsersWorkspaceImpl>>() {}));
+        workspaces.putAll(localStorage.loadMap(new TypeToken<Map<String, WorkspaceImpl>>() {}));
     }
 
     @PreDestroy
@@ -76,28 +77,28 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     }
 
     @Override
-    public synchronized UsersWorkspaceImpl create(UsersWorkspaceImpl workspace) throws ConflictException, ServerException {
+    public synchronized WorkspaceImpl create(WorkspaceImpl workspace) throws ConflictException, ServerException {
         if (workspaces.containsKey(workspace.getId())) {
             throw new ConflictException("Workspace with id " + workspace.getId() + " already exists");
         }
-        if (find(workspace.getConfig().getName(), workspace.getOwner()).isPresent()) {
+        if (find(workspace.getConfig().getName(), workspace.getNamespace()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
                                                workspace.getConfig().getName(),
-                                               workspace.getOwner()));
+                                               workspace.getNamespace()));
         }
-        workspace.setStatus(null);
-        workspaces.put(workspace.getId(), doClone(workspace));
+        workspace.setStatus(WorkspaceStatus.STOPPED);
+        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
         return workspace;
     }
 
     @Override
-    public synchronized UsersWorkspaceImpl update(UsersWorkspaceImpl workspace)
+    public synchronized WorkspaceImpl update(WorkspaceImpl workspace)
             throws NotFoundException, ConflictException, ServerException {
         if (!workspaces.containsKey(workspace.getId())) {
             throw new NotFoundException("Workspace with id " + workspace.getId() + " was not found");
         }
         workspace.setStatus(null);
-        workspaces.put(workspace.getId(), doClone(workspace));
+        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
         return workspace;
     }
 
@@ -107,45 +108,36 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     }
 
     @Override
-    public synchronized UsersWorkspaceImpl get(String id) throws NotFoundException, ServerException {
-        final UsersWorkspaceImpl workspace = workspaces.get(id);
+    public synchronized WorkspaceImpl get(String id) throws NotFoundException, ServerException {
+        final WorkspaceImpl workspace = workspaces.get(id);
         if (workspace == null) {
             throw new NotFoundException("Workspace with id " + id + " was not found");
         }
-        return doClone(workspace);
+        return new WorkspaceImpl(workspace);
     }
 
     @Override
-    public synchronized UsersWorkspaceImpl get(String name, String owner) throws NotFoundException, ServerException {
-        final Optional<UsersWorkspaceImpl> wsOpt = find(name, owner);
+    public synchronized WorkspaceImpl get(String name, String owner) throws NotFoundException, ServerException {
+        final Optional<WorkspaceImpl> wsOpt = find(name, owner);
         if (!wsOpt.isPresent()) {
             throw new NotFoundException(format("Workspace with name %s and owner %s was not found", name, owner));
         }
-        return doClone(wsOpt.get());
+        return new WorkspaceImpl(wsOpt.get());
     }
 
     @Override
-    public synchronized List<UsersWorkspaceImpl> getByOwner(String owner) throws ServerException {
+    public synchronized List<WorkspaceImpl> getByNamespace(String owner) throws ServerException {
         return workspaces.values()
                          .stream()
-                         .filter(ws -> ws.getOwner().equals(owner))
-                         .map(this::doClone)
+                         .filter(ws -> ws.getNamespace().equals(owner))
+                         .map(WorkspaceImpl::new)
                          .collect(toList());
     }
 
-    private Optional<UsersWorkspaceImpl> find(String name, String owner) {
+    private Optional<WorkspaceImpl> find(String name, String owner) {
         return workspaces.values()
                          .stream()
-                         .filter(ws -> ws.getConfig().getName().equals(name) && ws.getOwner().equals(owner))
+                         .filter(ws -> ws.getConfig().getName().equals(name) && ws.getNamespace().equals(owner))
                          .findFirst();
-    }
-
-    private UsersWorkspaceImpl doClone(UsersWorkspaceImpl workspace) {
-        UsersWorkspaceImpl copyWorkspace = new UsersWorkspaceImpl(new WorkspaceConfigImpl(workspace.getConfig()),
-                                                                  workspace.getId(),
-                                                                  workspace.getOwner());
-        copyWorkspace.setStatus(workspace.getStatus());
-        copyWorkspace.setTemporary(workspace.isTemporary());
-        return copyWorkspace;
     }
 }

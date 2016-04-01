@@ -12,7 +12,7 @@ package org.eclipse.che.api.workspace.gwt.client.event;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 /**
  * The class contains information about started workspace and provides ability to handle events when workspace starts.
@@ -23,14 +23,14 @@ public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedHandler> {
 
     public static final Type<WorkspaceStartedHandler> TYPE = new Type<>();
 
-    private final UsersWorkspaceDto workspace;
+    private final WorkspaceDto workspace;
 
-    public WorkspaceStartedEvent(UsersWorkspaceDto workspace) {
+    public WorkspaceStartedEvent(WorkspaceDto workspace) {
         this.workspace = workspace;
     }
 
     /** Returns started workspace. */
-    public UsersWorkspaceDto getWorkspace() {
+    public WorkspaceDto getWorkspace() {
         return workspace;
     }
 

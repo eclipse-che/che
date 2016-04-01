@@ -16,7 +16,7 @@ import org.eclipse.che.api.machine.gwt.client.MachineManager;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -82,7 +82,7 @@ public class MachineStateNotifierTest {
     @Mock
     private MessageBus                         messageBus;
     @Mock
-    private UsersWorkspaceDto                  workspace;
+    private WorkspaceDto                       workspace;
     @Mock
     private StatusNotification                 notification;
 
@@ -111,7 +111,7 @@ public class MachineStateNotifierTest {
 
     @Test
     public void machineShouldBeTrackedWhenMachineStateIsCreating() throws Exception {
-        UsersWorkspaceDto workspace = mock(UsersWorkspaceDto.class);
+        WorkspaceDto workspace = mock(WorkspaceDto.class);
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(SOME_TEXT);
         when(machineConfig.getName()).thenReturn(SOME_TEXT);
@@ -128,7 +128,7 @@ public class MachineStateNotifierTest {
 
     @Test
     public void machineShouldBeTrackedWhenMachineStateIsDestroying() throws Exception {
-        UsersWorkspaceDto workspace = mock(UsersWorkspaceDto.class);
+        WorkspaceDto workspace = mock(WorkspaceDto.class);
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(SOME_TEXT);
         when(machineConfig.getName()).thenReturn(SOME_TEXT);

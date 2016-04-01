@@ -17,7 +17,7 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.app.CurrentUser;
@@ -49,7 +49,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
     private final List<String>              projectsInImport;
 
-    private UsersWorkspaceDto   workspace;
+    private WorkspaceDto        workspace;
     private CurrentProject      currentProject;
     private CurrentUser         currentUser;
     private Factory             factory;
@@ -86,12 +86,12 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
     }
 
     @Override
-    public UsersWorkspaceDto getWorkspace() {
+    public WorkspaceDto getWorkspace() {
         return workspace;
     }
 
     @Override
-    public void setWorkspace(UsersWorkspaceDto workspace) {
+    public void setWorkspace(WorkspaceDto workspace) {
         this.workspace = workspace;
     }
 

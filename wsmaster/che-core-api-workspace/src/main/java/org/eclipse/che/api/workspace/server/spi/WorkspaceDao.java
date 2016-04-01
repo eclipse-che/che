@@ -13,12 +13,12 @@ package org.eclipse.che.api.workspace.server.spi;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
 import java.util.List;
 
 /**
- * Defines data access object contract for {@link UsersWorkspaceImpl}.
+ * Defines data access object contract for {@link WorkspaceImpl}.
  *
  * @author Eugene Voevodin
  */
@@ -33,12 +33,12 @@ public interface WorkspaceDao {
      * @throws NullPointerException
      *         when {@code workspace} is null
      * @throws ConflictException
-     *         when workspace with given {@link UsersWorkspaceImpl#getName() name}
-     *         already exists for given {@link UsersWorkspaceImpl#getOwner() owner}
+     *         when workspace with given name
+     *         already exists for given namespace
      * @throws ServerException
      *         when any other error occurs during workspace creation
      */
-    UsersWorkspaceImpl create(UsersWorkspaceImpl workspace) throws ConflictException, ServerException;
+    WorkspaceImpl create(WorkspaceImpl workspace) throws ConflictException, ServerException;
 
     /**
      * Updates workspace with new entity, actually replaces(not merges) existing workspaces.
@@ -59,14 +59,13 @@ public interface WorkspaceDao {
      * @throws NullPointerException
      *         when {@code update} is null
      * @throws NotFoundException
-     *         when workspace with given {@link UsersWorkspaceImpl#getId() identifier} was not found
+     *         when workspace with given {@link WorkspaceImpl#getId() identifier} was not found
      * @throws ConflictException
-     *         when workspace with given {@link UsersWorkspaceImpl#getName() name}
-     *         already exists for given {@link UsersWorkspaceImpl#getOwner() owner}
+     *         when workspace with given name already exists for given owner
      * @throws ServerException
      *         when any other error occurs during workspace updating
      */
-    UsersWorkspaceImpl update(UsersWorkspaceImpl update) throws NotFoundException, ConflictException, ServerException;
+    WorkspaceImpl update(WorkspaceImpl update) throws NotFoundException, ConflictException, ServerException;
 
     /**
      * Removes workspace.
@@ -100,7 +99,7 @@ public interface WorkspaceDao {
      * @throws ServerException
      *         when any other error occurs during workspace fetching
      */
-    UsersWorkspaceImpl get(String id) throws NotFoundException, ServerException;
+    WorkspaceImpl get(String id) throws NotFoundException, ServerException;
 
     /**
      * Gets workspace by name and owner.
@@ -117,7 +116,7 @@ public interface WorkspaceDao {
      * @throws ServerException
      *         when any other error occurs during workspace fetching
      */
-    UsersWorkspaceImpl get(String name, String owner) throws NotFoundException, ServerException;
+    WorkspaceImpl get(String name, String owner) throws NotFoundException, ServerException;
 
     /**
      * Gets list of workspaces owned by given {@code owner}.
@@ -131,5 +130,5 @@ public interface WorkspaceDao {
      * @throws ServerException
      *         when any other error occurs during workspaces fetching
      */
-    List<UsersWorkspaceImpl> getByOwner(String owner) throws ServerException;
+    List<WorkspaceImpl> getByNamespace(String owner) throws ServerException;
 }

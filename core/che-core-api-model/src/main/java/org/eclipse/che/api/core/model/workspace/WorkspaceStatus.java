@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
  *
  * <p>{@link MachineStatus} is responsible for states of machines different from the dev-machine.
  *
- * <p>Workspace is rather part of the {@link UsersWorkspace} than {@link RuntimeWorkspace} or {@link WorkspaceConfig},
+ * <p>Workspace is rather part of the {@link Workspace} than {@link WorkspaceRuntime} or {@link WorkspaceConfig},
  * as it shows the state of <b>certain</b> user's workspace and exists <b>earlier</b> than runtime workspace instance
  * e.g. UsersWorkspace may be considered as 'STARTING' before it becomes runtime('RUNNING').
  *

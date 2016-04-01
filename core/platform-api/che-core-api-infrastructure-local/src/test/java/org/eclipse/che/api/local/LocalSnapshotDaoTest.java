@@ -81,7 +81,7 @@ public class LocalSnapshotDaoTest {
                            .generateId()
                            .setType("docker")
                            .setInstanceKey(new DummyInstanceKey())
-                           .setOwner("user123")
+                           .setNamespace("user123")
                            .setWorkspaceId("workspace123")
                            .setMachineName("machine123")
                            .setEnvName("env123")

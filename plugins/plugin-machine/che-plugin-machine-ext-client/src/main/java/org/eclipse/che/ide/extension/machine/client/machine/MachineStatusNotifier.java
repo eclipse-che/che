@@ -16,7 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -77,7 +77,7 @@ class MachineStatusNotifier {
 
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
             @Override
-            public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+            public void onWorkspaceStarted(WorkspaceDto workspace) {
                 messageBus = messageBusProvider.getMessageBus();
             }
         });

@@ -17,7 +17,7 @@ import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.project.gwt.client.watcher.WatcherServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -69,7 +69,7 @@ public class SystemFileWatcherTest {
     @Mock
     private ProjectExplorerPresenter projectExplorer;
     @Mock
-    private UsersWorkspaceDto        workspace;
+    private WorkspaceDto             workspace;
     @Mock
     private WsAgentStateEvent        wsAgentStateEvent;
 

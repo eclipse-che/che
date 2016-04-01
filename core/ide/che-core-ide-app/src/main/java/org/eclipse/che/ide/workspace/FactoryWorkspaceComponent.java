@@ -25,7 +25,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -143,10 +143,10 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
     /**
      * Checks if specified workspace has {@link WorkspaceStatus} which is {@code RUNNING}
      */
-    protected Operation<UsersWorkspaceDto> checkWorkspaceIsStarted() {
-        return new Operation<UsersWorkspaceDto>() {
+    protected Operation<WorkspaceDto> checkWorkspaceIsStarted() {
+        return new Operation<WorkspaceDto>() {
             @Override
-            public void apply(UsersWorkspaceDto workspace) throws OperationException {
+            public void apply(WorkspaceDto workspace) throws OperationException {
                 if (!RUNNING.equals(workspace.getStatus())) {
                     notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, true);
                     throw new OperationException(locale.workspaceNotRunning());
@@ -161,9 +161,9 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
     /**
      * Gets {@link Promise} of workspace according to workspace ID specified in parameter.
      */
-    private Promise<UsersWorkspaceDto> getWorkspaceToStart() {
+    private Promise<WorkspaceDto> getWorkspaceToStart() {
         // get workspace from the given id
-        return this.workspaceServiceClient.getUsersWorkspace(workspaceId);
+        return this.workspaceServiceClient.getWorkspace(workspaceId);
     }
 
 }

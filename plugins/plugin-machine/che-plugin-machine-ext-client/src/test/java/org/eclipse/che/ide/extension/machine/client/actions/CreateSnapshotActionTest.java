@@ -11,7 +11,8 @@
 package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -80,7 +81,7 @@ public class CreateSnapshotActionTest {
 
     @Test
     public void shouldCreateSnapshotWithWorkspaceIdFromAppContextWhenActionPerformed() {
-        when(appContext.getWorkspace()).thenReturn(newDto(UsersWorkspaceDto.class).withId("workspace123"));
+        when(appContext.getWorkspace()).thenReturn(newDto(WorkspaceDto.class).withId("workspace123"));
 
         createSnapshotAction.actionPerformed(event);
 

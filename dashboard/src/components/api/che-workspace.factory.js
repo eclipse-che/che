@@ -45,11 +45,10 @@ export class CheWorkspace {
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
         getDetails: {method: 'GET', url: '/api/workspace/:workspaceId'},
         create: {method: 'POST', url: '/api/workspace?account=:accountId'},
-        deleteConfig: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
-        updateConfig: {method: 'PUT', url : '/api/workspace/:workspaceId'},
+        deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
+        updateWorkspace: {method: 'PUT', url : '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url : '/api/workspace/:workspaceId/project'},
-        getRuntime: {method: 'GET', url : '/api/workspace/:workspaceId/runtime'},
-        deleteRuntime: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
+        stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
@@ -81,6 +80,14 @@ export class CheWorkspace {
     return this.workspacesById;
   }
 
+  /**
+   * Gets the workspace by id
+   * @param workspace id
+   * @returns {workspace}
+   */
+  getWorkspaceById(id) {
+    return this.workspacesById.get(id);
+  }
 
   /**
    * Ask for loading the workspaces in asynchronous way
@@ -155,25 +162,16 @@ export class CheWorkspace {
 
 
   createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
-    // /api/workspace?account=accountId
-    let attr = attributes ? attributes : {};
-
     let data = {
       'environments': [],
       'name': workspaceName,
-      'attributes': attributes,
       'projects': [],
       'defaultEnv': workspaceName,
       'description': null,
-      'commands': [],
-      'links': []
+      'commands': []
     };
 
-    var memory = 2048;
-    if (ram) {
-      memory = ram;
-    }
-
+    let memory = ram || 2048;
 
     let envEntry = {
         'name': workspaceName,
@@ -189,12 +187,31 @@ export class CheWorkspace {
 
     data.environments.push(envEntry);
 
-    let promise = this.remoteWorkspaceAPI.create({accountId : accountId}, data).$promise;
+    let attrs = this._convertAttributes(attributes);
+
+    let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;
     return promise;
   }
 
-  createWorkspaceFromConfig(accountId, workspaceConfig) {
-    return this.remoteWorkspaceAPI.create({accountId : accountId}, workspaceConfig).$promise;
+  createWorkspaceFromConfig(accountId, workspaceConfig, attributes) {
+    let attrs = this._convertAttributes(attributes);
+    return this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, workspaceConfig).$promise;
+  }
+
+  /**
+   * Converts attributes from a single object to the list of attributes where
+   * each item is attribute name and value separated by ':'(colon).
+   * @param attributes object
+   * @returns array of attributes
+   */
+  _convertAttributes(attributes) {
+    let attrs = [];
+    if (attributes) {
+      for (let attrName in attributes) {
+        attrs.push(attrName + ':' + attributes[attrName]);
+      }
+    }
+    return attrs;
   }
 
   /**
@@ -220,7 +237,7 @@ export class CheWorkspace {
 
 
   stopWorkspace(workspaceId) {
-    let promise = this.remoteWorkspaceAPI.deleteRuntime({workspaceId: workspaceId}, {}).$promise;
+    let promise = this.remoteWorkspaceAPI.stopWorkspace({workspaceId: workspaceId}, {}).$promise;
     return promise;
   }
 
@@ -231,7 +248,7 @@ export class CheWorkspace {
    * @returns {*|promise|n|N}
    */
   updateWorkspace(workspaceId, data) {
-    let promise = this.remoteWorkspaceAPI.updateConfig({workspaceId : workspaceId}, data).$promise;
+    let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId : workspaceId}, data).$promise;
     promise.then(() => {this.fetchWorkspaceDetails(workspaceId);});
     return promise;
   }
@@ -243,7 +260,7 @@ export class CheWorkspace {
    */
   deleteWorkspaceConfig(workspaceId) {
     var defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.deleteConfig({workspaceId : workspaceId}).$promise;
+    let promise = this.remoteWorkspaceAPI.deleteWorkspace({workspaceId : workspaceId}).$promise;
     promise.then(() => {
       this.listeners.forEach((listener) => {
         listener.onDeleteWorkspace(workspaceId);
@@ -257,45 +274,17 @@ export class CheWorkspace {
   }
 
   /**
-   * Get Runtimeconfig of a workspace
-   * @param workspaceId the workspace ID
-   * @returns {*|promise|n|N}
-   */
-  fetchRuntimeConfig(workspaceId) {
-    var defer = this.$q.defer();
-    let promise = this.remoteWorkspaceAPI.getRuntime({workspaceId: workspaceId}).$promise;
-    let updatedPromise = promise.then((data) => {
-      this.runtimeConfig.set(workspaceId, data);
-      defer.resolve();
-    }, (error) => {
-      if (error.status !== 304) {
-        defer.reject(error);
-      } else {
-        defer.resolve();
-      }
-    });
-    return defer.promise;
-  }
-
-  /**
-   * Get Runtime Config of a workspace.
-   * @param workspaceId the workspace ID
-   * @returns {Object}
-   */
-  getRuntimeConfig(workspaceId) {
-    return this.runtimeConfig.get(workspaceId);
-  }
-
-  /**
    * Gets websocket for a given workspace. It needs to have fetched first the runtime configuration of the workspace
    * @param workspaceId the id of the workspace
    * @returns {string}
    */
-  getWebsocketUrl(workspaceId) {
-    let runtimeData = this.getRuntimeConfig(workspaceId);
-    if (!runtimeData) {
+   getWebsocketUrl(workspaceId) {
+    let workspace = this.workspacesById.get(workspaceId);
+    if (!workspace || !workspace.runtime) {
       return '';
     }
+    let runtimeData = workspace.runtime;
+
     // extract the Websocket URL of the runtime
     let servers = runtimeData.devMachine.runtime.servers;
 

@@ -21,8 +21,8 @@ import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
@@ -167,7 +167,7 @@ public class MavenProjectResolverTest {
     protected static class TestWorkspaceHolder extends WorkspaceHolder {
 
         protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(UsersWorkspaceDto.class).
+            super(DtoFactory.newDto(WorkspaceDto.class).
                              withId("id").withConfig(DtoFactory.newDto(WorkspaceConfigDto.class).withName("name")
                             .withProjects(projects)));
         }

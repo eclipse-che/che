@@ -35,7 +35,7 @@ public class SnapshotImpl implements Snapshot {
     private final String  envName;
     private final String  id;
     private final String  type;
-    private final String  owner;
+    private final String  namespace;
     private final boolean isDev;
     private final long    creationDate;
 
@@ -46,7 +46,7 @@ public class SnapshotImpl implements Snapshot {
         this(snapshot.getId(),
              snapshot.getType(),
              null,
-             snapshot.getOwner(),
+             snapshot.getNamespace(),
              snapshot.getCreationDate(),
              snapshot.getWorkspaceId(),
              snapshot.getDescription(),
@@ -58,7 +58,7 @@ public class SnapshotImpl implements Snapshot {
     public SnapshotImpl(String id,
                         String type,
                         InstanceKey instanceKey,
-                        String owner,
+                        String namespace,
                         long creationDate,
                         String workspaceId,
                         String description,
@@ -67,7 +67,7 @@ public class SnapshotImpl implements Snapshot {
                         String envName) {
         this.id = requireNonNull(id, "Required non-null snapshot id");
         this.type = requireNonNull(type, "Required non-null snapshot type");
-        this.owner = requireNonNull(owner, "Required non-null snapshot owner");
+        this.namespace = requireNonNull(namespace, "Required non-null snapshot namespace");
         this.workspaceId = requireNonNull(workspaceId, "Required non-null workspace id for snapshot");
         this.machineName = requireNonNull(machineName, "Required non-null snapshot machine name");
         this.envName = requireNonNull(envName, "Required non-null environment name for snapshot");
@@ -92,8 +92,8 @@ public class SnapshotImpl implements Snapshot {
     }
 
     @Override
-    public String getOwner() {
-        return owner;
+    public String getNamespace() {
+        return namespace;
     }
 
     @Override
@@ -148,7 +148,7 @@ public class SnapshotImpl implements Snapshot {
                && Objects.equals(id, snapshot.id)
                && Objects.equals(type, snapshot.type)
                && Objects.equals(instanceKey, snapshot.instanceKey)
-               && Objects.equals(owner, snapshot.owner)
+               && Objects.equals(namespace, snapshot.namespace)
                && Objects.equals(workspaceId, snapshot.workspaceId)
                && Objects.equals(description, snapshot.description)
                && Objects.equals(machineName, snapshot.machineName)
@@ -163,7 +163,7 @@ public class SnapshotImpl implements Snapshot {
         hash = hash * 31 + Objects.hashCode(id);
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + Objects.hashCode(instanceKey);
-        hash = hash * 31 + Objects.hashCode(owner);
+        hash = hash * 31 + Objects.hashCode(namespace);
         hash = hash * 31 + Objects.hashCode(workspaceId);
         hash = hash * 31 + Objects.hashCode(description);
         hash = hash * 31 + Objects.hashCode(machineName);
@@ -177,7 +177,7 @@ public class SnapshotImpl implements Snapshot {
                "id='" + id + '\'' +
                ", type='" + type + '\'' +
                ", instanceKey=" + instanceKey +
-               ", owner='" + owner + '\'' +
+               ", namespace='" + namespace + '\'' +
                ", creationDate=" + creationDate +
                ", isDev=" + isDev +
                ", description='" + description + '\'' +
@@ -197,7 +197,7 @@ public class SnapshotImpl implements Snapshot {
         private String      envName;
         private String      id;
         private String      type;
-        private String      owner;
+        private String      namespace;
         private String      description;
         private InstanceKey instanceKey;
         private boolean     isDev;
@@ -239,8 +239,8 @@ public class SnapshotImpl implements Snapshot {
             return this;
         }
 
-        public SnapshotBuilder setOwner(String owner) {
-            this.owner = owner;
+        public SnapshotBuilder setNamespace(String namespace) {
+            this.namespace = namespace;
             return this;
         }
 
@@ -270,7 +270,7 @@ public class SnapshotImpl implements Snapshot {
         }
 
         public SnapshotImpl build() {
-            return new SnapshotImpl(id, type, instanceKey, owner, creationDate, workspaceId, description, isDev, machineName, envName);
+            return new SnapshotImpl(id, type, instanceKey, namespace, creationDate, workspaceId, description, isDev, machineName, envName);
         }
     }
 }

@@ -20,7 +20,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.junit.Test;
@@ -69,7 +69,7 @@ public class MachineComponentTest {
     @Mock
     private Promise<List<MachineDto>>                   machinesPromise;
     @Mock
-    private UsersWorkspaceDto                           usersWorkspaceDto;
+    private WorkspaceDto                                usersWorkspaceDto;
     @Captor
     private ArgumentCaptor<Operation<List<MachineDto>>> machinesCaptor;
 

@@ -21,8 +21,8 @@
                ng-class="{'list-item-active' : createProjectWorkspacesController.workspace.id === workspace.id}"
                ng-click="createProjectWorkspacesController.onWorkspaceSelect(workspace)" layout="column" flex>
             <div class="list-item-name">{{workspace.config.name}}</div>
-            <div ng-show="workspace.config.attributes && workspace.config.attributes.stackId" class="list-item-description">
-              {{workspace.config.attributes.stackId}} stack
+            <div ng-show="workspace.attributes && workspace.attributes.stackId" class="list-item-description">
+              {{workspace.attributes.stackId}} stack
             </div>
           </div>
         </div>

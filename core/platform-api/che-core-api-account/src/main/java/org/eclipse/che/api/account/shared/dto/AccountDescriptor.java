@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.account.shared.dto;
 
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.dto.shared.DTO;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -46,11 +45,11 @@ public interface AccountDescriptor {
 
     AccountDescriptor withId(String id);
 
-    List<UsersWorkspaceDto> getWorkspaces();
+    List<WorkspaceDto> getWorkspaces();
 
-    void setWorkspaces(List<UsersWorkspaceDto> workspaces);
+    void setWorkspaces(List<WorkspaceDto> workspaces);
 
-    AccountDescriptor withWorkspaces(List<UsersWorkspaceDto> workspaces);
+    AccountDescriptor withWorkspaces(List<WorkspaceDto> workspaces);
 
     List<Link> getLinks();
 

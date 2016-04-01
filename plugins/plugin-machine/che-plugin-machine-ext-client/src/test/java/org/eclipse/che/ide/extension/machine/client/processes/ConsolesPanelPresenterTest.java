@@ -26,7 +26,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -114,7 +114,7 @@ public class ConsolesPanelPresenterTest {
     @Mock
     private EventBus                    eventBus;
     @Mock
-    private UsersWorkspaceDto           workspace;
+    private WorkspaceDto                workspace;
     @Mock
     private OutputConsole               outputConsole;
 
