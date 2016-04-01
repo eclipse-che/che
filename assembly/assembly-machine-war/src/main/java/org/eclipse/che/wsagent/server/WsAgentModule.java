@@ -20,13 +20,10 @@ import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
-import org.eclipse.che.api.local.LocalUserDaoImpl;
 import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.vfs.VirtualFileSystemModule;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
@@ -45,20 +42,16 @@ import org.everrest.guice.ServiceBindingHelper;
 
 import javax.inject.Named;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Evgen Vidolob
  */
 @DynaModule
-public class MachineModule extends AbstractModule {
+public class WsAgentModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ApiInfoService.class);
 
-        //TODO it's temporary solution. Ext war should not have binding for DAO.
-        bind(UserDao.class).to(LocalUserDaoImpl.class);
         bind(PreferenceDao.class).to(org.eclipse.che.api.local.RemotePreferenceDao.class);
 
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
@@ -107,18 +100,5 @@ public class MachineModule extends AbstractModule {
     @SuppressWarnings("unchecked")
     Pair<String, String>[] propagateEventsProvider(@Named("event.bus.url") String eventBusURL) {
         return new Pair[] {Pair.of(eventBusURL, "")};
-    }
-
-    @Provides
-    @Named("codenvy.local.infrastructure.users")
-    Set<User> users() {
-        final Set<User> users = new HashSet<>(1);
-        final User user = new User().withId("che")
-                                    .withName("codenvy")
-                                    .withEmail("che@eclipse.org")
-                                    .withPassword("secret");
-        user.getAliases().add("che@eclipse.org");
-        users.add(user);
-        return users;
     }
 }

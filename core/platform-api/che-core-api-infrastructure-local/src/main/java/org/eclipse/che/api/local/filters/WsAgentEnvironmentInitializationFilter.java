@@ -8,26 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.machine.ext.provider;
+package org.eclipse.che.api.local.filters;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import com.google.inject.Singleton;
+
+import javax.servlet.ServletRequest;
 
 /**
- * Provides volumes configuration of machine for local storage
+ * The filter contains business logic which allows extract workspace id and sets it to environment context. Workspace id
+ * has defined place in URL. The filter mapped for all requests to ws agent API.
  *
- * @author Alexander Garagatyi
+ * @author Dmitry Shnurenko
  */
 @Singleton
-public class LocalStorageDockerVolumePathProvider implements Provider<String> {
-    @Inject
-    @Named("che.conf.storage")
-    private String localStoragePath;
+public class WsAgentEnvironmentInitializationFilter extends AbstractEnvironmentInitializationFilter {
 
     @Override
-    public String get() {
-        return localStoragePath + ":/local-storage";
+    protected String getWorkspaceId(ServletRequest request) {
+        return System.getenv("CHE_WORKSPACE_ID");
     }
 }

@@ -14,8 +14,8 @@ import com.google.inject.servlet.ServletModule;
 
 import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.api.local.CheGuiceEverrestServlet;
+import org.eclipse.che.api.local.filters.WsMasterEnvironmentInitializationFilter;
 import org.eclipse.che.api.machine.server.proxy.MachineExtensionProxyServlet;
-import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.websockets.WSConnectionTracker;
 
@@ -25,7 +25,7 @@ import java.util.Map;
 
 /** @author andrew00x */
 @DynaModule
-public class ApiServletModule extends ServletModule {
+public class WsMasterServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
@@ -48,10 +48,10 @@ public class ApiServletModule extends ServletModule {
         // preflight cache is available for 10 minutes
         corsFilterParams.put("cors.preflight.maxage", "10");
         bind(CorsFilter.class).in(Singleton.class);
-        filter("/*").through(CorsFilter.class, corsFilterParams);
 
-        bind(SingleEnvironmentFilter.class).in(Singleton.class);
-        filter("/*").through(SingleEnvironmentFilter.class);
+        filter("/*").through(CorsFilter.class, corsFilterParams);
+        filter("/api/*").through(WsMasterEnvironmentInitializationFilter.class);
+
         serve("/ext/*").with(MachineExtensionProxyServlet.class);
         serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(CheGuiceEverrestServlet.class);
         install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());

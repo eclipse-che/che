@@ -13,19 +13,20 @@ package org.eclipse.che.wsagent.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
-import org.eclipse.che.env.local.server.SingleEnvironmentFilter;
+import org.eclipse.che.api.local.filters.WsAgentEnvironmentInitializationFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
 import org.everrest.websockets.WSConnectionTracker;
 
 /** @author andrew00x */
 @DynaModule
-public class ApiServletModule extends ServletModule {
+public class WsAgentServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
-        filter("/ext/*").through(SingleEnvironmentFilter.class);
-//        serve("/ext/*").with(GuiceEverrestServlet.class);
+
+        filter("/ext/*").through(WsAgentEnvironmentInitializationFilter.class);
+
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
 
         bind(io.swagger.jaxrs.config.DefaultJaxrsConfig.class).asEagerSingleton();
