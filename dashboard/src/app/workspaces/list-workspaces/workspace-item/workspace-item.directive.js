@@ -23,9 +23,14 @@ export class CheWorkspaceItem {
   constructor() {
     this.restrict = 'E';
 
+    // we require ngModel as we want to use it inside our directive
+    this.require = ['ngModel'];
+
     // scope values
     this.scope = {
-      workspace: '=cheWorkspaceItem'
+      workspace: '=cheWorkspaceItem',
+      isSelectable: '=cheSelectable',
+      isSelect: '=?ngModel'
     };
 
     this.templateUrl = 'app/workspaces/list-workspaces/workspace-item/workspace-item.html';
