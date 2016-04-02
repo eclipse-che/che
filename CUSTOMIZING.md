@@ -11,10 +11,10 @@ A template is a packaged set of sample code that is launched in the workspace wh
 
 #### Stacks
 A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack. Tags define how the stack is presented in the stack library and also filters out the available project templates that a user sees when creating a project.
-* [Custom Stacks](https://eclipse-che.readme.io/docs/environments#custom-stacks)
-* * TODO: Remove custom stacks from environments page and create dedicated stacks page.
-* * TODO: Include adding custom stacks into the dedicated stacks docs page.
-* [Che's Default Stacks](https://github.com/codenvy/dockerfiles)
+* [Add Stacks](https://eclipse-che.readme.io/docs/stacks#add-stacks)
+* [Che Stacks](https://eclipse-che.readme.io/docs/stacks#che-stacks)
+* [Che Included Stacks](https://github.com/codenvy/dockerfiles)
+* [Writing Workspace Recipes](https://eclipse-che.readme.io/docs/stacks#custom-workspace-recipes)
 * [Stacks Created by Community](https://github.com/eclipse/che/pull/570)
 * * TODO: Update this link to point to wiki page that can be updated by community
 
