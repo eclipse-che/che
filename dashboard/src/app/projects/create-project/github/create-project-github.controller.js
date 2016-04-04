@@ -22,7 +22,7 @@ export class CreateProjectGithubCtrl {
    * @ngInject for Dependency injection
    */
   constructor (cheAPI, $rootScope, $http, $q, $window, $mdDialog, $location, $browser, $modal, $filter, GitHub, githubPopup, gitHubTokenStore,
-               cheBranding, githubOrganizationNameResolver) {
+               cheBranding, githubOrganizationNameResolver, $timeout) {
     this.cheAPI = cheAPI;
     this.$http = $http;
     this.$rootScope = $rootScope;
@@ -38,6 +38,7 @@ export class CreateProjectGithubCtrl {
     this.githubPopup = githubPopup;
     this.cheBranding = cheBranding;
     this.githubOrganizationNameResolver = githubOrganizationNameResolver;
+    this.$timeout = $timeout;
 
     this.productName = cheBranding.getName();
     var userAPI = cheAPI.getUser();
@@ -177,8 +178,11 @@ export class CreateProjectGithubCtrl {
 
   selectRepository(gitHubRepository) {
     this.selectedRepository = gitHubRepository;
-    // broadcast event
-    this.$rootScope.$broadcast('create-project-github:selected');
+    this.$timeout(() => {
+      this.repositorySelectNotify();
+      // broadcast event
+      this.$rootScope.$broadcast('create-project-github:selected');
+    });
   }
 
 

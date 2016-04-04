@@ -10,8 +10,7 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<form name="createProjectGitHubForm">
-    <div class="create-project-github-panel" layout="row" flex ng-init="createProjectCtrl.setForm(createProjectGitHubForm, 'github');"></div>
+    <div class="create-project-github-panel" layout="row" flex></div>
 
 
     <p ng-if="createProjectGithubCtrl.state == 'LOAD_ERROR'" class="alert alert-danger" style="margin-bottom: 15px">
@@ -49,7 +48,7 @@
 
         <che-list>
             <che-list-item ng-repeat="gitHubRepository in createProjectGithubCtrl.gitHubRepositories | githubFilterRepositories:createProjectGithubCtrl.organizationName:createProjectGithubCtrl.repositoryName | orderBy:'name'"
-                            ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository); createProjectCtrl.selectGitHubRepository(gitHubRepository)" flex-gt-sm="100" flex="33" ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
+                            ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository)" flex-gt-sm="100" flex="33" ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
 
                 <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row">
                     <div class="github-create-project-icons" flex-gt-sm="5">
@@ -77,4 +76,3 @@
 
 
     </div>
-</form>

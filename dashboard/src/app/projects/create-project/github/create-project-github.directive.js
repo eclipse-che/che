@@ -39,6 +39,13 @@ export class CreateProjectGithub {
 
     this.restrict = 'E';
     this.templateUrl = 'app/projects/create-project/github/create-project-github.html';
+
+    // scope values
+    this.scope = {
+      createProjectGitHubForm: '=cheForm',
+      selectedRepository: '=cheRepositoryModel',
+      repositorySelectNotify: '&cheRepositorySelect'
+    };
   }
 
   link($scope) {
