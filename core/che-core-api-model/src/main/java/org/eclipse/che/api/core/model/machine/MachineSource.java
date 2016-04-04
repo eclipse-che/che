@@ -16,7 +16,7 @@ package org.eclipse.che.api.core.model.machine;
 public interface MachineSource {
 
     /**
-     * Returns Recipe or Snapshot
+     * Returns dockerfile, image, ssh-config, etc
      */
     String getType();
 

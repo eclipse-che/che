@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server;
+package org.eclipse.che.api.machine.server.wsagent;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -18,11 +18,13 @@ import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
+import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;

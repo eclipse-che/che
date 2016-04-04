@@ -230,7 +230,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                      .withName("ws-machine")
                                      .withType("docker")
                                      .withSource(dtoFactory.createDto(MachineSourceDto.class)
-                                                           .withType("recipe")
+                                                           .withType("dockerfile")
                                                            .withLocation(view.getRecipeUrl()))
                                      .withDev(true)
                                      .withLimits(dtoFactory.createDto(LimitsDto.class).withRam(2048)));

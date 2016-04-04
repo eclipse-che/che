@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server;
+package org.eclipse.che.api.machine.server.event;
 
 /**
  * Describe instance state change.

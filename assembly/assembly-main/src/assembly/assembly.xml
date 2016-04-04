@@ -70,6 +70,19 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
+            <unpack>true</unpack>
+            <outputDirectory>lib/linux_arm7</outputDirectory>
+            <includes>
+                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_arm7</include>
+            </includes>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>sdk</outputDirectory>
             <outputFileNameMapping>che-plugin-sdk-tools.jar</outputFileNameMapping>

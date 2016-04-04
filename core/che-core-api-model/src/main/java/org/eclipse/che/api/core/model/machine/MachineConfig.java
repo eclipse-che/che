@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.machine;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ public interface MachineConfig {
     /**
      * Machine limits such as RAM size.
      */
+    @Nullable
     Limits getLimits();
 
     /**
@@ -54,4 +57,9 @@ public interface MachineConfig {
      * Get predefined environment variables of machine.
      */
     Map<String, String> getEnvVariables();
+
+    /**
+     * Architecture of target machine. Default is 'linux_amd64'.
+     */
+    String getArchitecture();
 }

@@ -19,7 +19,9 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -29,7 +31,6 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
-import java.util.Map;
 
 import static java.lang.String.format;
 
@@ -39,16 +40,11 @@ import static java.lang.String.format;
  * @author andrew00x
  * @author Alexander Garagatyi
  */
-public class DockerProcess implements InstanceProcess {
+public class DockerProcess extends AbstractMachineProcess implements InstanceProcess {
     private final DockerConnector     docker;
     private final String              container;
     private final String              pidFilePath;
-    private final int                 pid;
     private final String              commandLine;
-    private final String              commandName;
-    private final String              commandType;
-    private final Map<String, String> attributes;
-    private final String              outputChannel;
 
     private volatile boolean started;
 
@@ -56,49 +52,15 @@ public class DockerProcess implements InstanceProcess {
     public DockerProcess(DockerConnector docker,
                          @Assisted Command command,
                          @Assisted("container") String container,
-                         @Assisted("outputChannel") String outputChannel,
+                         @Nullable @Assisted("outputChannel") String outputChannel,
                          @Assisted("pid_file_path") String pidFilePath,
                          @Assisted int pid) {
+        super(command, pid, outputChannel);
         this.docker = docker;
         this.container = container;
         this.commandLine = command.getCommandLine();
-        this.commandName = command.getName();
-        this.commandType = command.getType();
-        this.attributes = command.getAttributes();
-        this.outputChannel = outputChannel;
         this.pidFilePath = pidFilePath;
-        this.pid = pid;
         this.started = false;
-    }
-
-    @Override
-    public int getPid() {
-        return pid;
-    }
-
-    @Override
-    public String getName() {
-        return commandName;
-    }
-
-    @Override
-    public String getCommandLine() {
-        return commandLine;
-    }
-
-    @Override
-    public String getType() {
-        return commandType;
-    }
-
-    @Override
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public String getOutputChannel() {
-        return outputChannel;
     }
 
     @Override
@@ -173,7 +135,7 @@ public class DockerProcess implements InstanceProcess {
         }
         // 'kill -0 [pid]' is silent if process is running or print "No such process" message otherwise
         if (!output.getText().isEmpty()) {
-            throw new NotFoundException(format("Process with pid %s not found", pid));
+            throw new NotFoundException(format("Process with pid %s not found", getPid()));
         }
     }
 

@@ -29,7 +29,7 @@ import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;

@@ -123,7 +123,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
 
-        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
+        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
@@ -131,6 +131,11 @@ public class WsMasterModule extends AbstractModule {
 
         bind(WorkspaceValidator.class).to(DefaultWorkspaceValidator.class);
         bind(MachineStateListener.class).asEagerSingleton();
-        bind(org.eclipse.che.api.machine.server.WsAgentLauncher.class).to(org.eclipse.che.api.machine.server.WsAgentLauncherImpl.class);
+        bind(org.eclipse.che.api.machine.wsagent.WsAgentLauncher.class)
+                .to(org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl.class);
+
+        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
+
+        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
     }
 }

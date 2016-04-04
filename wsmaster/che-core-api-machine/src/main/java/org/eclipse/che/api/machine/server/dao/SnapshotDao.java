@@ -12,7 +12,7 @@ package org.eclipse.che.api.machine.server.dao;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
-import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 
 import java.util.List;
 

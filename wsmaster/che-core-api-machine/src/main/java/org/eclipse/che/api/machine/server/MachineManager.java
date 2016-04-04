@@ -26,26 +26,26 @@ import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.CompositeLineConsumer;
-import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
-import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
+import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
-import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.machine.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -60,12 +60,9 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import javax.ws.rs.core.UriBuilder;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -76,8 +73,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.eclipse.che.api.machine.server.InstanceStateEvent.Type.DIE;
-import static org.eclipse.che.api.machine.server.InstanceStateEvent.Type.OOM;
+import static java.lang.String.format;
+import static org.eclipse.che.api.machine.server.event.InstanceStateEvent.Type.DIE;
+import static org.eclipse.che.api.machine.server.event.InstanceStateEvent.Type.OOM;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -99,10 +97,10 @@ public class MachineManager {
     private final ExecutorService          executor;
     private final MachineRegistry          machineRegistry;
     private final EventService             eventService;
-    private final String                   apiEndpoint;
     private final int                      defaultMachineMemorySizeMB;
     private final MachineCleaner           machineCleaner;
     private final WsAgentLauncher          wsAgentLauncher;
+    private final RecipeDownloader         recipeDownloader;
 
     @Inject
     public MachineManager(SnapshotDao snapshotDao,
@@ -111,13 +109,13 @@ public class MachineManager {
                           @Named("machine.logs.location") String machineLogsDir,
                           EventService eventService,
                           @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB,
-                          @Named("api.endpoint") String apiEndpoint,
-                          WsAgentLauncher wsAgentLauncher) {
+                          WsAgentLauncher wsAgentLauncher,
+                          RecipeDownloader recipeDownloader) {
         this.snapshotDao = snapshotDao;
         this.machineInstanceProviders = machineInstanceProviders;
         this.eventService = eventService;
-        this.apiEndpoint = apiEndpoint;
         this.wsAgentLauncher = wsAgentLauncher;
+        this.recipeDownloader = recipeDownloader;
         this.machineLogsDir = new File(machineLogsDir);
         this.machineRegistry = machineRegistry;
         this.defaultMachineMemorySizeMB = defaultMachineMemorySizeMB;
@@ -129,7 +127,7 @@ public class MachineManager {
     }
 
     /**
-     * Synchronously creates and starts machine from scratch using recipe.
+     * Synchronously creates and starts machine from scratch.
      *
      * @param machineConfig
      *         configuration that contains all information needed for machine creation
@@ -138,10 +136,6 @@ public class MachineManager {
      * @param environmentName
      *         environment name the created machine will belongs to
      * @return new machine
-     * @throws UnsupportedRecipeException
-     *         if recipe isn't supported
-     * @throws InvalidRecipeException
-     *         if recipe is not valid
      * @throws NotFoundException
      *         if machine type from recipe is unsupported
      * @throws NotFoundException
@@ -166,11 +160,15 @@ public class MachineManager {
                    MachineException,
                    BadRequestException {
         LOG.info("Creating machine [ws = {}: env = {}: machine = {}]", workspaceId, environmentName, machineConfig.getName());
-        final MachineImpl machine = createMachine(machineConfig, workspaceId, environmentName, this::createInstance, null);
+        final MachineImpl machine = createMachine(normalizeMachineConfig(machineConfig),
+                                                  workspaceId,
+                                                  environmentName,
+                                                  this::createInstance,
+                                                  null);
         LOG.info("Machine [ws = {}: env = {}: machine = {}] was successfully created, its id is '{}'",
                  workspaceId,
                  environmentName,
-                 machineConfig.getName(),
+                 machine.getConfig().getName(),
                  machine.getId());
 
         return machineRegistry.getMachine(machine.getId());
@@ -205,18 +203,22 @@ public class MachineManager {
         final SnapshotImpl snapshot = snapshotDao.getSnapshot(workspaceId, envName, machineConfig.getName());
 
         LOG.info("Recovering machine [ws = {}: env = {}: machine = {}] from snapshot", workspaceId, envName, machineConfig.getName());
-        final MachineImpl machine = createMachine(machineConfig, workspaceId, envName, this::createInstance, snapshot);
+        final MachineImpl machine = createMachine(normalizeMachineConfig(machineConfig),
+                                                  workspaceId,
+                                                  envName,
+                                                  this::createInstance,
+                                                  snapshot);
         LOG.info("Machine [ws = {}: env = {}: machine = {}] was successfully recovered, its id '{}'",
                  workspaceId,
                  envName,
-                 machineConfig.getName(),
+                 machine.getConfig().getName(),
                  machine.getId());
 
         return machineRegistry.getMachine(machine.getId());
     }
 
     /**
-     * Asynchronously creates and starts machine from scratch using recipe.
+     * Asynchronously creates and starts machine from scratch.
      *
      * @param machineConfig
      *         configuration that contains all information needed for machine creation
@@ -225,10 +227,6 @@ public class MachineManager {
      * @param environmentName
      *         environment name the created machine will belongs to
      * @return new machine
-     * @throws UnsupportedRecipeException
-     *         if recipe isn't supported
-     * @throws InvalidRecipeException
-     *         if recipe is not valid
      * @throws NotFoundException
      *         if machine type from recipe is unsupported
      * @throws NotFoundException
@@ -252,16 +250,16 @@ public class MachineManager {
                    ConflictException,
                    MachineException,
                    BadRequestException {
-        return createMachine(machineConfig,
+        return createMachine(normalizeMachineConfig(machineConfig),
                              workspaceId,
                              environmentName,
-                             (instanceProvider, recipe, instanceKey, machineState, machineLogger) ->
+                             (instanceProvider, recipe, instanceKey, machine, machineLogger) ->
                                      executor.execute(ThreadLocalPropagateContext.wrap(() -> {
                                          try {
                                              createInstance(instanceProvider,
                                                             recipe,
                                                             instanceKey,
-                                                            machineState,
+                                                            machine,
                                                             machineLogger);
                                          } catch (MachineException | NotFoundException e) {
                                              LOG.error(e.getLocalizedMessage(), e);
@@ -271,7 +269,7 @@ public class MachineManager {
                              null);
     }
 
-    private MachineImpl createMachine(MachineConfig machineConfig,
+    private MachineImpl createMachine(MachineConfigImpl machineConfig,
                                       String workspaceId,
                                       String environmentName,
                                       MachineInstanceCreator instanceCreator,
@@ -282,18 +280,26 @@ public class MachineManager {
                    BadRequestException,
                    MachineException {
         final InstanceProvider instanceProvider = machineInstanceProviders.getProvider(machineConfig.getType());
-        final String sourceType = machineConfig.getSource().getType();
 
-        Recipe recipe;
+        // Backward compatibility for source type 'Recipe'.
+        // Only 'dockerfile' impl of source type existed when 'Recipe' was valid source type.
+        // Changed in 4.2.0-RC1
+        // todo remove that several versions later
+        if ("Recipe".equals(machineConfig.getSource().getType())) {
+            machineConfig.getSource().setType("dockerfile");
+        }
+        if (!instanceProvider.getRecipeTypes().contains(machineConfig.getSource().getType().toLowerCase())) {
+            throw new UnsupportedRecipeException(format("Recipe type %s of %s machine is unsupported",
+                                                        machineConfig.getSource().getType(),
+                                                        machineConfig.getName()));
+        }
+
+        Recipe recipe = null;
         InstanceKey instanceKey = null;
         if (snapshot != null) {
             instanceKey = snapshot.getInstanceKey();
-        }
-        if ("Recipe".equalsIgnoreCase(sourceType)) {
-            // TODO should we check that it is dockerfile?
-            recipe = getRecipeByLocation(machineConfig);
         } else {
-            throw new BadRequestException("Source type is unsupported " + sourceType);
+            recipe = recipeDownloader.getRecipe(machineConfig);
         }
 
         if (!MACHINE_DISPLAY_NAME_PATTERN.matcher(machineConfig.getName()).matches()) {
@@ -310,9 +316,7 @@ public class MachineManager {
         final String creator = EnvironmentContext.getCurrent().getUser().getId();
 
         if (machineConfig.getLimits().getRam() == 0) {
-            MachineConfigImpl machineConfigWithLimits = new MachineConfigImpl(machineConfig);
-            machineConfigWithLimits.setLimits(new LimitsImpl(defaultMachineMemorySizeMB));
-            machineConfig = machineConfigWithLimits;
+            machineConfig.setLimits(new LimitsImpl(defaultMachineMemorySizeMB));
         }
 
         final MachineImpl machine = new MachineImpl(machineConfig,
@@ -400,7 +404,9 @@ public class MachineManager {
     }
 
     private interface MachineInstanceCreator {
-        void createInstance(InstanceProvider instanceProvider, Recipe recipe, InstanceKey instanceKey, Machine machineState,
+        void createInstance(InstanceProvider instanceProvider,
+                            Recipe recipe, InstanceKey instanceKey,
+                            Machine machineState,
                             LineConsumer machineLogger) throws MachineException, NotFoundException;
     }
 
@@ -952,35 +958,6 @@ public class MachineManager {
         }
     }
 
-    Recipe getRecipeByLocation(MachineConfig machineConfig) throws MachineException {
-        String recipeContent;
-        URL recipeUrl = null;
-        File file = null;
-        try {
-            UriBuilder targetUriBuilder = UriBuilder.fromUri(machineConfig.getSource().getLocation());
-            // add user token to be able to download user's private recipe
-            if (machineConfig.getSource().getLocation().startsWith(apiEndpoint)) {
-                if (EnvironmentContext.getCurrent().getUser() != null
-                    && EnvironmentContext.getCurrent().getUser().getToken() != null) {
-                    targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getUser().getToken());
-                }
-            }
-            recipeUrl = targetUriBuilder.build().toURL();
-            file = IoUtil.downloadFile(null, "recipe", null, recipeUrl);
-            recipeContent = IoUtil.readAndCloseQuietly(new FileInputStream(file));
-        } catch (IOException | IllegalArgumentException e) {
-            throw new MachineException("Can't start machine " + machineConfig.getName() +
-                                       ". Machine recipe downloading failed. Recipe url " + recipeUrl + ". "
-                                       + e.getLocalizedMessage());
-        } finally {
-            if (file != null) {
-                FileCleaner.addFile(file);
-            }
-        }
-
-        return new RecipeImpl().withType("Dockerfile").withScript(recipeContent);
-    }
-
     /**
      * Checks object reference is not {@code null}
      *
@@ -1048,5 +1025,9 @@ public class MachineManager {
         if (interrupted) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private MachineConfigImpl normalizeMachineConfig(MachineConfig machineConfig) {
+        return new MachineConfigImpl(machineConfig);
     }
 }

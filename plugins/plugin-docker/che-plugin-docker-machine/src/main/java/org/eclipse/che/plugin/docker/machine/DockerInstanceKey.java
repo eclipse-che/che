@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.machine.server.impl.InstanceKeyImpl;
+import org.eclipse.che.api.machine.server.spi.impl.InstanceKeyImpl;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 
 /**

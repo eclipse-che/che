@@ -64,6 +64,12 @@
             <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>che-websocket-terminal</artifactId>
+            <type>zip</type>
+            <classifier>linux_arm7</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-sdk-tools</artifactId>
             <type>jar</type>
