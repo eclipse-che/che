@@ -627,7 +627,6 @@ public class WorkspaceServiceTest {
                                                               GET_ALL_USER_WORKSPACES,
                                                               LINK_REL_GET_SNAPSHOT,
                                                               LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL,
-                                                              WSAGENT_REFERENCE,
                                                               LINK_REL_IDE_URL,
                                                               LINK_REL_SELF));
         assertTrue(actualRels.equals(expectedRels), format("Links difference: '%s'. \n" +
@@ -637,6 +636,7 @@ public class WorkspaceServiceTest {
                                                            actualRels.toString(),
                                                            expectedRels.toString()));
         assertNotNull(workspaceDto.getRuntime().getLink(LINK_REL_STOP_WORKSPACE), "Runtime doesn't contain stop link");
+        assertNotNull(workspaceDto.getRuntime().getLink(WSAGENT_REFERENCE), "Runtime doesn't contain wsagent link");
     }
 
     private static String unwrapError(Response response) {

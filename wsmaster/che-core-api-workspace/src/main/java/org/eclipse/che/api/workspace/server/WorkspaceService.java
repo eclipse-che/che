@@ -891,13 +891,15 @@ public class WorkspaceService extends Service {
                          .stream()
                          .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
                          .findAny()
-                         .ifPresent(wsAgent -> links.add(createLink("GET",
-                                                                    UriBuilder.fromUri(wsAgent.getUrl())
-                                                                              .scheme("https".equals(ideUri.getScheme()) ? "wss"
-                                                                                                                         : "ws")
-                                                                              .build()
-                                                                              .toString(),
-                                                                    WSAGENT_REFERENCE)));
+                         .ifPresent(wsAgent -> workspace.getRuntime()
+                                                        .getLinks()
+                                                        .add(createLink("GET",
+                                                                        UriBuilder.fromUri(wsAgent.getUrl())
+                                                                                  .scheme("https".equals(ideUri.getScheme()) ? "wss"
+                                                                                                                             : "ws")
+                                                                                  .build()
+                                                                                  .toString(),
+                                                                        WSAGENT_REFERENCE)));
             }
         }
         return workspace.withLinks(links);
