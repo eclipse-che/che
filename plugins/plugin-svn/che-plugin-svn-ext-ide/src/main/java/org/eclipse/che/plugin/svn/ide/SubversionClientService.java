@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.svn.ide;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.plugin.svn.shared.Depth;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -328,7 +329,6 @@ public interface SubversionClientService {
      * Get properties set for a path or a target.
      *
      * @param projectPath the project path
-     * @param propertyName the property name
      * @param path path to which property get
      * @param callback the callback
      */
@@ -354,4 +354,19 @@ public interface SubversionClientService {
      */
     void propertyDelete(final String projectPath, final String propertyName, final Depth depth,
                         final boolean force, final String path, final AsyncRequestCallback<CLIOutputResponse> callback);
+
+    /**
+     * Get the list of all revisions where a given path was modified
+     *
+     * @param projectPath
+     *         the project path
+     * @param path
+     *         path to get the revisions for
+     * @param revisionRange
+     *         the range of revisions to check
+     * @param callback
+     *         the callback
+     */
+    void getRevisions(final @NotNull String projectPath, final String path, final String revisionRange,
+                      final AsyncRequestCallback<GetRevisionsResponse> callback);
 }

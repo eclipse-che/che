@@ -29,6 +29,8 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.CleanupRequest;
 import org.eclipse.che.plugin.svn.shared.CommitRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.ListRequest;
@@ -414,6 +416,15 @@ public class SubversionService extends Service {
                                final @DefaultValue(".") @QueryParam("path") String path,
                                final @QueryParam("revision") String revision) throws ApiException, IOException {
         return this.subversionApi.exportPath(getAbsoluteProjectPath(projectPath), path, revision);
+    }
+
+    @Path("revisions")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    public GetRevisionsResponse getRevisions(final GetRevisionsRequest request) throws ApiException, IOException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return this.subversionApi.getRevisions(request);
     }
 
     /**

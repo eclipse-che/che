@@ -63,9 +63,7 @@ public abstract class SubversionAction extends ProjectAction {
     }
 
     @Override
-    public void actionPerformed(ActionEvent actionEvent) {
-        //Window.alert(constants.actionNotImplemented());
-    }
+    public abstract void actionPerformed(ActionEvent actionEvent);
 
     /**
      * @return the active project or null if there is none
@@ -79,9 +77,7 @@ public abstract class SubversionAction extends ProjectAction {
      */
     protected boolean isItemSelected() {
         final Selection<?> selection = projectExplorerPresenter.getSelection();
-
-        return selection != null && selection.getHeadElement() != null &&
-               selection.getHeadElement() instanceof HasStorablePath;
+        return !selection.isEmpty();
     }
 
     /**
@@ -110,5 +106,4 @@ public abstract class SubversionAction extends ProjectAction {
     protected boolean isSelectionRequired() {
         return false;
     }
-
 }
