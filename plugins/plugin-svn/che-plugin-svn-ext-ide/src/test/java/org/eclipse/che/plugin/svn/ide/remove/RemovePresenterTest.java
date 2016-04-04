@@ -31,8 +31,8 @@ public class RemovePresenterTest extends BaseSubversionPresenterTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        presenter = new RemovePresenter(appContext, dtoUnmarshallerFactory, eventBus, notificationManager,
-                                        subversionOutputConsolePresenter, constants, service, workspaceAgent, projectExplorerPart);
+        presenter = new RemovePresenter(appContext, dtoUnmarshallerFactory, notificationManager, subversionOutputConsoleFactory, constants,
+                                        service, consolesPanelPresenter, projectExplorerPart);
     }
 
     @Test

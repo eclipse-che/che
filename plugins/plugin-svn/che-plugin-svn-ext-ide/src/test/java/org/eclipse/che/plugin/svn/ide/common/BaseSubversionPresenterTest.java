@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -53,13 +54,13 @@ public abstract class BaseSubversionPresenterTest {
     @Mock
     protected ProjectConfigDto                         rootProjectDescriptor;
     @Mock
-    protected SubversionOutputConsolePresenter         subversionOutputConsolePresenter;
+    protected SubversionOutputConsoleFactory           subversionOutputConsoleFactory;
     @Mock
     protected SubversionClientService                  service;
     @Mock
     protected SubversionExtensionLocalizationConstants constants;
     @Mock
-    protected WorkspaceAgent                           workspaceAgent;
+    protected ConsolesPanelPresenter                   consolesPanelPresenter;
     @Mock
     protected ProjectExplorerPresenter                 projectExplorerPart;
 

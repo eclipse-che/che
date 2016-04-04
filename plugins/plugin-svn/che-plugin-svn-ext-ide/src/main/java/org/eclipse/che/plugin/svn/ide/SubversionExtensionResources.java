@@ -113,4 +113,6 @@ public interface SubversionExtensionResources extends ClientBundle {
     @Source("actions/svn.svg")
     SVGResource svn();
 
+    @Source("output-icon.svg")
+    SVGResource outputIcon();
 }

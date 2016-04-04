@@ -12,6 +12,9 @@ package org.eclipse.che.plugin.svn.ide.inject;
 
 import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerView;
 import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerViewImpl;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsole;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleView;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleViewImpl;
 import org.eclipse.che.plugin.svn.ide.importer.SubversionProjectImporterView;
@@ -76,7 +79,7 @@ public class SubversionGinModule extends AbstractGinModule {
 
         bind(SubversionProjectImporterView.class).to(SubversionProjectImporterViewImpl.class).in(Singleton.class);
 
-        bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class).in(Singleton.class);
+        bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class);
         bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
         bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
         bind(CopyView.class).to(CopyViewImpl.class).in(Singleton.class);
@@ -98,6 +101,9 @@ public class SubversionGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
                                              .build(ChoiceDialogFactory.class));
         bind(ChoiceDialogView.class).to(ChoiceDialogViewImpl.class);
+
+        install(new GinFactoryModuleBuilder().implement(SubversionOutputConsole.class, SubversionOutputConsolePresenter.class)
+                                             .build(SubversionOutputConsoleFactory.class));
     }
 
 }

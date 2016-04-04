@@ -21,9 +21,11 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 
 /**
@@ -44,14 +46,13 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     @Inject
     public ExportPresenter(@Named("cheExtensionPath") String extPath,
                            AppContext appContext,
-                           EventBus eventBus,
-                           SubversionOutputConsolePresenter console,
-                           WorkspaceAgent workspaceAgent,
+                           SubversionOutputConsoleFactory consoleFactory,
+                           ConsolesPanelPresenter consolesPanelPresenter,
                            ProjectExplorerPresenter projectExplorerPart,
                            ExportView view,
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.view = view;
         this.notificationManager = notificationManager;
         this.constants = constants;

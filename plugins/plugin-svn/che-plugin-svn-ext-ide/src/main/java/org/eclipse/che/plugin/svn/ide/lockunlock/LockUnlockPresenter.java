@@ -11,26 +11,25 @@
 package org.eclipse.che.plugin.svn.ide.lockunlock;
 
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
-import org.eclipse.che.plugin.svn.ide.common.PathTypeFilter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialog;
-import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
+import org.eclipse.che.plugin.svn.ide.common.PathTypeFilter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialog;
+import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -58,14 +57,13 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   final DialogFactory dialogFactory,
                                   final ChoiceDialogFactory choiceDialogFactory,
                                   final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                                  final EventBus eventBus,
                                   final NotificationManager notificationManager,
-                                  final SubversionOutputConsolePresenter console,
+                                  final SubversionOutputConsoleFactory consoleFactory,
+                                  final ConsolesPanelPresenter consolesPanelPresenter,
                                   final SubversionExtensionLocalizationConstants constants,
                                   final SubversionClientService service,
-                                  final WorkspaceAgent workspaceAgent,
                                   final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -200,11 +198,8 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         return new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
             @Override
             protected void onSuccess(final CLIOutputResponse result) {
-                final List<String> commandList = new ArrayList<>();
-                commandList.add(result.getCommand());
-                print(commandList);
-                print(result.getOutput());
-                printAndSpace(result.getErrOutput());
+                printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(),
+                              (lock ? constants.commandLock() : constants.commandUnlock()));
             }
             @Override
             protected void onFailure(final Throwable exception) {

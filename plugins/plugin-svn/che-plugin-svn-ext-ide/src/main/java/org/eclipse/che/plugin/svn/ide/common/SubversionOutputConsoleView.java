@@ -22,24 +22,51 @@ public interface SubversionOutputConsoleView extends View<SubversionOutputConsol
     /**
      * Action handler for the view actions/controls.
      */
-    interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
         /**
          * Handle the clear button.
          */
         void onClearClicked();
+
+        /**
+         * Handle user clicks on scroll console button.
+         */
+        void onScrollClicked();
     }
 
     /**
      * Print text in view.
      *
-     * @param text The text to display
+     * @param text
+     *         The text to display
      */
     void print(final String text);
 
     /**
+     * Print text in a given color in view.
+     *
+     * @param text
+     *         The text to display
+     * @param color
+     *         The color to use
+     */
+    void print(final String text, final String color);
+
+    /**
+     * Print text with a given style in view.
+     *
+     * @param text
+     *         The text to display
+     * @param style
+     *         The style to use
+     */
+    void printPredefinedStyle(final String text, final String style);
+
+    /**
      * Set title of view.
      *
-     * @param title The title to display
+     * @param title
+     *         The title to display
      */
     void setTitle(final String title);
 
@@ -52,11 +79,4 @@ public interface SubversionOutputConsoleView extends View<SubversionOutputConsol
      * Scroll to bottom of the view.
      */
     void scrollBottom();
-
-    /**
-     * Display or hide view
-     *
-     * @param isVisible
-     */
-    void setVisible(boolean isVisible);
 }

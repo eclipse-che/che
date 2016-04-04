@@ -12,22 +12,21 @@ package org.eclipse.che.plugin.svn.ide.resolve;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +44,8 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
     private List<String> conflictsPaths;
 
     @Inject
-    protected ResolvePresenter(final EventBus eventBus,
-                               final WorkspaceAgent workspaceAgent,
-                               final SubversionOutputConsolePresenter console,
+    protected ResolvePresenter(final ConsolesPanelPresenter consolesPanelPresenter,
+                               final SubversionOutputConsoleFactory consoleFactory,
                                final AppContext appContext,
                                final SubversionExtensionLocalizationConstants constants,
                                final NotificationManager notificationManager,
@@ -55,7 +53,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                final SubversionClientService subversionClientService,
                                final ResolveView view,
                                final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.subversionClientService = subversionClientService;
         this.notificationManager = notificationManager;
@@ -138,8 +136,8 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                             @Override
                                             public void onSuccess(CLIOutputResponseList result) {
                                                 for (CLIOutputResponse outputResponse : result.getCLIOutputResponses()) {
-                                                    printCommand(outputResponse.getCommand());
-                                                    printAndSpace(outputResponse.getOutput());
+                                                    printResponse(outputResponse.getCommand(), outputResponse.getOutput(), null,
+                                                                  constants.commandResolve());
                                                 }
                                             }
 
