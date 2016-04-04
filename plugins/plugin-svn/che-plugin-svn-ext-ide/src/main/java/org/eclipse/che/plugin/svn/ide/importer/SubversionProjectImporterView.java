@@ -22,22 +22,28 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
     /** Action handler for the view actions/controls. */
     public interface ActionDelegate {
         /** Performs any actions appropriate in response to the user having changed the project's name. */
-        void onProjectNameChanged();
+        void onProjectNameChanged(String projectName);
 
         /** Performs any actions appropriate in response to the user having changed the project's URL. */
-        void onProjectUrlChanged();
+        void onProjectUrlChanged(String projectUrl);
 
         /** Performs any actions appropriate in response to the user having changed the project's description. */
-        void onProjectDescriptionChanged();
+        void onProjectDescriptionChanged(String projectDescription);
 
         /** Performs any actions appropriate in response to the user having changed the relative path in the project. */
-        void onProjectRelativePathChanged();
+        void onProjectRelativePathChanged(String relativePath);
 
         void onCredentialsChanged();
     }
 
-    /** Set error marker. */
-    void setNameErrorVisibility(boolean visible);
+    /** Set error marker on project name field. */
+    void setProjectNameErrorHighlight(boolean visible);
+
+    /** Set error marker on project URL field. */
+    void setProjectUrlErrorHighlight(boolean visible);
+
+    /** Set URL error message. */
+    void setURLErrorMessage(String message);
 
     /** Set project description. */
     void setProjectDescription(String text);
@@ -68,4 +74,12 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
 
     /** Return user password. */
     String getPassword();
+
+    /**
+     * Set the enable state of the inputs.
+     *
+     * @param isEnabled
+     *         <code>true</code> if enabled, <code>false</code> if disabled
+     */
+    void setInputsEnableState(boolean isEnabled);
 }

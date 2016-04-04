@@ -398,14 +398,11 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("importer.projectDescriptionPrompt")
     String importerProjectDescriptionPrompt();
 
-    @Key("importer.projectPrivacy")
-    String importerProjectPrivacy();
+    @Key("importer.default.relativePath")
+    String importerDefaultRelativePath();
 
-    @Key("importer.projectVisibilityPublic")
-    String importerProjectVisibilityPublic();
-
-    @Key("importer.projectVisibilityPrivate")
-    String importerProjectVisibilityPrivate();
+    @Key("importer.url.incorrect.message")
+    String importProjectUrlIncorrectMessage();
 
     @Key("status.successful")
     String statusSuccessful();

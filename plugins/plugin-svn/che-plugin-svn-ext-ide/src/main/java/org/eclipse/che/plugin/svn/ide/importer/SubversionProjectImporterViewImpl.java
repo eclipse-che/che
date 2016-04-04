@@ -10,19 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.importer;
 
-import org.eclipse.che.ide.ui.Styles;
-
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.inject.Inject;
@@ -49,16 +46,6 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
     @UiField
     Label       labelUrlError;
     @UiField
-    HTMLPanel   descriptionArea;
-    @UiField
-    TextBox     projectName;
-    @UiField
-    TextArea    projectDescription;
-    @UiField
-    RadioButton projectPrivate;
-    @UiField
-    RadioButton projectPublic;
-    @UiField
     TextBox     projectUrl;
     @UiField
     TextBox     projectRelativePath;
@@ -66,6 +53,10 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
     TextBox     username;
     @UiField
     TextBox     password;
+    @UiField
+    TextBox     projectName;
+    @UiField
+    TextArea    projectDescription;
 
     @Inject
     public SubversionProjectImporterViewImpl(SubversionExtensionResources resources,
@@ -73,6 +64,7 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
         style = resources.svnProjectImporterPageStyle();
         style.ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+
         projectName.getElement().setAttribute("maxlength", "32");
         projectDescription.getElement().setAttribute("maxlength", "256");
     }
@@ -87,13 +79,28 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
     @Override
     public void setProjectUrl(@NotNull String url) {
         projectUrl.setText(url);
-        delegate.onProjectUrlChanged();
+        delegate.onProjectUrlChanged(url);
     }
 
     /** {@inheritDoc} */
     @Override
     public String getProjectUrl() {
         return this.projectUrl.getValue();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setProjectUrlErrorHighlight(boolean visible) {
+        if (visible) {
+            projectUrl.addStyleName(style.inputError());
+        } else {
+            projectUrl.removeStyleName(style.inputError());
+        }
+    }
+
+    @Override
+    public void setURLErrorMessage(@NotNull String message) {
+        labelUrlError.setText(message != null ? message : "");
     }
 
     /** {@inheritDoc} */
@@ -105,7 +112,7 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
 
     /** {@inheritDoc} */
     @Override
-    public void setNameErrorVisibility(boolean visible) {
+    public void setProjectNameErrorHighlight(boolean visible) {
         if (visible) {
             projectName.addStyleName(style.inputError());
         } else {
@@ -136,13 +143,24 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
     @Override
     public void setProjectName(@NotNull String projectName) {
         this.projectName.setValue(projectName);
-        delegate.onProjectNameChanged();
+        delegate.onProjectNameChanged(projectName);
     }
 
     /** {@inheritDoc} */
     @Override
     public void setUrlTextBoxFocused() {
         projectUrl.setFocus(true);
+    }
+
+    @Override
+    public void setInputsEnableState(boolean isEnabled) {
+        projectName.setEnabled(isEnabled);
+        projectDescription.setEnabled(isEnabled);
+        projectUrl.setEnabled(isEnabled);
+
+        if (isEnabled) {
+            setUrlTextBoxFocused();
+        }
     }
 
     /** {@inheritDoc} */
@@ -155,6 +173,24 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
     @Override
     public String getPassword() {
         return password.getText();
+    }
+
+    @UiHandler("projectUrl")
+    void onProjectUrlChanged(KeyUpEvent event) {
+        delegate.onProjectUrlChanged(projectUrl.getValue());
+    }
+
+    @UiHandler("projectRelativePath")
+    void onProjectRelativePathChanged(final KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            return;
+        }
+        delegate.onProjectRelativePathChanged(projectRelativePath.getValue());
+    }
+
+    @UiHandler({"username", "password"})
+    void credentialChangeHandler(final ValueChangeEvent<String> event) {
+        delegate.onCredentialsChanged();
     }
 
     @UiHandler("projectName")
@@ -171,21 +207,7 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
             projectName.setValue(tmp);
         }
 
-        delegate.onProjectNameChanged();
-    }
-
-    @UiHandler("projectUrl")
-    @SuppressWarnings("unused")
-    void onProjectUrlChanged(KeyUpEvent event) {
-        delegate.onProjectUrlChanged();
-    }
-
-    @UiHandler("projectRelativePath")
-    void onProjectRelativePathChanged(final KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            return;
-        }
-        delegate.onProjectRelativePathChanged();
+        delegate.onProjectNameChanged(projectName.getValue());
     }
 
     @UiHandler("projectDescription")
@@ -193,37 +215,29 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
             return;
         }
-        delegate.onProjectDescriptionChanged();
+        delegate.onProjectDescriptionChanged(projectDescription.getValue());
     }
 
-    @UiHandler({"username", "password"})
-    @SuppressWarnings("unused")
-    void credentialChangeHandler(final ValueChangeEvent<String> event) {
-        delegate.onCredentialsChanged();
-    }
-
-    public interface Style extends Styles {
+    public interface Style extends CssResource {
         String mainPanel();
 
         String namePanel();
 
         String labelPosition();
 
-        String marginTop();
-
         String alignRight();
 
-        String alignLeft();
-
         String labelErrorPosition();
-
-        String radioButtonPosition();
-
-        String description();
 
         String label();
 
         String horizontalLine();
+
+        String inputField();
+
+        String inputError();
+
+        String passwordField();
     }
 
 }

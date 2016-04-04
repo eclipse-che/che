@@ -13,13 +13,17 @@ package org.eclipse.che.plugin.svn.ide.importer;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.shared.ImportParameterKeys;
 import org.eclipse.che.ide.util.NameUtils;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Handler for the Subversion Project Importer.
@@ -29,17 +33,40 @@ import org.eclipse.che.ide.util.NameUtils;
 public class SubversionProjectImporterPresenter extends AbstractWizardPage<ProjectConfigDto>
         implements SubversionProjectImporterView.ActionDelegate {
 
-    private SubversionProjectImporterView view;
+    // start with white space
+    private static final RegExp SUBVERSION_REPOSITORY_REGEX =
+            RegExp.compile("^(http|https|svn|svn\\+ssh)://[A-Za-z0-9_\\-]+(\\.[A-Za-z0-9_\\-:]+)+(/[A-Za-z0-9_.\\-]+)*/?$");
+
+    private final SubversionExtensionLocalizationConstants constants;
+    private final SubversionProjectImporterView            view;
+
+    private boolean ignoreChanges;
 
     @Inject
-    public SubversionProjectImporterPresenter(SubversionProjectImporterView view) {
+    public SubversionProjectImporterPresenter(final SubversionExtensionLocalizationConstants constants,
+                                              final SubversionProjectImporterView view) {
+        this.constants = constants;
         this.view = view;
         this.view.setDelegate(this);
+    }
+
+    @Override
+    public boolean isCompleted() {
+        return isSubversionUrlCorrect(dataObject.getSource().getLocation())
+               && NameUtils.checkProjectName(dataObject.getName());
     }
 
     /** {@inheritDoc} */
     @Override
     public void go(AcceptsOneWidget container) {
+
+        if (Strings.isNullOrEmpty(dataObject.getName()) && Strings.isNullOrEmpty(dataObject.getSource().getLocation())) {
+            ignoreChanges = true;
+
+            view.setProjectUrlErrorHighlight(false);
+            view.setProjectNameErrorHighlight(false);
+            view.setURLErrorMessage(null);
+        }
 
         view.setProjectName(dataObject.getName());
         view.setProjectDescription(dataObject.getDescription());
@@ -47,46 +74,66 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Proje
 
         container.setWidget(view);
 
-        view.setUrlTextBoxFocused();
+        view.setInputsEnableState(true);
+
+        ignoreChanges = false;
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onProjectNameChanged() {
-        dataObject.setName(view.getProjectName());
-        updateDelegate.updateControls();
-
-        view.setNameErrorVisibility(!NameUtils.checkProjectName(view.getProjectName()));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onProjectUrlChanged() {
-        if (Strings.isNullOrEmpty(view.getProjectUrl())) {
-            view.setProjectName("");
+    public void onProjectNameChanged(final String projectName) {
+        if (ignoreChanges) {
             return;
         }
 
-        String projectName = Iterables.getLast(Splitter.on("/").omitEmptyStrings().split(view.getProjectUrl()));
-        String calcUrl = getUrl(view.getProjectUrl(), view.getProjectRelativePath());
+        dataObject.setName(projectName);
+        updateDelegate.updateControls();
 
-        view.setProjectName(projectName);
+        view.setProjectNameErrorHighlight(!NameUtils.checkProjectName(projectName));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void onProjectUrlChanged(final String projectUrl) {
+        if (ignoreChanges) {
+            return;
+        }
+
+        final String calcUrl = getUrl(projectUrl, view.getProjectRelativePath());
         dataObject.getSource().setLocation(calcUrl);
+
+        if (isSubversionUrlCorrect(calcUrl)) {
+            view.setProjectUrlErrorHighlight(false);
+            view.setURLErrorMessage(null);
+
+
+            if (isNullOrEmpty(view.getProjectName())) {
+                final String projectName = Iterables.getLast(Splitter.on("/").omitEmptyStrings().split(projectUrl));
+                if (!isNullOrEmpty(projectName)) {
+                    view.setProjectName(projectName);
+                    dataObject.setName(view.getProjectName());
+                }
+            }
+
+        } else {
+            view.setProjectUrlErrorHighlight(true);
+            view.setURLErrorMessage(constants.importProjectUrlIncorrectMessage());
+        }
+
         updateDelegate.updateControls();
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onProjectRelativePathChanged() {
-        String calcUrl = getUrl(view.getProjectUrl(), view.getProjectRelativePath());
+    public void onProjectRelativePathChanged(final String projectRelativePath) {
+        String calcUrl = getUrl(view.getProjectUrl(), projectRelativePath);
         dataObject.getSource().setLocation(calcUrl);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void onProjectDescriptionChanged() {
-        dataObject.setDescription(view.getProjectDescription());
-        updateDelegate.updateControls();
+    public void onProjectDescriptionChanged(final String projectDescription) {
+        dataObject.setDescription(projectDescription);
     }
 
     /** {@inheritDoc} */
@@ -94,6 +141,13 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Proje
     public void onCredentialsChanged() {
         dataObject.getSource().getParameters().put(ImportParameterKeys.PARAMETER_USERNAME, view.getUserName());
         dataObject.getSource().getParameters().put(ImportParameterKeys.PARAMETER_PASSWORD, view.getPassword());
+    }
+
+    private boolean isSubversionUrlCorrect(final String url) {
+        if (isNullOrEmpty(url)) {
+            return false;
+        }
+        return SUBVERSION_REPOSITORY_REGEX.test(url);
     }
 
     private String getUrl(String url, String relPath) {
