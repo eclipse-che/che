@@ -10,15 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-import javax.validation.constraints.NotNull;
-
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.AsyncRequestLoader;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -47,17 +51,12 @@ import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.AsyncRequestFactory;
-import org.eclipse.che.ide.rest.AsyncRequestLoader;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of the {@link SubversionClientService}.
@@ -74,16 +73,16 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
 
     @Inject
-    public SubversionClientServiceImpl(@Named("cheExtensionPath") String extPath,
-                                       final AsyncRequestFactory asyncRequestFactory,
+    public SubversionClientServiceImpl(final AsyncRequestFactory asyncRequestFactory,
                                        final AppContext appContext,
                                        final DtoFactory dtoFactory,
                                        final LoaderFactory loaderFactory,
-                                       final DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+                                       final DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                       WsAgentUrlProvider urlProvider) {
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoFactory = dtoFactory;
         this.loader = loaderFactory.newLoader();
-        this.baseHttpUrl = extPath + "/svn/" + appContext.getWorkspaceId();
+        this.baseHttpUrl = urlProvider.get() + "/svn/" + appContext.getWorkspaceId();
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
     }
 

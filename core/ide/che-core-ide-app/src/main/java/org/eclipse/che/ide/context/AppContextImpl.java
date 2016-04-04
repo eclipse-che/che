@@ -21,6 +21,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.app.CurrentUser;
+import org.eclipse.che.ide.api.app.StartUpAction;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
@@ -30,7 +31,6 @@ import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.project.node.ProjectNode;
-import org.eclipse.che.ide.api.app.StartUpAction;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
@@ -55,6 +55,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
     private Factory             factory;
     private String              devMachineId;
     private String              projectsRoot;
+    private String              wsAgentURL;
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
@@ -172,6 +173,21 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
     @Override
     public void setProjectsRoot(String projectsRoot) {
         this.projectsRoot = projectsRoot;
+    }
+
+    @Override
+    public String getWsAgentURL() {
+        return wsAgentURL;
+    }
+
+    /**
+     * Sets URL to send requests to workspace agent.
+     *
+     * @param wsAgentURL
+     *         workspace agent url
+     */
+    public void setWsAgentURL(String wsAgentURL) {
+        this.wsAgentURL = wsAgentURL;
     }
 
     @Override

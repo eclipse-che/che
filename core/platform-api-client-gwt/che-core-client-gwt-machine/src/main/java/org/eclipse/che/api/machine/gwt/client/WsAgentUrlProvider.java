@@ -8,22 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.gwt.client.event;
+package org.eclipse.che.api.machine.gwt.client;
 
-import com.google.gwt.event.shared.EventHandler;
+import com.google.inject.Provider;
 
 /**
- * Provides method which is called when workspace started.
+ * The class provides URL to send requests to workspace agent.
  *
  * @author Dmitry Shnurenko
  */
-public interface WorkspaceStartedHandler extends EventHandler {
-
-    /**
-     * Performs some actions when workspace started.
-     *
-     * @param event
-     *         contains information about started workspace
-     */
-    void onWorkspaceStarted(WorkspaceStartedEvent event);
+public interface WsAgentUrlProvider extends Provider<String> {
 }

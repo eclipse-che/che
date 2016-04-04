@@ -12,8 +12,8 @@ package org.eclipse.che.ide.ext.java.client.documentation;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -29,22 +29,22 @@ import org.eclipse.che.ide.util.loging.Log;
 public class QuickDocPresenter implements QuickDocumentation, QuickDocView.ActionDelegate {
 
 
-    private QuickDocView view;
-    private AppContext   appContext;
-    private String       caContext;
-    private String       workspaceId;
-    private EditorAgent editorAgent;
+    private final QuickDocView       view;
+    private final AppContext         appContext;
+    private final String             workspaceId;
+    private final EditorAgent        editorAgent;
+    private final WsAgentUrlProvider urlProvider;
 
     @Inject
     public QuickDocPresenter(QuickDocView view,
                              AppContext appContext,
-                             @Named("cheExtensionPath") String caContext,
-                             EditorAgent editorAgent) {
+                             EditorAgent editorAgent,
+                             WsAgentUrlProvider urlProvider) {
         this.view = view;
         this.appContext = appContext;
-        this.caContext = caContext;
-        this.workspaceId = appContext.getWorkspace().getId();
+        this.workspaceId = appContext.getWorkspaceId();
         this.editorAgent = editorAgent;
+        this.urlProvider = urlProvider;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
         EmbeddedTextEditorPresenter editor = ((EmbeddedTextEditorPresenter)activeEditor);
         int offset = editor.getCursorOffset();
         final PositionConverter.PixelCoordinates coordinates = editor.getPositionConverter().offsetToPixel(offset);
-        view.show(caContext + "/jdt/" + workspaceId + "/javadoc/find?fqn=" +
+        view.show(urlProvider.get() + "/jdt/" + workspaceId + "/javadoc/find?fqn=" +
                   JavaSourceFolderUtil.getFQNForFile(editor.getEditorInput().getFile()) + "&projectpath=" +
                   appContext.getCurrentProject().getProjectConfig().getPath() + "&offset=" + offset, coordinates.getX(),
                   coordinates.getY());

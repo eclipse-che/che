@@ -12,8 +12,8 @@ package org.eclipse.che.ide.ext.java.jdi.client.debug;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.jdi.client.JavaRuntimeLocalizationConstant;
@@ -55,17 +55,17 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
     private final DtoUnmarshallerFactory          dtoUnmarshallerFactory;
 
     @Inject
-    protected JavaDebuggerServiceClientImpl(@Named("cheExtensionPath") String extPath,
-                                            AppContext appContext,
+    protected JavaDebuggerServiceClientImpl(AppContext appContext,
                                             LoaderFactory loaderFactory,
                                             AsyncRequestFactory asyncRequestFactory,
                                             JavaRuntimeLocalizationConstant localizationConstant,
-                                            DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+                                            DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                                            WsAgentUrlProvider urlProvider) {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.localizationConstant = localizationConstant;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.baseUrl = extPath + "/debug-java/" + appContext.getWorkspace().getId();
+        this.baseUrl = urlProvider.get() + "/debug-java/" + appContext.getWorkspaceId();
     }
 
     @Override
@@ -124,8 +124,8 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
     public Promise<StackFrameDump> getStackFrameDump(@NotNull String id) {
         final String requestUrl = baseUrl + "/dump/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl)
-                           .loader(loaderFactory.newLoader())
-                           .send(dtoUnmarshallerFactory.newUnmarshaller(StackFrameDump.class));
+                                  .loader(loaderFactory.newLoader())
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(StackFrameDump.class));
     }
 
     @Override

@@ -17,7 +17,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
@@ -53,41 +52,39 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
 @Singleton
 public class WsAgentStateController implements ConnectionOpenedHandler, ConnectionClosedHandler, ConnectionErrorHandler {
 
-    private final EventBus                 eventBus;
-    private final MessageBusProvider       messageBusProvider;
-    private final InitialLoadingInfo       initialLoadingInfo;
-    private final LoaderPresenter          loader;
-    private final AsyncRequestFactory      asyncRequestFactory;
-    private final String                   extPath;
+    private final EventBus            eventBus;
+    private final MessageBusProvider  messageBusProvider;
+    private final InitialLoadingInfo  initialLoadingInfo;
+    private final LoaderPresenter     loader;
+    private final AsyncRequestFactory asyncRequestFactory;
+    private final WsAgentUrlProvider  urlProvider;
 
     //not used now added it for future if it we will have possibility check that service available for client call
-    private final List<RestServiceInfo>    availableServices;
+    private final List<RestServiceInfo> availableServices;
 
-    private MessageBus                     messageBus;
-    private WsAgentState                   state;
-    private String                         wsUrl;
-    private String                         wsId;
-    private AsyncCallback<MessageBus>      messageBusCallback;
+    private MessageBus                messageBus;
+    private WsAgentState              state;
+    private String                    wsUrl;
+    private AsyncCallback<MessageBus> messageBusCallback;
 
     @Inject
     public WsAgentStateController(EventBus eventBus,
                                   LoaderPresenter loader,
                                   MessageBusProvider messageBusProvider,
                                   AsyncRequestFactory asyncRequestFactory,
-                                  @Named("cheExtensionPath") String extPath,
-                                  InitialLoadingInfo initialLoadingInfo) {
+                                  InitialLoadingInfo initialLoadingInfo,
+                                  WsAgentUrlProvider urlProvider) {
         this.loader = loader;
         this.eventBus = eventBus;
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
-        this.extPath = extPath;
         this.initialLoadingInfo = initialLoadingInfo;
-        availableServices = new ArrayList<>();
+        this.availableServices = new ArrayList<>();
+        this.urlProvider = urlProvider;
     }
 
     public void initialize(String wsUrl, String wsId) {
         this.wsUrl = wsUrl + "/" + wsId;
-        this.wsId = wsId;
         this.state = STOPPED;
         initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), IN_PROGRESS);
         checkHttpConnection();
@@ -141,7 +138,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     }
 
 
-
     public WsAgentState getState() {
         return state;
     }
@@ -163,21 +159,29 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
      * Goto checking HTTP connection via getting all registered REST Services
      */
     private void checkHttpConnection() {
-        asyncRequestFactory.createGetRequest(extPath + "/" + wsId + "/").send(new AsyncRequestCallback<String>(new StringUnmarshaller()) {
+        String url = urlProvider.get() + '/';
+        asyncRequestFactory.createGetRequest(url).send(new AsyncRequestCallback<String>(new StringUnmarshaller()) {
             @Override
             protected void onSuccess(String result) {
-                JSONObject object = JSONParser.parseStrict(result).isObject();
-                if (object.containsKey("rootResources")) {
+                JSONObject object = null;
+                try {
+                    object = JSONParser.parseStrict(result).isObject();
+                } catch (Exception exception) {
+                    Log.warn(getClass(), "Parse root resources failed.");
+                }
+
+                if (object != null && object.containsKey("rootResources")) {
                     JSONArray rootResources = object.get("rootResources").isArray();
                     for (int i = 0; i < rootResources.size(); i++) {
                         JSONObject rootResource = rootResources.get(i).isObject();
                         String regex = rootResource.get("regex").isString().stringValue();
                         String fqn = rootResource.get("fqn").isString().stringValue();
                         String path = rootResource.get("path").isString().stringValue();
-                        availableServices.add(new RestServiceInfo(fqn,regex,path));
+                        availableServices.add(new RestServiceInfo(fqn, regex, path));
                     }
-                    checkWsConnection();
                 }
+
+                checkWsConnection();
             }
 
             @Override

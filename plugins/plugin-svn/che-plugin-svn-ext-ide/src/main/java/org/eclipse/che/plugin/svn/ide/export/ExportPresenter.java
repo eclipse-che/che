@@ -14,19 +14,16 @@ import com.google.common.base.Strings;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.WsAgentUrlProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 
 /**
  * Presenter for the {@link ExportView}.
@@ -44,21 +41,21 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     private HasStorablePath selectedNode;
 
     @Inject
-    public ExportPresenter(@Named("cheExtensionPath") String extPath,
-                           AppContext appContext,
+    public ExportPresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
                            ConsolesPanelPresenter consolesPanelPresenter,
                            ProjectExplorerPresenter projectExplorerPart,
                            ExportView view,
                            NotificationManager notificationManager,
-                           SubversionExtensionLocalizationConstants constants) {
+                           SubversionExtensionLocalizationConstants constants,
+                           WsAgentUrlProvider urlProvider) {
         super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.view = view;
         this.notificationManager = notificationManager;
         this.constants = constants;
         this.view.setDelegate(this);
 
-        this.baseHttpUrl = extPath + "/svn/" + appContext.getWorkspaceId();
+        this.baseHttpUrl = urlProvider.get() + "/svn/" + appContext.getWorkspaceId();
     }
 
     public void showExport(HasStorablePath selectedNode) {
