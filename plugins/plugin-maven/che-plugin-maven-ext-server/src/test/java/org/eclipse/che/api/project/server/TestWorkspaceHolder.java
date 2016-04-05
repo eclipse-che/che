@@ -11,8 +11,8 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.Collection;
 // but I need to override WorkspaceHolder to use him in tests
 public class TestWorkspaceHolder extends WorkspaceHolder {
     public TestWorkspaceHolder() throws ServerException {
-        super(DtoFactory.newDto(UsersWorkspaceDto.class).withId("id")
+        super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
                         .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
                                               .withName("name")
                                               .withProjects(new ArrayList<>())));
