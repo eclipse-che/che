@@ -32,7 +32,7 @@ init_global_variables () {
 Usage:
   che [OPTIONS] [COMMAND]
      -v,        --vmware                Use the docker-machine VMware driver (instead of VirtualBox)
-     -m:name,   --machine:name          For Win & Mac, sets the docker-machine VM name; default=default
+     -m:name,   --machine:name          For Win & Mac, sets the docker-machine VM name; default=che
      -a:driver, --machine-driver:driver For Win & Mac, specifies the docker-machine driver to use; default=vbox
      -p:port,   --port:port             Port that Che server will use for HTTP requests; default=8080
      -r:ip,     --remote:ip             If Che clients are not localhost, set to IP address of Che server
@@ -72,7 +72,7 @@ https://eclipse-che.readme.io/docs/networking."
   CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
-  VM=${CHE_DOCKER_MACHINE_NAME:-default}
+  VM=${CHE_DOCKER_MACHINE_NAME:-che}
   MACHINE_DRIVER=virtualbox
   CONTAINER=${CHE_CONTAINER_NAME:-che}
   USE_DEBUG=false
@@ -369,7 +369,7 @@ get_docker_ready () {
     ${VM_CHECK_CMD} &> /dev/null || VM_EXISTS_CODE=$? || true
 
     if [ "${VM_EXISTS_CODE}" == "1" ]; then
-      echo "Could not find an existing docker machine."
+      echo -e "Could not find an existing docker machine named ${GREEN}${VM}${NC}."
       echo -e "Creating docker machine named ${GREEN}${VM}${NC}... Please be patient, this takes a couple minutes the first time."
       "${DOCKER_MACHINE}" rm -f ${VM} &> /dev/null || true
       rm -rf ~/.docker/machine/machines/${VM}
