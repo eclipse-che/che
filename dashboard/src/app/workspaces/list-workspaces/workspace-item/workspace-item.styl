@@ -1,6 +1,8 @@
 .workspace-item-row
   min-height 56px
   outline none
+
+.workspace-item-details
   cursor pointer
 
 .workspace-item-name
@@ -8,7 +10,7 @@
   color $label-primary-color
   margin 5px 12px
 
-.workspace-item-details
+.workspace-item-status
   font-size 12px
   margin 5px
   color $label-info-color
@@ -34,12 +36,21 @@
   color $label-info-color
 
 
-.workspace-list-details-arrow md-icon
+.workspace-list-item-arrow md-icon
   height 32px !important
   line-height 35px
   width 36px !important
   font-size 32px !important
 
 
-.workspace-list-details-arrow button
+.workspace-list-item-arrow button
   font-size 11px !important
+
+.workspace-list-item-checkbox
+  .che-list-item-checkbox-main md-checkbox.che-list-item-checkbox
+    display inline-block
+  .che-list-item-checkbox-main md-icon
+    display none
+
+.workspace-list-item-checkbox > div
+  width 100px
