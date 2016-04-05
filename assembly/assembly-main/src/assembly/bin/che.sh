@@ -346,7 +346,11 @@ get_docker_ready () {
       fi
     else
       if [ ! -z "${VBOX_MSI_INSTALL_PATH}" ]; then
-        VBOXMANAGE=${VBOX_MSI_INSTALL_PATH}VBoxManage.exe
+        # Convert this directory to its short form name on Windows
+        if [ "${WIN}" == "true" ]; then
+          export VBOX_MSI_INSTALL_PATH=`(cd "${VBOX_MSI_INSTALL_PATH}" && cmd //C 'FOR %i in (.) do @echo %~Si')`\\
+      fi
+        VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}"VBoxManage.exe
       else
         VBOXMANAGE=/usr/local/bin/VBoxManage
       fi
@@ -367,7 +371,6 @@ get_docker_ready () {
     # Test to see if the VM we need is already running
     # Added || true to not fail due to set -e
     ${VM_CHECK_CMD} &> /dev/null || VM_EXISTS_CODE=$? || true
-
     if [ "${VM_EXISTS_CODE}" == "1" ]; then
       echo -e "Could not find an existing docker machine named ${GREEN}${VM}${NC}."
       echo -e "Creating docker machine named ${GREEN}${VM}${NC}... Please be patient, this takes a couple minutes the first time."
