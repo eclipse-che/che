@@ -46,7 +46,8 @@ public class PomReconcilerTest extends BaseTest {
                 }
             }
         };
-        projectManager = new MavenProjectManager(mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
+        MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
+        projectManager = new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
 
     }
 

@@ -22,8 +22,8 @@ import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.commons.xml.XMLTreeException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
 import org.eclipse.che.ide.extension.maven.server.MavenServerWrapper;
+import org.eclipse.che.ide.extension.maven.server.MavenWrapperManager;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectManager;
 import org.eclipse.che.ide.extension.maven.server.core.classpath.ClasspathManager;
@@ -60,7 +60,7 @@ import static javax.ws.rs.core.MediaType.TEXT_XML;
 public class MavenServerService {
     private static final Logger LOG = LoggerFactory.getLogger(MavenServerService.class);
 
-    private final MavenServerManager  mavenServerManager;
+    private final MavenWrapperManager wrapperManager;
     private final ProjectRegistry     projectRegistry;
     private final MavenProjectManager mavenProjectManager;
     private final ProjectManager      cheProjectManager;
@@ -81,13 +81,13 @@ public class MavenServerService {
     private ClasspathManager classpathManager;
 
     @Inject
-    public MavenServerService(MavenServerManager mavenServerManager,
+    public MavenServerService(MavenWrapperManager wrapperManager,
                               ProjectRegistry projectRegistry,
                               ProjectManager projectManager,
                               MavenProjectManager mavenProjectManager) {
 
         cheProjectManager = projectManager;
-        this.mavenServerManager = mavenServerManager;
+        this.wrapperManager = wrapperManager;
         this.projectRegistry = projectRegistry;
         this.mavenProjectManager = mavenProjectManager;
     }
@@ -117,7 +117,7 @@ public class MavenServerService {
         }
 
 
-        MavenServerWrapper mavenServer = mavenServerManager.createMavenServer();
+        MavenServerWrapper mavenServer = wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
 
         try {
             mavenServer.customize(projectManager.copyWorkspaceCache(), terminal, notifier, false, false);
@@ -127,8 +127,7 @@ public class MavenServerService {
             }
             return mavenServer.getEffectivePom(pomFile.getVirtualFile().toIoFile(), Collections.emptyList(), Collections.emptyList());
         } finally {
-            mavenServer.reset();
-            mavenServer.dispose();
+           wrapperManager.release(mavenServer);
         }
     }
 

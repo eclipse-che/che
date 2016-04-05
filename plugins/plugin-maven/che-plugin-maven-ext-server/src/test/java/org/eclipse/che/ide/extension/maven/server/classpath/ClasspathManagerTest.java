@@ -14,6 +14,7 @@ import com.google.gson.JsonObject;
 
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.ide.extension.maven.server.BaseTest;
+import org.eclipse.che.ide.extension.maven.server.MavenWrapperManager;
 import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenCommunication;
 import org.eclipse.che.ide.extension.maven.server.core.MavenExecutorService;
@@ -65,8 +66,9 @@ public class ClasspathManagerTest extends BaseTest {
         localRepository = new File(new File("target/localRepo").getAbsolutePath());
         localRepository.mkdirs();
         mavenServerManager.setLocalRepository(localRepository);
-        projectManager = new MavenProjectManager(mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
-        classpathManager = new ClasspathManager(root.getAbsolutePath(), mavenServerManager, projectManager, terminal, mavenNotifier);
+        MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
+        projectManager = new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
+        classpathManager = new ClasspathManager(root.getAbsolutePath(), wrapperManager, projectManager, terminal, mavenNotifier);
         mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
                                             new MavenCommunication() {
                                                 @Override

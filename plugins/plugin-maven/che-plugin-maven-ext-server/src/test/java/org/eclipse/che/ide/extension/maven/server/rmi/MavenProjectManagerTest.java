@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.extension.maven.server.rmi;
 
 import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
+import org.eclipse.che.ide.extension.maven.server.MavenWrapperManager;
 import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectListener;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectManager;
@@ -78,7 +79,8 @@ public class MavenProjectManagerTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        projectManager = new MavenProjectManager(manager, new MavenTerminalImpl(), new MavenServerManagerTest.MyMavenServerProgressNotifier(), workspaceProvider);
+        MavenWrapperManager wrapperManager = new MavenWrapperManager(manager);
+        projectManager = new MavenProjectManager(wrapperManager, manager, new MavenTerminalImpl(), new MavenServerManagerTest.MyMavenServerProgressNotifier(), workspaceProvider);
         when(workspaceProvider.get()).thenReturn(workspace);
         when(workspace.getRoot()).thenReturn(workspaceRoot);
     }

@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
 import org.eclipse.che.ide.extension.maven.server.MavenServerWrapper;
+import org.eclipse.che.ide.extension.maven.server.MavenWrapperManager;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProjectModifications;
 import org.eclipse.che.maven.data.MavenArtifact;
@@ -60,8 +61,9 @@ public class MavenProjectManager {
     //project that does not have parent project in our workspace
     private final List<MavenProject> rootProjects;
 
+    private final MavenWrapperManager   wrapperManager;
     private final MavenServerManager    serverManager;
-    private final MavenTerminal         terminal;
+    private final MavenTerminal terminal;
     private final MavenProgressNotifier mavenNotifier;
     private final Provider<IWorkspace>  workspaceProvider;
 
@@ -72,10 +74,12 @@ public class MavenProjectManager {
     private final MavenProjectListener dispatcher;
 
     @Inject
-    public MavenProjectManager(MavenServerManager serverManager,
+    public MavenProjectManager(MavenWrapperManager wrapperManager,
+                               MavenServerManager serverManager,
                                MavenTerminal terminal,
                                MavenProgressNotifier mavenNotifier,
                                EclipseWorkspaceProvider workspaceProvider) {
+        this.wrapperManager = wrapperManager;
         this.serverManager = serverManager;
         this.terminal = terminal;
         this.mavenNotifier = mavenNotifier;
@@ -109,7 +113,7 @@ public class MavenProjectManager {
     }
 
     public void resolveMavenProject(IProject project, MavenProject mavenProject) {
-        MavenServerWrapper mavenServer = serverManager.createMavenServer();
+        MavenServerWrapper mavenServer = wrapperManager.getMavenServer(MavenWrapperManager.ServerType.RESOLVE);
         try {
 
             mavenNotifier.setText("Resolving project: " + mavenProject.getName());
@@ -118,8 +122,7 @@ public class MavenProjectManager {
             dispatcher.projectResolved(mavenProject, modifications);
 
         } finally {
-            mavenServer.reset();
-            mavenServer.dispose();
+           wrapperManager.release(mavenServer);
         }
 
     }
@@ -129,6 +132,7 @@ public class MavenProjectManager {
         if (projects.isEmpty()) {
             return;
         }
+        mavenNotifier.start();
         UpdateState state = new UpdateState();
         Deque<MavenProject> stack = new LinkedList<>();
         for (IProject project : projects) {
@@ -139,7 +143,7 @@ public class MavenProjectManager {
                 internalAddMavenProject(project, recursive, state, stack);
             }
         }
-
+        mavenNotifier.stop();
         state.fireUpdate();
 
     }
@@ -174,6 +178,8 @@ public class MavenProjectManager {
 
         stack.addFirst(mavenProject);
 
+        mavenNotifier.setText("Reading pom: " + mavenProject.getPomPath());
+
         List<MavenProject> oldModules = findModules(mavenProject);
         Set<MavenProject> oldChilds = new HashSet<>();
         if (!isNew) {
@@ -203,11 +209,11 @@ public class MavenProjectManager {
         if (isNew) {
             addToChild(parentProject, mavenProject);
         } else {
-           updateChild(parentProject, mavenProject);
+            updateChild(parentProject, mavenProject);
         }
 
 //        if (hasparent) {
-            state.addUpdate(mavenProject, modifications);
+        state.addUpdate(mavenProject, modifications);
 //        }
 
         List<IProject> modules = mavenProject.getModulesProjects();

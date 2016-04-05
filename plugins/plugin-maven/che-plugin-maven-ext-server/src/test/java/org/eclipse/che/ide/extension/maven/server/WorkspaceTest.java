@@ -74,7 +74,8 @@ public class WorkspaceTest extends BaseTest {
                 }
             }
         };
-        projectManager = new MavenProjectManager(mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
+        MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
+        projectManager = new MavenProjectManager(wrapperManager,mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
         mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
                                             new MavenCommunication() {
                                                 @Override
@@ -91,7 +92,7 @@ public class WorkspaceTest extends BaseTest {
                                                 public void send(JsonObject object, MessageType type) {
 
                                                 }
-                                            }, new ClasspathManager(root.getAbsolutePath(), mavenServerManager, projectManager, terminal, mavenNotifier), pm);
+                                            }, new ClasspathManager(root.getAbsolutePath(), wrapperManager, projectManager, terminal, mavenNotifier), pm);
     }
 
 

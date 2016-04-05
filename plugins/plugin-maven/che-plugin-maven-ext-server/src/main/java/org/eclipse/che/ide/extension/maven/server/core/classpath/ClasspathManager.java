@@ -14,8 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.extension.maven.server.MavenServerManager;
 import org.eclipse.che.ide.extension.maven.server.MavenServerWrapper;
+import org.eclipse.che.ide.extension.maven.server.MavenWrapperManager;
 import org.eclipse.che.ide.extension.maven.server.core.MavenClasspathContainer;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProgressNotifier;
 import org.eclipse.che.ide.extension.maven.server.core.MavenProjectManager;
@@ -59,7 +59,7 @@ public class ClasspathManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClasspathManager.class);
     private final String                workspacePath;
-    private final MavenServerManager    mavenServerManager;
+    private final MavenWrapperManager   wrapperManager;
     private final MavenProjectManager   projectManager;
     private final MavenTerminal         terminal;
     private final MavenProgressNotifier notifier;
@@ -67,21 +67,21 @@ public class ClasspathManager {
 
     @Inject
     public ClasspathManager(@Named("che.user.workspaces.storage") String workspacePath,
-                            MavenServerManager mavenServerManager,
+                            MavenWrapperManager wrapperManager,
                             MavenProjectManager projectManager,
                             MavenTerminal terminal,
                             MavenProgressNotifier notifier) {
 
         this.workspacePath = workspacePath;
-        this.mavenServerManager = mavenServerManager;
+        this.wrapperManager = wrapperManager;
         this.projectManager = projectManager;
         this.terminal = terminal;
         this.notifier = notifier;
-        MavenServerWrapper mavenServer = mavenServerManager.createMavenServer();
+        MavenServerWrapper mavenServer = wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
         try {
             localRepository = mavenServer.getLocalRepository();
         } finally {
-            mavenServer.dispose();
+            wrapperManager.release(mavenServer);
         }
     }
 
@@ -180,7 +180,7 @@ public class ClasspathManager {
         IClasspathEntry classpathEntry = fragmentRoot.getResolvedClasspathEntry();
         MavenArtifactKey artifactKey = getArtifactKey(classpathEntry);
         if (artifactKey != null) {
-            MavenServerWrapper mavenServer = mavenServerManager.createMavenServer();
+            MavenServerWrapper mavenServer = wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
 
             try {
                 mavenServer.customize(projectManager.copyWorkspaceCache(), terminal, notifier, false, false);
@@ -195,8 +195,7 @@ public class ClasspathManager {
                 }
                 return mavenArtifact.isResolved();
             } finally {
-                mavenServer.reset();
-                mavenServer.dispose();
+               wrapperManager.release(mavenServer);
             }
         }
         return false;
