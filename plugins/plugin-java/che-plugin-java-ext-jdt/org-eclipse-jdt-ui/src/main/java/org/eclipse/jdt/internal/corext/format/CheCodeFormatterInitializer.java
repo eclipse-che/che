@@ -18,34 +18,33 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.io.Files.readLines;
 
 /**
  * @author Roman Nikitenko
+ * @author Igor Vinokur
  */
 public class CheCodeFormatterInitializer {
 
     @SuppressWarnings("unchecked")
     public void initializePreferences(String settingsDir, String preferencesFileName) throws IOException {
-        Map<String, String> codeFormatterDefaultSettings = CheCodeFormatterOptions.getDefaultFormatSettings();
+        Map<String, String> codeFormatterSettings = CheCodeFormatterOptions.getDefaultFormatSettings();
         Hashtable<String, String> options = JavaModelManager.getJavaModelManager().getOptions();
 
         File preferencesFile = Paths.get(settingsDir, preferencesFileName).toFile();
         if (preferencesFile.exists()) {
-            for (String fileLine : readLines(preferencesFile, Charset.defaultCharset())) {
-                String fileProperty = fileLine.substring(0, fileLine.indexOf("="));
-                if (!options.containsKey(fileProperty)) {
-                    options.put(fileProperty, "");
-                }
-                options.keySet()
-                       .stream()
-                       .filter(fileLine::contains)
-                       .forEach(property -> options.replace(property, fileLine.substring(fileLine.indexOf("=") + 1)));
-            }
+
+            Map<String, String> fileOptions = readLines(preferencesFile, Charset.defaultCharset())
+                    .stream()
+                    .map(fileLine -> fileLine.split("="))
+                    .collect(Collectors.toMap(elements -> elements[0], elements -> elements[1]));
+
+            codeFormatterSettings.putAll(fileOptions);
         }
 
-        options.putAll(codeFormatterDefaultSettings);
+        options.putAll(codeFormatterSettings);
         JavaModelManager.getJavaModelManager().setOptions(options);
     }
 }

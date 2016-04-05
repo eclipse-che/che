@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -35,6 +36,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -117,29 +119,31 @@ public class CompilerSetupService {
     }
 
     private void updateCreateSettingsFile(Map<String, String> changedParameters) throws IOException {
-        File settingsFile = Paths.get(settingsDir, preferencesFileName).toFile();
-        createParentDirs(settingsFile);
+        if (changedParameters.size() == 0) {
+            return;
+        }
 
-        String content = "";
-        if (settingsFile.createNewFile()) {
-            for (String parameter : changedParameters.keySet()) {
-                content += parameter + "=" + changedParameters.get(parameter) + "\n";
+        File preferencesFile = Paths.get(settingsDir, preferencesFileName).toFile();
+        createParentDirs(preferencesFile);
+
+        StringBuilder contentStringBuilder = new StringBuilder();
+        if (preferencesFile.createNewFile()) {
+            for (String property : changedParameters.keySet()) {
+                contentStringBuilder.append(property).append("=").append(changedParameters.get(property)).append("\n");
             }
         } else {
-            content = new String(toByteArray(settingsFile));
-            for (String changedProperty : changedParameters.keySet()) {
-                Optional<String> propertyFromFile = readLines(settingsFile, Charset.defaultCharset())
-                        .stream()
-                        .filter(fileLine -> fileLine.startsWith(changedProperty))
-                        .findFirst();
-                if (propertyFromFile.isPresent()) {
-                    content = content.replace(propertyFromFile.get(), changedProperty + "=" + changedParameters.get(changedProperty));
-                } else {
-                    content += changedProperty + "=" + changedParameters.get(changedProperty) + "\n";
-                }
+            Map<String, String> options = readLines(preferencesFile, Charset.defaultCharset())
+                    .stream()
+                    .map(fileLine -> fileLine.split("="))
+                    .collect(Collectors.toMap(elements -> elements[0], elements -> elements[1]));
+
+            options.putAll(changedParameters);
+
+            for (String param : options.keySet()) {
+                contentStringBuilder.append(param).append("=").append(options.get(param)).append("\n");
             }
         }
 
-        write(content.getBytes(), settingsFile);
+        write(contentStringBuilder.toString().getBytes(), preferencesFile);
     }
 }

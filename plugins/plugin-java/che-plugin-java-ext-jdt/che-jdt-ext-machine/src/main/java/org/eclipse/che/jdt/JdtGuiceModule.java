@@ -62,16 +62,16 @@ public class JdtGuiceModule extends AbstractModule {
     @Named("che.jdt.settings.dir")
     @Singleton
     protected String provideSettings(@Named("che.user.workspaces.storage") String wsStorage,
-                                     @Named("che.workspace.metadata") String wsMetadata) {
-        return Paths.get(wsStorage, wsMetadata, "settings").toString();
+                                     @Named("che.workspace.jdt.metadata") String jdtMetadata) {
+        return Paths.get(wsStorage, jdtMetadata, "settings").toString();
     }
 
     @Provides
     @Named("che.jdt.workspace.index.dir")
     @Singleton
     protected String provideIndex(@Named("che.user.workspaces.storage") String wsStorage,
-                                  @Named("che.workspace.metadata") String wsMetadata) {
-        return Paths.get(wsStorage, wsMetadata, "index").toString();
+                                  @Named("che.workspace.jdt.metadata") String jdtMetadata) {
+        return Paths.get(wsStorage, jdtMetadata, "index").toString();
     }
 
 
