@@ -24,6 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,13 +41,17 @@ public abstract class BaseTest {
     protected static EventService    eventService      = new EventService();
     protected static ResourcesPlugin plugin            /*= new ResourcesPlugin("target/index", workspacePath,
                                                                              new DummyProjectManager(workspacePath, eventService))*/;
-    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set");
+    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set", "preferences");
     protected static FileBuffersPlugin
                                      fileBuffersPlugin = new FileBuffersPlugin();
 
     static {
         plugin.start();
-        javaPlugin.start();
+        try {
+            javaPlugin.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

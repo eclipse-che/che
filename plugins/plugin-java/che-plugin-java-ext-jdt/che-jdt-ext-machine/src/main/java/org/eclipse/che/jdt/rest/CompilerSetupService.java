@@ -11,12 +11,15 @@
 
 package org.eclipse.che.jdt.rest;
 
+import com.google.inject.name.Named;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -24,11 +27,21 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
+import static com.google.common.io.Files.createParentDirs;
+import static com.google.common.io.Files.toByteArray;
+import static com.google.common.io.Files.readLines;
+import static com.google.common.io.Files.write;
 
 /**
  * Special service which allows control parameters of compiler for current project or current workspace.
@@ -38,20 +51,34 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path("/jdt/{wsId}/compiler-settings")
 public class CompilerSetupService {
 
+    @Inject
+    @Named("che.jdt.settings.dir")
+    String settingsDir;
+
+    @Inject
+    @Named("jdt.preferences.file.name")
+    String preferencesFileName;
+
     private static final JavaModel JAVA_MODEL = JavaModelManager.getJavaModelManager().getJavaModel();
 
     /**
      * Set java compiler preferences {@code changedParameters} for project by not empty path {@code projectpath}. If {@code projectpath}
      * is empty then java compiler preferences will be set for current workspace.
      *
-     * @param projectPath project path
-     * @param changedParameters java compiler preferences
+     * @param projectPath
+     *         project path
+     * @param changedParameters
+     *         java compiler preferences
      */
     @POST
     @Path("/set")
     @Consumes(APPLICATION_JSON)
-    public void setParameters(@QueryParam("projectpath") String projectPath, @NotNull Map<String, String> changedParameters) {
+    public void setParameters(@QueryParam("projectpath") String projectPath, @NotNull Map<String, String> changedParameters)
+            throws IOException {
         if (projectPath == null || projectPath.isEmpty()) {
+
+            updateCreateSettingsFile(changedParameters);
+
             JavaCore.setOptions(new Hashtable<>(changedParameters));
             return;
         }
@@ -63,7 +90,8 @@ public class CompilerSetupService {
      * Return java compiler preferences for current project by not empty path {@code projectpath}. If {@code projectpath} if empty then
      * return java compile preferences for current workspace.
      *
-     * @param projectPath project path
+     * @param projectPath
+     *         project path
      * @return java compiler preferences
      */
     @GET
@@ -86,5 +114,32 @@ public class CompilerSetupService {
 
         //noinspection unchecked
         return options.getMap();
+    }
+
+    private void updateCreateSettingsFile(Map<String, String> changedParameters) throws IOException {
+        File settingsFile = Paths.get(settingsDir, preferencesFileName).toFile();
+        createParentDirs(settingsFile);
+
+        String content = "";
+        if (settingsFile.createNewFile()) {
+            for (String parameter : changedParameters.keySet()) {
+                content += parameter + "=" + changedParameters.get(parameter) + "\n";
+            }
+        } else {
+            content = new String(toByteArray(settingsFile));
+            for (String changedProperty : changedParameters.keySet()) {
+                Optional<String> propertyFromFile = readLines(settingsFile, Charset.defaultCharset())
+                        .stream()
+                        .filter(fileLine -> fileLine.startsWith(changedProperty))
+                        .findFirst();
+                if (propertyFromFile.isPresent()) {
+                    content = content.replace(propertyFromFile.get(), changedProperty + "=" + changedParameters.get(changedProperty));
+                } else {
+                    content += changedProperty + "=" + changedParameters.get(changedProperty) + "\n";
+                }
+            }
+        }
+
+        write(content.getBytes(), settingsFile);
     }
 }

@@ -384,7 +384,7 @@ public class ProjectRegistry {
     private void initUnconfiguredFolders() {
         try {
             for (FolderEntry folder : root.getChildFolders()) {
-                if (!projects.containsKey(folder.getVirtualFile().getPath().toString())) {
+                if (!projects.containsKey(folder.getVirtualFile().getPath().toString()) && !folder.getName().startsWith(".")) {
                     putProject(null, folder, true, false);
                 }
             }

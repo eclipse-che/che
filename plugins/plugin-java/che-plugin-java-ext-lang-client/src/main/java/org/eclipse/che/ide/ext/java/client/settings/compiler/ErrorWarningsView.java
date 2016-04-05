@@ -32,4 +32,9 @@ public interface ErrorWarningsView extends IsWidget {
      *         widget which will be added
      */
     void addProperty(@NotNull PropertyWidget propertyWidget);
+
+    /**
+     * Remove all properties from panel on view.
+     */
+    void removeAllProperties();
 }

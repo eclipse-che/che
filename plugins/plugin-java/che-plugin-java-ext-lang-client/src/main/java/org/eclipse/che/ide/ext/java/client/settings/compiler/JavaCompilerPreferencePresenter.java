@@ -186,7 +186,8 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        //do nothing
+        widgets.clear();
+        view.removeAllProperties();
     }
 }
 
