@@ -10,22 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.web.bindery.event.shared.EventBus;
-
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
-import org.eclipse.che.ide.api.event.project.CurrentProjectChangedHandler;
-import org.eclipse.che.ide.api.parts.PartStackType;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.node.ProjectNode;
+import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -55,36 +49,20 @@ public class SubversionActionPresenter {
             {"G", "chartreuse"}
     };
 
-    protected final EventBus                         eventBus;
-    protected final WorkspaceAgent                   workspaceAgent;
-    private final   AppContext                       appContext;
-    private final   SubversionOutputConsolePresenter console;
-    private         boolean                          isViewClosed;
-
-    private final ProjectExplorerPresenter projectExplorerPart;
+    private final AppContext                     appContext;
+    private final SubversionOutputConsoleFactory consoleFactory;
+    private final ConsolesPanelPresenter         consolesPanelPresenter;
+    private final ProjectExplorerPresenter       projectExplorerPart;
 
     protected SubversionActionPresenter(final AppContext appContext,
-                                        final EventBus eventBus,
-                                        final SubversionOutputConsolePresenter console,
-                                        final WorkspaceAgent workspaceAgent,
+                                        final SubversionOutputConsoleFactory consoleFactory,
+                                        final ConsolesPanelPresenter consolesPanelPresenter,
                                         final ProjectExplorerPresenter projectExplorerPart) {
         this.appContext = appContext;
-        this.workspaceAgent = workspaceAgent;
-        this.console = console;
+        this.consoleFactory = consoleFactory;
+        this.consolesPanelPresenter = consolesPanelPresenter;
 
-        isViewClosed = true;
-
-        this.eventBus = eventBus;
         this.projectExplorerPart = projectExplorerPart;
-
-        eventBus.addHandler(CurrentProjectChangedEvent.TYPE, new CurrentProjectChangedHandler() {
-            @Override
-            public void onCurrentProjectChanged(CurrentProjectChangedEvent event) {
-                isViewClosed = true;
-                console.clear();
-                workspaceAgent.hidePart(console);
-            }
-        });
     }
 
     /**
@@ -176,106 +154,90 @@ public class SubversionActionPresenter {
     }
 
     /**
-     * Ensures view is opened.
-     */
-    protected void ensureViewOpened() {
-        if (isViewClosed) {
-            workspaceAgent.openPart(console, PartStackType.INFORMATION);
-            isViewClosed = false;
-        }
-    }
-
-    /**
-     * Print the update output.
+     * Prints errors output in console.
      *
-     * @param lines text to be printed
+     * @param errors the error output
+     * @param consoleTitle the title of the console to use
      */
-    protected void print(final List<String> lines) {
-        ensureViewOpened();
-
-        for (final String line : lines) {
-            console.print(line);
-        }
-    }
-
-    /**
-     * Prints command line.
-     *
-     * @param command command line
-     */
-    protected void printCommand(String command) {
-        ensureViewOpened();
-
-        if (command.startsWith("'") || command.startsWith("\"")) {
-            command += command.substring(1, command.length() - 1);
-        }
-
-        String line = "<span style=\"font-weight: bold; font-style: italic;\">$ " + command + "</span>";
-
-        console.print(line);
-    }
-
-    protected void printErrors(final List<String> errors) {
-        ensureViewOpened();
-
+    protected void printErrors(final List<String> errors, final String consoleTitle) {
+        final SubversionOutputConsole console = consoleFactory.create(consoleTitle);
         for (final String line : errors) {
-            console.print("<span style=\"color:red;\">" + SafeHtmlUtils.htmlEscape(line) + "</span>");
+            console.printError(line);
         }
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
     }
 
     /**
-     * Colorizes and prints response to the output.
+     * Colorizes and prints response outputs in console.
      *
-     * @param command
-     * @param output
-     * @param errors
+     * @param command the SVN command that was executed
+     * @param output the command output
+     * @param errors the error output
+     * @param consoleTitle the title of the console to use
      */
-    protected void printResponse(final String command, final List<String> output, final List<String> errors) {
-        ensureViewOpened();
+    protected void printResponse(final String command, final List<String> output, final List<String> errors, final String consoleTitle) {
+        final SubversionOutputConsole console = consoleFactory.create(consoleTitle);
 
         if (command != null) {
-            printCommand(command);
+            printCommand(command, console);
         }
 
         if (output != null) {
-            for (final String line : output) {
-                boolean found = false;
-
-                if (!line.trim().isEmpty()) {
-                    String prefix = line.trim().substring(0, 1);
-
-                    for (String[] stcol : STATUS_COLORS) {
-                        if (stcol[0].equals(prefix)) {
-                            // TODO: Turn the file paths into links (where appropriate)
-                            console.print("<span style=\"color:" + stcol[1] + ";\">" + SafeHtmlUtils.htmlEscape(line) + "</span>");
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!found) {
-                    console.print(SafeHtmlUtils.htmlEscape(line));
-                }
-            }
+            printOutput(output, console);
         }
 
         if (errors != null) {
             for (final String line : errors) {
-                console.print("<span style=\"color:red;\">" + SafeHtmlUtils.htmlEscape(line) + "</span>");
+                console.printError(line);
             }
         }
 
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+    }
+
+    /**
+     * Prints an executed command line in given console.
+     *
+     * @param command the SVN command that was executed
+     * @param console the console to use to print
+     */
+    private void printCommand(String command, final SubversionOutputConsole console) {
+        if (command.startsWith("'") || command.startsWith("\"")) {
+            command += command.substring(1, command.length() - 1);
+        }
+
+        console.printCommand(command);
         console.print("");
     }
 
     /**
-     * Print the update output & a blank line after.
+     * Prints output in given console.
      *
-     * @param output text to be printed
+     * @param output the command output
+     * @param console the console to use to print
      */
-    protected void printAndSpace(final List<String> output) {
-        print(output);
+    private void printOutput(List<String> output, SubversionOutputConsole console) {
+        for (final String line : output) {
+            boolean found = false;
+
+            if (!line.trim().isEmpty()) {
+                String prefix = line.trim().substring(0, 1);
+
+                for (String[] stcol : STATUS_COLORS) {
+                    if (stcol[0].equals(prefix)) {
+                        // TODO: Turn the file paths into links (where appropriate)
+                        console.print(line, stcol[1]);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                console.print(line);
+            }
+        }
+
         console.print("");
     }
 

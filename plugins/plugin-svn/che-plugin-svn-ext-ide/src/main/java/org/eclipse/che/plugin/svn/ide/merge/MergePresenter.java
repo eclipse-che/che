@@ -13,18 +13,19 @@ package org.eclipse.che.plugin.svn.ide.merge;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.tree.TreeNode;
 import org.eclipse.che.ide.api.project.tree.TreeStructure;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsole;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
@@ -49,10 +50,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class MergePresenter extends SubversionActionPresenter implements MergeView.ActionDelegate {
 
-    private final MergeView               view;
-    private final SubversionClientService subversionClientService;
-    private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
-    private final NotificationManager     notificationManager;
+    private final MergeView                                view;
+    private final SubversionClientService                  subversionClientService;
+    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
+    private final NotificationManager                      notificationManager;
+    private final SubversionExtensionLocalizationConstants constants;
 
     /** Target tree node to merge. */
     private HasStorablePath targetNode;
@@ -71,17 +73,18 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                           final SubversionClientService subversionClientService,
                           final AppContext appContext,
                           final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                          final EventBus eventBus,
-                          final SubversionOutputConsolePresenter console,
-                          final WorkspaceAgent workspaceAgent,
+                          final SubversionOutputConsoleFactory consoleFactory,
+                          final ConsolesPanelPresenter consolesPanelPresenter,
                           final ProjectExplorerPresenter projectExplorerPart,
-                          final NotificationManager notificationManager) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+                          final NotificationManager notificationManager,
+                          final SubversionExtensionLocalizationConstants constants) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.view = view;
         this.subversionClientService = subversionClientService;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
+        this.constants = constants;
 
         view.setDelegate(this);
     }
@@ -105,7 +108,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                                          @Override
                                          protected void onSuccess(InfoResponse result) {
                                              if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
-                                                 printResponse(null, null, result.getErrorOutput());
+                                                 printErrors(result.getErrorOutput(), constants.commandInfo());
                                                  notificationManager.notify("Unable to execute subversion command", FAIL, true);
                                                  return;
                                              }
@@ -120,7 +123,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                                     @Override
                                     protected void onSuccess(InfoResponse result) {
                                         if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
-                                            printResponse(null, null, result.getErrorOutput());
+                                            printErrors(result.getErrorOutput(), constants.commandInfo());
                                             notificationManager.notify("Unable to execute subversion command", FAIL, true);
                                             return;
                                         }
@@ -172,8 +175,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
                     @Override
                     protected void onSuccess(CLIOutputResponse result) {
-                        printCommand(result.getCommand());
-                        printAndSpace(result.getOutput());
+                        printResponse(result.getCommand(), result.getOutput(), null, constants.commandMerge());
                     }
 
                     @Override
@@ -250,7 +252,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                             @Override
                             protected void onSuccess(final InfoResponse result) {
                                 if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
-                                    printResponse(null, null, result.getErrorOutput());
+                                    printErrors(result.getErrorOutput(), constants.commandInfo());
                                     notificationManager.notify("Unable to execute subversion command", FAIL, true);
                                     return;
                                 }

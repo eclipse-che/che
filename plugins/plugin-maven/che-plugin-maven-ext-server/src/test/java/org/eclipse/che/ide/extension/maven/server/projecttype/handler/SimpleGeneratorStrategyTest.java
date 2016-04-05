@@ -22,8 +22,8 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
@@ -129,7 +129,7 @@ public class SimpleGeneratorStrategyTest {
 //                                             SystemPathsFilter.ANY);
 //        vfsRegistry.registerProvider(workspace, memoryFileSystemProvider);
 
-        UsersWorkspaceDto usersWorkspaceMock = mock(UsersWorkspaceDto.class);
+        WorkspaceDto usersWorkspaceMock = mock(WorkspaceDto.class);
         final ProjectConfigDto projectConfigDto = DtoFactory.getInstance().createDto(ProjectConfigDto.class).withPath("/my_project");
         WorkspaceConfigDto workspaceConfigMock = mock(WorkspaceConfigDto.class);
         when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
@@ -155,7 +155,7 @@ public class SimpleGeneratorStrategyTest {
 //                                                          .withHref(API_ENDPOINT + "/workspace/" + workspace))))
 //                .thenReturn(httpJsonRequest);
 //        when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
-        when(httpJsonResponse.asDto(UsersWorkspaceDto.class)).thenReturn(usersWorkspaceMock);
+        when(httpJsonResponse.asDto(WorkspaceDto.class)).thenReturn(usersWorkspaceMock);
 
         pm.createProject(DtoFactory.getInstance().createDto(ProjectConfigDto.class)
                                    .withType(pt.getId())

@@ -29,7 +29,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -88,7 +88,7 @@ public class BootstrapController {
     private void startWsAgentComponents(EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
             @Override
-            public void onWorkspaceStarted(UsersWorkspaceDto workspace) {
+            public void onWorkspaceStarted(WorkspaceDto workspace) {
                 startWsAgentComponents(components.values().iterator());
             }
         });

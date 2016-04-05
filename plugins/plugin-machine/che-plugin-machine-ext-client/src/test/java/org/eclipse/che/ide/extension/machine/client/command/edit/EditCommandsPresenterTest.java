@@ -15,7 +15,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -61,24 +61,24 @@ public class EditCommandsPresenterTest {
     @Mock
     private CommandManager                                          commandManager;
     @Mock
-    private DtoFactory                                              dtoFactory;
+    private DtoFactory                  dtoFactory;
     @Mock
-    private CommandTypeRegistry                                     commandTypeRegistry;
+    private CommandTypeRegistry         commandTypeRegistry;
     @Mock
-    private AppContext                                              appContext;
+    private AppContext                  appContext;
     @Mock
-    private DialogFactory                                           dialogFactory;
+    private DialogFactory               dialogFactory;
     @Mock
-    private MachineLocalizationConstant                             machineLocale;
+    private MachineLocalizationConstant machineLocale;
     @Mock
-    private CoreLocalizationConstant                                coreLocale;
+    private CoreLocalizationConstant    coreLocale;
     @Mock
-    private UsersWorkspaceDto                                       workspace;
+    private WorkspaceDto                workspace;
 
     @Mock
     private Promise<List<CommandDto>>                                              commandsPromise;
     @Mock
-    private Promise<UsersWorkspaceDto>                                             workspacePromise;
+    private Promise<WorkspaceDto>                                             workspacePromise;
     @Mock
     private Promise<List<CommandConfiguration>>                                    commandConfigurationPromise;
     @Captor
@@ -86,7 +86,7 @@ public class EditCommandsPresenterTest {
     @Captor
     private ArgumentCaptor<Operation<List<CommandConfiguration>>>                  commandConfigurationCaptor;
     @Captor
-    private ArgumentCaptor<Operation<UsersWorkspaceDto>>                           workspaceCaptor;
+    private ArgumentCaptor<Operation<WorkspaceDto>>                           workspaceCaptor;
 
 
     @InjectMocks
@@ -102,7 +102,7 @@ public class EditCommandsPresenterTest {
         when(commandsPromise.then((Function<List<CommandDto>, List<CommandConfiguration>>)anyObject()))
                 .thenReturn(commandConfigurationPromise);
         when(commandConfigurationPromise.then((Operation<List<CommandConfiguration>>)anyObject())).thenReturn(commandConfigurationPromise);
-        when(workspaceServiceClient.updateCommand(anyString(), anyObject())).thenReturn(workspacePromise);
+        when(workspaceServiceClient.updateCommand(anyString(), anyString(), anyObject())).thenReturn(workspacePromise);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class EditCommandsPresenterTest {
         verify(view).setCloseButtonInFocus();
 
         verify(view, never()).close();
-        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyObject());
+        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyString(), anyObject());
         verify(workspaceServiceClient, never()).deleteCommand(anyString(), anyString());
     }
 
@@ -144,7 +144,7 @@ public class EditCommandsPresenterTest {
 
         verify(view).close();
         verify(workspaceServiceClient, never()).getCommands(anyString());
-        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyObject());
+        verify(workspaceServiceClient, never()).updateCommand(anyString(), anyString(), anyObject());
         verify(workspaceServiceClient, never()).deleteCommand(anyString(), anyString());
     }
 
@@ -170,7 +170,7 @@ public class EditCommandsPresenterTest {
         presenter.onEnterClicked();
 
         verify(dtoFactory).createDto(CommandDto.class);
-        verify(workspaceServiceClient).updateCommand(eq(WORKSPACE_ID), eq(command));
+        verify(workspaceServiceClient).updateCommand(eq(WORKSPACE_ID), anyString(), eq(command));
         verify(workspacePromise).then(workspaceCaptor.capture());
         workspaceCaptor.getValue().apply(workspace);
 

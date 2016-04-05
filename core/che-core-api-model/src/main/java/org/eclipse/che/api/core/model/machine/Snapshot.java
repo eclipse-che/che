@@ -29,9 +29,10 @@ public interface Snapshot {
     String getType();
 
     /**
-     * Id of the user that is owner of the snapshot
+     * Snapshot namespace, which allows snapshot to be
+     * related to the certain workspace machine.
      */
-    String getOwner();
+    String getNamespace();
 
     /**
      * Creation date of the snapshot

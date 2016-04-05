@@ -8,6 +8,7 @@
     <che-list ng-show="dashboardLastWorkspacesController.getWorkspaces().length > 0 && dashboardLastWorkspacesController.state =='OK'">
 
       <che-workspace-item ng-repeat="workspace in dashboardLastWorkspacesController.getWorkspaces() | limitTo:'5'"
+                          che-selectable="false"
                           che-workspace-item="workspace"></che-workspace-item>
 
     </che-list>

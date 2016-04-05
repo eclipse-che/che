@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
+import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
@@ -44,6 +45,7 @@ import java.util.Map;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
 import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 
 /**
  * Presenter for displaying list of branches for comparing selected with local changes.
@@ -146,12 +148,12 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                 } else {
                                     String[] changedFiles = result.split("\n");
                                     if (changedFiles.length == 1) {
-                                        comparePresenter.show(changedFiles[0].substring(2), changedFiles[0].substring(0, 1),
+                                        comparePresenter.show(changedFiles[0].substring(2), defineStatus(changedFiles[0].substring(0, 1)),
                                                               selectedBranch.getName());
                                     } else {
-                                        Map<String, String> items = new HashMap<>();
+                                        Map<String, Status> items = new HashMap<>();
                                         for (String item : changedFiles) {
-                                            items.put(item.substring(2, item.length()), item.substring(0, 1));
+                                            items.put(item.substring(2, item.length()), defineStatus(item.substring(0, 1)));
                                         }
                                         changedListPresenter.show(items, selectedBranch.getName());
                                     }

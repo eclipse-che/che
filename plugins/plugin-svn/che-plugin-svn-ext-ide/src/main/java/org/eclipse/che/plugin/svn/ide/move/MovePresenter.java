@@ -15,27 +15,26 @@ import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.tree.TreeNode;
 import org.eclipse.che.ide.api.project.tree.generic.Openable;
 import org.eclipse.che.ide.api.project.tree.generic.StorableNode;
 import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredTreeStructureProvider;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredTreeStructureProvider;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,9 +64,8 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
 
     @Inject
     public MovePresenter(AppContext appContext,
-                         EventBus eventBus,
-                         SubversionOutputConsolePresenter console,
-                         WorkspaceAgent workspaceAgent,
+                         SubversionOutputConsoleFactory consoleFactory,
+                         ConsolesPanelPresenter consolesPanelPresenter,
                          ProjectExplorerPresenter projectExplorerPart,
                          MoveView view,
                          FilteredTreeStructureProvider treeStructureProvider,
@@ -75,7 +73,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                          SubversionClientService service,
                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
                          SubversionExtensionLocalizationConstants locale) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.projectExplorerPart = projectExplorerPart;
         this.treeStructureProvider = treeStructureProvider;
         this.notificationManager = notificationManager;

@@ -14,6 +14,8 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +23,10 @@ import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
 
-//TODO move?
-
 /**
  * Data object for {@link Environment}.
  *
- * @author Eugene Voevodin
+ * @author Yevhenii Voevodin
  */
 public class EnvironmentImpl implements Environment {
 
@@ -36,8 +36,9 @@ public class EnvironmentImpl implements Environment {
 
     public EnvironmentImpl(String name, Recipe recipe, List<? extends MachineConfig> machineConfigs) {
         this.name = name;
-        // TODO here should be the copy of the recipe
-        this.recipe = recipe;
+        if (recipe != null) {
+            this.recipe = new RecipeImpl(recipe);
+        }
         if (machineConfigs != null) {
             this.machineConfigs = machineConfigs.stream()
                                                 .map(MachineConfigImpl::new)
@@ -55,6 +56,7 @@ public class EnvironmentImpl implements Environment {
     }
 
     @Override
+    @Nullable
     public Recipe getRecipe() {
         return recipe;
     }
@@ -65,10 +67,6 @@ public class EnvironmentImpl implements Environment {
             machineConfigs = new ArrayList<>();
         }
         return machineConfigs;
-    }
-
-    public void setMachineConfigs(List<MachineConfigImpl> machineConfigs) {
-        this.machineConfigs = machineConfigs;
     }
 
     @Override

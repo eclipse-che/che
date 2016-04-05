@@ -168,7 +168,8 @@ public class StackService extends Service {
     @Consumes(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_UPDATE_STACK)
     @RolesAllowed({"user", "system/admin", "system/manager"})
-    @ApiOperation(value = "Update the stack by replacing all the existing data (exclude field \"creator\") with update", notes = "This operation can be performed only by stack owner. But user with roles \"system/admin\" or \"system/manager\" " +
+    @ApiOperation(value = "Update the stack by replacing all the existing data (exclude field \"creator\") with update",
+                  notes = "This operation can be performed only by stack owner. But user with roles \"system/admin\" or \"system/manager\" " +
                           "can update predefined stack.")
     @ApiResponses({@ApiResponse(code = 200, message = "The stack successfully updated"),
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),

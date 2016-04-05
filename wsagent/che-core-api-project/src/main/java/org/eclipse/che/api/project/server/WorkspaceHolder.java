@@ -17,12 +17,14 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.UsersWorkspace;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +33,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,14 +72,14 @@ public class WorkspaceHolder {
     }
 
     @VisibleForTesting
-    protected WorkspaceHolder(UsersWorkspaceDto workspace) throws ServerException {
+    protected WorkspaceHolder(WorkspaceDto workspace) throws ServerException {
         this.workspace = new UsersWorkspaceImpl(workspace);
     }
 
     /**
      * @return workspace object
      */
-    public UsersWorkspace getWorkspace() {
+    public Workspace getWorkspace() {
         return this.workspace;
     }
 
@@ -126,7 +129,7 @@ public class WorkspaceHolder {
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "updateProject")
-                                      .build(workspace.getId()).toString();
+                                      .build(workspace.getId(), project.getPath()).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).usePutMethod().setBody(asDto(project)).request();
         } catch (IOException | ApiException e) {
@@ -161,7 +164,7 @@ public class WorkspaceHolder {
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "deleteProject")
-                                      .build(workspace.getId(), project.getName()).toString();
+                                      .build(workspace.getId(), project.getPath()).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).useDeleteMethod().request();
         } catch (IOException | ApiException e) {
@@ -174,30 +177,36 @@ public class WorkspaceHolder {
      * @return
      * @throws ServerException
      */
-    private UsersWorkspaceDto workspaceDto(String wsId) throws ServerException {
+    private WorkspaceDto workspaceDto(String wsId) throws ServerException {
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class).path(WorkspaceService.class, "getByKey")
                                       .build(wsId).toString();
         try {
-            return httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(UsersWorkspaceDto.class);
+            return httpJsonRequestFactory.fromUrl(href).useGetMethod().request().asDto(WorkspaceDto.class);
         } catch (IOException | ApiException e) {
             throw new ServerException(e);
         }
     }
 
-    protected static class UsersWorkspaceImpl implements UsersWorkspace {
-        private String              id;
-        private String              owner;
-        private boolean             isTemporary;
-        private WorkspaceStatus     status;
-        private WorkspaceConfigImpl workspaceConfig;
+    protected static class UsersWorkspaceImpl implements Workspace {
+        private String               id;
+        private String               namespace;
+        private boolean              isTemporary;
+        private WorkspaceStatus      status;
+        private WorkspaceConfigImpl  workspaceConfig;
+        private WorkspaceRuntimeImpl runtime;
+        private Map<String, String>  attributes;
 
-        UsersWorkspaceImpl(UsersWorkspace usersWorkspace) {
-            id = usersWorkspace.getId();
-            owner = usersWorkspace.getOwner();
-            isTemporary = usersWorkspace.isTemporary();
-            status = usersWorkspace.getStatus();
-            workspaceConfig = new WorkspaceConfigImpl(usersWorkspace.getConfig());
+        UsersWorkspaceImpl(WorkspaceDto workspaceDto) {
+            id = workspaceDto.getId();
+            namespace = workspaceDto.getNamespace();
+            isTemporary = workspaceDto.isTemporary();
+            status = workspaceDto.getStatus();
+            workspaceConfig = new WorkspaceConfigImpl(workspaceDto.getConfig());
+            if (workspaceDto.getRuntime() != null) {
+                runtime = new WorkspaceRuntimeImpl(workspaceDto.getRuntime());
+            }
+            attributes = new HashMap<>(workspaceDto.getAttributes());
         }
 
         @Override
@@ -206,13 +215,18 @@ public class WorkspaceHolder {
         }
 
         @Override
+        public WorkspaceRuntime getRuntime() {
+            return runtime;
+        }
+
+        @Override
         public String getId() {
             return id;
         }
 
         @Override
-        public String getOwner() {
-            return owner;
+        public String getNamespace() {
+            return namespace;
         }
 
         @Override
@@ -223,6 +237,11 @@ public class WorkspaceHolder {
         @Override
         public WorkspaceStatus getStatus() {
             return status;
+        }
+
+        @Override
+        public Map<String, String> getAttributes() {
+            return attributes;
         }
 
         public List<? extends ProjectConfig> getProjects() {
@@ -272,7 +291,6 @@ public class WorkspaceHolder {
             commands = config.getCommands();
             projects = config.getProjects();
             environments = config.getEnvironments();
-            attributes = config.getAttributes();
         }
 
         @Override
@@ -307,11 +325,6 @@ public class WorkspaceHolder {
         @Override
         public List<? extends Environment> getEnvironments() {
             return environments;
-        }
-
-        @Override
-        public Map<String, String> getAttributes() {
-            return attributes;
         }
     }
 }

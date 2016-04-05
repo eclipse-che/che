@@ -58,9 +58,9 @@ public class CommitPresenterTest extends BaseSubversionPresenterTest {
         super.setUp();
 
         presenter =
-                new CommitPresenter(appContext, view, dtoUnmarshallerFactory, eventBus, notificationManager,
-                                    subversionOutputConsolePresenter, constants,
-                                    service, workspaceAgent, projectExplorerPart, diffViewerPresenter);
+                new CommitPresenter(appContext, view, dtoUnmarshallerFactory, notificationManager,
+                                    subversionOutputConsoleFactory, constants,
+                                    service, consolesPanelPresenter, projectExplorerPart, diffViewerPresenter);
     }
 
     @Test

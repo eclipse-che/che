@@ -33,7 +33,7 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -557,11 +557,11 @@ public class FactoryService extends Service {
                                    String path)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
         final String userId = EnvironmentContext.getCurrent().getUser().getId();
-        final UsersWorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
-        if (!usersWorkspace.getOwner().equals(userId)) {
+        final WorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
+        if (!usersWorkspace.getNamespace().equals(userId)) {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
         }
-        validateWorkspace(usersWorkspace, path);
+        excludeProjectsWithoutLocation(usersWorkspace, path);
         final Factory factory = newDto(Factory.class).withWorkspace(asDto(usersWorkspace.getConfig())).withV("4.0");
         return Response.ok(factory, APPLICATION_JSON)
                        .header(CONTENT_DISPOSITION, "attachment; filename=factory.json")
@@ -590,10 +590,10 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Checks if it is possible to create the factory from specified the user's workspace,
-     * in case when it impossible {@link BadRequestException} will be thrown.
+     * Filters workspace projects, removes projects which don't have location set.
+     * If all workspace projects don't have location throws {@link BadRequestException}.
      */
-    private void validateWorkspace(UsersWorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
+    private void excludeProjectsWithoutLocation(WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
         final boolean notEmptyPath = projectPath != null;
         //Condition for sifting valid project in user's workspace
         Predicate<ProjectConfigImpl> predicate = projectConfig -> !(notEmptyPath && !projectPath.equals(projectConfig.getPath()))
@@ -610,6 +610,7 @@ public class FactoryService extends Service {
             throw new BadRequestException("Unable to create factory from this workspace, " +
                                           "because it does not contains projects with source storage set and/or specified path");
         }
+        usersWorkspace.getConfig().setProjects(filtered);
     }
 
     /**

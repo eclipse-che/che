@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
-import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
-import org.eclipse.che.ide.api.parts.base.BaseView;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -32,13 +32,11 @@ import org.eclipse.che.ide.ui.button.ConsoleButtonFactory;
 /**
  * Implementation of {@link SubversionOutputConsoleView}.
  */
-@Singleton
-public class SubversionOutputConsoleViewImpl extends BaseView<SubversionOutputConsoleView.ActionDelegate> implements
-                                                                                                                 SubversionOutputConsoleView {
-    @UiTemplate(value = "SubversionOutputConsoleViewImpl.ui.xml")
-    interface SubversionOutputConsoleViewImplUiBinder extends UiBinder<Widget, SubversionOutputConsoleViewImpl> { }
+public class SubversionOutputConsoleViewImpl extends Composite implements SubversionOutputConsoleView {
 
-    private static SubversionOutputConsoleViewImplUiBinder uiBinder = GWT.create(SubversionOutputConsoleViewImplUiBinder.class);
+    private ActionDelegate delegate;
+
+    interface SubversionOutputConsoleViewImplUiBinder extends UiBinder<Widget, SubversionOutputConsoleViewImpl> { }
 
     @UiField
     FlowPanel buttons;
@@ -50,27 +48,79 @@ public class SubversionOutputConsoleViewImpl extends BaseView<SubversionOutputCo
     FlowPanel consoleArea;
 
     @Inject
-    public SubversionOutputConsoleViewImpl(final ConsoleButtonFactory consoleButtonFactory, final PartStackUIResources resources,
-                                           final Resources coreResources, final SubversionExtensionLocalizationConstants constants) {
-        super(resources);
+    public SubversionOutputConsoleViewImpl(final SubversionOutputConsoleViewImplUiBinder uiBinder,
+                                           final ConsoleButtonFactory consoleButtonFactory,
+                                           final PartStackUIResources resources,
+                                           final SubversionExtensionLocalizationConstants constants) {
 
-        setContentWidget(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
 
-        minimizeButton.ensureDebugId("console-minimizeBut");
-
-        ConsoleButton clearButton = consoleButtonFactory.createConsoleButton(constants.consoleClearButton(), coreResources.clear());
+        ConsoleButton clearButton = consoleButtonFactory.createConsoleButton(constants.consoleClearButton(), resources.erase());
         clearButton.setDelegate(new ConsoleButton.ActionDelegate() {
             @Override
             public void onButtonClicked() {delegate.onClearClicked();}
         });
 
         buttons.add(clearButton);
+
+        ConsoleButton scrollButton = consoleButtonFactory.createConsoleButton(constants.consoleScrollButton(), resources.arrowBottom());
+        scrollButton.setDelegate(new ConsoleButton.ActionDelegate() {
+            @Override
+            public void onButtonClicked() {delegate.onScrollClicked();}
+        });
+
+        buttons.add(scrollButton);
+    }
+
+    /**
+     * Sets the delegate to receive events from this view.
+     *
+     * @param delegate
+     */
+    @Override
+    public void setDelegate(ActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override
     public void print(String text) {
+        String preStyle = " style='margin:0px; font-size: 12px;' ";
+
         HTML html = new HTML();
-        html.setHTML("<pre style='margin:0px; font-size: 11px;'>" + text + "</pre>");
+        html.setHTML("<pre" + preStyle + ">" + SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</pre>");
+        html.getElement().setAttribute("style", "padding-left: 2px;");
+
+        consoleArea.add(html);
+    }
+
+    @Override
+    public void print(String text, String color) {
+        String preStyle = " style='margin:0px; font-size: 12px;' ";
+
+        HTML html = new HTML();
+        html.setHTML("<pre" + preStyle + "><span style='color:" + SimpleHtmlSanitizer.sanitizeHtml(color).asString() +
+                     ";'>" + SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</span></pre>");
+
+        html.getElement().setAttribute("style", "padding-left: 2px;");
+        consoleArea.add(html);
+    }
+
+    /**
+     * Print text with a given style in view.
+     *
+     * @param text
+     *         The text to display
+     * @param style
+     */
+    @Override
+    public void printPredefinedStyle(String text, String style) {
+        String preStyle = " style='margin:0px; font-size: 12px;' ";
+
+        HTML html = new HTML();
+
+        html.setHTML("<pre" + preStyle + "><span style='" + SimpleHtmlSanitizer.sanitizeHtml(style).asString() + "'>" +
+                     SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</span></pre>");
+
         html.getElement().setAttribute("style", "padding-left: 2px;");
         consoleArea.add(html);
     }

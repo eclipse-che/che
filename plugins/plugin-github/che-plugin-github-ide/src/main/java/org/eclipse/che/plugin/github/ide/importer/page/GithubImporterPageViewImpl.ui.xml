@@ -1,0 +1,88 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:p1='urn:import:com.google.gwt.user.cellview.client'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:ide='urn:import:org.eclipse.che.ide.ui'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant'/>
+    <ui:with field='resources' type='org.eclipse.che.plugin.github.ide.GitHubResources'/>
+    <ui:with field="style" type="org.eclipse.che.plugin.github.ide.importer.page.GithubImporterPageViewImpl.GithubStyle"/>
+    <g:DockLayoutPanel unit="PX" addStyleNames="{style.mainPanel}">
+        <g:north size="325">
+            <g:FlowPanel ui:field="importerPanel">
+                <g:FlowPanel height="65px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.githubImporterPageProjectUrl}"
+                             addStyleNames="{style.labelPosition}"/>
+                    <ide:TextBox ui:field="projectUrl" addStyleNames="{style.inputField} {style.alignRight}"
+                               tabIndex="3"
+                               debugId="file-importProject-projectUrl"/>
+                    <g:Label ui:field="labelUrlError" width="100%" wordWrap="true" addStyleNames="{style.labelErrorPosition}"/>
+                </g:FlowPanel>
+                <g:FlowPanel height="0" addStyleNames="{style.horizontalLine}"/>
+                <g:FlowPanel height="35px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.githubImporterPageProjectInfo}" addStyleNames="{style.label}"/>
+                </g:FlowPanel>
+                <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.githubImporterPageProjectName}"
+                             addStyleNames="{style.labelPosition}"/>
+                    <ide:TextBox ui:field="projectName" addStyleNames="{style.inputField} {style.alignRight}"
+                               tabIndex="4"
+                               debugId="file-importProject-projectName" title="{locale.githubImporterPageProjectNamePrompt}"/>
+                </g:FlowPanel>
+                <g:FlowPanel height="87px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.githubImporterPageProjectDescription}"
+                             addStyleNames="{style.labelPosition}"/>
+                    <g:TextArea height="42px" ui:field="projectDescription"
+                                addStyleNames="{style.inputField} {style.alignRight}"
+                                debugId="file-importProject-projectDescription" title="{locale.githubImporterPageProjectDescriptionPrompt}"
+                                tabIndex="5"/>
+                </g:FlowPanel>
+                <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+                    <g:CheckBox ui:field="keepDirectory" text="{locale.githubImporterPageKeepDirectory}"
+                                debugId="file-importProject-keepDirectory" addStyleNames="{style.alignLeft}" />
+                </g:FlowPanel>
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.githubImporterPageKeepDirectoryField}" addStyleNames="{style.labelPosition}"/>
+                    <ide:TextBox ui:field="directoryName" addStyleNames="{style.inputField} {style.alignRight}"
+                               tabIndex="9" debugId="file-importProject-keepDirectoryName" title="{locale.githubImporterPageProjectNamePrompt}"/>
+                </g:FlowPanel>
+
+            </g:FlowPanel>
+        </g:north>
+        <g:north size="30">
+            <g:FlowPanel>
+                <g:Button ui:field="loadRepo" text="Load Repo" addStyleNames="{style.loadRepo}"
+                          debugId="githubImporter-loadRepo"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:north size="205">
+            <g:FlowPanel ui:field="bottomPanel">
+                <g:DockLayoutPanel ui:field="githubPanel" debugId="file-importProject-githubPanel">
+                    <g:north size="36.0">
+                        <g:FlowPanel addStyleNames="{style.bottomSpace}">
+                            <g:Label text="{locale.importFromGithubAccount}"
+                                     addStyleNames="{style.alignLeft} {style.textPosition} {style.rightSpace}"/>
+                            <g:ListBox width="283px" ui:field="accountName" addStyleNames="{style.alignLeft}"
+                                       debugId="githubImporter-accountName"/>
+                        </g:FlowPanel>
+                    </g:north>
+                    <g:north size="165">
+                        <g:ScrollPanel width="100%" height="100%">
+                            <p1:CellTable width="100%" ui:field="repositories" focus="false" debugId="githubImporter-repositories"/>
+                        </g:ScrollPanel>
+                    </g:north>
+                </g:DockLayoutPanel>
+            </g:FlowPanel>
+        </g:north>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

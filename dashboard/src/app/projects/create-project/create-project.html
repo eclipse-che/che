@@ -68,11 +68,14 @@
                flex="auto">
             <div class="create-project-working-log">
               <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()" che-index="{{$index}}"
-                             che-current-step="{{createProjectCtrl.getCurrentProgressStep()}}">
+                             ng-hide="$index === createProjectCtrl.getCreationSteps().length-1"
+                             che-open-condition="($index === createProjectCtrl.getCurrentProgressStep() && !!createProjectCtrl.getCreationSteps()[$index].logs)"
+                             ng-class="{'che-accordion-active': ($index === createProjectCtrl.getCurrentProgressStep()),
+                                        'che-accordion-error': createProjectCtrl.getCreationSteps()[$index].hasError}">
                 <div class="che-accordion-title">
                   <span>{{createProjectCtrl.getCreationSteps()[$index].text}}{{$index < createProjectCtrl.getCurrentProgressStep() ? ' ... completed' : ''}}</span>
                 </div>
-                <div class="che-accordion-body" ng-show="$index>0 && $index<createProjectCtrl.getCreationSteps().length-1">
+                <div class="che-accordion-body" ng-show="createProjectCtrl.getCreationSteps()[$index].logs.length > 0">
                   <che-logs-output che-title="{{createProjectCtrl.getCreationSteps()[$index].inProgressText}}"
                                    che-text="createProjectCtrl.getCreationSteps()[$index].logs"
                                    che-scrollback="100"
@@ -144,7 +147,15 @@
               <span class="che-tab-label-title">Github</span>
             </md-tab-label>
             <md-tab-body>
-              <create-project-github class="projects-create-project-tab" layout="column"></create-project-github>
+              <form name="createProjectGitHubForm" >
+                <create-project-github ng-init="createProjectCtrl.setForm(createProjectGitHubForm, 'github')"
+                                       class="projects-create-project-tab"
+                                       che-form="createProjectGitHubForm"
+                                       che-repository-model="createProjectCtrl.selectedGitHubRepository"
+                                       che-repository-select="createProjectCtrl.selectGitHubRepository(createProjectCtrl.selectedGitHubRepository)"
+                                       layout="column"></create-project-github>
+              </form>
+
             </md-tab-body>
           </md-tab>
           <md-tab md-on-select="createProjectCtrl.setCurrentTab('zip')" che-event-logger="new.project/zip">

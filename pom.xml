@@ -361,7 +361,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-github-ext-github</artifactId>
+                <artifactId>che-plugin-github-ide</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -372,6 +372,16 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-provider-github</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-github-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-github-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

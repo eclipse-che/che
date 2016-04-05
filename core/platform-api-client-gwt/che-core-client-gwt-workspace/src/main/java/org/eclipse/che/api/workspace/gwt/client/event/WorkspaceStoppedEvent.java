@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.gwt.client.event;
 
 import com.google.gwt.event.shared.GwtEvent;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 /**
  * Event fired when workspace has been stopped.
@@ -22,13 +22,13 @@ public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedHandler> {
 
     public static final Type<WorkspaceStoppedHandler> TYPE = new Type<>();
 
-    private final UsersWorkspaceDto workspace;
+    private final WorkspaceDto workspace;
 
-    public WorkspaceStoppedEvent(UsersWorkspaceDto workspace) {
+    public WorkspaceStoppedEvent(WorkspaceDto workspace) {
         this.workspace = workspace;
     }
 
-    public UsersWorkspaceDto getWorkspace() {
+    public WorkspaceDto getWorkspace() {
         return workspace;
     }
 

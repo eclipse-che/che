@@ -20,13 +20,16 @@ export class WorkspaceDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($route, $location, cheWorkspace, cheAPI, $mdDialog, cheNotification) {
+  constructor($rootScope, $route, $location, cheWorkspace, $mdDialog, cheNotification, ideSvc, $log) {
+    this.$rootScope = $rootScope;
     this.cheNotification = cheNotification;
-    this.cheAPI = cheAPI;
     this.cheWorkspace = cheWorkspace;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
+    this.ideSvc = ideSvc;
+    this.$log = $log;
 
+    this.workspaceDetails = {};
     this.workspaceId = $route.current.params.workspaceId;
 
     this.loading = true;
@@ -46,16 +49,12 @@ export class WorkspaceDetailsCtrl {
     } else {
       this.updateWorkspaceData();
     }
-
-    this.isRemoving = false;
   }
-
 
   //Update the workspace data to be displayed.
   updateWorkspaceData() {
     this.workspaceDetails = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
     if (this.loading) {
-      this.startUpdateWorkspaceStatus();
       this.loading = false;
     }
     this.newName = angular.copy(this.workspaceDetails.config.name);
@@ -80,7 +79,7 @@ export class WorkspaceDetailsCtrl {
     workspaceNewDetails.config.name = this.newName;
     delete workspaceNewDetails.links;
 
-    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails.config);
+    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails);
     promise.then((data) => {
       this.cheWorkspace.getWorkspacesById().set(this.workspaceId, data);
       this.updateWorkspaceData();
@@ -88,7 +87,7 @@ export class WorkspaceDetailsCtrl {
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Rename workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
   }
 
@@ -103,37 +102,39 @@ export class WorkspaceDetailsCtrl {
       .clickOutsideToClose(true)
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
-      if (this.workspaceDetails.status === 'STOPPED') {
-        this.removeWorkspace();
-      } else {
-        this.isRemoving = true;
-        this.stopWorkspace();
+      let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED');
+
+      if (this.workspaceDetails.status === 'RUNNING') {
+        this.cheWorkspace.stopWorkspace(this.workspaceId);
       }
+
+      stoppedStatusPromise.then(() => {
+        this.removeWorkspace();
+      });
     });
   }
 
   removeWorkspace() {
-    this.isRemoving = true;
-
     let promise = this.cheWorkspace.deleteWorkspaceConfig(this.workspaceId);
 
     promise.then(() => {
-      this.isRemoving = false;
       this.$location.path('/workspaces');
     }, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Delete workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
 
     return promise;
   }
 
   runWorkspace() {
-    let promise = this.cheAPI.getWorkspace().startWorkspace(this.workspaceId, this.workspaceDetails.config.defaultEnv);
-
+    this.ideSvc.init();
+    this.ideSvc.setSelectedWorkspace(this.workspaceDetails);
+    this.$rootScope.loadingIDE = false;
+    let promise = this.ideSvc.startIde(true);
     promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
-      console.log('error', error);
+      this.$log.error(error);
     });
   }
 
@@ -142,18 +143,7 @@ export class WorkspaceDetailsCtrl {
 
     promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
-      console.log('error', error);
-    });
-  }
-
-  startUpdateWorkspaceStatus() {
-    let bus = this.cheAPI.getWebsocket().getBus(this.workspaceId);
-
-    bus.subscribe('workspace:' + this.workspaceId, (message) => {
-      this.workspaceDetails.status = message.eventType;
-      if (message.eventType === 'STOPPED' && this.isRemoving) {
-        this.removeWorkspace();
-      }
+      this.$log.error(error);
     });
   }
 }

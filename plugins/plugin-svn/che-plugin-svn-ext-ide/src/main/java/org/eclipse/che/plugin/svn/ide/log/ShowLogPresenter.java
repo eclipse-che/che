@@ -11,20 +11,20 @@
 package org.eclipse.che.plugin.svn.ide.log;
 
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-import org.eclipse.che.plugin.svn.shared.InfoResponse;
-import org.eclipse.che.plugin.svn.shared.SubversionItem;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.plugin.svn.shared.InfoResponse;
+import org.eclipse.che.plugin.svn.shared.SubversionItem;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -33,9 +33,10 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 public class ShowLogPresenter extends SubversionActionPresenter {
 
-    private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
-    private final SubversionClientService subversionClientService;
-    private final NotificationManager     notificationManager;
+    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
+    private final SubversionClientService                  subversionClientService;
+    private final NotificationManager                      notificationManager;
+    private final SubversionExtensionLocalizationConstants constants;
 
     private final ShowLogsView view;
 
@@ -45,18 +46,19 @@ public class ShowLogPresenter extends SubversionActionPresenter {
     @Inject
     protected ShowLogPresenter(final AppContext appContext,
                                final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                               final EventBus eventBus,
-                               final WorkspaceAgent workspaceAgent,
-                               final SubversionOutputConsolePresenter console,
+                               final SubversionOutputConsoleFactory consoleFactory,
+                               final ConsolesPanelPresenter consolesPanelPresenter,
                                final SubversionClientService subversionClientService,
                                final NotificationManager notificationManager,
                                final ProjectExplorerPresenter projectExplorerPart,
+                               final SubversionExtensionLocalizationConstants constants,
                                final ShowLogsView view) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
 
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.subversionClientService = subversionClientService;
         this.notificationManager = notificationManager;
+        this.constants = constants;
         this.view = view;
 
         view.setDelegate(new ShowLogsView.Delegate() {
@@ -89,7 +91,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                     @Override
                     protected void onSuccess(InfoResponse result) {
                         if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
-                            printResponse(null, null, result.getErrorOutput());
+                            printErrors(result.getErrorOutput(), constants.commandInfo());
                             notificationManager.notify("Unable to execute subversion command", FAIL, true);
                             return;
                         }
@@ -118,8 +120,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                 new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
                     @Override
                     protected void onSuccess(CLIOutputResponse result) {
-                        printCommand(result.getCommand());
-                        printAndSpace(result.getOutput());
+                        printResponse(result.getCommand(), result.getOutput(), null, constants.commandLog());
                     }
 
                     @Override

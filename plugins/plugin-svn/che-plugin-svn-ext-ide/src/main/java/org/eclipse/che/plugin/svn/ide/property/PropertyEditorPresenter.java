@@ -12,22 +12,21 @@ package org.eclipse.che.plugin.svn.ide.property;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-import org.eclipse.che.plugin.svn.shared.Depth;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.plugin.svn.shared.Depth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,16 +52,15 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
 
     @Inject
     protected PropertyEditorPresenter(AppContext appContext,
-                                      EventBus eventBus,
-                                      SubversionOutputConsolePresenter console,
-                                      WorkspaceAgent workspaceAgent,
+                                      SubversionOutputConsoleFactory consoleFactory,
+                                      ConsolesPanelPresenter consolesPanelPresenter,
                                       ProjectExplorerPresenter projectExplorerPart,
                                       PropertyEditorView view,
                                       SubversionClientService service,
                                       DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                       NotificationManager notificationManager,
                                       SubversionExtensionLocalizationConstants constants) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.view = view;
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -163,7 +161,7 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                             new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
                                 @Override
                                 protected void onSuccess(CLIOutputResponse result) {
-                                    printResponse(result.getCommand(), result.getOutput(), result.getErrOutput());
+                                    printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandProperty());
 
                                     notification.setTitle(constants.propertyModifyFinished());
                                     notification.setStatus(SUCCESS);
@@ -194,7 +192,7 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                                new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
                                    @Override
                                    protected void onSuccess(CLIOutputResponse result) {
-                                       printResponse(result.getCommand(), result.getOutput(), result.getErrOutput());
+                                       printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandProperty());
 
                                        notification.setTitle(constants.propertyRemoveFinished());
                                        notification.setStatus(SUCCESS);

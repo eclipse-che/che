@@ -17,7 +17,7 @@ import com.googlecode.gwt.test.utils.GwtReflectionUtils;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -73,7 +73,7 @@ public class PullPresenterTest extends BaseTest {
     @Mock
     private PullResponse        pullResponse;
     @Mock
-    private UsersWorkspaceDto   workspace;
+    private WorkspaceDto        workspace;
 
     private PullPresenter presenter;
 

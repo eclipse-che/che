@@ -16,12 +16,12 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 
 /**
  * Handler for the {@link org.eclipse.che.plugin.svn.ide.action.UpdateToRevisionAction} action.
@@ -36,13 +36,13 @@ public class UpdateToRevisionPresenter extends UpdatePresenter implements Update
                                      final DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      final EventBus eventBus,
                                      final NotificationManager notificationManager,
-                                     final SubversionOutputConsolePresenter console,
+                                     final SubversionOutputConsoleFactory consoleFactory,
                                      final SubversionClientService service,
                                      final SubversionExtensionLocalizationConstants constants,
-                                     final WorkspaceAgent workspaceAgent,
+                                     final ConsolesPanelPresenter consolesPanelPresenter,
                                      final UpdateToRevisionView view,
                                      final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, dtoUnmarshallerFactory, eventBus, console, service, workspaceAgent, constants,
+        super(appContext, dtoUnmarshallerFactory, eventBus, consoleFactory, service, consolesPanelPresenter, constants,
               notificationManager, projectExplorerPart);
 
         this.view = view;

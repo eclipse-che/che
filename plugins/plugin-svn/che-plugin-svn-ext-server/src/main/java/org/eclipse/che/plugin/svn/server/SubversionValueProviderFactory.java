@@ -75,7 +75,7 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
                     throw new ValueStorageException("invalid project path");
                 }
             } else {
-                throw new ValueStorageException(String.format("Folder .svn not found in %s", project.getPath()));
+                return Collections.emptyList();
             }
         } catch (final IOException | ForbiddenException | ServerException e) {
             LOG.debug("svn info error", e);

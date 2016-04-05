@@ -29,7 +29,7 @@ import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.UsersWorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -356,10 +356,10 @@ public class AccountServiceTest {
 
     @DataProvider(name = "roleProvider")
     public Object[][] roleProvider() {
-        return new String[][]{
+        return new String[][] {
                 {"system/admin"},
                 {"system/manager"},
-        };
+                };
     }
 
     @Test
@@ -449,7 +449,7 @@ public class AccountServiceTest {
 
     @Test
     public void workspaceShouldBeRegistered() throws Exception {
-        UsersWorkspaceImpl workspace = spy(createUsersWorkspace());
+        WorkspaceImpl workspace = spy(createUsersWorkspace());
         Account account = new Account("account123");
         when(workspace.getId()).thenReturn("workspace123");
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
@@ -467,7 +467,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldFailWorkspaceRegistrationWhenWorkspaceIsAlreadyRegistered() throws Exception {
-        UsersWorkspaceImpl workspace = mock(UsersWorkspaceImpl.class);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         Account account = new Account("account123");
         when(workspace.getId()).thenReturn("workspace123");
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
@@ -481,7 +481,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldFailWorkspaceRegistrationWhenAccountAlreadyContainsGivenWorkspace() throws Exception {
-        UsersWorkspaceImpl workspace = mock(UsersWorkspaceImpl.class);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         Account account = new Account("account123");
         account.setWorkspaces(singletonList(workspace));
         when(workspace.getId()).thenReturn("workspace123");
@@ -495,7 +495,7 @@ public class AccountServiceTest {
 
     @Test
     public void workspaceShouldBeUnregistered() throws Exception {
-        UsersWorkspaceImpl workspace = mock(UsersWorkspaceImpl.class);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         Account account = new Account("account123");
         account.setWorkspaces(new ArrayList<>(singletonList(workspace)));
         when(workspace.getId()).thenReturn("workspace123");
@@ -512,7 +512,7 @@ public class AccountServiceTest {
 
     @Test
     public void shouldFailWorkspaceUnRegistrationWhenWorkspaceIsNotRegistered() throws Exception {
-        UsersWorkspaceImpl workspace = mock(UsersWorkspaceImpl.class);
+        WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         Account account = new Account("account123");
         when(workspace.getId()).thenReturn("workspace123");
         when(workspaceManager.getWorkspace(any())).thenReturn(workspace);
@@ -586,7 +586,7 @@ public class AccountServiceTest {
         when(securityContext.isUserInRole(role)).thenReturn(true);
     }
 
-    private UsersWorkspaceImpl createUsersWorkspace() {
+    private WorkspaceImpl createUsersWorkspace() {
         final EnvironmentImpl environment = new EnvironmentImpl("name",
                                                                 new RecipeImpl(),
                                                                 singletonList(new MachineConfigImpl(true,
@@ -597,13 +597,11 @@ public class AccountServiceTest {
                                                                                                     null,
                                                                                                     null,
                                                                                                     null)));
-        return new UsersWorkspaceImpl(new WorkspaceConfigImpl("name",
-                                                              "desc",
-                                                              "defEnv",
-                                                              null,
-                                                              null,
-                                                              singletonList(environment),
-                                                              null)
-                , "id123", "owner1234");
+        return new WorkspaceImpl("id123", "owner1234", new WorkspaceConfigImpl("name",
+                                                                               "desc",
+                                                                               "defEnv",
+                                                                               null,
+                                                                               null,
+                                                                               singletonList(environment)));
     }
 }

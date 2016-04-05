@@ -628,9 +628,9 @@ export class CreateProjectCtrl {
 
       // Update project command lines using current.project.path with actual path based on workspace runtime configuration
       // so adding the same project twice allow to use commands for each project without first selecting project in tree
-      let workspaceConfig = this.cheAPI.getWorkspace().getRuntimeConfig(workspaceId);
-      if (workspaceConfig.devMachine) {
-        let runtime = workspaceConfig.devMachine.runtime;
+      let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
+      if (workspace && workspace.runtime) {
+        let runtime = workspace.runtime.devMachine.runtime;
         if (runtime) {
           let envVar = runtime.envVariables;
           if (envVar) {
@@ -813,8 +813,8 @@ export class CreateProjectCtrl {
     } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-      let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(this.workspaceSelected.id);
-      promiseRuntime.then(() => {
+      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceSelected.id);
+      promiseWorkspace.then(() => {
         let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.workspaceSelected.id);
         // Get bus
         let websocketStream = this.$websocket(websocketUrl);
@@ -878,8 +878,8 @@ export class CreateProjectCtrl {
 
           this.importProjectData.project.name = this.projectName;
 
-          let promiseRuntime = this.cheAPI.getWorkspace().fetchRuntimeConfig(workspace.id);
-          promiseRuntime.then(() => {
+          let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+          promiseWorkspace.then(() => {
             let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
             // try to connect
             this.websocketReconnect = 10;
@@ -1037,8 +1037,8 @@ export class CreateProjectCtrl {
     }
     this.setWorkspaceName(this.workspaceSelected.config.name);
     let stack = null;
-    if (this.workspaceSelected.config.attributes && this.workspaceSelected.config.attributes.stackId) {
-      stack = this.cheStack.getStackById(this.workspaceSelected.config.attributes.stackId);
+    if (this.workspaceSelected.attributes && this.workspaceSelected.attributes.stackId) {
+      stack = this.cheStack.getStackById(this.workspaceSelected.attributes.stackId);
     }
     this.updateCurrentStack(stack);
     let findEnvironment = this.lodash.find(this.workspaceSelected.config.environments, (environment) => {

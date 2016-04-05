@@ -18,7 +18,6 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -34,6 +33,8 @@ public interface WorkspaceConfigDto extends WorkspaceConfig, Hyperlinks {
     String getName();
 
     WorkspaceConfigDto withName(String name);
+
+    void setName(String name);
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
@@ -74,14 +75,6 @@ public interface WorkspaceConfigDto extends WorkspaceConfig, Hyperlinks {
     void setEnvironments(List<EnvironmentDto> environments);
 
     WorkspaceConfigDto withEnvironments(List<EnvironmentDto> environments);
-
-    @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    Map<String, String> getAttributes();
-
-    void setAttributes(Map<String, String> attributes);
-
-    WorkspaceConfigDto withAttributes(Map<String, String> attributes);
 
     @Override
     WorkspaceConfigDto withLinks(List<Link> links);

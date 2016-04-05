@@ -20,7 +20,7 @@ class IdeCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor (ideSvc, $routeParams, ideLoaderSvc, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
+  constructor(ideSvc, $routeParams, ideLoaderSvc, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
     this.ideSvc = ideSvc;
     this.ideIFrameSvc = ideIFrameSvc;
     this.$rootScope = $rootScope;
@@ -36,12 +36,14 @@ class IdeCtrl {
     // search the selected workspace
     let workspace = $routeParams.workspaceName;
     if (!workspace) {
-        this.selectedWorkspaceName = null;
+      this.selectedWorkspaceName = null;
     } else {
       this.selectedWorkspaceName = workspace;
     }
 
     let ideAction = $routeParams.action;
+    let ideParams = $routeParams.ideParams;
+    let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(this.selectedWorkspaceName);
     if (ideAction) {
       // send action
       this.ideSvc.setIDEAction(ideAction);
@@ -50,14 +52,45 @@ class IdeCtrl {
       routeHistory.popCurrentPath();
 
       // remove action from path
-      $location.url('/ide/' + this.selectedWorkspaceName, false);
+      $location.url(selectedWorkspaceIdeUrl, false);
+
+    } else if (ideParams) {
+      let params = new Map();
+      let isArray = Array.isArray(ideParams);
+      if (isArray) {
+        ideParams.forEach((param) => {
+          let argParam = this.getParams(param);
+          params.set(argParam.key, argParam.value);
+        });
+      } else {
+        let argParam = this.getParams(ideParams);
+        params.set(argParam.key, argParam.value);
+      }
+
+      for (var [key, val] of params) {
+        this.ideSvc.setLoadingParameter(key, val);
+      }
+
+      // pop current route as we will redirect
+      routeHistory.popCurrentPath();
+
+      // remove action from path
+      $location.url(selectedWorkspaceIdeUrl, false);
 
     } else {
-      // no action, keep current flow
-
       this.ideIFrameSvc.addIFrame();
 
       let promise = cheWorkspace.fetchWorkspaces();
+
+      if ($routeParams.showLogs) {
+        routeHistory.popCurrentPath();
+
+        // remove action from path
+        $location.url(selectedWorkspaceIdeUrl, false);
+        $location.replace();
+
+        this.ideSvc.setPreventRedirection($routeParams.showLogs);
+      }
 
       promise.then(() => {
         this.updateData();
@@ -66,12 +99,23 @@ class IdeCtrl {
       });
     }
 
+  }
 
+  /**
+   * Transform colon separator value into key/value
+   * @param arg
+   * @returns object with key and value
+   */
+  getParams(arg) {
+    let array = arg.split(':');
+    var obj = {};
+    obj.key = array[0];
+    obj.value = array[1];
+    return obj;
   }
 
   displayIDE() {
     this.ideSvc.displayIDE();
-
   }
 
   updateData() {
@@ -86,8 +130,11 @@ class IdeCtrl {
     }
 
     if (this.selectedWorkspace) {
-      // now, check if workspace has been started or not
-      if ('RUNNING' === this.selectedWorkspace.status) {
+      if (this.ideSvc.getPreventRedirection() && 'STARTING' === this.selectedWorkspace.status) {
+        this.$rootScope.hideIdeLoader = false;
+        this.ideLoaderSvc.addLoader();
+      } else if ('RUNNING' === this.selectedWorkspace.status) {
+        this.ideSvc.setPreventRedirection(false);
         this.ideSvc.init();
         this.ideSvc.openIde();
       } else if ('STOPPED' === this.selectedWorkspace.status) {
@@ -99,13 +146,8 @@ class IdeCtrl {
     } else {
       this.$rootScope.hideIdeLoader = true;
       this.$rootScope.hideLoader = true;
-
     }
-
   }
-
-
-
 }
 
 export default IdeCtrl;

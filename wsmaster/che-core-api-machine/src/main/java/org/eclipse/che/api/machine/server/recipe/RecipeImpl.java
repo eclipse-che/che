@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.recipe;
 
+import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 import org.eclipse.che.api.machine.shared.Permissions;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
@@ -46,6 +47,13 @@ public class RecipeImpl implements ManagedRecipe {
     private List<String> tags;
     private Permissions  permissions;
     private String       description;
+
+    public RecipeImpl() {}
+
+    public RecipeImpl(Recipe recipe) {
+        this.script = recipe.getScript();
+        this.type = recipe.getType();
+    }
 
     @Override
     public String getId() {

@@ -17,8 +17,8 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.UsersWorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
@@ -42,7 +42,6 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
@@ -73,13 +72,13 @@ public class ProjectUpdaterTest {
 
     //additional mocks
     @Mock
-    private ProjectConfigDto                 projectConfig;
+    private ProjectConfigDto        projectConfig;
     @Mock
-    private Wizard.CompleteCallback          completeCallback;
+    private Wizard.CompleteCallback completeCallback;
     @Mock
-    private UsersWorkspaceDto                usersWorkspaceDtoMock;
+    private WorkspaceDto            usersWorkspaceDtoMock;
     @Mock
-    private WorkspaceConfigDto               workspaceConfigDtoMock;
+    private WorkspaceConfigDto      workspaceConfigDtoMock;
 
     private Promise<ProjectConfigDto> getUpdatedProjectMock;
 

@@ -11,18 +11,12 @@
 package org.eclipse.che.plugin.svn.ide.revert;
 
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -30,6 +24,11 @@ import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import java.util.List;
 
@@ -48,15 +47,14 @@ public class RevertPresenter extends SubversionActionPresenter {
     @Inject
     protected RevertPresenter(final AppContext appContext,
                               final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                              final EventBus eventBus,
-                              final WorkspaceAgent workspaceAgent,
-                              final SubversionOutputConsolePresenter console,
+                              final SubversionOutputConsoleFactory consoleFactory,
+                              final ConsolesPanelPresenter consolesPanelPresenter,
                               final SubversionClientService subversionClientService,
                               final SubversionExtensionLocalizationConstants constants,
                               final NotificationManager notificationManager,
                               final DialogFactory dialogFactory,
                               final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, eventBus, console, workspaceAgent, projectExplorerPart);
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.subversionClientService = subversionClientService;
         this.constants = constants;
@@ -91,14 +89,10 @@ public class RevertPresenter extends SubversionActionPresenter {
                                                    @Override
                                                    protected void onSuccess(CLIOutputResponse result) {
 
-                                                       printCommand(result.getCommand());
-
-                                                       print(result.getOutput());
-
                                                        List<String> errOutput = result.getErrOutput();
-                                                       printAndSpace(errOutput);
+                                                       printResponse(result.getCommand(), result.getOutput(), errOutput, "svn revert");
 
-                                                       if (errOutput == null || errOutput.size() == 0) {                                                           
+                                                       if (errOutput == null || errOutput.size() == 0) {
                                                            notification.setTitle(constants.revertSuccessful());
                                                            notification.setStatus(SUCCESS);
                                                        } else {
