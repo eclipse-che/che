@@ -250,7 +250,9 @@ public class GitHubService {
                     input.getTitle(), input.getHead(), input.getBase(), input.getBody());
             return gitHubDTOFactory.createPullRequest(pullRequest);
         } catch (Exception e) {
-            LOG.error("Creating  pull request fail", e);
+            if (!e.getMessage().contains("No commits between master and master")) {
+                LOG.error("Creating  pull request fail", e);
+            }
             throw new ServerException(e.getMessage());
         }
     }
