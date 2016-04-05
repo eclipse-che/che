@@ -32,7 +32,6 @@
         <module>che-plugin-java-ext-lang-client</module>
         <module>che-plugin-java-ext-debugger-java-server</module>
         <module>che-plugin-java-ext-debugger-java-client</module>
-        <module>che-plugin-java-ext-debugger-java-shared</module>
     </modules>
     <build>
         <pluginManagement>

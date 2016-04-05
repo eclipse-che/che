@@ -29,21 +29,22 @@ import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.InvalidRequestStateException;
 import com.sun.jdi.request.StepRequest;
 
+import org.eclipse.che.ide.ext.debugger.shared.Breakpoint;
+import org.eclipse.che.ide.ext.debugger.shared.BreakpointActivatedEvent;
+import org.eclipse.che.ide.ext.debugger.shared.BreakpointEvent;
+import org.eclipse.che.ide.ext.debugger.shared.DebuggerEvent;
+import org.eclipse.che.ide.ext.debugger.shared.DebuggerEventList;
+import org.eclipse.che.ide.ext.debugger.shared.DisconnectEvent;
+import org.eclipse.che.ide.ext.debugger.shared.Field;
+import org.eclipse.che.ide.ext.debugger.shared.Location;
+import org.eclipse.che.ide.ext.debugger.shared.StackFrameDump;
+import org.eclipse.che.ide.ext.debugger.shared.StepEvent;
+import org.eclipse.che.ide.ext.debugger.shared.Value;
+import org.eclipse.che.ide.ext.debugger.shared.Variable;
+import org.eclipse.che.ide.ext.debugger.shared.VariablePath;
 import org.eclipse.che.ide.ext.java.jdi.server.expression.Evaluator;
 import org.eclipse.che.ide.ext.java.jdi.server.expression.ExpressionException;
 import org.eclipse.che.ide.ext.java.jdi.server.expression.ExpressionParser;
-import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
-import org.eclipse.che.ide.ext.java.jdi.shared.BreakPointEvent;
-import org.eclipse.che.ide.ext.java.jdi.shared.BreakpointActivatedEvent;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerEvent;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerEventList;
-import org.eclipse.che.ide.ext.java.jdi.shared.Field;
-import org.eclipse.che.ide.ext.java.jdi.shared.Location;
-import org.eclipse.che.ide.ext.java.jdi.shared.StackFrameDump;
-import org.eclipse.che.ide.ext.java.jdi.shared.StepEvent;
-import org.eclipse.che.ide.ext.java.jdi.shared.Value;
-import org.eclipse.che.ide.ext.java.jdi.shared.Variable;
-import org.eclipse.che.ide.ext.java.jdi.shared.VariablePath;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -80,8 +81,7 @@ public class Debugger implements EventsHandler {
     private static final Logger                          LOG                  = LoggerFactory.getLogger(Debugger.class);
     private static final AtomicLong                      counter              = new AtomicLong(1);
     private static final ConcurrentMap<String, Debugger> instances            = new ConcurrentHashMap<>();
-    private static final String                          EVENTS_CHANNEL       = "debugger:events:";
-    private static final String                          DISCONNECTED_CHANNEL = "debugger:disconnected:";
+    private static final String                          EVENTS_CHANNEL       = "javadebugger:events:";
 
     public static Debugger newInstance(String host, int port) throws VMConnectException {
         Debugger d = new Debugger(host, port);
@@ -106,7 +106,7 @@ public class Debugger implements EventsHandler {
      * A mapping of source file names to breakpoints. This mapping is used to set
      * breakpoints in files that haven't been loaded yet by a target Java VM.
      */
-    private final ConcurrentMap<String, List<BreakPoint>>    deferredBreakpoints  = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, List<Breakpoint>>    deferredBreakpoints  = new ConcurrentHashMap<>();
     /** Stores ClassPrepareRequests to prevent making duplicate class prepare requests. */
     private final ConcurrentMap<String, ClassPrepareRequest> classPrepareRequests = new ConcurrentHashMap<>();
 
@@ -208,7 +208,7 @@ public class Debugger implements EventsHandler {
      * @throws DebuggerException
      *         when other JDI error occurs
      */
-    public void addBreakpoint(BreakPoint breakpoint) throws InvalidBreakPointException, DebuggerException {
+    public void addBreakpoint(Breakpoint breakpoint) throws InvalidBreakPointException, DebuggerException {
         final String className = breakpoint.getLocation().getClassName();
         final int lineNumber = breakpoint.getLocation().getLineNumber();
         List<ReferenceType> classes = vm.classesByName(className);
@@ -260,10 +260,10 @@ public class Debugger implements EventsHandler {
         LOG.debug("Add breakpoint: {}", location);
     }
 
-    private void deferBreakpoint(BreakPoint breakpoint) throws DebuggerException {
+    private void deferBreakpoint(Breakpoint breakpoint) throws DebuggerException {
         final String className = breakpoint.getLocation().getClassName();
-        List<BreakPoint> newList = new ArrayList<>();
-        List<BreakPoint> list = deferredBreakpoints.putIfAbsent(className, newList);
+        List<Breakpoint> newList = new ArrayList<>();
+        List<Breakpoint> list = deferredBreakpoints.putIfAbsent(className, newList);
         if (list == null) {
             list = newList;
         }
@@ -288,7 +288,7 @@ public class Debugger implements EventsHandler {
      * @throws DebuggerException
      *         when any JDI errors occurs when try to access current break points
      */
-    public List<BreakPoint> getBreakPoints() throws DebuggerException {
+    public List<Breakpoint> getBreakPoints() throws DebuggerException {
         List<BreakpointRequest> breakpointRequests;
         try {
             breakpointRequests = getEventManager().breakpointRequests();
@@ -300,11 +300,11 @@ public class Debugger implements EventsHandler {
             }
             throw e;
         }
-        List<BreakPoint> breakPoints = new ArrayList<>(breakpointRequests.size());
+        List<Breakpoint> breakPoints = new ArrayList<>(breakpointRequests.size());
         for (BreakpointRequest breakpointRequest : breakpointRequests) {
             com.sun.jdi.Location location = breakpointRequest.location();
             // Breakpoint always enabled at the moment. Managing states of breakpoint is not supported for now.
-            breakPoints.add(newDto(BreakPoint.class).withEnabled(true)
+            breakPoints.add(newDto(Breakpoint.class).withEnabled(true)
                                                     .withLocation(newDto(Location.class).withClassName(location.declaringType().name())
                                                                                         .withLineNumber(location.lineNumber())));
         }
@@ -312,7 +312,7 @@ public class Debugger implements EventsHandler {
         return breakPoints;
     }
 
-    private static final Comparator<BreakPoint> BREAKPOINT_COMPARATOR = new BreakPointComparator();
+    private static final Comparator<Breakpoint> BREAKPOINT_COMPARATOR = new BreakPointComparator();
 
     /**
      * Delete break point.
@@ -322,7 +322,7 @@ public class Debugger implements EventsHandler {
      * @throws DebuggerException
      *         when any JDI errors occurs when try to delete break point
      */
-    public void deleteBreakPoint(BreakPoint breakPoint) throws DebuggerException {
+    public void deleteBreakPoint(Breakpoint breakPoint) throws DebuggerException {
         final String className = breakPoint.getLocation().getClassName();
         final int lineNumber = breakPoint.getLocation().getLineNumber();
         EventRequestManager requestManager = getEventManager();
@@ -640,13 +640,13 @@ public class Debugger implements EventsHandler {
 
         if (hitBreakpoint) {
             com.sun.jdi.Location location = event.location();
-            BreakPointEvent breakPointEvent;
+            BreakpointEvent breakPointEvent;
             synchronized (events) {
                 Location locationDto = newDto(Location.class).withClassName(location.declaringType().name())
                                                              .withLineNumber(location.lineNumber());
                 // Breakpoint always enabled at the moment. Managing states of breakpoint is not supported for now.
                 breakPointEvent =
-                        (BreakPointEvent)newDto(BreakPointEvent.class).withBreakPoint(newDto(BreakPoint.class).withEnabled(true)
+                        (BreakpointEvent)newDto(BreakpointEvent.class).withBreakpoint(newDto(Breakpoint.class).withEnabled(true)
                                                                                                               .withLocation(locationDto))
                                                                       .withType(DebuggerEvent.BREAKPOINT);
                 events.add(breakPointEvent);
@@ -682,7 +682,18 @@ public class Debugger implements EventsHandler {
     }
 
     private boolean processDisconnectEvent(com.sun.jdi.event.VMDisconnectEvent event) {
-        publishWebSocketMessage(null, DISCONNECTED_CHANNEL + id);
+        DisconnectEvent disconnectEvent;
+
+        synchronized (events) {
+            disconnectEvent = newDto(DisconnectEvent.class);
+            disconnectEvent.setType(DebuggerEvent.DISCONNECTED);
+            events.add(disconnectEvent);
+        }
+
+        List<DebuggerEvent> eventsList = new ArrayList<>();
+        eventsList.add(disconnectEvent);
+        publishWebSocketMessage(newDto(DebuggerEventList.class).withEvents(eventsList), EVENTS_CHANNEL + id);
+
         eventsCollector.stop();
         instances.remove(id);
         return true;
@@ -693,18 +704,18 @@ public class Debugger implements EventsHandler {
         final String className = event.referenceType().name();
 
         // add deferred breakpoints
-        List<BreakPoint> breakpointsToAdd = deferredBreakpoints.get(className);
+        List<Breakpoint> breakpointsToAdd = deferredBreakpoints.get(className);
         if (breakpointsToAdd != null) {
             List<DebuggerEvent> eventsList = new ArrayList<>();
 
-            for (BreakPoint b : breakpointsToAdd) {
+            for (Breakpoint b : breakpointsToAdd) {
                 addBreakpoint(b);
 
                 BreakpointActivatedEvent breakpointActivatedEvent;
                 synchronized (events) {
                     breakpointActivatedEvent = newDto(BreakpointActivatedEvent.class);
                     breakpointActivatedEvent.setType(DebuggerEvent.BREAKPOINT_ACTIVATED);
-                    breakpointActivatedEvent.setBreakPoint(b);
+                    breakpointActivatedEvent.setBreakpoint(b);
                     events.add(breakpointActivatedEvent);
                 }
                 eventsList.add(breakpointActivatedEvent);

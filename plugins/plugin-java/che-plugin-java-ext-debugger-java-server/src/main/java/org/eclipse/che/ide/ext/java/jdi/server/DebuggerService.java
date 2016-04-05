@@ -11,14 +11,13 @@
 package org.eclipse.che.ide.ext.java.jdi.server;
 
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
-import org.eclipse.che.ide.ext.java.jdi.shared.BreakPointList;
-import org.eclipse.che.ide.ext.java.jdi.shared.DebuggerEventList;
-import org.eclipse.che.ide.ext.java.jdi.shared.JavaDebuggerInfo;
-import org.eclipse.che.ide.ext.java.jdi.shared.StackFrameDump;
-import org.eclipse.che.ide.ext.java.jdi.shared.UpdateVariableRequest;
-import org.eclipse.che.ide.ext.java.jdi.shared.Value;
-import org.eclipse.che.ide.ext.java.jdi.shared.VariablePath;
+import org.eclipse.che.ide.ext.debugger.shared.Breakpoint;
+import org.eclipse.che.ide.ext.debugger.shared.BreakpointList;
+import org.eclipse.che.ide.ext.debugger.shared.DebuggerInfo;
+import org.eclipse.che.ide.ext.debugger.shared.StackFrameDump;
+import org.eclipse.che.ide.ext.debugger.shared.UpdateVariableRequest;
+import org.eclipse.che.ide.ext.debugger.shared.Value;
+import org.eclipse.che.ide.ext.debugger.shared.VariablePath;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -36,18 +35,32 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("debug-java/{ws-id}")
 public class DebuggerService {
+
     @GET
-    @Path("connect")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public JavaDebuggerInfo create(@QueryParam("host") String host,
-                               @QueryParam("port") int port) throws DebuggerException {
-        Debugger d = Debugger.newInstance(host, port);
-        return DtoFactory.getInstance().createDto(JavaDebuggerInfo.class)
+    public DebuggerInfo isConnected(@PathParam("id") String id) throws DebuggerException {
+        Debugger d = Debugger.getInstance(id);
+        return DtoFactory.getInstance().createDto(DebuggerInfo.class)
                          .withHost(d.getHost())
                          .withPort(d.getPort())
                          .withId(d.id)
-                         .withVmName(d.getVmName())
-                         .withVmVersion(d.getVmVersion());
+                         .withName(d.getVmName())
+                         .withVersion(d.getVmVersion());
+    }
+
+    @GET
+    @Path("connect")
+    @Produces(MediaType.APPLICATION_JSON)
+    public DebuggerInfo create(@QueryParam("host") String host,
+                               @QueryParam("port") int port) throws DebuggerException {
+        Debugger d = Debugger.newInstance(host, port);
+        return DtoFactory.getInstance().createDto(DebuggerInfo.class)
+                         .withHost(d.getHost())
+                         .withPort(d.getPort())
+                         .withId(d.id)
+                         .withName(d.getVmName())
+                         .withVersion(d.getVmVersion());
     }
 
     @GET
@@ -65,22 +78,22 @@ public class DebuggerService {
     @POST
     @Path("breakpoints/add/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void addBreakpoint(@PathParam("id") String id, BreakPoint breakPoint) throws DebuggerException {
+    public void addBreakpoint(@PathParam("id") String id, Breakpoint breakPoint) throws DebuggerException {
         Debugger.getInstance(id).addBreakpoint(breakPoint);
     }
 
     @GET
     @Path("breakpoints/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public BreakPointList getBreakpoints(@PathParam("id") String id) throws DebuggerException {
-        return DtoFactory.getInstance().createDto(BreakPointList.class)
-                         .withBreakPoints(Debugger.getInstance(id).getBreakPoints());
+    public BreakpointList getBreakpoints(@PathParam("id") String id) throws DebuggerException {
+        return DtoFactory.getInstance().createDto(BreakpointList.class)
+                         .withBreakpoints(Debugger.getInstance(id).getBreakPoints());
     }
 
     @POST
     @Path("breakpoints/delete/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteBreakpoint(@PathParam("id") String id, BreakPoint breakPoint) throws DebuggerException {
+    public void deleteBreakpoint(@PathParam("id") String id, Breakpoint breakPoint) throws DebuggerException {
         Debugger.getInstance(id).deleteBreakPoint(breakPoint);
     }
 
@@ -88,13 +101,6 @@ public class DebuggerService {
     @Path("breakpoints/delete_all/{id}")
     public void deleteAllBreakpoint(@PathParam("id") String id) throws DebuggerException {
         Debugger.getInstance(id).deleteAllBreakPoints();
-    }
-
-    @GET
-    @Path("events/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public DebuggerEventList getEvents(@PathParam("id") String id) throws DebuggerException {
-        return DtoFactory.getInstance().createDto(DebuggerEventList.class).withEvents(Debugger.getInstance(id).getEvents());
     }
 
     @GET

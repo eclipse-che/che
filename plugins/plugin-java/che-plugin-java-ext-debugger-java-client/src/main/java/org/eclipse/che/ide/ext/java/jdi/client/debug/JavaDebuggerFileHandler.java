@@ -27,6 +27,8 @@ import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.debugger.client.debug.ActiveFileHandler;
+import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerPresenter;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
@@ -47,7 +49,7 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
  *
  * @author Anatoliy Bazko
  */
-public class JavaDebuggerFileHandler {
+public class JavaDebuggerFileHandler implements ActiveFileHandler {
 
     private final DebuggerManager          debuggerManager;
     private final EditorAgent              editorAgent;
@@ -74,11 +76,12 @@ public class JavaDebuggerFileHandler {
         this.projectExplorer = projectExplorer;
     }
 
+    @Override
     public void openFile(final List<String> filePaths,
                          final String className,
                          final int lineNumber,
                          final AsyncCallback<VirtualFile> callback) {
-        if (debuggerManager.getActiveDebugger() != debuggerManager.getDebugger(JavaDebugger.LANGUAGE)) {
+        if (debuggerManager.getActiveDebugger() != debuggerManager.getDebugger(JavaDebugger.ID)) {
             callback.onFailure(null);
             return;
         }

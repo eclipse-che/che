@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdi.server;
 
-import org.eclipse.che.ide.ext.java.jdi.shared.BreakPoint;
+import org.eclipse.che.ide.ext.debugger.shared.Breakpoint;
 
 import java.util.Comparator;
 
@@ -19,9 +19,9 @@ import java.util.Comparator;
  *
  * @author andrew00x
  */
-final class BreakPointComparator implements Comparator<BreakPoint> {
+final class BreakPointComparator implements Comparator<Breakpoint> {
     @Override
-    public int compare(BreakPoint o1, BreakPoint o2) {
+    public int compare(Breakpoint o1, Breakpoint o2) {
         String className1 = o1.getLocation().getClassName();
         String className2 = o2.getLocation().getClassName();
         if (className1 == null && className2 == null) {
