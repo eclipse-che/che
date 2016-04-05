@@ -32,7 +32,7 @@ export class CheListItemChecked {
     // scope values
     this.scope = {
       valueModel: '=?ngModel',
-      icon: '@cheIcon',
+      icon: '@?cheIcon',
       ariaLabel: '@cheAriaLabelCheckbox'
     };
   }

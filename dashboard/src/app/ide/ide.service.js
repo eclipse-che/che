@@ -20,7 +20,7 @@ class IdeSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q, $log) {
+  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q, $log, cheWorkspace) {
     this.cheAPI = cheAPI;
     this.$rootScope = $rootScope;
     this.lodash = lodash;
@@ -35,6 +35,7 @@ class IdeSvc {
     this.routeHistory = routeHistory;
     this.$q = $q;
     this.$log = $log;
+    this.cheWorkspace = cheWorkspace;
 
     this.ideParams = new Map();
 
@@ -87,6 +88,14 @@ class IdeSvc {
     this.selectedWorkspace = selectedWorkspace;
   }
 
+  handleError(error) {
+    if (error.data.message) {
+      this.steps[this.currentStep].logs += '\n' + error.data.message;
+    }
+    this.steps[this.currentStep].hasError = true;
+    this.$log.error(error);
+  }
+
   startIde(noIdeLoader) {
     if (!noIdeLoader) {
       this.ideLoaderSvc.addLoader();
@@ -94,36 +103,24 @@ class IdeSvc {
 
     this.currentStep = 1;
 
-    // recipe url
     let bus = this.cheAPI.getWebsocket().getBus(this.selectedWorkspace.id);
-    let workspaceChannel = 'workspace:' + this.selectedWorkspace.id;
-    this.listeningChannels.push(workspaceChannel);
-    // subscribe to workspace events
-    bus.subscribe(workspaceChannel, (message) => {
+    let runningStatusPromise = this.cheWorkspace.fetchStatusChange(this.selectedWorkspace.id, 'RUNNING');
 
-      if (message.eventType === 'RUNNING' && message.workspaceId === this.selectedWorkspace.id) {
+    this.startWorkspace(bus, this.selectedWorkspace);
 
+    return runningStatusPromise
+      .then(() => {
         // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-        let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.selectedWorkspace.id);
+        let promiseWorkspace = this.cheWorkspace.fetchWorkspaceDetails(this.selectedWorkspace.id);
         promiseWorkspace.then(() => {
-          let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.selectedWorkspace.id);
+          let websocketUrl = this.cheWorkspace.getWebsocketUrl(this.selectedWorkspace.id);
           // try to connect
           this.websocketReconnect = 50;
           this.connectToExtensionServer(websocketUrl, this.selectedWorkspace.id);
+        }, (error) => {
+          this.handleError(error);
         });
-      }
-    });
-
-    let defer = this.$q.defer();
-    this.$timeout(() => {
-      let startWorkspacePromise = this.startWorkspace(bus, this.selectedWorkspace);
-      startWorkspacePromise.then(() => {
-        defer.resolve()
-      }, (error) => {
-        defer.reject(error)
       });
-    }, 1000);
-    return defer.promise;
   }
 
   startWorkspace(bus, data) {
@@ -216,6 +213,8 @@ class IdeSvc {
         }
       });
 
+    }, (error) => {
+      this.handleError(error);
     });
 
     return startWorkspacePromise;

@@ -21,13 +21,14 @@ export class CheWorkspace {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource, $q, cheUser, lodash) {
+  constructor ($resource, $q, cheUser, cheWebsocket, lodash) {
     // keep resource
     this.$resource = $resource;
 
     this.$q = $q;
 
     this.cheUser = cheUser;
+    this.cheWebsocket = cheWebsocket;
 
     this.lodash = lodash;
 
@@ -42,6 +43,10 @@ export class CheWorkspace {
 
     // listeners if workspaces are changed/updated
     this.listeners = [];
+
+    // list of websocket bus per workspace
+    this.websocketBusByWorkspaceId = new Map();
+    this.statusDefers = {};
 
     // remote call
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
@@ -115,6 +120,7 @@ export class CheWorkspace {
           this.workspaces.push(workspace);
           this.workspacesById.set(workspace.id, workspace);
         }
+        this.startUpdateWorkspaceStatus(workspace.id);
       });
       return this.workspaces;
     });
@@ -139,6 +145,7 @@ export class CheWorkspace {
     let promise = this.remoteWorkspaceAPI.getDetails({workspaceId : workspaceId}).$promise;
     promise.then((data) => {
       this.workspacesById.set(workspaceId, data);
+      this.startUpdateWorkspaceStatus(workspaceId);
       defer.resolve();
     }, (error) => {
       if (error.status !== 304) {
@@ -291,10 +298,54 @@ export class CheWorkspace {
     }
 
     return 'ws://' + wsagentServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
-
   }
 
   getIdeUrl(workspaceName) {
     return '/ide/' + workspaceName;
+  }
+
+  /**
+   * Creates deferred object which will be resolved
+   * when workspace change it's status to given
+   * @param workspaceId
+   * @param status needed to resolve deferred object
+     */
+  fetchStatusChange(workspaceId, status) {
+    let defer = this.$q.defer();
+    if (status === this.getWorkspaceById(workspaceId).status) {
+      defer.resolve();
+    } else {
+      if (!this.statusDefers[workspaceId]) {
+        this.statusDefers[workspaceId] = {};
+      }
+      if (!this.statusDefers[workspaceId][status]) {
+        this.statusDefers[workspaceId][status] = [];
+      }
+      this.statusDefers[workspaceId][status].push(defer);
+    }
+    return defer.promise;
+  }
+
+  /**
+   * Add subscribe to websocket channel for specified workspaceId
+   * to handle workspace's status changes.
+   * @param workspaceId
+     */
+  startUpdateWorkspaceStatus(workspaceId) {
+    if (!this.websocketBusByWorkspaceId.has(workspaceId)) {
+      let bus = this.cheWebsocket.getBus(workspaceId);
+      this.websocketBusByWorkspaceId.set(workspaceId, bus);
+
+      bus.subscribe('workspace:' + workspaceId, (message) => {
+        this.getWorkspaceById(workspaceId).status = message.eventType;
+
+        if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.eventType]) {
+          return;
+        }
+
+        this.statusDefers[workspaceId][message.eventType].forEach((defer) => {defer.resolve()});
+        this.statusDefers[workspaceId][message.eventType].length = 0;
+      });
+    }
   }
 }
