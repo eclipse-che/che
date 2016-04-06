@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.env.local.client.CheConnectionClosedInformer;
 import org.eclipse.che.env.local.client.CheProductInfoDataProvider;
+import org.eclipse.che.env.local.client.CheWorkspaceStoppedHandler;
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -28,5 +29,6 @@ public class LocalEnvironmentGinModule extends AbstractGinModule {
     protected void configure() {
         bind(ProductInfoDataProvider.class).to(CheProductInfoDataProvider.class).in(Singleton.class);
         bind(ConnectionClosedInformer.class).to(CheConnectionClosedInformer.class).in(Singleton.class);
+        bind(CheWorkspaceStoppedHandler.class).asEagerSingleton();
     }
 }

@@ -337,7 +337,7 @@ public class CreateWorkspacePresenterTest {
         callApplyCreateWorkspaceMethod();
 
         verify(wsComponentProvider).get();
-        verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto);
+        verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto, componentCallback);
     }
 
     private void callApplyCreateWorkspaceMethod() throws Exception {
@@ -361,7 +361,7 @@ public class CreateWorkspacePresenterTest {
 
         callApplyCreateWorkspaceMethod();
 
-        verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto);
+        verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto, componentCallback);
     }
 
     @Test

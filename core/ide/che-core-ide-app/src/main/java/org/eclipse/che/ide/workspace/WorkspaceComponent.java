@@ -177,8 +177,11 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      *
      * @param workspace
      *         workspace which will be started
+     * @param callback
+     *         callback to be executed
      */
-    public void startWorkspaceById(final WorkspaceDto workspace) {
+    public void startWorkspaceById(final WorkspaceDto workspace, final Callback<Component, Exception> callback) {
+        this.callback = callback;
         loader.show(initialLoadingInfo);
         initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
 
@@ -304,12 +307,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                             break;
 
                         case STOPPED:
-                            workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(new Operation<List<WorkspaceDto>>() {
-                                @Override
-                                public void apply(List<WorkspaceDto> workspaces) throws OperationException {
-                                    startWorkspacePresenter.show(workspaces, callback);
-                                }
-                            });
                             unSubscribeWorkspace(statusEvent.getWorkspaceId(), this);
                             notificationManager.notify(locale.extServerStopped(), StatusNotification.Status.SUCCESS, true);
                             eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
@@ -369,7 +366,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         return new Operation<WorkspaceDto>() {
             @Override
             public void apply(WorkspaceDto workspaceToStart) throws OperationException {
-                startWorkspaceById(workspaceToStart);
+                startWorkspaceById(workspaceToStart, callback);
             }
         };
     }
