@@ -326,16 +326,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-debugger-gdb-ide</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-debugger-gdb-server</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-debugger-ide</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -362,6 +352,16 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ext-dashboard-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-gdb-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-gdb-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -416,17 +416,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-debugger-java-client</artifactId>
+                <artifactId>che-plugin-java-debugger-ide</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-debugger-java-server</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-debugger-java-shared</artifactId>
+                <artifactId>che-plugin-java-debugger-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

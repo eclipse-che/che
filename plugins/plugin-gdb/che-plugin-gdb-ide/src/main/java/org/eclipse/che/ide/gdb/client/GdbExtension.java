@@ -8,14 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.gdb;
+package org.eclipse.che.ide.gdb.client;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.ide.gdb.client.GdbDebuggerClient;
 
 /**
  * Extension allows to debug CPP applications.

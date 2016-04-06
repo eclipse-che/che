@@ -8,20 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.gdb;
+package org.eclipse.che.ide.gdb.client;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.gdb.client.GdbDebuggerServiceClientImpl;
 
 /** @author Anatolii Bazko */
 @ExtensionGinModule
 public class GdbGinModule extends AbstractGinModule {
     @Override
-    protected void configure() {
-        bind(DebuggerServiceClient.class).to(GdbDebuggerServiceClientImpl.class).in(Singleton.class);
-    }
+    protected void configure() { }
 }

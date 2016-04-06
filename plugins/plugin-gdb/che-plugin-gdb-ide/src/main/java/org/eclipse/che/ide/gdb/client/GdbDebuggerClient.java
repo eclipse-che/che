@@ -18,8 +18,6 @@ import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.debugger.client.debug.AbstractDebugger;
-import org.eclipse.che.ide.ext.debugger.client.debug.ActiveFileHandler;
-import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.ext.debugger.client.fqn.FqnResolverFactory;
 import org.eclipse.che.ide.ext.debugger.shared.Location;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
@@ -44,13 +42,13 @@ public class GdbDebuggerClient extends AbstractDebugger {
     public static final String EVENTS_CHANNEL = "gdbdebugger:events:";
 
     @Inject
-    public GdbDebuggerClient(DebuggerServiceClient service,
+    public GdbDebuggerClient(GdbDebuggerServiceClientImpl service,
                              DtoFactory dtoFactory,
                              LocalStorageProvider localStorageProvider,
                              MessageBusProvider messageBusProvider,
                              EventBus eventBus,
                              FqnResolverFactory fqnResolverFactory,
-                             ActiveFileHandler activeFileHandler,
+                             GdbDebuggerFileHandler activeFileHandler,
                              DebuggerManager debuggerManager,
                              FileTypeRegistry fileTypeRegistry) {
 

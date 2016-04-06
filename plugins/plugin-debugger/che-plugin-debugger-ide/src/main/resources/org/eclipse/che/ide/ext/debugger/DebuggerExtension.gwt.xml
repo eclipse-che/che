@@ -21,5 +21,6 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.Core"/>
 
-    <source path=""/>
+    <source path="client"/>
+    <source path="shared"/>
 </module>

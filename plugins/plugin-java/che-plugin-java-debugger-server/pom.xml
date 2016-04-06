@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.1.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>che-plugin-java-debugger-java-server</artifactId>
+    <artifactId>che-plugin-java-debugger-server</artifactId>
     <packaging>jar</packaging>
     <name>Che Plugin :: Java :: Extension Debugger Java Server</name>
     <properties>
