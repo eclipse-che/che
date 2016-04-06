@@ -38,7 +38,7 @@ public interface WorkspaceServiceClient {
      * @param account
      *         the account id related to this operation
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#create(WorkspaceConfigDto, List, String)
+     * @see WorkspaceService#create(WorkspaceConfigDto, List, Boolean, String)
      */
     Promise<WorkspaceDto> create(WorkspaceConfigDto newWorkspace, String account);
 
@@ -106,7 +106,7 @@ public interface WorkspaceServiceClient {
      * @param envName
      *         the name of the workspace environment that should be used for start
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#startById(String, String, String)
+     * @see WorkspaceService#startById(String, String, Boolean, String)
      */
     Promise<WorkspaceDto> startById(String id, String envName);
 
@@ -116,7 +116,7 @@ public interface WorkspaceServiceClient {
      * @param wsId
      *         workspace ID
      * @return a promise that will resolve when the workspace has been stopped, or rejects with an error
-     * @see WorkspaceService#stop(String)
+     * @see WorkspaceService#stop(String, Boolean)
      */
     Promise<Void> stop(String wsId);
 
