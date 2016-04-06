@@ -47,7 +47,7 @@ public class ReconcileTest extends BaseTest {
 
     void setWorkingCopyContents(String contents) throws JavaModelException {
         IPath path = workingCopy.getPath();
-        File file = new File(wsPath, path.toOSString());
+        File file = new File(WS_PATH, path.toOSString());
         try {
             file.delete();
             Files.write(file.toPath(), contents.getBytes(), StandardOpenOption.CREATE);
