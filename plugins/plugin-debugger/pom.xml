@@ -23,7 +23,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Debugger :: Parent</name>
     <modules>
-        <module>che-plugin-ext-debugger-shared</module>
-        <module>che-plugin-ext-debugger-client</module>
+        <module>che-plugin-debugger-shared</module>
+        <module>che-plugin-debugger-ide</module>
     </modules>
 </project>

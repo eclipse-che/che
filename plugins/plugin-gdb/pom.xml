@@ -17,21 +17,13 @@
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.1.0-RC1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>che-plugin-java-parent</artifactId>
+    <artifactId>che-plugin-gdb-parent</artifactId>
     <packaging>pom</packaging>
-    <name>Che Plugin :: Java :: Parent</name>
+    <name>Che Plugin :: GDB :: Parent</name>
     <modules>
-        <module>che-plugin-java-maven-tools</module>
-        <module>che-plugin-java-generator-archetype</module>
-        <module>che-plugin-java-ext-maven</module>
-        <module>che-plugin-java-ext-jdt</module>
-        <module>che-plugin-java-ext-lang-shared</module>
-        <module>che-plugin-java-ext-lang-server</module>
-        <module>che-plugin-java-ext-lang-client</module>
-        <module>che-plugin-java-debugger-java-server</module>
-        <module>che-plugin-java-debugger-java-ide</module>
+        <module>che-plugin-gdb-server</module>
+        <module>che-plugin-gdb-ide</module>
     </modules>
     <build>
         <pluginManagement>
