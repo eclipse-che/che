@@ -53,6 +53,7 @@ import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATED;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATION_ERROR;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -305,7 +306,7 @@ public class WorkspaceManager {
         }
         workspaceDao.remove(workspaceId);
         hooks.afterRemove(workspaceId);
-        LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUser().getName());
+        LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOr("undefined"));
     }
 
     /**
@@ -535,7 +536,7 @@ public class WorkspaceManager {
                 LOG.info("Workspace '{}:{}' started by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
-                         sessionUser().getName());
+                         sessionUserNameOr("undefined"));
             } catch (RuntimeException | ServerException | NotFoundException | ConflictException | ForbiddenException ex) {
                 if (workspace.isTemporary()) {
                     try {
@@ -565,10 +566,11 @@ public class WorkspaceManager {
                     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
                     workspaceDao.update(workspace);
                 }
+                final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
                 LOG.info("Workspace '{}:{}' stopped by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
-                         sessionUser().getName());
+                         firstNonNull(stoppedBy, "undefined"));
             } catch (RuntimeException | ConflictException | NotFoundException | ServerException ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
             }
@@ -577,6 +579,14 @@ public class WorkspaceManager {
 
     private User sessionUser() {
         return EnvironmentContext.getCurrent().getUser();
+    }
+
+    private String sessionUserNameOr(String nameIfNoUser) {
+        final User user;
+        if (EnvironmentContext.getCurrent() != null && (user = EnvironmentContext.getCurrent().getUser()) != null) {
+            return user.getName();
+        }
+        return nameIfNoUser;
     }
 
     private WorkspaceImpl normalizeState(WorkspaceImpl workspace) {
@@ -618,7 +628,7 @@ public class WorkspaceManager {
         LOG.info("Workspace '{}:{}' created by user '{}'",
                  namespace,
                  workspace.getConfig().getName(),
-                 sessionUser().getName());
+                 sessionUserNameOr("undefined"));
         return workspace;
     }
 
