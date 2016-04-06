@@ -476,77 +476,7 @@ export class CreateProjectCtrl {
 
       // now, resolve the project
       deferredImportPromise.then(() => {
-        let resolvePromise = this.cheAPI.getProject().fetchResolve(workspaceId, projectName);
-        resolvePromise.then(() => {
-          let resultResolve = this.cheAPI.getProject().getResolve(workspaceId, projectName);
-          // get project-types
-          let fetchTypePromise = this.cheAPI.getProjectType().fetchTypes(workspaceId);
-          fetchTypePromise.then(() => {
-            let projectTypesByCategory = this.cheAPI.getProjectType().getProjectTypesIDs(workspaceId);
-            // now try the estimate for each source
-            let deferredEstimate = this.$q.defer();
-            let deferredEstimatePromise = deferredResolve.promise;
-
-            let projectDetails = projectData.project;
-            if (!projectDetails.attributes) {
-              projectDetails.source = projectData.source;
-              projectDetails.attributes = {};
-            }
-            let estimatePromises = [];
-            let estimateTypes = [];
-            resultResolve.forEach((sourceResolve) => {
-              // add attributes if any
-              if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
-                for (let attributeKey in sourceResolve.attributes) {
-                  projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
-                }
-              }
-              let projectType = projectTypesByCategory.get(sourceResolve.type);
-              if (projectType.primaryable) {
-                // call estimate
-                let estimatePromise = this.cheAPI.getProject().fetchEstimate(workspaceId, projectName, sourceResolve.type);
-                estimatePromises.push(estimatePromise);
-                estimateTypes.push(sourceResolve.type);
-              }
-            });
-
-            if (estimateTypes.length > 0) {
-              // wait estimate are all finished
-              let waitEstimate = this.$q.all(estimatePromises);
-
-              waitEstimate.then(() => {
-                var firstMatchingType;
-                var firstMatchingResult;
-                estimateTypes.forEach((type) => {
-                  let resultEstimate = this.cheAPI.getProject().getEstimate(workspaceId, projectName, type);
-                  // add attributes
-                  // there is a matching estimate
-                  if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
-                    firstMatchingType = type;
-                    firstMatchingResult = resultEstimate.attributes;
-                  }
-                });
-
-                if (firstMatchingType) {
-                  projectDetails.attributes = firstMatchingResult;
-                  projectDetails.type = firstMatchingType;
-                  let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
-                  updateProjectPromise.then(() => {
-                    deferredResolve.resolve();
-                  });
-                } else {
-                  deferredResolve.resolve();
-                }
-              });
-            } else {
-              deferredResolve.resolve();
-            }
-          });
-
-
-        }, (error) => {
-          deferredResolve.reject(error);
-        })
+        this.resolveProjectType(workspaceId, projectName, projectData, deferredResolve);
       });
       promise = this.$q.all([deferredImportPromise, deferredAddCommandPromise, deferredResolvePromise]);
     }
@@ -571,6 +501,90 @@ export class CreateProjectCtrl {
     });
 
   }
+
+  resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {
+    let projectDetails = projectData.project;
+    if (!projectDetails.attributes) {
+      projectDetails.source = projectData.source;
+      projectDetails.attributes = {};
+    }
+
+    if (projectDetails.type) {
+      let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
+      updateProjectPromise.then(() => {
+        deferredResolve.resolve();
+      });
+      return;
+    }
+
+    let resolvePromise = this.cheAPI.getProject().fetchResolve(workspaceId, projectName);
+    resolvePromise.then(() => {
+      let resultResolve = this.cheAPI.getProject().getResolve(workspaceId, projectName);
+      // get project-types
+      let fetchTypePromise = this.cheAPI.getProjectType().fetchTypes(workspaceId);
+      fetchTypePromise.then(() => {
+        let projectTypesByCategory = this.cheAPI.getProjectType().getProjectTypesIDs(workspaceId);
+        // now try the estimate for each source
+        let deferredEstimate = this.$q.defer();
+        let deferredEstimatePromise = deferredResolve.promise;
+
+
+        let estimatePromises = [];
+        let estimateTypes = [];
+        resultResolve.forEach((sourceResolve) => {
+          // add attributes if any
+          if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
+            for (let attributeKey in sourceResolve.attributes) {
+              projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
+            }
+          }
+          let projectType = projectTypesByCategory.get(sourceResolve.type);
+          if (projectType.primaryable) {
+            // call estimate
+            let estimatePromise = this.cheAPI.getProject().fetchEstimate(workspaceId, projectName, sourceResolve.type);
+            estimatePromises.push(estimatePromise);
+            estimateTypes.push(sourceResolve.type);
+          }
+        });
+
+        if (estimateTypes.length > 0) {
+          // wait estimate are all finished
+          let waitEstimate = this.$q.all(estimatePromises);
+
+          waitEstimate.then(() => {
+            var firstMatchingType;
+            var firstMatchingResult;
+            estimateTypes.forEach((type) => {
+              let resultEstimate = this.cheAPI.getProject().getEstimate(workspaceId, projectName, type);
+              // add attributes
+              // there is a matching estimate
+              if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
+                firstMatchingType = type;
+                firstMatchingResult = resultEstimate.attributes;
+              }
+            });
+
+          if (firstMatchingType) {
+            projectDetails.attributes = firstMatchingResult;
+            projectDetails.type = firstMatchingType;
+            let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
+            updateProjectPromise.then(() => {
+              deferredResolve.resolve();
+            });
+          } else {
+            deferredResolve.resolve();
+          }
+          });
+        } else {
+          deferredResolve.resolve();
+        }
+      });
+
+    }, (error) => {
+      deferredResolve.reject(error);
+    });
+  }
+
 
   /**
    * Show the add ssh key dialog
