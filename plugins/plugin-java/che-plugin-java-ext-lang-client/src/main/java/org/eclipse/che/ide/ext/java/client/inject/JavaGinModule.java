@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
 import org.eclipse.che.ide.api.project.node.settings.SettingsProvider;
+import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.ext.java.client.CurrentClassFQNProvider;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
@@ -40,10 +41,12 @@ import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServ
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaClassInterceptor;
+import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaContentRootInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.TestContentRootDecorator;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 import org.eclipse.che.ide.ext.java.client.project.settings.JavaNodeSettingsProvider;
+import org.eclipse.che.ide.ext.java.client.project.wizard.SimpleJavaProjectWizardRegistrar;
 import org.eclipse.che.ide.ext.java.client.reference.JavaFqnProvider;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchService;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchServiceWS;
@@ -70,6 +73,8 @@ public class JavaGinModule extends AbstractGinModule {
         GinMapBinder<String, ProposalAction> proposalActionMapBinder = GinMapBinder.newMapBinder(binder(), String.class, ProposalAction.class);
         proposalActionMapBinder.addBinding(JAVA_ORGANIZE_IMPORT_ID).to(OrganizeImportsAction.class);
 
+        GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class).addBinding().to(SimpleJavaProjectWizardRegistrar.class);
+
         bind(NewJavaSourceFileView.class).to(NewJavaSourceFileViewImpl.class).in(Singleton.class);
         bind(QuickDocumentation.class).to(QuickDocPresenter.class).in(Singleton.class);
         bind(JavaNavigationService.class).to(JavaNavigationServiceImpl.class);
@@ -82,6 +87,7 @@ public class JavaGinModule extends AbstractGinModule {
                 GinMapBinder.newMapBinder(binder(), String.class, SettingsProvider.class);
         mapBinder.addBinding("java").to(JavaNodeSettingsProvider.class);
 
+        GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(JavaContentRootInterceptor.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(JavaClassInterceptor.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(TestContentRootDecorator.class);
 

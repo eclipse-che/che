@@ -36,7 +36,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateE
 import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 import org.eclipse.che.ide.extension.maven.client.actions.CreateMavenModuleAction;
 import org.eclipse.che.ide.extension.maven.client.actions.GetEffectivePomAction;
-import org.eclipse.che.ide.extension.maven.client.actions.UpdateDependencyAction;
 import org.eclipse.che.ide.extension.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.ide.extension.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.ide.extension.maven.client.editor.ClassFileSourcesDownloader;
@@ -153,18 +152,15 @@ public class MavenExtension {
 
     @Inject
     private void prepareActions(ActionManager actionManager,
-                                UpdateDependencyAction updateDependencyAction,
                                 CreateMavenModuleAction createMavenModuleAction,
                                 DependencyResolverAction dependencyResolverAction,
                                 GetEffectivePomAction getEffectivePomAction) {
         // register actions
-        actionManager.registerAction("updateDependency", updateDependencyAction);
         actionManager.registerAction("createMavenModule", createMavenModuleAction);
         actionManager.registerAction("getEffectivePom", getEffectivePomAction);
 
         // add actions in main menu
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_ASSISTANT);
-        assistantGroup.add(updateDependencyAction, Constraints.LAST);
         assistantGroup.add(getEffectivePomAction, Constraints.LAST);
 
         DefaultActionGroup newGroup = (DefaultActionGroup)actionManager.getAction(GROUP_FILE_NEW);
@@ -173,7 +169,6 @@ public class MavenExtension {
         // add actions in context menu
         DefaultActionGroup buildContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_BUILD_CONTEXT_MENU);
         buildContextMenuGroup.addSeparator();
-        buildContextMenuGroup.addAction(updateDependencyAction);
 
         // add resolver widget on right part of bottom panel
         final DefaultActionGroup rightStatusPanelGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);

@@ -12,9 +12,15 @@ package org.eclipse.che.ide.ext.java.server.inject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+
+import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.ide.ext.java.server.generator.SimpleJavaProjectGenerator;
 import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.ide.ext.java.server.projecttype.SimpleJavaProjectType;
 import org.eclipse.che.inject.DynaModule;
+
+import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 /**
  * @author Vitaly Parfonov
@@ -25,5 +31,10 @@ public class JavaModule extends AbstractModule {
     protected void configure() {
         Multibinder<ProjectTypeDef> projectTypeMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
         projectTypeMultibinder.addBinding().to(JavaProjectType.class);
+
+        newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(SimpleJavaProjectType.class);
+
+        Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
+        projectHandlerMultibinder.addBinding().to(SimpleJavaProjectGenerator.class);
     }
 }

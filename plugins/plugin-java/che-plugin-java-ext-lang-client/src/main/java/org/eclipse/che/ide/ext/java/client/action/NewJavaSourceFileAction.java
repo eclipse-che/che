@@ -23,7 +23,11 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFilePresenter;
 import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Action to create new Java source file.
@@ -32,9 +36,6 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
  */
 @Singleton
 public class NewJavaSourceFileAction extends ProjectAction {
-
-    private static final String MAVEN = "maven";
-
     private final AppContext                 appContext;
     private       ProjectExplorerPresenter   projectExplorer;
     private       NewJavaSourceFilePresenter newJavaSourceFilePresenter;
@@ -60,7 +61,8 @@ public class NewJavaSourceFileAction extends ProjectAction {
     @Override
     public void updateProjectAction(ActionEvent e) {
         CurrentProject project = appContext.getCurrentProject();
-        if (project == null || !MAVEN.equals(project.getRootProject().getType())) {
+
+        if ((project == null) || !isJavaProject(project)) {
             e.getPresentation().setEnabledAndVisible(false);
             return;
         }
@@ -74,5 +76,12 @@ public class NewJavaSourceFileAction extends ProjectAction {
         e.getPresentation().setVisible(true);
         e.getPresentation().setEnabled(selection.isSingleSelection() &&
                 (selection.getHeadElement() instanceof SourceFolderNode || selection.getHeadElement() instanceof PackageNode));
+    }
+
+    private boolean isJavaProject(CurrentProject project) {
+        Map<String, List<String>> attributes = project.getProjectConfig().getAttributes();
+        return attributes.containsKey(Constants.LANGUAGE)
+               && attributes.get(Constants.LANGUAGE) != null
+               && "java".equals(attributes.get(Constants.LANGUAGE).get(0));
     }
 }

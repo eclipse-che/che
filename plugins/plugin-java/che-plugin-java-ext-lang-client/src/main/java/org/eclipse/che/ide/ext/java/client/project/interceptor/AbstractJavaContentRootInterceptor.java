@@ -75,11 +75,20 @@ public abstract class AbstractJavaContentRootInterceptor implements NodeIntercep
         final ProjectConfigDto projectConfig = folderNode.getProjectConfig();
 
         String srcFolder = _getSourceFolder(projectConfig, getSrcFolderAttribute());
+        if (srcFolder == null) {
+            return null;
+        }
+
         if (folderNode.getStorablePath().endsWith(srcFolder)) {
             return ContentRoot.SOURCE;
         }
 
         String testSrcFolder = _getSourceFolder(projectConfig, getTestSrcFolderAttribute());
+
+        if (testSrcFolder == null) {
+            return null;
+        }
+
         if (folderNode.getStorablePath().endsWith(testSrcFolder)) {
             return ContentRoot.TEST_SOURCE;
         }
@@ -90,7 +99,7 @@ public abstract class AbstractJavaContentRootInterceptor implements NodeIntercep
     private String _getSourceFolder(ProjectConfigDto projectConfig, String srcAttribute) {
         Map<String, List<String>> attributes = projectConfig.getAttributes();
         if (!attributes.containsKey(srcAttribute)) {
-            return "";
+            return null;
         }
 
         List<String> values = attributes.get(srcAttribute);
