@@ -71,7 +71,7 @@ public class SubversionProjectImporterPresenterTest {
     }
 
     /**
-     * Test for {@link SubversionProjectImporterPresenter#onProjectNameChanged()} with an empty name.
+     * Test for {@link SubversionProjectImporterPresenter#onProjectNameChanged(String projectName)} with an empty name.
      *
      * @throws Exception if anything goes wrong
      */
@@ -81,15 +81,15 @@ public class SubversionProjectImporterPresenterTest {
 
         when(view.getProjectName()).thenReturn(projectName);
 
-        presenter.onProjectNameChanged();
+        presenter.onProjectNameChanged(projectName);
 
         verify(dataObject).setName(eq(projectName));
         verify(updateDelegate).updateControls();
-        verify(view).setNameErrorVisibility(eq(true));
+        verify(view).setProjectNameErrorHighlight(eq(true));
     }
 
     /**
-     * Test for {@link SubversionProjectImporterPresenter#onProjectNameChanged()} with an invalid name.
+     * Test for {@link SubversionProjectImporterPresenter#onProjectNameChanged(String projectName)} with an invalid name.
      *
      * @throws Exception if anything goes wrong
      */
@@ -99,15 +99,15 @@ public class SubversionProjectImporterPresenterTest {
 
         when(view.getProjectName()).thenReturn(projectName);
 
-        presenter.onProjectNameChanged();
+        presenter.onProjectNameChanged(projectName);
 
         verify(dataObject).setName(eq(projectName));
         verify(updateDelegate).updateControls();
-        verify(view).setNameErrorVisibility(eq(true));
+        verify(view).setProjectNameErrorHighlight(eq(true));
     }
 
     /**
-     * Test for {@link SubversionProjectImporterPresenter#onProjectNameChanged()} with a valid name.
+     * Test for {@link SubversionProjectImporterPresenter#onProjectNameChanged(String projectName)} with a valid name.
      *
      * @throws Exception if anything goes wrong
      */
@@ -117,15 +117,15 @@ public class SubversionProjectImporterPresenterTest {
 
         when(view.getProjectName()).thenReturn(projectName);
 
-        presenter.onProjectNameChanged();
+        presenter.onProjectNameChanged(projectName);
 
         verify(dataObject).setName(eq(projectName));
         verify(updateDelegate).updateControls();
-        verify(view).setNameErrorVisibility(eq(false));
+        verify(view).setProjectNameErrorHighlight(eq(false));
     }
 
     /**
-     * Test for {@link SubversionProjectImporterPresenter#onProjectUrlChanged()} with an non-URL value.
+     * Test for {@link SubversionProjectImporterPresenter#onProjectUrlChanged(String projectUrl)} with an non-URL value.
      *
      * @throws Exception if anything goes wrong
      */
@@ -133,18 +133,17 @@ public class SubversionProjectImporterPresenterTest {
     public void testNonUrlProjectUrl() throws Exception {
         final String projectUrl = "subversion";
 
-        when(view.getProjectUrl()).thenReturn(projectUrl);
+        presenter.onProjectUrlChanged(projectUrl);
 
-        presenter.onProjectUrlChanged();
+        verify(view).setProjectUrlErrorHighlight(eq(true));
+        verify(view).setURLErrorMessage(constants.importProjectUrlIncorrectMessage());
 
-        verify(view).setProjectName(eq(projectUrl));
-        verify(view, never()).setNameErrorVisibility(anyBoolean());
-        verify(dataObject.getSource()).setLocation(projectUrl + "/");
-        verify(updateDelegate, times(1)).updateControls();
+        verify(view, never()).setProjectName(eq(projectUrl));
+        verify(view, never()).setProjectNameErrorHighlight(eq(false));
     }
 
     /**
-     * Test for {@link SubversionProjectImporterPresenter#onProjectUrlChanged()} with a valid URL value.
+     * Test for {@link SubversionProjectImporterPresenter#onProjectUrlChanged(String projectUrl)} with a valid URL value.
      *
      * @throws Exception if anything goes wrong
      */
@@ -152,17 +151,17 @@ public class SubversionProjectImporterPresenterTest {
     public void testValidProjectUrl() throws Exception {
         final String projectUrl = "https://svn.apache.org/repos/asf/subversion/trunk/";
 
-        when(view.getProjectUrl()).thenReturn(projectUrl);
-
-        presenter.onProjectUrlChanged();
+        presenter.onProjectUrlChanged(projectUrl);
 
         verify(view).setProjectName(eq("trunk"));
+        verify(view).setProjectUrlErrorHighlight(eq(false));
         verify(dataObject.getSource()).setLocation(projectUrl);
-        verify(updateDelegate).updateControls();
+        verify(updateDelegate, times(1)).updateControls();
+        verify(view, never()).setProjectNameErrorHighlight(eq(false));
     }
 
     /**
-     * Test for {@link SubversionProjectImporterPresenter#onProjectDescriptionChanged()}.
+     * Test for {@link SubversionProjectImporterPresenter#onProjectDescriptionChanged(String projectDescription)}.
      *
      * @throws Exception if anything goes wrong
      */
@@ -172,11 +171,9 @@ public class SubversionProjectImporterPresenterTest {
 
         when(view.getProjectDescription()).thenReturn(description);
 
-        presenter.onProjectDescriptionChanged();
+        presenter.onProjectDescriptionChanged(description);
 
         verify(dataObject).setDescription(eq(description));
-        verify(view, never()).setNameErrorVisibility(anyBoolean());
-        verify(updateDelegate).updateControls();
     }
 
     /**
@@ -198,7 +195,7 @@ public class SubversionProjectImporterPresenterTest {
         verify(view).setProjectName(anyString());
         verify(view).setProjectDescription(anyString());
         verify(view).setProjectUrl(anyString());
-        verify(view).setUrlTextBoxFocused();
+        verify(view).setInputsEnableState(eq(true));
     }
 
 }

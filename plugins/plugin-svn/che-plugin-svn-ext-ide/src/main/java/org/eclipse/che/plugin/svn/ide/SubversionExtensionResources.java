@@ -26,13 +26,11 @@ public interface SubversionExtensionResources extends ClientBundle {
     /**
      * CSS for Subversion.
      */
-    public interface SubversionCSS extends CssResource {
+    interface SubversionCSS extends CssResource {
         String textFont();
-
-        String simpleListContainer();
     }
 
-    @Source({"importer/SubversionProjectImporterView.css", "org/eclipse/che/ide/ui/Styles.css"})
+    @Source({"importer/SubversionProjectImporterView.css", "org/eclipse/che/ide/api/ui/style.css"})
     SubversionProjectImporterViewImpl.Style svnProjectImporterPageStyle();
 
     @Source({"subversion.css", "org/eclipse/che/ide/api/ui/style.css"})
