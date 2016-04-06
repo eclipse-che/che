@@ -12,6 +12,7 @@
 
 import {CheAccordion} from './accordion/che-accordion.directive';
 import {CheButtonPrimary} from './button/che-button-primary.directive';
+import {CheButtonPrimaryFlat} from './button/che-button-primary-flat.directive';
 import {CheButtonDanger} from './button/che-button-danger.directive';
 import {CheButtonDefault} from './button/che-button-default.directive';
 import {CheButtonNotice} from './button/che-button-notice.directive';
@@ -66,6 +67,7 @@ export class WidgetConfig {
 
       // button
       .directive('cheButtonPrimary', CheButtonPrimary)
+      .directive('cheButtonPrimaryFlat', CheButtonPrimaryFlat)
       .directive('cheButtonDanger', CheButtonDanger)
       .directive('cheButtonDefault', CheButtonDefault)
       .directive('cheButtonNotice', CheButtonNotice)

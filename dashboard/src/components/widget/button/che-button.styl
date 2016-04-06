@@ -1,12 +1,15 @@
-che-button-style()
+che-flat-button-style()
   che-border-radius(2px)
-  box-shadow-simple()
   font-size 1em
   font-weight bold
   width auto
   height 30px
   padding-left 20px
   padding-right 20px
+
+che-button-style()
+  che-flat-button-style()
+  box-shadow-simple()
 
 che-button-danger .md-button.md-danger-theme.md-hue-3.md-accent.md-raised, che-button-danger .md-button.md-danger-theme.md-hue-3.md-accent.md-raised
   che-button-style()
@@ -25,6 +28,10 @@ che-button-notice .md-button.md-accent.md-raised.md-hue-2.md-button.md-chenotice
 
 che-button-primary .md-button.md-default-theme.md-hue-2.md-accent.md-raised, che-button-primary .md-button.md-maincontent-theme-theme.md-hue-2.md-accent.md-raised
   che-button-style()
+
+che-button-primary-flat .md-button.md-default-theme.md-hue-2.md-accent, che-button-primary-flat .md-button.md-maincontent-theme-theme.md-hue-2.md-accent
+  che-flat-button-style()
+  border 1px solid $stroke-color
 
 .che-button md-icon
   display inherit

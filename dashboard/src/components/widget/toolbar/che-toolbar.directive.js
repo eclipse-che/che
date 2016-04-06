@@ -137,11 +137,16 @@ export class CheToolbar {
     }
 
     if (buttonName) {
-      template = template + '<a class=\"che-toolbar-control-button\" title=\"' + buttonName + '\" href=\"' + buttonHref + '\"';
+      template += '<che-button-primary-flat class=\"che-toolbar-open-button\"';
+      template += ' che-button-title=\"' + buttonName + '\"';
+      if (buttonIcon) {
+        template += ' che-button-icon=\"' + buttonIcon + '\"';
+      }
+      template += ' href=\"' + buttonHref + '\"';
       if (buttonHrefTarget) {
         template = template + ' target=\"' + buttonHrefTarget + '\"';
       }
-      template += '><md-icon md-font-icon=\"fa ' + buttonIcon + '\"></md-icon></a>';
+      template += '</che-button-primary-flat>';
     }
 
     if (addButtonName) {
