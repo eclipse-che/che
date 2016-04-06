@@ -80,6 +80,7 @@ import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
+import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
@@ -891,15 +892,21 @@ public class WorkspaceService extends Service {
                          .stream()
                          .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
                          .findAny()
-                         .ifPresent(wsAgent -> workspace.getRuntime()
-                                                        .getLinks()
-                                                        .add(createLink("GET",
-                                                                        UriBuilder.fromUri(wsAgent.getUrl())
-                                                                                  .scheme("https".equals(ideUri.getScheme()) ? "wss"
-                                                                                                                             : "ws")
-                                                                                  .build()
-                                                                                  .toString(),
-                                                                        WSAGENT_REFERENCE)));
+                         .ifPresent(wsAgent -> {
+                             workspace.getRuntime()
+                                      .getLinks()
+                                      .add(createLink("GET",
+                                                      wsAgent.getUrl(),
+                                                      WSAGENT_REFERENCE));
+                             workspace.getRuntime()
+                                      .getLinks()
+                                      .add(createLink("GET",
+                                                      UriBuilder.fromUri(wsAgent.getUrl())
+                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
+                                                                .build()
+                                                                .toString(),
+                                                      WSAGENT_WEBSOCKET_REFERENCE));
+                         });
             }
         }
         return workspace.withLinks(links);

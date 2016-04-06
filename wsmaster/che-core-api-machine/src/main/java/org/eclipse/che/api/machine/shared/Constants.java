@@ -37,6 +37,7 @@ public class Constants {
     public static final String LINK_REL_GET_MACHINE_STATUS_CHANNEL = "get machine status channel";
 
     public static final String WSAGENT_REFERENCE                   = "wsagent";
+    public static final String WSAGENT_WEBSOCKET_REFERENCE         = "wsagent.websocket";
     public static final String WSAGENT_DEBUG_REFERENCE             = "wsagent.debug";
 
     public static final String TERMINAL_REFERENCE                  = "terminal";
