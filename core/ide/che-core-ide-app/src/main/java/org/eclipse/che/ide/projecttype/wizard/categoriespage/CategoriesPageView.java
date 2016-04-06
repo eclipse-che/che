@@ -34,8 +34,6 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
 
     void reset();
 
-    void resetName();
-
     void setConfigOptions(List<String> options);
 
     void setName(String name);
