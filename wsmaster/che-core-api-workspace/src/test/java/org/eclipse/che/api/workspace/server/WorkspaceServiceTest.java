@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -278,6 +279,7 @@ public class WorkspaceServiceTest {
         assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
         verify(permissionManager).checkPermission(eq(Constants.START_WORKSPACE), any(), any());
         verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
+        verify(wsManager, never()).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
     }
 
     @Test
@@ -331,7 +333,41 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(wsManager).stopWorkspace(workspace.getId());
+        verify(wsManager).stopWorkspace(workspace.getId(), false);
+    }
+
+    @Test
+    public void workspaceStopShouldCreateSnapshotWhenUseBackParamIsSetToTrue() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .delete(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime?auto-snapshot=true");
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(wsManager).stopWorkspace(workspace.getId(), true);
+    }
+
+    @Test
+    public void workspaceStartShouldUseSnapshotIfSnapshotExistsAndAuthUseSnapshotParamSetToTrue() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.recoverWorkspace(any(), any(), any())).thenReturn(workspace);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime" +
+                                               "?environment=" + workspace.getConfig().getDefaultEnv() +
+                                               "&auto-restore=true");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        verify(permissionManager).checkPermission(eq(Constants.START_WORKSPACE), any(), any());
+        verify(wsManager).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
+        verify(wsManager, never()).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
     }
 
     @Test

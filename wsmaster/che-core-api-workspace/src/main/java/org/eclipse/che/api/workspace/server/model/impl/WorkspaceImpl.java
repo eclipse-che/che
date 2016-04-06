@@ -129,7 +129,7 @@ public class WorkspaceImpl implements Workspace {
     }
 
     @Override
-    public WorkspaceRuntime getRuntime() {
+    public WorkspaceRuntimeImpl getRuntime() {
         return runtime;
     }
 
