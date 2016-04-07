@@ -20,7 +20,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
@@ -94,7 +93,6 @@ public class ProjectUpdater {
                                           return;
                                       }
                                       eventBus.fireEvent(new CreateProjectEvent(updated));
-                                      eventBus.fireEvent(new ConfigureProjectEvent(updated));
                                       projectNotificationSubscriber.onSuccess();
                                       callback.onCompleted();
                                   }

@@ -12,19 +12,29 @@ package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
+import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.project.node.FolderReferenceNode;
+import org.eclipse.che.ide.project.node.ProjectNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
@@ -37,31 +47,36 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar
  * @author Dmitry Shnurenko
  */
 public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements CategoriesPageView.ActionDelegate {
-    public final static String DEFAULT_TEMPLATE_CATEGORY = "Samples";
+    private final static String DEFAULT_PARENT_DIRECTORY  = "/";
+    public final static  String DEFAULT_TEMPLATE_CATEGORY = "Samples";
 
-    private final CategoriesPageView view;
-    private final ProjectTypeRegistry projectTypeRegistry;
-    private final ProjectTemplateRegistry projectTemplateRegistry;
-    private final ProjectWizardRegistry wizardRegistry;
+    private final CategoriesPageView            view;
+    private final ProjectTypeRegistry           projectTypeRegistry;
+    private final ProjectTemplateRegistry       projectTemplateRegistry;
+    private final ProjectWizardRegistry         wizardRegistry;
     private final PreSelectedProjectTypeManager preSelectedProjectTypeManager;
-    private ProjectTypeDto selectedProjectType;
-    private ProjectTemplateDescriptor selectedProjectTemplate;
-    private       ProjectTypeSelectionListener     projectTypeSelectionListener;
-    private       ProjectTemplateSelectionListener projectTemplateSelectionListener;
-    private       boolean                          initialized;
+    private final SelectionAgent                selectionAgent;
+
+    private ProjectTypeSelectionListener     projectTypeSelectionListener;
+    private ProjectTemplateSelectionListener projectTemplateSelectionListener;
+    private ProjectTypeDto                   selectedProjectType;
+    private ProjectTemplateDescriptor        selectedProjectTemplate;
+    private boolean                          initialized;
 
     @Inject
     public CategoriesPagePresenter(CategoriesPageView view,
                                    ProjectTypeRegistry projectTypeRegistry,
                                    ProjectTemplateRegistry projectTemplateRegistry,
                                    ProjectWizardRegistry wizardRegistry,
-                                   PreSelectedProjectTypeManager preSelectedProjectTypeManager) {
+                                   PreSelectedProjectTypeManager preSelectedProjectTypeManager,
+                                   SelectionAgent selectionAgent) {
         super();
         this.view = view;
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectTemplateRegistry = projectTemplateRegistry;
         this.wizardRegistry = wizardRegistry;
         this.preSelectedProjectTypeManager = preSelectedProjectTypeManager;
+        this.selectionAgent = selectionAgent;
 
         view.setDelegate(this);
         loadProjectTypesAndTemplates();
@@ -80,7 +95,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
         if (CREATE == wizardMode) {
             // set pre-selected project type
             final String preSelectedProjectTypeId;
-            if(dataObject.getType() != null ) {
+            if (dataObject.getType() != null) {
                 preSelectedProjectTypeId = dataObject.getType();
             } else {
                 preSelectedProjectTypeId = preSelectedProjectTypeManager.getPreSelectedProjectTypeId();
@@ -90,6 +105,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
             }
         }
 
+        view.setParentDirectory(getPathToParent());
         view.updateCategories(CREATE == wizardMode);
     }
 
@@ -140,7 +156,13 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
 
     @Override
     public void projectNameChanged(String name) {
-        dataObject.setPath(Path.valueOf(name).makeAbsolute().toString());
+        String pathToParent = Path.valueOf(view.getParentDirectory())
+                                  .makeAbsolute()
+                                  .addTrailingSeparator()
+                                  .toString();
+
+        String pathToProject = pathToParent + name;
+        dataObject.setPath(pathToProject);
         dataObject.setName(name);
         updateDelegate.updateControls();
 
@@ -149,6 +171,39 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
         } else {
             view.showNameError();
         }
+    }
+
+    private String getPathToParent() {
+        Selection<?> selection = selectionAgent.getSelection();
+        if (selection == null || selection.isEmpty()) {
+            return DEFAULT_PARENT_DIRECTORY;
+        }
+
+        if (selection.getAllElements().size() > 1) {
+            return DEFAULT_PARENT_DIRECTORY;
+        }
+
+        Object selectedElement = selection.getHeadElement();
+
+        if (selectedElement instanceof FolderReferenceNode) {
+            Node parent = ((FolderReferenceNode)selectedElement).getParent();
+            return getPath(parent);
+        } else if (selectedElement instanceof ProjectNode) {
+            Node parent = ((ProjectNode)selectedElement).getParent();
+            return getPath(parent);
+        }
+
+        return DEFAULT_PARENT_DIRECTORY;
+    }
+
+    private String getPath(Node parent) {
+        if (parent instanceof ProjectNode) {
+            return ((ProjectNode)parent).getStorablePath() + '/';
+        } else if (parent instanceof FolderReferenceNode) {
+            return ((FolderReferenceNode)parent).getData().getPath() + '/';
+        }
+
+        return DEFAULT_PARENT_DIRECTORY;
     }
 
     @Override

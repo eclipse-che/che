@@ -14,14 +14,12 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.maven.client.MavenArchetype;
 import org.eclipse.che.ide.extension.maven.client.MavenExtension;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -63,7 +61,6 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
     protected final MavenPageView          view;
     protected final EventBus               eventBus;
     private final   ProjectServiceClient   projectServiceClient;
-    private final   DtoFactory             dtoFactory;
     private final   DialogFactory          dialogFactory;
     private final   DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final   AppContext             appContext;
@@ -73,18 +70,16 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
                               EventBus eventBus,
                               AppContext appContext,
                               ProjectServiceClient projectServiceClient,
-                              DtoFactory dtoFactory,
                               DialogFactory dialogFactory,
                               DtoUnmarshallerFactory dtoUnmarshallerFactory) {
         super();
         this.view = view;
         this.eventBus = eventBus;
         this.projectServiceClient = projectServiceClient;
-        this.dtoFactory = dtoFactory;
         this.dialogFactory = dialogFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         view.setDelegate(this);
-        
+
         this.appContext = appContext;
     }
 
@@ -142,8 +137,7 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        final String message = dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
-                        dialogFactory.createMessageDialog("Not valid Maven project", message, null).show();
+                        dialogFactory.createMessageDialog("Not valid Maven project", exception.getLocalizedMessage(), null).show();
                         Log.error(MavenPagePresenter.class, exception);
                     }
                 });

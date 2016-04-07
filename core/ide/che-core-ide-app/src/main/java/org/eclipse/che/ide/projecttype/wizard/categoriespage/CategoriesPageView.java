@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 
 import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.ide.api.mvp.View;
@@ -39,6 +40,10 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
     void setName(String name);
 
     void setDescription(String description);
+
+    String getParentDirectory();
+
+    void setParentDirectory(String parentDirectory);
 
     void removeNameError();
 

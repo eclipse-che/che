@@ -14,14 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
-import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
@@ -100,7 +98,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         context.put(PROJECT_NAME_KEY, dataObject.getName());
 
         if (mode == UPDATE || mode == CREATE_MODULE) {
-            context.put(PROJECT_PATH_KEY, projectPath);
+            context.put(PROJECT_PATH_KEY, projectPath == null ? dataObject.getPath() : projectPath);
         }
     }
 
@@ -112,7 +110,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         } else if (mode == CREATE_MODULE) {
             createModule(callback);
         } else if (mode == UPDATE) {
-            updater.updateProject(new UpdateCallback(callback), dataObject, false);
+            updater.updateProject(new UpdateCallback(callback), dataObject, true);
         } else if (mode == IMPORT) {
             importer.importProject(callback, dataObject);
         }
@@ -130,8 +128,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
 
             @Override
             protected void onFailure(Throwable exception) {
-                final String message = dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
-                callback.onFailure(new Exception(message));
+                callback.onFailure(new Exception(exception.getLocalizedMessage()));
             }
         });
     }
@@ -214,19 +211,16 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         dataObject.setType(Constants.BLANK_ID);
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
         projectServiceClient
-                .updateProject(workspaceId, dataObject.getName(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+                .updateProject(workspaceId, dataObject.getPath(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
                     @Override
                     protected void onSuccess(ProjectConfigDto result) {
-                        // just re-open project if it's already opened
-                        ProjectWizard.this.eventBus.fireEvent(new OpenProjectEvent(result));
+                        eventBus.fireEvent(new CreateProjectEvent(result));
                         callback.onCompleted();
                     }
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        final String message =
-                                ProjectWizard.this.dtoFactory.createDtoFromJson(exception.getMessage(), ServiceError.class).getMessage();
-                        callback.onFailure(new Exception(message));
+                        callback.onFailure(new Exception(exception.getLocalizedMessage()));
                     }
                 });
     }
