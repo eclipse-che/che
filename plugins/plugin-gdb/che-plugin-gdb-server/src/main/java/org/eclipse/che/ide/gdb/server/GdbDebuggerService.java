@@ -27,6 +27,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.nio.file.Paths;
 
 /**
  * Provides access to {@link GdbDebugger} through HTTP.
@@ -55,8 +56,13 @@ public class GdbDebuggerService {
     @Produces(MediaType.APPLICATION_JSON)
     public DebuggerInfo create(@QueryParam("host") String host,
                                @QueryParam("port") @DefaultValue("0") int port,
-                               @QueryParam("file") String file) throws GdbDebuggerException {
-        GdbDebugger d = GdbDebugger.newInstance(host, port, file);
+                               @QueryParam("file") String file,
+                               @QueryParam("sources") String srcDirectory) throws GdbDebuggerException {
+        if (srcDirectory == null) {
+            srcDirectory = Paths.get(file).getParent().toString();
+        }
+
+        GdbDebugger d = GdbDebugger.newInstance(host, port, file, srcDirectory);
         return DtoFactory.getInstance().createDto(DebuggerInfo.class)
                          .withHost(d.getHost())
                          .withPort(d.getPort())

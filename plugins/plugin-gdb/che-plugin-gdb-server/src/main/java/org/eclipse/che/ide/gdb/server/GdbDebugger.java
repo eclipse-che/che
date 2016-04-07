@@ -107,10 +107,11 @@ public class GdbDebugger {
     /**
      * Factory.
      */
-    public static GdbDebugger newInstance(String host, int port, String file) throws GdbDebuggerException {
+    public static GdbDebugger newInstance(String host, int port, String file, String srcDirectory) throws GdbDebuggerException {
         Gdb gdb;
         try {
             gdb = Gdb.start();
+            gdb.directory(srcDirectory);
             gdb.file(file);
             if (port > 0) {
                 gdb.targetRemote(host, port);
@@ -139,7 +140,6 @@ public class GdbDebugger {
 
         return gdbDebugger;
     }
-
 
     /**
      * Disconnects from GDB.

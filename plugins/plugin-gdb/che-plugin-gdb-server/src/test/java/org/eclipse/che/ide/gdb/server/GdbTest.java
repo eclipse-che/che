@@ -23,6 +23,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -35,16 +37,19 @@ import static org.testng.Assert.assertTrue;
 public class GdbTest {
 
     private String file;
+    private Path   sourceDirectory;
     private Gdb    gdb;
 
     @BeforeClass
     public void beforeClass() throws Exception {
         file = GdbTest.class.getResource("/hello").getFile();
+        sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
         gdb = Gdb.start();
+        gdb.directory(sourceDirectory.getParent().toString());
     }
 
     @AfterMethod
