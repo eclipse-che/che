@@ -1065,6 +1065,16 @@ export class CreateProjectCtrl {
   }
 
   /**
+   * Update creation flow state when source option changes
+   */
+  onSourceOptionChanged() {
+    if ('select-source-existing' === this.selectSourceOption) {
+      //Need to call selection of current tab
+      this.setCurrentTab(this.currentTab);
+    }
+  }
+
+  /**
    * Use of an existing stack
    * @param stack the stack to use
    */
@@ -1101,6 +1111,7 @@ export class CreateProjectCtrl {
     if (!stack) {
       return;
     }
+
     this.templatesChoice = 'templates-samples';
     this.generateProjectName(true);
     // Enable wizard only if
