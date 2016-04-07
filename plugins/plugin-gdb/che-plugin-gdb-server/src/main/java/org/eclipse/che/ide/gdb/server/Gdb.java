@@ -14,6 +14,7 @@ import org.eclipse.che.ide.gdb.server.parser.GdbBreak;
 import org.eclipse.che.ide.gdb.server.parser.GdbClear;
 import org.eclipse.che.ide.gdb.server.parser.GdbContinue;
 import org.eclipse.che.ide.gdb.server.parser.GdbDelete;
+import org.eclipse.che.ide.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.ide.gdb.server.parser.GdbFile;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoArgs;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoBreak;
@@ -151,6 +152,14 @@ public class Gdb extends GdbProcess {
         String command = "break " + lineNumber;
         sendCommand(command);
         GdbBreak.parse(outputs.take());
+    }
+
+    /**
+     * `directory` command.
+     */
+    public GdbDirectory directory(@NotNull String directory) throws IOException, GdbParseException, InterruptedException {
+        sendCommand("directory " + directory);
+        return GdbDirectory.parse(outputs.take());
     }
 
     /**

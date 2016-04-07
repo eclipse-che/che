@@ -25,6 +25,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -42,6 +44,7 @@ import static org.testng.Assert.assertTrue;
 public class GdbDebuggerTest {
 
     private String                       file;
+    private Path                         sourceDirectory;
     private GdbServer                    gdbServer;
     private GdbDebugger                  gdbDebugger;
     private BlockingQueue<DebuggerEvent> events;
@@ -49,6 +52,7 @@ public class GdbDebuggerTest {
     @BeforeClass
     public void beforeClass() throws Exception {
         file = GdbTest.class.getResource("/hello").getFile();
+        sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
         events = new ArrayBlockingQueue<>(10);
     }
 
@@ -230,7 +234,7 @@ public class GdbDebuggerTest {
     }
 
     private void initializeDebugger() throws GdbDebuggerException {
-        gdbDebugger = spy(GdbDebugger.newInstance("localhost", 1111, file));
+        gdbDebugger = spy(GdbDebugger.newInstance("localhost", 1111, file, sourceDirectory.getParent().toString()));
 
         doAnswer(invocation -> {
             DebuggerEventList eventList = (DebuggerEventList)invocation.getArguments()[0];
