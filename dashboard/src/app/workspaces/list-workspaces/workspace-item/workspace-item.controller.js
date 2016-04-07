@@ -22,9 +22,10 @@ export class WorkspaceItemCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, lodash) {
+  constructor($location, lodash, cheWorkspace) {
     this.$location = $location;
     this.lodash = lodash;
+    this.cheWorkspace = cheWorkspace;
   }
 
   redirectToWorkspaceDetails() {
@@ -38,5 +39,14 @@ export class WorkspaceItemCtrl {
         return environment.name === envName;
     });
     return defaultEnvironment;
+  }
+
+  /**
+   * Returns current status of workspace
+   * @returns {String}
+   */
+  getWorkspaceStatus() {
+    let workspace = this.cheWorkspace.getWorkspaceById(this.workspace.id);
+    return workspace ? workspace.status : 'unknown';
   }
 }

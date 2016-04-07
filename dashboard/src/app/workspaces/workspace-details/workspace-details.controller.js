@@ -146,4 +146,13 @@ export class WorkspaceDetailsCtrl {
       this.$log.error(error);
     });
   }
+
+  /**
+   * Returns current status of workspace
+   * @returns {String}
+   */
+  getWorkspaceStatus() {
+    let workspace = this.cheWorkspace.getWorkspaceById(this.workspaceId);
+    return workspace ? workspace.status : 'unknown';
+  }
 }
