@@ -238,6 +238,6 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(updater).updateProject(Matchers.<ProjectWizard.UpdateCallback>anyObject(), eq(dataObject), eq(false));
+        verify(updater).updateProject(Matchers.<ProjectWizard.UpdateCallback>anyObject(), eq(dataObject), eq(true));
     }
 }

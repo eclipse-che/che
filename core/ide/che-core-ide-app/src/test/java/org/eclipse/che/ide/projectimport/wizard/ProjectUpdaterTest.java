@@ -46,7 +46,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -151,7 +150,7 @@ public class ProjectUpdaterTest {
         verify(usersWorkspaceDtoMock).getConfig();
         verify(workspaceConfigDtoMock).withProjects(eq(newArrayList(projectConfig)));
 
-        verify(eventBus, times(2)).fireEvent(Matchers.<CreateProjectEvent>anyObject());
+        verify(eventBus).fireEvent(Matchers.<CreateProjectEvent>anyObject());
         verify(projectNotificationSubscriber).onSuccess();
         verify(completeCallback).onCompleted();
     }
