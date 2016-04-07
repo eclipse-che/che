@@ -977,11 +977,11 @@ public class WorkspaceService extends Service {
         return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
     }
 
-    private boolean snapshotExists(String workspaceId) {
+    private boolean snapshotExists(String workspaceId) throws ServerException {
         try {
             workspaceManager.getSnapshot(workspaceId);
             return true;
-        } catch (ServerException | NotFoundException e) {
+        } catch (NotFoundException e) {
             return false;
         }
     }
