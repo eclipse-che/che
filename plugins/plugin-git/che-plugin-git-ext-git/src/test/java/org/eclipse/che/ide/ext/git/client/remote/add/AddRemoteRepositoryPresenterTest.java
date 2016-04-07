@@ -14,6 +14,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.googlecode.gwt.test.utils.GwtReflectionUtils;
 
 import org.eclipse.che.ide.ext.git.client.BaseTest;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -41,13 +42,15 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
     private AddRemoteRepositoryView      view;
     @Mock
     private AsyncCallback<Void>          callback;
+    @Mock
+    private GitLocalizationConstant      locale;
     private AddRemoteRepositoryPresenter presenter;
 
     @Override
     public void disarm() {
         super.disarm();
 
-        presenter = new AddRemoteRepositoryPresenter(view, service, appContext);
+        presenter = new AddRemoteRepositoryPresenter(view, service, locale, appContext);
 
         when(view.getName()).thenReturn(REMOTE_NAME);
         when(view.getUrl()).thenReturn(REMOTE_URI);
@@ -115,7 +118,8 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
 
     @Test
     public void testOnValueChangedEnableButton() throws Exception {
-        presenter.onValueChanged();
+        presenter.onRemoteNameChanged();
+        presenter.onRemoteURLChanged();
 
         verify(view).setEnableOkButton(eq(ENABLE_BUTTON));
     }
@@ -125,7 +129,8 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
         when(view.getName()).thenReturn(EMPTY_TEXT);
         when(view.getUrl()).thenReturn(EMPTY_TEXT);
 
-        presenter.onValueChanged();
+        presenter.onRemoteNameChanged();
+        presenter.onRemoteURLChanged();
 
         verify(view).setEnableOkButton(eq(DISABLE_BUTTON));
     }

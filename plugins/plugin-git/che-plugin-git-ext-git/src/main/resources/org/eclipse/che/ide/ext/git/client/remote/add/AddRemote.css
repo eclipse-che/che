@@ -1,0 +1,13 @@
+.emptyBorder {
+    margin: 6px;
+}
+.labelErrorPosition {
+    position: relative;
+}
+
+.labelErrorPosition {
+    color: errorEventColor;
+    font-weight: lighter;
+    text-align: center;
+    float: left;
+}

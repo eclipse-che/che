@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.git.client;
 
 import org.eclipse.che.ide.ext.git.client.importer.page.GitImporterPageViewImpl;
+import org.eclipse.che.ide.ext.git.client.remote.add.AddRemoteRepositoryViewImpl;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
@@ -36,6 +37,9 @@ public interface GitResources extends ClientBundle {
 
     @Source({"importer/page/GitImporterPage.css", "org/eclipse/che/ide/api/ui/style.css"})
     GitImporterPageViewImpl.Style gitImporterPageStyle();
+
+    @Source({"remote/add/AddRemote.css", "org/eclipse/che/ide/api/ui/style.css"})
+    AddRemoteRepositoryViewImpl.Style addRemoteStyle();
 
     @Source({"git.css", "org/eclipse/che/ide/api/ui/style.css"})
     GitCSS gitCSS();

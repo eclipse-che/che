@@ -28,8 +28,11 @@ public interface AddRemoteRepositoryView extends View<AddRemoteRepositoryView.Ac
         /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
         void onCancelClicked();
 
-        /** Performs any actions appropriate in response to the user having changed something. */
-        void onValueChanged();
+        /** Performs any actions appropriate in response to the user having changed the remote name. */
+        void onRemoteNameChanged();
+
+        /** Performs any actions appropriate in response to the user having changed the remote URL. */
+        void onRemoteURLChanged();
     }
 
     /** @return repository name */
@@ -69,4 +72,32 @@ public interface AddRemoteRepositoryView extends View<AddRemoteRepositoryView.Ac
 
     /** Show dialog. */
     void showDialog();
+
+    /**
+     * Marks Name field containing valid value.
+     */
+    void markNameValid();
+
+    /**
+     * Marks Name field containing invalid value.
+     */
+    void markNameInvalid();
+
+    /**
+     * Marks URL field containing valid value.
+     */
+    void markURLValid();
+
+    /**
+     * Marks URL field containing invalid value.
+     */
+    void markURLInvalid();
+
+    /**
+     * Displays error message under URL field.
+     *
+     * @param message
+     *         message
+     */
+    void setURLErrorMessage(@NotNull String message);
 }

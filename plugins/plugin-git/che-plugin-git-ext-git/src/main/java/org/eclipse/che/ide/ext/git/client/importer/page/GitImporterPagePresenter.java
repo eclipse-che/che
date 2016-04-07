@@ -226,7 +226,7 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
     private boolean isGitUrlCorrect(@NotNull String url) {
         if (WHITE_SPACE.test(url)) {
             view.markURLInvalid();
-            view.setURLErrorMessage(locale.importProjectMessageStartWithWhiteSpace());
+            view.setURLErrorMessage(locale.gitUrlStartWithWhiteSpaceMessage());
             return false;
         }
 
@@ -238,19 +238,19 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
 
         if (!PROTOCOL.test(url)) {
             view.markURLInvalid();
-            view.setURLErrorMessage(locale.importProjectMessageProtocolIncorrect());
+            view.setURLErrorMessage(locale.gitUrlProtocolIncorrectMessage());
             return false;
         }
 
         if (!(HOST1.test(url) || HOST2.test(url))) {
             view.markURLInvalid();
-            view.setURLErrorMessage(locale.importProjectMessageHostIncorrect());
+            view.setURLErrorMessage(locale.gitUrlHostIncorrectMessage());
             return false;
         }
 
         if (!(REPO_NAME.test(url))) {
             view.markURLInvalid();
-            view.setURLErrorMessage(locale.importProjectMessageNameRepoIncorrect());
+            view.setURLErrorMessage(locale.gitUrlNameRepoIncorrectMessage());
             return false;
         }
 
