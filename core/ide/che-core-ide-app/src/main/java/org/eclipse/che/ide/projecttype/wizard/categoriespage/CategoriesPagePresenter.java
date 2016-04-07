@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
 import java.util.*;
@@ -139,7 +140,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
 
     @Override
     public void projectNameChanged(String name) {
-        dataObject.setPath(name);
+        dataObject.setPath(Path.valueOf(name).makeAbsolute().toString());
         dataObject.setName(name);
         updateDelegate.updateControls();
 
