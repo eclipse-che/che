@@ -39,18 +39,18 @@ public class DebuggerManager implements DebuggerManagerObservable {
     }
 
     /**
-     * Register new debugger for the given language.
+     * Register new debugger for the given id.
      */
-    public void registeredDebugger(String language, Debugger debugger) {
-        debuggers.put(language, debugger);
+    public void registeredDebugger(String id, Debugger debugger) {
+        debuggers.put(id, debugger);
     }
 
     /**
-     * Gets {@link Debugger} for the given language.
+     * Gets {@link Debugger} for the given id.
      */
     @Nullable
-    public Debugger getDebugger(String language) {
-        return debuggers.get(language);
+    public Debugger getDebugger(String id) {
+        return debuggers.get(id);
     }
 
     /**
@@ -84,8 +84,6 @@ public class DebuggerManager implements DebuggerManagerObservable {
     public Debugger getActiveDebugger() {
         return activeDebugger;
     }
-
-    // Active debugger events
 
     @Override
     public void addObserver(DebuggerManagerObserver observer) {

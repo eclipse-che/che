@@ -38,7 +38,12 @@ public class VirtualFileImpl implements VirtualFile {
     @Override
     public String getName() {
         if (fileInfo.getName() == null) {
-            throw new UnsupportedOperationException();
+            String path = fileInfo.getPath();
+            if (path == null) {
+                throw new UnsupportedOperationException();
+            } else {
+                return path.substring(path.lastIndexOf("/") + 1);
+            }
         } else {
             return fileInfo.getName();
         }

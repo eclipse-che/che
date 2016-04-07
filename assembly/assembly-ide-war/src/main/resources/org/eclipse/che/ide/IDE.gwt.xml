@@ -42,7 +42,9 @@
     <!-- Extensions                                                 -->
     <inherits name='org.eclipse.che.ide.ext.help.HelpAboutExtension'/>
     <inherits name='org.eclipse.che.ide.ext.web.Web'/>
-    <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaRuntimeExtension'/>
+    <inherits name='org.eclipse.che.ide.ext.debugger.DebuggerExtension'/>
+    <inherits name='org.eclipse.che.ide.gdb.GdbExtension'/>
+    <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaDebuggerExtension'/>П
     <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
     <inherits name='org.eclipse.che.ide.extension.maven.Maven'/>
     <inherits name='org.eclipse.che.ide.ext.gwt.GWT'/>
