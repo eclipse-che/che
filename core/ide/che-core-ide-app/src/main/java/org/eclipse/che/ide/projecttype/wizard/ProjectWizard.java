@@ -39,9 +39,7 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE_MODULE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.PROJECT_NAME_KEY;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.PROJECT_PATH_KEY;
@@ -105,14 +103,20 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
     /** {@inheritDoc} */
     @Override
     public void complete(@NotNull final CompleteCallback callback) {
-        if (mode == CREATE) {
-            createProject(callback);
-        } else if (mode == CREATE_MODULE) {
-            createModule(callback);
-        } else if (mode == UPDATE) {
-            updater.updateProject(new UpdateCallback(callback), dataObject, true);
-        } else if (mode == IMPORT) {
-            importer.importProject(callback, dataObject);
+        switch (mode) {
+            case CREATE:
+                createProject(callback);
+                break;
+            case UPDATE:
+                updater.updateProject(new UpdateCallback(callback), dataObject, false);
+                break;
+            case IMPORT:
+                importer.importProject(callback, dataObject);
+                break;
+            case CREATE_MODULE:
+                createModule(callback);
+                break;
+            default:
         }
     }
 
