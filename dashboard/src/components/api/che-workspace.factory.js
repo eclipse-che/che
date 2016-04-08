@@ -26,6 +26,7 @@ export class CheWorkspace {
     this.$resource = $resource;
 
     this.$q = $q;
+    this.lodash = lodash;
 
     this.cheUser = cheUser;
 
@@ -36,9 +37,6 @@ export class CheWorkspace {
 
     // per Id
     this.workspacesById = new Map();
-
-    // per workspace
-    this.runtimeConfig = new Map();
 
     // listeners if workspaces are changed/updated
     this.listeners = [];
@@ -55,6 +53,17 @@ export class CheWorkspace {
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
     );
+  }
+
+  getWorkspaceAgent(workspaceId) {
+    let runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
+    let wsAgentLink;
+    if (runtimeConfig) {
+      wsAgentLink = this.lodash.find(runtimeConfig.links, (link) => {
+        return link.rel === 'wsagent';
+      });
+    }
+    return wsAgentLink ? wsAgentLink.href.replace('ws://', '') : '';
   }
 
   /**
@@ -280,7 +289,6 @@ export class CheWorkspace {
         wsagentServerAddress = server.address;
       }
     }
-
     let endpoint = runtimeData.devMachine.runtime.envVariables.CHE_API_ENDPOINT;
 
     var contextPath;

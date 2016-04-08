@@ -27,7 +27,6 @@ export class CheWorkspaceBuilder {
 
   }
 
-
   withName(name) {
     this.workspace.config.name = name;
     return this;
@@ -40,6 +39,11 @@ export class CheWorkspaceBuilder {
 
   withTemporary(temporary) {
     this.workspace.config.temporary = temporary;
+    return this;
+  }
+
+  withRuntime(runtime) {
+    this.workspace.runtime = runtime;
     return this;
   }
 

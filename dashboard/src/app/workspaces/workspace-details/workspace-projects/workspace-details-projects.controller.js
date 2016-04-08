@@ -32,13 +32,8 @@ export class WorkspaceDetailsProjectsCtrl {
 
     this.profileCreationDate = profilePreferences['che:created'];
 
-    this.projects = this.cheAPI.getProject().getProjectsByWorkspaceMap().get(this.workspaceId);
-    if (!this.projects) {
-      let promise = this.cheAPI.getProject().fetchProjectsForWorkspaceId(this.workspaceId);
-      promise.then(() => {
-        this.projects = this.cheAPI.getProject().getProjectsByWorkspaceMap().get(this.workspaceId);
-      });
-    }
+    this.workspace = this.cheAPI.getWorkspace().getWorkspacesById().get(this.workspaceId);
+    this.projects = this.workspace.config.projects;
   }
 
   widthGtSm() {

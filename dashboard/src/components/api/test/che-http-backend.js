@@ -33,6 +33,7 @@ export class CheHttpBackend {
     this.localGitUrlsMap = new Map();
     this.remoteSvnUrlsMap = new Map();
     this.projectTypesWorkspaces = new Map();
+    this.workspaceAgentMap = new Map();
 
     this.memberships = [];
 
@@ -54,13 +55,15 @@ export class CheHttpBackend {
     for (let key of workspaceKeys) {
       var tmpWorkspace = this.workspaces.get(key);
       workspaceReturn.push(tmpWorkspace);
+      this.addWorkspaceAgent(key, tmpWorkspace.runtime);
+      this.httpBackend.when('GET', '/api/workspace/' + key).respond(tmpWorkspace);
     }
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
 
     var projectTypeKeys = this.projectTypesWorkspaces.keys();
     for (let key of projectTypeKeys) {
-      this.httpBackend.when('GET', '/api/ext/project-type/' + key).respond(this.projectTypesWorkspaces.get(key));
+      this.httpBackend.when('GET', '//' + this.workspaceAgentMap.get(key) + '/api/ext/project-type/' + key).respond(this.projectTypesWorkspaces.get(key));
     }
 
     //memberships:
@@ -76,13 +79,14 @@ export class CheHttpBackend {
     for (let key of userEmailKeys) {
       this.httpBackend.when('GET', '/api/user/find?alias=' + key).respond(this.userEmailMap.get(key));
     }
+
     this.httpBackend.when('GET', '/api/user/inrole?role=admin&scope=system&scopeId=').respond(false);
     this.httpBackend.when('GET', '/api/user/inrole?role=user&scope=system&scopeId=').respond(true);
-
 
     //profiles
     this.httpBackend.when('GET', '/api/profile').respond(this.defaultProfile);
     this.httpBackend.when('GET', '/api/profile/prefs').respond(this.defaultProfilePrefs);
+    var profileKeys = this.profilesMap.keys();
     var profileKeys = this.profilesMap.keys();
     for (let key of profileKeys) {
       this.httpBackend.when('GET', '/api/profile/' + key).respond(this.profilesMap.get(key));
@@ -91,7 +95,8 @@ export class CheHttpBackend {
     /// project details
     var projectDetailsKeys = this.projectDetailsMap.keys();
     for (let projectKey of projectDetailsKeys) {
-      this.httpBackend.when('GET', '/api/ext/project/' + projectKey).respond(this.projectDetailsMap.get(projectKey));
+      let workspaceKey = projectKey.split('/')[0];
+      this.httpBackend.when('GET', '//' + this.workspaceAgentMap.get(workspaceKey) + '/api/ext/project/' + projectKey).respond(this.projectDetailsMap.get(projectKey));
     }
 
     // permissions
@@ -166,7 +171,7 @@ export class CheHttpBackend {
     );
 
     // add call to the backend
-    this.httpBackend.when('GET', '/api/ext/project/' + workspace.id).respond(this.projectsPerWorkspace.get(workspace.id));
+    this.httpBackend.when('GET', '//' + this.workspaceAgentMap.get(workspace.id) + '/api/ext/project/' + workspace.id).respond(this.projectsPerWorkspace.get(workspace.id));
 
   }
 
@@ -177,6 +182,21 @@ export class CheHttpBackend {
    */
   addProjectTypes(workspaceId, projectTypes) {
     this.projectTypesWorkspaces.set(workspaceId, projectTypes);
+  }
+
+  /**
+   * Add the given project types
+   * @param workspaceId the workspaceId of the runt
+   * @param runtime runtime to add
+   */
+  addWorkspaceAgent(workspaceId, runtime) {
+    if (runtime && runtime.links) {
+      runtime.links.forEach((link) => {
+        if (link.rel === 'wsagent') {
+          this.workspaceAgentMap.set(workspaceId, link.href);
+        }
+      });
+    }
   }
 
   /**
@@ -350,7 +370,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getLocalGitUrl(workspaceId, projectPath) {
-    this.httpBackend.when('GET', '/api/ext/git/' + workspaceId + '/read-only-url?projectPath=' + projectPath)
+    this.httpBackend.when('GET', '//' + this.workspaceAgentMap.get(workspaceId) + '/api/ext/git/' + workspaceId + '/read-only-url?projectPath=' + projectPath)
       .respond(this.localGitUrlsMap.get(workspaceId + projectPath));
   }
 
@@ -360,7 +380,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getRemoteGitUrlArray(workspaceId, projectPath) {
-    this.httpBackend.when('POST', '/api/ext/git/' + workspaceId + '/remote-list?projectPath=' + projectPath)
+    this.httpBackend.when('POST','//' + this.workspaceAgentMap.get(workspaceId) + '/api/ext/git/' + workspaceId + '/remote-list?projectPath=' + projectPath)
       .respond(this.remoteGitUrlArraysMap.get(workspaceId + projectPath));
   }
 

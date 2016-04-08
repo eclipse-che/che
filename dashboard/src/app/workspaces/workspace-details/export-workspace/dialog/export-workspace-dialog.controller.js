@@ -107,23 +107,17 @@ export class ExportWorkspaceDialogController {
           let recipeLink = findLink.href;
           defaultEnvironment.machineConfigs[0].source.location = recipeLink;
 
-
           let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
-          let remoteProjectAPI = this.cheRemote.newProject(authData);
           this.exportInCloudSteps += 'Creating remote workspace...';
           let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, copyOfWorkspace.config);
           createWorkspacePromise.then((remoteWorkspace) => {
             this.exportInCloudSteps += 'ok !<br>';
-            // ok now we've to import each project with a location into the remote workspace
-            let importProjectsPromise = this.importProjectsIntoWorkspace(remoteWorkspaceAPI, remoteProjectAPI, remoteWorkspace, authData);
-            importProjectsPromise.then(() => {
-              this.exportInCloudSteps += 'Export of workspace ' + copyOfWorkspace.config.name + 'finished <br>';
-              this.cheNotification.showInfo('Successfully exported the workspace to ' + copyOfWorkspace.config.name + ' on ' + this.privateCloudUrl);
-              this.hide();
-            }, (error) => {
-              this.handleError(error);
-            })
 
+            if (remoteWorkspace.config.projects && remoteWorkspace.config.projects.length > 0) {
+              this.startRemoteWorkspace(remoteWorkspaceAPI, remoteWorkspace, authData);
+            } else {
+              this.finishWorkspaceExporting(remoteWorkspace);
+            }
           }, (error) => {
             this.handleError(error);
           })
@@ -137,51 +131,86 @@ export class ExportWorkspaceDialogController {
     });
   }
 
+  /**
+   * Start remote workspace.
+   *
+   * @param remoteWorkspaceAPI remote workspace API
+   * @param remoteWorkspace workspace to start
+   * @param authData remote url and token data
+   */
+  startRemoteWorkspace(remoteWorkspaceAPI, remoteWorkspace, authData) {
+    this.exportInCloudSteps += 'Starting remote workspace...';
+
+    // compute WS url
+    let remoteURL = authData.url;
+    let remoteWsURL = remoteURL.replace('http', 'ws') + '/api/ws/';
+
+    let startWorkspacePromise = remoteWorkspaceAPI.startWorkspace(remoteWsURL, remoteWorkspace.id, remoteWorkspace.config.defaultEnv);
+
+    startWorkspacePromise.then((workspace) => {
+      let wsAgentLink = this.lodash.find(workspace.runtime.links, (link) => {
+        return link.rel === 'wsagent';
+      });
+
+
+      //TODO when token for wsagent is ready - will need to use it instead of wsmaster one:
+      let agentAuthData = {url: wsAgentLink.href, token: authData.token};
+      let remoteProjectAPI = this.cheRemote.newProject(agentAuthData);
+
+      this.exportInCloudSteps += 'ok !<br>';
+      // ok now we've to import each project with a location into the remote workspace
+      let importProjectsPromise = this.importProjectsIntoWorkspace(remoteProjectAPI, remoteWorkspace);
+      importProjectsPromise.then(() => {
+        this.finishWorkspaceExporting(remoteWorkspace);
+      }, (error) => {
+        this.handleError(error);
+      })
+    }, (error) => {
+      this.handleError(error);
+    });
+  }
 
   /**
    * Import all projects with a given source location into the remote workspace
+   *
+   * @param remoteProjectAPI the remote project API
    * @param workspace the remote workspace
    */
-  importProjectsIntoWorkspace(remoteWorkspaceAPI, remoteProjectAPI, workspace, authData) {
-
+  importProjectsIntoWorkspace(remoteProjectAPI, workspace) {
     var projectPromises = [];
 
-    // ok so
     workspace.config.projects.forEach((project) => {
       if (project.source && project.source.location && project.source.location.length > 0) {
         let deferred = this.$q.defer();
         let deferredPromise = deferred.promise;
         projectPromises.push(deferredPromise);
-        this.exportInCloudSteps += 'Starting remote workspace...';
+        let importProjectPromise = remoteProjectAPI.importProject(workspace.id, project.name, project.source);
 
-        // compute WS url
-        let remoteURL = authData.url;
-        let remoteWsURL = remoteURL.replace('http', 'ws') + '/api/ws/';
-
-        let startWorkspacePromise = remoteWorkspaceAPI.startWorkspace(remoteWsURL, workspace.id, workspace.config.defaultEnv);
-
-        startWorkspacePromise.then(() => {
-          this.exportInCloudSteps += 'ok !<br>';
-          let importProjectPromise = remoteProjectAPI.importProject(workspace.id, project.name, project.source);
-
-          importProjectPromise.then(() => {
-            this.exportInCloudSteps += 'Importing project ' + project.name + '...<br>';
-            let updateProjectPromise = remoteProjectAPI.updateProject(workspace.id, project.name, project);
-            updateProjectPromise.then(() => {
-              deferred.resolve(workspace);
-            }, (error) => {
-              deferred.reject(error);
-            });
+        importProjectPromise.then(() => {
+          this.exportInCloudSteps += 'Importing project ' + project.name + '...<br>';
+          let updateProjectPromise = remoteProjectAPI.updateProject(workspace.id, project.name, project);
+          updateProjectPromise.then(() => {
+            deferred.resolve(workspace);
           }, (error) => {
             deferred.reject(error);
           });
         }, (error) => {
-          this.handleError(error);
+          deferred.reject(error);
         });
       }
-
     });
     return this.$q.all(projectPromises);
+  }
+
+  /**
+   * Finilize the Workspace exporting - show proper messages, close popup.
+   *
+   * @param remoteWorkspace the remote exported workspace
+   */
+  finishWorkspaceExporting(remoteWorkspace) {
+    this.exportInCloudSteps += 'Export of workspace ' + remoteWorkspace.config.name + 'finished <br>';
+    this.cheNotification.showInfo('Successfully exported the workspace to ' + remoteWorkspace.config.name + ' on ' + this.privateCloudUrl);
+    this.hide();
   }
 
   /**
