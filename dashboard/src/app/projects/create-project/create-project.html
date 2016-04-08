@@ -67,9 +67,10 @@
                layout-align="center center"
                flex="auto">
             <div class="create-project-working-log">
-              <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()" che-index="{{$index}}"
+              <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()"
                              ng-hide="$index === createProjectCtrl.getCreationSteps().length-1"
-                             che-open-condition="($index === createProjectCtrl.getCurrentProgressStep() && !!createProjectCtrl.getCreationSteps()[$index].logs)"
+                             che-open-condition="($index === createProjectCtrl.getCurrentProgressStep())"
+                             che-close-condition="(0 === createProjectCtrl.getCurrentProgressStep())"
                              ng-class="{'che-accordion-active': ($index === createProjectCtrl.getCurrentProgressStep()),
                                         'che-accordion-error': createProjectCtrl.getCreationSteps()[$index].hasError}">
                 <div class="che-accordion-title">

@@ -15,7 +15,7 @@
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarCtrl.email"></md-progress-linear>
     <div ng-show="navbarCtrl.email">
       <section class="navbar-top-dropdown" layout="column" layout-align="center center">
-        <che-button-dropdown che-button-dropdown-href="#/create-project" che-button-dropdown-label="New Project"
+        <che-button-dropdown che-button-dropdown-href="#/create-project?resetProgress" che-button-dropdown-label="New Project"
                              che-event-logger="new.project"
                              che-button-dropdown-controller="navbarCtrl"
                              ng-if="navbarCtrl.isUser()"></che-button-dropdown>
