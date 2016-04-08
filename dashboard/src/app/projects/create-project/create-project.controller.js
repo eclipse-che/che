@@ -417,8 +417,14 @@ export class CreateProjectCtrl {
         }
       });
     }
-    
-    this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    startWorkspacePromise.then(() => {}, (error) => {
+      if (error.data.message) {
+        this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
+      }
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+    });
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
