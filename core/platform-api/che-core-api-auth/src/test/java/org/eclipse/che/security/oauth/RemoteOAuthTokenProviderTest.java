@@ -94,7 +94,7 @@ public class RemoteOAuthTokenProviderTest {
     }
 
     @Test
-    public void shouldReturnNollOnNotFoundException() throws Exception {
+    public void shouldReturnNullOnNotFoundException() throws Exception {
         //given
         when(httpJsonRequest.request()).thenThrow(NotFoundException.class);
         //when
@@ -103,7 +103,7 @@ public class RemoteOAuthTokenProviderTest {
     }
 
     @Test
-    public void shouldReturnNollOnIfUserIsEmpty() throws Exception {
+    public void shouldReturnNullOnIfUserIsEmpty() throws Exception {
         //given
         //when
         //then
