@@ -356,7 +356,7 @@ get_docker_ready () {
       fi
       VM_CHECK_CMD="${VBOXMANAGE} showvminfo ${VM}"
       DOCKER_MACHINE_DRIVER=virtualbox
-      DOCKER_MACHINE_DRIVER_OPTIONS=--virtualbox-host-dns-resolver
+      DOCKER_MACHINE_DRIVER_OPTIONS='--virtualbox-host-dns-resolver --virtualbox-memory 2048 --virtualbox-cpu-count 2'
       if [ ! -f "${VBOXMANAGE}" ]; then
         error_exit "Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected Virtual Box at /usr/local/bin/VBoxManage."
       return
