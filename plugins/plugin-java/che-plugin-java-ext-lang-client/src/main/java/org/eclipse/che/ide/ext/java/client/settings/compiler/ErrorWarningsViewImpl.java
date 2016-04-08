@@ -47,4 +47,10 @@ public class ErrorWarningsViewImpl extends Composite implements ErrorWarningsVie
     public void addProperty(@NotNull PropertyWidget propertyWidget) {
         properties.add(propertyWidget);
     }
+
+    /** {@inheritDoc} */
+    @Override
+    public void removeAllProperties() {
+        properties.clear();
+    }
 }

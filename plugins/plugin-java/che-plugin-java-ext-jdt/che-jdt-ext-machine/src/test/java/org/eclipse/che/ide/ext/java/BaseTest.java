@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java;
 
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.jdt.javadoc.JavaElementLinks;
 import org.eclipse.core.internal.filebuffers.FileBuffersPlugin;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -33,22 +32,13 @@ import java.util.Map;
 // TODO: rework after new Project API
 public abstract class BaseTest {
 
-    protected static final String              wsPath        = BaseTest.class.getResource("/projects").getFile();
-    private static final   String              workspacePath = BaseTest.class.getResource("/projects").getFile();
-    protected static       Map<String, String> options       = new HashMap<>();
-    protected static JavaProject project;
-    protected static EventService    eventService      = new EventService();
-    protected static ResourcesPlugin plugin            /*= new ResourcesPlugin("target/index", workspacePath,
-                                                                             new DummyProjectManager(workspacePath, eventService))*/;
-    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set");
-    protected static FileBuffersPlugin
-                                     fileBuffersPlugin = new FileBuffersPlugin();
+    protected static final String WS_PATH = BaseTest.class.getResource("/projects").getFile();
 
-    static {
-        plugin.start();
-        javaPlugin.start();
-    }
+    protected JavaProject     project;
+    protected ResourcesPlugin plugin;
 
+    protected Map<String, String> options      = new HashMap<>();
+    protected JavaPlugin          javaPlugin   = new JavaPlugin(WS_PATH + "/set", "preferences");
 
     public BaseTest() {
         options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
@@ -74,6 +64,9 @@ public abstract class BaseTest {
 
     @Before
     public void setUp() throws Exception {
+        plugin.start();
+        javaPlugin.start();
+
         project = (JavaProject)JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject("/test");
     }
 
@@ -82,12 +75,9 @@ public abstract class BaseTest {
         if (project != null) {
             project.close();
         }
-        File pref = new File(wsPath + "/test/.codenvy/project.preferences");
+        File pref = new File(WS_PATH + "/test/.codenvy/project.preferences");
         if (pref.exists()) {
             pref.delete();
         }
-
     }
-
-
 }

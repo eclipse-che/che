@@ -140,12 +140,15 @@ public class JavaPlugin {
 
 
     private ImageDescriptorRegistry fImageDescriptorRegistry;
-    private String                  settingsDir;
-    private String                  cahPath;
+
+    private final String settingsDir;
+    private final String preferencesFileName;
+    private final String cahPath;
 
     @Inject
-    public JavaPlugin(@Named("che.jdt.settings.dir") String settingsDir) {
+    public JavaPlugin(@Named("che.jdt.settings.dir") String settingsDir, @Named("jdt.preferences.file.name") String preferencesFileName) {
         this.settingsDir = settingsDir;
+        this.preferencesFileName = preferencesFileName;
         fgJavaPlugin = this;
         cahPath = settingsDir + CODEASSIST_LRU_HISTORY;
     }
@@ -190,7 +193,7 @@ public class JavaPlugin {
     }
 
     @PostConstruct
-    public void start() {
+    public void start() throws IOException {
 //        WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
 //            @Override
 //            public IBuffer createBuffer(ICompilationUnit workingCopy) {
@@ -205,7 +208,7 @@ public class JavaPlugin {
         fMembersOrderPreferenceCache = new MembersOrderPreferenceCache();
         PreferenceConstants.initializeDefaultValues(PreferenceConstants.getPreferenceStore());
         new JavaCorePreferenceInitializer().initializeDefaultPreferences();
-        new CheCodeFormatterInitializer().initializeDefaultPreferences();
+        new CheCodeFormatterInitializer().initializePreferences(settingsDir, preferencesFileName);
     }
 
     @PreDestroy
