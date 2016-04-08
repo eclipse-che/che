@@ -125,7 +125,7 @@
 
     <che-panel id="create-project-source-id" che-title="Select Source"
                che-tooltip="Choose where the initial source code for this project will come from. The choice of templates and samples will vary by the stack chosen.">
-      <md-radio-group ng-model="createProjectCtrl.selectSourceOption">
+      <md-radio-group ng-model="createProjectCtrl.selectSourceOption" ng-change="createProjectCtrl.onSourceOptionChanged()">
         <md-radio-button value="select-source-new">New from blank, template, or sample project</md-radio-button>
         <md-radio-button value="select-source-existing">Import from existing location</md-radio-button>
       </md-radio-group>
