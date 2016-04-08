@@ -78,8 +78,11 @@ public class ProjectResolver {
      */
     public void resolveProject(@NotNull final CompleteCallback callback, @NotNull final ProjectConfigDto projectConfig) {
         final String projectName = projectConfig.getName();
+        final String projectPath = projectConfig.getPath();
+
+        String path = projectPath == null ? projectName : projectPath;
         Unmarshallable<List<SourceEstimation>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(SourceEstimation.class);
-        projectService.resolveSources(workspaceId, projectName, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
+        projectService.resolveSources(workspaceId, path, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
 
             Function<SourceEstimation, ProjectTypeDto> estimateToType = new Function<SourceEstimation, ProjectTypeDto>() {
                 @Nullable

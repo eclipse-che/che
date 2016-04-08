@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.explorer.project;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -242,6 +243,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     private String getPathToParent(ProjectConfigDto projectConfig) {
         String path = projectConfig.getPath();
 
+        if (Strings.isNullOrEmpty(path)) {
+            return "/";
+        }
+
         return path.substring(0, path.lastIndexOf("/"));
     }
 
@@ -252,7 +257,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             if (node instanceof FolderReferenceNode) {
                 nodePath = ((FolderReferenceNode)node).getData().getPath();
             } else if (node instanceof ProjectNode) {
-                nodePath = ((ProjectNode)node).getStorablePath();
+                String storablePath = ((ProjectNode)node).getStorablePath();
+                nodePath = storablePath == null ? '/' + node.getName() : storablePath;
             }
 
             if (nodePath.equals(pathToNode)) {

@@ -163,6 +163,11 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
         delegate.projectDescriptionChanged(description);
     }
 
+    @UiHandler("parentDirectory")
+    void onParentDirectoryChanged(KeyUpEvent event) {
+        delegate.onParentDirectoryChanged();
+    }
+
     private void selectNextWizardType(Object itemData) {
         if (itemData instanceof ProjectTemplateDescriptor) {
             delegate.projectTemplateSelected((ProjectTemplateDescriptor)itemData);
@@ -238,6 +243,11 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
     @Override
     public String getParentDirectory() {
         return parentDirectory.getText();
+    }
+
+    @Override
+    public String getName() {
+        return projectName.getText();
     }
 
     @Override

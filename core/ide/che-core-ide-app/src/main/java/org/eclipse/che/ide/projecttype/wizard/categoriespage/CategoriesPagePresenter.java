@@ -109,6 +109,29 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
         view.updateCategories(CREATE == wizardMode);
     }
 
+    private String getPathToParent() {
+        Selection<?> selection = selectionAgent.getSelection();
+        if (selection == null || selection.isEmpty()) {
+            return DEFAULT_PARENT_DIRECTORY;
+        }
+
+        if (selection.getAllElements().size() > 1) {
+            return DEFAULT_PARENT_DIRECTORY;
+        }
+
+        Object selectedElement = selection.getHeadElement();
+
+        if (selectedElement instanceof FolderReferenceNode) {
+            Node parent = ((FolderReferenceNode)selectedElement).getParent();
+            return getPath(parent);
+        } else if (selectedElement instanceof ProjectNode) {
+            Node parent = ((ProjectNode)selectedElement).getParent();
+            return getPath(parent);
+        }
+
+        return DEFAULT_PARENT_DIRECTORY;
+    }
+
     @Override
     public boolean isCompleted() {
         final String projectName = dataObject.getName();
@@ -155,14 +178,24 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
     }
 
     @Override
-    public void projectNameChanged(String name) {
+    public void onParentDirectoryChanged() {
+        setPathInProjectConfig();
+    }
+
+    private void setPathInProjectConfig() {
         String pathToParent = Path.valueOf(view.getParentDirectory())
                                   .makeAbsolute()
                                   .addTrailingSeparator()
                                   .toString();
 
-        String pathToProject = pathToParent + name;
+        String pathToProject = pathToParent + view.getName();
         dataObject.setPath(pathToProject);
+    }
+
+    @Override
+    public void projectNameChanged(String name) {
+        setPathInProjectConfig();
+
         dataObject.setName(name);
         updateDelegate.updateControls();
 
@@ -171,29 +204,6 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
         } else {
             view.showNameError();
         }
-    }
-
-    private String getPathToParent() {
-        Selection<?> selection = selectionAgent.getSelection();
-        if (selection == null || selection.isEmpty()) {
-            return DEFAULT_PARENT_DIRECTORY;
-        }
-
-        if (selection.getAllElements().size() > 1) {
-            return DEFAULT_PARENT_DIRECTORY;
-        }
-
-        Object selectedElement = selection.getHeadElement();
-
-        if (selectedElement instanceof FolderReferenceNode) {
-            Node parent = ((FolderReferenceNode)selectedElement).getParent();
-            return getPath(parent);
-        } else if (selectedElement instanceof ProjectNode) {
-            Node parent = ((ProjectNode)selectedElement).getParent();
-            return getPath(parent);
-        }
-
-        return DEFAULT_PARENT_DIRECTORY;
     }
 
     private String getPath(Node parent) {

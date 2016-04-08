@@ -43,6 +43,8 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
 
     String getParentDirectory();
 
+    String getName();
+
     void setParentDirectory(String parentDirectory);
 
     void removeNameError();
@@ -54,6 +56,8 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
     void setProjectTypes(List<ProjectTypeDto> availableProjectTypes);
 
     interface ActionDelegate {
+
+        void onParentDirectoryChanged();
 
         void projectNameChanged(String name);
 

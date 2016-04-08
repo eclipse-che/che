@@ -52,11 +52,11 @@ import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 @Singleton
 public class ProjectImporter extends AbstractImporter {
 
-    private final CoreLocalizationConstant localizationConstant;
-    private final EventBus                 eventBus;
-    private final ProjectResolver          projectResolver;
-    private final DialogFactory            dialogFactory;
-    private final String                   restContext;
+    private final CoreLocalizationConstant    localizationConstant;
+    private final EventBus                    eventBus;
+    private final ProjectResolver             projectResolver;
+    private final DialogFactory               dialogFactory;
+    private final String                      restContext;
     private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
 
     private ProjectConfigDto projectConfig;
@@ -85,8 +85,9 @@ public class ProjectImporter extends AbstractImporter {
         this.projectConfig = projectConfig;
         this.callback = callback;
         final String projectName = projectConfig.getName();
-        String pathToProject = '/' + projectName;
-        startImport(pathToProject, projectName, projectConfig.getSource());
+        final String pathToProject = projectConfig.getPath();
+        String path = pathToProject == null ? projectName : pathToProject;
+        startImport(path, projectName, projectConfig.getSource());
     }
 
     @Override
@@ -98,8 +99,8 @@ public class ProjectImporter extends AbstractImporter {
 
 
     private Promise<Void> doImport(@NotNull final String pathToProject,
-                          @NotNull final String projectName,
-                          @NotNull final SourceStorageDto sourceStorage) {
+                                   @NotNull final String projectName,
+                                   @NotNull final SourceStorageDto sourceStorage) {
         final ProjectNotificationSubscriber subscriber = subscriberFactory.createSubscriber();
         subscriber.subscribe(projectName);
         Promise<Void> importPromise = projectService.importProject(workspaceId, pathToProject, false, sourceStorage);
@@ -153,27 +154,27 @@ public class ProjectImporter extends AbstractImporter {
                                              @NotNull final String projectName,
                                              @NotNull final SourceStorageDto sourceStorage,
                                              @NotNull final ProjectNotificationSubscriber subscriber) {
-            OAuth2Authenticator authenticator = oAuth2AuthenticatorRegistry.getAuthenticator(providerName);
-            if(authenticator == null) {
-                authenticator = oAuth2AuthenticatorRegistry.getAuthenticator("default");
-            }
-            authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(restContext, authenticateUrl),
-                                       new AsyncCallback<OAuthStatus>() {
-                                           @Override
-                                           public void onFailure(Throwable caught) {
-                                               callback.onFailure(new Exception(caught.getMessage()));
-                                           }
+        OAuth2Authenticator authenticator = oAuth2AuthenticatorRegistry.getAuthenticator(providerName);
+        if (authenticator == null) {
+            authenticator = oAuth2AuthenticatorRegistry.getAuthenticator("default");
+        }
+        authenticator.authenticate(OAuth2AuthenticatorUrlProvider.get(restContext, authenticateUrl),
+                                   new AsyncCallback<OAuthStatus>() {
+                                       @Override
+                                       public void onFailure(Throwable caught) {
+                                           callback.onFailure(new Exception(caught.getMessage()));
+                                       }
 
-                                           @Override
-                                           public void onSuccess(OAuthStatus result) {
-                                               if (!result.equals(OAuthStatus.NOT_PERFORMED)) {
-                                                   doImport(pathToProject, projectName, sourceStorage);
-                                               } else {
-                                                   subscriber.onFailure("Authentication cancelled");
-                                                   callback.onCompleted();
-                                               }
+                                       @Override
+                                       public void onSuccess(OAuthStatus result) {
+                                           if (!result.equals(OAuthStatus.NOT_PERFORMED)) {
+                                               doImport(pathToProject, projectName, sourceStorage);
+                                           } else {
+                                               subscriber.onFailure("Authentication cancelled");
+                                               callback.onCompleted();
                                            }
-                                       });
+                                       }
+                                   });
 
     }
 
