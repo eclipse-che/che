@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-ext-jdt-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.1.0-RC1-SNAPSHOT</version>
+        <version>4.1.0</version>
     </parent>
     <artifactId>org.eclipse.jdt.ui</artifactId>
     <packaging>jar</packaging>
