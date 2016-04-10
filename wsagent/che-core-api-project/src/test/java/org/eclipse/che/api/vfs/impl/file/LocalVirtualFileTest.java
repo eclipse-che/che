@@ -1784,6 +1784,7 @@ public class LocalVirtualFileTest {
         ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
         DataOutputStream dataOutput = new DataOutputStream(byteOutput);
         new FileMetadataSerializer().write(dataOutput, properties);
+        dataOutput.flush();
         return byteOutput.toByteArray();
     }
 
