@@ -264,7 +264,7 @@ public class GitImporterPagePresenterTest {
     @Test
     public void keepDirectoryUnSelectedTest() {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("keepDirectory", "directory");
+        parameters.put("keepDir", "directory");
         when(source.getParameters()).thenReturn(parameters);
 
         presenter.keepDirectorySelected(false);
