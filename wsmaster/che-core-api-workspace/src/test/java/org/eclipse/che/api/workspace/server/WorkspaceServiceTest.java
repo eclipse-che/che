@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -23,6 +25,7 @@ import org.eclipse.che.api.core.rest.permission.PermissionManager;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -92,6 +95,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -252,7 +256,9 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldDeleteWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        when(wsManager.getSnapshot(anyString())).thenReturn(ImmutableList.of(mock(SnapshotImpl.class)));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -260,6 +266,7 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 204);
+        verify(machineManager).removeSnapshots(USER_ID, workspace.getId());
         verify(wsManager).removeWorkspace(workspace.getId());
     }
 

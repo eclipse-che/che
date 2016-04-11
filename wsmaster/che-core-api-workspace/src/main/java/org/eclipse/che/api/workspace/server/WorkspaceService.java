@@ -279,6 +279,9 @@ public class WorkspaceService extends Service {
                                                                                         ConflictException,
                                                                                         ForbiddenException {
         ensureUserIsWorkspaceOwner(id);
+        if (!workspaceManager.getSnapshot(id).isEmpty()) {
+            machineManager.removeSnapshots(getCurrentUserId(), id);
+        }
         workspaceManager.removeWorkspace(id);
     }
 
