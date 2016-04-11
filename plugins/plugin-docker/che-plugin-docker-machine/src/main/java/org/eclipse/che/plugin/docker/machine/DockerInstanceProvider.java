@@ -80,6 +80,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final DockerInstanceStopDetector       dockerInstanceStopDetector;
     private final WorkspaceFolderPathProvider      workspaceFolderPathProvider;
     private final boolean                          doForcePullOnBuild;
+    private final boolean                          privilegeMode;
     private final Set<String>                      supportedRecipeTypes;
     private final DockerMachineFactory             dockerMachineFactory;
     private final Map<String, Map<String, String>> devMachinePortsToExpose;
@@ -104,6 +105,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                   @Named("che.machine.projects.internal.storage") String projectFolderPath,
                                   @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
+                                  @Named("machine.docker.privilege_mode") boolean privilegeMode,
                                   @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                   @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables)
             throws IOException {
@@ -113,6 +115,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
+        this.privilegeMode = privilegeMode;
         this.supportedRecipeTypes = Collections.singleton("Dockerfile");
         this.projectFolderPath = projectFolderPath;
 
@@ -423,7 +426,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                           .withExtraHosts(allMachinesExtraHosts)
                                                           .withPublishAllPorts(true)
                                                           .withMemorySwap(-1)
-                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024);
+                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024)
+                                                          .withPrivileged(privilegeMode);
             final ContainerConfig config = new ContainerConfig().withImage(imageName)
                                                                 .withExposedPorts(portsToExpose)
                                                                 .withHostConfig(hostConfig)

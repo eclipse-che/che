@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.impl.InstanceKeyImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -35,6 +36,7 @@ import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
@@ -97,6 +99,9 @@ public class DockerInstanceProviderTest {
     @Mock
     private WorkspaceFolderPathProvider workspaceFolderPathProvider;
 
+    @Captor
+    private ArgumentCaptor<ContainerConfig> containerConfigArgumentCaptor;
+
     private DockerInstanceProvider dockerInstanceProvider;
 
     @BeforeMethod
@@ -114,6 +119,7 @@ public class DockerInstanceProviderTest {
                                                                 null,
                                                                 workspaceFolderPathProvider,
                                                                 PROJECT_FOLDER_PATH,
+                                                                false,
                                                                 false,
                                                                 Collections.emptySet(),
                                                                 Collections.emptySet()));
@@ -223,6 +229,30 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
         assertEquals(argumentCaptor.getValue().getImage(), "eclipse-che/" + generatedContainerId);
+    }
+
+    @Test
+    public void shouldCreateContainerWithPrivilegeMode() throws Exception {
+        dockerInstanceProvider = spy(new DockerInstanceProvider(dockerConnector,
+                                                                dockerConnectorConfiguration,
+                                                                dockerMachineFactory,
+                                                                dockerInstanceStopDetector,
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                null,
+                                                                workspaceFolderPathProvider,
+                                                                PROJECT_FOLDER_PATH,
+                                                                false,
+                                                                true,
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet()));
+
+        createInstanceFromRecipe();
+
+        verify(dockerConnector).createContainer(containerConfigArgumentCaptor.capture(), anyString());
+        assertTrue(containerConfigArgumentCaptor.getValue().getHostConfig().isPrivileged());
     }
 
     @Test
@@ -421,6 +451,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -456,6 +487,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -499,6 +531,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -534,6 +567,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -571,6 +605,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -612,6 +647,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -651,6 +687,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -692,6 +729,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -726,6 +764,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -762,6 +801,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -796,6 +836,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -829,6 +870,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -870,6 +912,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -913,6 +956,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -954,6 +998,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -992,6 +1037,7 @@ public class DockerInstanceProviderTest {
                                                             "dev.box.com:192.168.0.1",
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -1032,6 +1078,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -1071,6 +1118,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -1109,6 +1157,7 @@ public class DockerInstanceProviderTest {
                                                             "dev.box.com:192.168.0.1,codenvy.com.com:185",
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -1150,6 +1199,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -1286,6 +1336,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             devEnv,
                                                             commonEnv);
 
@@ -1316,6 +1367,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             devEnv,
                                                             commonEnv);
@@ -1353,6 +1405,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             devEnv,
                                                             commonEnv);
 
@@ -1383,6 +1436,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             devEnv,
                                                             commonEnv);
@@ -1416,6 +1470,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
@@ -1458,6 +1513,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -1499,6 +1555,7 @@ public class DockerInstanceProviderTest {
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
                                                             false,
+                                                            false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
 
@@ -1539,6 +1596,7 @@ public class DockerInstanceProviderTest {
                                                             null,
                                                             workspaceFolderPathProvider,
                                                             PROJECT_FOLDER_PATH,
+                                                            false,
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet());
