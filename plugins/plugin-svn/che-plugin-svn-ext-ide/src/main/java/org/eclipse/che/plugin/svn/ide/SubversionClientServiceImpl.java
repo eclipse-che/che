@@ -27,6 +27,8 @@ import org.eclipse.che.plugin.svn.shared.CleanupRequest;
 import org.eclipse.che.plugin.svn.shared.CommitRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
 import org.eclipse.che.plugin.svn.shared.Depth;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.ListRequest;
@@ -409,6 +411,27 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                           .withPath(path);
 
         asyncRequestFactory.createPostRequest(baseHttpUrl + "/propdel", request).loader(loader).send(callback);
+    }
+
+    /**
+     * Get the list of all revisions where a given path was modified
+     *
+     * @param projectPath
+     *         the project path
+     * @param path
+     *         path to get the revisions for
+     * @param revisionRange
+     *         the range of revisions to check
+     * @param callback
+     */
+    @Override
+    public void getRevisions(@NotNull String projectPath, String path, String revisionRange,
+                             AsyncRequestCallback<GetRevisionsResponse> callback) {
+        final GetRevisionsRequest request = dtoFactory.createDto(GetRevisionsRequest.class)
+                                                      .withProjectPath(projectPath)
+                                                      .withPath(path)
+                                                      .withRevisionRange(revisionRange);
+        asyncRequestFactory.createPostRequest(baseHttpUrl + "/revisions", request).loader(loader).send(callback);
     }
 
     @Override

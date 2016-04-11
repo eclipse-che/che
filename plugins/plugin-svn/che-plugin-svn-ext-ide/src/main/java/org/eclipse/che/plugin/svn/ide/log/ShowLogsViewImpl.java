@@ -94,7 +94,7 @@ public class ShowLogsViewImpl extends Window implements ShowLogsView {
     }
 
     @Override
-    public HasValue<String> rangeFiend() {
+    public HasValue<String> rangeField() {
         return revisionField;
     }
 

@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.svn.ide.action;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
@@ -33,4 +34,8 @@ public class CreatePatchAction extends SubversionAction {
               projectExplorerPresenter);
     }
 
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+
+    }
 }

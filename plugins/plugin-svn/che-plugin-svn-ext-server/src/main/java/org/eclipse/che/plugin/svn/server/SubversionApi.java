@@ -38,6 +38,8 @@ import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 import org.eclipse.che.plugin.svn.shared.CleanupRequest;
 import org.eclipse.che.plugin.svn.shared.CommitRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.ListRequest;
@@ -61,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -72,6 +75,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
@@ -561,7 +565,7 @@ public class SubversionApi {
      * @throws ServerException
      *         if there is an exporting issue
      */
-    public Response exportPath(String projectPath, String path, String revision)
+    public Response exportPath(@NotNull final String projectPath, @NotNull final String path, String revision)
             throws IOException, ServerException {
 
         final File project = new File(projectPath);
@@ -583,7 +587,7 @@ public class SubversionApi {
             final CommandLineResult result = runCommand(null, uArgs, project, Arrays.asList(path, tempDir.getAbsolutePath()));
             if (result.getExitCode() != 0) {
                 LOG.warn("Svn export process finished with exit status {}", result.getExitCode());
-                throw new ServerException("Exporting was failed");
+                throw new ServerException("Export failed");
             }
 
             zip = new File(Files.createTempDir(), "export.zip");
@@ -1035,4 +1039,29 @@ public class SubversionApi {
                          .withOutput(result.getStdout());
     }
 
+    public GetRevisionsResponse getRevisions(GetRevisionsRequest request) throws IOException, SubversionException {
+        final File projectPath = new File(request.getProjectPath());
+
+        final List<String> uArgs = defaultArgs();
+
+        addOption(uArgs, "--revision", request.getRevisionRange());
+        uArgs.add("log");
+
+        final CommandLineResult result = runCommand(null, uArgs, projectPath, Arrays.asList(request.getPath()));
+
+        final GetRevisionsResponse response = DtoFactory.getInstance().createDto(GetRevisionsResponse.class)
+                                                .withCommand(result.getCommandLine().toString())
+                                                .withOutput(result.getStdout())
+                                                .withErrOutput(result.getStderr());
+
+        if (result.getExitCode() == 0) {
+            List<String> revisions = result.getStdout().parallelStream()
+                                           .filter(line -> line.split("\\|").length == 4)
+                                           .map(line -> line.split("\\|")[0].trim())
+                                           .collect(Collectors.toList());
+            response.withRevisions(revisions);
+        }
+
+        return response;
+    }
 }

@@ -529,6 +529,18 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("export.successful")
     String exportSuccessful(String path);
 
+    @Key("export.fail.noprojectpath")
+    String exportFailedNoProjectPath();
+
+    @Key("export.fail.command.execution")
+    String exportCommandExecutionError();
+
+    @Key("export.fail.revision.donotexist")
+    String exportRevisionDoNotExistForPath(String givenRevision, String path);
+
+    @Key("export.fail.norevision")
+    String exportNoRevisionForPath(String path);
+
     /* Move dialog */
     @Key("move.fail.to.get.project")
     String moveFailToGetProject();

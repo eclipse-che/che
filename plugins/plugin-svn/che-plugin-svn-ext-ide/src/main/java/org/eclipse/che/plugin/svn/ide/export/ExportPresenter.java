@@ -10,23 +10,32 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.export;
 
-import com.google.common.base.Strings;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
+
+import java.util.List;
+
+import static com.google.common.base.Strings.emptyToNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * Presenter for the {@link ExportView}.
@@ -37,6 +46,8 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 public class ExportPresenter extends SubversionActionPresenter implements ExportView.ActionDelegate {
 
     private       ExportView                               view;
+    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
+    private final SubversionClientService                  subversionClientService;
     private       NotificationManager                      notificationManager;
     private       SubversionExtensionLocalizationConstants constants;
     private final String                                   baseHttpUrl;
@@ -50,10 +61,14 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
                            ConsolesPanelPresenter consolesPanelPresenter,
                            ProjectExplorerPresenter projectExplorerPart,
                            ExportView view,
+                           DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                           SubversionClientService subversionClientService,
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants) {
         super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
         this.view = view;
+        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+        this.subversionClientService = subversionClientService;
         this.notificationManager = notificationManager;
         this.constants = constants;
         this.view.setDelegate(this);
@@ -79,29 +94,91 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         final String projectPath = getCurrentProjectPath();
 
         if (projectPath == null) {
+            notificationManager.notify(constants.exportFailedNoProjectPath(), FAIL, true);
             return;
         }
 
-        final String exportPath = Strings.emptyToNull(relPath(projectPath, selectedNode.getStorablePath()));
-        final String revision = view.isRevisionSpecified() ? view.getRevision() : null;
+        final String nullableExportPath = emptyToNull(relPath(projectPath, selectedNode.getStorablePath()));
+        final String exportPath = (nullableExportPath != null ? nullableExportPath : ".");
+        final String givenRevision = view.isRevisionSpecified() ? view.getRevision() : null;
 
-        notificationManager.notify(constants.exportStarted(exportPath));
+        final StatusNotification notification = new StatusNotification(constants.exportStarted(exportPath), PROGRESS, true);
+        notificationManager.notify(notification);
 
         view.onClose();
 
-        char prefix = '?';
-        StringBuilder url = new StringBuilder(baseHttpUrl + "/export" + projectPath);
+        if (!isNullOrEmpty(givenRevision)) {
+            final String path = getSelectedPaths().get(0);
+            subversionClientService.getRevisions(getActiveProject().getRootProject().getPath(), path, "1:HEAD",
+                                                 new AsyncRequestCallback<GetRevisionsResponse>(
+                                                         dtoUnmarshallerFactory.newUnmarshaller(GetRevisionsResponse.class)) {
+                                                     @Override
+                                                     protected void onSuccess(GetRevisionsResponse result) {
+                                                         final List<String> pathRevisions = result.getRevisions();
 
-        if (!Strings.isNullOrEmpty(exportPath)) {
-            url.append(prefix).append("path").append('=').append(exportPath);
-            prefix = '&';
+                                                         if (pathRevisions.size() > 0) {
+                                                             final String pathFirstRevision = pathRevisions.get(0);
+                                                             final String pathLastRevision = pathRevisions.get(pathRevisions.size() - 1);
+
+                                                             final int givenRevisionNb = Integer.valueOf(givenRevision);
+                                                             final int pathFirstRevisionNb =
+                                                                     Integer.valueOf(pathFirstRevision.substring(1));
+                                                             final int pathLastRevisionNb = Integer.valueOf(pathLastRevision.substring(1));
+
+                                                             final List<String> errOutput = result.getErrOutput();
+                                                             if (errOutput != null && !errOutput.isEmpty()) {
+                                                                 printErrors(errOutput, constants.commandInfo());
+                                                                 notification.setTitle(constants.exportCommandExecutionError());
+                                                                 notification.setStatus(FAIL);
+
+                                                             } else if (givenRevisionNb < pathFirstRevisionNb ||
+                                                                        givenRevisionNb > pathLastRevisionNb) {
+                                                                 notification.setTitle(
+                                                                         constants.exportRevisionDoNotExistForPath(givenRevision, path));
+                                                                 notification.setStatus(FAIL);
+
+                                                             } else {
+                                                                 openExportPopup(projectPath, exportPath, givenRevision, notification);
+                                                             }
+                                                         } else {
+                                                             notification.setTitle(constants.exportNoRevisionForPath(exportPath));
+                                                             notification.setStatus(FAIL);
+                                                         }
+                                                     }
+
+                                                     @Override
+                                                     protected void onFailure(Throwable exception) {
+                                                         notification.setTitle(constants.exportCommandExecutionError() + "\n" +
+                                                                               exception.getLocalizedMessage());
+                                                         notification.setStatus(FAIL);
+                                                     }
+                                                 });
+        } else {
+            openExportPopup(projectPath, exportPath, notification);
+        }
+    }
+
+    private void openExportPopup(final String projectPath, final String exportPath, final StatusNotification notification) {
+        openExportPopup(projectPath, exportPath, null, notification);
+    }
+
+    private void openExportPopup(final String projectPath, final String exportPath, final String revision,
+                                 final StatusNotification notification) {
+        final StringBuilder url = new StringBuilder(baseHttpUrl + "/export" + projectPath);
+
+        char separator = '?';
+        if (!".".equals(exportPath)) {
+            url.append(separator).append("path").append('=').append(exportPath);
+            separator = '&';
         }
 
-        if (!Strings.isNullOrEmpty(revision)) {
-            url.append(prefix).append("revision").append('=').append(revision);
+        if (!isNullOrEmpty(revision)) {
+            url.append(separator).append("revision").append('=').append(revision);
         }
 
         Window.open(url.toString(), "_self", "");
+        notification.setTitle(constants.exportSuccessful(exportPath));
+        notification.setStatus(SUCCESS);
     }
 
     /** {@inheritDoc} */

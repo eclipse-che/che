@@ -64,7 +64,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         view.setDelegate(new ShowLogsView.Delegate() {
             @Override
             public void logClicked() {
-                String range = view.rangeFiend().getValue();
+                String range = view.rangeField().getValue();
                 if (range != null && !range.trim().isEmpty()) {
                     view.hide();
                     showLogs(range);
@@ -98,7 +98,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
 
                         SubversionItem subversionItem = result.getItems().get(0);
                         view.setRevisionCount(subversionItem.getRevision());
-                        view.rangeFiend().setValue("1:" + subversionItem.getRevision());
+                        view.rangeField().setValue("1:" + subversionItem.getRevision());
                         view.show();
                     }
 
