@@ -12,18 +12,22 @@ package org.eclipse.che.ide.ext.debugger.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.debug.BreakpointManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
+
+import java.util.Collections;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Action which allows remove all breakpoints
  *
  * @author Mykola Morhun
  */
-public class DeleteAllBreakpointsAction extends Action {
+public class DeleteAllBreakpointsAction extends AbstractPerspectiveAction {
 
     private final BreakpointManager breakpointManager;
 
@@ -31,8 +35,11 @@ public class DeleteAllBreakpointsAction extends Action {
     public DeleteAllBreakpointsAction(BreakpointManager breakpointManager,
                                       DebuggerLocalizationConstant locale,
                                       DebuggerResources resources) {
-        super(locale.deleteAllBreakpoints(), locale.deleteAllBreakpointsDescription() , null, resources.deleteAllBreakpoints());
-
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.deleteAllBreakpoints(),
+              locale.deleteAllBreakpointsDescription(),
+              null,
+              resources.deleteAllBreakpoints());
         this.breakpointManager = breakpointManager;
     }
 
@@ -42,8 +49,7 @@ public class DeleteAllBreakpointsAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setEnabled(!breakpointManager.getBreakpointList().isEmpty());
+    public void updateInPerspective(ActionEvent event) {
+        event.getPresentation().setEnabled(!breakpointManager.getBreakpointList().isEmpty());
     }
-
 }

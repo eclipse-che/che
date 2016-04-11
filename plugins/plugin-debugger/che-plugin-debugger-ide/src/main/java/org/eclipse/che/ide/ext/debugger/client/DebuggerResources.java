@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.debugger.client;
 
 import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -53,4 +54,19 @@ public interface DebuggerResources extends ClientBundle {
     @Source("separator.svg")
     SVGResource separator();
 
+    /** Returns the icon for debug configurations list on central toolbar. */
+    @Source("debug-icon.svg")
+    SVGResource debugIcon();
+
+    /** Returns the CSS resource for the Debugger extension. */
+    @Source({"debugger.css", "org/eclipse/che/ide/api/ui/style.css"})
+    Css getCss();
+
+    /** The CssResource interface for the Debugger extension. */
+    interface Css extends CssResource {
+
+        String selectConfigurationBox();
+
+        String selectConfigurationsBoxIconPanel();
+    }
 }

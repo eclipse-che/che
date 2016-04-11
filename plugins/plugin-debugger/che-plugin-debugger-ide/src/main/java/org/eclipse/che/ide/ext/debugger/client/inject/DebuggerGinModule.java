@@ -14,6 +14,8 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.ext.debugger.client.configuration.EditDebugConfigurationsView;
+import org.eclipse.che.ide.ext.debugger.client.configuration.EditDebugConfigurationsViewImpl;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerToolbar;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerView;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerViewImpl;
@@ -25,7 +27,10 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.storage.BrowserLocalStorageProviderImpl;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
-/** @author Andrey Plotnikov */
+/**
+ * @author Andrey Plotnikov
+ * @author Artem Zatsarynnyi
+ */
 @ExtensionGinModule
 public class DebuggerGinModule extends AbstractGinModule {
 
@@ -34,6 +39,8 @@ public class DebuggerGinModule extends AbstractGinModule {
         bind(DebuggerView.class).to(DebuggerViewImpl.class).in(Singleton.class);
         bind(EvaluateExpressionView.class).to(EvaluateExpressionViewImpl.class).in(Singleton.class);
         bind(ChangeValueView.class).to(ChangeValueViewImpl.class).in(Singleton.class);
+        bind(EditDebugConfigurationsView.class).to(EditDebugConfigurationsViewImpl.class).in(Singleton.class);
+
         bind(LocalStorageProvider.class).to(BrowserLocalStorageProviderImpl.class).in(Singleton.class);
         bind(ToolbarPresenter.class).annotatedWith(DebuggerToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
     }

@@ -12,19 +12,23 @@ package org.eclipse.che.ide.ext.debugger.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerPresenter;
 import org.eclipse.che.ide.ext.debugger.client.debug.changevalue.ChangeValuePresenter;
 
+import java.util.Collections;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
 /**
  * Action which allows change value of selected variable with debugger
  *
  * @author Mykola Morhun
  */
-public class ChangeVariableValueAction extends Action {
+public class ChangeVariableValueAction extends AbstractPerspectiveAction {
 
     private final ChangeValuePresenter changeValuePresenter;
     private final DebuggerPresenter    debuggerPresenter;
@@ -34,8 +38,11 @@ public class ChangeVariableValueAction extends Action {
                                      DebuggerResources resources,
                                      ChangeValuePresenter changeValuePresenter,
                                      DebuggerPresenter debuggerPresenter) {
-        super(locale.changeVariableValue(), locale.changeVariableValueDescription(), null, resources.changeVariableValue());
-
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.changeVariableValue(),
+              locale.changeVariableValueDescription(),
+              null,
+              resources.changeVariableValue());
         this.changeValuePresenter = changeValuePresenter;
         this.debuggerPresenter = debuggerPresenter;
     }
@@ -46,8 +53,7 @@ public class ChangeVariableValueAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
-        e.getPresentation().setEnabled(debuggerPresenter.getSelectedVariable() != null);
+    public void updateInPerspective(ActionEvent event) {
+        event.getPresentation().setEnabled(debuggerPresenter.getSelectedVariable() != null);
     }
-
 }
