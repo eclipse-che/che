@@ -874,7 +874,9 @@ public final class CronExpression implements Serializable, Cloneable {
     }
 
     protected int findNextWhiteSpace(int i, String s) {
-        for (; i < s.length() && (s.charAt(i) != ' ' || s.charAt(i) != '\t'); i++) {}
+        for (; i < s.length() && (s.charAt(i) != ' ' || s.charAt(i) != '\t'); i++) {
+            ;
+        }
 
         return i;
     }
@@ -1145,7 +1147,7 @@ public final class CronExpression implements Serializable, Cloneable {
 
             // get hour...................................................
             st = hours.tailSet(hr);
-            if (st != null && st.size() != 0) {
+            if (st.size() != 0) {
                 t = hr;
                 hr = st.first();
             } else {
