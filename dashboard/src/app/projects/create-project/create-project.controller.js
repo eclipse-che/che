@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document, routeHistory) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -35,6 +35,16 @@ export class CreateProjectCtrl {
     this.lodash = lodash;
     this.$q = $q;
     this.$document = $document;
+
+    if ($routeParams.resetProgress) {
+      this.resetCreateProgress();
+
+      routeHistory.popCurrentPath();
+
+      // remove param
+      $location.search({});
+      $location.replace();
+    }
 
     // JSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
