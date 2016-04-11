@@ -94,6 +94,13 @@ public class CommitViewImpl extends Window implements CommitView {
 
     private static final String PLACEHOLDER = "placeholder";
 
+    private static final String ADDED      = org.eclipse.che.ide.api.theme.Style.getVcsConsoleStagedFilesColor();
+    private static final String CONFLICTED = org.eclipse.che.ide.api.theme.Style.getVcsConsoleErrorColor();
+    private static final String DELETED    = org.eclipse.che.ide.api.theme.Style.getVcsConsoleErrorColor();
+    private static final String MODIFIED   = org.eclipse.che.ide.api.theme.Style.getVcsConsoleModifiedFilesColor();
+    private static final String REPLACED   = org.eclipse.che.ide.api.theme.Style.getVcsConsoleModifiedFilesColor();
+    private static final String DEFAULT    = org.eclipse.che.ide.api.theme.Style.getMainFontColor();
+
     @Inject
     public CommitViewImpl(final SubversionExtensionLocalizationConstants constants,
                           final SubversionExtensionResources resources,
@@ -118,10 +125,9 @@ public class CommitViewImpl extends Window implements CommitView {
                 delegate.onCommitClicked();
             }
         });
-        btnCommit.addStyleName(windowResources.windowCss().button());
 
-        getFooter().add(btnCancel);
-        getFooter().add(btnCommit);
+        addButtonToFooter(btnCancel);
+        addButtonToFooter(btnCommit);
 
         btnCommit.setEnabled(false);
 
@@ -152,7 +158,7 @@ public class CommitViewImpl extends Window implements CommitView {
         alertMarker = resources.alert().getSvg();
         alertMarker.getStyle().setWidth(22, Style.Unit.PX);
         alertMarker.getStyle().setHeight(22, Style.Unit.PX);
-        alertMarker.getStyle().setMargin(10, Style.Unit.PX);
+        alertMarker.getStyle().setMarginTop(5, Style.Unit.PX);
         getFooter().getElement().appendChild(alertMarker.getElement());
 
         Tooltip.create((elemental.dom.Element)alertMarker.getElement(),
@@ -230,15 +236,6 @@ public class CommitViewImpl extends Window implements CommitView {
 
     private class ChangesListRenderer extends SimpleList.ListItemRenderer<StatusItem> {
 
-        class FileStatusColor {
-            private static final String ADDED      = "#629755";
-            private static final String CONFLICTED = "#a23239";
-            private static final String DELETED    = "#5c6b5d";
-            private static final String MODIFIED   = "#6897bb";
-            private static final String REPLACED   = "#629755";
-            private static final String DEFAULT    = "#dbdbdb";
-        }
-
         /** {@inheritDoc} */
         @Override
         public void render(Element listItemBase, StatusItem itemData) {
@@ -262,6 +259,7 @@ public class CommitViewImpl extends Window implements CommitView {
             htmlNode.setInnerText(item.getFileState().getValue());
             htmlNode.setWidth("16px");
             htmlNode.setAlign("center");
+            htmlNode.getStyle().setPaddingTop("3px");
             htmlNode.getStyle().setFontSize("11px");
             return htmlNode;
         }
@@ -282,7 +280,7 @@ public class CommitViewImpl extends Window implements CommitView {
                 String rawPath = item.getPath().substring(0, item.getPath().length() - pathElements[pathElements.length - 1].length() - 1);
                 String escapedPath = new SafeHtmlBuilder().appendEscaped(rawPath).toSafeHtml().asString();
 
-                sb.append(" <span style=\"color:#999999\">(");
+                sb.append(" <span>(");
                 sb.append(escapedPath);
                 sb.append(")</span>");
             }
@@ -343,17 +341,17 @@ public class CommitViewImpl extends Window implements CommitView {
         private String getChangedItemColor(StatusItem item) {
             switch (item.getFileState()) {
                 case ADDED:
-                    return FileStatusColor.ADDED;
+                    return ADDED;
                 case CONFLICTED:
-                    return FileStatusColor.CONFLICTED;
+                    return CONFLICTED;
                 case DELETED:
-                    return FileStatusColor.DELETED;
+                    return DELETED;
                 case MODIFIED:
-                    return FileStatusColor.MODIFIED;
+                    return MODIFIED;
                 case REPLACED:
-                    return FileStatusColor.REPLACED;
+                    return REPLACED;
                 default:
-                    return FileStatusColor.DEFAULT;
+                    return DEFAULT;
             }
         }
     }

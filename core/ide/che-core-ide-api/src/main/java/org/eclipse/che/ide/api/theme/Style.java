@@ -564,16 +564,23 @@ public class Style {
         return theme.getListBoxDropdownBackgroundColor();
     }
 
-    public static String getGitConsoleStagedFilesColor() {
-        return theme.gitConsoleStagedFilesColor();
+    public static String getVcsConsoleStagedFilesColor() {
+        return theme.vcsConsoleStagedFilesColor();
     }
 
-    public static String getGitConsoleUnstagedFilesColor() {
-        return theme.gitConsoleUnstagedFilesColor();
+    public static String getVcsConsoleUnstagedFilesColor() {
+        return theme.vcsConsoleUnstagedFilesColor();
     }
 
-    public static String getGitConsoleErrorColor() {
-        return theme.gitConsoleErrorColor();
+    public static String getVcsConsoleErrorColor() {
+        return theme.vcsConsoleErrorColor();
     }
 
+    public static String getVcsConsoleModifiedFilesColor() {
+        return theme.vcsConsoleModifiedFilesColor();
+    }
+
+    public static String getVcsConsoleChangesLineNumbersColor() {
+        return theme.vcsConsoleChangesLineNumbersColor();
+    }
 }

@@ -101,13 +101,13 @@ public class StatusCommandPresenter {
         boolean stagedChangesAlreadyPrinted = false;
         for (String line : statusLines) {
             if ((line.startsWith("\t") || line.startsWith("#\t")) && containsStagedChanges && !stagedChangesAlreadyPrinted) {
-                console.print(line, Style.getGitConsoleStagedFilesColor());
+                console.print(line, Style.getVcsConsoleStagedFilesColor());
                 if (statusLines.indexOf(line) == statusLines.size() - 1 || statusLines.get(statusLines.indexOf(line) + 1).equals("")) {
                     stagedChangesAlreadyPrinted = true;
                 }
                 continue;
             } else if ((line.startsWith("\t") || line.startsWith("#\t"))) {
-                console.print(line, Style.getGitConsoleUnstagedFilesColor());
+                console.print(line, Style.getVcsConsoleUnstagedFilesColor());
                 continue;
             }
             console.print(line);

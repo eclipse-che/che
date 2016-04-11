@@ -1441,17 +1441,27 @@ public class DarkTheme implements Theme {
     }
 
     @Override
-    public String gitConsoleStagedFilesColor() {
+    public String vcsConsoleStagedFilesColor() {
         return "lightgreen";
     }
 
     @Override
-    public String gitConsoleUnstagedFilesColor() {
+    public String vcsConsoleUnstagedFilesColor() {
         return "#F62217";
     }
 
     @Override
-    public String gitConsoleErrorColor() {
+    public String vcsConsoleErrorColor() {
         return "#F62217";
+    }
+
+    @Override
+    public String vcsConsoleModifiedFilesColor() {
+        return "#FF7F50";
+    }
+
+    @Override
+    public String vcsConsoleChangesLineNumbersColor() {
+        return "#00FFFF";
     }
 }

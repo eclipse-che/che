@@ -42,7 +42,6 @@
 
         .block-header hr {
             border: 0;
-            border-bottom: 1px solid #505050;
             padding-top: 1px;
         }
 

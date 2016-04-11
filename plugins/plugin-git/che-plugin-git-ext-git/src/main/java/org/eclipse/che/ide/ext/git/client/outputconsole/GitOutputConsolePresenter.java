@@ -90,7 +90,7 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
 
     @Override
     public void printError(String text) {
-        print(text, Style.getGitConsoleErrorColor());
+        print(text, Style.getVcsConsoleErrorColor());
     }
 
     /** {@inheritDoc} */
