@@ -11,12 +11,24 @@
 package org.eclipse.che.ide.gdb.client;
 
 import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.gdb.client.configuration.GdbConfigurationPageView;
+import org.eclipse.che.ide.gdb.client.configuration.GdbConfigurationPageViewImpl;
+import org.eclipse.che.ide.gdb.client.configuration.GdbConfigurationType;
 
-/** @author Anatolii Bazko */
+/**
+ * @author Anatolii Bazko
+ * @author Artem Zatsarynnyi
+ */
 @ExtensionGinModule
 public class GdbGinModule extends AbstractGinModule {
     @Override
-    protected void configure() { }
+    protected void configure() {
+        GinMultibinder.newSetBinder(binder(), DebugConfigurationType.class).addBinding().to(GdbConfigurationType.class);
+        bind(GdbConfigurationPageView.class).to(GdbConfigurationPageViewImpl.class).in(Singleton.class);
+    }
 }

@@ -12,27 +12,34 @@ package org.eclipse.che.ide.ext.debugger.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
 
+import java.util.Collections;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
 /**
  * Action which allows disconnect debugger from running process
  *
  * @author Mykola Morhun
  */
-public class DisconnectDebuggerAction extends Action {
+public class DisconnectDebuggerAction extends AbstractPerspectiveAction {
     private final DebuggerManager debuggerManager;
 
     @Inject
     public DisconnectDebuggerAction(DebuggerManager debuggerManager,
                                     DebuggerLocalizationConstant locale,
                                     DebuggerResources resources) {
-        super(locale.disconnectDebugger(), locale.disconnectDebuggerDescription(), null, resources.disconnectDebugger());
-
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.disconnectDebugger(),
+              locale.disconnectDebuggerDescription(),
+              null,
+              resources.disconnectDebugger());
         this.debuggerManager = debuggerManager;
     }
 
@@ -45,9 +52,8 @@ public class DisconnectDebuggerAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
+    public void updateInPerspective(ActionEvent event) {
         Debugger debugger = debuggerManager.getActiveDebugger();
-        e.getPresentation().setEnabled(debugger != null && debugger.isConnected());
+        event.getPresentation().setEnabled(debugger != null && debugger.isConnected());
     }
-
 }

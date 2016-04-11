@@ -161,7 +161,7 @@ public class MachineExtension {
         final DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
         final DefaultActionGroup machineToolbarGroup = new DefaultActionGroup(GROUP_MACHINE_TOOLBAR, false, actionManager);
         actionManager.registerAction(GROUP_MACHINE_TOOLBAR, machineToolbarGroup);
-        centerToolbarGroup.add(machineToolbarGroup);
+        centerToolbarGroup.add(machineToolbarGroup, FIRST);
         machineToolbarGroup.add(selectCommandAction);
         final DefaultActionGroup executeToolbarGroup = new DefaultActionGroup(actionManager);
         executeToolbarGroup.add(executeSelectedCommandAction);
