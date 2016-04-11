@@ -46,7 +46,7 @@
             </div>
         </div>
 
-        <che-list>
+        <che-list class="github-create-project-repositories-list">
             <che-list-item ng-repeat="gitHubRepository in createProjectGithubCtrl.gitHubRepositories | githubFilterRepositories:createProjectGithubCtrl.organizationName:createProjectGithubCtrl.repositoryName | orderBy:'name'"
                             ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository)" flex-gt-sm="100" flex="33" ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
 
