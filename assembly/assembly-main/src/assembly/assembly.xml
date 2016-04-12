@@ -58,9 +58,9 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>lib/linux_amd64</outputDirectory>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal</include>
+                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_amd64</include>
             </includes>
             <unpackOptions>
                 <excludes>

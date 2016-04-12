@@ -117,6 +117,7 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-websocket-terminal</artifactId>
             <type>zip</type>
+            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -213,6 +214,7 @@
                                     <groupId>org.eclipse.che.lib</groupId>
                                     <artifactId>che-websocket-terminal</artifactId>
                                     <version>${che.websocket.terminal.version}</version>
+                                    <classifier>linux_amd64</classifier>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
                                 </artifactItem>
