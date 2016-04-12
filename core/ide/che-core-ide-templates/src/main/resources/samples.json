@@ -22,6 +22,193 @@
       "blank"
     ]
   },
+    {
+    "name": "console-python3-simple",
+    "displayName": "console-python3.5-simple",
+    "path": "/console-python3-simple",
+    "description": "Simple Python3.5 Project.",
+    "projectType": "python",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "ruby"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/console-python3-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && python main.py",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Python 3.5"
+    ]
+  },
+  {
+    "name": "web-python2.7-simple",
+    "displayName": "web-python2.7-simple",
+    "path": "/web-python2.7-simple",
+    "description": "Simple Python2.7 Project.",
+    "projectType": "python",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "ruby"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-python2.7-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && sudo virtualenv /env && sudo pip install -r requirements.txt && python main.py",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Python 2.7"
+    ]
+  },
+{
+    "name": "web-rails-simple",
+    "displayName": "web-rails-simple",
+    "path": "/web-rails-simple",
+    "description": "Simple Rails Project.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "rails"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-rails-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "install dependencies",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && sudo bundle install",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && sudo rails server -b 0.0.0.0",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "ruby",
+      "rails"
+    ]
+  },
+  {
+    "name": "console-ruby-simple",
+    "displayName": "console-ruby-simple",
+    "path": "/console-ruby-simple",
+    "description": "Simple Ruby Project.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "ruby"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/console-ruby-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && ruby main.rb",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "ruby",
+      "rails"
+    ]
+  },
+
+  {
+    "name": "nodejs-hello-world",
+    "displayName": "nodejs-hello-world",
+    "path": "/nodejs-hello-world",
+    "description": "Simple NodeJS Project.",
+    "projectType": "node-js",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "ruby"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-nodejs-sample.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && node app/app.js",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "nodejs",
+      "javascript"
+    ]
+  },
   {
     "name": "web-java-spring",
     "displayName": "web-java-spring",
