@@ -75,6 +75,9 @@ public interface SubversionProjectImporterView extends View<SubversionProjectImp
     /** Return user password. */
     String getPassword();
 
+    /** Clean username and password fields */
+    void cleanCredentials();
+
     /**
      * Set the enable state of the inputs.
      *

@@ -31,6 +31,8 @@ import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 import org.eclipse.che.plugin.svn.shared.ImportParameterKeys;
 import org.slf4j.LoggerFactory;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * Implementation of {@link ProjectImporter} for Subversion.
  */
@@ -80,38 +82,40 @@ public class SubversionProjectImporter implements ProjectImporter {
         }
 
         final String location = sourceStorage.getLocation();
-        final Map<String,String> parameters = sourceStorage.getParameters();
+        final Map<String, String> parameters = sourceStorage.getParameters();
 
-        // can't store the credentials yet, no workspaceId/projectId
         String[] credentials = null;
-        String username = "";
-        String password = "";
+
         if (parameters != null) {
             String paramUsername = parameters.get(ImportParameterKeys.PARAMETER_USERNAME);
-            if (paramUsername != null) {
-                username = paramUsername;
-            }
             String paramPassword = parameters.get(ImportParameterKeys.PARAMETER_PASSWORD);
-            if (paramPassword != null) {
-                password = paramPassword;
-            }
-            credentials = new String[]{username, password};
-            try {
-                this.credentialsProvider.storeCredential(location, new CredentialsProvider.Credentials(username, password));
-            } catch (final CredentialsException e) {
-                LoggerFactory.getLogger(SubversionProjectImporter.class.getName())
-                             .warn("Could not store credentials - try to continue anyway." + e.getMessage());
+
+            if (!isNullOrEmpty(paramUsername) && !isNullOrEmpty(paramPassword)) {
+                credentials = new String[] {paramUsername, paramPassword};
+                try {
+                    this.credentialsProvider.storeCredential(location, new CredentialsProvider.Credentials(paramUsername, paramPassword));
+                } catch (final CredentialsException e) {
+                    LoggerFactory.getLogger(SubversionProjectImporter.class.getName())
+                                 .warn("Could not store credentials - try to continue anyway." + e.getMessage());
+                }
             }
         }
 
         this.subversionApi.setOutputLineConsumerFactory(lineConsumerFactory);
 
         // Perform checkout
-        this.subversionApi.checkout(DtoFactory.getInstance()
-                                              .createDto(CheckoutRequest.class)
-                                              .withProjectPath(baseFolder.getVirtualFile().toIoFile().getAbsolutePath())
-                                              .withUrl(location),
-                                    credentials);
+        if (credentials != null) {
+            this.subversionApi.checkout(DtoFactory.getInstance()
+                                                  .createDto(CheckoutRequest.class)
+                                                  .withProjectPath(baseFolder.getVirtualFile().toIoFile().getAbsolutePath())
+                                                  .withUrl(location),
+                                        credentials);
+        } else {
+            this.subversionApi.checkout(DtoFactory.getInstance()
+                                                  .createDto(CheckoutRequest.class)
+                                                  .withProjectPath(baseFolder.getVirtualFile().toIoFile().getAbsolutePath())
+                                                  .withUrl(location));
+        }
     }
 
     @Override

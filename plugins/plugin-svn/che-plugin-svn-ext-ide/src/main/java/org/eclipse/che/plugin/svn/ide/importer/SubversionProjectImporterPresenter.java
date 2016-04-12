@@ -72,6 +72,9 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Proje
         view.setProjectDescription(dataObject.getDescription());
         view.setProjectUrl(dataObject.getSource().getLocation());
 
+        view.cleanCredentials();
+        onCredentialsChanged();
+
         container.setWidget(view);
 
         view.setInputsEnableState(true);

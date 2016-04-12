@@ -175,6 +175,15 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
         return password.getText();
     }
 
+    /**
+     * Clean username and password fields
+     */
+    @Override
+    public void cleanCredentials() {
+        username.setText("");
+        password.setText("");
+    }
+
     @UiHandler("projectUrl")
     void onProjectUrlChanged(KeyUpEvent event) {
         delegate.onProjectUrlChanged(projectUrl.getValue());
