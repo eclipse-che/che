@@ -1,7 +1,6 @@
 <div>
   <md-tabs md-dynamic-height md-stretch-tabs="always">
-    <md-tab che-event-logger="new.project/select-ready-to-go-stack"
-            md-on-select="workspaceSelectStackCtrl.setStackTab('ready-to-go')">
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('ready-to-go')">
       <md-tab-label>
         <md-icon md-font-icon="fa-magic" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Ready-to-go Stacks</span>
@@ -15,8 +14,7 @@
           ></ready-to-go-stacks>
       </md-tab-body>
     </md-tab>
-    <md-tab che-event-logger="new.project/stack-library"
-            md-on-select="workspaceSelectStackCtrl.setStackTab('stack-library')">
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-library')">
       <md-tab-label>
         <md-icon md-font-icon="fa-sliders" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Stack library</span>
@@ -25,8 +23,7 @@
         <create-project-stack-library che-stacks="workspaceSelectStackCtrl.stacks"></create-project-stack-library>
       </md-tab-body>
     </md-tab>
-    <md-tab che-event-logger="new.project/custom-stack"
-            md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_input_24px" class="che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Custom stack</span>

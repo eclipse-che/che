@@ -133,7 +133,7 @@
 
       <div ng-show="createProjectCtrl.selectSourceOption === 'select-source-existing'">
         <md-tabs md-stretch-tabs="always" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
-          <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')" che-event-logger="new.project/git">
+          <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')">
             <md-tab-label>
               <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Git Repository</span>
@@ -142,7 +142,7 @@
               <create-project-git class="projects-create-project-tab" layout="column"></create-project-git>
             </md-tab-body>
           </md-tab>
-          <md-tab md-on-select="createProjectCtrl.setCurrentTab('github')" che-event-logger="new.project/github">
+          <md-tab md-on-select="createProjectCtrl.setCurrentTab('github')">
             <md-tab-label>
               <md-icon md-font-icon="fa-github" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Github</span>
@@ -159,7 +159,7 @@
 
             </md-tab-body>
           </md-tab>
-          <md-tab md-on-select="createProjectCtrl.setCurrentTab('zip')" che-event-logger="new.project/zip">
+          <md-tab md-on-select="createProjectCtrl.setCurrentTab('zip')">
             <md-tab-label>
               <md-icon md-font-icon="fa-file-archive-o" class="fa che-tab-label-icon"></md-icon>
               <span class="che-tab-label-title">Zip</span>
