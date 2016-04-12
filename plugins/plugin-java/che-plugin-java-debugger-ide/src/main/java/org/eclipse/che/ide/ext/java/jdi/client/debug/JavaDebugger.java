@@ -16,10 +16,12 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.debugger.client.debug.AbstractDebugger;
+import org.eclipse.che.ide.ext.debugger.client.fqn.FqnResolver;
 import org.eclipse.che.ide.ext.debugger.client.fqn.FqnResolverFactory;
 import org.eclipse.che.ide.ext.debugger.shared.Location;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
@@ -65,7 +67,7 @@ public class JavaDebugger extends AbstractDebugger {
     }
 
     @Override
-    protected List<String> resolveFilePathByLocation(@NotNull Location location) {
+    protected List<String> fqnToPath(@NotNull Location location) {
         CurrentProject currentProject = appContext.getCurrentProject();
 
         if (currentProject == null) {
@@ -83,6 +85,21 @@ public class JavaDebugger extends AbstractDebugger {
         filePaths.add(location.getClassName());
 
         return filePaths;
+    }
+
+    @Override
+    protected String pathToFqn(VirtualFile file) {
+        List<String> mimeTypes = fileTypeRegistry.getFileTypeByFile(file).getMimeTypes();
+
+        if (!mimeTypes.isEmpty()) {
+            String mediaType = mimeTypes.get(0);
+            FqnResolver resolver = fqnResolverFactory.getResolver(mediaType);
+            if (resolver != null) {
+                return resolver.resolveFqn(file);
+            }
+        }
+
+        return null;
     }
 
     @Override

@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public class GdbInfoLine {
 
-    private static final Pattern GDB_INFO_LINE = Pattern.compile("Line ([0-9]*) of \"(.*)\" starts at .*");
+    private static final Pattern GDB_INFO_LINE = Pattern.compile("Line ([0-9]*) of \"(.*)\"\\s*starts at .*");
 
     private final Location location;
 
@@ -53,6 +53,6 @@ public class GdbInfoLine {
             return new GdbInfoLine(location);
         }
 
-        throw new GdbParseException(GdbTargetRemote.class, output);
+        throw new GdbParseException(GdbInfoLine.class, output);
     }
 }

@@ -28,7 +28,7 @@ import java.util.Map;
 @Singleton
 public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.ActionDelegate, DebugConfigurationPage<DebugConfiguration> {
 
-    public static final String BIN_PATH_CONNECTION_PROPERTY = "binary-path";
+    public static final String BIN_PATH_CONNECTION_PROPERTY = "BINARY";
 
     private final GdbConfigurationPageView view;
 

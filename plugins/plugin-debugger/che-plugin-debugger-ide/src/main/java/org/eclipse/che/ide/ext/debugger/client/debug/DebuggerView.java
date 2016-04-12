@@ -45,12 +45,10 @@ public interface DebuggerView extends View<DebuggerView.ActionDelegate> {
     /**
      * Sets information about the execution point.
      *
-     * @param absentInformation
-     *         availability status for variables
      * @param location
      *         information about the execution point
      */
-    void setExecutionPoint(boolean absentInformation, @NotNull Location location);
+    void setExecutionPoint(@NotNull Location location);
 
     /**
      * Sets variables.

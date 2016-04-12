@@ -209,17 +209,12 @@ public class DebuggerViewImpl extends BaseView<DebuggerView.ActionDelegate> impl
 
     /** {@inheritDoc} */
     @Override
-    public void setExecutionPoint(boolean existInformation, @Nullable Location location) {
+    public void setExecutionPoint(@Nullable Location location) {
         StringBuilder labelText = new StringBuilder();
         if (location != null) {
             labelText.append("{").append(location.getClassName()).append(":").append(location.getLineNumber()).append("} ");
         }
-        if (existInformation) {
-            executionPoint.getElement().setClassName(coreRes.coreCss().defaultFont());
-        } else {
-            labelText.append(locale.absentInformationVariables());
-            executionPoint.getElement().setClassName(coreRes.coreCss().warningFont());
-        }
+        executionPoint.getElement().setClassName(coreRes.coreCss().defaultFont());
         executionPoint.setText(labelText.toString());
     }
 

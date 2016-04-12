@@ -22,9 +22,12 @@ import org.eclipse.che.ide.ext.debugger.shared.StackFrameDump;
 import org.eclipse.che.ide.ext.debugger.shared.StepEvent;
 import org.eclipse.che.ide.ext.debugger.shared.Value;
 import org.eclipse.che.ide.ext.debugger.shared.Variable;
+import org.eclipse.che.ide.ext.debugger.shared.VariablePath;
 import org.eclipse.che.ide.gdb.server.parser.GdbContinue;
+import org.eclipse.che.ide.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoLine;
+import org.eclipse.che.ide.gdb.server.parser.GdbInfoProgram;
 import org.eclipse.che.ide.gdb.server.parser.GdbParseException;
 import org.eclipse.che.ide.gdb.server.parser.GdbPrint;
 import org.eclipse.che.ide.gdb.server.parser.GdbRun;
@@ -111,7 +114,9 @@ public class GdbDebugger {
         Gdb gdb;
         try {
             gdb = Gdb.start();
-            gdb.directory(srcDirectory);
+            GdbDirectory directory = gdb.directory(srcDirectory);
+            LOG.debug("Source directories: " + directory.getDirectories());
+
             gdb.file(file);
             if (port > 0) {
                 gdb.targetRemote(host, port);
@@ -135,7 +140,7 @@ public class GdbDebugger {
     public static GdbDebugger getInstance(String id) throws GdbDebuggerException {
         GdbDebugger gdbDebugger = instances.get(id);
         if (gdbDebugger == null) {
-            throw new GdbDebuggerException("Instance " + id + " not found");
+            throw new GdbDebuggerNotFoundException("Instance " + id + " not found");
         }
 
         return gdbDebugger;
@@ -234,7 +239,7 @@ public class GdbDebugger {
         try {
             Breakpoint breakpoint;
 
-            if (getPort() > 0) {
+            if (isRemoteConnection()) {
                 GdbContinue gdbContinue = gdb.cont();
                 breakpoint = gdbContinue.getBreakpoint();
             } else {
@@ -250,10 +255,19 @@ public class GdbDebugger {
                 DebuggerEventList debuggerEventList = newDto(DebuggerEventList.class);
                 debuggerEventList.withEvents(Collections.singletonList(breakpointEvent));
                 publishWebSocketMessage(debuggerEventList, EVENTS_CHANNEL + id);
+            } else {
+                GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
+                if (gdbInfoProgram.getStoppedAddress() == null) {
+                    disconnect();
+                }
             }
         } catch (IOException | GdbParseException | InterruptedException e) {
             throw new GdbDebuggerException("Error during running.", e);
         }
+    }
+
+    private boolean isRemoteConnection() {
+        return getPort() > 0;
     }
 
     /**
@@ -262,6 +276,10 @@ public class GdbDebugger {
     public void stepOver() throws GdbDebuggerException {
         try {
             GdbInfoLine gdbInfoLine = gdb.next();
+            if (gdbInfoLine == null) {
+                disconnect();
+                return;
+            }
 
             StepEvent stepEvent = newDto(StepEvent.class);
             stepEvent.setType(DebuggerEvent.STEP);
@@ -281,6 +299,10 @@ public class GdbDebugger {
     public void stepInto() throws GdbDebuggerException {
         try {
             GdbInfoLine gdbInfoLine = gdb.step();
+            if (gdbInfoLine == null) {
+                disconnect();
+                return;
+            }
 
             StepEvent stepEvent = newDto(StepEvent.class);
             stepEvent.setType(DebuggerEvent.STEP);
@@ -300,6 +322,10 @@ public class GdbDebugger {
     public void stepOut() throws GdbDebuggerException {
         try {
             GdbInfoLine gdbInfoLine = gdb.finish();
+            if (gdbInfoLine == null) {
+                disconnect();
+                return;
+            }
 
             StepEvent stepEvent = newDto(StepEvent.class);
             stepEvent.setType(DebuggerEvent.STEP);
@@ -329,6 +355,11 @@ public class GdbDebugger {
                 DebuggerEventList debuggerEventList = newDto(DebuggerEventList.class);
                 debuggerEventList.withEvents(Collections.singletonList(breakpointEvent));
                 publishWebSocketMessage(debuggerEventList, EVENTS_CHANNEL + id);
+            } else {
+                GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
+                if (gdbInfoProgram.getStoppedAddress() == null) {
+                    disconnect();
+                }
             }
         } catch (IOException | GdbParseException | InterruptedException e) {
             throw new GdbDebuggerException("Resume error.", e);
@@ -386,11 +417,20 @@ public class GdbDebugger {
             List<Variable> variables = new ArrayList<>();
             for (Map.Entry<String, String> e : locals.entrySet()) {
                 String varName = e.getKey();
+                String varValue = e.getValue();
+                String varType = gdb.ptype(varName).getType();
+
+                VariablePath variablePath = newDto(VariablePath.class);
+                variablePath.setPath(Collections.singletonList(varName));
 
                 Variable variable = newDto(Variable.class);
                 variable.setName(varName);
-                variable.setValue(e.getValue());
-                variable.setType(gdb.ptype(varName).getType());
+                variable.setValue(varValue);
+                variable.setType(varType);
+                variable.setVariablePath(variablePath);
+                variable.setExistInformation(true);
+                variable.setPrimitive(true);
+
                 variables.add(variable);
             }
 

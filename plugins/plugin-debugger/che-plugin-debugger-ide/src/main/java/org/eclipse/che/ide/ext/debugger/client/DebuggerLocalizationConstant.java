@@ -54,9 +54,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     @Key("variables")
     String variables();
 
-    @Key("absentInformationVariables")
-    String absentInformationVariables();
-
     @Key("stepInto")
     String stepInto();
 

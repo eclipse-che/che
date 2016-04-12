@@ -109,6 +109,8 @@ public abstract class GdbProcess {
                 GdbOutput gdbOutput = GdbOutput.of(buf.substring(0, indexOf));
                 outputs.add(gdbOutput);
 
+                LOG.debug(gdbOutput.getOutput());
+
                 buf.delete(0, indexOf + outputSeparator.length());
             }
         }
