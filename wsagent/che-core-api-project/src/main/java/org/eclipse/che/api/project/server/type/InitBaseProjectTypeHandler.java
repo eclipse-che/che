@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
 import java.util.List;
@@ -42,7 +43,10 @@ public class InitBaseProjectTypeHandler implements ProjectInitHandler {
                                                                                                         NotFoundException {
         List<String> projects = projectRegistry.getProjects(projectFolder.getPath().toString());
         for (String project : projects) {
-            projectRegistry.setProjectType(project, BaseProjectType.ID, false);
+            RegisteredProject detected = projectRegistry.getProject(project);
+            if (detected.isDetected()) {
+                projectRegistry.setProjectType(project, BaseProjectType.ID, false);
+            }
         }
     }
 }
