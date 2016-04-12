@@ -49,6 +49,9 @@ export class WorkspaceDetailsCtrl {
     } else {
       this.updateWorkspaceData();
     }
+
+    // show link 'Show more' if true
+    this.showShowMore = false;
   }
 
   //Update the workspace data to be displayed.
@@ -128,11 +131,15 @@ export class WorkspaceDetailsCtrl {
   }
 
   runWorkspace() {
+    this.showShowMore = true;
+
     this.ideSvc.init();
     this.ideSvc.setSelectedWorkspace(this.workspaceDetails);
     this.$rootScope.loadingIDE = false;
     let promise = this.ideSvc.startIde(true);
-    promise.then(() => {}, (error) => {
+    promise.then(() => {
+      this.showShowMore = false;
+    }, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
       this.$log.error(error);
     });

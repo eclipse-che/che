@@ -49,15 +49,15 @@
                 <che-link che-link-text="Show more"
                           ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}?showLogs" che-no-padding-
                           layout-align="end start"
-                          ng-show="workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING'"></che-link>
+                          ng-show="(workspaceDetailsCtrl.showShowMore === true && workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING')"></che-link>
               </div>
             </che-label-container>
             <div flex="none" flex-offset="5" layout="column" layout-align="end end">
-              <che-button-default ng-disabled="(workspaceDetailsCtrl.getWorkspaceStatus() !== 'STOPPED')"
-                                  ng-show="(workspaceDetailsCtrl.getWorkspaceStatus() === 'STOPPED' || workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING')"
+              <che-button-default ng-disabled="(workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING')"
+                                  ng-show="(workspaceDetailsCtrl.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsCtrl.getWorkspaceStatus() !== 'STOPPING')"
                                   che-button-title="Run" name="runButton"
                                   ng-click="workspaceDetailsCtrl.runWorkspace()"></che-button-default>
-              <che-button-default ng-disabled="(workspaceDetailsCtrl.getWorkspaceStatus() !== 'RUNNING')"
+              <che-button-default ng-disabled="(workspaceDetailsCtrl.getWorkspaceStatus() === 'STOPPING')"
                                   ng-show="(workspaceDetailsCtrl.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'STOPPING')"
                                   che-button-title="Stop" name="stopButton"
                                   ng-click="workspaceDetailsCtrl.stopWorkspace()"></che-button-default>
