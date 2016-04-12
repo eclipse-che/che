@@ -146,7 +146,13 @@ public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.Act
             return false;
         }
 
-        if (!HOST1.test(url) || !HOST2.test(url)) {
+        if (!HOST1.test(url)) {
+            view.markURLInvalid();
+            view.setURLErrorMessage(locale.gitUrlHostIncorrectMessage());
+            return false;
+        }
+
+        if (!HOST2.test(url)) {
             view.markURLInvalid();
             view.setURLErrorMessage(locale.gitUrlHostIncorrectMessage());
             return false;
