@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.rest.permission.PermissionManager;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -92,6 +93,7 @@ import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -145,6 +147,32 @@ public class WorkspaceServiceTest {
         assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
         verify(validator).validateConfig(any());
         verify(validator).validateAttributes(any());
+        verify(wsManager).createWorkspace(anyObject(),
+                                          anyString(),
+                                          eq(ImmutableMap.of("stackId", "stack123",
+                                                             "factoryId", "factory123",
+                                                             "custom", "custom:value")),
+                                          eq(null));
+    }
+
+    @Test
+    public void shouldStartTheWorkspaceAfterItIsCreatedWhenStartAfterCreateParamIsTrue() throws Exception {
+        final WorkspaceConfigDto configDto = createConfigDto();
+        final WorkspaceImpl workspace = createWorkspace(configDto);
+        when(wsManager.createWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+
+        given().auth()
+               .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+               .contentType("application/json")
+               .body(configDto)
+               .when()
+               .post(SECURE_PATH + "/workspace" +
+                     "?attribute=stackId:stack123" +
+                     "&attribute=factoryId:factory123" +
+                     "&attribute=custom:custom:value" +
+                     "&start-after-create=true");
+
+        verify(wsManager).startWorkspace(workspace.getId(), null, null);
         verify(wsManager).createWorkspace(anyObject(),
                                           anyString(),
                                           eq(ImmutableMap.of("stackId", "stack123",
@@ -252,7 +280,9 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldDeleteWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        when(wsManager.getSnapshot(anyString())).thenReturn(ImmutableList.of(mock(SnapshotImpl.class)));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -260,6 +290,7 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 204);
+        verify(machineManager).removeSnapshots(USER_ID, workspace.getId());
         verify(wsManager).removeWorkspace(workspace.getId());
     }
 
@@ -333,41 +364,7 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(wsManager).stopWorkspace(workspace.getId(), false);
-    }
-
-    @Test
-    public void workspaceStopShouldCreateSnapshotWhenUseBackParamIsSetToTrue() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .delete(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime?auto-snapshot=true");
-
-        assertEquals(response.getStatusCode(), 204);
-        verify(wsManager).stopWorkspace(workspace.getId(), true);
-    }
-
-    @Test
-    public void workspaceStartShouldUseSnapshotIfSnapshotExistsAndAuthUseSnapshotParamSetToTrue() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.recoverWorkspace(any(), any(), any())).thenReturn(workspace);
-        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime" +
-                                               "?environment=" + workspace.getConfig().getDefaultEnv() +
-                                               "&auto-restore=true");
-
-        assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(permissionManager).checkPermission(eq(Constants.START_WORKSPACE), any(), any());
-        verify(wsManager).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
-        verify(wsManager, never()).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
+        verify(wsManager).stopWorkspace(workspace.getId());
     }
 
     @Test

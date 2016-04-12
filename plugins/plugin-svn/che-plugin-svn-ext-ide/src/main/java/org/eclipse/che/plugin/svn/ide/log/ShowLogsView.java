@@ -54,6 +54,6 @@ public interface ShowLogsView {
      *
      * @return
      */
-    HasValue<String> rangeFiend();
+    HasValue<String> rangeField();
 
 }

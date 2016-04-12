@@ -29,13 +29,23 @@ export class CheAccordion {
 
     // scope values
     this.scope = {
-      index: '@cheIndex',
-      openCondition: '=cheOpenCondition'
+      openCondition: '=cheOpenCondition',
+      closeCondition: '=?cheCloseCondition'
     };
   }
 
   link($scope, element, attr, ctrl) {
     let currentBodyElement = element.find('.che-accordion-body');
+
+    if ($scope.closeCondition) {
+      $scope.$watch(() => {
+        return $scope.closeCondition;
+      }, (doClose) => {
+        if (doClose) {
+          element.addClass('che-accordion-closed');
+        }
+      });
+    }
 
     // automatic switching panes
     $scope.$watch(() => {

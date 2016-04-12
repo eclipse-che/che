@@ -265,17 +265,17 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
                 allPaths.add(path);
             }
         }
-        String commonPath = getCommonPath(allPaths);
-        boolean needToAddCommonFolder = !commonPath.isEmpty() && !allPaths.contains(commonPath);
-        if (needToAddCommonFolder) {
-            allPaths.add(commonPath);
+        List<String> commonPaths = getCommonPaths(allPaths);
+        for (String commonPath : commonPaths) {
+            if (!allPaths.contains(commonPath)) {
+                allPaths.add(commonPath);
+            }
         }
-        int commonPathDirectoriesAmount = Path.valueOf(commonPath).segmentCount();
 
         Map<String, Node> preparedNodes = new HashMap<>();
         for (int i = getMaxNestedLevel(allFiles); i > 0; i--) {
 
-            //Collect child files of all folders of current nesting level and map them to their folders
+            //Collect child files of all folders of current nesting level
             Map<String, List<Node>> currentChildNodes = new HashMap<>();
             for (String file : allFiles) {
                 Path pathName = Path.valueOf(file);
@@ -293,15 +293,16 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
                 }
             }
 
-            //Set collected files to new folders that they are related to and add them to prepared earlier map
-            if (needToAddCommonFolder && commonPathDirectoriesAmount == i) {
-                preparedNodes.put(commonPath, new ChangedFolderNode(commonPath, nodesResources));
-            } else {
-                for (String path : currentChildNodes.keySet()) {
-                    Node folder = new ChangedFolderNode(getFolders(allPaths, path), nodesResources);
-                    folder.setChildren(currentChildNodes.get(path));
-                    preparedNodes.put(path, folder);
+            //Map child files to related folders of current nesting level or just create a common folder
+            for (String path : allPaths) {
+                if (!(Path.valueOf(path).segmentCount() == i - 1)) {
+                    continue;
                 }
+                Node folder = new ChangedFolderNode(getTransitFolderName(allPaths, path), nodesResources);
+                if (currentChildNodes.keySet().contains(path)) {
+                    folder.setChildren(currentChildNodes.get(path));
+                }
+                preparedNodes.put(path, folder);
             }
 
             //Take all child folders and nest them to related parent folders of current nesting level
@@ -317,7 +318,7 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
                     continue;
                 }
                 Collections.sort(nodesToNest, new NameComparator());
-                if (!needToAddCommonFolder || commonPathDirectoriesAmount != i) {
+                if (currentChildNodes.keySet().contains(parentPath)) {
                     nodesToNest.addAll(currentChildNodes.get(parentPath));
                 }
                 if (parentPath.isEmpty()) {
@@ -327,10 +328,12 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
                 }
             }
         }
-        return new ArrayList<>(preparedNodes.values());
+        ArrayList<Node> nodes = new ArrayList<>(preparedNodes.values());
+        Collections.sort(nodes, new NameComparator());
+        return new ArrayList<>(nodes);
     }
 
-    private String getFolders(List<String> allPaths, String comparedPath) {
+    private String getTransitFolderName(List<String> allPaths, String comparedPath) {
         Path path = Path.valueOf(comparedPath);
         int segmentCount = path.segmentCount();
         for (int i = segmentCount; i > 0; i--) {
@@ -350,15 +353,28 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
         return level;
     }
 
-    private String getCommonPath(List<String> paths) {
-        Path commonPath = Path.valueOf(paths.get(0));
+    private List<String> getCommonPaths(List<String> allPaths) {
+        List<String> commonPaths = new ArrayList<>();
+        for (String path : allPaths) {
+            int pathIndex = allPaths.indexOf(path);
+            if (pathIndex + 1 == allPaths.size()) {
+                continue;
+            }
+            String commonPath = getCommonPath(allPaths.get(pathIndex), allPaths.get(pathIndex + 1));
+            if (!commonPath.isEmpty() && !commonPaths.contains(commonPath)) {
+                commonPaths.add(commonPath);
+            }
+        }
+        return commonPaths;
+    }
+
+    private String getCommonPath(String firstPath, String secondPath) {
+        Path commonPath = Path.valueOf(firstPath);
         int segmentCount = commonPath.segmentCount();
         for (int i = 1; i < segmentCount; i++) {
-            for (String currentPath : paths) {
-                String path = commonPath.removeLastSegments(segmentCount - i).toString();
-                if (!currentPath.startsWith(path)) {
-                    return Path.valueOf(path).removeLastSegments(1).toString();
-                }
+            String path = commonPath.removeLastSegments(segmentCount - i).toString();
+            if (!secondPath.startsWith(path)) {
+                return Path.valueOf(path).removeLastSegments(1).toString();
             }
         }
         return commonPath.toString();

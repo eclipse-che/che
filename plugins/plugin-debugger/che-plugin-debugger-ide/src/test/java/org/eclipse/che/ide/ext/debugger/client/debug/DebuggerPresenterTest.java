@@ -215,7 +215,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
         verify(view).setVariables(any());
         verify(view).setVMName(eq(""));
-        verify(view).setExecutionPoint(eq(true), eq(null));
+        verify(view).setExecutionPoint(eq(null));
     }
 
     @Test
@@ -224,7 +224,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
         verify(view).setVariables(any());
         verify(view).setVMName(eq(""));
-        verify(view).setExecutionPoint(eq(true), eq(null));
+        verify(view).setExecutionPoint(eq(null));
     }
 
     @Test
@@ -233,7 +233,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
         verify(view).setVariables(any());
         verify(view).setVMName(eq(""));
-        verify(view).setExecutionPoint(eq(true), eq(null));
+        verify(view).setExecutionPoint(eq(null));
     }
 
     @Test
@@ -242,7 +242,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
         verify(view).setVariables(any());
         verify(view).setVMName(eq(""));
-        verify(view).setExecutionPoint(eq(true), eq(null));
+        verify(view).setExecutionPoint(eq(null));
     }
 
     @Test

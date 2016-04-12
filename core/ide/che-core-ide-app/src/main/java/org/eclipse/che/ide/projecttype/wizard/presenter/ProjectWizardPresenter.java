@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE_MODULE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPORT;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 
@@ -160,7 +159,7 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
     /** Open the project wizard for creating module from the given {@code folder}. */
     public void show(@NotNull ItemReference folder) {
         resetState();
-        wizardMode = CREATE_MODULE;
+        wizardMode = UPDATE;
         projectPath = folder.getPath();
         final ProjectConfigDto dataObject = dtoFactory.createDto(ProjectConfigDto.class)
                                                       .withName(folder.getName());

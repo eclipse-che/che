@@ -11,13 +11,25 @@
 package org.eclipse.che.ide.ext.debugger.client;
 
 /**
- * Interface to represent the messages contained in resource bundle: 'RuntimeLocalizationConstant.properties'.
+ * I18n constants for the Debugger extension.
  *
  * @author Artem Zatsarynnyi
  */
 public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client.Messages {
 
     /* actions */
+    @Key("editDebugConfigurationsActionTitle")
+    String editDebugConfigurationsActionTitle();
+
+    @Key("selectConfigurationActionText")
+    String selectConfigurationActionText();
+
+    @Key("selectConfigurationActionDescription")
+    String selectConfigurationActionDescription();
+
+    @Key("selectConfigurationActionEmptyCurrentConfigurationText")
+    String selectConfigurationActionEmptyCurrentConfigurationText();
+
     @Key("breakpoints")
     String breakpoints();
 
@@ -42,9 +54,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     @Key("variables")
     String variables();
 
-    @Key("absentInformationVariables")
-    String absentInformationVariables();
-
     @Key("stepInto")
     String stepInto();
 
@@ -64,6 +73,9 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     String showHideDebuggerPanel();
 
     /* actions descriptions */
+    @Key("editDebugConfigurationsActionDescription")
+    String editDebugConfigurationsActionDescription();
+
     @Key("resumeExecutionDescription")
     String resumeExecutionDescription();
 
@@ -101,9 +113,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     @Key("debugger.connected.description")
     String debuggerConnectedDescription(String address);
 
-    @Key("debugger.disconnecting.Title")
-    String debuggerDisconnectingTitle();
-
     @Key("debugger.disconnected.title")
     String debuggerDisconnectedTitle();
 
@@ -112,12 +121,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
 
     @Key("debugger.already.connected")
     String debuggerAlreadyConnected();
-
-    @Key("failed.to.connect.to.remote.debugger.title")
-    String failedToConnectToRemoteDebuggerTitle();
-
-    @Key("failed.to.connect.to.remote.debugger.wrong.port")
-    String failedToConnectToRemoteDebuggerWrongPort(String port);
 
     @Key("failed.to.connect.to.remote.debugger.description")
     String failedToConnectToRemoteDebuggerDescription(String address);
@@ -160,19 +163,40 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     @Key("connect.to.remote")
     String connectToRemote();
 
-    @Key("connect.to.remote.description")
-    String connectToRemoteDescription();
+    @Key("debugActionTitle")
+    String debugActionTitle();
 
-    @Key("server.log")
-    String displayServerLogTitle();
+    @Key("debugActionDescription")
+    String debugActionDescription();
 
-    @Key("server.log.description")
-    String displayServerLogDescription();
+    /* EditConfigurations */
+    @Key("view.editConfigurations.placeholder")
+    String editConfigurationsViewPlaceholder();
 
-    @Key("server.log.tab.title")
-    String serverLogTabTitle();
+    @Key("view.editConfigurations.title")
+    String editConfigurationsViewTitle();
 
-    @Key("view.remoteDebug.description")
-    String remoteDebugViewDescription();
+    @Key("view.editConfigurations.header")
+    String editConfigurationsViewHeader();
 
+    @Key("view.editConfigurations.hint")
+    String editConfigurationsViewHint();
+
+    @Key("view.editConfigurations.name.text")
+    String editConfigurationsViewNameText();
+
+    @Key("view.editConfigurations.remove.title")
+    String editConfigurationsViewRemoveTitle();
+
+    @Key("view.editConfigurations.remove.confirmation")
+    String editConfigurationsRemoveConfirmation(String configurationName);
+
+    @Key("view.editConfigurations.saveChanges.title")
+    String editConfigurationsSaveChangesTitle();
+
+    @Key("view.editConfigurations.saveChanges.text")
+    String editConfigurationsSaveChangesConfirmation(String configurationName);
+
+    @Key("view.editConfigurations.saveChanges.discard")
+    String editConfigurationsSaveChangesDiscard();
 }

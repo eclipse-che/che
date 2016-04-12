@@ -12,28 +12,35 @@ package org.eclipse.che.ide.ext.debugger.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
 
+import java.util.Collections;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
 /**
  * Action which allows continue execution in debugger session
  *
  * @author Mykola Morhun
  */
-public class ResumeExecutionAction extends Action {
+public class ResumeExecutionAction extends AbstractPerspectiveAction {
 
-    private final DebuggerManager   debuggerManager;
+    private final DebuggerManager debuggerManager;
 
     @Inject
     public ResumeExecutionAction(DebuggerManager debuggerManager,
                                  DebuggerLocalizationConstant locale,
                                  DebuggerResources resources) {
-        super(locale.resumeExecution(), locale.resumeExecutionDescription(), null, resources.resumeExecution());
-
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.resumeExecution(),
+              locale.resumeExecutionDescription(),
+              null,
+              resources.resumeExecution());
         this.debuggerManager = debuggerManager;
     }
 
@@ -46,9 +53,8 @@ public class ResumeExecutionAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
+    public void updateInPerspective(ActionEvent event) {
         Debugger debugger = debuggerManager.getActiveDebugger();
-        e.getPresentation().setEnabled(debugger != null && debugger.isSuspended());
+        event.getPresentation().setEnabled(debugger != null && debugger.isSuspended());
     }
-
 }

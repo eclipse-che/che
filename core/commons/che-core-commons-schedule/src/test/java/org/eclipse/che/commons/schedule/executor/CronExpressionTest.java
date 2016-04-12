@@ -132,6 +132,7 @@ public class CronExpressionTest {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(cronExpression);
+        oos.flush();
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         ObjectInputStream ois = new ObjectInputStream(bais);
         CronExpression newExpression = (CronExpression)ois.readObject();

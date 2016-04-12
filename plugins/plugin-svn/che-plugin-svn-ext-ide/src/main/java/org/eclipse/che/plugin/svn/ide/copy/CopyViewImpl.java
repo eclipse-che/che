@@ -339,13 +339,20 @@ public class CopyViewImpl extends Window implements CopyView {
     /** {@inheritDoc} */
     @Override
     public void show() {
-        new SlideAnimation().showWidget(null, deckPanel.getWidget(0));
-        new SlideAnimation().showWidget(commentDeckPanel.getWidget(0), commentDeckPanel.getWidget(1));
+        // TODO uncomment next two lines, clean following two once CHE-941 is fixed
+//      new SlideAnimation().showWidget(null, deckPanel.getWidget(0));
+//      new SlideAnimation().showWidget(commentDeckPanel.getWidget(0), commentDeckPanel.getWidget(1));
+        new SlideAnimation().showWidget(null, deckPanel.getWidget(1));
+        new SlideAnimation().showWidget(null, commentDeckPanel.getWidget(0));
 
         sourceLabel.setText("Path:");
         newNameTextBox.setText(null);
         sourceCheckBox.setValue(false);
-        targetCheckBox.setValue(false);
+
+        // TODO setValue(false) and clean setEnabled(false) once CHE-941 is fixed
+        targetCheckBox.setValue(true);
+        targetCheckBox.setEnabled(false);
+
         targetUrlTextBox.setText(null);
         targetUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
 

@@ -15,8 +15,7 @@
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarCtrl.email"></md-progress-linear>
     <div ng-show="navbarCtrl.email">
       <section class="navbar-top-dropdown" layout="column" layout-align="center center">
-        <che-button-dropdown che-button-dropdown-href="#/create-project" che-button-dropdown-label="New Project"
-                             che-event-logger="new.project"
+        <che-button-dropdown che-button-dropdown-href="#/create-project?resetProgress" che-button-dropdown-label="New Project"
                              che-button-dropdown-controller="navbarCtrl"
                              ng-if="navbarCtrl.isUser()"></che-button-dropdown>
       </section>
@@ -35,8 +34,7 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left"
-                         che-event-logger="workspaces">
+              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="fa fa-server fa-lg icon">&nbsp;</i>
                   <span>Workspaces</span>
@@ -44,8 +42,7 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left"
-                         che-event-logger="projects">
+              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="fa fa-folder-open icon">&nbsp;</i>
                   <span>Projects</span>
@@ -53,8 +50,7 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isFactoryServiceAvailable">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.factories}}" layout-align="left"
-                         che-event-logger="factories">
+              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.factories}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="chefont cheico-rocket-chefont icon">&nbsp;</i>
                   <span>Factories</span>
@@ -82,8 +78,7 @@
                  ng-if="configMenuIsExpand">
           <md-list layout="column" flex>
             <md-list-item ng-show="navbarCtrl.isAdminPluginServiceAvailable" flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.plugins}}" layout-align="left"
-                         che-event-logger="account">
+              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.plugins}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">Plug-Ins</div>
               </md-button>
             </md-list-item>

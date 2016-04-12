@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document, routeHistory) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -35,6 +35,16 @@ export class CreateProjectCtrl {
     this.lodash = lodash;
     this.$q = $q;
     this.$document = $document;
+
+    if ($routeParams.resetProgress) {
+      this.resetCreateProgress();
+
+      routeHistory.popCurrentPath();
+
+      // remove param
+      $location.search({});
+      $location.replace();
+    }
 
     // JSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
@@ -340,87 +350,90 @@ export class CreateProjectCtrl {
   startWorkspace(bus, workspace) {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    // get channels
+    let environments = workspace.config.environments;
+    let envName = workspace.config.defaultEnv;
+    let defaultEnvironment = this.lodash.find(environments, (environment) => {
+      return environment.name === envName;
+    });
 
-    startWorkspacePromise.then((workspace) => {
-      // get channels
-      let environments = workspace.config.environments;
-      let envName = workspace.config.defaultEnv;
-      let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === envName;
-      });
+    let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
 
-      let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
+    let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+      return machineConfigsLink.rel === 'get machine status channel';
+    });
 
-      let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-        return machineConfigsLink.rel === 'get machine status channel';
-      });
+    let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+      return machineConfigsLink.rel === 'get machine logs channel';
+    });
 
-      let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-        return machineConfigsLink.rel === 'get machine logs channel';
-      });
+    let workspaceId = workspace.id;
 
-      let workspaceId = workspace.id;
+    let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
+    let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
+    let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
-      let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
-      let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
-      let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
+    this.listeningChannels.push(agentChannel);
+    bus.subscribe(agentChannel, (message) => {
+      if (this.createProjectSvc.getCurrentProgressStep() < 2) {
+        this.createProjectSvc.setCurrentProgressStep(2);
+      }
+      let agentStep = 2;
+      if (this.getCreationSteps()[agentStep].logs.length > 0) {
+        this.getCreationSteps()[agentStep].logs = this.getCreationSteps()[agentStep].logs + '\n' + message;
+      } else {
+        this.getCreationSteps()[agentStep].logs = message;
+      }
+    });
 
-      this.listeningChannels.push(agentChannel);
-      bus.subscribe(agentChannel, (message) => {
-        if (this.createProjectSvc.getCurrentProgressStep() < 2) {
-          this.createProjectSvc.setCurrentProgressStep(2);
+    if (statusChannel) {
+      // for now, display log of status channel in case of errors
+      this.listeningChannels.push(statusChannel);
+      bus.subscribe(statusChannel, (message) => {
+        if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+
+          // need to show the error
+          this.$mdDialog.show(
+              this.$mdDialog.alert()
+                  .title('Unable to start workspace')
+                  .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+                  .ariaLabel('Workspace start')
+                  .ok('OK')
+          );
         }
-        let agentStep = 2;
-        if (this.getCreationSteps()[agentStep].logs.length > 0) {
-          this.getCreationSteps()[agentStep].logs = this.getCreationSteps()[agentStep].logs + '\n' + message;
+        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+          // need to show the error
+          this.$mdDialog.show(
+              this.$mdDialog.alert()
+                  .title('Error when starting workspace')
+                  .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+                  .ariaLabel('Workspace start')
+                  .ok('OK')
+          );
+        }
+        this.$log.log('Status channel of workspaceID', workspaceId, message);
+      });
+    }
+
+    if (outputChannel) {
+      this.listeningChannels.push(outputChannel);
+      bus.subscribe(outputChannel, (message) => {
+        if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
         } else {
-          this.getCreationSteps()[agentStep].logs = message;
+          this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
         }
       });
+    }
 
-      if (statusChannel) {
-        // for now, display log of status channel in case of errors
-        this.listeningChannels.push(statusChannel);
-        bus.subscribe(statusChannel, (message) => {
-          if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
-            this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-
-            // need to show the error
-            this.$mdDialog.show(
-              this.$mdDialog.alert()
-                .title('Unable to start workspace')
-                .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
-                .ariaLabel('Workspace start')
-                .ok('OK')
-            );
-          }
-          if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-            this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-            // need to show the error
-            this.$mdDialog.show(
-              this.$mdDialog.alert()
-                .title('Error when starting workspace')
-                .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
-                .ariaLabel('Workspace start')
-                .ok('OK')
-            );
-          }
-          this.$log.log('Status channel of workspaceID', workspaceId, message);
-        });
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    startWorkspacePromise.then(() => {}, (error) => {
+      if (error.data.message) {
+        this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
       }
-
-      if (outputChannel) {
-        this.listeningChannels.push(outputChannel);
-        bus.subscribe(outputChannel, (message) => {
-          if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
-            this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
-          } else {
-            this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
-          }
-        });
-      }
-
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
     });
   }
 
@@ -1065,6 +1078,16 @@ export class CreateProjectCtrl {
   }
 
   /**
+   * Update creation flow state when source option changes
+   */
+  onSourceOptionChanged() {
+    if ('select-source-existing' === this.selectSourceOption) {
+      //Need to call selection of current tab
+      this.setCurrentTab(this.currentTab);
+    }
+  }
+
+  /**
    * Use of an existing stack
    * @param stack the stack to use
    */
@@ -1101,6 +1124,7 @@ export class CreateProjectCtrl {
     if (!stack) {
       return;
     }
+
     this.templatesChoice = 'templates-samples';
     this.generateProjectName(true);
     // Enable wizard only if

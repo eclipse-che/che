@@ -14,6 +14,7 @@ import org.eclipse.che.ide.ext.debugger.shared.Breakpoint;
 import org.eclipse.che.ide.gdb.server.parser.GdbContinue;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoLine;
+import org.eclipse.che.ide.gdb.server.parser.GdbInfoProgram;
 import org.eclipse.che.ide.gdb.server.parser.GdbPType;
 import org.eclipse.che.ide.gdb.server.parser.GdbParseException;
 import org.eclipse.che.ide.gdb.server.parser.GdbPrint;
@@ -23,10 +24,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -35,16 +39,19 @@ import static org.testng.Assert.assertTrue;
 public class GdbTest {
 
     private String file;
+    private Path   sourceDirectory;
     private Gdb    gdb;
 
     @BeforeClass
     public void beforeClass() throws Exception {
         file = GdbTest.class.getResource("/hello").getFile();
+        sourceDirectory = Paths.get(GdbTest.class.getResource("/h.cpp").getFile());
     }
 
     @BeforeMethod
     public void setUp() throws Exception {
         gdb = Gdb.start();
+        gdb.directory(sourceDirectory.getParent().toString());
     }
 
     @AfterMethod
@@ -152,16 +159,10 @@ public class GdbTest {
         gdb.run();
 
         GdbInfoLine gdbInfoLine = gdb.step();
-
         assertNotNull(gdbInfoLine.getLocation());
-        assertEquals(gdbInfoLine.getLocation().getLineNumber(), 5);
-        assertEquals(gdbInfoLine.getLocation().getClassName(), "h.cpp");
 
         gdbInfoLine = gdb.step();
-
         assertNotNull(gdbInfoLine.getLocation());
-        assertEquals(gdbInfoLine.getLocation().getLineNumber(), 6);
-        assertEquals(gdbInfoLine.getLocation().getClassName(), "h.cpp");
     }
 
     @Test
@@ -199,5 +200,25 @@ public class GdbTest {
 
         GdbPType gdbPType = gdb.ptype("i");
         assertEquals(gdbPType.getType(), "int");
+    }
+
+    @Test
+    public void testInfoProgram() throws Exception {
+        gdb.file(file);
+
+        GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
+        assertNull(gdbInfoProgram.getStoppedAddress());
+
+        gdb.breakpoint(4);
+        gdb.run();
+
+        gdbInfoProgram = gdb.infoProgram();
+        assertNotNull(gdbInfoProgram.getStoppedAddress());
+
+        GdbContinue gdbContinue = gdb.cont();
+        assertNull(gdbContinue.getBreakpoint());
+
+        gdbInfoProgram = gdb.infoProgram();
+        assertNull(gdbInfoProgram.getStoppedAddress());
     }
 }

@@ -44,5 +44,4 @@ public class LogAction extends SubversionAction {
     public void actionPerformed(final ActionEvent e) {
         presenter.showLog();
     }
-
 }

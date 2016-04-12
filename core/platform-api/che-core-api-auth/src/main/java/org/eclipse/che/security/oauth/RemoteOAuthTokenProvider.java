@@ -62,16 +62,13 @@ public class RemoteOAuthTokenProvider implements OAuthTokenProvider {
                                       .path(OAuthAuthenticationService.class, "token")
                                       .queryParam("oauth_provider", oauthProviderName);
             Link getTokenLink = DtoFactory.newDto(Link.class).withHref(ub.build().toString()).withMethod("GET");
-            OAuthToken token = httpJsonRequestFactory.fromLink(getTokenLink)
-                                                     .request()
-                                                     .asDto(OAuthToken.class);
-
-            if (token == null) {
-                LOG.warn("Token not found for user {}", userId);
-                return null;
-            }
-            return token;
-        } catch (ServerException | UnauthorizedException | ForbiddenException | NotFoundException | ConflictException | BadRequestException e) {
+            return httpJsonRequestFactory.fromLink(getTokenLink)
+                                         .request()
+                                         .asDto(OAuthToken.class);
+        } catch (NotFoundException ne) {
+            LOG.warn("Token not found for user {}", userId);
+            return null;
+        } catch (ServerException | UnauthorizedException | ForbiddenException | ConflictException | BadRequestException e) {
             LOG.error("Exception on token retrieval, message : {}", e.getLocalizedMessage());
             return null;
         }

@@ -176,6 +176,16 @@ public class ProjectService extends Service {
                                                                                                                        ForbiddenException,
                                                                                                                        ServerException,
                                                                                                                        NotFoundException {
+        String pathToProject = projectConfig.getPath();
+        String pathToParent = pathToProject.substring(0, pathToProject.lastIndexOf("/"));
+
+        if (!pathToParent.equals("/")) {
+            VirtualFileEntry parentFileEntry = projectManager.getProjectsRoot().getChild(pathToParent);
+            if (parentFileEntry == null) {
+                throw new NotFoundException("The parent folder with path " + pathToParent + " does not exist.");
+            }
+        }
+
         final RegisteredProject project = projectManager.createProject(projectConfig, null);
         final ProjectConfigDto configDto = asDto(project);
 
@@ -313,7 +323,7 @@ public class ProjectService extends Service {
                                                                      ServerException,
                                                                      NotFoundException,
                                                                      BadRequestException {
-        projectManager.importProject(path, sourceStorage);
+        projectManager.importProject(path, sourceStorage, force);
     }
 
     @POST

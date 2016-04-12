@@ -46,6 +46,9 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
         return new ValueProvider() {
             @Override
             public List<String> getValues(final String attributeName) throws ValueStorageException {
+                if (project == null) {
+                    return Collections.emptyList();
+                }
                 LOG.debug("Asked value for attribute {}.", attributeName);
                 if (attributeName == null) {
                     throw new ValueStorageException("Invalid attribute name: null");

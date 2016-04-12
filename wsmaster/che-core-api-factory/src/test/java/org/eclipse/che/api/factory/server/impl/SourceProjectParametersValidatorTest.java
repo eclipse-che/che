@@ -38,8 +38,8 @@ public class SourceProjectParametersValidatorTest {
                                           put("branch", "master");
                                           put("commitId", "123456");
                                           put("keepVcs", "true");
-                                          put("remoteOriginFetch", "12345");
-                                          put("keepDirectory", "/src");
+                                          put("fetch", "12345");
+                                          put("keepDir", "/src");
                                       }
                                   });
     }

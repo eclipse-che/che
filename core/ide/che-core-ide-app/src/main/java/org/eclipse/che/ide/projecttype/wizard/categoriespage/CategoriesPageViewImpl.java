@@ -20,8 +20,15 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.ide.Resources;
@@ -33,8 +40,13 @@ import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * @author Evgen Vidolob
@@ -43,7 +55,7 @@ import java.util.Map.Entry;
 public class CategoriesPageViewImpl implements CategoriesPageView {
 
     private static MainPageViewImplUiBinder ourUiBinder = GWT.create(MainPageViewImplUiBinder.class);
-    private final DockLayoutPanel       rootElement;
+    private final DockLayoutPanel rootElement;
     private final Category.CategoryEventDelegate<ProjectTemplateDescriptor> templateCategoryEventDelegate    =
             new Category.CategoryEventDelegate<ProjectTemplateDescriptor>() {
                 @Override
@@ -51,14 +63,14 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
                     selectNextWizardType(itemData);
                 }
             };
-    private final Category.CategoryEventDelegate<ProjectTypeDto>     projectTypeCategoryEventDelegate =
+    private final Category.CategoryEventDelegate<ProjectTypeDto>            projectTypeCategoryEventDelegate =
             new Category.CategoryEventDelegate<ProjectTypeDto>() {
                 @Override
                 public void onListItemClicked(Element listItemBase, ProjectTypeDto itemData) {
                     selectNextWizardType(itemData);
                 }
             };
-    private final CategoryRenderer<ProjectTypeDto> projectTypeCategoryRenderer      =
+    private final CategoryRenderer<ProjectTypeDto>                          projectTypeCategoryRenderer      =
             new CategoryRenderer<ProjectTypeDto>() {
                 @Override
                 public void renderElement(Element element, ProjectTypeDto data) {
@@ -70,7 +82,7 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
                     return renderCategoryHeader(category.getTitle());
                 }
             };
-    private final CategoryRenderer<ProjectTemplateDescriptor> templateCategoryRenderer         =
+    private final CategoryRenderer<ProjectTemplateDescriptor>               templateCategoryRenderer         =
             new CategoryRenderer<ProjectTemplateDescriptor>() {
                 @Override
                 public void renderElement(Element element, ProjectTemplateDescriptor data) {
@@ -85,7 +97,7 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
     private final IconRegistry iconRegistry;
 
     @UiField(provided = true)
-    Style       style;
+    Style       styles;
     @UiField
     SimplePanel categoriesPanel;
     @UiField
@@ -100,6 +112,8 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
     TextBox     projectName;
     @UiField
     TextArea    projectDescription;
+    @UiField
+    TextBox     parentDirectory;
 
     private ActionDelegate                              delegate;
     private Map<String, Set<ProjectTypeDto>>            typesByCategory;
@@ -114,8 +128,8 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
                                   ProjectWizardResources wizardResources) {
         this.resources = resources;
         this.iconRegistry = iconRegistry;
-        style = wizardResources.mainPageStyle();
-        style.ensureInjected();
+        styles = wizardResources.mainPageStyle();
+        styles.ensureInjected();
         rootElement = ourUiBinder.createAndBindUi(this);
         reset();
 
@@ -147,6 +161,11 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
         }
 
         delegate.projectDescriptionChanged(description);
+    }
+
+    @UiHandler("parentDirectory")
+    void onParentDirectoryChanged(KeyUpEvent event) {
+        delegate.onParentDirectoryChanged();
     }
 
     private void selectNextWizardType(Object itemData) {
@@ -221,6 +240,21 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
         delegate.projectNameChanged(name.replaceAll("\\s", "_"));
     }
 
+    @Override
+    public String getParentDirectory() {
+        return parentDirectory.getText();
+    }
+
+    @Override
+    public String getName() {
+        return projectName.getText();
+    }
+
+    @Override
+    public void setParentDirectory(String parentDirectory) {
+        this.parentDirectory.setText(parentDirectory);
+    }
+
     /** {@inheritDoc} */
     @Override
     public void setDescription(String description) {
@@ -229,12 +263,12 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
 
     @Override
     public void removeNameError() {
-        projectName.removeStyleName(style.inputError());
+        projectName.removeStyleName(styles.inputError());
     }
 
     @Override
     public void showNameError() {
-        projectName.addStyleName(style.inputError());
+        projectName.addStyleName(styles.inputError());
     }
 
     @Override

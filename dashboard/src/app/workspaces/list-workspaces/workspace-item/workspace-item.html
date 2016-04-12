@@ -12,13 +12,13 @@
 -->
 <che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div layout-gt-md="row"
-       flex="100" layout-align="start center"
+       flex="100" layout-align="start stretch"
        class="workspace-item-row">
     <div class="workspace-list-item-checkbox" layout="row" layout-align="center center"
          ng-if="workspaceItemCtrl.isSelectable === true">
       <div>
         <che-list-item-checked ng-model="workspaceItemCtrl.isSelect"
-                               ng-show="('RUNNING' === workspaceItemCtrl.workspace.status || 'STOPPED' === workspaceItemCtrl.workspace.status)"
+                               ng-show="('RUNNING' === workspaceItemCtrl.getWorkspaceStatus() || 'STOPPED' === workspaceItemCtrl.getWorkspaceStatus())"
                                che-aria-label-checkbox="Workspace {{workspaceItemCtrl.workspace.config.name}}"></che-list-item-checked>
       </div>
     </div>
@@ -31,7 +31,7 @@
         <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
       </div>
       <div flex="33" class="workspace-item-status">
-        <workspace-status-indicator che-status="workspaceItemCtrl.workspace.status"></workspace-status-indicator>
+        <workspace-status-indicator che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
       </div>
       <div flex="33" class="workspace-consumed-value">
         {{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB

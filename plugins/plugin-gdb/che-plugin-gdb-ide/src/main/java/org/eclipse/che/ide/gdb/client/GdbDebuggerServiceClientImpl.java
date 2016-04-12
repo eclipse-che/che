@@ -33,9 +33,10 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static org.eclipse.che.ide.MimeType.TEXT_PLAIN;
-import static org.eclipse.che.ide.gdb.client.GdbDebuggerClient.ConnectionProperties.FILE;
+import static org.eclipse.che.ide.gdb.client.GdbDebuggerClient.ConnectionProperties.BINARY;
 import static org.eclipse.che.ide.gdb.client.GdbDebuggerClient.ConnectionProperties.HOST;
 import static org.eclipse.che.ide.gdb.client.GdbDebuggerClient.ConnectionProperties.PORT;
+import static org.eclipse.che.ide.gdb.client.GdbDebuggerClient.ConnectionProperties.SOURCES;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
 
@@ -66,9 +67,14 @@ public class GdbDebuggerServiceClientImpl implements DebuggerServiceClient {
     @Override
     public Promise<DebuggerInfo> connect(@NotNull Map<String, String> connectionProperties) {
         final String requestUrl = baseUrl + "/connect";
-        final String params = "?host=" + connectionProperties.get(HOST.toString())
+        String params = "?host=" + connectionProperties.get(HOST.toString())
                               + "&port=" + connectionProperties.get(PORT.toString())
-                              + "&file=" + connectionProperties.get(FILE.toString());
+                              + "&file=" + connectionProperties.get(BINARY.toString());
+
+        String sources = connectionProperties.get(SOURCES.toString());
+        if (sources != null) {
+            params += "&sources=" + sources;
+        }
 
         return asyncRequestFactory.createGetRequest(requestUrl + params)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(DebuggerInfo.class));

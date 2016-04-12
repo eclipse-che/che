@@ -17,6 +17,7 @@ import org.eclipse.che.ide.ext.debugger.shared.DebuggerInfo;
 import org.eclipse.che.ide.ext.debugger.shared.StackFrameDump;
 import org.eclipse.che.ide.ext.debugger.shared.UpdateVariableRequest;
 import org.eclipse.che.ide.ext.debugger.shared.Value;
+import org.eclipse.che.ide.ext.debugger.shared.Variable;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -27,6 +28,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.nio.file.Paths;
 
 /**
  * Provides access to {@link GdbDebugger} through HTTP.
@@ -55,8 +57,13 @@ public class GdbDebuggerService {
     @Produces(MediaType.APPLICATION_JSON)
     public DebuggerInfo create(@QueryParam("host") String host,
                                @QueryParam("port") @DefaultValue("0") int port,
-                               @QueryParam("file") String file) throws GdbDebuggerException {
-        GdbDebugger d = GdbDebugger.newInstance(host, port, file);
+                               @QueryParam("file") String file,
+                               @QueryParam("sources") String sources) throws GdbDebuggerException {
+        if (sources == null) {
+            sources = Paths.get(file).getParent().toString();
+        }
+
+        GdbDebugger d = GdbDebugger.newInstance(host, port, file, sources);
         return DtoFactory.getInstance().createDto(DebuggerInfo.class)
                          .withHost(d.getHost())
                          .withPort(d.getPort())
@@ -75,7 +82,11 @@ public class GdbDebuggerService {
     @GET
     @Path("disconnect/{id}")
     public void disconnect(@PathParam("id") String id) throws GdbDebuggerException {
-        GdbDebugger.getInstance(id).disconnect();
+        try {
+            GdbDebugger.getInstance(id).disconnect();
+        } catch (GdbDebuggerNotFoundException e) {
+            // ignore
+        }
     }
 
     @GET
@@ -122,8 +133,8 @@ public class GdbDebuggerService {
     @Path("value/get/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Value getValue(@PathParam("id") String id, String variable) throws GdbDebuggerException {
-        return GdbDebugger.getInstance(id).getValue(variable);
+    public Value getValue(@PathParam("id") String id, Variable variable) throws GdbDebuggerException {
+        return GdbDebugger.getInstance(id).getValue(variable.getName());
     }
 
     @POST

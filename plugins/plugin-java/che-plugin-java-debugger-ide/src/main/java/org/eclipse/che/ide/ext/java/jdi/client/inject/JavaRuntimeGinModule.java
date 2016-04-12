@@ -11,13 +11,25 @@
 package org.eclipse.che.ide.ext.java.jdi.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
+import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.ext.java.jdi.client.configuration.JavaDebugConfigurationPageView;
+import org.eclipse.che.ide.ext.java.jdi.client.configuration.JavaDebugConfigurationPageViewImpl;
+import org.eclipse.che.ide.ext.java.jdi.client.configuration.JavaDebugConfigurationType;
 
-/** @author Andrey Plotnikov */
+/**
+ * @author Andrey Plotnikov
+ * @author Artem Zatsarynnyi
+ */
 @ExtensionGinModule
 public class JavaRuntimeGinModule extends AbstractGinModule {
 
     @Override
-    protected void configure() { }
+    protected void configure() {
+        GinMultibinder.newSetBinder(binder(), DebugConfigurationType.class).addBinding().to(JavaDebugConfigurationType.class);
+        bind(JavaDebugConfigurationPageView.class).to(JavaDebugConfigurationPageViewImpl.class).in(Singleton.class);
+    }
 }

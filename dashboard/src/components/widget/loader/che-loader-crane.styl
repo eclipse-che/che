@@ -764,7 +764,7 @@ $che-crane-width = ($load-jib-1-width + $load-jib-2-width + $load-jib-3-width + 
       width $box-bottom-side-length
       height $box-bottom-side-length
       position absolute
-      top ($box-side-height - $box-bottom-side-offset-top)
+      top floor($box-side-height - $box-bottom-side-offset-top)
       left $box-side-width
       transform-origin top left
       transform matrix($cos-angle, $sin-angle, -($cos-angle), $sin-angle, 0, 0)

@@ -40,8 +40,8 @@ public class SourceStorageParametersValidator implements FactoryParameterValidat
                         break;
                     case "branch":
                     case "commitId":
-                    case "keepDirectory":
-                    case "remoteOriginFetch":
+                    case "keepDir":
+                    case "fetch":
                     case "branchMerge":
                         break;
                     default:

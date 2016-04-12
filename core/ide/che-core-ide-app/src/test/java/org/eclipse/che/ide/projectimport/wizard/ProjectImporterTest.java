@@ -22,9 +22,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.wizard.Wizard;
@@ -37,12 +35,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.Collections;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,7 +76,7 @@ public class ProjectImporterTest {
     private OAuth2AuthenticatorRegistry   oAuth2AuthenticatorRegistry;
 
     @Captor
-    private ArgumentCaptor<Operation<Void>>            voidOperationCaptor;
+    private ArgumentCaptor<Operation<Void>> voidOperationCaptor;
 
     private ProjectImporter importer;
 
@@ -92,6 +84,7 @@ public class ProjectImporterTest {
     public void setUp() {
         when(appContext.getWorkspaceId()).thenReturn(ID);
         when(projectConfig.getName()).thenReturn(PROJECT_NAME);
+        when(projectConfig.getPath()).thenReturn('/' + PROJECT_NAME);
         when(projectConfig.getSource()).thenReturn(source);
         when(subscriberFactory.createSubscriber()).thenReturn(subscriber);
         when(projectServiceClient.importProject(ID, '/' + PROJECT_NAME, false, source)).thenReturn(importPromise);

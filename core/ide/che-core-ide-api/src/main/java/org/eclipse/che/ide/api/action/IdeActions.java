@@ -15,20 +15,17 @@ package org.eclipse.che.ide.api.action;
  * @author Vlad Zhukovskyi
  */
 public interface IdeActions {
-    String GROUP_MAIN_MENU      = "mainMenu";
-    String GROUP_WORKSPACE      = "workspaceGroup";
-    String GROUP_PROJECT        = "projectGroup";
-    String GROUP_EDIT           = "editGroup";
-    String GROUP_ASSISTANT      = "assistantGroup";
-    String GROUP_RUN            = "runGroup";
-    String GROUP_PROFILE        = "profileGroup";
-    String GROUP_FILE_NEW       = "newGroup";
-    String GROUP_CODE           = "codeGroup";
-    String GROUP_IMPORT_PROJECT = "importProjectGroup";
-    String GROUP_WINDOW         = "windowGroup";
-    String GROUP_HELP           = "helpGroup";
-    String GROUP_REFACTORING    = "refactoringGroup";
-    String GROUP_RECENT_FILES   = "recentFiles";
+    String GROUP_MAIN_MENU    = "mainMenu";
+    String GROUP_WORKSPACE    = "workspaceGroup";
+    String GROUP_PROJECT      = "projectGroup";
+    String GROUP_EDIT         = "editGroup";
+    String GROUP_ASSISTANT    = "assistantGroup";
+    String GROUP_RUN          = "runGroup";
+    String GROUP_PROFILE      = "profileGroup";
+    String GROUP_FILE_NEW     = "newGroup";
+    String GROUP_WINDOW       = "windowGroup";
+    String GROUP_HELP         = "helpGroup";
+    String GROUP_RECENT_FILES = "recentFiles";
 
     String GROUP_MAIN_TOOLBAR   = "mainToolBar";
     String GROUP_CENTER_TOOLBAR = "centerToolBar";
@@ -37,6 +34,7 @@ public interface IdeActions {
     String GROUP_MAIN_CONTEXT_MENU             = "mainContextMenu";
     String GROUP_BUILD_CONTEXT_MENU            = "buildGroupContextMenu";
     String GROUP_RUN_CONTEXT_MENU              = "runGroupContextMenu";
+    String GROUP_DEBUG_CONTEXT_MENU            = "debugGroupContextMenu";
     String GROUP_PROJECT_EXPLORER_CONTEXT_MENU = "projectExplorerContextMenu";
     String GROUP_EDITOR_TAB_CONTEXT_MENU       = "editorTabContextMenu";
 

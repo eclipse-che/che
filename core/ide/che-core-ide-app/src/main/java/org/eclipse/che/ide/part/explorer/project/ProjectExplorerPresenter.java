@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.explorer.project;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -68,6 +69,7 @@ import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent.ResourceNodeDe
 import org.eclipse.che.ide.project.event.ResourceNodeRenamedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeRenamedEvent.ResourceNodeRenamedHandler;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.node.ItemReferenceBasedNode;
 import org.eclipse.che.ide.project.node.ModuleNode;
 import org.eclipse.che.ide.project.node.NodeManager;
@@ -210,14 +212,14 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         List<Node> nodes = view.getAllNodes();
 
         Node parent = null;
+        String pathToParent = getPathToParent(projectConfig);
+        if (!pathToParent.isEmpty()) {
+            parent = getNode(nodes, pathToParent);
+        }
 
-        for (Node node : nodes) {
-            if (node.getName().equals(projectConfig.getName())) {
-                parent = node.getParent();
-                view.removeNode(node, true);
-
-                break;
-            }
+        Node existingNode = getNode(nodes, projectConfig.getPath());
+        if (existingNode != null) {
+            view.removeNode(existingNode, true);
         }
 
         if (view.isGoIntoActivated()) {
@@ -225,6 +227,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         }
 
         final ProjectNode node = nodeManager.wrap(projectConfig);
+        node.setParent(parent);
 
         view.addNode(parent, node);
         view.select(node, false);
@@ -235,6 +238,35 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             //TODO move this logic to separate component
             askUserToSetUpProject(projectConfig);
         }
+    }
+
+    private String getPathToParent(ProjectConfigDto projectConfig) {
+        String path = projectConfig.getPath();
+
+        if (Strings.isNullOrEmpty(path)) {
+            return "/";
+        }
+
+        return path.substring(0, path.lastIndexOf("/"));
+    }
+
+    @Nullable
+    private Node getNode(List<Node> nodes, String pathToNode) {
+        for (Node node : nodes) {
+            String nodePath = "";
+            if (node instanceof FolderReferenceNode) {
+                nodePath = ((FolderReferenceNode)node).getData().getPath();
+            } else if (node instanceof ProjectNode) {
+                String storablePath = ((ProjectNode)node).getStorablePath();
+                nodePath = storablePath == null ? '/' + node.getName() : storablePath;
+            }
+
+            if (nodePath.equals(pathToNode)) {
+                return node;
+            }
+        }
+
+        return null;
     }
 
     private void askUserToSetUpProject(final ProjectConfigDto descriptor) {

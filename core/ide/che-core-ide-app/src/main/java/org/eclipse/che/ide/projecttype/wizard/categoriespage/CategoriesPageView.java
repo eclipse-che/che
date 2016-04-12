@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 
 import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.ide.api.mvp.View;
@@ -40,6 +41,12 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
 
     void setDescription(String description);
 
+    String getParentDirectory();
+
+    String getName();
+
+    void setParentDirectory(String parentDirectory);
+
     void removeNameError();
 
     void showNameError();
@@ -49,6 +56,8 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
     void setProjectTypes(List<ProjectTypeDto> availableProjectTypes);
 
     interface ActionDelegate {
+
+        void onParentDirectoryChanged();
 
         void projectNameChanged(String name);
 

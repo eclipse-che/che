@@ -10,21 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.ide.gdb.server;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.gdb.server.parser.GdbBreak;
 import org.eclipse.che.ide.gdb.server.parser.GdbClear;
 import org.eclipse.che.ide.gdb.server.parser.GdbContinue;
 import org.eclipse.che.ide.gdb.server.parser.GdbDelete;
+import org.eclipse.che.ide.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.ide.gdb.server.parser.GdbFile;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoArgs;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoLine;
 import org.eclipse.che.ide.gdb.server.parser.GdbInfoLocals;
+import org.eclipse.che.ide.gdb.server.parser.GdbInfoProgram;
 import org.eclipse.che.ide.gdb.server.parser.GdbPType;
 import org.eclipse.che.ide.gdb.server.parser.GdbParseException;
 import org.eclipse.che.ide.gdb.server.parser.GdbPrint;
 import org.eclipse.che.ide.gdb.server.parser.GdbRun;
 import org.eclipse.che.ide.gdb.server.parser.GdbTargetRemote;
 import org.eclipse.che.ide.gdb.server.parser.GdbVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.io.BufferedWriter;
@@ -37,7 +42,7 @@ import java.io.OutputStreamWriter;
  * @author Anatoliy Bazko
  */
 public class Gdb extends GdbProcess {
-
+    private static final Logger LOG              = LoggerFactory.getLogger(GdbProcess.class);
     private static final String PROCESS_NAME     = "gdb";
     private static final String OUTPUT_SEPARATOR = "(gdb) ";
 
@@ -121,9 +126,15 @@ public class Gdb extends GdbProcess {
     /**
      * `next` command.
      */
+    @Nullable
     public GdbInfoLine next() throws IOException, InterruptedException, GdbParseException {
         sendCommand("next");
         outputs.take();
+
+        if (infoProgram().getStoppedAddress() == null) {
+            return null;
+        }
+
         return infoLine();
     }
 
@@ -151,6 +162,14 @@ public class Gdb extends GdbProcess {
         String command = "break " + lineNumber;
         sendCommand(command);
         GdbBreak.parse(outputs.take());
+    }
+
+    /**
+     * `directory` command.
+     */
+    public GdbDirectory directory(@NotNull String directory) throws IOException, GdbParseException, InterruptedException {
+        sendCommand("directory " + directory);
+        return GdbDirectory.parse(outputs.take());
     }
 
     /**
@@ -230,7 +249,17 @@ public class Gdb extends GdbProcess {
         return GdbInfoLine.parse(outputs.take());
     }
 
+    /**
+     * `info program` command.
+     */
+    public GdbInfoProgram infoProgram() throws IOException, InterruptedException, GdbParseException {
+        sendCommand("info program");
+        return GdbInfoProgram.parse(outputs.take());
+    }
+
     private void sendCommand(String command) throws IOException {
+        LOG.debug(command);
+
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
         writer.write(command);
         writer.newLine();

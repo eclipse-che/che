@@ -1,5 +1,211 @@
 [
   {
+    "id": "rails-default",
+    "creator": "ide",
+    "name": "Rails",
+    "description": "Default Rails Stack with Ruby 2.3.0, Rails 4.2.6, Bundler 1.11.2.",
+    "scope": "general",
+    "tags": [
+      "Ruby",
+      "Rails",
+      "Bundler",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Ruby",
+        "version": "2.3.0"
+      },
+      {
+        "name": "Rails",
+        "version": "4.2.6"
+      },
+      {
+        "name": "Bundler",
+        "version": "1.11.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_rails"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null},
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-ruby.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "python-default",
+    "creator": "ide",
+    "name": "Python 3.5",
+    "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
+    "scope": "general",
+    "tags": [
+      "Python 3.5",
+      "pip",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Python",
+        "version": "3.5.1"
+      },
+      {
+        "name": "pip",
+        "version": "8.1.1"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_python:latest"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null},
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-python.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "python-2.7",
+    "creator": "ide",
+    "name": "Python 2.7",
+    "description": "Default Python Stack with Python 2.7.11, pip 8.1.1.",
+    "scope": "general",
+    "tags": [
+      "Python 2.7",
+      "pip",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Python",
+        "version": "2.7.11"
+      },
+      {
+        "name": "pip",
+        "version": "8.1.1"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_python:2.7"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "recipe"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null},
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-python.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "blank-default",
     "creator": "ide",
     "name": "Blank",

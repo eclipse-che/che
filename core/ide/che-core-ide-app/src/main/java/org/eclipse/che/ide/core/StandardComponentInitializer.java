@@ -19,11 +19,8 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.actions.CloseCurrentFile;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
+import org.eclipse.che.ide.actions.ConvertFolderToProjectAction;
 import org.eclipse.che.ide.actions.CopyAction;
-import org.eclipse.che.ide.actions.RedirectToDashboardProjectsAction;
-import org.eclipse.che.ide.actions.RedirectToDashboardWorkspacesAction;
-import org.eclipse.che.ide.actions.ShowReferenceAction;
-import org.eclipse.che.ide.actions.CreateModuleAction;
 import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.CutAction;
 import org.eclipse.che.ide.actions.DeleteItemAction;
@@ -44,12 +41,15 @@ import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.OpenSelectedFileAction;
 import org.eclipse.che.ide.actions.PasteAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
+import org.eclipse.che.ide.actions.RedirectToDashboardProjectsAction;
+import org.eclipse.che.ide.actions.RedirectToDashboardWorkspacesAction;
 import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.SaveAction;
 import org.eclipse.che.ide.actions.SaveAllAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
+import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.SwitchLeftTabAction;
 import org.eclipse.che.ide.actions.SwitchRightTabAction;
 import org.eclipse.che.ide.actions.UndoAction;
@@ -226,9 +226,6 @@ public class StandardComponentInitializer {
     private CreateProjectAction createProjectAction;
 
     @Inject
-    private CreateModuleAction createModuleAction;
-
-    @Inject
     private FullTextSearchAction fullTextSearchAction;
 
     @Inject
@@ -281,6 +278,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private RedirectToDashboardWorkspacesAction redirectToDashboardWorkspacesAction;
+
+    @Inject
+    private ConvertFolderToProjectAction convertFolderToProjectAction;
 
     @Inject
     @Named("XMLFileType")
@@ -414,11 +414,11 @@ public class StandardComponentInitializer {
         newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getSVGImage());
         newGroup.addAction(newXmlFileAction);
 
-        actionManager.registerAction("createModuleAction", createModuleAction);
-        projectGroup.addAction(createModuleAction);
-
         actionManager.registerAction("uploadFile", uploadFileAction);
         projectGroup.add(uploadFileAction);
+
+        actionManager.registerAction("convertFolderToProject", convertFolderToProjectAction);
+        projectGroup.add(convertFolderToProjectAction);
 
         actionManager.registerAction("uploadFolder", uploadFolderAction);
         projectGroup.add(uploadFolderAction);
@@ -500,7 +500,7 @@ public class StandardComponentInitializer {
         saveGroup.add(saveAllAction);
 
         //Compose Profile menu
-        DefaultActionGroup profileGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_PROFILE);
+        DefaultActionGroup profileGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PROFILE);
         actionManager.registerAction("redirectToDashboardProjectsAction", redirectToDashboardProjectsAction);
         actionManager.registerAction("redirectToDashboardWorkspacesAction", redirectToDashboardWorkspacesAction);
         actionManager.registerAction("showPreferences", showPreferencesAction);
@@ -511,7 +511,7 @@ public class StandardComponentInitializer {
         profileGroup.add(showPreferencesAction);
 
         // Compose Help menu
-        DefaultActionGroup helpGroup = (DefaultActionGroup) actionManager.getAction(IdeActions.GROUP_HELP);
+        DefaultActionGroup helpGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_HELP);
         helpGroup.addSeparator();
 
         // Compose main context menu
@@ -530,7 +530,7 @@ public class StandardComponentInitializer {
         resourceOperation.addSeparator();
         resourceOperation.add(downloadItemAction);
         resourceOperation.addSeparator();
-        resourceOperation.add(createModuleAction);
+        resourceOperation.add(convertFolderToProjectAction);
 
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_CONTEXT_MENU);
         mainContextMenuGroup.add(newGroup);

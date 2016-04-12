@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.debugger.client.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -21,13 +21,17 @@ import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
 import org.eclipse.che.ide.ext.debugger.client.debug.expression.EvaluateExpressionPresenter;
 
+import java.util.Collections;
+
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+
 /**
  * Action which allows evaluateExpression expression with debugger
  *
  * @author Mykola Morhun
  */
 @Singleton
-public class EvaluateExpressionAction extends Action {
+public class EvaluateExpressionAction extends AbstractPerspectiveAction {
 
     private final DebuggerManager             debuggerManager;
     private final EvaluateExpressionPresenter evaluateExpressionPresenter;
@@ -37,8 +41,11 @@ public class EvaluateExpressionAction extends Action {
                                     EvaluateExpressionPresenter evaluateExpressionPresenter,
                                     DebuggerLocalizationConstant locale,
                                     DebuggerResources resources) {
-        super(locale.evaluateExpression(), locale.evaluateExpressionDescription(), null, resources.evaluateExpression());
-
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.evaluateExpression(),
+              locale.evaluateExpressionDescription(),
+              null,
+              resources.evaluateExpression());
         this.debuggerManager = debuggerManager;
         this.evaluateExpressionPresenter = evaluateExpressionPresenter;
     }
@@ -49,9 +56,8 @@ public class EvaluateExpressionAction extends Action {
     }
 
     @Override
-    public void update(ActionEvent e) {
+    public void updateInPerspective(ActionEvent event) {
         Debugger debugger = debuggerManager.getActiveDebugger();
-        e.getPresentation().setEnabled(debugger != null && debugger.isSuspended());
+        event.getPresentation().setEnabled(debugger != null && debugger.isSuspended());
     }
-
 }
