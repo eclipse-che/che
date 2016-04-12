@@ -224,9 +224,12 @@ public class MoveViewImpl extends Window implements MoveView {
         targetUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
         commentTextBox.getElement().setAttribute(PLACEHOLDER, "Comment...");
 
-        urlCheckBox.setValue(false, true);
+        // TODO setValue(false, true), clean setEnabled(false) and deckPanel.showWidget(0) once CHE-942 is fixed
+        urlCheckBox.setValue(true, true);
+        urlCheckBox.setEnabled(false);
+        onUrlCheckBoxClicked(null);
 
-        deckPanel.showWidget(0);
+        deckPanel.showWidget(1);
     }
 
     /** {@inheritDoc} */
