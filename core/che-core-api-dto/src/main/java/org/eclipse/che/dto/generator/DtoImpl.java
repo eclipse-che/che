@@ -232,7 +232,7 @@ abstract class DtoImpl {
         }
         String methodName = method.getName();
         if ((methodName.startsWith("get") || methodName.startsWith("is")) && method.getParameterTypes().length == 0) {
-            if (methodName.startsWith("is") && methodName.length() > 2) {
+            if (methodName.length() > 2 && methodName.startsWith("is")) {
                 return method.getReturnType() == Boolean.class || method.getReturnType() == boolean.class;
             }
             return methodName.length() > 3;
@@ -247,12 +247,11 @@ abstract class DtoImpl {
 
     /** Tests whether or not a given return type is a number primitive or its wrapper type. */
     protected static boolean isNumber(Class<?> returnType) {
-        final Class<?>[] numericTypes = {int.class, long.class, short.class, float.class, double.class, byte.class,
-                                         Integer.class, Long.class, Short.class, Float.class, Double.class, Byte.class};
-        for (Class<?> standardPrimitive : numericTypes) {
-            if (returnType.equals(standardPrimitive)) {
-                return true;
-            }
+        if (null != returnType && (Number.class.isAssignableFrom(returnType)
+                || int.class.equals(returnType) || long.class.equals(returnType)
+                || short.class.equals(returnType) || float.class.equals(returnType)
+                || double.class.equals(returnType) || byte.class.equals(returnType))) {
+            return true;
         }
         return false;
     }
