@@ -227,7 +227,6 @@ public class MoveViewImpl extends Window implements MoveView {
         // TODO setValue(false, true), clean setEnabled(false) and deckPanel.showWidget(0) once CHE-942 is fixed
         urlCheckBox.setValue(true, true);
         urlCheckBox.setEnabled(false);
-        onUrlCheckBoxClicked(null);
 
         deckPanel.showWidget(1);
     }
