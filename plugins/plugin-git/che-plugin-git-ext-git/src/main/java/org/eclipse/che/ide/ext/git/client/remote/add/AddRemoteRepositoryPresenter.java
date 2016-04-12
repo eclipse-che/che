@@ -32,19 +32,19 @@ import javax.validation.constraints.NotNull;
 public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.ActionDelegate {
 
     // An alternative scp-like syntax: [user@]host.xz:path/to/repo.git/
-    private static final RegExp SCP_LIKE_SYNTAX = RegExp.compile("([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+:");
+    private static final RegExp SCP_LIKE_SYNTAX        = RegExp.compile("([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+:");
     // the transport protocol
-    private static final RegExp PROTOCOL        = RegExp.compile("((http|https|git|ssh|ftp|ftps)://)");
+    private static final RegExp PROTOCOL               = RegExp.compile("((http|https|git|ssh|ftp|ftps)://)");
     // the address of the remote server between // and /
-    private static final RegExp HOST1           = RegExp.compile("//([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+/");
+    private static final RegExp HOST1                  = RegExp.compile("//([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+/");
     // the address of the remote server between @ and : or /
-    private static final RegExp HOST2           = RegExp.compile("@([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+[:/]");
+    private static final RegExp HOST2                  = RegExp.compile("@([A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-:]+)+[:/]");
     // the repository name
-    private static final RegExp REPO_NAME       = RegExp.compile("/[A-Za-z0-9_.\\-]+$");
+    private static final RegExp REPO_NAME              = RegExp.compile("/[A-Za-z0-9_.\\-]+$");
     // start with white space
-    private static final RegExp WHITE_SPACE     = RegExp.compile("^\\s");
+    private static final RegExp START_WITH_WHITE_SPACE = RegExp.compile("^\\s");
     // remote name
-    private static final RegExp REMOTE_NAME     = RegExp.compile("^[A-Za-z0-9_\\.]+$");
+    private static final RegExp REMOTE_NAME            = RegExp.compile("^[A-Za-z0-9_\\.]+$");
 
     private final AddRemoteRepositoryView view;
     private final GitLocalizationConstant locale;
@@ -128,7 +128,7 @@ public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.Act
      * @return <code>true</code> if url is correct
      */
     private boolean isRemoteUrlCorrect(@NotNull String url) {
-        if (WHITE_SPACE.test(url)) {
+        if (START_WITH_WHITE_SPACE.test(url)) {
             view.markURLInvalid();
             view.setURLErrorMessage(locale.gitUrlStartWithWhiteSpaceMessage());
             return false;
@@ -146,13 +146,13 @@ public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.Act
             return false;
         }
 
-        if (!(HOST1.test(url) || HOST2.test(url))) {
+        if (!HOST1.test(url) || !HOST2.test(url)) {
             view.markURLInvalid();
             view.setURLErrorMessage(locale.gitUrlHostIncorrectMessage());
             return false;
         }
 
-        if (!(REPO_NAME.test(url))) {
+        if (!REPO_NAME.test(url)) {
             view.markURLInvalid();
             view.setURLErrorMessage(locale.gitUrlNameRepoIncorrectMessage());
             return false;
