@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.debugger.client.debug;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
@@ -46,6 +47,7 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -76,6 +78,7 @@ import static org.mockito.Mockito.verify;
  * @author Valeriy Svydenko
  * @author Dmytro Nochevnov
  */
+@RunWith(GwtMockitoTestRunner.class)
 public class DebuggerTest extends BaseTest {
     private static final String DEBUG_INFO  = "debug_info";
     private static final String DEBUGGER_ID = "debugger_id";
@@ -227,15 +230,9 @@ public class DebuggerTest extends BaseTest {
     public void testAttachDebuggerWithConnection() throws Exception {
         Map<String, String> connectionProperties = mock(Map.class);
 
-        try {
-            debugger.attachDebugger(connectionProperties);
-        } catch (UnsatisfiedLinkError e) {
-            assertTrue(e.getMessage().contains("JsPromiseError.create"));  // verify calling "Promises.resolve(null)"
-            verify(service, never()).connect(any());
-            return;
-        }
+        debugger.attachDebugger(connectionProperties);
 
-        fail("debugger.attachDebugger() didn't try to obtain rejected promise when there is a connection");
+        verify(service, never()).connect(any());
     }
 
     @Test
@@ -256,7 +253,6 @@ public class DebuggerTest extends BaseTest {
 
         operationVoidCaptor.getValue().apply(null);
         operationPromiseErrorCaptor.getValue().apply(promiseError);
-        verify(promiseError).getMessage();
         verify(observer, times(2)).onDebuggerDisconnected();
         verify(debuggerManager, times(2)).setActiveDebugger(eq(null));
     }
@@ -265,15 +261,9 @@ public class DebuggerTest extends BaseTest {
     public void testDisconnectDebuggerWithoutConnection() throws Exception {
         debugger.setDebuggerInfo(null);
 
-        try {
-            debugger.disconnectDebugger();
-        } catch (UnsatisfiedLinkError e) {
-            assertTrue(e.getMessage().contains("Promises.resolve"));  // verify calling "Promises.resolve(null)"
-            verify(service, never()).disconnect(any());
-            return;
-        }
+        debugger.disconnectDebugger();
 
-        fail("debugger.disconnectDebugger() didn't try to obtain disconnect promiseVoid from the method 'Promises.resolve(null)'");
+        verify(service, never()).disconnect(any());
     }
 
     @Test
@@ -490,15 +480,9 @@ public class DebuggerTest extends BaseTest {
     public void testGetValueWithoutConnection() throws Exception {
         debugger.setDebuggerInfo(null);
 
-        try {
-            debugger.getValue(null);
-        } catch (UnsatisfiedLinkError e) {
-            assertTrue(e.getMessage().contains("JsPromiseError.create"));  // verify calling "Promises.resolve(null)"
-            verify(service, never()).getValue(any(), any());
-            return;
-        }
+        debugger.getValue(null);
 
-        fail("debugger.getValue() didn't try to obtain rejected promise when there is no connection");
+        verify(service, never()).getValue(any(), any());
     }
 
     @Test
@@ -532,15 +516,9 @@ public class DebuggerTest extends BaseTest {
     public void testGetStackFrameDumpWithoutConnection() throws Exception {
         debugger.setDebuggerInfo(null);
 
-        try {
-            debugger.getStackFrameDump();
-        } catch (UnsatisfiedLinkError e) {
-            assertTrue(e.getMessage().contains("JsPromiseError.create"));  // verify calling "Promises.resolve(null)"
-            verify(service, never()).getStackFrameDump(any());
-            return;
-        }
+        debugger.getStackFrameDump();
 
-        fail("debugger.getStackFrameDump() didn't try to obtain rejected promise when there is no connection");
+        verify(service, never()).getStackFrameDump(any());
     }
 
     @Test
@@ -556,16 +534,8 @@ public class DebuggerTest extends BaseTest {
     @Test
     public void testEvaluateExpressionWithoutConnection() throws Exception {
         debugger.setDebuggerInfo(null);
-
-        try {
-            debugger.evaluateExpression("any");
-        } catch (UnsatisfiedLinkError e) {
-            assertTrue(e.getMessage().contains("JsPromiseError.create"));  // verify calling "Promises.resolve(null)"
-            verify(service, never()).evaluateExpression(any(), any());
-            return;
-        }
-
-        fail("debugger.evaluateExpression() didn't try to obtain rejected promise when there is no connection");
+        debugger.evaluateExpression("any");
+        verify(service, never()).evaluateExpression(any(), any());
     }
 
     @Test
@@ -606,8 +576,13 @@ public class DebuggerTest extends BaseTest {
         }
 
         @Override
-        protected List<String> resolveFilePathByLocation(@NotNull Location location) {
+        protected List<String> fqnToPath(@NotNull Location location) {
             return Collections.emptyList();
+        }
+
+        @Override
+        protected String pathToFqn(VirtualFile file) {
+            return FQN;
         }
 
         @Override

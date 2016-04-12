@@ -14,7 +14,6 @@
 
 package org.eclipse.che.ide.ui.tree;
 
-import org.eclipse.che.ide.util.browser.BrowserUtils;
 import elemental.dom.Element;
 import elemental.dom.NodeList;
 import elemental.events.Event;
@@ -23,15 +22,6 @@ import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 import elemental.js.dom.JsElement;
 
-import org.eclipse.che.ide.mvp.CompositeView;
-import org.eclipse.che.ide.mvp.UiComponent;
-import org.eclipse.che.ide.util.AnimationController;
-import org.eclipse.che.ide.util.CssUtils;
-import org.eclipse.che.ide.util.dom.DomUtils;
-import org.eclipse.che.ide.util.dom.Elements;
-import org.eclipse.che.ide.util.dom.MouseGestureListener;
-import org.eclipse.che.ide.util.input.SignalEvent;
-import org.eclipse.che.ide.util.input.SignalEventImpl;
 import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
@@ -45,6 +35,16 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.mvp.CompositeView;
+import org.eclipse.che.ide.mvp.UiComponent;
+import org.eclipse.che.ide.util.AnimationController;
+import org.eclipse.che.ide.util.CssUtils;
+import org.eclipse.che.ide.util.browser.BrowserUtils;
+import org.eclipse.che.ide.util.dom.DomUtils;
+import org.eclipse.che.ide.util.dom.Elements;
+import org.eclipse.che.ide.util.dom.MouseGestureListener;
+import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.input.SignalEventImpl;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
