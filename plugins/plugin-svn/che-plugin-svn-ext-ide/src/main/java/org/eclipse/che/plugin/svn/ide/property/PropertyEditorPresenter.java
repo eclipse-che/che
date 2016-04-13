@@ -23,6 +23,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -59,8 +60,9 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                                       SubversionClientService service,
                                       DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                       NotificationManager notificationManager,
-                                      SubversionExtensionLocalizationConstants constants) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                                      SubversionExtensionLocalizationConstants constants,
+                                      final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.view = view;
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;

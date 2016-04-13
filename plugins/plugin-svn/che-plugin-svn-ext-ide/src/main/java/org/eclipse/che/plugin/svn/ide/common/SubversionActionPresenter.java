@@ -14,7 +14,6 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
@@ -35,35 +34,22 @@ import static org.eclipse.che.plugin.svn.ide.common.PathTypeFilter.ALL;
  */
 public class SubversionActionPresenter {
 
-    static final String[][] STATUS_COLORS = {
-            {"M", Style.getVcsConsoleStagedFilesColor()},
-            {"!", Style.getMainFontColor()},
-            {"?", Style.getMainMenuFontSelectedColor()},
-            {"A", Style.getVcsConsoleStagedFilesColor()},
-            {"X", Style.getMainFontColor()},
-            {"C", Style.getMainFontColor()},
-            {"D", Style.getVcsConsoleUnstagedFilesColor()},
-            {"+", Style.getVcsConsoleStagedFilesColor()},
-            {"-", Style.getVcsConsoleUnstagedFilesColor()},
-            {"@", Style.getVcsConsoleChangesLineNumbersColor()},
-            {"U", Style.getVcsConsoleModifiedFilesColor()},
-            {"G", Style.getVcsConsoleModifiedFilesColor()}
-    };
-
     private final AppContext                     appContext;
     private final SubversionOutputConsoleFactory consoleFactory;
     private final ConsolesPanelPresenter         consolesPanelPresenter;
     private final ProjectExplorerPresenter       projectExplorerPart;
+    private final StatusColors                   statusColors;
 
     protected SubversionActionPresenter(final AppContext appContext,
                                         final SubversionOutputConsoleFactory consoleFactory,
                                         final ConsolesPanelPresenter consolesPanelPresenter,
-                                        final ProjectExplorerPresenter projectExplorerPart) {
+                                        final ProjectExplorerPresenter projectExplorerPart,
+                                        final StatusColors statusColors) {
         this.appContext = appContext;
         this.consoleFactory = consoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
-
         this.projectExplorerPart = projectExplorerPart;
+        this.statusColors = statusColors;
     }
 
     /**
@@ -219,25 +205,18 @@ public class SubversionActionPresenter {
      */
     private void printOutput(List<String> output, SubversionOutputConsole console) {
         for (final String line : output) {
-            boolean found = false;
-
             if (!line.trim().isEmpty()) {
                 String prefix = line.trim().substring(0, 1);
 
-                for (String[] stcol : STATUS_COLORS) {
-                    if (stcol[0].equals(prefix)) {
+                final String color = statusColors.getStatusColor(prefix);
+                    if (color != null) {
                         // TODO: Turn the file paths into links (where appropriate)
-                        console.print(line, stcol[1]);
-                        found = true;
-                        break;
+                        console.print(line, color);
+                    } else {
+                        console.print(line);
                     }
                 }
             }
-
-            if (!found) {
-                console.print(line);
-            }
-        }
 
         console.print("");
     }

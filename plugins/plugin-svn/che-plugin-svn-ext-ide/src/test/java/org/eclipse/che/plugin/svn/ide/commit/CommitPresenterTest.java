@@ -60,7 +60,7 @@ public class CommitPresenterTest extends BaseSubversionPresenterTest {
         presenter =
                 new CommitPresenter(appContext, view, dtoUnmarshallerFactory, notificationManager,
                                     subversionOutputConsoleFactory, constants,
-                                    service, consolesPanelPresenter, projectExplorerPart, diffViewerPresenter);
+                                    service, consolesPanelPresenter, projectExplorerPart, diffViewerPresenter, statusColors);
     }
 
     @Test

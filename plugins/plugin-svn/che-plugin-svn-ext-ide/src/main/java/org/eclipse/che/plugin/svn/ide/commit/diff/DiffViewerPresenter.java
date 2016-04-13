@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.commit.diff;
 
-import com.google.common.base.Splitter;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Presenter for the {@link DiffViewerView}.
@@ -39,8 +35,9 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
                                   SubversionOutputConsoleFactory consoleFactory,
                                   ConsolesPanelPresenter consolesPanelPresenter,
                                   ProjectExplorerPresenter projectExplorerPart,
-                                  DiffViewerView view) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                                  DiffViewerView view,
+                                  final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.view = view;
         this.view.setDelegate(this);
     }

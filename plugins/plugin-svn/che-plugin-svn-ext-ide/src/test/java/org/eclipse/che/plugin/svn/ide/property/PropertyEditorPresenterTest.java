@@ -41,7 +41,7 @@ public class PropertyEditorPresenterTest extends BaseSubversionPresenterTest {
 
         presenter =
                 new PropertyEditorPresenter(appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart, view,
-                                            service, dtoUnmarshallerFactory, notificationManager, constants);
+                                            service, dtoUnmarshallerFactory, notificationManager, constants, statusColors);
     }
 
     @Test

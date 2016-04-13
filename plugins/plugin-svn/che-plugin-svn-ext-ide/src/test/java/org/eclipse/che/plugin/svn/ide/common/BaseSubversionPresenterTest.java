@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -38,6 +39,7 @@ public abstract class BaseSubversionPresenterTest {
 
     public static String PROJECT_NAME = "plugin-svn-test";
     public static String PROJECT_PATH = "/plugin-svn-test";
+    private static String STATUS_COLOR = "#FFFFFF";
 
     @Mock
     protected AppContext                               appContext;
@@ -63,6 +65,8 @@ public abstract class BaseSubversionPresenterTest {
     protected ConsolesPanelPresenter                   consolesPanelPresenter;
     @Mock
     protected ProjectExplorerPresenter                 projectExplorerPart;
+    @Mock
+    protected StatusColors                             statusColors;
 
     @Before
     public void setUp() throws Exception {
@@ -76,5 +80,7 @@ public abstract class BaseSubversionPresenterTest {
 
         when(rootProjectDescriptor.getName()).thenReturn(PROJECT_NAME);
         when(rootProjectDescriptor.getPath()).thenReturn(PROJECT_PATH);
+
+        when(statusColors.getStatusColor(anyString())).thenReturn(STATUS_COLOR);
     }
 }

@@ -12,16 +12,14 @@ package org.eclipse.che.plugin.svn.ide.diff;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -40,6 +38,7 @@ public class DiffPresenter extends SubversionActionPresenter {
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
     private final SubversionExtensionLocalizationConstants constants;
+    private final StatusColors                             statusColors;
 
     @Inject
     protected DiffPresenter(final AppContext appContext,
@@ -49,13 +48,15 @@ public class DiffPresenter extends SubversionActionPresenter {
                             final ConsolesPanelPresenter consolesPanelPresenter,
                             final SubversionClientService service,
                             final SubversionExtensionLocalizationConstants constants,
-                            final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                            final ProjectExplorerPresenter projectExplorerPart,
+                            final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
 
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
         this.constants = constants;
+        this.statusColors = statusColors;
     }
 
     public void showDiff() {

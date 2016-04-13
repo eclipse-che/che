@@ -39,7 +39,7 @@ public class ExportPresenterTest extends BaseSubversionPresenterTest {
         super.setUp();
 
         presenter = new ExportPresenter(null, appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart,
-                                        exportView, dtoUnmarshallerFactory, service, notificationManager, constants);
+                                        exportView, dtoUnmarshallerFactory, service, notificationManager, constants, statusColors);
     }
 
     @Test

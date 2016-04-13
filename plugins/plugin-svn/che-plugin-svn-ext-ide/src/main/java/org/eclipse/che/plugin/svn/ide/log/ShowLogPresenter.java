@@ -20,6 +20,7 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -52,8 +53,9 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                                final NotificationManager notificationManager,
                                final ProjectExplorerPresenter projectExplorerPart,
                                final SubversionExtensionLocalizationConstants constants,
-                               final ShowLogsView view) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                               final ShowLogsView view,
+                               final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
 
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.subversionClientService = subversionClientService;

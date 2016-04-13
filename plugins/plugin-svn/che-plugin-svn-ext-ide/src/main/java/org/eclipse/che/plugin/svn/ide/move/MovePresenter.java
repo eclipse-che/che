@@ -31,6 +31,7 @@ import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredTreeStructureProvider;
@@ -72,8 +73,9 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                          NotificationManager notificationManager,
                          SubversionClientService service,
                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                         SubversionExtensionLocalizationConstants locale) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                         SubversionExtensionLocalizationConstants locale,
+                         final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.projectExplorerPart = projectExplorerPart;
         this.treeStructureProvider = treeStructureProvider;
         this.notificationManager = notificationManager;
