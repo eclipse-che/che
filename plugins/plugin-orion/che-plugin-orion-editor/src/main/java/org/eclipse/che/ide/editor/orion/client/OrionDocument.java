@@ -117,6 +117,16 @@ public class OrionDocument extends AbstractEmbeddedDocument {
     }
 
     @Override
+    public int getLineAtOffset(int offset) {
+        return this.editorOverlay.getTextView().getLineAtOffset(offset);
+    }
+
+    @Override
+    public int getLineStart(int lineIndex) {
+        return editorOverlay.getTextView().getLineStart(lineIndex);
+    }
+
+    @Override
     public TextPosition getCursorPosition() {
         final int offset = this.editorOverlay.getCaretOffset();
         return getPositionFromIndex(offset);

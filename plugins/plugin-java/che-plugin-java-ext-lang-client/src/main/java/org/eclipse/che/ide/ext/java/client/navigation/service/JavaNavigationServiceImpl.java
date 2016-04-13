@@ -17,6 +17,7 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
@@ -24,6 +25,7 @@ import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
+import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -154,5 +156,16 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
     @Override
     public String getContentUrl(String projectPath, int libId, String path) {
         return restContext + "/jdt/" + workspaceId + "/navigation/content?projectpath=" + projectPath + "&root=" + libId + "&path=" + path;
+    }
+
+    @Override
+    public Promise<List<MethodParameters>> getMethodParametersHints(String projectPath, String fqn, int offset, int lineStartOffset) {
+        String url = restContext + "/jdt/" + workspaceId + "/navigation/parameters" +
+                     "?projectpath=" + projectPath + "&fqn=" + fqn + "&offset=" + offset + "&lineStart=" + lineStartOffset;
+
+        return requestFactory.createGetRequest(url)
+                             .header(ACCEPT, MimeType.APPLICATION_JSON)
+                             .loader(loaderFactory.newLoader("Getting parameters..."))
+                             .send(unmarshallerFactory.newListUnmarshaller(MethodParameters.class));
     }
 }
