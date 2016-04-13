@@ -35,32 +35,68 @@ public interface Document extends ReadOnlyDocument {
 
     /**
      * Change the selected range.
-     * @param range the new selected range
+     *
+     * @param range
+     *         the new selected range
      */
     void setSelectedRange(TextRange range);
 
     /**
+     * Returns the line index at the given character offset.
+     * The valid offsets are 0 to char count inclusive. The line index for
+     * char count is <code>line count - 1</code>. Returns <code>-1</code> if
+     * the offset is out of range.
+     *
+     * @param offset
+     *         a character offset.
+     * @return line index or <code>-1</code> if out of range.
+     */
+    int getLineAtOffset(int offset);
+
+    /**
+     * Returns the start character offset for the given line.
+     * <p>
+     * The valid indices are 0 to line count exclusive.  Returns <code>-1</code>
+     * if the index is out of range.
+     * </p>
+     *
+     * @param lineIndex
+     *         index of the line.
+     * @return the line start offset or <code>-1</code> if out of range.
+     */
+    int getLineStart(int lineIndex);
+
+    /**
      * Change the selected range and optionally move the viewport to show the new selection.
-     * @param range the new selected range
-     * @param show true iff the viewport is moved to show the selection
+     *
+     * @param range
+     *         the new selected range
+     * @param show
+     *         true iff the viewport is moved to show the selection
      */
     void setSelectedRange(TextRange range, boolean show);
 
     /**
      * Change the selected range.
-     * @param range the new selected range
+     *
+     * @param range
+     *         the new selected range
      */
     void setSelectedRange(LinearRange range);
 
     /**
      * Change the selected range and optionally move the viewport to show the new selection.
-     * @param range the new selected range
-     * @param show true iff the viewport is moved to show the selection
+     *
+     * @param range
+     *         the new selected range
+     * @param show
+     *         true iff the viewport is moved to show the selection
      */
     void setSelectedRange(LinearRange range, boolean show);
 
     /**
      * Returns the document handle.
+     *
      * @return the document handle
      */
     DocumentHandle getDocumentHandle();
@@ -76,9 +112,13 @@ public interface Document extends ReadOnlyDocument {
 
     /**
      * Replaces the text range with the given replacement contents.
-     * @param offset start of the range
-     * @param length en of the range
-     * @param text the replacement text
+     *
+     * @param offset
+     *         start of the range
+     * @param length
+     *         en of the range
+     * @param text
+     *         the replacement text
      */
     void replace(int offset, int length, String text);
 
@@ -88,6 +128,7 @@ public interface Document extends ReadOnlyDocument {
 
     /**
      * Returns a {@link ReadOnlyDocument} that refers to the same document.
+     *
      * @return a read-only document
      */
     ReadOnlyDocument getReadOnlyDocument();

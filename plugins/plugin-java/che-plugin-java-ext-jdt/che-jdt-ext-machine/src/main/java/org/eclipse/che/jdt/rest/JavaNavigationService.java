@@ -16,8 +16,10 @@ import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
+import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 import org.eclipse.che.jdt.JavaNavigation;
 import org.eclipse.che.jdt.JavaTypeHierarchy;
+import org.eclipse.che.jdt.ParametersHints;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -43,6 +45,8 @@ public class JavaNavigationService {
     private JavaNavigation    navigation;
     @Inject
     private JavaTypeHierarchy javaTypeHierarchy;
+    @Inject
+    private ParametersHints   parametersHints;
 
     @GET
     @Path("contentbyfqn")
@@ -157,4 +161,16 @@ public class JavaNavigationService {
     public List<JavaProject> getProjectsAndPackages(@QueryParam("includepackages") boolean includePackages) throws JavaModelException {
         return navigation.getAllProjectsAndPackages(includePackages);
     }
+
+    @GET
+    @Path("parameters")
+    public List<MethodParameters> getParameters(@QueryParam("projectpath") String projectPath,
+                                                @QueryParam("fqn") String fqn,
+                                                @QueryParam("offset") int offset,
+                                                @QueryParam("lineStart") int lineStartOffset) throws JavaModelException {
+        IJavaProject project = MODEL.getJavaProject(projectPath);
+
+        return parametersHints.findHints(project, fqn, offset, lineStartOffset);
+    }
+
 }

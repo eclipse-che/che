@@ -17,6 +17,7 @@ import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
 import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
+import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import java.util.List;
@@ -91,4 +92,20 @@ public interface JavaNavigationService {
      * @return
      */
     String getContentUrl(String projectPath, int libId, String path);
+
+    /**
+     * The method returns list of parameters for particular method or constructor. Parameters represented as string which contains hints
+     * separated by comma.
+     *
+     * @param projectPath
+     *         path to current project
+     * @param fqn
+     *         fqn of file
+     * @param offset
+     *         cursor position in editor
+     * @param lineStartOffset
+     *         offset of start line where method or constructor is located
+     * @return list of parameters which method or constructor can accept
+     */
+    Promise<List<MethodParameters>> getMethodParametersHints(String projectPath, String fqn, int offset, int lineStartOffset);
 }

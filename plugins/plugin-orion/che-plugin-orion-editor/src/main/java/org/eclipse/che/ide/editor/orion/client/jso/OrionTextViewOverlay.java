@@ -63,6 +63,14 @@ public class OrionTextViewOverlay extends JavaScriptObject {
         return this.getSelection();
     }-*/;
 
+    public final native int getLineAtOffset(int offset) /*-{
+        return this.getLineAtOffset(offset);
+    }-*/;
+
+    public final native int getLineStart(int lineIndex) /*-{
+        return this.getLineStart(lineIndex);
+    }-*/;
+
     public final native boolean showSelection() /*-{
         return this.showSelection();
     }-*/;
@@ -72,13 +80,13 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     }-*/;
 
     public final native boolean showSelection(double additionalFractionScroll, SimpleCallBack callback) /*-{
-        return this.showSelection(additionalFractionScroll, function() {
+        return this.showSelection(additionalFractionScroll, function () {
             callback.@org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay.SimpleCallBack::onFinished()();
         });
     }-*/;
 
     public final native boolean showSelection(OrionTextViewShowOptionsOverlay options, SimpleCallBack callback) /*-{
-        return this.showSelection(options, function() {
+        return this.showSelection(options, function () {
             callback.@org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay.SimpleCallBack::onFinished()();
         });
     }-*/;
@@ -139,7 +147,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     // actions
 
     public final native void setAction(String actionId, Action action) /*-{
-        this.setAction(actionId, function() {
+        this.setAction(actionId, function () {
             action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
             return true;
         });
@@ -147,13 +155,17 @@ public class OrionTextViewOverlay extends JavaScriptObject {
 
     /**
      * Set custom action
-     * @param actionId actonId
-     * @param action implementation of action
-     * @param description action description
+     *
+     * @param actionId
+     *         actonId
+     * @param action
+     *         implementation of action
+     * @param description
+     *         action description
      */
     public final native void setAction(String actionId, Action action, String description) /*-{
-        var actionDescription = {name : description};
-        this.setAction(actionId, function() {
+        var actionDescription = {name: description};
+        this.setAction(actionId, function () {
             action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
             return true;
         }, actionDescription);
@@ -174,20 +186,21 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     // events
 
     public final native void addEventListener(String eventType, EventHandlerNoParameter handler, boolean useCapture) /*-{
-        this.addEventListener(eventType, function() {
+        this.addEventListener(eventType, function () {
             handler.@org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay.EventHandlerNoParameter::onEvent()();
         }, useCapture);
     }-*/;
 
-    public final native <T extends OrionEventOverlay> void addEventListener(String eventType, EventHandler<T> handler, boolean useCapture) /*-{
+    public final native <T extends OrionEventOverlay> void addEventListener(String eventType, EventHandler<T> handler,
+                                                                            boolean useCapture) /*-{
         var func = function (param) {
             handler.@org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay.EventHandler::onEvent(*)(param);
         };
-        if($wnd.che_handels === undefined){
+        if ($wnd.che_handels === undefined) {
             $wnd.che_handels = {};
         }
         $wnd.che_handels[handler] = func;
-        this.addEventListener(eventType, func , useCapture);
+        this.addEventListener(eventType, func, useCapture);
     }-*/;
 
     public final void addEventListener(String type, EventHandlerNoParameter handler) {
@@ -240,8 +253,10 @@ public class OrionTextViewOverlay extends JavaScriptObject {
 
     /**
      * Returns the {x, y} pixel location of the top-left corner of the character bounding box at the specified offset
-     * in the document. The pixel location is relative to the document. 
-     * @param offset the text offset
+     * in the document. The pixel location is relative to the document.
+     *
+     * @param offset
+     *         the text offset
      * @return the pixel location
      */
     public final native OrionPixelPositionOverlay getLocationAtOffset(int offset) /*-{
@@ -254,6 +269,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
      * "document" - relative to document, the origin is the top-left corner of first line
      * "page" - relative to html page that contains the text view
      * All methods in the view that take or return a position are in the document coordinate space.
+     *
      * @return the pixel location
      */
     public final native OrionPixelPositionOverlay convert(OrionPixelPositionOverlay rect, String from, String to) /*-{
@@ -261,7 +277,8 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     }-*/;
 
     /**
-     *  Returns the default line height
+     * Returns the default line height
+     *
      * @return
      */
     public final native int getLineHeight() /*-{
@@ -269,9 +286,12 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     }-*/;
 
     /**
-     * Returns the character offset nearest to the given pixel location. The pixel location is relative to the document. 
-     * @param x the horizontal pixel coordinate
-     * @param y the vertical pixel coordinate
+     * Returns the character offset nearest to the given pixel location. The pixel location is relative to the document.
+     *
+     * @param x
+     *         the horizontal pixel coordinate
+     * @param y
+     *         the vertical pixel coordinate
      * @return the text offset
      */
     public final native int getOffsetAtLocation(int x, int y) /*-{
@@ -281,7 +301,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
 
     /**
      * Replaces the text in the given range with the given text.
-     *  The character at the end offset is not replaced.
+     * The character at the end offset is not replaced.
      */
     public final native void setText(String text, int start, int end) /*-{
         this.setText(text, start, end);
@@ -303,12 +323,14 @@ public class OrionTextViewOverlay extends JavaScriptObject {
         return this.getRulers();
     }-*/;
 
-    public final native <T extends OrionEventOverlay> void removeEventListener(String eventType, EventHandler<T> handler,boolean useCapture) /*-{
+    public final native <T extends OrionEventOverlay> void removeEventListener(String eventType, EventHandler<T> handler,
+                                                                               boolean useCapture) /*-{
         this.removeEventListener(eventType, $wnd.che_handels[handler], useCapture)
     }-*/;
 
     /**
      * Get action description by actionId
+     *
      * @param actionId
      * @return action description
      */
