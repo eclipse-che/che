@@ -212,7 +212,7 @@ public class OrionDocument extends AbstractEmbeddedDocument {
         final int startOffset = this.textViewOverlay.getModel().getLineStart(line);
         final int endOffset = this.textViewOverlay.getModel().getLineEnd(line);
         final int length = endOffset - startOffset;
-        return new TextRange(new TextPosition(line, 0), new TextPosition(line, length - 1));
+        return new TextRange(new TextPosition(line, 0), new TextPosition(line, length));
     }
 
     @Override
