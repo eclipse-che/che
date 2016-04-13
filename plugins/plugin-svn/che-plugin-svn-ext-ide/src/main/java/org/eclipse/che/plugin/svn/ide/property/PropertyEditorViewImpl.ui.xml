@@ -37,24 +37,12 @@
 
         .block-header hr {
             border: 0;
-            border-bottom: 1px solid #505050;
             padding-top: 1px;
         }
 
         .label {
             margin-right: 5px;
             margin-top: 1px;
-        }
-
-        .textArea {
-            background-color: #474747;
-            color: #dbdbdb;
-            border: 1px solid #191c1e;
-            border-radius: 1px;
-            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.19) inset, 0px 1px 0px 0px rgba(223, 223, 223, 0.4);
-            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
-            font-size: 12px;
-            text-shadow: 0px 1px 0px rgba(46, 46, 46, 0.5);
         }
     </ui:style>
     <g:DockPanel width="320px" addStyleNames="{style.margin5}">
@@ -93,7 +81,7 @@
                     <g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT"/>
                 </g:west>
                 <g:center>
-                    <g:TextArea ui:field="propertyCurrentValue" width="190px" height="28px" addStyleNames="{style.textArea}"/>
+                    <g:TextArea ui:field="propertyCurrentValue" width="190px" height="28px" addStyleNames="{resources.subversionCSS.textFont}"/>
                 </g:center>
             </g:DockLayoutPanel>
         </g:Dock>
@@ -111,7 +99,7 @@
                     <g:HorizontalPanel width="100%" horizontalAlignment="ALIGN_RIGHT"/>
                 </g:west>
                 <g:center>
-                    <g:TextArea ui:field="propertyValue" width="235px" height="53px" addStyleNames="{style.textArea}" tabIndex="1"/>
+                    <g:TextArea ui:field="propertyValue" width="235px" height="53px" addStyleNames="{resources.subversionCSS.textFont}" tabIndex="1"/>
                 </g:center>
             </g:DockLayoutPanel>
         </g:Dock>

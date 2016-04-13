@@ -32,16 +32,7 @@ import java.util.Map;
 @Singleton
 public class DiffViewerPresenter extends SubversionActionPresenter implements DiffViewerView.ActionDelegate {
 
-    private static final Map<String, String> lineRules;
-
     private DiffViewerView view;
-
-    static {
-        lineRules = new HashMap<>();
-        lineRules.put("+", "chartreuse");
-        lineRules.put("-", "rgb(247, 47, 47)");
-        lineRules.put("@", "cyan");
-    }
 
     @Inject
     protected DiffViewerPresenter(AppContext appContext,
@@ -55,13 +46,7 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
     }
 
     public void showDiff(String content) {
-        StringBuilder html = new StringBuilder();
-
-        html.append("<pre>");
-        colorizeDiff(html, content);
-        html.append("</pre>");
-
-        view.setDiffContent(html.toString());
+        view.showDiff(content);
         view.onShow();
     }
 
@@ -69,18 +54,5 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
     @Override
     public void onCloseClicked() {
         view.onClose();
-    }
-
-    private void colorizeDiff(StringBuilder colorized, String origin) {
-        for (String line : Splitter.on("\n").splitToList(origin)) {
-            final String prefix = line.substring(0, 1);
-            final String sanitizedLine = new SafeHtmlBuilder().appendEscaped(line).toSafeHtml().asString();
-            colorized.append("<span style=\"color:")
-                     .append(lineRules.containsKey(prefix) ? lineRules.get(prefix) : "#dbdbdb")
-                     .append(";\">")
-                     .append(sanitizedLine)
-                     .append("</span>")
-                     .append("\n");
-        }
     }
 }

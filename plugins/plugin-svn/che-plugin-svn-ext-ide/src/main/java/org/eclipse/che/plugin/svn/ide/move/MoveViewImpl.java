@@ -119,7 +119,7 @@ public class MoveViewImpl extends Window implements MoveView {
                 delegate.onCancelClicked();
             }
         });
-        getFooter().add(btnCancel);
+        addButtonToFooter(btnCancel);
 
         btnMove = createButton(constants.moveButton(), "svn-move-move", new ClickHandler() {
             @Override
@@ -127,7 +127,7 @@ public class MoveViewImpl extends Window implements MoveView {
                 delegate.onMoveClicked();
             }
         });
-        getFooter().add(btnMove);
+        addButtonToFooter(btnMove);
 
         alertMarker = resources.alert().getSvg();
         alertMarker.getStyle().setWidth(22, Style.Unit.PX);

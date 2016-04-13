@@ -79,7 +79,7 @@ public class ExportViewImpl extends Window implements ExportView {
                 delegate.onCancelClicked();
             }
         });
-        getFooter().add(btnCancel);
+        addButtonToFooter(btnCancel);
 
         btnExport = createButton("Export", "svn-export-export", new ClickHandler() {
             @Override
@@ -87,7 +87,7 @@ public class ExportViewImpl extends Window implements ExportView {
                 delegate.onExportClicked();
             }
         });
-        getFooter().add(btnExport);
+        addButtonToFooter(btnExport);
     }
 
     /** {@inheritDoc} */

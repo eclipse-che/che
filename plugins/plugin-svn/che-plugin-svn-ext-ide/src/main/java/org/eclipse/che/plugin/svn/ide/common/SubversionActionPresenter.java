@@ -14,6 +14,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
@@ -35,18 +36,18 @@ import static org.eclipse.che.plugin.svn.ide.common.PathTypeFilter.ALL;
 public class SubversionActionPresenter {
 
     static final String[][] STATUS_COLORS = {
-            {"M", "rgb(247, 47, 47)"},
-            {"!", "grey"},
-            {"?", "lightskyblue"},
-            {"A", "chartreuse"},
-            {"X", "yellow"},
-            {"C", "yellow"},
-            {"D", "rgb(247, 47, 47)"},
-            {"+", "chartreuse"},
-            {"-", "rgb(247, 47, 47)"},
-            {"@", "cyan"},
-            {"U", "chartreuse"},
-            {"G", "chartreuse"}
+            {"M", Style.getVcsConsoleStagedFilesColor()},
+            {"!", Style.getMainFontColor()},
+            {"?", Style.getMainMenuFontSelectedColor()},
+            {"A", Style.getVcsConsoleStagedFilesColor()},
+            {"X", Style.getMainFontColor()},
+            {"C", Style.getMainFontColor()},
+            {"D", Style.getVcsConsoleUnstagedFilesColor()},
+            {"+", Style.getVcsConsoleStagedFilesColor()},
+            {"-", Style.getVcsConsoleUnstagedFilesColor()},
+            {"@", Style.getVcsConsoleChangesLineNumbersColor()},
+            {"U", Style.getVcsConsoleModifiedFilesColor()},
+            {"G", Style.getVcsConsoleModifiedFilesColor()}
     };
 
     private final AppContext                     appContext;

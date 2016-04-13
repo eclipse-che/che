@@ -109,7 +109,7 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
      */
     @Override
     public void printError(@NotNull String text) {
-        print(text, Style.getGitConsoleErrorColor());
+        print(text, Style.getVcsConsoleErrorColor());
     }
 
     public void clear() {

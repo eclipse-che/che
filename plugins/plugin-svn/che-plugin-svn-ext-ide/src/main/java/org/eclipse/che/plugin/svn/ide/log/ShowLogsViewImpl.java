@@ -62,7 +62,7 @@ public class ShowLogsViewImpl extends Window implements ShowLogsView {
         });
         buttonShowLogs.addStyleName(resources.windowCss().button());
         buttonShowLogs.getElement().getStyle().setMarginRight(8, Style.Unit.PX);
-        getFooter().add(buttonShowLogs);
+        addButtonToFooter(buttonShowLogs);
 
         buttonCancel = createButton(constants.buttonCancel(), "svn-showlogs-cancel", new ClickHandler() {
             @Override
@@ -70,7 +70,7 @@ public class ShowLogsViewImpl extends Window implements ShowLogsView {
                 delegate.cancelClicked();
             }
         });
-        getFooter().add(buttonCancel);
+        addButtonToFooter(buttonCancel);
     }
 
     @Override

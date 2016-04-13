@@ -26,7 +26,7 @@
         }
 
         .checkBox {
-            margin-left: 6px;
+            margin-left: 10px;
             margin-top: 6px;
         }
 
@@ -46,22 +46,7 @@
 
         .block-header hr {
             border: 0;
-            border-bottom: 1px solid #505050;
             padding-top: 1px;
-        }
-
-        .textArea {
-            background-color: #474747;
-            color: #dbdbdb;
-            border: 1px solid #191c1e;
-            border-radius: 1px;
-            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.19) inset, 0px 1px 0px 0px rgba(223, 223, 223, 0.4);
-            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
-            font-size: 12px;
-            text-shadow: 0px 1px 0px rgba(46, 46, 46, 0.5);
-            margin-left: 10px;
-            margin-top: 5px;
-            margin-right: 3px;
         }
 
         .changesCount {
@@ -128,7 +113,7 @@
                         </g:Dock>
 
                         <g:Dock direction="NORTH">
-                            <g:TextArea ui:field="message" width="338px" height="50px" addStyleNames="{style.textArea}"/>
+                            <g:TextArea ui:field="message" width="338px" height="50px" addStyleNames="{resources.subversionCSS.textFont}"/>
                         </g:Dock>
                     </g:DockPanel>
                 </g:Dock>

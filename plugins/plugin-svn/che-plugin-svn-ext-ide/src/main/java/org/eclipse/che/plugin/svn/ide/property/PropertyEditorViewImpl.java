@@ -105,7 +105,7 @@ public class PropertyEditorViewImpl extends Window implements PropertyEditorView
             }
         });
         btnCancel.setTabIndex(6);
-        getFooter().add(btnCancel);
+        addButtonToFooter(btnCancel);
 
         btnOk = createButton("Ok", "svn-property-edit-ok", new ClickHandler() {
             @Override
@@ -114,7 +114,7 @@ public class PropertyEditorViewImpl extends Window implements PropertyEditorView
             }
         });
         btnOk.setTabIndex(5);
-        getFooter().add(btnOk);
+        addButtonToFooter(btnOk);
 
         final String[] props = new String[] {
                 "svn:ignore",

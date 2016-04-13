@@ -13,6 +13,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='resources' type='org.eclipse.che.plugin.svn.ide.SubversionExtensionResources'/>
     <ui:style>
 
         .margin5 {
@@ -35,23 +36,7 @@
 
         .block-header hr {
             border: 0;
-            border-bottom: 1px solid #505050;
             padding-top: 1px;
-        }
-
-        .textArea {
-            background-color: #474747;
-            color: #dbdbdb;
-            border: 1px solid #191c1e;
-            border-radius: 1px;
-            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.19) inset, 0px 1px 0px 0px rgba(223, 223, 223, 0.4);
-            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
-            font-size: 12px;
-            text-shadow: 0px 1px 0px rgba(46, 46, 46, 0.5);
-            margin-left: 10px;
-            margin-top: 5px;
-            margin-right: 3px;
-            margin-bottom: 7px;
         }
 
     </ui:style>
@@ -72,7 +57,7 @@
         </g:Dock>
 
         <g:Dock direction="NORTH">
-            <g:RichTextArea ui:field="diffViewer" width="674px" height="400px" addStyleNames="{style.textArea}"/>
+            <g:RichTextArea ui:field="diffViewer" width="674px" height="400px" addStyleNames="{resources.subversionCSS.textFont}"/>
         </g:Dock>
 
     </g:DockPanel>
