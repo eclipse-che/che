@@ -222,9 +222,7 @@ public abstract class FactoryBaseValidator {
         if (onAppLoaded != null) {
             for (Action action : onAppLoaded.getActions()) {
                 final Map<String, String> properties = action.getProperties();
-                if ("openWelcomePage".equals(action.getId()) && (isNullOrEmpty(properties.get("nonAuthenticatedContentUrl")) ||
-                                                                 isNullOrEmpty(properties.get("authenticatedContentUrl")))) {
-
+                if ("openWelcomePage".equals(action.getId()) && isNullOrEmpty(properties.get("greetingContentUrl"))) {
                     throw new BadRequestException(FactoryConstants.INVALID_WELCOME_PAGE_ACTION);
                 }
             }
