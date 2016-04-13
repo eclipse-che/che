@@ -61,6 +61,7 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-websocket-terminal</artifactId>
             <type>zip</type>
+            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
