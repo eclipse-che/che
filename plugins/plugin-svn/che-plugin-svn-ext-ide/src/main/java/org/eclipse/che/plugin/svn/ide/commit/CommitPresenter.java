@@ -12,19 +12,17 @@ package org.eclipse.che.plugin.svn.ide.commit;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.commit.CommitView.ActionDelegate;
 import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerPresenter;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsolePresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputParser;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -77,8 +75,9 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            final SubversionClientService subversionService,
                            final ConsolesPanelPresenter consolesPanelPresenter,
                            final ProjectExplorerPresenter projectExplorerPart,
-                           final DiffViewerPresenter diffViewerPresenter) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                           final DiffViewerPresenter diffViewerPresenter,
+                           final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.subversionService = subversionService;
         this.view = view;
         this.diffViewerPresenter = diffViewerPresenter;

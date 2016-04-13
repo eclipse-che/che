@@ -21,6 +21,7 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 
 /**
@@ -41,9 +42,10 @@ public class UpdateToRevisionPresenter extends UpdatePresenter implements Update
                                      final SubversionExtensionLocalizationConstants constants,
                                      final ConsolesPanelPresenter consolesPanelPresenter,
                                      final UpdateToRevisionView view,
-                                     final ProjectExplorerPresenter projectExplorerPart) {
+                                     final ProjectExplorerPresenter projectExplorerPart,
+                                     final StatusColors statusColors) {
         super(appContext, dtoUnmarshallerFactory, eventBus, consoleFactory, service, consolesPanelPresenter, constants,
-              notificationManager, projectExplorerPart);
+              notificationManager, projectExplorerPart, statusColors);
 
         this.view = view;
 

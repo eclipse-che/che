@@ -32,7 +32,7 @@ public class RemovePresenterTest extends BaseSubversionPresenterTest {
         super.setUp();
 
         presenter = new RemovePresenter(appContext, dtoUnmarshallerFactory, notificationManager, subversionOutputConsoleFactory, constants,
-                                        service, consolesPanelPresenter, projectExplorerPart);
+                                        service, consolesPanelPresenter, projectExplorerPart, statusColors);
     }
 
     @Test

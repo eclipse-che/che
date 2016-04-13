@@ -25,6 +25,7 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
@@ -64,8 +65,9 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
                            DtoUnmarshallerFactory dtoUnmarshallerFactory,
                            SubversionClientService subversionClientService,
                            NotificationManager notificationManager,
-                           SubversionExtensionLocalizationConstants constants) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                           SubversionExtensionLocalizationConstants constants,
+                           final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.view = view;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.subversionClientService = subversionClientService;

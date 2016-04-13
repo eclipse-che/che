@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
 import org.eclipse.che.plugin.svn.ide.common.PathTypeFilter;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialog;
@@ -62,8 +63,9 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   final ConsolesPanelPresenter consolesPanelPresenter,
                                   final SubversionExtensionLocalizationConstants constants,
                                   final SubversionClientService service,
-                                  final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                                  final ProjectExplorerPresenter projectExplorerPart,
+                                  final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
 
         this.service = service;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;

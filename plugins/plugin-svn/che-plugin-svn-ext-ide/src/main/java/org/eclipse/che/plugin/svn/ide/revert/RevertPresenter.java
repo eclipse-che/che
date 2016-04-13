@@ -26,6 +26,7 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -53,8 +54,9 @@ public class RevertPresenter extends SubversionActionPresenter {
                               final SubversionExtensionLocalizationConstants constants,
                               final NotificationManager notificationManager,
                               final DialogFactory dialogFactory,
-                              final ProjectExplorerPresenter projectExplorerPart) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                              final ProjectExplorerPresenter projectExplorerPart,
+                              final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.subversionClientService = subversionClientService;
         this.constants = constants;

@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.project.tree.TreeStructure;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsole;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -77,8 +77,9 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                           final ConsolesPanelPresenter consolesPanelPresenter,
                           final ProjectExplorerPresenter projectExplorerPart,
                           final NotificationManager notificationManager,
-                          final SubversionExtensionLocalizationConstants constants) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart);
+                          final SubversionExtensionLocalizationConstants constants,
+                          final StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
 
         this.view = view;
         this.subversionClientService = subversionClientService;

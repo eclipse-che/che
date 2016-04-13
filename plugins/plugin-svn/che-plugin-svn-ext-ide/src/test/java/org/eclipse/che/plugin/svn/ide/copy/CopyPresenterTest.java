@@ -59,7 +59,7 @@ public class CopyPresenterTest extends BaseSubversionPresenterTest {
 
         presenter =
                 new CopyPresenter(appContext, subversionOutputConsoleFactory, consolesPanelPresenter, copyView, notificationManager,
-                                  service, dtoUnmarshallerFactory, constants, projectExplorerPart);
+                                  service, dtoUnmarshallerFactory, constants, projectExplorerPart, statusColors);
     }
 
     @Test
