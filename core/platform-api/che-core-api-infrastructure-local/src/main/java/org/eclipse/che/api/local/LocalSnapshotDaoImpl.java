@@ -17,7 +17,7 @@ import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
-import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.adapters.InstanceKeyAdapter;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 

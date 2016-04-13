@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
@@ -562,7 +562,7 @@ public class WorkspaceManagerTest {
                                                               .setDev(true)
                                                               .setName("dev-machine")
                                                               .setType("docker")
-                                                              .setSource(new MachineSourceImpl("location", "recipe"))
+                                                              .setSource(new MachineSourceImpl("location", "dockerfile"))
                                                               .setServers(asList(new ServerConfImpl("ref1",
                                                                                                     "8080",
                                                                                                     "https",

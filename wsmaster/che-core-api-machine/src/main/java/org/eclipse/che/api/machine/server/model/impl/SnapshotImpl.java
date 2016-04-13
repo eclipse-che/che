@@ -8,9 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.impl;
+package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.machine.server.spi.impl.InstanceKeyImpl;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.commons.lang.NameGenerator;

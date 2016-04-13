@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -66,6 +67,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 
 /**
  * Docker implementation of {@link InstanceProvider}
@@ -116,7 +118,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegeMode = privilegeMode;
-        this.supportedRecipeTypes = Collections.singleton("Dockerfile");
+        this.supportedRecipeTypes = Collections.singleton("dockerfile");
         this.projectFolderPath = projectFolderPath;
 
         if (SystemInfo.isWindows()) {
@@ -209,7 +211,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     @Override
     public Instance createInstance(Recipe recipe,
                                    Machine machine,
-                                   LineConsumer creationLogsOutput) throws MachineException {
+                                   LineConsumer creationLogsOutput) throws MachineException, UnsupportedRecipeException {
         final Dockerfile dockerfile = parseRecipe(recipe);
 
         final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
@@ -276,7 +278,7 @@ public class DockerInstanceProvider implements InstanceProvider {
             return DockerfileParser.parse(recipe.getScript());
         } catch (DockerFileException e) {
             LOG.debug(e.getLocalizedMessage(), e);
-            throw new InvalidRecipeException(String.format("Unable build docker based machine. %s", e.getMessage()));
+            throw new InvalidRecipeException("Unable build docker based machine. " + e.getMessage());
         }
     }
 
@@ -396,9 +398,9 @@ public class DockerInstanceProvider implements InstanceProvider {
             if (machine.getConfig().isDev()) {
                 portsToExpose = new HashMap<>(devMachinePortsToExpose);
 
-                final String projectFolderVolume = String.format("%s:%s:Z",
-                                                                 workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
-                                                                 projectFolderPath);
+                final String projectFolderVolume = format("%s:%s:Z",
+                                                          workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
+                                                          projectFolderPath);
                 volumes = ObjectArrays.concat(devMachineSystemVolumes,
                                               SystemInfo.isWindows() ? escapePath(projectFolderVolume) : projectFolderVolume);
 

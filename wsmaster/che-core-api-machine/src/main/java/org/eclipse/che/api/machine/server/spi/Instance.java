@@ -116,11 +116,23 @@ public interface Instance extends Machine {
      *         path to file or directory inside specified machine
      * @param targetPath
      *         path to destination file or directory inside machine
-     * @param overwrite
+     * @param overwriteDirNonDir
      *         If "false" then it will be an error if unpacking the given content would cause
      *         an existing directory to be replaced with a non-directory and vice versa.
      * @throws MachineException
      *         if any error occurs when files are being copied
      */
-    void copy(Instance sourceMachine, String sourcePath, String targetPath, boolean overwrite) throws MachineException;
+    void copy(Instance sourceMachine, String sourcePath, String targetPath, boolean overwriteDirNonDir) throws MachineException;
+
+    /**
+     * Copies files from CHE server into current machine.
+     *
+     * @param sourcePath
+     *         path to file or directory inside CHE server
+     * @param targetPath
+     *         path to destination file or directory inside machine
+     * @throws MachineException
+     *         if any error occurs when files are being copied
+     */
+    void copy(String sourcePath, String targetPath) throws MachineException;
 }

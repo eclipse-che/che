@@ -507,7 +507,7 @@ public class DefaultWorkspaceValidatorTest {
                                                                     .withName("dev-machine")
                                                                     .withType("docker")
                                                                     .withSource(newDto(MachineSourceDto.class).withLocation("location")
-                                                                                                              .withType("recipe"))
+                                                                                                              .withType("dockerfile"))
                                                                     .withServers(serversConf)
                                                                     .withEnvVariables(new HashMap<>(singletonMap("key1", "value1")));
         EnvironmentDto devEnv = newDto(EnvironmentDto.class).withName("dev-env")

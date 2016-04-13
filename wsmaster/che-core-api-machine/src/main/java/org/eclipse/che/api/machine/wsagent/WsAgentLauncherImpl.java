@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server;
+package org.eclipse.che.api.machine.wsagent;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
+import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.slf4j.Logger;

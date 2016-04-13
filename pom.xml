@@ -306,6 +306,13 @@
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-websocket-terminal</artifactId>
+                <version>${che.lib.version}</version>
+                <type>zip</type>
+                <classifier>linux_arm7</classifier>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-jdt-ext-machine</artifactId>
                 <version>${project.version}</version>
@@ -535,6 +542,11 @@
                 <artifactId>che-plugin-sdk-tools</artifactId>
                 <version>${project.version}</version>
                 <classifier>jar-with-dependencies</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-ssh-machine</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>

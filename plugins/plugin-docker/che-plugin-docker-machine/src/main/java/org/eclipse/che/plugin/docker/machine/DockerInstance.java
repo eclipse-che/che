@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.impl.AbstractInstance;
+import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
@@ -298,23 +298,8 @@ public class DockerInstance extends AbstractInstance {
         return content;
     }
 
-    /**
-     * Copies files from specified container.
-     *
-     * @param sourceMachine
-     *         source machine
-     * @param sourcePath
-     *         path to file or directory inside specified container
-     * @param targetPath
-     *         path to destination file or directory inside container
-     * @param overwrite
-     *         If "false" then it will be an error if unpacking the given content would cause
-     *         an existing directory to be replaced with a non-directory and vice versa.
-     * @throws MachineException
-     *         if any error occurs when files are being copied
-     */
     @Override
-    public void copy(Instance sourceMachine, String sourcePath, String targetPath, boolean overwrite) throws MachineException {
+    public void copy(Instance sourceMachine, String sourcePath, String targetPath, boolean overwriteDirNonDir) throws MachineException {
         if (!(sourceMachine instanceof DockerInstance)) {
             throw new MachineException("Unsupported copying between not docker machines");
         }
@@ -322,10 +307,20 @@ public class DockerInstance extends AbstractInstance {
             docker.putResource(container,
                                targetPath,
                                docker.getResource(((DockerInstance)sourceMachine).container, sourcePath),
-                               overwrite);
+                               overwriteDirNonDir);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage());
         }
+    }
+
+    /**
+     * Not implemented.<p/>
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public void copy(String sourcePath, String targetPath) throws MachineException {
+        throw new MachineException("Unsupported operation for docker machine implementation");
     }
 
     /**
@@ -335,5 +330,12 @@ public class DockerInstance extends AbstractInstance {
      */
     void removeProcess(int pid) {
         machineProcesses.remove(pid);
+    }
+
+    /**
+     * Can be used for docker specific operations with machine
+     */
+    String getContainer() {
+        return container;
     }
 }

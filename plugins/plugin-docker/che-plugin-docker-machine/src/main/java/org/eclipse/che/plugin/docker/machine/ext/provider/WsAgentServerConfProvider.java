@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.server.WsAgentLauncherImpl;
+import org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 
 import javax.inject.Inject;

@@ -15,6 +15,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.server.event.MachineProcessMessenger;
 import org.eclipse.che.api.machine.server.event.MachineStateMessenger;
+import org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl;
 
 /**
  * Guice container configuration file. Replaces old REST application composers and servlet context listeners.

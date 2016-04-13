@@ -189,7 +189,7 @@ export class CheWorkspace {
           'name': 'ws-machine',
           'limits': {'ram': memory},
           'type': 'docker',
-          'source': {'location': recipeUrl, 'type': 'recipe'},
+          'source': {'location': recipeUrl, 'type': 'dockerfile'},
           'dev': true
         }]
       };

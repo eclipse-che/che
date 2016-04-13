@@ -21,7 +21,7 @@ import org.eclipse.che.api.machine.server.MachineRegistry;
 import org.eclipse.che.api.machine.server.MachineService;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.spi.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineStateImpl;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;

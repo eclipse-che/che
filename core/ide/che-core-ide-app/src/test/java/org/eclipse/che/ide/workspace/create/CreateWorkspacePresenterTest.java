@@ -322,7 +322,7 @@ public class CreateWorkspacePresenterTest {
         verify(machineConfigDto).withDev(true);
 
         verify(dtoFactory).createDto(MachineSourceDto.class);
-        verify(machineSourceDto).withType("recipe");
+        verify(machineSourceDto).withType("dockerfile");
         verify(machineSourceDto).withLocation("test");
 
         verify(dtoFactory).createDto(EnvironmentDto.class);

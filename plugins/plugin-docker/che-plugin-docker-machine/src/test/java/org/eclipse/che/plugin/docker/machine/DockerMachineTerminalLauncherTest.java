@@ -10,50 +10,87 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
-import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalLauncher;
+import org.eclipse.che.plugin.docker.client.Exec;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.verifyZeroInteractions;
+import java.io.IOException;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
- *
+ * @author Alexander Garagatyi
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class DockerMachineTerminalLauncherTest {
+    private static final String LAUNCH_COMMAND = "launch terminal";
+    private static final String CONTAINER      = "test container";
+    private static final String EXEC_ID        = "testExecId";
 
-    private  EventService    eventService;
     @Mock
-    private  DockerConnector docker;
+    private DockerConnector docker;
     @Mock
-    private  MachineManager  machineManager;
+    private Instance        testMachineInstance;
+    @Mock
+    private DockerInstance  dockerInstance;
+    @Mock
+    private Exec            exec;
 
-    private DockerMachineTerminalLauncher launcher;
+    private DockerMachineImplTerminalLauncher launcher;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        eventService = new EventService();
-    }
+        launcher = new DockerMachineImplTerminalLauncher(docker, LAUNCH_COMMAND);
 
+        when(dockerInstance.getContainer()).thenReturn(CONTAINER);
+        when(docker.createExec(CONTAINER, true, "/bin/bash", "-c", LAUNCH_COMMAND)).thenReturn(exec);
+        when(exec.getId()).thenReturn(EXEC_ID);
+    }
 
     @Test
-    public void shouldSkipEventsWithStatusOtherThanRunning() {
-        launcher = new DockerMachineTerminalLauncher(eventService,docker,machineManager,"");
-
-        launcher.start();
-
-        eventService.publish(DtoFactory.newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.ERROR));
-
-        verifyZeroInteractions(machineManager);
+    public void shouldReturnDockerMachineType() throws Exception {
+        assertEquals(launcher.getMachineType(), "docker");
     }
 
+    @Test(expectedExceptions = MachineException.class,
+          expectedExceptionsMessageRegExp = "Docker terminal launcher was used to launch terminal in non-docker machine.")
+    public void shouldThrowExcIfNonDockerInstanceWasPassedAsArgument() throws Exception {
+        launcher.launchTerminal(testMachineInstance);
+    }
+
+    @Test
+    public void shouldCreateDetachedExecWithTerminalCommandInBash() throws Exception {
+        launcher.launchTerminal(dockerInstance);
+
+        verify(docker).createExec(CONTAINER, true, "/bin/bash", "-c", LAUNCH_COMMAND);
+    }
+
+    @Test
+    public void shouldStartCreatedExec() throws Exception {
+        launcher.launchTerminal(dockerInstance);
+
+        verify(docker).startExec(eq(EXEC_ID), any());
+    }
+
+    @Test(expectedExceptions = MachineException.class,
+          expectedExceptionsMessageRegExp = "test error")
+    public void shouldThrowMachineExceptionIfIOExceptionWasThrownByDocker() throws Exception {
+        when(docker.createExec(anyString(), anyBoolean(), anyVararg())).thenThrow(new IOException("test error"));
+
+        launcher.launchTerminal(dockerInstance);
+    }
 }

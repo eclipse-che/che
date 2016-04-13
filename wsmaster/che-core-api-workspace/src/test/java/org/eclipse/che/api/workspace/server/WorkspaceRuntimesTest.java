@@ -27,7 +27,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.mockito.Mock;

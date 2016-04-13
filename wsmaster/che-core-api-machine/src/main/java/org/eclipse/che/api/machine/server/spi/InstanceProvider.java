@@ -63,7 +63,9 @@ public interface InstanceProvider {
      */
     Instance createInstance(Recipe recipe,
                             Machine machine,
-                            LineConsumer creationLogsOutput) throws UnsupportedRecipeException, InvalidRecipeException, MachineException;
+                            LineConsumer creationLogsOutput) throws UnsupportedRecipeException,
+                                                                    InvalidRecipeException,
+                                                                    MachineException;
 
     /**
      * Creates instance using implementation specific {@link InstanceKey}.

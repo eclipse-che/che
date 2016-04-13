@@ -76,7 +76,8 @@ public class Machine {
 
         String machineSourceType = machineSource.getType();
 
-        if ("recipe".equalsIgnoreCase(machineSourceType)) {
+        // recipe is left for backward compatibility
+        if ("recipe".equalsIgnoreCase(machineSourceType) || "dockerfile".equalsIgnoreCase(machineSourceType)) {
             return machineSource.getLocation();
         }
 

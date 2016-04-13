@@ -35,8 +35,6 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-// TODO! use global registry for DTO converters
-
 /**
  * Helps to convert to/from DTOs related to workspace.
  *
@@ -56,7 +54,8 @@ public final class DtoConverter {
                                                                 .stream()
                                                                 .map(DtoConverter::asDto)
                                                                 .collect(Collectors.toList()))
-                                             .withEnvVariables(config.getEnvVariables());
+                                             .withEnvVariables(config.getEnvVariables())
+                                             .withArchitecture(config.getArchitecture());
     }
 
     /**

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server;
+package org.eclipse.che.api.machine.wsagent;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
