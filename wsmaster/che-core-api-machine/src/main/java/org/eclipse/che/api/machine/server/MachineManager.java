@@ -285,7 +285,7 @@ public class MachineManager {
         // Only 'dockerfile' impl of source type existed when 'Recipe' was valid source type.
         // Changed in 4.2.0-RC1
         // todo remove that several versions later
-        if ("Recipe".equals(machineConfig.getSource().getType())) {
+        if ("recipe".equalsIgnoreCase(machineConfig.getSource().getType())) {
             machineConfig.getSource().setType("dockerfile");
         }
         if (!instanceProvider.getRecipeTypes().contains(machineConfig.getSource().getType().toLowerCase())) {
