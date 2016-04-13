@@ -11,11 +11,6 @@ $logs-output-text-offset-left = 3px
 $output-height = $logs-output-height - $logs-output-title-height
 $output-padding = 3px
 
-$logs-output-front-side-color = #ececec
-$logs-output-side-color = #d8d8d8
-$logs-output-background-color = #373737
-$logs-output-font = "Droid Sans Mono", monospace
-
 .che-logs-output > div > div
     float left
 .che-logs-output > div:last-child
@@ -32,20 +27,20 @@ $logs-output-font = "Droid Sans Mono", monospace
 
 
   .che-logs-output-top-border
-    background-color $logs-output-side-color
+    background-color $mouse-gray-color
     height $logs-output-border-thickness
     transform-origin bottom left
     transform skewX(-($logs-output-border-angle))
 
   .che-logs-output-right-border
-    background-color $logs-output-side-color
+    background-color $mouse-gray-color
     height $logs-output-height
     width $logs-output-border-thickness
     transform-origin top left
     transform skewY(-($logs-output-border-angle))
 
   .che-logs-output-front-side
-    background-color $logs-output-front-side-color
+    background-color $light-gray-color
     height $logs-output-height
 
     .che-logs-output-title
@@ -64,16 +59,16 @@ $logs-output-font = "Droid Sans Mono", monospace
         position absolute
         top 0
         left 0
-        background-color $logs-output-background-color
+        background-color $che-loader-logs-background-color
         width 100%
         min-height 100%
         padding 3px
         line-height 10px
 
         code
-          font-family $logs-output-font
+          font-family $che-logs-output-font
           font-size 0.7em
-          background-color $logs-output-background-color
+          background-color transparent
           color white
           margin 0
           margin-bottom -3px
