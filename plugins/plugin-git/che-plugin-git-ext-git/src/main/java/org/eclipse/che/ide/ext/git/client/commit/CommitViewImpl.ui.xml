@@ -17,7 +17,7 @@
     <ui:with field='res' type='org.eclipse.che.ide.ext.git.client.GitResources'/>
     <ui:style>
         .spacing {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .mainPanel {
@@ -26,14 +26,10 @@
         }
 
         .emptyBorder {
-            margin: 6px;
+            margin: 1px;
         }
 
-        .space {
-            margin-right: 5px;
-        }
-
-        .addSection {
+        .checkBoxesSection {
             display: -webkit-flex;
             display: flex;
             -webkit-flex-direction: column;
@@ -41,33 +37,25 @@
             align-items: flex-start;
             -webkit-align-items: flex-start;
         }
-
-        .optionSection {
-            margin-top:0.3em;
-            display: -webkit-flex;
-            display: flex;
-            -webkit-flex-direction: column;
-            flex-direction: column;
-            align-items: flex-end;
-            -webkit-align-items: flex-end;
-        }
     </ui:style>
 
     <g:HTMLPanel addStyleNames="{style.emptyBorder} {style.mainPanel}" debugId="git-commit-mainForm">
-        <div class="{style.addSection}"><!-- Late 'git add' section -->
-            <g:CheckBox ui:field="addAll" HTML="{locale.commitAllFieldTitle}" addStyleNames="{res.gitCSS.textFont}"
+        <div class="{style.checkBoxesSection} {style.spacing}"><!-- Late 'git add' section -->
+            <g:CheckBox ui:field="addAll" HTML="{locale.commitAllFieldTitle}"
+                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
                         debugId="git-commit-addAll"/>
-            <g:CheckBox ui:field="addSelection" HTML="{locale.commitSelectionFieldTitle}" addStyleNames="{res.gitCSS.textFont}"
+            <g:CheckBox ui:field="addSelection" HTML="{locale.commitSelectionFieldTitle}"
+                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
                         debugId="git-commit-addSelection"/>
-            <g:CheckBox ui:field="onlySelection" HTML="{locale.commitOnlySelectionFieldTitle}" addStyleNames="{res.gitCSS.textFont}"
+            <g:CheckBox ui:field="onlySelection" HTML="{locale.commitOnlySelectionFieldTitle}"
+                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
                         debugId="git-commit-onlySelection"/>
-        </div>
-        <div class="{style.optionSection}"><!-- Commit modifiers -->
             <g:CheckBox ui:field="amend" HTML="{locale.commitAmendFieldTitle}"
-                        addStyleNames="{res.gitCSS.textFont}" debugId="git-commit-amend"/>
+                        addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}" debugId="git-commit-amend"/>
         </div>
-        <g:TextArea ui:field="message" width="338px" height="140px" addStyleNames="{res.gitCSS.textFont}"
-                        debugId="git-commit-message"/>
+        <g:TextArea ui:field="message" width="338px" height="140px"
+                    addStyleNames="{res.gitCSS.textFont} {style.emptyBorder}"
+                    debugId="git-commit-message"/>
     </g:HTMLPanel>
 
 </ui:UiBinder>
