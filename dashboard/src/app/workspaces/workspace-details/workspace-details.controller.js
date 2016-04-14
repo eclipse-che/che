@@ -140,7 +140,11 @@ export class WorkspaceDetailsCtrl {
     promise.then(() => {
       this.showShowMore = false;
     }, (error) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
+      let errorMessage = 'Unable to start this workspace. ';
+      if (error.data && error.data.message !== null) {
+        errorMessage += error.data.message;
+      }
+      this.cheNotification.showError(errorMessage);
       this.$log.error(error);
     });
   }

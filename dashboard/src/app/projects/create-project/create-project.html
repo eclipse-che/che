@@ -109,7 +109,7 @@
               </div>
               <div layout="column" layout-align="end end"
                    ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError">
-                <che-button-danger che-button-title="Retry"
+                <che-button-danger che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
                                    ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
                 <che-link class="create-project-download-logs-link"
                           ng-click="createProjectCtrl.downloadLogs()"
