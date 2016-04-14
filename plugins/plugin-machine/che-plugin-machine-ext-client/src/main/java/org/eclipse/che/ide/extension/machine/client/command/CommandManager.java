@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -32,6 +33,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPrese
 import org.eclipse.che.ide.util.UUID;
 
 import javax.validation.constraints.NotNull;
+
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -73,19 +75,36 @@ public class CommandManager {
         this.commandPropertyValueProviderRegistry = commandPropertyValueProviderRegistry;
     }
 
+    /**
+     * The method execute command in passed machine.
+     *
+     * @param command
+     *         command which will be executed
+     * @param machine
+     *         machine in which command will be executed
+     */
+    public void execute(@NotNull CommandConfiguration command, @NotNull MachineDto machine) {
+        executeCommand(command, machine.getId());
+    }
+
     /** Execute the the given command configuration on the developer machine. */
     public void execute(@NotNull CommandConfiguration configuration) {
         final String devMachineId = appContext.getDevMachineId();
-        if (devMachineId == null) {
+
+        executeCommand(configuration, devMachineId);
+    }
+
+    private void executeCommand(@NotNull CommandConfiguration configuration, @NotNull String machineId) {
+        if (machineId == null) {
             notificationManager.notify(localizationConstant.failedToExecuteCommand(), localizationConstant.noDevMachine(), FAIL, true);
             return;
         }
 
         final String outputChannel = "process:output:" + UUID.uuid();
 
-        final CommandOutputConsole console = commandConsoleFactory.create(configuration, devMachineId);
+        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machineId);
         console.listenToOutput(outputChannel);
-        consolesPanelPresenter.addCommandOutput(devMachineId, console);
+        consolesPanelPresenter.addCommandOutput(machineId, console);
         workspaceAgent.setActivePart(consolesPanelPresenter);
 
         final String commandLine = substituteProperties(configuration.toCommandLine());
@@ -95,7 +114,7 @@ public class CommandManager {
                                              .withCommandLine(commandLine)
                                              .withType(configuration.getType().getId());
 
-        final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(devMachineId, command, outputChannel);
+        final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machineId, command, outputChannel);
         processPromise.then(new Operation<MachineProcessDto>() {
             @Override
             public void apply(MachineProcessDto process) throws OperationException {

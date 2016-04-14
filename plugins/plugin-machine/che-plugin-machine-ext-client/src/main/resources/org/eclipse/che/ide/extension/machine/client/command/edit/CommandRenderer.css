@@ -103,6 +103,18 @@ div.categorySubElementHeader[selected] .buttonArea span:hover > svg {
     float: right;
 }
 
+.running {
+    width: 10px;
+    height: 10px;
+    background-color: #46af00;
+    border: 1px solid #7ed321;
+    border-radius: 5px;
+    box-sizing: border-box;
+    position: absolute;
+    left: 30px;
+    top: 4px;
+}
+
 input.filterPlaceholder::-webkit-input-placeholder {
     font-weight: bold;
     padding-left: literal("calc(50% - 15px)");

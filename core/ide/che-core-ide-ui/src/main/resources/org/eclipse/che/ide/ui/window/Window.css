@@ -153,6 +153,7 @@
 .button, .primaryButton {
     float: right;
     height: buttonHeight;
+    line-height: buttonLineHeight;
     min-width: buttonMinWidth;
     padding: 0px buttonPadding;
     outline: none;

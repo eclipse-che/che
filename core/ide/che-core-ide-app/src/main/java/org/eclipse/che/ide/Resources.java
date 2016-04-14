@@ -23,7 +23,6 @@ import org.eclipse.che.ide.ui.buttonLoader.ButtonLoaderResources;
 import org.eclipse.che.ide.ui.cellview.CellTableResources;
 import org.eclipse.che.ide.ui.cellview.CellTreeResources;
 import org.eclipse.che.ide.ui.cellview.DataGridResources;
-import org.eclipse.che.ide.ui.dropdown.DropDownHeaderWidgetImpl;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.SimpleList;
 import org.eclipse.che.ide.ui.tree.Tree;
@@ -46,7 +45,6 @@ public interface Resources extends Tree.Resources,
                                    CellTableResources,
                                    CellTreeResources,
                                    CategoriesList.Resources,
-                                   DropDownHeaderWidgetImpl.Resources,
                                    ButtonLoaderResources,
                                    ProjectWizardResources {
 

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -22,7 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +43,8 @@ public class ExecuteSelectedCommandActionTest {
 
     @Mock
     private CommandConfiguration command;
+    @Mock
+    private MachineDto           machine;
 
     @InjectMocks
     private ExecuteSelectedCommandAction action;
@@ -50,6 +52,7 @@ public class ExecuteSelectedCommandActionTest {
     @Before
     public void setUp() throws Exception {
         when(selectCommandAction.getSelectedCommand()).thenReturn(command);
+        when(selectCommandAction.getSelectedMachine()).thenReturn(machine);
     }
 
     @Test
@@ -63,6 +66,6 @@ public class ExecuteSelectedCommandActionTest {
     public void actionShouldBePerformed() throws Exception {
         action.actionPerformed(event);
 
-        verify(commandManager).execute(eq(command));
+        verify(commandManager).execute(command, machine);
     }
 }

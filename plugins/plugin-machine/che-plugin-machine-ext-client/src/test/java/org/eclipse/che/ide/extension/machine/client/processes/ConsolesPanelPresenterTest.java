@@ -30,7 +30,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -44,6 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFacto
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
+import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.event.ProcessFinishedEvent;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -214,7 +214,7 @@ public class ConsolesPanelPresenterTest {
 
         when(appContext.getWorkspace()).thenReturn(workspace);
         DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
-        verify(eventBus, times(4)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
+        verify(eventBus, times(5)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
 
         DevMachineStateHandler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
         devMachineStateHandler.onMachineStarted(devMachineStateEvent);

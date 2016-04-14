@@ -25,17 +25,14 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("main.menu.machine")
     String mainMenuMachine();
 
+    @Key("control.selectMachine.dev.category")
+    String selectMachineDevCategory();
+
     @Key("control.selectCommand.text")
     String selectCommandControlTitle();
 
     @Key("control.selectCommand.description")
     String selectCommandControlDescription();
-
-    @Key("control.selectCommand.emptyCurrentDevMachine.text")
-    String selectCommandEmptyCurrentDevMachineText();
-
-    @Key("control.selectCommand.emptyCurrentCommand.text")
-    String selectCommandEmptyCurrentCommandText();
 
     @Key("control.runSelectedCommand.text")
     String executeSelectedCommandControlTitle();
@@ -54,6 +51,12 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("control.editCommands.description")
     String editCommandsControlDescription();
+
+    @Key("control.editTargets")
+    String editTargets();
+
+    @Key("control.editTargets.description")
+    String editTargetsDescription();
 
     @Key("control.clearMachineConsole.text")
     String clearConsoleControlTitle();
@@ -192,6 +195,46 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("view.editCommands.saveChanges.discard")
     String editCommandsSaveChangesDiscard();
+
+    /* Targets view */
+    @Key("view.targets.title")
+    String targetsViewTitle();
+
+    @Key("view.targets.targetDefinition")
+    String targetsViewTargetDefinition();
+
+    @Key("view.targets.newTarget.hint")
+    String targetsViewNewTargetHint();
+
+    @Key("view.targets.save.success")
+    String targetsViewSaveSuccess();
+
+    @Key("view.targets.save.error")
+    String targetsViewSaveError();
+
+    @Key("view.targets.connect.progress")
+    String targetsViewConnectProgress(String target);
+
+    @Key("view.targets.connect.success")
+    String targetsViewConnectSuccess(String target);
+
+    @Key("view.targets.connect.error")
+    String targetsViewConnectError(String target);
+
+    @Key("view.targets.disconnect.success")
+    String targetsViewDisconnectSuccess(String target);
+
+    @Key("view.targets.disconnect.error")
+    String targetsViewDisconnectError(String target);
+
+    @Key("view.targets.delete.confirm")
+    String targetsViewDeleteConfirm(String target);
+
+    @Key("view.targets.delete.success")
+    String targetsViewDeleteSuccess(String target);
+
+    @Key("view.targets.delete.error")
+    String targetsViewDeleteError(String target);
 
 
     @Key("process.active")

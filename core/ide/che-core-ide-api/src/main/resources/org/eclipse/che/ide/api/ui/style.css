@@ -79,6 +79,7 @@
 
 /*Button */
 @def buttonHeight 22px;
+@def buttonLineHeight 20px;
 @def buttonPadding 16px;
 @def buttonMinWidth 60px;
 

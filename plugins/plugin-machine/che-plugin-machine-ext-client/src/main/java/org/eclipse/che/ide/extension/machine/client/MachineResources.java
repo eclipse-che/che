@@ -12,7 +12,6 @@ package org.eclipse.che.ide.extension.machine.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.resources.client.TextResource;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -44,6 +43,9 @@ public interface MachineResources extends ClientBundle {
     /** Returns the icon for 'Edit Commands...' action. */
     @Source("images/recipe.svg")
     SVGResource recipe();
+
+    @Source("images/ssh.svg")
+    SVGResource ssh();
 
     /** Returns the icon for 'Arbitrary' command type. */
     @Source("command/arbitrary/arbitrary-command-type.svg")
@@ -142,7 +144,7 @@ public interface MachineResources extends ClientBundle {
 
         String processTreeNode();
 
-        String devMachineLabel();
+        String machineLabel();
 
         String machineStatus();
 
@@ -152,7 +154,7 @@ public interface MachineResources extends ClientBundle {
 
         String machineStatusPausedRight();
 
-        String machineLabel();
+        String nameLabel();
 
         String processIconPanel();
 

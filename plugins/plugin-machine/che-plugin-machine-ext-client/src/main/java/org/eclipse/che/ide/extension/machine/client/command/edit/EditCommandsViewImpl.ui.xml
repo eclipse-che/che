@@ -119,7 +119,6 @@
             margin-right: 6px;
         }
     </ui:style>
-
     <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.commandPanel}">
         <g:west size="380">
             <g:DockLayoutPanel unit="PX" addStyleNames="{style.leftPart}">
@@ -151,5 +150,4 @@
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
-
 </ui:UiBinder>

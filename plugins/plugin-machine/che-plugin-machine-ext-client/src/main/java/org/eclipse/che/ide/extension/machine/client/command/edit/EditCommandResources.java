@@ -34,6 +34,8 @@ public interface EditCommandResources extends ClientBundle {
 
         String buttonArea();
 
+        String running();
+
         String filterPlaceholder();
     }
 
