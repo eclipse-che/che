@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.machine;
 
+import com.google.common.annotations.Beta;
+
 import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
@@ -60,6 +62,10 @@ public interface MachineConfig {
 
     /**
      * Architecture of target machine. Default is 'linux_amd64'.
+     *
+     * <p/>This method is in beta. And can be removed in next versions.
      */
+    // todo remove after resolving CHE-995
+    @Beta
     String getArchitecture();
 }
