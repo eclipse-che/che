@@ -88,14 +88,6 @@ public class InitialAuthConfig {
         }
     }
 
-    public AuthConfig getInitialAuthConfig() {
-        if (predefinedConfig != null) {
-            return predefinedConfig;
-        } else {
-            return null;
-        }
-    }
-
     public AuthConfigs getAuthConfigs() {
         AuthConfigs authConfigs = DtoFactory.newDto(AuthConfigs.class);
         if (predefinedConfig != null) {
