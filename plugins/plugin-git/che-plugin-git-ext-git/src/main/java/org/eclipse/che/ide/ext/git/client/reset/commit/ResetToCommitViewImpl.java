@@ -144,7 +144,7 @@ public class ResetToCommitViewImpl extends Window implements ResetToCommitView {
      */
     private void addDescription(RadioButton radioItem, String description) {
         Element descElement = DOM.createSpan();
-        descElement.setInnerText(description);
+        descElement.setInnerText(" " + description);
         descElement.getStyle().setColor("#888");
         radioItem.getElement().appendChild(descElement);
     }
