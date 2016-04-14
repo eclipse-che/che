@@ -364,6 +364,10 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         }
 
         view.removeNode(toDelete, true);
+
+        if (!view.getRootNodes().isEmpty()) {
+            select(view.getRootNodes().get(0), false);
+        }
     }
 
     /** {@inheritDoc} */

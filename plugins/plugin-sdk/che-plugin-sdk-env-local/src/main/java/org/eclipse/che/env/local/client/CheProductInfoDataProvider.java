@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.env.local.client;
 
-import javax.inject.Inject;
-
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.ui.Resources;
 import org.vectomatic.dom.svg.ui.SVGResource;
+
+import javax.inject.Inject;
 
 /**
  * Implementation of {@link ProductInfoDataProvider}
@@ -45,8 +45,8 @@ public class CheProductInfoDataProvider implements ProductInfoDataProvider {
         return locale.cheTabTitle();
     }
 
-    public String getDocumentTitle(String project) {
-        return locale.cheTabTitle(project);
+    public String getDocumentTitle(String workspaceName) {
+        return locale.cheTabTitle(workspaceName);
     }
 
     public SVGResource getLogo() {

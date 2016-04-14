@@ -15,11 +15,11 @@ import com.google.gwt.i18n.client.Messages;
 /** @author Vitalii Parfonov */
 public interface LocalizationConstant extends Messages {
 
-    @Key("che.none.project.selected.title")
+    @Key("che.tab.title")
     String cheTabTitle();
 
-    @Key("che.project.selected.title")
-    String cheTabTitle(String projectName);
+    @Key("che.tab.title.with.workspace.name")
+    String cheTabTitle(String workspaceName);
 
     @Key("messages.server.failure")
     String messagesServerFailure();

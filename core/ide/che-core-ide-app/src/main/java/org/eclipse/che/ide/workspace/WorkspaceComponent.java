@@ -169,7 +169,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             needToReloadComponents = false;
         }
 
-        browserQueryFieldRenderer.setWorkspaceName(workspace.getConfig().getName());
+        browserQueryFieldRenderer.setQueryField(workspace.getConfig().getName(), "");
     }
 
     /**

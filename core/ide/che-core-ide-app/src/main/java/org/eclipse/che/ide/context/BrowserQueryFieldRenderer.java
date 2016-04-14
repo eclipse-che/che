@@ -12,9 +12,12 @@ package org.eclipse.che.ide.context;
 
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
+import org.eclipse.che.ide.api.app.AppContext;
 
 /**
  * The class contains business logic which allows get or set workspace name to query field in browser.
@@ -26,13 +29,18 @@ import org.eclipse.che.ide.api.ProductInfoDataProvider;
 public class BrowserQueryFieldRenderer {
 
     private static final int WORKSPACE_ORDER_IN_URL = 2;
+    //Used in the JSNI methods follow
+    private static final int AMOUNT_URL_PARTS = 4;
 
     //Used in the JSNI methods follow
     private final ProductInfoDataProvider productInfoDataProvider;
+    private final Provider<AppContext>    appContextProvider;
 
     @Inject
-    public BrowserQueryFieldRenderer(ProductInfoDataProvider productInfoDataProvider) {
+    public BrowserQueryFieldRenderer(ProductInfoDataProvider productInfoDataProvider,
+                                     Provider<AppContext> appContextProvider) {
         this.productInfoDataProvider = productInfoDataProvider;
+        this.appContextProvider = appContextProvider;
     }
 
     /**
@@ -68,43 +76,29 @@ public class BrowserQueryFieldRenderer {
     }-*/;
 
     /**
-     * Sets workspace name to query field in browser.
-     *
-     * @param workspaceName
-     *         name which will be set
-     */
-    public native void setWorkspaceName(String workspaceName) /*-{
-        try {
-            var window = $wnd;
-            var document = $doc;
-
-            if (!window["_history_relocation_id"]) {
-                window["_history_relocation_id"] = 0;
-            }
-
-            var browserUrl = window.location.pathname;
-
-            var urlParts = browserUrl.split("/");
-            urlParts[2] = workspaceName;
-
-            browserUrl = urlParts.join("/");
-
-            window.top.document.title = this.@org.eclipse.che.ide.context.BrowserQueryFieldRenderer::
-                productInfoDataProvider.@org.eclipse.che.ide.api.ProductInfoDataProvider::getDocumentTitle()();
-            window.history.pushState(window["_history_relocation_id"], window.top.document.title, browserUrl);
-            window["_history_relocation_id"]++;
-        } catch (e) {
-            console.log(e.message);
-        }
-    }-*/;
-
-    /**
-     * Sets project name to query field in browser.
+     * Sets {@code projectName} to query field in browser.
      *
      * @param projectName
-     *         name which will be set
+     *         name which will be set. Can be null or empty if workspace does not contain any projects
      */
-    public native void setProjectName(String projectName) /*-{
+    public void setProjectName(String projectName) {
+        String workspaceName = "";
+        WorkspaceDto workspaceDto = appContextProvider.get().getWorkspace();
+        if (workspaceDto != null) {
+            workspaceName = workspaceDto.getConfig().getName();
+        }
+        setQueryField(workspaceName, projectName);
+    }
+
+    /**
+     * Sets {@code projectName} to query field in browser and set tab title with current running {@code workspaceName}
+     *
+     * @param workspaceName
+     *         name of the current running workspace. Can be null or empty if workspace was stopped.
+     * @param projectName
+     *         name which will be set. Can be null or empty if workspace does not contain any projects
+     */
+    public native void setQueryField(String workspaceName, String projectName) /*-{
         try {
             var window = $wnd;
             var document = $doc;
@@ -114,17 +108,27 @@ public class BrowserQueryFieldRenderer {
             }
 
             var browserUrl = window.location.pathname;
+            var urlParts = browserUrl.split('/');
 
-            var urlParts = browserUrl.split("/");
-            urlParts[3] = "";
+            urlParts[2] = workspaceName;
+            urlParts[3] = projectName;
 
-            browserUrl = urlParts.join("/") + projectName;
+            var sliceIndex = @org.eclipse.che.ide.context.BrowserQueryFieldRenderer::AMOUNT_URL_PARTS;
+            if (projectName == null || projectName.length == 0) {
+                sliceIndex--;
+            }
+            if (workspaceName == null || workspaceName.length == 0) {
+                sliceIndex--;
+            }
+            browserUrl = urlParts.slice(0, sliceIndex).join('/');
 
-            var titleWithoutSelectedProject = this.@org.eclipse.che.ide.context.BrowserQueryFieldRenderer::
-                productInfoDataProvider.@org.eclipse.che.ide.api.ProductInfoDataProvider::getDocumentTitle()();
-            var titleWithSelectedProject = this.@org.eclipse.che.ide.context.BrowserQueryFieldRenderer::
-                productInfoDataProvider.@org.eclipse.che.ide.api.ProductInfoDataProvider::getDocumentTitle(Ljava/lang/String;)(projectName);
-            window.top.document.title = projectName.length == 0 ? titleWithoutSelectedProject : titleWithSelectedProject;
+            var title = this.@org.eclipse.che.ide.context.BrowserQueryFieldRenderer::
+            productInfoDataProvider.@org.eclipse.che.ide.api.ProductInfoDataProvider::getDocumentTitle()();
+
+            var titleWithWorkspaceName = this.@org.eclipse.che.ide.context.BrowserQueryFieldRenderer::
+            productInfoDataProvider.@org.eclipse.che.ide.api.ProductInfoDataProvider::getDocumentTitle(Ljava/lang/String;)(workspaceName);
+
+            window.top.document.title = (workspaceName == null || workspaceName.length == 0) ? title : titleWithWorkspaceName;
 
             window.history.pushState(window["_history_relocation_id"], window.top.document.title, browserUrl);
             window["_history_relocation_id"]++;
