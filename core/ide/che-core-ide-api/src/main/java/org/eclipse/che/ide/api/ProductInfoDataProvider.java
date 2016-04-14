@@ -20,36 +20,36 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface ProductInfoDataProvider {
     /**
-     * Get product name
      * @return product name
      */
     String getName();
 
     /**
-     * Get support link
      * @return url to support resource
      */
     String getSupportLink();
 
     /**
-     * Get document title for browser tab
-     * @return document title
+     * @return document title for browser tab
      */
     String getDocumentTitle();
 
     /**
-     * Get document title with project name for browser tab
-     * @param project name of project which was selected in the Project Explorer
+     * Get document title with current {@code workspaceName}.
+     *
+     * @param workspaceName
+     *         name of the current running workspace
      * @return document title
      */
-    String getDocumentTitle(String project);
+    String getDocumentTitle(String workspaceName);
 
     /**
-     * Get logo SVG resources
-     * @return SVG resources
+     * @return logo SVG resource
      */
     SVGResource getLogo();
 
-    /** Returns title for support action which displayed in Help menu. */
-    public String getSupportTitle();
+    /**
+     * @return title for support action which displayed in Help menu.
+     */
+    String getSupportTitle();
 }
