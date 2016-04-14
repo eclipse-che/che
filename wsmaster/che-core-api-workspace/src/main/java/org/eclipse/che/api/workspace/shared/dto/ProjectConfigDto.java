@@ -77,7 +77,7 @@ public interface ProjectConfigDto extends ProjectConfig {
     ProjectConfigDto withAttributes(Map<String, List<String>> attributes);
 
     @Override
-    @FactoryParameter(obligation = MANDATORY)
+    @FactoryParameter(obligation = OPTIONAL)
     SourceStorageDto getSource();
 
     void setSource(SourceStorageDto source);
