@@ -24,27 +24,30 @@
     fill: selectCommandActionHoverColor;
 }
 
-.onMouseOver,
-.onMouseOut,
-.onClick {
+.menuElement {
     height: 100%;
-}
-
-.onMouseOut {
     color: selectCommandActionColor;
 }
 
-.onMouseOver {
+.menuElement:hover {
     color: selectCommandActionHoverColor;
 }
 
-.onClick {
+.menuElement:focus {
     color: selectCommandActionHoverColor;
     background-color: hoverBackgroundColor;
 }
 
+.dropDownListMenu {
+    max-height: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: opacity 0.2s;
+}
+
 .dropDownListMenu > table {
-    min-width: 148px;
+    min-width: 25px;
+    width: inherit;
 }
 
 .dropDownListMenu > table > tbody > tr > td {

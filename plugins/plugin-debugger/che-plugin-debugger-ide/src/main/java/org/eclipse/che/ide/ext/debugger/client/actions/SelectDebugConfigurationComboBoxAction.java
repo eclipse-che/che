@@ -20,7 +20,6 @@ import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
-import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
@@ -31,8 +30,8 @@ import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
 import org.eclipse.che.ide.ext.debugger.client.configuration.DebugConfigurationsManager;
 import org.eclipse.che.ide.ext.debugger.client.configuration.EditDebugConfigurationsPresenter;
-import org.eclipse.che.ide.ui.dropdown.DropDownHeaderWidget;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
+import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;
@@ -52,18 +51,15 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveAction implements CustomComponentAction,
                                                                                                  EditDebugConfigurationsPresenter.ConfigurationChangedListener,
-                                                                                                 WsAgentStateHandler,
-                                                                                                 DropDownHeaderWidget.ActionDelegate {
+                                                                                                 WsAgentStateHandler {
 
     private static final String                         GROUP_DEBUG_CONFIGURATIONS = "DebugConfigurationsGroup";
     private static final Comparator<DebugConfiguration> CONFIGURATIONS_COMPARATOR  = new ConfigurationsComparator();
 
-    private final DebuggerLocalizationConstant locale;
-    private final DropDownHeaderWidget         dropDownHeaderWidget;
-    private final DropDownListFactory          dropDownListFactory;
-    private final DebugConfigurationsManager   debugConfigurationsManager;
-    private final ActionManager                actionManager;
-    private final DebuggerResources            resources;
+    private final DropDownWidget             dropDownHeaderWidget;
+    private final DebugConfigurationsManager debugConfigurationsManager;
+    private final ActionManager              actionManager;
+    private final DebuggerResources          resources;
 
     private List<DebugConfiguration> configurations;
     private DefaultActionGroup       configurationActions;
@@ -80,13 +76,11 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
               locale.selectConfigurationActionText(),
               locale.selectConfigurationActionDescription(),
               null, null);
-        this.locale = locale;
         this.resources = resources;
         this.actionManager = actionManager;
 
-        this.dropDownListFactory = dropDownListFactory;
         this.debugConfigurationsManager = debugConfigurationsManager;
-        this.dropDownHeaderWidget = dropDownListFactory.createList(GROUP_DEBUG_CONFIGURATIONS_LIST);
+        this.dropDownHeaderWidget = dropDownListFactory.createList(GROUP_DEBUG_CONFIGURATIONS);
 
         configurations = new LinkedList<>();
 
@@ -95,8 +89,6 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
 
         configurationActions = new DefaultActionGroup(GROUP_DEBUG_CONFIGURATIONS, false, actionManager);
         actionManager.registerAction(GROUP_DEBUG_CONFIGURATIONS, configurationActions);
-
-        dropDownHeaderWidget.setDelegate(this);
     }
 
     @Override
@@ -121,10 +113,6 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
         return customComponentHeader;
     }
 
-    @Override
-    public void onSelect() {
-    }
-
     /** Returns the selected debug configuration. */
     @Nullable
     public DebugConfiguration getSelectedConfiguration() {
@@ -132,7 +120,7 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
             return null;
         }
 
-        final String selectedConfigurationName = dropDownHeaderWidget.getSelectedElementName();
+        final String selectedConfigurationName = dropDownHeaderWidget.getSelectedName();
 
         for (DebugConfiguration configuration : configurations) {
             if (configuration.getName().equals(selectedConfigurationName)) {
@@ -143,7 +131,7 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
     }
 
     public void setSelectedConfiguration(DebugConfiguration configuration) {
-        dropDownHeaderWidget.selectElement(configuration.getName());
+        dropDownHeaderWidget.selectElement(configuration.getName(), configuration.getName());
     }
 
     /**
@@ -171,9 +159,10 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
 
         configurations.clear();
 
-        clearConfigurationActions(configurationsList);
         configurationActions.removeAll();
-
+        if (configurationsList != null) {
+            configurationActions.addAll(configurationsList);
+        }
         Collections.sort(debugConfigurations, CONFIGURATIONS_COMPARATOR);
         DebugConfiguration prevConf = null;
         for (DebugConfiguration configuration : debugConfigurations) {
@@ -181,11 +170,9 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
                 configurationActions.addSeparator(configuration.getType().getDisplayName());
             }
             configurationActions
-                    .add(dropDownListFactory.createElement(configuration.getName(), configuration.getName(), dropDownHeaderWidget));
+                    .add(dropDownHeaderWidget.createAction(configuration.getName(), configuration.getName()));
             prevConf = configuration;
         }
-
-        configurationsList.addAll(configurationActions);
         configurations.addAll(debugConfigurations);
 
         if (configurationToSelect != null) {
@@ -195,27 +182,12 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
         }
     }
 
-    private void clearConfigurationActions(DefaultActionGroup configurationsList) {
-        for (Action action : configurationActions.getChildActionsOrStubs()) {
-            configurationsList.remove(action);
-        }
-    }
-
     /** Selects the last used configuration. */
     private void selectLastUsedConfiguration() {
-        if (configurations.isEmpty()) {
-            setEmptyConfiguration();
-        } else {
-            // TODO: consider to saving last used configuration name somewhere
-            // for now, we always select the first configuration
-            final DebugConfiguration configuration = configurations.get(0);
-            dropDownHeaderWidget.selectElement(configuration.getName());
-        }
-    }
-
-    /** Clears the selected element in the drop-down list. */
-    private void setEmptyConfiguration() {
-        dropDownHeaderWidget.selectElement(locale.selectConfigurationActionEmptyCurrentConfigurationText());
+        final String configName = configurations.isEmpty() ? null : configurations.get(0).getName();
+        dropDownHeaderWidget.selectElement(configName, configName);
+        // TODO: consider to saving last used configuration name somewhere
+        // for now, we always select the first configuration
     }
 
     @Override

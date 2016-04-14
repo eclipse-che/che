@@ -27,9 +27,6 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     @Key("selectConfigurationActionDescription")
     String selectConfigurationActionDescription();
 
-    @Key("selectConfigurationActionEmptyCurrentConfigurationText")
-    String selectConfigurationActionEmptyCurrentConfigurationText();
-
     @Key("breakpoints")
     String breakpoints();
 

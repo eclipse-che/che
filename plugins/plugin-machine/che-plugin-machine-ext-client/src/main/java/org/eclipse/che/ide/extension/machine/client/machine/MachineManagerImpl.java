@@ -200,7 +200,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                     final String displayName = machineState.getConfig().getName();
                     final boolean isDev = machineState.getConfig().isDev();
 
-                    startMachine(recipeUrl, displayName, isDev, RESTART);
+                    startMachine(recipeUrl, displayName, isDev, RESTART, "dockerfile", "docker");
 
                     isMachineRestarting = false;
                 }
@@ -218,32 +218,50 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     /** Start new machine. */
     @Override
     public void startMachine(String recipeURL, String displayName) {
-        startMachine(recipeURL, displayName, false, START);
+        startMachine(recipeURL, displayName, false, START, "dockerfile", "docker");
+    }
+
+    /** Start new SSH machine. */
+    @Override
+    public void startSSHMachine(String recipeURL, String displayName) {
+        startMachine(recipeURL, displayName, false, START, "ssh-config", "ssh");
     }
 
     /** Start new machine as dev-machine (bind workspace to running machine). */
     @Override
     public void startDevMachine(String recipeURL, String displayName) {
-        startMachine(recipeURL, displayName, true, START);
+        startMachine(recipeURL, displayName, true, START, "dockerfile", "docker");
     }
 
+    /**
+     * @param recipeURL
+     * @param displayName
+     * @param isDev
+     * @param operationType
+     * @param sourceType
+     *          "dockerfile" or "ssh-config"
+     * @param machineType
+     *          "docker" or "ssh"
+     */
     private void startMachine(final String recipeURL,
                               final String displayName,
                               final boolean isDev,
-                              final MachineOperationType operationType) {
+                              final MachineOperationType operationType,
+                              final String sourceType,
+                              final String machineType) {
 
         LimitsDto limitsDto = dtoFactory.createDto(LimitsDto.class).withRam(1024);
         if (isDev) {
             limitsDto.withRam(3072);
         }
-        MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType("dockerfile").withLocation(recipeURL);
+        MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType(sourceType).withLocation(recipeURL);
 
         MachineConfigDto configDto = dtoFactory.createDto(MachineConfigDto.class)
                                                .withDev(isDev)
                                                .withName(displayName)
                                                .withSource(sourceDto)
                                                .withLimits(limitsDto)
-                                               .withType("docker");
+                                               .withType(machineType);
 
         Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
 

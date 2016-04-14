@@ -233,7 +233,7 @@
 .processTree .processTreeNode {
 }
 
-.processTree .devMachineLabel {
+.processTree .machineLabel {
     background-color: primaryHighlightColor;
     color: processTreeDevLabel;
     text-transform: uppercase;
@@ -253,7 +253,7 @@
     line-height: 18px;
 }
 
-.processTree .machineLabel {
+.processTree .nameLabel {
     font-weight: bold;
 }
 

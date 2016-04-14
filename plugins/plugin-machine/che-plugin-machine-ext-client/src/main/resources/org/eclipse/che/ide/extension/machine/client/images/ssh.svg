@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="32px"
+	 height="32px" viewBox="0 0 32 32" xml:space="preserve">
+<g>
+  <rect rx="2" id="svg_1" height="15.749944" width="30.124892" y="8.125028" x="0.937558" stroke-width="1.5" stroke="#b73377" fill="#b73377"/>
+  <text font-weight="bold" stroke="#94265f" transform="matrix(0.370747367382844,0,0,0.4832595801663869,0.2582233419171047,16.20483222380739) " xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="32" y="11" x="9.491006" stroke-width="0" fill="#000000">SSH</text>
+ </g>
+</svg>

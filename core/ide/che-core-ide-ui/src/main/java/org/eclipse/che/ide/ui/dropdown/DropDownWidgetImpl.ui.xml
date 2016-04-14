@@ -14,13 +14,11 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:style>
-
         .widget {
             display: inline-block;
         }
 
         .selectedElementName {
-            margin-height: none;
             color: inherit;
             font-size: inherit;
         }

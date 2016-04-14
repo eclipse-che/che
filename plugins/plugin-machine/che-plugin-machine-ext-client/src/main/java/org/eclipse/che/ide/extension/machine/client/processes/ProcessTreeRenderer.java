@@ -24,15 +24,18 @@ import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.ui.Tooltip;
-
-import static org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter.SSH_PORT;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import org.eclipse.che.ide.ui.tree.NodeRenderer;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.dom.Elements;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter.SSH_PORT;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Renderer for {@ProcessTreeNode} UI presentation.
@@ -41,7 +44,11 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Roman Nikitenko
  */
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
-
+    public static final Map<String, String> LABELS_BY_TYPE_MAP = new HashMap<String, String>() {
+        {
+            put("docker", "dkr");
+        }
+    };
     private final MachineResources            resources;
     private final MachineLocalizationConstant locale;
     private final PartStackUIResources        partStackUIResources;
@@ -83,13 +90,20 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         return treeNode;
     }
 
+    private String getLabelText(MachineDto machine) {
+        if (machine.getConfig().isDev()) {
+            return this.locale.viewProcessesDevTitle();
+        }
+        final String machineType = machine.getConfig().getType();
+
+        return LABELS_BY_TYPE_MAP.containsKey(machineType) ? LABELS_BY_TYPE_MAP.get(machineType) : machineType.substring(0, 3);
+    }
+
     private SpanElement createMachineElement(final ProcessTreeNode node, final MachineDto machine) {
         SpanElement root = Elements.createSpanElement();
-        if (machine.getConfig().isDev()) {
-            SpanElement devLabel = Elements.createSpanElement(resources.getCss().devMachineLabel());
-            devLabel.setTextContent(locale.viewProcessesDevTitle());
-            root.appendChild(devLabel);
-        }
+        SpanElement machineLabel = Elements.createSpanElement(resources.getCss().machineLabel());
+        machineLabel.setTextContent(this.getLabelText(machine));
+        root.appendChild(machineLabel);
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
         root.appendChild(statusElement);
@@ -167,7 +181,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
 
 
-        Element nameElement = Elements.createSpanElement(resources.getCss().machineLabel());
+        Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
         nameElement.setTextContent(machine.getConfig().getName());
         root.appendChild(nameElement);
 

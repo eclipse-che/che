@@ -33,7 +33,6 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -79,7 +78,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     private       Button                   saveButton;
     private       Button                   closeButton;
 
-    private final CategoryRenderer<CommandConfiguration> projectImporterRenderer =
+    private final CategoryRenderer<CommandConfiguration> commandConfigurationRenderer =
             new CategoryRenderer<CommandConfiguration>() {
                 @Override
                 public void renderElement(Element element, CommandConfiguration data) {
@@ -95,7 +94,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
                 }
             };
 
-    private final Category.CategoryEventDelegate<CommandConfiguration> projectImporterDelegate =
+    private final Category.CategoryEventDelegate<CommandConfiguration> commandConfigurationDelegate =
             new Category.CategoryEventDelegate<CommandConfiguration>() {
                 @Override
                 public void onListItemClicked(Element listItemBase, CommandConfiguration itemData) {
@@ -295,7 +294,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
                 }
             }
             Category<CommandConfiguration> category =
-                    new Category<>(type.getId(), projectImporterRenderer, configurations, projectImporterDelegate);
+                    new Category<>(type.getId(), commandConfigurationRenderer, configurations, commandConfigurationDelegate);
             categoriesList.add(category);
         }
         list.clear();

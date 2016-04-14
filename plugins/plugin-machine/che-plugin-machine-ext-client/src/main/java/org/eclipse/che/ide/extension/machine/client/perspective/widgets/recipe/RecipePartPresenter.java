@@ -350,4 +350,5 @@ public class RecipePartPresenter extends BasePresenter implements RecipePartView
         RecipeEditorPanel recipePanel = recipesContainerPresenter.getEditorPanel(selectedRecipe);
         recipePanel.setDelegate(this);
     }
+
 }
