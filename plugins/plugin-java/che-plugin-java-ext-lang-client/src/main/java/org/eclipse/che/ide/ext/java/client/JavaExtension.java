@@ -33,6 +33,7 @@ import org.eclipse.che.ide.ext.java.client.action.OpenImplementationAction;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
 import org.eclipse.che.ide.ext.java.client.action.ParametersHintsAction;
 import org.eclipse.che.ide.ext.java.client.action.QuickDocumentationAction;
+import org.eclipse.che.ide.ext.java.client.action.QuickFixAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.CutJavaSourceAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.RenameRefactoringAction;
@@ -72,6 +73,7 @@ public class JavaExtension {
                                 OrganizeImportsAction organizeImportsAction,
                                 RenameRefactoringAction renameRefactoringAction,
                                 QuickDocumentationAction quickDocumentationAction,
+                                QuickFixAction quickFixAction,
                                 OpenDeclarationAction openDeclarationAction,
                                 OpenImplementationAction openImplementationAction,
                                 FindUsagesAction findUsagesAction,
@@ -107,8 +109,10 @@ public class JavaExtension {
         actionManager.registerAction("javaClassStructure", fileStructureAction);
         actionManager.registerAction("organizeImports", organizeImportsAction);
         actionManager.registerAction("parametersInfo", parametersHintsAction);
+        actionManager.registerAction("quickFix", quickFixAction);
 
         assistantGroup.add(quickDocumentationAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
+        assistantGroup.add(quickFixAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
         assistantGroup.add(openDeclarationAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
         assistantGroup.add(organizeImportsAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
         assistantGroup.add(openImplementationAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
