@@ -133,7 +133,11 @@ export class WorkspaceDetailsCtrl {
     this.$rootScope.loadingIDE = false;
     let promise = this.ideSvc.startIde(true);
     promise.then(() => {}, (error) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
+      let errorMessage = 'Unable to start this workspace. ';
+      if (error.data && error.data.message !== null) {
+        errorMessage += error.data.message;
+      }
+      this.cheNotification.showError(errorMessage);
       this.$log.error(error);
     });
   }
