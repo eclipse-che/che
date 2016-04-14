@@ -336,7 +336,9 @@ public class WorkspaceRuntimes {
         for (MachineImpl machine : machines) {
             try {
                 machineManager.destroy(machine.getId(), false);
-            } catch (RuntimeException | NotFoundException | MachineException ex) {
+            } catch (NotFoundException ignore) {
+                // it is ok, machine has been already destroyed
+            } catch (RuntimeException | MachineException ex) {
                 LOG.error(format("Could not destroy machine '%s' of workspace '%s'",
                                  machine.getId(),
                                  machine.getWorkspaceId()),
@@ -347,7 +349,9 @@ public class WorkspaceRuntimes {
         try {
             machineManager.destroy(devMachine.getId(), false);
             publishEvent(EventType.STOPPED, wsId, null);
-        } catch (RuntimeException | NotFoundException | ServerException ex) {
+        } catch (NotFoundException ignore) {
+            // it is ok, machine has been already destroyed
+        } catch (RuntimeException | ServerException ex) {
             publishEvent(EventType.ERROR, wsId, ex.getLocalizedMessage());
             throw ex;
         } finally {

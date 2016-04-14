@@ -1011,8 +1011,23 @@ public class MachineManager {
     private void cleanup() {
         eventService.unsubscribe(machineCleaner);
 
-        boolean interrupted = false;
         executor.shutdown();
+
+        try {
+            for (MachineImpl machine : machineRegistry.getMachines()) {
+                try {
+                    destroy(machine.getId(), false);
+                } catch (NotFoundException ignore) {
+                    // it is ok, machine has been already destroyed
+                } catch (Exception e) {
+                    LOG.warn(e.getMessage());
+                }
+            }
+        } catch (MachineException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+        }
+
+        boolean interrupted = false;
         try {
             if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
@@ -1023,18 +1038,6 @@ public class MachineManager {
         } catch (InterruptedException e) {
             interrupted = true;
             executor.shutdownNow();
-        }
-
-        try {
-            for (MachineImpl machine : machineRegistry.getMachines()) {
-                try {
-                    destroy(machine.getId(), false);
-                } catch (Exception e) {
-                    LOG.warn(e.getMessage());
-                }
-            }
-        } catch (MachineException e) {
-            LOG.error(e.getLocalizedMessage(), e);
         }
 
         final java.io.File[] files = machineLogsDir.listFiles();
