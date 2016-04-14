@@ -97,6 +97,7 @@ class IdeSvc {
   }
 
   startIde(noIdeLoader) {
+    let defer = this.$q.defer();
     if (!noIdeLoader) {
       this.ideLoaderSvc.addLoader();
     }
@@ -104,12 +105,11 @@ class IdeSvc {
     this.currentStep = 1;
 
     let bus = this.cheAPI.getWebsocket().getBus(this.selectedWorkspace.id);
-    let runningStatusPromise = this.cheWorkspace.fetchStatusChange(this.selectedWorkspace.id, 'RUNNING');
 
-    this.startWorkspace(bus, this.selectedWorkspace);
-
-    return runningStatusPromise
-      .then(() => {
+    let startWorkspacePromise = this.startWorkspace(bus, this.selectedWorkspace);
+    startWorkspacePromise.then(() => {
+      let runningStatusPromise = this.cheWorkspace.fetchStatusChange(this.selectedWorkspace.id, 'RUNNING');
+      runningStatusPromise.then(() => {
         // Now that the container is started, wait for the extension server. For this, needs to get runtime details
         let promiseWorkspace = this.cheWorkspace.fetchWorkspaceDetails(this.selectedWorkspace.id);
         promiseWorkspace.then(() => {
@@ -117,10 +117,17 @@ class IdeSvc {
           // try to connect
           this.websocketReconnect = 50;
           this.connectToExtensionServer(websocketUrl, this.selectedWorkspace.id);
+          defer.resolve();
         }, (error) => {
           this.handleError(error);
+          defer.reject(error);
         });
       });
+    }, (error) => {
+      defer.reject(error);
+    });
+
+    return defer.promise;
   }
 
   startWorkspace(bus, data) {
