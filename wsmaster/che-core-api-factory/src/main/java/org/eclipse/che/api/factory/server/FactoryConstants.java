@@ -70,8 +70,7 @@ public class FactoryConstants {
     public static final String INVALID_FIND_REPLACE_ACTION = "The findReplace action requires 'in', " +
                                                              "'find' and 'replace' properties to be set.";
 
-    public static final String INVALID_WELCOME_PAGE_ACTION = "The openWelcomePage action requires 'nonAuthenticatedContentUrl', " +
-                                                             "'authenticatedContentUrl' properties to be set.";
+    public static final String INVALID_WELCOME_PAGE_ACTION = "The openWelcomePage action requires 'greetingContentUrl' property to be set.";
 
     public static final String ILLEGAL_REQUIRE_AUTHENTICATION_FOR_NAMED_WORKSPACE_MESSAGE =
             "This factory was improperly configured. The parameter 'workspace.type=named' requires 'policies.requireAuthentication=true'.";
