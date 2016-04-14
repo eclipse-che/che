@@ -73,19 +73,24 @@ public abstract class FactoryBaseValidator {
                                               "digits or these following special characters -._.");
             }
 
-            final String location = project.getSource().getLocation();
-            final String parameterLocationName = "project.storage.location";
-            if (isNullOrEmpty(location)) {
-                throw new BadRequestException(format(FactoryConstants.PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE,
-                                                     parameterLocationName,
-                                                     location));
-            }
-            try {
-                URLDecoder.decode(location, "UTF-8");
-            } catch (IllegalArgumentException | UnsupportedEncodingException e) {
-                throw new BadRequestException(format(FactoryConstants.PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE,
-                                                     parameterLocationName,
-                                                     location));
+            if (project.getPath().indexOf('/', 1) == -1) {
+
+                final String location = project.getSource().getLocation();
+                final String parameterLocationName = "project.source.location";
+
+                if (isNullOrEmpty(location)) {
+                    throw new BadRequestException(format(FactoryConstants.PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE,
+                                                         parameterLocationName,
+                                                         location));
+                }
+
+                try {
+                    URLDecoder.decode(location, "UTF-8");
+                } catch (IllegalArgumentException | UnsupportedEncodingException e) {
+                    throw new BadRequestException(format(FactoryConstants.PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE,
+                                                         parameterLocationName,
+                                                         location));
+                }
             }
         }
     }

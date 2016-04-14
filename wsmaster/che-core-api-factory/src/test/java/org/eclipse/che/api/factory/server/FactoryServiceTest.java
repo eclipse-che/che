@@ -963,11 +963,13 @@ public class FactoryServiceTest {
         wsConfig.setProjects(Arrays.asList(dto.createDto(ProjectConfigDto.class)
                                               .withSource(dto.createDto(SourceStorageDto.class)
                                                        .withType("git")
-                                                       .withLocation("location")),
+                                                       .withLocation("location"))
+                                              .withPath("path"),
                                            dto.createDto(ProjectConfigDto.class)
                                               .withSource(dto.createDto(SourceStorageDto.class)
                                                        .withType("git")
-                                                       .withLocation("location"))));
+                                                       .withLocation("location"))
+                                              .withPath("path")));
         wsConfig.setName("wsname");
         wsConfig.setDefaultEnv("env1");
         wsConfig.setEnvironments(Collections.singletonList(dto.createDto(EnvironmentDto.class).withName("env1")));
