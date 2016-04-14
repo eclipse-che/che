@@ -42,8 +42,6 @@ import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
 import org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistAssistant;
-import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistProcessor;
-import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -67,25 +65,23 @@ public class TextEditorInit<T extends EditorWidget> {
     private final TextEditorConfiguration        configuration;
     private final EventBus                       generalEventBus;
     private final CodeAssistantFactory           codeAssistantFactory;
-    private final QuickAssistantFactory          quickAssistantFactory;
     private final EmbeddedTextEditorPresenter<T> textEditor;
+    private final QuickAssistAssistant           quickAssist;
 
 
     /**
      * The quick assist assistant.
      */
-    private QuickAssistAssistant quickAssist;
-
     public TextEditorInit(final TextEditorConfiguration configuration,
                           final EventBus generalEventBus,
                           final CodeAssistantFactory codeAssistantFactory,
-                          final QuickAssistantFactory quickAssistantFactory,
+                          final QuickAssistAssistant quickAssist,
                           final EmbeddedTextEditorPresenter<T> textEditor) {
 
         this.configuration = configuration;
         this.generalEventBus = generalEventBus;
         this.codeAssistantFactory = codeAssistantFactory;
-        this.quickAssistantFactory = quickAssistantFactory;
+        this.quickAssist = quickAssist;
         this.textEditor = textEditor;
     }
 
@@ -103,8 +99,8 @@ public class TextEditorInit<T extends EditorWidget> {
                 configureReconciler(documentHandle);
                 configureAnnotationModel(documentHandle);
                 configureCodeAssist(documentHandle);
-                configureQuickAssist(documentHandle);
                 configureChangeInterceptors(documentHandle);
+                addQuickAssistKeyBinding();
             }
         };
         new DocReadyWrapper<TextEditorInit<T>>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
@@ -282,48 +278,22 @@ public class TextEditorInit<T extends EditorWidget> {
     }
 
     /**
-     * Sets up the quick assist assistant.
-     * @param documentHandle the handle to the document
+     * Add key binding to quick assist assistant.
      */
-    private void configureQuickAssist(final DocumentHandle documentHandle) {
-        final QuickAssistProcessor processor = configuration.getQuickAssistProcessor();
-        if (this.quickAssistantFactory != null && processor != null) {
-            this.quickAssist = quickAssistantFactory.createQuickAssistant(this.textEditor);
-            this.quickAssist.setQuickAssistProcessor(processor);
-//            documentHandle.getDocEventBus().addHandler(GutterClickEvent.TYPE, new GutterClickHandler() {
-//                @Override
-//                public void onGutterClick(final GutterClickEvent event) {
-//                    if (Gutters.ANNOTATION_GUTTER.equals(event.getGutterId())) {
-//                        final MouseEvent originalEvent = event.getEvent();
-//                        showQuickAssistant(event.getLineNumber(),
-//                                           originalEvent.getClientX(),
-//                                           originalEvent.getClientY());
-//                    }
-//                }
-//            });
-
-            //add a key binding
+    private void addQuickAssistKeyBinding() {
+        if (this.quickAssist != null) {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
                 public void action() {
                     final PositionConverter positionConverter = textEditor.getPositionConverter();
                     if (positionConverter != null) {
-                        final TextPosition cursor = textEditor.getCursorPosition();
-                        final int offset = textEditor.getCursorModel().getCursorPosition().getOffset();
-                        final PositionConverter.PixelCoordinates pixelPos = positionConverter.textToPixel(cursor);
-                        //TODO add to pixelPos.getY()  line height to assist widget doesn't cover current line
-                        showQuickAssistant(offset, pixelPos.getX(), pixelPos.getY());
+                        textEditor.showQuickAssist();
                     }
                 }
             };
             final HasKeybindings hasKeybindings = this.textEditor.getHasKeybindings();
             hasKeybindings.addKeybinding(new Keybinding(false, false, true, false, KeyCode.ENTER, action), QUICK_FIX);
-//            hasKeybindings.addKeybinding(new Keybinding(true, false, false, false, KeyCode.ONE, action));
         }
-    }
-
-    private void showQuickAssistant(final int offset, int clientX, int clientY) {
-        quickAssist.showPossibleQuickAssists(offset, clientX, clientY);
     }
 
     private void configureChangeInterceptors(final DocumentHandle documentHandle) {

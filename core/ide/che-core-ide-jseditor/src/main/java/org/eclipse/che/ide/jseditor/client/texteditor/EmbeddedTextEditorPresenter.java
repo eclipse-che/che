@@ -67,6 +67,8 @@ import org.eclipse.che.ide.jseditor.client.gutter.HasGutter;
 import org.eclipse.che.ide.jseditor.client.keymap.KeyBindingAction;
 import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
+import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistAssistant;
+import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
 import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilerWithAutoSave;
@@ -109,10 +111,10 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
 
     private static final String TOGGLE_LINE_BREAKPOINT = "Toggle line breakpoint";
 
-    private final WorkspaceAgent         workspaceAgent;
-    private final EditorWidgetFactory<T> editorWidgetFactory;
-    private final EditorModule<T>        editorModule;
-    private final JsEditorConstants      constant;
+    private final WorkspaceAgent           workspaceAgent;
+    private final EditorWidgetFactory<T>   editorWidgetFactory;
+    private final EditorModule<T>          editorModule;
+    private final JsEditorConstants        constant;
 
     private final DocumentStorage            documentStorage;
     private final EventBus                   generalEventBus;
@@ -130,6 +132,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
     private EditorWidget             editorWidget;
     private Document                 document;
     private CursorModelWithHandler   cursorModel;
+    private QuickAssistAssistant     quickAssistant;
     private HasKeybindings keyBindingsManager = new TemporaryKeybindingsManager();
     private LoaderFactory       loaderFactory;
     private NotificationManager notificationManager;
@@ -178,10 +181,15 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
 
     @Override
     protected void initializeEditor(final OpenEditorCallback callback) {
+        QuickAssistProcessor processor = configuration.getQuickAssistProcessor();
+        if (quickAssistantFactory != null && processor != null) {
+            quickAssistant = quickAssistantFactory.createQuickAssistant(this);
+            quickAssistant.setQuickAssistProcessor(processor);
+        }
         new TextEditorInit<T>(configuration,
                               generalEventBus,
                               this.codeAssistantFactory,
-                              this.quickAssistantFactory,
+                              this.quickAssistant,
                               this).init();
 
         if (editorModule.isError()) {
@@ -210,6 +218,23 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
         documentStorage.getDocument(input.getFile(), dualCallback);
         if (!moduleReady) {
             editorModule.waitReady(dualCallback);
+        }
+    }
+
+    /**
+     * Show the quick assist assistant.
+     */
+    public void showQuickAssist() {
+        if (quickAssistant == null) {
+            return;
+        }
+        PositionConverter positionConverter = getPositionConverter();
+        if (positionConverter != null) {
+            TextPosition cursor = getCursorPosition();
+            PositionConverter.PixelCoordinates pixelPos = positionConverter.textToPixel(cursor);
+            quickAssistant.showPossibleQuickAssists(getCursorModel().getCursorPosition().getOffset(),
+                                                    pixelPos.getX(),
+                                                    pixelPos.getY());
         }
     }
 
