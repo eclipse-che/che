@@ -333,6 +333,12 @@ public final class ProjectManager {
         List<? extends ProjectConfig> projects = workspaceConfig.getProjects();
         for (ProjectConfig project : projects) {
             if (normalizePath.equals(project.getPath())) {
+                // TODO Needed for factory project importing with keepDir. It needs to find more appropriate solution
+                List<String> innerProjects = projectRegistry.getProjects(normalizePath);
+                for (String innerProject : innerProjects) {
+                    RegisteredProject registeredProject = projectRegistry.getProject(innerProject);
+                    projectRegistry.putProject(registeredProject, asFolder(registeredProject.getPath()), true, false);
+                }
                 return projectRegistry.putProject(project, folder, true, false);
             }
         }

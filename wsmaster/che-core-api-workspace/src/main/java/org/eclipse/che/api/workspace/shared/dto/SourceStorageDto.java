@@ -20,12 +20,14 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDA
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 /**
+ * TODO Type and location are optional in case it is a subproject, that has an empty source.
+ *
  * @author Alexander Garagatyi
  */
 @DTO
 public interface SourceStorageDto extends SourceStorage {
     @Override
-    @FactoryParameter(obligation = MANDATORY)
+    @FactoryParameter(obligation = OPTIONAL)
     String getType();
 
     void setType(String type);
@@ -33,7 +35,7 @@ public interface SourceStorageDto extends SourceStorage {
     SourceStorageDto withType(String type);
 
     @Override
-    @FactoryParameter(obligation = MANDATORY)
+    @FactoryParameter(obligation = OPTIONAL)
     String getLocation();
 
     void setLocation(String location);

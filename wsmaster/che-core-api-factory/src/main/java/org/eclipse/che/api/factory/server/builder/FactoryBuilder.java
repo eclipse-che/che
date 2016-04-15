@@ -15,6 +15,7 @@ import com.google.common.base.CaseFormat;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.factory.server.FactoryConstants;
 import org.eclipse.che.api.factory.server.LegacyConverter;
@@ -144,7 +145,7 @@ public class FactoryBuilder {
             default:
                 throw new ConflictException(FactoryConstants.INVALID_VERSION_MESSAGE);
         }
-        validateCompatibility(factory, Factory.class, usedFactoryVersionMethodProvider, v, "");
+        validateCompatibility(factory, null, Factory.class, usedFactoryVersionMethodProvider, v, "");
     }
 
     /**
@@ -169,6 +170,8 @@ public class FactoryBuilder {
      *
      * @param object
      *         - object to validate factory parameters
+     * @param object
+     *         - parent object
      * @param methodsProvider
      *         - class that provides methods with {@link org.eclipse.che.api.core.factory.FactoryParameter}
      *         annotations
@@ -181,12 +184,13 @@ public class FactoryBuilder {
      * @throws org.eclipse.che.api.core.ConflictException
      */
     void validateCompatibility(Object object,
+                               Object parent,
                                Class methodsProvider,
                                Class allowedMethodsProvider,
                                Version version,
                                String parentName) throws ConflictException {
         // validate source
-        if (SourceStorageDto.class.equals(methodsProvider)) {
+        if (SourceStorageDto.class.equals(methodsProvider) && !hasSubprojectInPath(parent)) {
             sourceStorageParametersValidator.validate((SourceStorage)object, version);
         }
 
@@ -239,7 +243,7 @@ public class FactoryBuilder {
                 // use recursion if parameter is DTO object
                 if (method.getReturnType().isAnnotationPresent(DTO.class)) {
                     // validate inner objects such Git ot ProjectAttributes
-                    validateCompatibility(parameterValue, method.getReturnType(), method.getReturnType(), version, fullName);
+                    validateCompatibility(parameterValue, object, method.getReturnType(), method.getReturnType(), version, fullName);
                 } else if (Map.class.isAssignableFrom(method.getReturnType())) {
                     Type tp = ((ParameterizedType)method.getGenericReturnType()).getActualTypeArguments()[1];
 
@@ -248,7 +252,7 @@ public class FactoryBuilder {
                         if (secMapParamClass.isAnnotationPresent(DTO.class)) {
                             Map<Object, Object> map = (Map)parameterValue;
                             for (Map.Entry<Object, Object> entry : map.entrySet()) {
-                                validateCompatibility(entry.getValue(), secMapParamClass, secMapParamClass, version,
+                                validateCompatibility(entry.getValue(), object, secMapParamClass, secMapParamClass, version,
                                                       fullName + "." + entry.getKey());
                             }
                         } else {
@@ -263,7 +267,7 @@ public class FactoryBuilder {
                         if (secListParamClass.isAnnotationPresent(DTO.class)) {
                             List<Object> list = (List)parameterValue;
                             for (Object entry : list) {
-                                validateCompatibility(entry, secListParamClass, secListParamClass, version, fullName);
+                                validateCompatibility(entry, object, secListParamClass, secListParamClass, version, fullName);
                             }
                         } else {
                             throw new RuntimeException("This type of fields is not supported by factory.");
@@ -272,5 +276,11 @@ public class FactoryBuilder {
                 }
             }
         }
+    }
+
+    private boolean hasSubprojectInPath(Object parent) {
+        return parent != null
+            && ProjectConfig.class.isAssignableFrom(parent.getClass())
+            && ((ProjectConfig)parent).getPath().indexOf('/', 1) != -1;
     }
 }
