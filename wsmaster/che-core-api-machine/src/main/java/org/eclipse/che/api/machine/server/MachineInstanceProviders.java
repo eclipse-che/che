@@ -44,9 +44,28 @@ public class MachineInstanceProviders {
      * @throws NotFoundException if no implementation found for provided machine type
      */
     public InstanceProvider getProvider(String machineType) throws NotFoundException {
-        if (instanceProviders.containsKey(machineType)) {
+        if (hasProvider(machineType)) {
             return instanceProviders.get(machineType);
         }
         throw new NotFoundException(String.format("Can't find machine provider for unsupported machine type '%s'", machineType));
+    }
+    
+    /**
+     * Checks if an {link InstanceProvider} implementation of the given machine type exists
+     *
+     * @param machineType type of machine implementation
+     * @return <code>true</code> if such implementation exists, <code>false</code> otherwise
+     */
+    public boolean hasProvider(String machineType) {
+        return instanceProviders.containsKey(machineType);
+    }
+    
+    /**
+     * Returns the machine types of all available {link InstanceProvider} implementations.
+     *
+     * @return an array of machine types
+     */
+    public String[] getProviderTypes() {
+        return instanceProviders.keySet().toArray(new String[instanceProviders.size()]);
     }
 }
