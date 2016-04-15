@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-orion-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.1.1-SNAPSHOT</version>
+        <version>4.1.1</version>
     </parent>
     <artifactId>che-plugin-orion-compare</artifactId>
     <packaging>jar</packaging>
