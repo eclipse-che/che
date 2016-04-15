@@ -33,7 +33,7 @@ public interface TextEditorConfiguration {
      *
      * @return the tab width
      */
-    public int getTabWidth();
+    int getTabWidth();
 
     /**
      * Returns the content formatter.
@@ -41,7 +41,7 @@ public interface TextEditorConfiguration {
      * @return the content formatter
      */
     @Nullable
-    public ContentFormatter getContentFormatter();
+    ContentFormatter getContentFormatter();
 
     /**
      * Returns the content assistant (completion) processors.
@@ -49,7 +49,7 @@ public interface TextEditorConfiguration {
      * @return the code assist processors
      */
     @Nullable
-    public Map<String, CodeAssistProcessor> getContentAssistantProcessors();
+    Map<String, CodeAssistProcessor> getContentAssistantProcessors();
 
     /**
      * Returns the reconciler.
@@ -57,7 +57,7 @@ public interface TextEditorConfiguration {
      * @return the reconciler
      */
     @Nullable
-    public Reconciler getReconciler();
+    Reconciler getReconciler();
 
     /**
      * Returns the document partitioner.
@@ -65,7 +65,7 @@ public interface TextEditorConfiguration {
      * @return the document partitioner
      */
     @NotNull
-    public DocumentPartitioner getPartitioner();
+    DocumentPartitioner getPartitioner();
 
     /**
      * Return the document position model.
@@ -73,7 +73,7 @@ public interface TextEditorConfiguration {
      * @return the position model
      */
     @Nullable
-    public DocumentPositionMap getDocumentPositionMap();
+    DocumentPositionMap getDocumentPositionMap();
 
     /**
      * Return the annotation model.
@@ -81,7 +81,7 @@ public interface TextEditorConfiguration {
      * @return the annotation model
      */
     @Nullable
-    public AnnotationModel getAnnotationModel();
+    AnnotationModel getAnnotationModel();
 
     /**
      * Return the Quickassist assistant processor.
@@ -89,7 +89,7 @@ public interface TextEditorConfiguration {
      * @return the quickassist assistant processor
      */
     @Nullable
-    public QuickAssistProcessor getQuickAssistProcessor();
+    QuickAssistProcessor getQuickAssistProcessor();
 
     /**
      * Return the {@link org.eclipse.che.ide.jseditor.client.changeintercept.ChangeInterceptorProvider}.<br>

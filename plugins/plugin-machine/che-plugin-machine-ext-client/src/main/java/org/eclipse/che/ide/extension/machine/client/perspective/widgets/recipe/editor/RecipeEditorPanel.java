@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
@@ -52,7 +51,6 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
     private final FileTypeRegistry       fileTypeRegistry;
     private final RecipeDescriptor       recipeDescriptor;
     private final OrionTextEditorFactory orionTextEditorFactory;
-    private final NotificationManager    notificationManager;
 
     private EditorPartPresenter editor;
     private ActionDelegate      delegate;
@@ -64,11 +62,9 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
     public RecipeEditorPanel(RecipeFileFactory recipeFileFactory,
                              FileTypeRegistry fileTypeRegistry,
                              OrionTextEditorFactory orionTextEditorFactory,
-                             NotificationManager notificationManager,
                              RecipeEditorView view,
                              @Assisted @NotNull RecipeDescriptor recipeDescriptor) {
         this.view = view;
-        this.notificationManager = notificationManager;
         this.recipeFileFactory = recipeFileFactory;
         this.orionTextEditorFactory = orionTextEditorFactory;
         this.fileTypeRegistry = fileTypeRegistry;
@@ -174,7 +170,7 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
 
     private EmbeddedTextEditor getEditor() {
         EmbeddedTextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
-        editor.initialize(new DefaultTextEditorConfiguration(), notificationManager);
+        editor.initialize(new DefaultTextEditorConfiguration());
 
         return editor;
     }

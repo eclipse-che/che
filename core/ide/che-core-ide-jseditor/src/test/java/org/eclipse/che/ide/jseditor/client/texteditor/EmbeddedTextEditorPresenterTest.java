@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.api.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.jseditor.client.JsEditorConstants;
@@ -80,8 +79,6 @@ public class EmbeddedTextEditorPresenterTest {
     @Mock
     private TextEditorConfiguration           configuration;
     @Mock
-    private NotificationManager               notificationManager;
-    @Mock
     private LoaderFactory                     loaderFactory;
     @Mock
     private MessageLoader loader;
@@ -128,7 +125,7 @@ public class EmbeddedTextEditorPresenterTest {
 
     @Test
     public void shouldFormatOperationWhenDocumentAndFormatterAreNull() throws EditorInitException {
-        embeddedTextEditorPresenter.initialize(configuration, notificationManager);
+        embeddedTextEditorPresenter.initialize(configuration);
         embeddedTextEditorPresenter.doOperation(TextEditorOperations.FORMAT);
 
         verify(contentFormatter, never()).format(document);
@@ -138,7 +135,7 @@ public class EmbeddedTextEditorPresenterTest {
     public void shouldFormatOperationWhenFormatterIsNotNullButDocumentIsNull() throws EditorInitException {
         doReturn(contentFormatter).when(configuration).getContentFormatter();
 
-        embeddedTextEditorPresenter.initialize(configuration, notificationManager);
+        embeddedTextEditorPresenter.initialize(configuration);
         embeddedTextEditorPresenter.doOperation(TextEditorOperations.FORMAT);
 
         verify(contentFormatter, never()).format(document);
@@ -213,7 +210,7 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(document).when(editorWidget).getDocument();
 
         embeddedTextEditorPresenter.injectAsyncLoader(loaderFactory);
-        embeddedTextEditorPresenter.initialize(configuration, notificationManager);
+        embeddedTextEditorPresenter.initialize(configuration);
         embeddedTextEditorPresenter.init(editorInput, editorCallback);
 
         verify(documentStorage).getDocument(any(VirtualFile.class), callBackCaptor.capture());

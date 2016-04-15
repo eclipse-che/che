@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.jseditor.client.inject.PlainTextFileType;
 import org.eclipse.che.ide.jseditor.client.popup.PopupResources;
 import org.eclipse.che.ide.jseditor.client.preference.EditorPreferenceResource;
@@ -30,21 +29,12 @@ public class JsEditorExtension {
     /** The default editor injection name. */
     public static final String DEFAULT_EDITOR_TYPE_INSTANCE = "DefaultEditorType";
 
-    /** The editor without autosave */
-    public static final String EMBEDDED_EDITOR_BUILDER= "DefaultEditorBuilder";
-
-    /** The editor without autosave */
-    public static final String EMBEDDED_EDITOR_PROVIDER= "DefaultEditorProvider";
-
-
     @Inject
     public JsEditorExtension(final FileTypeRegistry fileTypeRegistry,
                              final @PlainTextFileType FileType plainText,
                              final EditorPreferenceResource editorPreferenceResource,
                              final EditorResources editorResources,
-                             final KeyBindingAgent keyBindingAgent,
                              final PopupResources popupResources) {
-
         // register text/plain file type
         fileTypeRegistry.registerFileType(plainText);
 
@@ -52,7 +42,5 @@ public class JsEditorExtension {
         editorPreferenceResource.cellStyle().ensureInjected();
         editorResources.editorCss().ensureInjected();
         popupResources.popupStyle().ensureInjected();
-
-//        keyBindingAgent.getGlobal().addKey(new KeyBuilder().action().charCode('1').build(), "preventNative");
     }
 }

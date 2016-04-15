@@ -29,7 +29,6 @@ import org.eclipse.che.ide.jseditor.client.debug.BreakpointManagerImpl;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererFactory;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererImpl;
 import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.EditorWithoutAutoSaveProvider;
 import org.eclipse.che.ide.jseditor.client.document.DocumentStorage;
 import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.jseditor.client.editortype.EditorTypeRegistry;
@@ -116,8 +115,6 @@ public class JsEditorGinModule extends AbstractGinModule {
         // bind the quick assist widget factory
         install(new GinFactoryModuleBuilder()
                         .build(QuickAssistWidgetFactory.class));
-
-        bind(EditorProvider.class).annotatedWith(Names.named(JsEditorExtension.EMBEDDED_EDITOR_PROVIDER)).to(EditorWithoutAutoSaveProvider.class);
     }
 
     // no real need to make it a singleton, it's a simple instantiation

@@ -41,7 +41,7 @@ public class EditorTypeRegistryImpl implements EditorTypeRegistry {
             throw new RuntimeException("Cannot register editor type with null provider");
         }
         if (this.editorTypes.containsKey(editorType)) {
-            throw new RuntimeException("Editor type already registrered with the same key");
+            throw new RuntimeException("Editor type already registered with the same key");
         }
         this.editorTypes.put(editorType, new RegistryStorage(name, editorBuilder));
         Log.debug(EditorTypeRegistryImpl.class, "Contents: " + PrintMap.printMap(this.editorTypes));

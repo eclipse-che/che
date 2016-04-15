@@ -26,7 +26,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -302,8 +301,8 @@ public class DefaultEditorAdapter extends Composite implements EditorAdapter, Fi
     }
 
     @Override
-    public void initialize(final TextEditorConfiguration configuration, final NotificationManager notificationManager) {
-        this.textEditor.initialize(configuration, notificationManager);
+    public void initialize(final TextEditorConfiguration configuration) {
+        this.textEditor.initialize(configuration);
     }
 
     @Override

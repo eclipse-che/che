@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.editor.EditorInitException;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -56,7 +55,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 /**
  * Test of the Default editor adapter class.
@@ -357,11 +355,10 @@ public class DefaultEditorAdapterTest {
     @Test
     public void shouldInitialize() {
         final TextEditorConfiguration configuration = mock(TextEditorConfiguration.class);
-        final NotificationManager notificationManager = mock(NotificationManager.class);
 
-        defaultEditorAdapter.initialize(configuration, notificationManager);
+        defaultEditorAdapter.initialize(configuration);
 
-        verify(textEditor).initialize(configuration, notificationManager);
+        verify(textEditor).initialize(configuration);
     }
 
     @Test

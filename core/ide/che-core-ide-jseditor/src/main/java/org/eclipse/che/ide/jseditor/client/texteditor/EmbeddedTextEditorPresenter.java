@@ -159,7 +159,8 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
                                        final EventBus eventBus,
                                        final FileTypeIdentifier fileTypeIdentifier,
                                        final QuickAssistantFactory quickAssistantFactory,
-                                       final WorkspaceAgent workspaceAgent) {
+                                       final WorkspaceAgent workspaceAgent,
+                                       final NotificationManager notificationManager) {
 
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
@@ -174,6 +175,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
         this.generalEventBus = eventBus;
         this.quickAssistantFactory = quickAssistantFactory;
         this.workspaceAgent = workspaceAgent;
+        this.notificationManager = notificationManager;
 
         this.editorView.setDelegate(this);
         eventBus.addHandler(FileEvent.TYPE, this);
@@ -429,10 +431,8 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
     }
 
     @Override
-    public void initialize(@NotNull final TextEditorConfiguration configuration,
-                           @NotNull final NotificationManager notificationManager) {
+    public void initialize(@NotNull final TextEditorConfiguration configuration) {
         this.configuration = configuration;
-        this.notificationManager = notificationManager;
     }
 
     @Override

@@ -15,7 +15,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
@@ -54,8 +53,6 @@ public class RecipeEditorPanelTest {
     private RecipeDescriptor       recipeDescriptor;
     @Mock
     private OrionTextEditorFactory orionTextEditorFactory;
-    @Mock
-    private NotificationManager    notificationManager;
 
     @Mock
     private VirtualFile                                    recipeFile;
@@ -75,7 +72,6 @@ public class RecipeEditorPanelTest {
         presenter = new RecipeEditorPanel(recipeFileFactory,
                                           fileTypeRegistry,
                                           orionTextEditorFactory,
-                                          notificationManager,
                                           view,
                                           recipeDescriptor);
 

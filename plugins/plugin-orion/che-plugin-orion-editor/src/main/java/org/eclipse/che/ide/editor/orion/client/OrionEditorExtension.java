@@ -186,7 +186,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
             @Override
             public ConfigurableTextEditor buildEditor() {
                 final EmbeddedTextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
-                editor.initialize(new AutoSaveTextEditorConfiguration(), notificationManager);
+                editor.initialize(new AutoSaveTextEditorConfiguration());
                 return editor;
             }
         });

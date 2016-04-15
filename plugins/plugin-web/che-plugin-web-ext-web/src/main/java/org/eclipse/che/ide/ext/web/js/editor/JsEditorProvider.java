@@ -12,28 +12,20 @@ package org.eclipse.che.ide.ext.web.js.editor;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
+import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractEditorProvider;
+import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 
 /**
  * {@link EditorProvider} for JavaScript files.
  *
  * @author Evgen Vidolob
  */
-public class JsEditorProvider implements EditorProvider {
-    private final DefaultEditorProvider         editorProvider;
-    private final NotificationManager           notificationManager;
+public class JsEditorProvider extends AbstractEditorProvider {
     private final JsEditorConfigurationProvider configurationProvider;
 
     @Inject
-    public JsEditorProvider(final DefaultEditorProvider editorProvider,
-                            NotificationManager notificationManager,
-                            JsEditorConfigurationProvider configurationProvider) {
-        this.editorProvider = editorProvider;
-        this.notificationManager = notificationManager;
+    public JsEditorProvider(JsEditorConfigurationProvider configurationProvider) {
         this.configurationProvider = configurationProvider;
     }
 
@@ -48,9 +40,7 @@ public class JsEditorProvider implements EditorProvider {
     }
 
     @Override
-    public EditorPartPresenter getEditor() {
-        ConfigurableTextEditor textEditor = editorProvider.getEditor();
-        textEditor.initialize(configurationProvider.get(), notificationManager);
-        return textEditor;
+    protected TextEditorConfiguration getEditorConfiguration() {
+        return configurationProvider.get();
     }
 }

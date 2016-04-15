@@ -12,27 +12,19 @@ package org.eclipse.che.ide.ext.web.html.editor;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
+import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractEditorProvider;
+import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 
 /**
  * {@link EditorProvider} for HTML files.
  */
-public class HtmlEditorProvider implements EditorProvider {
-    private final DefaultEditorProvider           editorProvider;
-    private final NotificationManager             notificationManager;
-    private final HTMLEditorConfigurationProvider htmlEditorConfigurationProvider;
+public class HtmlEditorProvider extends AbstractEditorProvider {
+    private final HTMLEditorConfigurationProvider configurationProvider;
 
     @Inject
-    public HtmlEditorProvider(final DefaultEditorProvider editorProvider,
-                              final NotificationManager notificationManager,
-                              final HTMLEditorConfigurationProvider htmlEditorConfigurationProvider) {
-        this.editorProvider = editorProvider;
-        this.notificationManager = notificationManager;
-        this.htmlEditorConfigurationProvider = htmlEditorConfigurationProvider;
+    public HtmlEditorProvider(HTMLEditorConfigurationProvider htmlEditorConfigurationProvider) {
+        this.configurationProvider = htmlEditorConfigurationProvider;
     }
 
     @Override
@@ -46,10 +38,7 @@ public class HtmlEditorProvider implements EditorProvider {
     }
 
     @Override
-    public EditorPartPresenter getEditor() {
-        ConfigurableTextEditor textEditor = editorProvider.getEditor();
-        HtmlEditorConfiguration configuration = this.htmlEditorConfigurationProvider.get();
-        textEditor.initialize(configuration, notificationManager);
-        return textEditor;
+    protected TextEditorConfiguration getEditorConfiguration() {
+        return configurationProvider.get();
     }
 }
