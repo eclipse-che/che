@@ -44,9 +44,30 @@ export class ListWorkspacesCtrl {
     this.workspacesSelectedStatus = {};
     this.menuOptions = [
       {
+        title: 'Select all workspaces',
+        onclick: () => {
+          this.selectAllWorkspaces();
+        },
+        disabled: () => {
+          return this.isAllWorkspacesSelected();
+        }
+      },
+      {
+        title: 'Deselect all workspaces',
+        onclick: () => {
+          this.deselectAllWorkspaces();
+        },
+        disabled: () => {
+          return this.isNoWorkspacesSelected();
+        }
+      },
+      {
         title: 'Delete selected workspaces',
         onclick: () => {
           this.deleteSelectedWorkspaces();
+        },
+        disabled: () => {
+          return this.isNoWorkspacesSelected();
         }
       }
     ];
@@ -122,6 +143,54 @@ export class ListWorkspacesCtrl {
       this.isInfoLoading = false;
     }, (error) => {
       this.isInfoLoading = false;
+    });
+  }
+
+  /**
+   * return true if all workspaces in list are checked
+   * @returns {boolean}
+     */
+  isAllWorkspacesSelected() {
+    let disabled = true;
+    for (let key of this.workspacesById.keys()) {
+      if (!this.workspacesSelectedStatus[key]) {
+        disabled = false;
+        break;
+      }
+    }
+    return disabled;
+  }
+
+  /**
+   * returns true if all workspaces in list are not checked
+   * @returns {boolean}
+     */
+  isNoWorkspacesSelected() {
+    let workspaceIds = Object.keys(this.workspacesSelectedStatus);
+    if (!workspaceIds.length) {
+      return true;
+    }
+
+    return workspaceIds.every((key) => {
+      return !this.workspacesSelectedStatus[key];
+    });
+  }
+
+  /**
+   * Check all workspaces in list
+   */
+  selectAllWorkspaces() {
+    for (let key of this.workspacesById.keys()) {
+      this.workspacesSelectedStatus[key] = true;
+    }
+  }
+
+  /**
+   * Uncheck all workspaces in list
+   */
+  deselectAllWorkspaces() {
+    Object.keys(this.workspacesSelectedStatus).forEach((key) => {
+      this.workspacesSelectedStatus[key] = false;
     });
   }
 
