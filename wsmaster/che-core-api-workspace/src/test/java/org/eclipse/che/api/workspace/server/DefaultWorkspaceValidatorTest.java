@@ -301,7 +301,7 @@ public class DefaultWorkspaceValidatorTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Type of machine .* in environment .* is not supported. Supported value is 'docker'.")
+          expectedExceptionsMessageRegExp = "Type .* of machine .* in environment .* is not supported. Supported value are 'docker' and 'ssh'.")
     public void shouldFailValidationIfMachineTypeIsNull() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getEnvironments()
@@ -315,7 +315,7 @@ public class DefaultWorkspaceValidatorTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Type of machine .* in environment .* is not supported. Supported value is 'docker'.")
+          expectedExceptionsMessageRegExp = "Type .* of machine .* in environment .* is not supported. Supported value are 'docker' and 'ssh'.")
     public void shouldFailValidationIfMachineTypeIsNotDocker() throws Exception {
         final WorkspaceConfigDto config = createConfig();
         config.getEnvironments()

@@ -112,8 +112,9 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     private void validateMachine(MachineConfig machineCfg, String envName) throws BadRequestException {
         checkArgument(!isNullOrEmpty(machineCfg.getName()), "Environment %s contains machine with null or empty name", envName);
         checkNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without source");
-        checkArgument("docker".equals(machineCfg.getType()),
-                      "Type of machine %s in environment %s is not supported. Supported value is 'docker'.",
+        checkArgument("docker".equals(machineCfg.getType()) || "ssh".equals(machineCfg.getType()),
+                      "Type %s of machine %s in environment %s is not supported. Supported value are 'docker' and 'ssh'.",
+                      machineCfg.getType(),
                       machineCfg.getName(),
                       envName);
 
