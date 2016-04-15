@@ -8,8 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.machine.events;
+package org.eclipse.che.ide.extension.machine.client.machine;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -19,11 +20,43 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
  *
  * @author Artem Zatsarynnyi
  */
-public class MachineStateEvent extends GwtEvent<MachineStateHandler> {
+public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
 
-    /** Type class used to register this event. */
-    public static Type<MachineStateHandler> TYPE = new Type<>();
+    public interface Handler extends EventHandler {
+
+        /**
+         * Is called when creating a machine.
+         *
+         * @param event
+         *          state event
+         */
+        void onMachineCreating(MachineStateEvent event);
+
+        /**
+         * Called when machine has been run.
+         *
+         * @param event
+         *         the fired {@link MachineStateEvent}
+         */
+        void onMachineRunning(MachineStateEvent event);
+
+        /**
+         * Called when machine has been destroyed.
+         *
+         * @param event
+         *         the fired {@link MachineStateEvent}
+         */
+        void onMachineDestroyed(MachineStateEvent event);
+
+    }
+
+    /**
+     * Type class used to register this event.
+     */
+    public static Type<MachineStateEvent.Handler> TYPE = new Type<>();
+
     private final MachineDto    machine;
+
     private final MachineAction machineAction;
 
     /**
@@ -34,33 +67,13 @@ public class MachineStateEvent extends GwtEvent<MachineStateHandler> {
      * @param machineAction
      *         the type of action
      */
-    protected MachineStateEvent(MachineDto machine, MachineAction machineAction) {
+    public MachineStateEvent(MachineDto machine, MachineAction machineAction) {
         this.machine = machine;
         this.machineAction = machineAction;
     }
 
-    /**
-     * Creates a Machine Running event.
-     *
-     * @param machine
-     *         running machine
-     */
-    public static MachineStateEvent createMachineRunningEvent(MachineDto machine) {
-        return new MachineStateEvent(machine, MachineAction.RUNNING);
-    }
-
-    /**
-     * Creates a Machine Destroyed event.
-     *
-     * @param machine
-     *         destroyed machine
-     */
-    public static MachineStateEvent createMachineDestroyedEvent(MachineDto machine) {
-        return new MachineStateEvent(machine, MachineAction.DESTROYED);
-    }
-
     @Override
-    public Type<MachineStateHandler> getAssociatedType() {
+    public Type<MachineStateEvent.Handler> getAssociatedType() {
         return TYPE;
     }
 
@@ -73,21 +86,27 @@ public class MachineStateEvent extends GwtEvent<MachineStateHandler> {
     }
 
     @Override
-    protected void dispatch(MachineStateHandler handler) {
+    protected void dispatch(MachineStateEvent.Handler handler) {
         switch (machineAction) {
+            case CREATING:
+                handler.onMachineCreating(this);
+                break;
             case RUNNING:
                 handler.onMachineRunning(this);
                 break;
             case DESTROYED:
                 handler.onMachineDestroyed(this);
                 break;
-            default:
-                break;
         }
     }
 
-    /** Set of possible type of machine actions. */
+    /**
+     * Set of possible type of machine actions.
+     */
     public enum MachineAction {
-        RUNNING, DESTROYED
+        CREATING,
+        RUNNING,
+        DESTROYED
     }
+
 }

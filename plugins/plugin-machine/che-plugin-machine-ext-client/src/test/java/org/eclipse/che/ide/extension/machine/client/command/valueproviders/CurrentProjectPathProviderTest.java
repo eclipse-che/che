@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.event.project.CloseCurrentProjectEvent;
 import org.eclipse.che.ide.api.event.project.ProjectReadyEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -118,4 +118,5 @@ public class CurrentProjectPathProviderTest {
 
         assertTrue(currentProjectPathProvider.getValue().isEmpty());
     }
+
 }

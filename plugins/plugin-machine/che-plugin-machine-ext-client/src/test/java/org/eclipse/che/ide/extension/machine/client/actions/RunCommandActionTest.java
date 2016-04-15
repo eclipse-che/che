@@ -39,7 +39,7 @@ public class RunCommandActionTest {
     
     //constructors mocks
     @Mock
-    SelectCommandComboBoxReady          selectCommandAction;
+    SelectCommandComboBox               selectCommandAction;
     @Mock
     private CommandManager              commandManager;
     @Mock
@@ -74,4 +74,5 @@ public class RunCommandActionTest {
 
         verify(commandManager).execute(eq(command));
     }
+
 }

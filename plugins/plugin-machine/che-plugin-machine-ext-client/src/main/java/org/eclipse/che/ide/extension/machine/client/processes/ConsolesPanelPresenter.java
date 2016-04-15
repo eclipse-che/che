@@ -18,7 +18,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateHandler;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -47,8 +46,7 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
@@ -87,7 +85,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartedHandler,
                                                                      WorkspaceStoppedHandler,
-                                                                     MachineStateHandler {
+                                                                     MachineStateEvent.Handler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
@@ -156,14 +154,14 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.view.setDelegate(this);
         this.view.setTitle(localizationConstant.viewConsolesTitle());
 
-        eventBus.addHandler(DevMachineStateEvent.TYPE, new DevMachineStateHandler() {
+        eventBus.addHandler(DevMachineStateEvent.TYPE, new DevMachineStateEvent.Handler() {
             @Override
-            public void onMachineStarted(DevMachineStateEvent event) {
+            public void onDevMachineStarted(DevMachineStateEvent event) {
                 fetchMachines();
             }
 
             @Override
-            public void onMachineDestroyed(DevMachineStateEvent event) {
+            public void onDevMachineDestroyed(DevMachineStateEvent event) {
             }
         });
 
@@ -212,6 +210,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
+    }
+
+    @Override
+    public void onMachineCreating(MachineStateEvent event) {
     }
 
     @Override

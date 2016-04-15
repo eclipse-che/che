@@ -38,8 +38,7 @@ import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
@@ -59,7 +58,7 @@ import java.util.Map;
  */
 @Singleton
 public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate,
-                                                                    MachineStateHandler,
+                                                                    MachineStateEvent.Handler,
                                                                     WorkspaceStartedHandler,
                                                                     WorkspaceStoppedHandler,
                                                                     MachineStartingHandler,
@@ -269,6 +268,10 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         view.setData(rootNode);
 
         view.selectNode(existingMachineNodes.get(event.getMachine().getId()));
+    }
+
+    @Override
+    public void onMachineCreating(MachineStateEvent event) {
     }
 
     /** {@inheritDoc} */

@@ -63,16 +63,6 @@ public interface MachineManager {
     void startMachine(String recipeURL, String displayName);
 
     /**
-     * Start new SSH machine in workspace.
-     *
-     * @param recipeURL
-     *         special recipe url to get docker image.
-     * @param displayName
-     *         display name for machine
-     */
-    void startSSHMachine(String recipeURL, String displayName);
-
-    /**
      * Destroy machine.
      *
      * @param machine

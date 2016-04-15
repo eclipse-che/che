@@ -38,7 +38,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBoxReady;
+import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
@@ -112,7 +112,7 @@ public class MachineExtension {
                                 ActionManager actionManager,
                                 KeyBindingAgent keyBinding,
                                 ExecuteSelectedCommandAction executeSelectedCommandAction,
-                                SelectCommandComboBoxReady selectCommandAction,
+                                SelectCommandComboBox selectCommandAction,
                                 EditCommandsAction editCommandsAction,
                                 CreateMachineAction createMachine,
                                 RestartMachineAction restartMachine,

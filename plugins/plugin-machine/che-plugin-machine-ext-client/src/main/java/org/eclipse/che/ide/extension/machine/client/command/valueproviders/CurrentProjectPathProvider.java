@@ -23,8 +23,7 @@ import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedHandler;
 import org.eclipse.che.ide.api.event.project.ProjectReadyEvent;
 import org.eclipse.che.ide.api.event.project.ProjectReadyHandler;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 
 import javax.validation.constraints.NotNull;
 
@@ -37,7 +36,7 @@ import javax.validation.constraints.NotNull;
  */
 @Singleton
 public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
-                                                   MachineStateHandler,
+                                                   MachineStateEvent.Handler,
                                                    CloseCurrentProjectHandler,
                                                    ProjectReadyHandler,
                                                    CurrentProjectChangedHandler {
@@ -69,6 +68,10 @@ public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
     @Override
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public void onMachineCreating(MachineStateEvent event) {
     }
 
     @Override
@@ -114,4 +117,5 @@ public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
     public void onCurrentProjectChanged(CurrentProjectChangedEvent event) {
         updateValue();
     }
+
 }

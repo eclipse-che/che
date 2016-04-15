@@ -27,7 +27,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBoxReady;
+import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage.DirtyStateListener;
@@ -69,7 +69,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
     private final DialogFactory                                  dialogFactory;
     private final MachineLocalizationConstant                    machineLocale;
     private final CoreLocalizationConstant                       coreLocale;
-    private final Provider<SelectCommandComboBoxReady>           selectCommandActionProvider;
+    private final Provider<SelectCommandComboBox>                selectCommandActionProvider;
     private final Set<ConfigurationChangedListener>              configurationChangedListeners;
     private final AppContext                                     appContext;
     /** Set of the existing command names. */
@@ -90,7 +90,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
                                     DialogFactory dialogFactory,
                                     MachineLocalizationConstant machineLocale,
                                     CoreLocalizationConstant coreLocale,
-                                    Provider<SelectCommandComboBoxReady> selectCommandActionProvider,
+                                    Provider<SelectCommandComboBox> selectCommandActionProvider,
                                     CommandManager commandManager,
                                     AppContext appContext,
                                     DtoFactory dtoFactory) {
@@ -587,4 +587,5 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
         /** Called when handling of command is completed successfully. */
         void onCompleted();
     }
+
 }

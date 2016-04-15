@@ -16,8 +16,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 
@@ -29,7 +28,7 @@ import java.util.Map;
  *
  * @author Dmitry Shnurenko
  */
-public class TerminalContainer implements TabPresenter, MachineStateHandler {
+public class TerminalContainer implements TabPresenter, MachineStateEvent.Handler {
 
     private final TerminalContainerView          view;
     private final TerminalFactory                terminalFactory;
@@ -87,6 +86,10 @@ public class TerminalContainer implements TabPresenter, MachineStateHandler {
         container.setWidget(view);
     }
 
+    @Override
+    public void onMachineCreating(MachineStateEvent event) {
+    }
+
     /** {@inheritDoc} */
     @Override
     public void onMachineRunning(MachineStateEvent event) {
@@ -100,4 +103,5 @@ public class TerminalContainer implements TabPresenter, MachineStateHandler {
 
         terminals.remove(destroyedMachineId);
     }
+
 }

@@ -52,6 +52,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  *
  * @author Valeriy Svydenko
  * @author Oleksii Orel
+ * @author Vitaliy Guliy
  */
 public class DropDownWidgetImpl extends Composite implements ActionSelectedHandler, ClickHandler, DropDownWidget {
 
@@ -62,14 +63,18 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
 
     @UiField
     FlowPanel marker;
+
     @UiField
     Label     selectedElementName;
+
     @UiField
     FlowPanel selectedElement;
+
     @UiField
     FlowPanel listHeader;
 
-    private final String                       listId;
+    private final String                       actionGroupId;
+
     private final Resources                    resources;
     private final ActionManager                actionManager;
     private final KeyBindingAgent              keyBindingAgent;
@@ -84,10 +89,13 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
 
 
     @AssistedInject
-    public DropDownWidgetImpl(Resources resources, ActionManager actionManager, KeyBindingAgent keyBindingAgent,
-                              Provider<PerspectiveManager> managerProvider, @NotNull @Assisted String listId) {
+    public DropDownWidgetImpl(Resources resources,
+                              ActionManager actionManager,
+                              KeyBindingAgent keyBindingAgent,
+                              Provider<PerspectiveManager> managerProvider,
+                              @NotNull @Assisted String actionGroupId) {
         this.resources = resources;
-        this.listId = listId;
+        this.actionGroupId = actionGroupId;
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -140,7 +148,7 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
         int left = getAbsoluteLeft();
         int top = getAbsoluteTop() + listHeader.getOffsetHeight();
         int width = listHeader.getOffsetWidth();
-        this.show(left, top, width, listId);
+        show(left, top, width);
     }
 
     /** {@inheritDoc} */
@@ -151,7 +159,7 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
         }
         this.hide();
         int top = getAbsoluteTop() + listHeader.getOffsetHeight();
-        this.show(getAbsoluteLeft(), top, listHeader.getOffsetWidth(), listId);
+        show(getAbsoluteLeft(), top, listHeader.getOffsetWidth());
     }
 
     /** {@inheritDoc} */
@@ -175,12 +183,10 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
      *         vertical position
      * @param width
      *         header width
-     * @param itemId
-     *         list identifier
      */
-    private void show(final int left, final int top, final int width, @NotNull String itemId) {
+    private void show(int left, int top, int width) {
         hide();
-        this.updateActions(itemId);
+        updateActions();
 
         lockLayer = new MenuLockLayer();
         popupMenu = new PopupMenu(actions,
@@ -190,7 +196,7 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
                                   lockLayer,
                                   this,
                                   keyBindingAgent,
-                                  itemId);
+                                  actionGroupId);
         popupMenu.addStyleName(resources.dropdownListCss().dropDownListMenu());
         popupMenu.getElement().getStyle().setTop(top, PX);
         popupMenu.getElement().getStyle().setLeft(left, PX);
@@ -200,15 +206,12 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
     }
 
     /**
-     * Updates the list of visible actions.
-     *
-     * @param listId
-     *         identifier of action group which contains elements of list
+     * Refresh the list of visible actions.
      */
-    private void updateActions(@NotNull String listId) {
+    private void updateActions() {
         actions.removeAll();
 
-        ActionGroup mainActionGroup = (ActionGroup)actionManager.getAction(listId);
+        ActionGroup mainActionGroup = (ActionGroup)actionManager.getAction(actionGroupId);
         if (mainActionGroup == null) {
             return;
         }
@@ -286,4 +289,5 @@ public class DropDownWidgetImpl extends Composite implements ActionSelectedHandl
         @Source("expansionIcon.svg")
         SVGResource expansionImage();
     }
+
 }

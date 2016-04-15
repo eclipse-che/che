@@ -152,10 +152,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
         }, KeyDownEvent.getType());
         targetsPanel.add(list);
 
-        architectureListBox.addItem("linux_amd64");
-        architectureListBox.addItem("linux_arm7");
-        architectureListBox.setSelectedIndex(0);
-
         architectureListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent changeEvent) {
@@ -235,12 +231,19 @@ public class TargetsViewImpl extends Window implements TargetsView {
                 delegate.onPasswordChanged(password.getValue());
             }
         });
-
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
+    }
+
+    @Override
+    public void setAvailableArchitectures(List<String> architectures) {
+        architectureListBox.clear();
+        for (String architecture : architectures) {
+            architectureListBox.addItem(architecture);
+        }
     }
 
     @Override
@@ -429,12 +432,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
     @Override
     public void setArchitecture(String architecture) {
-        for (int i = 0; i < architectureListBox.getItemCount(); i++) {
-            if (architecture.equals(architectureListBox.getItemText(i))) {
-                architectureListBox.setSelectedIndex(i);
-                return;
-            }
-        }
+        architectureListBox.select(architecture);
     }
 
     @Override

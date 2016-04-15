@@ -18,13 +18,25 @@ import org.eclipse.che.ide.api.action.Action;
  *
  * @author Valeriy Svydenko
  * @author Oleksii Orel
+ * @author Vitaliy Gulily
  */
 public interface DropDownWidget {
-    /** returns name of the selected element* */
+
+    /**
+     * Returns name of the selected element.
+     *
+     * @return
+     *          name of the selected element
+     */
     @Nullable
     String getSelectedName();
 
-    /** returns id of the selected element* */
+    /**
+     * Returns id of the selected element.
+     *
+     * @return
+     *          selected element identifier
+     */
     @Nullable
     String getSelectedId();
 
@@ -39,7 +51,7 @@ public interface DropDownWidget {
     void selectElement(@Nullable String id, @Nullable String name);
 
     /**
-     * Create an instance of element action with given name amd id for displaying it.
+     * Creates an instance of element action with given name and id for displaying it.
      *
      * @param id
      *         id of element
@@ -51,7 +63,7 @@ public interface DropDownWidget {
     Action createAction(String id, String name);
 
     /**
-     * Update popup elements in drop down part of widget.
+     * Updates popup elements in drop down part of widget.
      */
     void updatePopup();
 

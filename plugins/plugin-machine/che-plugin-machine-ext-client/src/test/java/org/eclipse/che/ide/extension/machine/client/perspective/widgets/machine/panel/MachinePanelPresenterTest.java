@@ -34,7 +34,7 @@ import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.ide.ui.dialogs.InputCallback;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
@@ -366,4 +366,5 @@ public class MachinePanelPresenterTest {
         verify(view).setData(Matchers.<MachineTreeNode>anyObject());
         verify(view).selectNode(machineNode1);
     }
+
 }

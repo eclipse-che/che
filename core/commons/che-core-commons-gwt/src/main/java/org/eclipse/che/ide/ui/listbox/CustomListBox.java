@@ -53,7 +53,6 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
     private int     defaultSelectedIndex = -1;
     private boolean isActive             = false;
 
-
     public static CustomListBox wrap(Element element) {
         // Assert that the element is attached.
         assert Document.get().getBody().isOrHasChild(element);
@@ -411,15 +410,45 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
         if (index < 0) {
             return;
         }
+
         //set default index if not added options yet
         if (index >= getItemCount()) {
             defaultSelectedIndex = index;
             return;
         }
+
         selectedIndex = index;
         currentItemLabel.setInnerText(getItemText(index));
-        final InputElement inputElement = getListItemElement(index);
+        InputElement inputElement = getListItemElement(index);
         inputElement.setChecked(true);
+    }
+
+    /**
+     * Selects an item with given text.
+     *
+     * @param text
+     *          text of an item to be selected
+     */
+    public void select(String text) {
+        // uncheck previous value
+        if (selectedIndex >= 0) {
+            InputElement inputElement = getListItemElement(selectedIndex);
+            inputElement.setChecked(false);
+        }
+
+        // find and select a new one
+        if (text != null) {
+            for (int i = 0; i < getItemCount(); i++) {
+                if (text.equals(getItemText(i))) {
+                    setSelectedIndex(i);
+                    return;
+                }
+            }
+        }
+
+        // clear the selection
+        selectedIndex = -1;
+        currentItemLabel.setInnerText("");
     }
 
     /**
@@ -459,4 +488,5 @@ public class CustomListBox extends FocusWidget implements HasChangeHandlers {
         var activeElement = $doc.activeElement;
         return activeElement.isEqualNode(element);
     }-*/;
+
 }
