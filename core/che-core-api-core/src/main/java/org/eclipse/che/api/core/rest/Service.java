@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.rest;
 
+import com.google.common.collect.ListMultimap;
+
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.annotations.OPTIONS;
@@ -20,6 +23,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.core.rest.shared.dto.RequestBodyDescriptor;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceDescriptor;
+import org.eclipse.che.api.core.util.PagingUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.ws.rs.Consumes;
@@ -39,13 +43,18 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 
 /**
  * Base class for all API services.
@@ -70,7 +79,66 @@ public abstract class Service {
         return DtoFactory.getInstance().createDto(ServiceDescriptor.class);
     }
 
-    //
+    /**
+     * Generates link header value based on given {@code page}
+     * and uri returned by {@code uriInfo.getRequestUri()}.
+     *
+     * @param page
+     *         page to create link header
+     * @return link header value
+     */
+    protected String createLinkHeader(Page<?> page) {
+        return PagingUtil.createLinkHeader(page, uriInfo.getRequestUri());
+    }
+
+    /**
+     * Creates uri from the given parameters and
+     * delegates execution to the {@link PagingUtil#createLinkHeader(Page, URI)} method.
+     *
+     * @param page
+     *         page to create link header
+     * @param method
+     *         rest service method name like {@link UriBuilder#path(Class, String) path} argument
+     * @param queryParams
+     *         query parameters map, if multiple query params needed then
+     *         {@link #createLinkHeader(Page, String, ListMultimap, Object...)}
+     *         method should be used instead
+     * @param pathParams
+     *         path param values like {f@link UriBuilder#build(Object...)} method arguments
+     */
+    protected String createLinkHeader(Page<?> page,
+                                      String method,
+                                      Map<String, Object> queryParams,
+                                      Object... pathParams) {
+        final UriBuilder ub = getServiceContext().getServiceUriBuilder().path(getClass(), method);
+        for (Map.Entry<String, Object> queryParam : queryParams.entrySet()) {
+            ub.queryParam(queryParam.getKey(), queryParam.getValue());
+        }
+        return PagingUtil.createLinkHeader(page, ub.build(pathParams));
+    }
+
+    /**
+     * This method is the same to the {@link #createLinkHeader(Page, String, Map, Object...)}
+     * except of receiving query parameters.
+     */
+    protected String createLinkHeader(Page<?> page, String method, Object... pathParams) {
+        return createLinkHeader(page, method, emptyMap(), pathParams);
+    }
+
+    /**
+     * This method is the same to {@link #createLinkHeader(Page, String, Map, Object...)}
+     * except of receiving multivalued query parameters.
+     */
+    protected String createLinkHeader(Page<?> page,
+                                      String method,
+                                      ListMultimap<String, Object> queryParams,
+                                      Object... pathParams) {
+        final UriBuilder ub = getServiceContext().getServiceUriBuilder().path(getClass(), method);
+        for (Map.Entry<String, Object> queryParam : queryParams.entries()) {
+            ub.queryParam(queryParam.getKey(), queryParam.getValue());
+        }
+        return PagingUtil.createLinkHeader(page, ub.build(pathParams));
+    }
 
     private static final Set<String> JAX_RS_ANNOTATIONS;
 
@@ -117,7 +185,7 @@ public abstract class Service {
         }
         if (httpMethod == null) {
             throw new IllegalArgumentException(
-                    String.format("Method '%s' has not any HTTP method annotation and may not be used to produce link.", method.getName()));
+                    format("Method '%s' has not any HTTP method annotation and may not be used to produce link.", method.getName()));
         }
 
         final Consumes consumes = getAnnotation(method, Consumes.class);

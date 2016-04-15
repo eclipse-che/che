@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.rest;
 
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
@@ -34,7 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
@@ -44,7 +47,7 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
  * @author Yevhenii Voevodin
  */
 @Path("/test")
-public class TestService {
+public class TestService extends Service {
 
     public static final String JSON_OBJECT = new JsonArrayImpl<>(singletonList("element")).toJson();
 
@@ -110,5 +113,17 @@ public class TestService {
     public String getUriInfo(@QueryParam("query") String query,
                              @Context UriInfo uriInfo) {
         return URLDecoder.decode(uriInfo.getRequestUri().toString());
+    }
+
+    @GET
+    @Path("/paging/{value}")
+    @Produces(APPLICATION_JSON)
+    public Response getStringList(@PathParam("value") String value, @QueryParam("query-param") String param) {
+        final Page<String> page = new Page<>(asList("item3", "item4", "item5"), 3, 3, 7);
+
+        return Response.ok()
+                       .entity(page.getItems())
+                       .header("Link", createLinkHeader(page, "getStringList", singletonMap("query-param", param), value))
+                       .build();
     }
 }
