@@ -33,13 +33,13 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class ExecuteSelectedCommandAction extends AbstractPerspectiveAction {
 
-    private final SelectCommandComboBoxReady selectCommandAction;
+    private final SelectCommandComboBox selectCommandAction;
     private final CommandManager             commandManager;
 
     @Inject
     public ExecuteSelectedCommandAction(MachineLocalizationConstant localizationConstant,
                                         MachineResources resources,
-                                        SelectCommandComboBoxReady selectCommandAction,
+                                        SelectCommandComboBox selectCommandAction,
                                         CommandManager commandManager) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               localizationConstant.executeSelectedCommandControlTitle(),
@@ -60,10 +60,9 @@ public class ExecuteSelectedCommandAction extends AbstractPerspectiveAction {
         final CommandConfiguration command = selectCommandAction.getSelectedCommand();
         MachineDto machine = selectCommandAction.getSelectedMachine();
 
-        if (command == null || machine == null) {
-            return;
+        if (command != null && machine != null) {
+            commandManager.execute(command, machine);
         }
-
-        commandManager.execute(command, machine);
     }
+
 }

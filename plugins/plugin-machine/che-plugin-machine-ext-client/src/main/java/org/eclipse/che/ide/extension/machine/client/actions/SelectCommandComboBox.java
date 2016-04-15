@@ -41,8 +41,7 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
 import org.eclipse.che.ide.util.loging.Log;
@@ -68,10 +67,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * @author Oleksii Orel
  */
 @Singleton
-public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implements CustomComponentAction,
-                                                                                     EditCommandsPresenter.ConfigurationChangedListener,
-                                                                                     WsAgentStateHandler,
-                                                                                     MachineStateHandler {
+public class SelectCommandComboBox extends AbstractPerspectiveAction implements CustomComponentAction,
+                                                                                EditCommandsPresenter.ConfigurationChangedListener,
+                                                                                WsAgentStateHandler,
+                                                                                MachineStateEvent.Handler {
 
     public static final String              GROUP_COMMANDS                 = "CommandsGroup";
     public static final String              GROUP_MACHINES                 = "MachinesGroup";
@@ -91,16 +90,16 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
     private final DefaultActionGroup          machinesActions;
 
     @Inject
-    public SelectCommandComboBoxReady(MachineLocalizationConstant locale,
-                                      MachineResources resources,
-                                      ActionManager actionManager,
-                                      EventBus eventBus,
-                                      DropDownListFactory dropDownListFactory,
-                                      WorkspaceServiceClient workspaceServiceClient,
-                                      MachineServiceClient machineServiceClient,
-                                      CommandTypeRegistry commandTypeRegistry,
-                                      EditCommandsPresenter editCommandsPresenter,
-                                      AppContext appContext) {
+    public SelectCommandComboBox(MachineLocalizationConstant locale,
+                                 MachineResources resources,
+                                 ActionManager actionManager,
+                                 EventBus eventBus,
+                                 DropDownListFactory dropDownListFactory,
+                                 WorkspaceServiceClient workspaceServiceClient,
+                                 MachineServiceClient machineServiceClient,
+                                 CommandTypeRegistry commandTypeRegistry,
+                                 EditCommandsPresenter editCommandsPresenter,
+                                 AppContext appContext) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.selectCommandControlTitle(),
               locale.selectCommandControlDescription(),
@@ -114,10 +113,10 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         this.workspaceId = appContext.getWorkspaceId();
 
         this.registeredMachineMap = new HashMap<>();
-        this.commands = new LinkedList<>();
+        this.commands = new ArrayList<>();
 
-        this.machinesListWidget = dropDownListFactory.createList(GROUP_MACHINES);
-        this.commandsListWidget = dropDownListFactory.createList(GROUP_COMMANDS);
+        this.machinesListWidget = dropDownListFactory.createDropDown(GROUP_MACHINES);
+        this.commandsListWidget = dropDownListFactory.createDropDown(GROUP_COMMANDS);
 
         editCommandsPresenter.addConfigurationsChangedListener(this);
 
@@ -333,6 +332,10 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
     }
 
     @Override
+    public void onMachineCreating(MachineStateEvent event) {
+    }
+
+    @Override
     public void onMachineRunning(MachineStateEvent event) {
         MachineDto machine = event.getMachine();
 
@@ -343,39 +346,32 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
     public void onMachineDestroyed(MachineStateEvent event) {
         MachineDto machine = event.getMachine();
 
-        this.removeMachineAction(machine);
+        final String machineId = machine.getId();
+
+        if (registeredMachineMap.remove(machineId) == null) {
+            return;
+        }
+
+        if (machine.getConfig().getName().equals(machinesListWidget.getSelectedName())) {
+            machinesListWidget.selectElement(null, null);
+        }
+
+        updateMachineActions();
     }
 
     private void addMachineActions(List<MachineDto> machines) {
         for (MachineDto machine : machines) {
             registeredMachineMap.put(machine.getId(), machine);
         }
-        this.updateMachineActions();
+
+        updateMachineActions();
     }
 
     private void addMachineAction(MachineDto machine) {
         registeredMachineMap.put(machine.getId(), machine);
-        this.updateMachineActions();
+        updateMachineActions();
 
         machinesListWidget.selectElement(machine.getId(), machine.getConfig().getName());
-    }
-
-    private boolean removeMachineAction(MachineDto machine) {
-        final String machineId = machine.getId();
-
-        MachineDto deletedAction = registeredMachineMap.get(machineId);
-        if (deletedAction == null) {
-            return false;
-        }
-
-        registeredMachineMap.remove(machineId);
-
-        if (machine.getConfig().getName().equals(machinesListWidget.getSelectedName())) {
-            machinesListWidget.selectElement(null, null);
-        }
-        this.updateMachineActions();
-
-        return true;
     }
 
     private void updateMachineActions() {
@@ -384,6 +380,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
         if (actionList != null) {
             machinesActions.addAll(actionList);
         }
+
         if (registeredMachineMap.isEmpty()) {
             return;
         }
@@ -417,7 +414,7 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
 
     private String getMachineCategory(MachineConfigDto machineConfig) {
         if (machineConfig.isDev()) {
-            return this.locale.selectMachineDevCategory();
+            return locale.selectMachineDevCategory();
         }
         return  machineConfig.getType();
     }
@@ -452,4 +449,5 @@ public class SelectCommandComboBoxReady extends AbstractPerspectiveAction implem
             return (getMachineCategory(firstMachineConfig)).compareToIgnoreCase(getMachineCategory(secondMachineConfig));
         }
     }
+
 }

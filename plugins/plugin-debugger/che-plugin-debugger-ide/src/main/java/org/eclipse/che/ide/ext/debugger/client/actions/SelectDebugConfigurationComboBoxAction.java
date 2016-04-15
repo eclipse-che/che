@@ -80,7 +80,7 @@ public class SelectDebugConfigurationComboBoxAction extends AbstractPerspectiveA
         this.actionManager = actionManager;
 
         this.debugConfigurationsManager = debugConfigurationsManager;
-        this.dropDownHeaderWidget = dropDownListFactory.createList(GROUP_DEBUG_CONFIGURATIONS);
+        this.dropDownHeaderWidget = dropDownListFactory.createDropDown(GROUP_DEBUG_CONFIGURATIONS);
 
         configurations = new LinkedList<>();
 

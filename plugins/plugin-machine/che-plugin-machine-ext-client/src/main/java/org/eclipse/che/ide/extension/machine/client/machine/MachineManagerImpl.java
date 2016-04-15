@@ -38,8 +38,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier.RunningListener;
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsolePresenter;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.util.loging.Log;
@@ -188,7 +186,12 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
 
     @Override
     public void restartMachine(final MachineDto machineState) {
-        eventBus.addHandler(MachineStateEvent.TYPE, new MachineStateHandler() {
+        eventBus.addHandler(MachineStateEvent.TYPE, new MachineStateEvent.Handler () {
+
+            @Override
+            public void onMachineCreating(MachineStateEvent event) {
+            }
+
             @Override
             public void onMachineRunning(MachineStateEvent event) {
             }
@@ -219,12 +222,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     @Override
     public void startMachine(String recipeURL, String displayName) {
         startMachine(recipeURL, displayName, false, START, "dockerfile", "docker");
-    }
-
-    /** Start new SSH machine. */
-    @Override
-    public void startSSHMachine(String recipeURL, String displayName) {
-        startMachine(recipeURL, displayName, false, START, "ssh-config", "ssh");
     }
 
     /** Start new machine as dev-machine (bind workspace to running machine). */

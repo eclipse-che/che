@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -124,13 +123,13 @@ class MachineStatusNotifier {
                                                                              : locale.notificationMachineIsRunning(machineName);
                         notification.setTitle(message);
                         notification.setStatus(SUCCESS);
-                        eventBus.fireEvent(MachineStateEvent.createMachineRunningEvent(machine));
+                        eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.RUNNING));
                         break;
                     case DESTROYED:
                         unsubscribe(wsChannel, this);
                         notification.setStatus(SUCCESS);
                         notification.setTitle(locale.notificationMachineDestroyed(machineName));
-                        eventBus.fireEvent(MachineStateEvent.createMachineDestroyedEvent(machine));
+                        eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
                         break;
                     case ERROR:
                         unsubscribe(wsChannel, this);
@@ -184,4 +183,5 @@ class MachineStatusNotifier {
     interface RunningListener {
         void onRunning();
     }
+
 }

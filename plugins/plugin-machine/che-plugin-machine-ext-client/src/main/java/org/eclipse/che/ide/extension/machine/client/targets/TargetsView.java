@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.targets;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
@@ -75,6 +74,14 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
      *          target name field value
      */
     String getTargetName();
+
+    /**
+     * Sets a list of available architectures.
+     *
+     * @param architectures
+     *          list of available architectures
+     */
+    void setAvailableArchitectures(List<String> architectures);
 
     /**
      * Sets target architecture.
@@ -200,6 +207,7 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
         // Perform actions when clicking Add target button
         void onAddTarget(String category);
 
+        // Is called when target is deleted
         void onDeleteTarget(Target target);
 
         // Perform actions when selecting a target

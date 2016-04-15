@@ -30,8 +30,7 @@ import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.ext.java.client.dependenciesupdater.DependenciesUpdater;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.maven.client.actions.UpdateDependencyAction;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
@@ -97,7 +96,13 @@ public class MavenExtension {
             }
         });
 
-        eventBus.addHandler(MachineStateEvent.TYPE, new MachineStateHandler() {
+        eventBus.addHandler(MachineStateEvent.TYPE, new MachineStateEvent.Handler() {
+
+            @Override
+            public void onMachineCreating(MachineStateEvent event) {
+
+            }
+
             @Override
             public void onMachineRunning(MachineStateEvent event) {
                 if (project != null) {

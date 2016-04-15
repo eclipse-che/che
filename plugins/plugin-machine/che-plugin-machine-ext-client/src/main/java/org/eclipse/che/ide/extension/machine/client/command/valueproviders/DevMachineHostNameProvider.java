@@ -20,8 +20,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +30,7 @@ import javax.validation.constraints.NotNull;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class DevMachineHostNameProvider implements CommandPropertyValueProvider, MachineStateHandler {
+public class DevMachineHostNameProvider implements CommandPropertyValueProvider, MachineStateEvent.Handler {
 
     private static final String KEY = "${machine.dev.hostname}";
 
@@ -60,6 +59,10 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
     @Override
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public void onMachineCreating(MachineStateEvent event) {
     }
 
     @Override
@@ -108,4 +111,5 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
             }
         });
     }
+
 }
