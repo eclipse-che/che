@@ -38,7 +38,7 @@
 }
 
 .treeRoot > .treeNode > .treeNodeBody > .leafIcon {
-    display: none;
+    visibility: hidden;
 }
 
 .childrenContainer {
