@@ -25,8 +25,8 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("main.menu.machine")
     String mainMenuMachine();
 
-    @Key("control.selectMachine.dev.category")
-    String selectMachineDevCategory();
+    @Key("control.devMachine.category")
+    String devMachineCategory();
 
     @Key("control.selectCommand.text")
     String selectCommandControlTitle();

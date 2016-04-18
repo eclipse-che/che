@@ -414,7 +414,7 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
 
     private String getMachineCategory(MachineConfigDto machineConfig) {
         if (machineConfig.isDev()) {
-            return locale.selectMachineDevCategory();
+            return locale.devMachineCategory();
         }
         return  machineConfig.getType();
     }

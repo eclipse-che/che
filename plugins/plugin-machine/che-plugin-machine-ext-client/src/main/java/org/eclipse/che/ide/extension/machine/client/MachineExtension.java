@@ -199,8 +199,6 @@ public class MachineExtension {
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.runtime.icon", machineResources.devMachine()));
-        iconRegistry.registerIcon(new Icon("docker.runtime.icon", machineResources.devMachine()));
-        iconRegistry.registerIcon(new Icon("ssh.runtime.icon", machineResources.ssh()));
     }
 
     @Inject

@@ -44,9 +44,6 @@ public interface MachineResources extends ClientBundle {
     @Source("images/recipe.svg")
     SVGResource recipe();
 
-    @Source("images/ssh.svg")
-    SVGResource ssh();
-
     /** Returns the icon for 'Arbitrary' command type. */
     @Source("command/arbitrary/arbitrary-command-type.svg")
     SVGResource customCommandTypeSubElementIcon();
@@ -144,7 +141,9 @@ public interface MachineResources extends ClientBundle {
 
         String processTreeNode();
 
-        String machineLabel();
+        String differentMachineLabel();
+
+        String dockerMachineLabel();
 
         String machineStatus();
 
