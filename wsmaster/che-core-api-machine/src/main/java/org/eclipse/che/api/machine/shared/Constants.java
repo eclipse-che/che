@@ -40,7 +40,9 @@ public class Constants {
     public static final String WSAGENT_WEBSOCKET_REFERENCE         = "wsagent.websocket";
     public static final String WSAGENT_DEBUG_REFERENCE             = "wsagent.debug";
 
-    public static final String TERMINAL_REFERENCE                  = "terminal";
+    public static final String TERMINAL_REFERENCE = "terminal";
+
+    public static final String WS_AGENT_PORT = "4401/tcp";
 
     private Constants() {
     }

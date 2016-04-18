@@ -13,6 +13,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.gwt.event.shared.EventBus;
 import com.google.web.bindery.event.shared.Event;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -35,6 +36,8 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +59,8 @@ public class ProjectImporterTest {
     private ImportProjectNotificationSubscriberFactory subscriberFactory;
     @Mock
     private AppContext                                 appContext;
+    @Mock
+    private DevMachine                                 devMachine;
     @Mock
     private ProjectResolver                            resolver;
 
@@ -83,11 +88,13 @@ public class ProjectImporterTest {
     @Before
     public void setUp() {
         when(appContext.getWorkspaceId()).thenReturn(ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getWsAgentBaseUrl()).thenReturn("/ext");
         when(projectConfig.getName()).thenReturn(PROJECT_NAME);
         when(projectConfig.getPath()).thenReturn('/' + PROJECT_NAME);
         when(projectConfig.getSource()).thenReturn(source);
         when(subscriberFactory.createSubscriber()).thenReturn(subscriber);
-        when(projectServiceClient.importProject(ID, '/' + PROJECT_NAME, false, source)).thenReturn(importPromise);
+        when(projectServiceClient.importProject(devMachine, '/' + PROJECT_NAME, false, source)).thenReturn(importPromise);
         when(importPromise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(importPromise);
         when(importPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(importPromise);
 

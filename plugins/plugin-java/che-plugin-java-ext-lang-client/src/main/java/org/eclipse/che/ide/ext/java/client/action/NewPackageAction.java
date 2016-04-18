@@ -98,7 +98,7 @@ public class NewPackageAction extends AbstractNewResourceAction {
 
         final String path = parent.getStorablePath() + '/' + value.replace('.', '/');
 
-        projectServiceClient.createFolder(appContext.getWorkspace().getId(), path, createCallback());
+        projectServiceClient.createFolder(appContext.getDevMachine(), path, createCallback());
     }
 
     protected AsyncRequestCallback<ItemReference> createCallback() {

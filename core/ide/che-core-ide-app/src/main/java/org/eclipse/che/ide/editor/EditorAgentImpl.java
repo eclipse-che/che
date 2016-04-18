@@ -277,7 +277,7 @@ public class EditorAgentImpl implements EditorAgent {
 
         final String newFilePath = oldFilePath.replaceFirst(oldTargetPath, newTargetPath);
 
-        projectService.getItem(appContext.getWorkspace().getId(), newFilePath, new AsyncRequestCallback<ItemReference>(unmarshaller) {
+        projectService.getItem(appContext.getDevMachine(), newFilePath, new AsyncRequestCallback<ItemReference>(unmarshaller) {
             @Override
             protected void onSuccess(ItemReference result) {
                 FileReferenceNode fileReferenceNode = ((FileReferenceNode)editorPart.getEditorInput().getFile());

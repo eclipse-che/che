@@ -64,6 +64,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncCallback<Void> callback = (AsyncCallback<Void>)arguments[1];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
@@ -86,6 +87,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncCallback<String> callback = (AsyncCallback<String>)arguments[1];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;

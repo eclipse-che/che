@@ -151,7 +151,7 @@ public class SubversionActionPresenter {
         for (final String line : errors) {
             console.printError(line);
         }
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
     }
 
     /**
@@ -179,7 +179,7 @@ public class SubversionActionPresenter {
             }
         }
 
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
     }
 
     /**

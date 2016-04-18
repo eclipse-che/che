@@ -13,6 +13,7 @@ package org.eclipse.che.ide.part.explorer.project.synchronize;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -46,10 +47,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +67,10 @@ public class ProjectConfigSynchronizationListenerTest {
 
     //constructor mocks
     @Mock
-    private AppContext               appContext;
+    private AppContext appContext;
+    @Mock
+    private DevMachine devMachine;
+
     @Mock
     private DialogFactory            dialogFactory;
     @Mock
@@ -110,6 +116,7 @@ public class ProjectConfigSynchronizationListenerTest {
     @Before
     public void setUp() {
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
         when(event.getNode()).thenReturn(projectNode);
         when(projectNode.getProjectConfig()).thenReturn(projectConfig);
 
@@ -142,7 +149,6 @@ public class ProjectConfigSynchronizationListenerTest {
 
     @Test
     public void constructorShouldBeInitialized() {
-        verify(appContext).getWorkspaceId();
         verify(eventBus).addHandler(BeforeExpandNodeEvent.getType(), listener);
     }
 
@@ -253,7 +259,7 @@ public class ProjectConfigSynchronizationListenerTest {
         cancelCaptor.getValue().cancelled();
 
         //noinspection unchecked
-        verify(projectService).delete(eq(WORKSPACE_ID), anyString(), Matchers.<AsyncRequestCallback>anyObject());
+        verify(projectService).delete(eq(devMachine), anyString(), Matchers.<AsyncRequestCallback>anyObject());
     }
 
     @Test
@@ -297,9 +303,11 @@ public class ProjectConfigSynchronizationListenerTest {
         cancelCaptor.getValue().cancelled();
 
         verify(projectConfig).setType(Constants.BLANK_ID);
+        verify(appContext).getDevMachine();
 
         //noinspection unchecked
-        verify(projectService).updateProject(eq(WORKSPACE_ID), anyString(), eq(projectConfig), Matchers.<AsyncRequestCallback>anyObject());
+
+        verify(projectService).updateProject(eq(devMachine), anyString(), eq(projectConfig), Matchers.<AsyncRequestCallback>anyObject());
     }
 
     @Test

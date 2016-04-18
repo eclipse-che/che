@@ -66,6 +66,6 @@ public class NewFolderAction extends AbstractNewResourceAction {
 
         final String folderPath = ((HasStorablePath)parent).getStorablePath() + '/' + value;
 
-        projectServiceClient.createFolder(appContext.getWorkspace().getId(), folderPath, createCallback(parent));
+        projectServiceClient.createFolder(appContext.getDevMachine(), folderPath, createCallback(parent));
     }
 }

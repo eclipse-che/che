@@ -38,5 +38,4 @@ export class WorkspaceDetailsProjects {
     this.controllerAs = 'workspaceDetailsProjectsCtrl';
     this.bindToController = true;
   }
-
 }

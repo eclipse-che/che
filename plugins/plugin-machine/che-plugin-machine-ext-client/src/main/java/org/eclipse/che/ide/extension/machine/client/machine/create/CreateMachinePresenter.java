@@ -135,8 +135,8 @@ public class CreateMachinePresenter implements CreateMachineView.ActionDelegate 
         final String machineName = view.getMachineName();
         final String recipeURL = view.getRecipeURL();
 
-        if (appContext.getDevMachineId() != null) {
-            machineServiceClient.getMachine(appContext.getDevMachineId()).then(new Operation<MachineDto>() {
+        if (appContext.getDevMachine() != null) {
+            machineServiceClient.getMachine(appContext.getDevMachine().getId()).then(new Operation<MachineDto>() {
                 @Override
                 public void apply(MachineDto machine) throws OperationException {
                     machineManager.destroyMachine(machine);

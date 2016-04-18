@@ -23,22 +23,31 @@ export class WorkspaceDetailsProjectsCtrl {
    * @ngInject for Dependency injection
    */
   constructor($route, cheAPI, $mdMedia) {
-    this.cheAPI = cheAPI;
+    this.cheWorkspace = cheAPI.getWorkspace();
     this.$mdMedia = $mdMedia;
-
     this.workspaceId = $route.current.params.workspaceId;
 
-    let profilePreferences = this.cheAPI.getProfile().getPreferences();
+    let profilePreferences = cheAPI.getProfile().getPreferences();
 
     this.profileCreationDate = profilePreferences['che:created'];
 
-    this.projects = this.cheAPI.getProject().getProjectsByWorkspaceMap().get(this.workspaceId);
-    if (!this.projects) {
-      let promise = this.cheAPI.getProject().fetchProjectsForWorkspaceId(this.workspaceId);
+    if (!this.cheWorkspace.getWorkspacesById().get(this.workspaceId)) {
+      let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId);
       promise.then(() => {
-        this.projects = this.cheAPI.getProject().getProjectsByWorkspaceMap().get(this.workspaceId);
+        this.updateProjectsData();
+      }, (error) => {
+        if (error.status === 304) {
+          this.updateProjectsData();
+        }
       });
+    } else {
+      this.updateProjectsData();
     }
+  }
+
+  updateProjectsData() {
+    this.workspace = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
+    this.projects = this.workspace.config.projects;
   }
 
   widthGtSm() {

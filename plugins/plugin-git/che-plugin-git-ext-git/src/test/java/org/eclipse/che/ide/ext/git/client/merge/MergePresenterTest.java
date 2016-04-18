@@ -104,7 +104,7 @@ public class MergePresenterTest extends BaseTest {
             Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
             onSuccess.invoke(callback, branches);
             return callback;
-        }).when(service).branchList(anyString(), anyObject(), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
+        }).when(service).branchList(devMachine, anyObject(), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
 
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
@@ -112,15 +112,15 @@ public class MergePresenterTest extends BaseTest {
             Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
             onSuccess.invoke(callback, branches);
             return callback;
-        }).when(service).branchList(anyString(), anyObject(), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
+        }).when(service).branchList(eq(devMachine), anyObject(), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
 
         presenter.showDialog();
 
         verify(appContext).getCurrentProject();
         verify(view).setEnableMergeButton(eq(DISABLE_BUTTON));
         verify(view).showDialog();
-        verify(service).branchList(anyString(), eq(rootProjectConfig), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
-        verify(service).branchList(anyString(), eq(rootProjectConfig), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
+        verify(service).branchList(eq(devMachine), eq(rootProjectConfig), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
+        verify(service).branchList(eq(devMachine), eq(rootProjectConfig), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
         verify(view).setRemoteBranches((List<Reference>)anyObject());
         verify(view).setLocalBranches((List<Reference>)anyObject());
         verify(notificationManager, never()).notify(anyString(), rootProjectConfig);
@@ -135,7 +135,7 @@ public class MergePresenterTest extends BaseTest {
             Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
             onFailure.invoke(callback, mock(Throwable.class));
             return callback;
-        }).when(service).branchList(anyString(), anyObject(), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
+        }).when(service).branchList(devMachine, anyObject(), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
 
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
@@ -143,12 +143,12 @@ public class MergePresenterTest extends BaseTest {
             Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
             onFailure.invoke(callback, mock(Throwable.class));
             return callback;
-        }).when(service).branchList(anyString(), anyObject(), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
+        }).when(service).branchList(devMachine, anyObject(), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
 
         presenter.showDialog();
 
-        verify(service).branchList(anyString(), eq(rootProjectConfig), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
-        verify(service).branchList(anyString(), eq(rootProjectConfig), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
+        verify(service).branchList(eq(devMachine), eq(rootProjectConfig), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
+        verify(service).branchList(eq(devMachine), eq(rootProjectConfig), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
         verify(gitOutputConsoleFactory).create(MERGE_COMMAND_NAME);
         verify(console, times(2)).printError(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
@@ -170,14 +170,14 @@ public class MergePresenterTest extends BaseTest {
             Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
             onSuccess.invoke(callback, mergeResult);
             return callback;
-        }).when(service).merge(anyString(), anyObject(), anyString(), (AsyncRequestCallback<MergeResult>)anyObject());
+        }).when(service).merge(devMachine, anyObject(), anyString(), (AsyncRequestCallback<MergeResult>)anyObject());
 
         presenter.onReferenceSelected(selectedReference);
         presenter.onMergeClicked();
 
         verify(view).close();
         verify(editorAgent).getOpenedEditors();
-        verify(service).merge(anyString(), eq(rootProjectConfig), eq(DISPLAY_NAME), (AsyncRequestCallback<MergeResult>)anyObject());
+        verify(service).merge(eq(devMachine), eq(rootProjectConfig), eq(DISPLAY_NAME), (AsyncRequestCallback<MergeResult>)anyObject());
         verify(appContext).getCurrentProject();
         verify(partPresenter).getEditorInput();
         verify(file).getPath();
@@ -194,7 +194,7 @@ public class MergePresenterTest extends BaseTest {
         presenter.onReferenceSelected(selectedReference);
         presenter.onMergeClicked();
 
-        verify(service).merge(anyString(), anyObject(), eq(DISPLAY_NAME), (AsyncRequestCallback<MergeResult>)anyObject());
+        verify(service).merge(eq(devMachine), anyObject(), eq(DISPLAY_NAME), (AsyncRequestCallback<MergeResult>)anyObject());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class MergePresenterTest extends BaseTest {
         presenter.onReferenceSelected(selectedReference);
         presenter.onMergeClicked();
 
-        verify(service).merge(anyString(), anyObject(), eq(DISPLAY_NAME), (AsyncRequestCallback<MergeResult>)anyObject());
+        verify(service).merge(eq(devMachine), anyObject(), eq(DISPLAY_NAME), (AsyncRequestCallback<MergeResult>)anyObject());
     }
 
     @Test
@@ -218,7 +218,7 @@ public class MergePresenterTest extends BaseTest {
             Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
             onSuccess.invoke(callback, emptyBranchList);
             return callback;
-        }).when(service).branchList(anyString(), anyObject(), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
+        }).when(service).branchList(devMachine, anyObject(), eq(LIST_LOCAL), (AsyncRequestCallback<List<Branch>>)anyObject());
 
         doAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
@@ -226,7 +226,7 @@ public class MergePresenterTest extends BaseTest {
             Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
             onSuccess.invoke(callback, emptyBranchList);
             return callback;
-        }).when(service).branchList(anyString(), anyObject(), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
+        }).when(service).branchList(eq(devMachine), anyObject(), eq(LIST_REMOTE), (AsyncRequestCallback<List<Branch>>)anyObject());
 
         presenter.showDialog();
 

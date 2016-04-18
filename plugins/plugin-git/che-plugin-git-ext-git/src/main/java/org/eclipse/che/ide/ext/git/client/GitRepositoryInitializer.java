@@ -34,7 +34,6 @@ public class GitRepositoryInitializer {
     private final GitLocalizationConstant gitLocale;
     private final AppContext              appContext;
     private final NotificationManager     notificationManager;
-    private final String                  workspaceId;
 
     @Inject
     public GitRepositoryInitializer(GitServiceClient gitService,
@@ -45,7 +44,6 @@ public class GitRepositoryInitializer {
         this.gitLocale = gitLocale;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
-        this.workspaceId = appContext.getWorkspaceId();
     }
 
     public static boolean isGitRepository(ProjectConfigDto project) {
@@ -61,7 +59,7 @@ public class GitRepositoryInitializer {
      */
     public void initGitRepository(final ProjectConfigDto project, final AsyncCallback<Void> callback) {
         try {
-            gitService.init(workspaceId, project, false, new RequestCallback<Void>() {
+            gitService.init(appContext.getDevMachine(), project, false, new RequestCallback<Void>() {
                                 @Override
                                 protected void onSuccess(Void result) {
                                     callback.onSuccess(null);
@@ -99,7 +97,7 @@ public class GitRepositoryInitializer {
             return;
         }
 
-        gitService.getGitReadOnlyUrl(workspaceId, 
+        gitService.getGitReadOnlyUrl(appContext.getDevMachine(),
                                      project,
                                      new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                                          @Override

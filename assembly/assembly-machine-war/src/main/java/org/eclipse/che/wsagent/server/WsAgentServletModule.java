@@ -13,6 +13,7 @@ package org.eclipse.che.wsagent.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.servlet.ServletModule;
 
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.api.local.filters.WsAgentEnvironmentInitializationFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.servlet.GuiceEverrestServlet;
@@ -25,6 +26,7 @@ public class WsAgentServletModule extends ServletModule {
     protected void configureServlets() {
         getServletContext().addListener(new WSConnectionTracker());
 
+        filter("/*").through(CheCorsFilter.class);
         filter("/ext/*").through(WsAgentEnvironmentInitializationFilter.class);
 
         serveRegex("^/ext((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);

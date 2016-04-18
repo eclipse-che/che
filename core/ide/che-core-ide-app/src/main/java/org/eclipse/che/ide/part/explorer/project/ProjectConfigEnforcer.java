@@ -79,7 +79,7 @@ public class ProjectConfigEnforcer implements NodeInterceptor {
             return resolve(children);
         }
 
-        return projectClient.getProjects(appContext.getWorkspaceId())
+        return projectClient.getProjects(appContext.getDevMachine())
                             .thenPromise(new Function<List<ProjectConfigDto>, Promise<List<Node>>>() {
                                 @Override
                                 public Promise<List<Node>> apply(final List<ProjectConfigDto> projects) throws FunctionException {

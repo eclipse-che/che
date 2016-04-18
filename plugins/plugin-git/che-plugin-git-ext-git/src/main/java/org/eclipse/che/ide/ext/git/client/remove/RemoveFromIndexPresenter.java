@@ -152,12 +152,12 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     @Override
     public void onRemoveClicked() {
         final GitOutputConsole console = gitOutputConsoleFactory.create(REMOVE_FROM_INDEX_COMMAND_NAME);
-        service.remove(appContext.getWorkspaceId(), project.getRootProject(), getFilePatterns(), view.isRemoved(),
+        service.remove(appContext.getDevMachine(), project.getRootProject(), getFilePatterns(), view.isRemoved(),
                        new AsyncRequestCallback<String>() {
                            @Override
                            protected void onSuccess(String result) {
                                console.print(constant.removeFilesSuccessfull());
-                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                notificationManager.notify(constant.removeFilesSuccessfull(), project.getRootProject());
 
                                if (!view.isRemoved()) {
@@ -179,7 +179,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
                            @Override
                            protected void onFailure(Throwable exception) {
                                handleError(exception, console);
-                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                            }
                        }
                       );
@@ -242,7 +242,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     private void handleError(@NotNull Throwable e, GitOutputConsole console) {
         String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.removeFilesFailed();
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(constant.removeFilesFailed(), FAIL, true, project.getRootProject());
     }
 

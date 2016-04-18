@@ -62,6 +62,10 @@
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-api</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>

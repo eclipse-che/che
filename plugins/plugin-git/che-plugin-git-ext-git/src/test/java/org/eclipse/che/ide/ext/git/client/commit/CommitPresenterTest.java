@@ -115,11 +115,12 @@ public class CommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Revision> callback = (AsyncRequestCallback<Revision>)arguments[4];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, revision);
                 return callback;
             }
-        }).when(service).commit(anyString(), anyObject(), anyString(), anyBoolean(), anyBoolean(),
+        }).when(service).commit(devMachine, anyObject(), anyString(), anyBoolean(), anyBoolean(),
                                 (AsyncRequestCallback<Revision>)anyObject());
 
         presenter.showDialog();
@@ -131,7 +132,7 @@ public class CommitPresenterTest extends BaseTest {
         verify(view).close();
         verify(view).setMessage(eq(EMPTY_TEXT));
 
-        verify(service).commit(anyString(), eq(rootProjectConfig), eq(COMMIT_TEXT), eq(ALL_FILE_INCLUDES), eq(IS_OVERWRITTEN),
+        verify(service).commit(eq(devMachine), eq(rootProjectConfig), eq(COMMIT_TEXT), eq(ALL_FILE_INCLUDES), eq(IS_OVERWRITTEN),
                                (AsyncRequestCallback<Revision>)anyObject());
         verify(gitOutputConsoleFactory).create(COMMIT_COMMAND_NAME);
         verify(console).print(anyString());
@@ -149,11 +150,12 @@ public class CommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Revision> callback = (AsyncRequestCallback<Revision>)arguments[4];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).commit(anyString(), anyObject(), anyString(), anyBoolean(), anyBoolean(),
+        }).when(service).commit(devMachine, anyObject(), anyString(), anyBoolean(), anyBoolean(),
                                 (AsyncRequestCallback<Revision>)anyObject());
 
         presenter.showDialog();
@@ -165,7 +167,7 @@ public class CommitPresenterTest extends BaseTest {
         verify(view).close();
         verify(view, times(0)).setMessage(anyString());
 
-        verify(service).commit(anyString(), eq(rootProjectConfig), eq(COMMIT_TEXT), eq(ALL_FILE_INCLUDES), eq(IS_OVERWRITTEN),
+        verify(service).commit(eq(devMachine), eq(rootProjectConfig), eq(COMMIT_TEXT), eq(ALL_FILE_INCLUDES), eq(IS_OVERWRITTEN),
                                (AsyncRequestCallback<Revision>)anyObject());
         verify(constant).commitFailed();
         verify(gitOutputConsoleFactory).create(COMMIT_COMMAND_NAME);

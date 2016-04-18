@@ -18,6 +18,11 @@ describe('CheProject', function () {
   var factory;
 
   /**
+   * Workspace for the test
+   */
+  var workspace;
+
+  /**
    * Backend for handling http operations
    */
   var httpBackend;
@@ -41,10 +46,11 @@ describe('CheProject', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheProject, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function (cheProject, cheAPIBuilder, cheWorkspace, cheHttpBackend) {
     factory = cheProject;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
+    workspace = cheWorkspace;
     httpBackend = cheHttpBackend.getHttpBackend();
   }));
 
@@ -127,6 +133,11 @@ describe('CheProject', function () {
         workspaceName: 'qwerty',
         workspaceId: 'workspace12345'
       };
+      let agentUrl = 'localhost:3232';
+      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
+      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(testProjectDetails.workspaceId).withRuntime(runtime).build();
+
+      cheBackend.addWorkspaces([workspace1]);
 
       // providing request
       // add project details on http backend
@@ -135,11 +146,18 @@ describe('CheProject', function () {
       // setup backend
       cheBackend.setup();
 
+      //fetch runtime
+      workspace.fetchWorkspaceDetails(testProjectDetails.workspaceId);
+      httpBackend.expectGET('/api/workspace/' + testProjectDetails.workspaceId);
+
+      // flush command
+      httpBackend.flush();
+
       // fetch remote url
       factory.fetchProjectDetails(testProjectDetails.workspaceId, '/' + testProjectDetails.name);
 
       // expecting GET
-      httpBackend.expectGET('/api/ext/project/' + testProjectDetails.workspaceId + '/' + testProjectDetails.name);
+      httpBackend.expectGET('//' + agentUrl + '/api/ext/project/' + testProjectDetails.workspaceId + '/' + testProjectDetails.name);
 
       // flush command
       httpBackend.flush();

@@ -20,7 +20,9 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.vectomatic.libgwtsvg"/>
+    <inherits name="org.eclipse.che.api.Core"/>
     <inherits name="org.eclipse.che.api.Project"/>
+    <inherits name="org.eclipse.che.api.Machine"/>
     <inherits name="org.eclipse.che.api.Workspace"/>
     <inherits name="org.eclipse.che.api.promises.Promises"/>
 

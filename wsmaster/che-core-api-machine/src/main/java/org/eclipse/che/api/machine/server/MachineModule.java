@@ -15,7 +15,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.server.event.MachineProcessMessenger;
 import org.eclipse.che.api.machine.server.event.MachineStateMessenger;
-import org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl;
+import org.eclipse.che.api.machine.shared.Constants;
 
 /**
  * Guice container configuration file. Replaces old REST application composers and servlet context listeners.
@@ -28,6 +28,6 @@ public class MachineModule extends AbstractModule {
         bind(MachineStateMessenger.class).asEagerSingleton();
         bind(MachineProcessMessenger.class).asEagerSingleton();
 
-        bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(WsAgentLauncherImpl.WS_AGENT_PORT);
+        bindConstant().annotatedWith(Names.named("machine.extension.api_port")).to(Constants.WS_AGENT_PORT);
     }
 }

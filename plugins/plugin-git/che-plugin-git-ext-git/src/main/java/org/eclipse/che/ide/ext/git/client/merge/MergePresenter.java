@@ -70,7 +70,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
     private final EditorAgent              editorAgent;
     private final AppContext               appContext;
     private final NotificationManager      notificationManager;
-    private final String                   workspaceId;
 
     private Reference selectedReference;
 
@@ -100,8 +99,6 @@ public class MergePresenter implements MergeView.ActionDelegate {
         this.appContext = appContext;
         this.notificationManager = notificationManager;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-
-        this.workspaceId = appContext.getWorkspaceId();
     }
 
     /** Show dialog. */
@@ -111,7 +108,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
         selectedReference = null;
         view.setEnableMergeButton(false);
 
-        service.branchList(workspaceId, project, LIST_LOCAL,
+        service.branchList(appContext.getDevMachine(), project, LIST_LOCAL,
                            new AsyncRequestCallback<List<Branch>>(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class)) {
                                @Override
                                protected void onSuccess(List<Branch> result) {
@@ -128,12 +125,12 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                @Override
                                protected void onFailure(Throwable exception) {
                                    console.printError(exception.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.branchesListFailed(), FAIL, true, project);
                                }
                            });
 
-        service.branchList(workspaceId, project, LIST_REMOTE,
+        service.branchList(appContext.getDevMachine(), project, LIST_REMOTE,
                            new AsyncRequestCallback<List<Branch>>(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class)) {
                                @Override
                                protected void onSuccess(List<Branch> result) {
@@ -151,7 +148,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                @Override
                                protected void onFailure(Throwable exception) {
                                    console.printError(exception.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.branchesListFailed(), FAIL, true, project);
                                }
                            });
@@ -171,12 +168,12 @@ public class MergePresenter implements MergeView.ActionDelegate {
         view.close();
 
         final GitOutputConsole console = gitOutputConsoleFactory.create(MERGE_COMMAND_NAME);
-        service.merge(workspaceId, appContext.getCurrentProject().getRootProject(), selectedReference.getDisplayName(),
+        service.merge(appContext.getDevMachine(), appContext.getCurrentProject().getRootProject(), selectedReference.getDisplayName(),
                       new AsyncRequestCallback<MergeResult>(dtoUnmarshallerFactory.newUnmarshaller(MergeResult.class)) {
                           @Override
                           protected void onSuccess(final MergeResult result) {
                               console.print(formMergeMessage(result));
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager.notify(formMergeMessage(result), appContext.getCurrentProject().getRootProject());
                               refreshProject(editorAgent.getOpenedEditors());
                           }
@@ -195,7 +192,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                   return;
                               }
                               console.printError(exception.getMessage());
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager
                                       .notify(constant.mergeFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
                           }

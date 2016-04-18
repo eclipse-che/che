@@ -65,7 +65,6 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     private final GitOutputConsoleFactory  gitOutputConsoleFactory;
     private final ConsolesPanelPresenter   consolesPanelPresenter;
     private final ProjectExplorerPresenter projectExplorer;
-    private final String                   workspaceId;
 
     @Inject
     public CommitPresenter(CommitView view,
@@ -91,7 +90,6 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         this.constant = constant;
         this.notificationManager = notificationManager;
         this.projectExplorer = projectExplorer;
-        this.workspaceId = appContext.getWorkspaceId();
     }
 
     /** Show dialog. */
@@ -134,7 +132,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
             final List<String> filePattern = buildFileList(selection);
 
             try {
-                service.add(workspaceId, appContext.getCurrentProject().getRootProject(), false, filePattern, new RequestCallback<Void>() {
+                service.add(appContext.getDevMachine(), appContext.getCurrentProject().getRootProject(), false, filePattern, new RequestCallback<Void>() {
                     @Override
                     protected void onSuccess(final Void result) {
                         // then commit
@@ -168,7 +166,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         final Selection<HasStorablePath> selection = (Selection<HasStorablePath>)this.projectExplorer.getSelection();
         if (selection != null && !selection.isEmpty() && (selection.getHeadElement() != null)) {
             final List<String> files = buildFileList(selection);
-            service.commit(workspaceId, appContext.getCurrentProject().getRootProject(), message, files, amend,
+            service.commit(appContext.getDevMachine(), appContext.getCurrentProject().getRootProject(), message, files, amend,
                            new AsyncRequestCallback<Revision>(dtoUnmarshallerFactory.newUnmarshaller(Revision.class)) {
                                @Override
                                protected void onSuccess(final Revision result) {
@@ -186,7 +184,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     }
 
     private void doCommit(final String message, final boolean all, final boolean amend) {
-        service.commit(workspaceId, appContext.getCurrentProject().getRootProject(), message, all, amend,
+        service.commit(appContext.getDevMachine(), appContext.getCurrentProject().getRootProject(), message, all, amend,
                        new AsyncRequestCallback<Revision>(dtoUnmarshallerFactory.newUnmarshaller(Revision.class)) {
                            @Override
                            protected void onSuccess(final Revision result) {
@@ -232,7 +230,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         }
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.print(message);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(message, appContext.getCurrentProject().getRootProject());
         view.setMessage("");
     }
@@ -258,7 +256,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
         String errorMessage = (exceptionMessage != null && !exceptionMessage.isEmpty()) ? exceptionMessage : constant.commitFailed();
         GitOutputConsole console = gitOutputConsoleFactory.create(COMMIT_COMMAND_NAME);
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(constant.commitFailed(), errorMessage, FAIL, true, appContext.getCurrentProject().getRootProject());
     }
 
@@ -279,7 +277,7 @@ public class CommitPresenter implements CommitView.ActionDelegate {
     public void setAmendCommitMessage() {
         final ProjectConfigDto project = appContext.getCurrentProject().getRootProject();
         final Unmarshallable<LogResponse> unmarshall = dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class);
-        this.service.log(workspaceId, project, null, false,
+        this.service.log(appContext.getDevMachine(), project, null, false,
                          new AsyncRequestCallback<LogResponse>(unmarshall) {
                              @Override
                              protected void onSuccess(final LogResponse result) {

@@ -14,6 +14,7 @@ import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -101,6 +102,8 @@ public class ProjectWizardTest {
     @Mock
     private AppContext                       appContext;
     @Mock
+    private DevMachine                       devMachine;
+    @Mock
     private ProjectConfigDto                 dataObject;
     @Mock
     private ProjectConfigDto                 projectConfig;
@@ -122,6 +125,7 @@ public class ProjectWizardTest {
     @Before
     public void setUp() {
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
         when(dataObject.getName()).thenReturn(PROJECT_NAME);
         when(dataObject.getSource()).thenReturn(storage);
         when(dialogFactory.createConfirmDialog(anyString(),
@@ -136,7 +140,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).createProject(anyString(), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).createProject(eq(devMachine), eq(dataObject), callbackCaptor.capture());
 
         AsyncRequestCallback<ProjectConfigDto> callback = callbackCaptor.getValue();
         GwtReflectionUtils.callOnSuccess(callback, mock(ProjectConfigDto.class));
@@ -168,7 +172,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).createProject(anyString(), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).createProject(eq(devMachine), eq(dataObject), callbackCaptor.capture());
 
         AsyncRequestCallback<ProjectConfigDto> callback = callbackCaptor.getValue();
         GwtReflectionUtils.callOnFailure(callback, mock(Throwable.class));
@@ -183,7 +187,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).createProject(eq(WORKSPACE_ID), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).createProject(eq(devMachine), eq(dataObject), callbackCaptor.capture());
         GwtReflectionUtils.callOnSuccess(callbackCaptor.getValue(), projectConfig);
 
         verify(eventBus).fireEvent(Matchers.<CreateProjectEvent>anyObject());
@@ -199,7 +203,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID), anyString(), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).updateProject(eq(devMachine), anyString(), eq(dataObject), callbackCaptor.capture());
         GwtReflectionUtils.callOnSuccess(callbackCaptor.getValue(), projectConfig);
 
         verify(eventBus).fireEvent(Matchers.<ModuleCreatedEvent>anyObject());
@@ -217,7 +221,7 @@ public class ProjectWizardTest {
 
         wizard.complete(completeCallback);
 
-        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID), anyString(), eq(dataObject), callbackCaptor.capture());
+        verify(projectServiceClient).updateProject(eq(devMachine), anyString(), eq(dataObject), callbackCaptor.capture());
         GwtReflectionUtils.callOnFailure(callbackCaptor.getValue(), throwable);
 
         verify(completeCallback).onFailure(throwable);

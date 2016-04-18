@@ -12,6 +12,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -69,6 +70,8 @@ public class ProjectUpdaterTest {
     private EventBus                      eventBus;
     @Mock
     private AppContext                    appContext;
+    @Mock
+    private DevMachine                    devMachine;
 
     //additional mocks
     @Mock
@@ -103,14 +106,16 @@ public class ProjectUpdaterTest {
     public void setUp() {
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(appContext.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getWsAgentBaseUrl()).thenReturn("/ext");
         when(usersWorkspaceDtoMock.getConfig()).thenReturn(workspaceConfigDtoMock);
         when(projectConfig.getName()).thenReturn(PROJECT_NAME);
 
         getUpdatedProjectMock = createPromiseMock();
         getProjectsMock = createPromiseMock();
 
-        when(projectServiceClient.updateProject(anyString(), anyString(), any(ProjectConfigDto.class))).thenReturn(getUpdatedProjectMock);
-        when(projectServiceClient.getProjects(anyString())).thenReturn(getProjectsMock);
+        when(projectServiceClient.updateProject(eq(devMachine), anyString(), any(ProjectConfigDto.class))).thenReturn(getUpdatedProjectMock);
+        when(projectServiceClient.getProjects(eq(devMachine))).thenReturn(getProjectsMock);
 
         updater = new ProjectUpdater(projectServiceClient,
                                      projectNotificationSubscriber,
@@ -139,14 +144,14 @@ public class ProjectUpdaterTest {
 
         verify(projectConfig).getName();
 
-        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID),
+        verify(projectServiceClient).updateProject(eq(devMachine),
                                                    eq('/' + PROJECT_NAME),
                                                    eq(projectConfig));
 
         verify(getProjectsMock).then(getProjectsCaptor.capture());
         getProjectsCaptor.getValue().apply(singletonList(projectConfig));
 
-        verify(projectServiceClient).getProjects(eq(WORKSPACE_ID));
+        verify(projectServiceClient).getProjects(eq(devMachine));
         verify(appContext).getWorkspace();
         verify(usersWorkspaceDtoMock).getConfig();
         verify(workspaceConfigDtoMock).withProjects(eq(newArrayList(projectConfig)));
@@ -165,7 +170,7 @@ public class ProjectUpdaterTest {
 
         verify(projectConfig).getName();
 
-        verify(projectServiceClient).updateProject(eq(WORKSPACE_ID),
+        verify(projectServiceClient).updateProject(eq(devMachine),
                                                    eq('/' + PROJECT_NAME),
                                                    eq(projectConfig));
 

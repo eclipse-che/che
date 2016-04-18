@@ -22,9 +22,7 @@ import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.Server;
-import org.eclipse.che.ide.util.Config;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,9 @@ public class Machine {
     private String activeTabName;
 
     @Inject
-    public Machine(MachineLocalizationConstant locale, EntityFactory entityFactory, @Assisted MachineDto descriptor) {
+    public Machine(MachineLocalizationConstant locale,
+                   EntityFactory entityFactory,
+                   @Assisted MachineDto descriptor) {
         this.entityFactory = entityFactory;
         this.descriptor = descriptor;
 
@@ -82,24 +82,6 @@ public class Machine {
         }
 
         return "";
-    }
-
-    /** @return special url to connect to terminal web socket. */
-    @NotNull
-    public String getWsServerExtensionsUrl() {
-        String url = "";
-        Map<String, ServerDto> serverDescriptors = descriptor.getRuntime().getServers();
-        for (ServerDto descriptor : serverDescriptors.values()) {
-            if (Constants.WSAGENT_REFERENCE.equals(descriptor.getRef())) {
-                url = descriptor.getUrl();
-            }
-        }
-
-        String extUrl = url.substring(url.indexOf(':'), url.length());
-
-        boolean isSecureConnection = Window.Location.getProtocol().equals("https:");
-
-        return (isSecureConnection ? "wss" : "ws") + extUrl + Config.getCheExtensionPath() + "/ws";
     }
 
     /**

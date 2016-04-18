@@ -218,7 +218,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     }
 
     private void replaceContent(VirtualFile file, final Document document) {
-        projectService.getFileContent(appContext.getWorkspaceId(),
+        projectService.getFileContent(appContext.getDevMachine(),
                                       file.getPath(),
                                       new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                                           @Override

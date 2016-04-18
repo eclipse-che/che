@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.model.machine;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * Provides description of the Che server in machine
  *
@@ -30,15 +32,18 @@ public interface Server {
     /**
      * Protocol of access to the server.
      */
+    @Nullable
     String getProtocol();
 
     /**
      * Path to access the server.
      */
+    @Nullable
     String getPath();
 
     /**
      * Url of the server, e.g. http://localhost:8080
      */
+    @Nullable
     String getUrl();
 }

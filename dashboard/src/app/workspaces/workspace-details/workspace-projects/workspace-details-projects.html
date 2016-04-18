@@ -19,6 +19,7 @@
                ng-class="{ 'projects-small': !workspaceDetailsProjectsCtrl.widthGtSm() }">
       <che-project-item ng-repeat="project in workspaceDetailsProjectsCtrl.projects" flex-gt-sm="100" flex="33"
                          che-project-item-workspace-id="workspaceDetailsProjectsCtrl.workspaceId"
+                         che-project-item-workspace-name="workspaceDetailsProjectsCtrl.workspace.config.name"
                          che-project-item-project="project"
                          che-profile-creation-date="workspaceDetailsProjectsCtrl.profileCreationDate"></che-project-item>
     </che-list>
