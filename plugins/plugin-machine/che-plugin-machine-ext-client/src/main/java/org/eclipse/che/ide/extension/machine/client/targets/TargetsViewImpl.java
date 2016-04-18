@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.targets;
 
+import elemental.events.KeyboardEvent;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -35,19 +37,18 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import elemental.events.KeyboardEvent;
+
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandResources;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.ArrayList;
@@ -56,6 +57,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer.MACHINE_LABELS_BY_CATEGORY_MAP;
+import static org.eclipse.che.ide.extension.machine.client.targets.TargetsPresenter.SSH_CATEGORY;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * @author Vitaliy Guliy
@@ -66,68 +73,64 @@ public class TargetsViewImpl extends Window implements TargetsView {
     interface TargetsViewImplUiBinder extends UiBinder<Widget, TargetsViewImpl> {
     }
 
-    private EditCommandResources    commandResources;
-    private IconRegistry            iconRegistry;
-    private ActionDelegate          delegate;
+
+
+    private final EditCommandResources commandResources;
+    private final MachineResources     machineResources;
+    private final IconRegistry         iconRegistry;
+
+    private ActionDelegate delegate;
 
     @UiField(provided = true)
-    MachineLocalizationConstant     machineLocale;
+    MachineLocalizationConstant machineLocale;
 
     @UiField
-    TextBox                         filterTargets;
+    TextBox filterTargets;
 
     @UiField
-    SimplePanel                     targetsPanel;
+    SimplePanel targetsPanel;
 
-    private CategoriesList          list;
-
-    @UiField
-    FlowPanel                       hintPanel;
+    private CategoriesList list;
 
     @UiField
-    FlowPanel                       infoPanel;
-
+    FlowPanel       hintPanel;
     @UiField
-    FlowPanel                       propertiesPanel;
-
+    FlowPanel       infoPanel;
     @UiField
-    TextBox                         targetName;
-
+    FlowPanel       propertiesPanel;
     @UiField
-    CustomListBox                   architectureListBox;
-
+    TextBox         targetName;
     @UiField
-    TextBox                         host;
-
+    CustomListBox   architectureListBox;
     @UiField
-    TextBox                         port;
-
+    TextBox         host;
     @UiField
-    TextBox                         userName;
-
+    TextBox         port;
     @UiField
-    PasswordTextBox                 password;
-
+    TextBox         userName;
     @UiField
-    FlowPanel                       operationPanel;
-
+    PasswordTextBox password;
     @UiField
-    FlowPanel                       footer;
+    FlowPanel       operationPanel;
+    @UiField
+    FlowPanel       footer;
 
-    private Button                  closeButton;
+    private Button closeButton;
 
-    private Button                  saveButton;
-    private Button                  cancelButton;
-    private Button                  connectButton;
+    private Button saveButton;
+    private Button cancelButton;
+    private Button connectButton;
 
     @Inject
     public TargetsViewImpl(org.eclipse.che.ide.Resources resources,
                            MachineLocalizationConstant machineLocale,
+                           MachineResources machineResources,
                            CoreLocalizationConstant coreLocale,
                            EditCommandResources commandResources,
                            IconRegistry iconRegistry,
                            TargetsViewImplUiBinder uiBinder) {
         this.machineLocale = machineLocale;
+        this.machineResources = machineResources;
         this.commandResources = commandResources;
         this.iconRegistry = iconRegistry;
 
@@ -313,33 +316,45 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
     private void ensureSSHCategoryExists(List<Category<?>> categoriesList) {
         for (Category<?> category : categoriesList) {
-            if ("ssh".equalsIgnoreCase(category.getTitle())) {
+            if (SSH_CATEGORY.equalsIgnoreCase(category.getTitle())) {
                 return;
             }
         }
 
-        categoriesList.add(new Category<>("ssh", categoriesRenderer, new ArrayList<Target>(), categoriesEventDelegate));
+        categoriesList.add(new Category<>(SSH_CATEGORY, categoriesRenderer, new ArrayList<Target>(), categoriesEventDelegate));
+    }
+
+    private DivElement createMachineLabel(String machineCategory) {
+        final DivElement machineLabel = Document.get().createDivElement();
+
+        Icon icon = iconRegistry.getIconIfExist(machineCategory + ".runtime.icon");
+        if (icon != null) {
+            machineLabel.appendChild(icon.getSVGImage().getElement());
+            return machineLabel;
+        }
+
+        if (MACHINE_LABELS_BY_CATEGORY_MAP.containsKey(machineCategory)) {
+            machineLabel.setInnerText(MACHINE_LABELS_BY_CATEGORY_MAP.get(machineCategory));
+            machineLabel.setClassName(this.machineResources.getCss().dockerMachineLabel());
+            return machineLabel;
+        }
+
+        machineLabel.setInnerText(machineCategory.substring(0, 3));
+        machineLabel.setClassName(this.machineResources.getCss().differentMachineLabel());
+        return machineLabel;
+
     }
 
     private SpanElement renderCategoryHeader(final Category<Target> category) {
         SpanElement categoryHeaderElement = Document.get().createSpanElement();
         categoryHeaderElement.setClassName(commandResources.getCss().categoryHeader());
-
-        SpanElement iconElement = Document.get().createSpanElement();
-        iconElement.getStyle().setPaddingRight(4, Style.Unit.PX);
-        iconElement.getStyle().setPaddingLeft(2, Style.Unit.PX);
-        categoryHeaderElement.appendChild(iconElement);
-
-        Icon icon = iconRegistry.getIconIfExist(category.getTitle() + ".runtime.icon");
-        if (icon != null) {
-            iconElement.appendChild(icon.getSVGImage().getElement());
-        }
+        categoryHeaderElement.appendChild(createMachineLabel(category.getTitle()));
 
         SpanElement textElement = Document.get().createSpanElement();
         categoryHeaderElement.appendChild(textElement);
         textElement.setInnerText(category.getTitle());
 
-        if (!"docker".equalsIgnoreCase(category.getTitle())) {
+        if (SSH_CATEGORY.equalsIgnoreCase(category.getTitle())) {
             // Add button to create a target
             SpanElement buttonElement = Document.get().createSpanElement();
             buttonElement.appendChild(commandResources.addCommandButton().getSvg().getElement());
@@ -367,7 +382,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
                 @Override
                 public void renderElement(Element element, final Target target) {
                     element.setInnerText(target.getName());
-
+                    element.getStyle().setPaddingLeft(54, PX);
                     element.addClassName(commandResources.getCss().categorySubElementHeader());
                     element.setId("target-" + target.getName());
 

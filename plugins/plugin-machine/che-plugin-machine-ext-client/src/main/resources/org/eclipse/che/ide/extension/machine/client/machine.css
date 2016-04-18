@@ -36,7 +36,7 @@
 }
 
 .terminal-cursor {
-    background: #4EABFF;
+    background: blueIconColor;
 }
 
 .fullSize {
@@ -117,7 +117,7 @@
 .outputsContainerConsoleTabPanel.outputsContainerConsoleTabSelected:before {
     left: 0;
     width: 100%;
-    border-top: 1px solid #47afdd !important;
+    border-top: 1px solid blueIconColor !important;
 }
 
 .outputsContainerConsoleTabLabel {
@@ -233,20 +233,28 @@
 .processTree .processTreeNode {
 }
 
-.processTree .machineLabel {
-    background-color: primaryHighlightColor;
+.dockerMachineLabel {
+    background-color: blueIconColor;
+}
+
+.differentMachineLabel {
+    background-color: redIconColor;
+}
+
+.dockerMachineLabel,
+.differentMachineLabel {
+    display: inline-block;
     color: processTreeDevLabel;
     text-transform: uppercase;
-    line-height: smallFontSize;
-    font-size: 9px;
-    padding: 1px 2px;
+    text-align: center;
     font-weight: bold;
-    border-radius: 1.5px;
-    padding-bottom: 0px;
-    margin-right: 5px;
-    margin-left: 3px;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    line-height: 12px;
+    min-width: 22px;
+    font-size: 9px;
+    padding: 0;
+    border-radius: 2px;
+    margin: 0 5px 0 3px;
+    box-shadow: 1px 1px 2px treeTextShadow;
 }
 
 .processTree span {

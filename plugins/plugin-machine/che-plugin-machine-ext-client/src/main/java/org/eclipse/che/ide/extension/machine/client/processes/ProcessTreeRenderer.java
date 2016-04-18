@@ -44,9 +44,10 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  * @author Roman Nikitenko
  */
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
-    public static final Map<String, String> LABELS_BY_TYPE_MAP = new HashMap<String, String>() {
+    public static final Map<String, String> MACHINE_LABELS_BY_CATEGORY_MAP = new HashMap<String, String>() {
         {
             put("docker", "dkr");
+            put("development", "dev");
         }
     };
     private final MachineResources            resources;
@@ -90,20 +91,24 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         return treeNode;
     }
 
-    private String getLabelText(MachineDto machine) {
-        if (machine.getConfig().isDev()) {
-            return this.locale.viewProcessesDevTitle();
-        }
-        final String machineType = machine.getConfig().getType();
+    private DivElement createMachineLabel(String machineCategory) {
+        final DivElement machineLabel = Elements.createDivElement();
 
-        return LABELS_BY_TYPE_MAP.containsKey(machineType) ? LABELS_BY_TYPE_MAP.get(machineType) : machineType.substring(0, 3);
+        if (MACHINE_LABELS_BY_CATEGORY_MAP.containsKey(machineCategory)) {
+            machineLabel.setTextContent(MACHINE_LABELS_BY_CATEGORY_MAP.get(machineCategory));
+            machineLabel.setClassName(resources.getCss().dockerMachineLabel());
+            return machineLabel;
+        }
+
+        machineLabel.setTextContent(machineCategory.substring(0, 3));
+        machineLabel.setClassName(resources.getCss().differentMachineLabel());
+        return machineLabel;
     }
 
     private SpanElement createMachineElement(final ProcessTreeNode node, final MachineDto machine) {
         SpanElement root = Elements.createSpanElement();
-        SpanElement machineLabel = Elements.createSpanElement(resources.getCss().machineLabel());
-        machineLabel.setTextContent(this.getLabelText(machine));
-        root.appendChild(machineLabel);
+        final String machineCategory = machine.getConfig().isDev() ? locale.devMachineCategory() : machine.getConfig().getType();
+        root.appendChild(createMachineLabel(machineCategory));
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
         root.appendChild(statusElement);
