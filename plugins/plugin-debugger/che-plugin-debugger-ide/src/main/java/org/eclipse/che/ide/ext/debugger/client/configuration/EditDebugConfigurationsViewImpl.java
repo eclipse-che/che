@@ -340,7 +340,7 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
                 delegate.onSaveClicked();
             }
         });
-        saveButton.addStyleName(this.resources.windowCss().primaryButton());
+        saveButton.addStyleName(Window.resources.windowCss().primaryButton());
         overFooter.add(saveButton);
 
         cancelButton = createButton(coreLocale.cancel(), "window-edit-debug-configurations-cancel", new ClickHandler() {
