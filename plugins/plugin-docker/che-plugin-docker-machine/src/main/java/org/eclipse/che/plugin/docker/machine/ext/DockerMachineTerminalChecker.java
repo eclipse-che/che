@@ -21,26 +21,22 @@ import java.io.File;
 import static java.nio.file.Files.notExists;
 
 /**
- *
  * Check that ext terminal zip is present in configuration specified place.
  *
  * @author Max Shaposhnik
- *
  */
 public class DockerMachineTerminalChecker {
 
-    public static final String TERMINAL_ARCHIVE_LOCATION = "machine.server.terminal.archive";
-
+    public static final String TERMINAL_ARCHIVE_LOCATION = "machine.server.terminal.path_to_archive.linux_amd64";
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerMachineTerminalChecker.class);
 
-    private final String          terminalArchiveLocation;
+    private final String terminalArchiveLocation;
 
     @Inject
     public DockerMachineTerminalChecker(@Named(TERMINAL_ARCHIVE_LOCATION) String terminalArchiveLocation) {
         this.terminalArchiveLocation = terminalArchiveLocation;
     }
-
 
     @PostConstruct
     public void start() {

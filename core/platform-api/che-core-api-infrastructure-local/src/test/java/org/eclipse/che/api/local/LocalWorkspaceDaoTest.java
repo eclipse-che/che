@@ -108,8 +108,7 @@ public class LocalWorkspaceDaoTest {
                                                                                                      "9090/udp",
                                                                                                      "someprotocol",
                                                                                                      "/some/path")),
-                                                                    Collections.singletonMap("key1", "value1"),
-                                                                    null);
+                                                                    Collections.singletonMap("key1", "value1"));
         final MachineConfigImpl machineCfg2 = new MachineConfigImpl(false,
                                                                     "non-dev-machine",
                                                                     "machine-type-2",
@@ -123,8 +122,7 @@ public class LocalWorkspaceDaoTest {
                                                                                                      "9090/udp",
                                                                                                      "someprotocol",
                                                                                                      "/some/path")),
-                                                                    Collections.singletonMap("key1", "value1"),
-                                                                    null);
+                                                                    Collections.singletonMap("key1", "value1"));
 
         final EnvironmentImpl env1 = new EnvironmentImpl("my-environment", recipe, asList(machineCfg1, machineCfg2));
         final EnvironmentImpl env2 = new EnvironmentImpl("my-environment-2", recipe, singletonList(machineCfg1));

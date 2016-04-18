@@ -76,30 +76,6 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
     String getTargetName();
 
     /**
-     * Sets a list of available architectures.
-     *
-     * @param architectures
-     *          list of available architectures
-     */
-    void setAvailableArchitectures(List<String> architectures);
-
-    /**
-     * Sets target architecture.
-     *
-     * @param architecture
-     *          target architecture
-     */
-    void setArchitecture(String architecture);
-
-    /**
-     * Returns target architecture.
-     * 
-     * @return
-     *          target architecture
-     */
-    String getArchitecture();
-
-    /**
      * Sets SSH host value.
      *
      * @param host
@@ -214,8 +190,6 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
         void onTargetSelected(Target target);
 
         void onTargetNameChanged(String value);
-
-        void onArchitectureChanged(String value);
 
         void onHostChanged(String value);
 

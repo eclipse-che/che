@@ -596,7 +596,6 @@ public class AccountServiceTest {
                                                                                                                           "location"),
                                                                                                     null,
                                                                                                     null,
-                                                                                                    null,
                                                                                                     null)));
         return new WorkspaceImpl("id123", "owner1234", new WorkspaceConfigImpl("name",
                                                                                "desc",

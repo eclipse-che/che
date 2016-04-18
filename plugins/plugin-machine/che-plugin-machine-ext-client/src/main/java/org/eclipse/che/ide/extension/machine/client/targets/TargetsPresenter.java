@@ -72,8 +72,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     private Target selectedTarget;
     private final Map<String, MachineDto> machinesByNameMap = new HashMap<>();
 
-    private final List<String>                          architectures = new ArrayList<>();
-
     private StatusNotification                          connectNotification;
 
     @Inject
@@ -99,9 +97,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         this.eventBus = eventBus;
 
         view.setDelegate(this);
-
-        architectures.add("linux_amd64");
-        architectures.add("linux_arm7");
     }
 
     /**
@@ -200,11 +195,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         try {
             JSONObject json = JSONParser.parseStrict(target.getRecipe().getScript()).isObject();
 
-            if (json.get("architecture") != null) {
-                String architecture = json.get("architecture").isString().stringValue();
-                target.setArchitecture(architecture);
-            }
-
             if (json.get("host") != null) {
                 String host = json.get("host").isString().stringValue();
                 target.setHost(host);
@@ -238,7 +228,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     @Override
     public void onAddTarget(String category) {
         Target target = new Target("[new target]", SSH_CATEGORY);
-        target.setArchitecture("linux_amd64");
         target.setHost("127.0.0.1");
         target.setPort("22");
         target.setUserName("root");
@@ -262,9 +251,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             view.showPropertiesPanel();
             view.setTargetName(target.getName());
 
-            view.setAvailableArchitectures(architectures);
-            view.setArchitecture(target.getArchitecture());
-
             view.setHost(target.getHost());
             view.setPort(target.getPort());
             view.setUserName(target.getUserName());
@@ -286,17 +272,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         }
 
         selectedTarget.setName(value);
-        selectedTarget.setDirty(true);
-        updateButtons();
-    }
-
-    @Override
-    public void onArchitectureChanged(String value) {
-        if (selectedTarget.getArchitecture().equals(value)) {
-            return;
-        }
-
-        selectedTarget.setArchitecture(value);
         selectedTarget.setDirty(true);
         updateButtons();
     }
@@ -397,7 +372,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 .withName(selectedTarget.getName())
                 .withType(SSH_CATEGORY)
                 .withScript("{" +
-                        "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
                         "\"host\": \"" + selectedTarget.getHost() + "\", " +
                         "\"port\": \"" + selectedTarget.getPort() + "\", " +
                         "\"username\": \"" + selectedTarget.getUserName() + "\", " +
@@ -434,7 +408,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 .withDescription(selectedTarget.getRecipe().getDescription())
                 .withPermissions(selectedTarget.getRecipe().getPermissions())
                 .withScript("{" +
-                        "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
                         "\"host\": \"" + selectedTarget.getHost() + "\", " +
                         "\"port\": \"" + selectedTarget.getPort() + "\", " +
                         "\"username\": \"" + selectedTarget.getUserName() + "\", " +
@@ -522,8 +495,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 .withName(selectedTarget.getName())
                 .withSource(sourceDto)
                 .withLimits(limitsDto)
-                .withType(SSH_CATEGORY)
-                .withArchitecture(selectedTarget.getArchitecture());
+                .withType(SSH_CATEGORY);
 
         Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
 

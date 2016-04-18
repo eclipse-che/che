@@ -26,10 +26,11 @@ import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
- * Starts websocket terminal in the machine after its start
+ * Starts websocket terminal in the machine after its start.
  *
  * @author Alexander Garagatyi
  */
@@ -44,12 +45,12 @@ public class MachineTerminalLauncher {
     @Inject
     public MachineTerminalLauncher(EventService eventService,
                                    MachineManager machineManager,
-                                   Set<MachineImplSpecificTerminalLauncher> machineImplSpecificTerminalLaunchers) {
+                                   Set<MachineImplSpecificTerminalLauncher> machineImplLaunchers) {
         this.eventService = eventService;
         this.machineManager = machineManager;
-        this.terminalLaunchers = machineImplSpecificTerminalLaunchers.stream()
-                                                                     .collect(Collectors.toMap(MachineImplSpecificTerminalLauncher::getMachineType,
-                                                                                               Function.identity()));
+        this.terminalLaunchers = machineImplLaunchers.stream()
+                                                     .collect(toMap(MachineImplSpecificTerminalLauncher::getMachineType,
+                                                                    Function.identity()));
     }
 
     @PostConstruct
@@ -61,13 +62,14 @@ public class MachineTerminalLauncher {
                     try {
                         final Instance machine = machineManager.getInstance(event.getMachineId());
 
-                        MachineImplSpecificTerminalLauncher machineImplSpecificTerminalLauncher = terminalLaunchers.get(machine.getConfig().getType());
-                        if (machineImplSpecificTerminalLauncher == null) {
+                        MachineImplSpecificTerminalLauncher terminalLauncher = terminalLaunchers.get(machine.getConfig()
+                                                                                                            .getType());
+                        if (terminalLauncher == null) {
                             LOG.warn("Terminal launcher implementation was not found for machine {} with type {}.",
                                      machine.getId(),
                                      machine.getConfig().getType());
                         } else {
-                            machineImplSpecificTerminalLauncher.launchTerminal(machine);
+                            terminalLauncher.launchTerminal(machine);
                         }
                     } catch (MachineException | NotFoundException e) {
                         LOG.error(e.getLocalizedMessage(), e);

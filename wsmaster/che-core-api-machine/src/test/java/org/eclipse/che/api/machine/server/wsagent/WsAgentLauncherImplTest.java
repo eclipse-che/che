@@ -25,7 +25,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
