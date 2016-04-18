@@ -15,15 +15,12 @@
 package org.eclipse.che.ide.util;
 
 import org.eclipse.che.ide.commons.exception.ServerException;
-import org.eclipse.che.ide.dto.DtoFactory;
 
 import java.util.Collections;
 import java.util.Map;
 
 /** Utility class for common Exception related operations. */
 public class ExceptionUtils {
-
-    private static DtoFactory dtoFactory = new DtoFactory();
 
     public static final int MAX_CAUSE = 10;
 
@@ -37,7 +34,7 @@ public class ExceptionUtils {
         }
         // For each cause, print the requested number of entries of its stack
         // trace, being careful to avoid getting stuck in an infinite loop.
-        StringBuffer s = new StringBuffer(newline);
+        StringBuilder s = new StringBuilder(newline);
         Throwable currentCause = e;
         String causedBy = "";
 
@@ -50,11 +47,11 @@ public class ExceptionUtils {
             s.append(currentCause.getMessage());
             StackTraceElement[] stackElems = currentCause.getStackTrace();
             if (stackElems != null) {
-                for (int i = 0; i < stackElems.length; ++i) {
+                for (StackTraceElement stackElem : stackElems) {
                     s.append(newline);
                     s.append(indent);
                     s.append("at ");
-                    s.append(stackElems[i].toString());
+                    s.append(stackElem.toString());
                 }
             }
 
@@ -70,7 +67,7 @@ public class ExceptionUtils {
     }
 
     /**
-     * Returns error code of the exception if it is of type {@clink ServerException} and has error code set, or -1 otherwise.
+     * Returns error code of the exception if it is of type {@link ServerException} and has error code set, or -1 otherwise.
      *
      * @param exception
      *         passed exception
@@ -87,7 +84,7 @@ public class ExceptionUtils {
     }
 
     /**
-     * Returns attributes of the exception if it is of type {@clink ServerException} and has attributes set, or empty map otherwise.
+     * Returns attributes of the exception if it is of type {@link ServerException} and has attributes set, or empty map otherwise.
      *
      * @param exception
      *         passed exception
@@ -100,6 +97,23 @@ public class ExceptionUtils {
             return ((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)exception).getAttributes();
         } else {
             return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Returns HTTP status the exception if it is of type {@link ServerException} or -1 otherwise.
+     *
+     * @param exception
+     *         passed exception
+     * @return status code
+     */
+    public static int getStatusCode(Throwable exception) {
+        if (exception instanceof ServerException) {
+            return ((ServerException)exception).getHTTPStatus();
+        } else if (exception instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
+            return ((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)exception).getHTTPStatus();
+        } else {
+            return -1;
         }
     }
 }

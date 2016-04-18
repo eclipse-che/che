@@ -34,6 +34,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.event.HttpSessionDestroyedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
@@ -41,11 +42,13 @@ import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.HTTPStatus;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -182,36 +185,49 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      */
     public void startWorkspaceById(final WorkspaceDto workspace, final Callback<Component, Exception> callback) {
         this.callback = callback;
-        loader.show(initialLoadingInfo);
-        initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
-
-        if (messageBus != null) {
-            messageBus.cancelReconnection();
-        }
-        messageBus = messageBusProvider.createMessageBus(workspace.getId());
-
-        messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
+        workspaceServiceClient.getWorkspace(workspace.getId()).then(new Operation<WorkspaceDto>() {
             @Override
-            public void onOpen() {
-                messageBus.removeOnOpenHandler(this);
-                subscribeToWorkspaceStatusWebSocket(workspace);
+            public void apply(WorkspaceDto arg) throws OperationException {
+                loader.show(initialLoadingInfo);
+                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
 
-                if (!RUNNING.equals(workspace.getStatus())) {
-                    workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
-                        @Override
-                        public void apply(List<SnapshotDto> snapshots) throws OperationException {
-                            if (snapshots.isEmpty()) {
-                                handleWsStart(workspaceServiceClient.startById(workspace.getId(),
-                                                                               workspace.getConfig().getDefaultEnv()));
-                            } else {
-                                showRecoverWorkspaceConfirmDialog(workspace);
-                            }
+                if (messageBus != null) {
+                    messageBus.cancelReconnection();
+                }
+                messageBus = messageBusProvider.createMessageBus(workspace.getId());
+
+                messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
+                    @Override
+                    public void onOpen() {
+                        messageBus.removeOnOpenHandler(this);
+                        subscribeToWorkspaceStatusWebSocket(workspace);
+
+                        if (!RUNNING.equals(workspace.getStatus())) {
+                            workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
+                                @Override
+                                public void apply(List<SnapshotDto> snapshots) throws OperationException {
+                                    if (snapshots.isEmpty()) {
+                                        handleWsStart(workspaceServiceClient.startById(workspace.getId(),
+                                                                                       workspace.getConfig().getDefaultEnv()));
+                                    } else {
+                                        showRecoverWorkspaceConfirmDialog(workspace);
+                                    }
+                                }
+                            });
+                        } else {
+                            initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), SUCCESS);
+                            setCurrentWorkspace(workspace);
+                            eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
                         }
-                    });
-                } else {
-                    initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), SUCCESS);
-                    setCurrentWorkspace(workspace);
-                    eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
+                    }
+                });
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError err) throws OperationException {
+                Log.error(getClass(), err.getCause());
+                if (ExceptionUtils.getStatusCode(err.getCause()) == HTTPStatus.FORBIDDEN) {
+                    eventBus.fireEvent(new HttpSessionDestroyedEvent());
                 }
             }
         });
