@@ -76,7 +76,6 @@ public class NodeManager {
     protected final DtoFactory             dtoFactory;
     protected final Set<NodeIconProvider>  nodeIconProvider;
     protected final AppContext             appContext;
-    protected final String                 workspaceId;
 
     @Inject
     public NodeManager(NodeFactory nodeFactory,
@@ -97,7 +96,6 @@ public class NodeManager {
         this.nodeIconProvider = nodeIconProvider;
         this.appContext = appContext;
 
-        this.workspaceId = appContext.getWorkspace().getId();
 
         eventBus.addHandler(DeleteProjectEvent.TYPE, new DeleteProjectHandler() {
             @Override
@@ -161,7 +159,7 @@ public class NodeManager {
             @Override
             public void makeCall(AsyncCallback<List<ItemReference>> callback) {
                 projectService
-                        .getChildren(workspaceId, path, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
+                        .getChildren(appContext.getDevMachine(), path, newCallback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
             }
         }).thenPromise(filterItemReference())
           .thenPromise(createItemReferenceNodes(projectConfigDto, nodeSettings))
@@ -174,7 +172,7 @@ public class NodeManager {
             @Override
             public void makeCall(AsyncCallback<List<ItemReference>> callback) {
                 projectService
-                        .getChildren(workspaceId, path, _callback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
+                        .getChildren(appContext.getDevMachine(), path, _callback(callback, dtoUnmarshaller.newListUnmarshaller(ItemReference.class)));
             }
         };
     }
@@ -244,7 +242,7 @@ public class NodeManager {
      */
     @NotNull
     public Promise<List<Node>> getProjectNodes() {
-        return projectService.getProjects(workspaceId).then(new Function<List<ProjectConfigDto>, List<Node>>() {
+        return projectService.getProjects(appContext.getDevMachine()).then(new Function<List<ProjectConfigDto>, List<Node>>() {
             @Override
             public List<Node> apply(List<ProjectConfigDto> projects) throws FunctionException {
                 if (projects == null) {

@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.jdi.client.debug;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -48,26 +47,29 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENTTYPE;
  */
 @Singleton
 public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
-    private final String                          baseUrl;
-    private final LoaderFactory                   loaderFactory;
-    private final AsyncRequestFactory             asyncRequestFactory;
-    private final DtoUnmarshallerFactory          dtoUnmarshallerFactory;
+    private final AppContext             appContext;
+    private final LoaderFactory          loaderFactory;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
 
     @Inject
-    protected JavaDebuggerServiceClientImpl(@Named("cheExtensionPath") String extPath,
-                                            AppContext appContext,
+    protected JavaDebuggerServiceClientImpl(AppContext appContext,
                                             LoaderFactory loaderFactory,
                                             AsyncRequestFactory asyncRequestFactory,
                                             DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+        this.appContext = appContext;
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.baseUrl = extPath + "/debug-java/" + appContext.getWorkspace().getId();
+    }
+
+    private String baseUrl() {
+        return appContext.getDevMachine().getWsAgentBaseUrl() + "/debug-java/" + appContext.getWorkspaceId();
     }
 
     @Override
     public Promise<DebuggerInfo> connect(Map<String, String> connectionProperties) {
-        final String requestUrl = baseUrl + "/connect";
+        final String requestUrl = baseUrl() + "/connect";
         final String params = "?host=" + connectionProperties.get(HOST.toString()) + "&port=" + connectionProperties.get(PORT.toString());
 
         return asyncRequestFactory.createGetRequest(requestUrl + params)
@@ -81,7 +83,7 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
 
     @Override
     public Promise<Void> disconnect(@NotNull String id) {
-        final String requestUrl = baseUrl + "/disconnect/" + id;
+        final String requestUrl = baseUrl() + "/disconnect/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send();
@@ -89,14 +91,14 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
 
     @Override
     public Promise<DebuggerInfo> getInfo(@NotNull String id) {
-        final String requestUrl = baseUrl + "/" + id;
+        final String requestUrl = baseUrl() + "/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(DebuggerInfo.class));
     }
 
     @Override
     public Promise<Void> addBreakpoint(@NotNull String id, @NotNull Breakpoint breakPoint) {
-        final String requestUrl = baseUrl + "/breakpoints/add/" + id;
+        final String requestUrl = baseUrl() + "/breakpoints/add/" + id;
         return asyncRequestFactory.createPostRequest(requestUrl, breakPoint)
                                   .loader(loaderFactory.newLoader())
                                   .send();
@@ -104,14 +106,14 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
 
     @Override
     public Promise<Void> deleteBreakpoint(@NotNull String id, @NotNull Breakpoint breakPoint) {
-        final String requestUrl = baseUrl + "/breakpoints/delete/" + id;
+        final String requestUrl = baseUrl() + "/breakpoints/delete/" + id;
         return asyncRequestFactory.createPostRequest(requestUrl, breakPoint)
                                   .send();
     }
 
     @Override
     public Promise<BreakpointList> getAllBreakpoints(@NotNull String id) {
-        final String requestUrl = baseUrl + "/breakpoints/" + id;
+        final String requestUrl = baseUrl() + "/breakpoints/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl)
                                   .loader(loaderFactory.newLoader())
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(BreakpointList.class));
@@ -119,28 +121,28 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
 
     @Override
     public Promise<Void> deleteAllBreakpoints(@NotNull String id) {
-        final String requestUrl = baseUrl + "/breakpoints/delete_all/" + id;
+        final String requestUrl = baseUrl() + "/breakpoints/delete_all/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send();
     }
 
 
     @Override
     public Promise<StackFrameDump> getStackFrameDump(@NotNull String id) {
-        final String requestUrl = baseUrl + "/dump/" + id;
+        final String requestUrl = baseUrl() + "/dump/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl)
-                           .loader(loaderFactory.newLoader())
-                           .send(dtoUnmarshallerFactory.newUnmarshaller(StackFrameDump.class));
+                                  .loader(loaderFactory.newLoader())
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(StackFrameDump.class));
     }
 
     @Override
     public Promise<Void> resume(@NotNull String id) {
-        final String requestUrl = baseUrl + "/resume/" + id;
+        final String requestUrl = baseUrl() + "/resume/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send();
     }
 
     @Override
     public Promise<Value> getValue(@NotNull String id, @NotNull Variable var) {
-        final String requestUrl = baseUrl + "/value/get/" + id;
+        final String requestUrl = baseUrl() + "/value/get/" + id;
         return asyncRequestFactory.createPostRequest(requestUrl, var.getVariablePath())
                                   .loader(loaderFactory.newLoader())
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(Value.class));
@@ -148,31 +150,31 @@ public class JavaDebuggerServiceClientImpl implements DebuggerServiceClient {
 
     @Override
     public Promise<Void> setValue(@NotNull String id, @NotNull UpdateVariableRequest request) {
-        final String requestUrl = baseUrl + "/value/set/" + id;
+        final String requestUrl = baseUrl() + "/value/set/" + id;
         return asyncRequestFactory.createPostRequest(requestUrl, request).loader(loaderFactory.newLoader()).send();
     }
 
     @Override
     public Promise<Void> stepInto(@NotNull String id) {
-        final String requestUrl = baseUrl + "/step/into/" + id;
+        final String requestUrl = baseUrl() + "/step/into/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send();
     }
 
     @Override
     public Promise<Void> stepOver(@NotNull String id) {
-        final String requestUrl = baseUrl + "/step/over/" + id;
+        final String requestUrl = baseUrl() + "/step/over/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send();
     }
 
     @Override
     public Promise<Void> stepOut(@NotNull String id) {
-        final String requestUrl = baseUrl + "/step/out/" + id;
+        final String requestUrl = baseUrl() + "/step/out/" + id;
         return asyncRequestFactory.createGetRequest(requestUrl).loader(loaderFactory.newLoader()).send();
     }
 
     @Override
     public Promise<String> evaluateExpression(@NotNull String id, @NotNull String expression) {
-        final String requestUrl = baseUrl + "/expression/" + id;
+        final String requestUrl = baseUrl() + "/expression/" + id;
         return asyncRequestFactory.createPostRequest(requestUrl, null)
                                   .data(expression)
                                   .header(ACCEPT, TEXT_PLAIN)

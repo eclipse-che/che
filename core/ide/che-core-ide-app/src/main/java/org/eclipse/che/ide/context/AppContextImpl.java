@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -21,6 +22,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.app.CurrentUser;
+import org.eclipse.che.ide.api.app.StartUpAction;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
@@ -30,7 +32,6 @@ import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.project.node.ProjectNode;
-import org.eclipse.che.ide.api.app.StartUpAction;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
     private CurrentProject      currentProject;
     private CurrentUser         currentUser;
     private Factory             factory;
-    private String              devMachineId;
+    private DevMachine          devMachine;
     private String              projectsRoot;
     /**
      * List of actions with parameters which comes from startup URL.
@@ -155,13 +156,13 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
     }
 
     @Override
-    public String getDevMachineId() {
-        return devMachineId;
+    public DevMachine getDevMachine() {
+        return devMachine;
     }
 
     @Override
-    public void setDevMachineId(String id) {
-        this.devMachineId = id;
+    public void setDevMachine(DevMachine devMachine) {
+        this.devMachine = devMachine;
     }
 
     @Override

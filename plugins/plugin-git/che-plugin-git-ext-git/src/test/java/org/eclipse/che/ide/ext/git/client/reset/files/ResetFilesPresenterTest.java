@@ -85,12 +85,12 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, status);
                 return callback;
             }
-        }).when(service).status(anyString(), anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
 
         presenter.showDialog();
 
         verify(appContext).getCurrentProject();
-        verify(service).status(anyString(), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
+        verify(service).status(eq(devMachine), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
         verify(view).setIndexedFiles((List<IndexFile>)anyObject());
         verify(view).showDialog();
     }
@@ -117,12 +117,12 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, status);
                 return callback;
             }
-        }).when(service).status(anyString(), anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
 
         presenter.showDialog();
 
         verify(appContext).getCurrentProject();
-        verify(service).status(anyString(), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
+        verify(service).status(eq(devMachine), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
         verify(dialogFactory).createMessageDialog(eq("Warning"), eq("Index is Empty"),
                                                   (ConfirmCallback)anyObject());
         verify(view, never()).setIndexedFiles((List<IndexFile>)anyObject());
@@ -140,12 +140,12 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).status(anyString(), anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
 
         presenter.showDialog();
 
         verify(appContext).getCurrentProject();
-        verify(service).status(anyString(), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
+        verify(service).status(eq(devMachine), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
         verify(console).printError(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(constant).statusFailed();
@@ -176,13 +176,13 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, status);
                 return callback;
             }
-        }).when(service).status(anyString(), anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
 
         presenter.showDialog();
         presenter.onResetClicked();
 
         verify(view).close();
-        verify(service, never()).reset(anyString(), eq(projectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+        verify(service, never()).reset(eq(devMachine), eq(projectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                                        (AsyncRequestCallback<Void>)anyObject());
         verify(console).print(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
@@ -207,7 +207,7 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, status);
                 return callback;
             }
-        }).when(service).status(anyString(), anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -217,14 +217,14 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
             }
-        }).when(service).reset(anyString(), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+        }).when(service).reset(eq(devMachine), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                                (AsyncRequestCallback<Void>)anyObject());
 
         presenter.showDialog();
         presenter.onResetClicked();
 
         verify(view).close();
-        verify(service).reset(anyString(), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+        verify(service).reset(eq(devMachine), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(console).print(anyString());
@@ -249,7 +249,7 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, status);
                 return callback;
             }
-        }).when(service).status(anyString(), anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -259,13 +259,13 @@ public class ResetFilesPresenterTest extends BaseTest {
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).reset(anyString(), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+        }).when(service).reset(devMachine, anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                                (AsyncRequestCallback<Void>)anyObject());
 
         presenter.showDialog();
         presenter.onResetClicked();
 
-        verify(service).reset(anyString(), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+        verify(service).reset(eq(devMachine), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(constant).resetFilesFailed();
         verify(console).printError(anyString());

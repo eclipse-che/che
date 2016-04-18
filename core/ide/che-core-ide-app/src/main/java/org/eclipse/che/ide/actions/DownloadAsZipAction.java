@@ -12,7 +12,6 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -40,16 +39,12 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class DownloadAsZipAction extends AbstractPerspectiveAction {
-
-    private final String BASE_URL;
-
     private final AppContext               appContext;
-    private       DownloadContainer        downloadContainer;
+    private final DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
 
     @Inject
-    public DownloadAsZipAction(@Named("cheExtensionPath") String extPath,
-                               AppContext appContext,
+    public DownloadAsZipAction(AppContext appContext,
                                CoreLocalizationConstant locale,
                                Resources resources,
                                DownloadContainer downloadContainer,
@@ -62,20 +57,19 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
         this.appContext = appContext;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
-
-        BASE_URL = extPath + "/project/" + appContext.getWorkspace().getId() + "/export/";
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        String url = BASE_URL + getPath();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/project/" + appContext.getWorkspaceId() + "/export/" + getPath();
         downloadContainer.setUrl(url);
     }
 
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
+
         Selection<?> selection = projectExplorer.getSelection();
         boolean enabled = appContext.getCurrentProject() != null || (selection != null &&
                                                                      (!selection.isEmpty() &&

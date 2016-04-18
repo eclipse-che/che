@@ -77,7 +77,7 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
             queryExpression.setPath(view.getPathToSearch());
         }
 
-        projectServiceClient.search(appContext.getWorkspace().getId(), queryExpression).then(new Operation<List<ItemReference>>() {
+        projectServiceClient.search(appContext.getDevMachine(), queryExpression).then(new Operation<List<ItemReference>>() {
             @Override
             public void apply(List<ItemReference> result) throws OperationException {
                 view.close();

@@ -63,8 +63,8 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
     private final ProjectServiceClient     projectServiceClient;
     private final DtoUnmarshallerFactory   dtoUnmarshaller;
     private final List<JavaSourceFileType> sourceFileTypes;
-    private final DialogFactory            dialogFactory;
-    private final String                   workspaceId;
+    private final AppContext               appContext;
+    private final DialogFactory dialogFactory;
 
     @Inject
     public NewJavaSourceFilePresenter(NewJavaSourceFileView view,
@@ -73,6 +73,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
                                       ProjectServiceClient projectServiceClient,
                                       DtoUnmarshallerFactory dtoUnmarshaller,
                                       DialogFactory dialogFactory) {
+        this.appContext = appContext;
         this.dialogFactory = dialogFactory;
         sourceFileTypes = Arrays.asList(CLASS, INTERFACE, ENUM, ANNOTATION);
         this.view = view;
@@ -80,8 +81,6 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         this.projectServiceClient = projectServiceClient;
         this.dtoUnmarshaller = dtoUnmarshaller;
         this.view.setDelegate(this);
-        
-        this.workspaceId = appContext.getWorkspace().getId();
     }
 
     public void showDialog() {
@@ -248,7 +247,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         return new AsyncPromiseHelper.RequestCall<ItemReference>() {
             @Override
             public void makeCall(AsyncCallback<ItemReference> callback) {
-                projectServiceClient.createFile(workspaceId,
+                projectServiceClient.createFile(appContext.getDevMachine(),
                                                 folder.getPath(),
                                                 nameWithoutExtension + ".java",
                                                 content,
@@ -266,7 +265,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         return new AsyncPromiseHelper.RequestCall<ItemReference>() {
             @Override
             public void makeCall(AsyncCallback<ItemReference> callback) {
-                projectServiceClient.getItem(workspaceId, path, _callback(callback, dtoUnmarshaller.newUnmarshaller(ItemReference.class)));
+                projectServiceClient.getItem(appContext.getDevMachine(), path, _callback(callback, dtoUnmarshaller.newUnmarshaller(ItemReference.class)));
             }
         };
     }
@@ -303,7 +302,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
         return new AsyncPromiseHelper.RequestCall<ItemReference>() {
             @Override
             public void makeCall(AsyncCallback<ItemReference> callback) {
-                projectServiceClient.createFolder(workspaceId, path, _callback(callback, dtoUnmarshaller.newUnmarshaller(ItemReference.class)));
+                projectServiceClient.createFolder(appContext.getDevMachine(), path, _callback(callback, dtoUnmarshaller.newUnmarshaller(ItemReference.class)));
             }
         };
     }

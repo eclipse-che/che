@@ -24,11 +24,8 @@ import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.mvp.View;
@@ -83,7 +80,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                                                                      HasView,
                                                                      ProcessFinishedHandler,
                                                                      OutputConsole.ConsoleOutputListener,
-                                                                     WorkspaceStartedHandler,
                                                                      WorkspaceStoppedHandler,
                                                                      MachineStateEvent.Handler {
 
@@ -166,7 +162,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         });
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
     }
@@ -375,8 +370,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         workspaceAgent.setActivePart(this);
 
         if (selectedTreeNode == null) {
-            if (appContext.getDevMachineId() != null) {
-                onAddTerminal(appContext.getDevMachineId());
+            if (appContext.getDevMachine() != null) {
+                onAddTerminal(appContext.getDevMachine().getId());
             }
             return;
         }
@@ -652,9 +647,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         }
     }
 
-    @Override
-    public void onWorkspaceStarted(WorkspaceDto workspace) {
-    }
+
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
@@ -671,5 +664,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         view.selectNode(null);
         view.setProcessesData(rootNode);
     }
+
 
 }

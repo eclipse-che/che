@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.machine.shared.Constants;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,9 +37,9 @@ public class WsAgentServerConfProvider implements Provider<ServerConf> {
     @Override
     public ServerConf get() {
         return new ServerConfImpl(WSAGENT_REFERENCE,
-                                  WsAgentLauncherImpl.WS_AGENT_PORT,
+                                  Constants.WS_AGENT_PORT,
                                   apiEndpoint.getScheme(),
-                                  null);
+                                  "/api/ext");
     }
 
 }

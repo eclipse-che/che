@@ -76,7 +76,7 @@ public class StatusCommandPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, EMPTY_TEXT);
                 return callback;
             }
-        }).when(service).statusText(anyString(),
+        }).when(service).statusText(devMachine,
                                     Matchers.<ProjectConfigDto>anyObject(),
                                     Matchers.<StatusFormat>anyObject(),
                                     Matchers.<AsyncRequestCallback<String>>anyObject());
@@ -84,7 +84,7 @@ public class StatusCommandPresenterTest extends BaseTest {
         presenter.showStatus();
 
         verify(appContext).getCurrentProject();
-        verify(service).statusText(anyString(),
+        verify(service).statusText(eq(devMachine),
                                    eq(rootProjectConfig),
                                    eq(IS_NOT_FORMATTED),
                                    Matchers.<AsyncRequestCallback<String>>anyObject());
@@ -101,7 +101,7 @@ public class StatusCommandPresenterTest extends BaseTest {
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).statusText(anyString(),
+        }).when(service).statusText(devMachine,
                                     Matchers.<ProjectConfigDto>anyObject(),
                                     Matchers.<StatusFormat>anyObject(),
                                     Matchers.<AsyncRequestCallback<String>>anyObject());
@@ -109,7 +109,7 @@ public class StatusCommandPresenterTest extends BaseTest {
         presenter.showStatus();
 
         verify(appContext).getCurrentProject();
-        verify(service).statusText(anyString(), eq(rootProjectConfig), eq(IS_NOT_FORMATTED), Matchers.<AsyncRequestCallback<String>>anyObject());
+        verify(service).statusText(eq(devMachine), eq(rootProjectConfig), eq(IS_NOT_FORMATTED), Matchers.<AsyncRequestCallback<String>>anyObject());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(constant).statusFailed();
     }

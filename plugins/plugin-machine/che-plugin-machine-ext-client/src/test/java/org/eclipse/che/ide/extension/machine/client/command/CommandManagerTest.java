@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.command;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -68,6 +69,8 @@ public class CommandManagerTest {
     @Mock
     private AppContext                           appContext;
     @Mock
+    private DevMachine                           devMachine;
+    @Mock
     private CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry;
 
     @Mock
@@ -80,6 +83,8 @@ public class CommandManagerTest {
 
     @Test
     public void shouldShowWarningWhenNoDevMachineIsRunning() throws Exception {
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getId()).thenReturn(null);
         commandManager.execute(mock(CommandConfiguration.class));
 
         verify(localizationConstant).noDevMachine();
@@ -89,7 +94,8 @@ public class CommandManagerTest {
     @Test
     public void shouldExecuteCommand() throws Exception {
         String devMachineId = "devMachineId";
-        when(appContext.getDevMachineId()).thenReturn(devMachineId);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getId()).thenReturn(devMachineId);
         CommandOutputConsole outputConsole = mock(CommandOutputConsole.class);
         when(commandConsoleFactory.create(any(CommandConfiguration.class), anyString())).thenReturn(outputConsole);
         when(machineServiceClient.executeCommand(anyString(), anyObject(), anyString())).thenReturn(processPromise);
@@ -114,7 +120,7 @@ public class CommandManagerTest {
 
         commandManager.execute(command);
 
-        verify(appContext).getDevMachineId();
+        verify(appContext).getDevMachine();
         verify(commandConsoleFactory).create(eq(command), eq(devMachineId));
         verify(outputConsole).listenToOutput(anyString());
         verify(consolesPanelPresenter).addCommandOutput(eq(devMachineId), eq(outputConsole));

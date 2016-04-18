@@ -72,7 +72,7 @@ public class StatusCommandPresenter {
             return;
         }
 
-        service.statusText(appContext.getWorkspaceId(), project.getRootProject(), LONG,
+        service.statusText(appContext.getDevMachine(), project.getRootProject(), LONG,
                            new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                                @Override
                                protected void onSuccess(String result) {
@@ -113,6 +113,6 @@ public class StatusCommandPresenter {
             console.print(line);
         }
 
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
     }
 }

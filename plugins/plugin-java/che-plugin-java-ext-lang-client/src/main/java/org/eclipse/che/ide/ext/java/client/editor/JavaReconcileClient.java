@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.editor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
@@ -27,24 +26,21 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class JavaReconcileClient {
 
-    private final String                 javaCAPath;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
-    private final String                 workspaceId;
+    private final AppContext appContext;
 
     @Inject
-    public JavaReconcileClient(@Named("cheExtensionPath") String javaCAPath,
-                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
+    public JavaReconcileClient(DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                AppContext appContext,
                                AsyncRequestFactory asyncRequestFactory) {
-        this.workspaceId = appContext.getWorkspace().getId();
-        this.javaCAPath = javaCAPath;
+        this.appContext = appContext;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
     }
 
     public void reconcile(String projectPath, String fqn, final ReconcileCallback callback) {
-        String url = javaCAPath + "/jdt/" + workspaceId + "/reconcile/?projectpath=" + projectPath + "&fqn=" + fqn;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/" + appContext.getWorkspaceId() + "/reconcile/?projectpath=" + projectPath + "&fqn=" + fqn;
         asyncRequestFactory.createGetRequest(url)
                            .send(new AsyncRequestCallback<ReconcileResult>(dtoUnmarshallerFactory.newUnmarshaller(ReconcileResult.class)) {
                                @Override

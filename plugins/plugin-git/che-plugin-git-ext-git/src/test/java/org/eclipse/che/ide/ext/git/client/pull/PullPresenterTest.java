@@ -123,6 +123,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Remote>> callback = (AsyncRequestCallback<List<Remote>>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, remotes);
                 return callback;
@@ -134,6 +135,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, branches);
                 return callback;
@@ -143,6 +145,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, branches);
                 return callback;
@@ -174,6 +177,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Remote>> callback = (AsyncRequestCallback<List<Remote>>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, remotes);
                 return callback;
@@ -185,6 +189,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, branches);
                 return callback;
@@ -194,6 +199,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, branches);
                 return callback;
@@ -228,6 +234,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Remote>> callback = (AsyncRequestCallback<List<Remote>>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, remotes);
                 return callback;
@@ -239,6 +246,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
@@ -248,6 +256,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
@@ -274,6 +283,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Remote>> callback = (AsyncRequestCallback<List<Remote>>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
@@ -299,6 +309,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, pullResponse);
                 return callback;
@@ -333,6 +344,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, pullResponse);
                 return callback;
@@ -366,6 +378,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, exception);
                 return callback;
@@ -395,6 +408,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, exception);
                 return callback;
@@ -425,6 +439,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[3];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, pullResponse);
                 return callback;
@@ -463,6 +478,7 @@ public class PullPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<List<Branch>> callback = (AsyncRequestCallback<List<Branch>>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, branches);
                 return callback;

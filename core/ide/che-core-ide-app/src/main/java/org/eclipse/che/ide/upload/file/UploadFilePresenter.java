@@ -12,11 +12,11 @@ package org.eclipse.che.ide.upload.file;
 
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -24,8 +24,6 @@ import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
-
-import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
 
@@ -36,24 +34,22 @@ import java.util.List;
  */
 public class UploadFilePresenter implements UploadFileView.ActionDelegate {
 
-    private       UploadFileView           view;
-    private       String                   restContext;
-    private       String                   workspaceId;
-    private       EventBus                 eventBus;
-    private       NotificationManager      notificationManager;
-    private       ProjectExplorerPresenter projectExplorer;
+    private final UploadFileView           view;
+    private final String                   workspaceId;
+    private final EventBus                 eventBus;
+    private final NotificationManager      notificationManager;
+    private final ProjectExplorerPresenter projectExplorer;
     private final CoreLocalizationConstant locale;
+    private final AppContext               appContext;
 
     @Inject
     public UploadFilePresenter(UploadFileView view,
-                               @Named("cheExtensionPath") String restContext,
                                AppContext appContext,
                                EventBus eventBus,
                                NotificationManager notificationManager,
                                ProjectExplorerPresenter projectExplorer,
                                CoreLocalizationConstant locale) {
-
-        this.restContext = restContext;
+        this.appContext = appContext;
         this.workspaceId = appContext.getWorkspace().getId();
         this.eventBus = eventBus;
         this.view = view;
@@ -96,8 +92,8 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
     @Override
     public void onUploadClicked() {
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(
-                restContext + "/project/" + workspaceId + "/uploadfile" + ((HasStorablePath)getResourceBasedNode()).getStorablePath());
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() +"/project/" + workspaceId + "/uploadfile"
+                       + ((HasStorablePath)getResourceBasedNode()).getStorablePath());
         view.submit();
     }
 

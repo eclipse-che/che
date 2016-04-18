@@ -16,6 +16,7 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="org.eclipse.che.ide.Commons"/>
+    <inherits name="org.eclipse.che.api.core.model.Model"/>
     <inherits name="org.eclipse.che.api.promises.Promises"/>
     <source path='machine/gwt'/>
     <source path='machine/shared'/>

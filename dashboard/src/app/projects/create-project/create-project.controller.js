@@ -505,7 +505,7 @@ export class CreateProjectCtrl {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       //if we have a SSH error
-      if (error.data.errorCode === 32068) {
+      if (error.data && error.data.errorCode === 32068) {
         this.showAddSecretKeyDialog(projectData.source.location, workspaceId);
         return;
       }
@@ -843,24 +843,7 @@ export class CreateProjectCtrl {
       }
     } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
-      // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceSelected.id);
-      promiseWorkspace.then(() => {
-        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(this.workspaceSelected.id);
-        // Get bus
-        let websocketStream = this.$websocket(websocketUrl);
-        // on success, create project
-        websocketStream.onOpen(() => {
-          let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
-          // mode
-          this.createProjectInWorkspace(this.workspaceSelected.id, this.projectName, this.importProjectData, bus);
-        });
-      }, (error) => {
-        if (error.data.message) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
-        }
-        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-      });
+      this.checkExistingWorkspaceState(this.workspaceSelected);
     }
     // do we have projects ?
     let projects = this.cheAPI.getProject().getAllProjects();
@@ -869,6 +852,68 @@ export class CreateProjectCtrl {
       this.createProjectSvc.showPopup();
       this.$location.path('/projects');
     }
+  }
+
+  /**
+   * Check whether existing workspace in running (runtime should be present)
+   *
+   * @param workspace existing workspace
+   */
+  checkExistingWorkspaceState(workspace) {
+    if (workspace.runtime) {
+      let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
+      // Get bus
+      let websocketStream = this.$websocket(websocketUrl);
+      // on success, create project
+      websocketStream.onOpen(() => {
+        let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
+        this.createProjectInWorkspace(workspace.id, this.projectName, this.importProjectData, bus);
+      });
+    } else {
+      this.subscribeStatusChannel(workspace);
+      let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+      this.startWorkspace(bus, workspace);
+    }
+  }
+
+  /**
+   * Subscribe on workspace status channel
+   *
+   * @param workspace workspace for listening status
+   */
+  subscribeStatusChannel(workspace) {
+    let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+    // subscribe to workspace events
+    let workspaceChannel = 'workspace:' + workspace.id;
+    this.listeningChannels.push(workspaceChannel);
+    bus.subscribe(workspaceChannel, (message) => {
+      if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+        this.createProjectSvc.setCurrentProgressStep(2);
+        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+        // need to show the error
+        this.$mdDialog.show(
+          this.$mdDialog.alert()
+            .title('Error when starting agent')
+            .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
+            .ariaLabel('Workspace agent start')
+            .ok('OK')
+        );
+      }
+
+      if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id) {
+        this.createProjectSvc.setCurrentProgressStep(2);
+
+        this.importProjectData.project.name = this.projectName;
+
+        let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+        promiseWorkspace.then(() => {
+          let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
+          // try to connect
+          this.websocketReconnect = 10;
+          this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
+        });
+      }
+    });
   }
 
   /**
@@ -884,42 +929,11 @@ export class CreateProjectCtrl {
       if (this.workspaces.length === 0) {
         this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
       }
-      // recipe url
-      let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
-      // subscribe to workspace events
-      let workspaceChannel = 'workspace:' + workspace.id;
-      this.listeningChannels.push(workspaceChannel);
-      bus.subscribe(workspaceChannel, (message) => {
 
-        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-          this.createProjectSvc.setCurrentProgressStep(2);
-          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-          // need to show the error
-          this.$mdDialog.show(
-            this.$mdDialog.alert()
-              .title('Error when starting agent')
-              .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
-              .ariaLabel('Workspace agent start')
-              .ok('OK')
-          );
-        }
+      this.subscribeStatusChannel(workspace);
 
-        if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id) {
-          this.createProjectSvc.setCurrentProgressStep(2);
-
-          this.importProjectData.project.name = this.projectName;
-
-          let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
-          promiseWorkspace.then(() => {
-            let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
-            // try to connect
-            this.websocketReconnect = 10;
-            this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
-
-          });
-        }
-      });
       this.$timeout(() => {
+        let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
         this.startWorkspace(bus, workspace);
       }, 1000);
 

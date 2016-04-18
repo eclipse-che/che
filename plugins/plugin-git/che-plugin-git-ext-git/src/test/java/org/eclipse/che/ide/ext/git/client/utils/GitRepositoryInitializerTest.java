@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ext.git.client.utils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.googlecode.gwt.test.utils.GwtReflectionUtils;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.GitRepositoryInitializer;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -31,7 +30,6 @@ import java.util.List;
 
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -68,15 +66,16 @@ public class GitRepositoryInitializerTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 RequestCallback<Void> callback = (RequestCallback<Void>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
             }
-        }).when(service).init(anyString(), anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
+        }).when(service).init(devMachine, anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
 
         gitRepositoryInitializer.initGitRepository(rootProjectConfig, callback);
 
-        verify(service).init(anyString(), eq(rootProjectConfig), eq(BARE), (RequestCallback<Void>)anyObject());
+        verify(service).init(eq(devMachine), eq(rootProjectConfig), eq(BARE), (RequestCallback<Void>)anyObject());
     }
 
     @Test
@@ -89,26 +88,28 @@ public class GitRepositoryInitializerTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 RequestCallback<Void> callback = (RequestCallback<Void>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
             }
-        }).when(service).init(anyString(), anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
+        }).when(service).init(devMachine, anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
 
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[1];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, REMOTE_URI);
                 return callback;
             }
-        }).when(service).getGitReadOnlyUrl(anyString(), anyObject(), (AsyncRequestCallback<String>)anyObject());
+        }).when(service).getGitReadOnlyUrl(devMachine, anyObject(), (AsyncRequestCallback<String>)anyObject());
 
         gitRepositoryInitializer.getGitUrlWithAutoInit(rootProjectConfig, stringCallback);
 
-        verify(service).init(anyString(), eq(rootProjectConfig), eq(BARE), (RequestCallback<Void>)anyObject());
+        verify(service).init(eq(devMachine), eq(rootProjectConfig), eq(BARE), (RequestCallback<Void>)anyObject());
         verify(stringCallback).onSuccess(eq(REMOTE_URI));
     }
 
@@ -123,15 +124,16 @@ public class GitRepositoryInitializerTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[1];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, REMOTE_URI);
                 return callback;
             }
-        }).when(service).getGitReadOnlyUrl(anyString(), anyObject(), (AsyncRequestCallback<String>)anyObject());
+        }).when(service).getGitReadOnlyUrl(devMachine, anyObject(), (AsyncRequestCallback<String>)anyObject());
 
         gitRepositoryInitializer.getGitUrlWithAutoInit(rootProjectConfig, stringCallback);
 
-        verify(service, never()).init(anyString(), anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
+        verify(service, never()).init(eq(devMachine), anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
         verify(stringCallback).onSuccess(eq(REMOTE_URI));
     }
 }

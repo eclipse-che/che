@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,6 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
@@ -41,7 +41,6 @@ import java.net.HttpURLConnection;
 public class WsAgentLauncherImpl implements WsAgentLauncher {
     public static final String WS_AGENT_PROCESS_START_COMMAND = "machine.ws_agent.run_command";
     public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
-    public static final String WS_AGENT_PORT                  = "4401/tcp";
 
     private static final Logger LOG                             = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
@@ -52,7 +51,6 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     private final long                     wsAgentMaxStartTimeMs;
     private final long                     wsAgentPingDelayMs;
     private final int                      wsAgentPingConnectionTimeoutMs;
-    private final String                   wsAgentPingPath;
     private final String                   pingTimedOutErrorMessage;
 
     @Inject
@@ -62,8 +60,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
                                @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
                                @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
                                @Named("machine.ws_agent.ping_conn_timeout_ms") int wsAgentPingConnectionTimeoutMs,
-                               @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage,
-                               @Named("machine.ws_agent.agent_api.path") String wsAgentApiPath) {
+                               @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage) {
         this.machineManagerProvider = machineManagerProvider;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
         this.wsAgentStartCommandLine = wsAgentStartCommandLine;
@@ -71,8 +68,6 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
         this.wsAgentPingDelayMs = wsAgentPingDelayMs;
         this.wsAgentPingConnectionTimeoutMs = wsAgentPingConnectionTimeoutMs;
         this.pingTimedOutErrorMessage = pingTimedOutErrorMessage;
-        // everrest respond 404 to path to rest without trailing slash
-        this.wsAgentPingPath = wsAgentApiPath;
     }
 
     public static String getWsAgentProcessOutputChannel(String workspaceId) {
@@ -82,17 +77,23 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     @Override
     public void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException {
         final Machine devMachine = getMachineManager().getDevMachine(workspaceId);
+        final String wsAgentPingUrl = devMachine.getRuntime()
+                                                .getServers()
+                                                .get(Constants.WS_AGENT_PORT)
+                                                .getUrl();
         try {
             getMachineManager().exec(devMachine.getId(),
                                      new CommandImpl(WS_AGENT_PROCESS_NAME, wsAgentStartCommandLine, "Arbitrary"),
                                      getWsAgentProcessOutputChannel(workspaceId));
 
-            final HttpJsonRequest wsAgentPingRequest = createPingRequest(devMachine);
 
+            final HttpJsonRequest wsAgentPingRequest = httpJsonRequestFactory.fromUrl(wsAgentPingUrl)
+                                                                             .setMethod(HttpMethod.GET)
+                                                                             .setTimeout(wsAgentPingConnectionTimeoutMs);
             long pingStartTimestamp = System.currentTimeMillis();
             LOG.debug("Starts pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}",
                       workspaceId,
-                      wsAgentPingRequest,
+                      wsAgentPingUrl,
                       pingStartTimestamp);
 
             while (System.currentTimeMillis() - pingStartTimestamp < wsAgentMaxStartTimeMs) {
@@ -105,20 +106,8 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
         } catch (BadRequestException wsAgentLaunchingExc) {
             throw new MachineException(wsAgentLaunchingExc.getLocalizedMessage(), wsAgentLaunchingExc);
         }
+        LOG.error("Fail pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}", workspaceId, wsAgentPingUrl);
         throw new MachineException(pingTimedOutErrorMessage);
-    }
-
-    private HttpJsonRequest createPingRequest(Machine devMachine) {
-        final String wsAgentPingUrl = UriBuilder.fromUri(devMachine.getRuntime()
-                                                                   .getServers()
-                                                                   .get(WS_AGENT_PORT)
-                                                                   .getUrl())
-                                                .replacePath(wsAgentPingPath)
-                                                .build()
-                                                .toString();
-        return httpJsonRequestFactory.fromUrl(wsAgentPingUrl)
-                                     .setMethod(HttpMethod.GET)
-                                     .setTimeout(wsAgentPingConnectionTimeoutMs);
     }
 
     private boolean pingWsAgent(HttpJsonRequest wsAgentPingRequest) throws MachineException {

@@ -89,8 +89,7 @@ public class CommandManager {
 
     /** Execute the the given command configuration on the developer machine. */
     public void execute(@NotNull CommandConfiguration configuration) {
-        final String devMachineId = appContext.getDevMachineId();
-
+        final String devMachineId = appContext.getDevMachine().getId();
         executeCommand(configuration, devMachineId);
     }
 

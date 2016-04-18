@@ -49,8 +49,8 @@ public class FileReferenceNode extends ItemReferenceBasedNode implements Virtual
      * If you want to display another name different from origin, just set into attributes of this node this parameter.
      */
     public static final String DISPLAY_NAME_ATTR = "display";
-    
-    private final String workspaceId;
+
+    private final AppContext appContext;
 
     @Inject
     public FileReferenceNode(@Assisted ItemReference itemReference,
@@ -61,8 +61,7 @@ public class FileReferenceNode extends ItemReferenceBasedNode implements Virtual
                              NodeManager nodeManager,
                              ItemReferenceProcessor resourceProcessor) {
         super(itemReference, projectConfig, nodeSettings, eventBus, nodeManager, resourceProcessor);
-        
-        this.workspaceId = appContext.getWorkspace().getId();
+        this.appContext = appContext;
     }
 
     @Override
@@ -120,7 +119,7 @@ public class FileReferenceNode extends ItemReferenceBasedNode implements Virtual
         return newPromise(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
             public void makeCall(AsyncCallback<Void> callback) {
-                nodeManager.projectService.updateFile(workspaceId, getStorablePath(), content, newCallback(callback));
+                nodeManager.projectService.updateFile(appContext.getDevMachine(), getStorablePath(), content, newCallback(callback));
             }
         });
     }
@@ -135,7 +134,7 @@ public class FileReferenceNode extends ItemReferenceBasedNode implements Virtual
         return newPromise(new AsyncPromiseHelper.RequestCall<String>() {
             @Override
             public void makeCall(AsyncCallback<String> callback) {
-                nodeManager.projectService.getFileContent(workspaceId, getStorablePath(), newCallback(callback, new StringUnmarshaller()));
+                nodeManager.projectService.getFileContent(appContext.getDevMachine(), getStorablePath(), newCallback(callback, new StringUnmarshaller()));
             }
         });
     }

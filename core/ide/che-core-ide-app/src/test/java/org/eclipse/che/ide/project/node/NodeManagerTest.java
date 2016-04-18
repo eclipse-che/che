@@ -14,6 +14,7 @@ import com.google.common.collect.Sets;
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Function;
@@ -207,9 +208,11 @@ public class NodeManagerTest {
         final WorkspaceConfigDto workspaceConfigDtoMock = mock(WorkspaceConfigDto.class);
         final WorkspaceDto workspaceMock = mock(WorkspaceDto.class);
         final NodeSettings nodeSettingsMock = mock(NodeSettings.class);
+        final DevMachine devMachine = mock(DevMachine.class);
 
-        when(projectServiceClientMock.getProjects(anyString())).thenReturn(projectConfigsMock);
+        when(appContextMock.getDevMachine()).thenReturn(devMachine);
         when(appContextMock.getWorkspace()).thenReturn(workspaceMock);
+        when(projectServiceClientMock.getProjects(devMachine)).thenReturn(projectConfigsMock);
         when(workspaceMock.getConfig()).thenReturn(workspaceConfigDtoMock);
         when(project_1.getPath()).thenReturn("/project_1/");
         when(project_2.getPath()).thenReturn("/project_1/some_path/");

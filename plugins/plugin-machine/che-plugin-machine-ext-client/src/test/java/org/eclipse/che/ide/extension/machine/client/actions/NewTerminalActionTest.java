@@ -12,6 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -38,6 +39,8 @@ public class NewTerminalActionTest {
     @Mock
     private AppContext                  appContext;
     @Mock
+    private DevMachine                  devMachine;
+    @Mock
     private WorkspaceAgent              workspaceAgent;
     @Mock
     private ConsolesPanelPresenter      consolesPanelPresenter;
@@ -58,18 +61,19 @@ public class NewTerminalActionTest {
 
     @Test
     public void actionShouldBePerformed() throws Exception {
-        when(appContext.getDevMachineId()).thenReturn(MACHINE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getId()).thenReturn(MACHINE_ID);
 
         action.actionPerformed(actionEvent);
 
-        verify(appContext).getDevMachineId();
+        verify(appContext).getDevMachine();
         verify(consolesPanelPresenter).onAddTerminal(eq(MACHINE_ID));
         verify(workspaceAgent).setActivePart(eq(consolesPanelPresenter));
     }
 
     @Test
     public void actionShouldBeEnabledWhenDevMachineIsNotNull() throws Exception {
-        when(appContext.getDevMachineId()).thenReturn(MACHINE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
 
         action.updateInPerspective(actionEvent);
 
@@ -78,7 +82,7 @@ public class NewTerminalActionTest {
 
     @Test
     public void actionShouldBeDisabledWhenDevMachineIsNull() throws Exception {
-        when(appContext.getDevMachineId()).thenReturn(null);
+        when(appContext.getDevMachine()).thenReturn(null);
 
         action.updateInPerspective(actionEvent);
 

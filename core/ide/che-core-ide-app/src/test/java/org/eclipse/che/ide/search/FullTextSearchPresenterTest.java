@@ -13,6 +13,7 @@ package org.eclipse.che.ide.search;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.gwt.client.QueryExpression;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
@@ -38,6 +39,8 @@ import java.util.List;
 
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,7 +54,7 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class FullTextSearchPresenterTest {
     private final String SEARCHED_TEXT = "to be or not to be";
-
+    FullTextSearchPresenter fullTextSearchPresenter;
     @Mock
     private FullTextSearchView           view;
     @Mock
@@ -66,28 +69,27 @@ public class FullTextSearchPresenterTest {
     private Promise<List<ItemReference>> promise;
     @Mock
     private PromiseError                 promiseError;
-
     @Mock
     private AppContext   appContext;
     @Mock
+    private DevMachine   devMachine;
+    @Mock
     private WorkspaceDto workspaceDto;
-
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>        operationErrorCapture;
     @Captor
     private ArgumentCaptor<Operation<List<ItemReference>>> operationSuccessCapture;
 
-    FullTextSearchPresenter fullTextSearchPresenter;
-
     @Before
     public void setUp() throws Exception {
         when(appContext.getWorkspace()).thenReturn(workspaceDto);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
         when(workspaceDto.getId()).thenReturn("id");
         String MASK = "mask";
         when(view.getFileMask()).thenReturn(MASK);
         String PATH = "path";
         when(view.getPathToSearch()).thenReturn(PATH);
-        when(projectServiceClient.search(anyString(), Matchers.<QueryExpression>any())).thenReturn(promise);
+        when(projectServiceClient.search(eq(devMachine), Matchers.<QueryExpression>any())).thenReturn(promise);
         when(promise.then(operationSuccessCapture.capture())).thenReturn(promise);
 
         fullTextSearchPresenter = new FullTextSearchPresenter(view,
@@ -154,7 +156,7 @@ public class FullTextSearchPresenterTest {
         fullTextSearchPresenter.onEnterClicked();
 
         verify(view).getSearchText();
-        verify(projectServiceClient).search(anyString(), (QueryExpression)anyObject());
+        verify(projectServiceClient).search(eq(devMachine), (QueryExpression)anyObject());
     }
 
     @Test
@@ -165,7 +167,7 @@ public class FullTextSearchPresenterTest {
 
         verify(view).close();
         verify(view, never()).getSearchText();
-        verify(projectServiceClient, never()).search(anyString(), (QueryExpression)anyObject());
+        verify(projectServiceClient, never()).search(eq(devMachine), (QueryExpression)anyObject());
     }
 
     @Test
@@ -176,6 +178,6 @@ public class FullTextSearchPresenterTest {
 
         verify(view).showSelectPathDialog();
         verify(view, never()).getSearchText();
-        verify(projectServiceClient, never()).search(anyString(), (QueryExpression)anyObject());
+        verify(projectServiceClient, never()).search(eq(devMachine), (QueryExpression)anyObject());
     }
 }

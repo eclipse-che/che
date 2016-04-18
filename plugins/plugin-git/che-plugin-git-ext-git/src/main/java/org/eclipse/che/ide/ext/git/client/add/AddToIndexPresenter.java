@@ -61,7 +61,6 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     private final GitOutputConsoleFactory  gitOutputConsoleFactory;
     private final ConsolesPanelPresenter   consolesPanelPresenter;
-    private final String                   workspaceId;
 
     private CurrentProject project;
 
@@ -93,7 +92,6 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         this.notificationManager = notificationManager;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.workspaceId = appContext.getWorkspaceId();
         this.consolesPanelPresenter = consolesPanelPresenter;
     }
 
@@ -108,7 +106,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
 
         final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
         final Unmarshallable<Status> unmarshall = this.dtoUnmarshallerFactory.newUnmarshaller(Status.class);
-        service.status(workspaceId, project.getRootProject(),
+        service.status(appContext.getDevMachine(), project.getRootProject(),
                        new AsyncRequestCallback<Status>(unmarshall) {
                            @Override
                            protected void onSuccess(final Status result) {
@@ -116,7 +114,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                                    addSelection();
                                } else {
                                    console.print(constant.nothingAddToIndex());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                    notificationManager.notify(constant.nothingAddToIndex(), project.getRootProject());
                                }
                            }
@@ -124,7 +122,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                            @Override
                            protected void onFailure(Throwable exception) {
                                console.printError(exception.getMessage() != null ? exception.getMessage() : constant.statusFailed());
-                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                notificationManager.notify(constant.statusFailed(), FAIL, true, project.getRootProject());
                            }
                        });
@@ -177,12 +175,12 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         final GitOutputConsole console = gitOutputConsoleFactory.create(ADD_TO_INDEX_COMMAND_NAME);
 
         try {
-            service.add(workspaceId, project.getRootProject(), update, getMultipleFilePatterns(), new RequestCallback<Void>() {
+            service.add(appContext.getDevMachine(), project.getRootProject(), update, getMultipleFilePatterns(), new RequestCallback<Void>() {
                 @Override
                 protected void onSuccess(final Void result) {
 
                     console.print(constant.addSuccess());
-                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                     notificationManager.notify(constant.addSuccess(), project.getRootProject());
                 }
 
@@ -304,7 +302,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
     private void handleError(@NotNull final Throwable e, GitOutputConsole console) {
         String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.addFailed();
         console.printError(errorMessage);
-        consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
         notificationManager.notify(constant.addFailed(), FAIL, true, project.getRootProject());
     }
 

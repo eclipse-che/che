@@ -49,7 +49,7 @@ public class ProjectResolver {
     private final DtoUnmarshallerFactory        dtoUnmarshallerFactory;
     private final ProjectServiceClient          projectService;
     private final ProjectTypeRegistry           projectTypeRegistry;
-    private final String                        workspaceId;
+    private final AppContext                    appContext;
     private final ProjectNotificationSubscriber projectNotificationSubscriber;
     private final ProjectUpdater                projectUpdater;
 
@@ -63,7 +63,7 @@ public class ProjectResolver {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.projectService = projectService;
         this.projectTypeRegistry = projectTypeRegistry;
-        this.workspaceId = appContext.getWorkspaceId();
+        this.appContext = appContext;
         this.projectNotificationSubscriber = projectNotificationSubscriber;
         this.projectUpdater = projectUpdater;
     }
@@ -82,7 +82,7 @@ public class ProjectResolver {
 
         String path = projectPath == null ? projectName : projectPath;
         Unmarshallable<List<SourceEstimation>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(SourceEstimation.class);
-        projectService.resolveSources(workspaceId, path, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
+        projectService.resolveSources(appContext.getDevMachine(), path, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
 
             Function<SourceEstimation, ProjectTypeDto> estimateToType = new Function<SourceEstimation, ProjectTypeDto>() {
                 @Nullable

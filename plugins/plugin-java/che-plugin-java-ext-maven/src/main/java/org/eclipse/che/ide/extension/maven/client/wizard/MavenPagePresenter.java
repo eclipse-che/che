@@ -100,7 +100,7 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
     }
 
     private void estimateAndSetAttributes() {
-        projectServiceClient.estimateProject(appContext.getWorkspace().getId(),
+        projectServiceClient.estimateProject(appContext.getDevMachine(),
                 context.get(PROJECT_PATH_KEY), MAVEN_ID,
                 new AsyncRequestCallback<SourceEstimation>(dtoUnmarshallerFactory.newUnmarshaller(SourceEstimation.class)) {
                     @Override

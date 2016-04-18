@@ -16,6 +16,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Promise;
@@ -41,7 +42,7 @@ import java.util.Objects;
 @Deprecated
 public class FileNode extends ItemNode implements VirtualFile {
 
-    private final String workspaceId;
+    private final AppContext appContext;
 
     @Inject
     public FileNode(@Assisted TreeNode<?> parent,
@@ -58,7 +59,7 @@ public class FileNode extends ItemNode implements VirtualFile {
               appContext,
               projectService,
               dtoUnmarshallerFactory);
-        this.workspaceId = appContext.getWorkspace().getId();
+        this.appContext = appContext;
     }
 
     /** {@inheritDoc} */
@@ -101,7 +102,7 @@ public class FileNode extends ItemNode implements VirtualFile {
         final String oldNodePath = FileNode.this.getPath();
 
         Unmarshallable<ItemReference> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ItemReference.class);
-        projectServiceClient.getItem(workspaceId, newPath, new AsyncRequestCallback<ItemReference>(unmarshaller) {
+        projectServiceClient.getItem(appContext.getDevMachine(), newPath, new AsyncRequestCallback<ItemReference>(unmarshaller) {
             @Override
             protected void onSuccess(ItemReference result) {
                 setData(result);
@@ -172,7 +173,7 @@ public class FileNode extends ItemNode implements VirtualFile {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<String>() {
             @Override
             public void makeCall(final AsyncCallback<String> callback) {
-                projectServiceClient.getFileContent(workspaceId, getPath(), new AsyncRequestCallback<String>(new StringUnmarshaller()) {
+                projectServiceClient.getFileContent(appContext.getDevMachine(), getPath(), new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                     @Override
                     protected void onSuccess(String result) {
                         callback.onSuccess(result);
@@ -198,7 +199,7 @@ public class FileNode extends ItemNode implements VirtualFile {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
-                projectServiceClient.updateFile(workspaceId, getPath(), content, new AsyncRequestCallback<Void>() {
+                projectServiceClient.updateFile(appContext.getDevMachine(), getPath(), content, new AsyncRequestCallback<Void>() {
                     @Override
                     protected void onSuccess(Void result) {
                         callback.onSuccess(result);

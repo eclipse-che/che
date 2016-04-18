@@ -38,7 +38,7 @@ public class ExportPresenterTest extends BaseSubversionPresenterTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        presenter = new ExportPresenter(null, appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart,
+        presenter = new ExportPresenter(appContext, subversionOutputConsoleFactory, consolesPanelPresenter, projectExplorerPart,
                                         exportView, dtoUnmarshallerFactory, service, notificationManager, constants, statusColors);
     }
 

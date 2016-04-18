@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.gwt.client;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
@@ -37,7 +38,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getProjects(String workspaceId, AsyncRequestCallback<List<ProjectConfigDto>> callback);
+    void getProjects(DevMachine devMachine, AsyncRequestCallback<List<ProjectConfigDto>> callback);
 
     /**
      * Get all projects in current workspace.
@@ -46,7 +47,7 @@ public interface ProjectServiceClient {
      *         id of current workspace
      * @return a promise that will provide a list of {@link ProjectConfigDto}s, or rejects with an error
      */
-    Promise<List<ProjectConfigDto>> getProjects(String workspaceId);
+    Promise<List<ProjectConfigDto>> getProjects(DevMachine devMachine);
 
     /**
      * Get project.
@@ -58,7 +59,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getProject(String workspaceId, String path, AsyncRequestCallback<ProjectConfigDto> callback);
+    void getProject(DevMachine devMachine, String path, AsyncRequestCallback<ProjectConfigDto> callback);
 
     /**
      * Get project.
@@ -67,7 +68,7 @@ public interface ProjectServiceClient {
      *         path to the project
      * @return a promise that resolves to the {@link ProjectConfigDto}, or rejects with an error
      */
-    Promise<ProjectConfigDto> getProject(String workspaceId, String path);
+    Promise<ProjectConfigDto> getProject(DevMachine devMachine, String path);
 
     /**
      * Get item.
@@ -79,7 +80,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getItem(String workspaceId, String path, AsyncRequestCallback<ItemReference> callback);
+    void getItem(DevMachine devMachine, String path, AsyncRequestCallback<ItemReference> callback);
 
     /**
      * Create project.
@@ -91,7 +92,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void createProject(String workspaceId, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
+    void createProject(DevMachine devMachine, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
 
 
     /**
@@ -106,7 +107,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void estimateProject(String workspaceId, String path, String projectType, AsyncRequestCallback<SourceEstimation> callback);
+    void estimateProject(DevMachine devMachine, String path, String projectType, AsyncRequestCallback<SourceEstimation> callback);
 
 
     /**
@@ -121,7 +122,7 @@ public interface ProjectServiceClient {
      *
      * @deprecated instead of this method should use {@link ProjectServiceClient#resolveSources(String, String)}
      */
-    void resolveSources(String workspaceId, String path, AsyncRequestCallback<List<SourceEstimation>> callback);
+    void resolveSources(DevMachine devMachine, String path, AsyncRequestCallback<List<SourceEstimation>> callback);
 
      /**
       * Gets list of {@link SourceEstimation} for all supposed project types.
@@ -133,7 +134,7 @@ public interface ProjectServiceClient {
       * @return a promise that will provide a list of {@code SourceEstimation} for the given {@code workspaceId} and {@code path},
       *         or rejects with on error
       */
-    Promise<List<SourceEstimation>> resolveSources(String workspaceId, String path);
+    Promise<List<SourceEstimation>> resolveSources(DevMachine devMachine, String path);
 
     /**
      * Get sub-project.
@@ -145,7 +146,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getModules(String workspaceId, String path, AsyncRequestCallback<List<ProjectConfigDto>> callback);
+    void getModules(DevMachine devMachine, String path, AsyncRequestCallback<List<ProjectConfigDto>> callback);
 
     /**
      * Create sub-project.
@@ -159,7 +160,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void createModule(String workspaceId,
+    void createModule(DevMachine devMachine,
                       String parentProjectPath,
                       ProjectConfigDto projectConfig,
                       AsyncRequestCallback<ProjectConfigDto> callback);
@@ -178,7 +179,7 @@ public interface ProjectServiceClient {
      *
      * @deprecated instead of this method should use {@link ProjectServiceClient#updateProject(String, String, ProjectConfigDto)}
      */
-    void updateProject(String workspaceId, String path, ProjectConfigDto descriptor, AsyncRequestCallback<ProjectConfigDto> callback);
+    void updateProject(DevMachine devMachine, String path, ProjectConfigDto descriptor, AsyncRequestCallback<ProjectConfigDto> callback);
 
     /**
      * Update project.
@@ -192,7 +193,7 @@ public interface ProjectServiceClient {
      * @return a promise that will provide updated {@link ProjectConfigDto} for {@code workspaceId}, {@code path}, {@code descriptor}
      *         or rejects with an error
      */
-    Promise<ProjectConfigDto> updateProject(String workspaceId, String path, ProjectConfigDto descriptor);
+    Promise<ProjectConfigDto> updateProject(DevMachine devMachine, String path, ProjectConfigDto descriptor);
 
     /**
      * Create new file in the specified folder.
@@ -208,7 +209,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void createFile(String workspaceId, String parentPath, String name, String content, AsyncRequestCallback<ItemReference> callback);
+    void createFile(DevMachine devMachine, String parentPath, String name, String content, AsyncRequestCallback<ItemReference> callback);
 
     /**
      * Get file content.
@@ -220,7 +221,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getFileContent(String workspaceId, String path, AsyncRequestCallback<String> callback);
+    void getFileContent(DevMachine devMachine, String path, AsyncRequestCallback<String> callback);
 
     /**
      * Update file content.
@@ -234,7 +235,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void updateFile(String workspaceId, String path, String content, AsyncRequestCallback<Void> callback);
+    void updateFile(DevMachine devMachine, String path, String content, AsyncRequestCallback<Void> callback);
 
     /**
      * Create new folder in the specified folder.
@@ -246,7 +247,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void createFolder(String workspaceId, String path, AsyncRequestCallback<ItemReference> callback);
+    void createFolder(DevMachine devMachine, String path, AsyncRequestCallback<ItemReference> callback);
 
     /**
      * Delete item.
@@ -258,7 +259,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void delete(String workspaceId, String path, AsyncRequestCallback<Void> callback);
+    void delete(DevMachine devMachine, String path, AsyncRequestCallback<Void> callback);
 
     /**
      * Delete module.
@@ -272,7 +273,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void deleteModule(String workspaceId, String pathToParent, String modulePath, AsyncRequestCallback<Void> callback);
+    void deleteModule(DevMachine devMachine, String pathToParent, String modulePath, AsyncRequestCallback<Void> callback);
 
     /**
      * Copy an item with new name to the specified target path. Original item name is used if new name isn't set.
@@ -288,7 +289,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void copy(String workspaceId, String path, String newParentPath, String newName, AsyncRequestCallback<Void> callback);
+    void copy(DevMachine devMachine, String path, String newParentPath, String newName, AsyncRequestCallback<Void> callback);
 
     /**
      * Move an item to the specified target path. Set new name to rename the resource when moving.
@@ -304,7 +305,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void move(String workspaceId, String path, String newParentPath, String newName, AsyncRequestCallback<Void> callback);
+    void move(DevMachine devMachine, String path, String newParentPath, String newName, AsyncRequestCallback<Void> callback);
 
     /**
      * Rename and/or set new media type for item.
@@ -320,7 +321,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void rename(String workspaceId, String path, String newName, String newMediaType, AsyncRequestCallback<Void> callback);
+    void rename(DevMachine devMachine, String path, String newName, String newMediaType, AsyncRequestCallback<Void> callback);
 
     /**
      * Import sources into project.
@@ -336,7 +337,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void importProject(String workspaceId, String path, boolean force, SourceStorageDto sourceStorage, RequestCallback<Void> callback);
+    void importProject(DevMachine devMachine, String path, boolean force, SourceStorageDto sourceStorage, RequestCallback<Void> callback);
 
     /**
      * Import sources into project.
@@ -351,7 +352,7 @@ public interface ProjectServiceClient {
      *         {@link SourceStorageDto}
      * @return a promise that will resolve when the project has been imported, or rejects with an error
      */
-    Promise<Void> importProject(String workspaceId, String path, boolean force, SourceStorageDto sourceStorage);
+    Promise<Void> importProject(DevMachine devMachine, String path, boolean force, SourceStorageDto sourceStorage);
 
     /**
      * Get children for the specified path.
@@ -363,7 +364,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getChildren(String workspaceId, String path, AsyncRequestCallback<List<ItemReference>> callback);
+    void getChildren(DevMachine devMachine, String path, AsyncRequestCallback<List<ItemReference>> callback);
 
     /**
      * Get folders tree starts from the specified path.
@@ -377,7 +378,7 @@ public interface ProjectServiceClient {
      * @param callback
      *         the callback to use for the response
      */
-    void getTree(String workspaceId, String path, int depth, AsyncRequestCallback<TreeElement> callback);
+    void getTree(DevMachine devMachine, String path, int depth, AsyncRequestCallback<TreeElement> callback);
 
     /**
      * Search an item(s) by the specified criteria.
@@ -388,5 +389,5 @@ public interface ProjectServiceClient {
      *         search query expression
      * @return a promise that will provide a list of {@link ItemReference}s, or rejects with an error
      */
-    Promise<List<ItemReference>> search(String workspaceId, QueryExpression expression);
+    Promise<List<ItemReference>> search(DevMachine devMachine, QueryExpression expression);
 }

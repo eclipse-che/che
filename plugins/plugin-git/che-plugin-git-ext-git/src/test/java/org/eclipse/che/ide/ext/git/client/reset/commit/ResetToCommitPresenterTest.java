@@ -98,18 +98,19 @@ public class ResetToCommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, mock(LogResponse.class));
                 return callback;
 
             }
-        }).when(service).log(anyString(), anyObject(), null,anyBoolean(), (AsyncRequestCallback<LogResponse>)anyObject());
+        }).when(service).log(devMachine, anyObject(), null,anyBoolean(), (AsyncRequestCallback<LogResponse>)anyObject());
 
         presenter.showDialog();
 
         verify(appContext).getCurrentProject();
         verify(service)
-                .log(anyString(), eq(rootProjectConfig), null, eq(!IS_TEXT_FORMATTED), (AsyncRequestCallback<LogResponse>)anyObject());
+                .log(eq(devMachine), eq(rootProjectConfig), null, eq(!IS_TEXT_FORMATTED), (AsyncRequestCallback<LogResponse>)anyObject());
         verify(view).setRevisions((ArrayList<Revision>)anyObject());
         verify(view).setMixMode(eq(IS_MIXED));
         verify(view).setEnableResetButton(eq(DISABLE_BUTTON));
@@ -123,18 +124,19 @@ public class ResetToCommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[2];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
 
             }
-        }).when(service).log(anyString(), anyObject(), null, anyBoolean(), (AsyncRequestCallback<LogResponse>)anyObject());
+        }).when(service).log(devMachine, anyObject(), null, anyBoolean(), (AsyncRequestCallback<LogResponse>)anyObject());
 
         presenter.showDialog();
 
         verify(appContext).getCurrentProject();
         verify(service)
-                .log(anyString(), eq(rootProjectConfig), null, eq(!IS_TEXT_FORMATTED), (AsyncRequestCallback<LogResponse>)anyObject());
+                .log(eq(devMachine), eq(rootProjectConfig), null, eq(!IS_TEXT_FORMATTED), (AsyncRequestCallback<LogResponse>)anyObject());
         verify(constant).logFailed();
         verify(console).printError(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
@@ -153,12 +155,13 @@ public class ResetToCommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[4];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
             }
         }).when(service)
-          .reset(anyString(), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+          .reset(devMachine, anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                  (AsyncRequestCallback<Void>)anyObject());
 
         presenter.onRevisionSelected(selectedRevision);
@@ -167,7 +170,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
         verify(view).close();
         verify(selectedRevision).getId();
         verify(appContext).getCurrentProject();
-        verify(service).reset(anyString(), anyObject(), eq(PROJECT_PATH), eq(HARD), (List<String>)anyObject(),
+        verify(service).reset(eq(devMachine), anyObject(), eq(PROJECT_PATH), eq(HARD), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(eventBus).fireEvent(Matchers.<Event<OpenProjectEvent>>anyObject());
         verify(console).print(anyString());
@@ -187,12 +190,13 @@ public class ResetToCommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[4];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
                 onSuccess.invoke(callback, (Void)null);
                 return callback;
             }
         }).when(service)
-          .reset(anyString(), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(),
+          .reset(devMachine, anyObject(), anyString(), (ResetRequest.ResetType)anyObject(),
                  (List<String>)anyObject(), (AsyncRequestCallback<Void>)anyObject());
 
         presenter.onRevisionSelected(selectedRevision);
@@ -201,7 +205,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
         verify(view).close();
         verify(selectedRevision).getId();
         verify(appContext).getCurrentProject();
-        verify(service).reset(anyString(), anyObject(), eq(PROJECT_PATH), eq(HARD), (List<String>)anyObject(),
+        verify(service).reset(eq(devMachine), anyObject(), eq(PROJECT_PATH), eq(HARD), (List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(eventBus).fireEvent(Matchers.<Event<OpenProjectEvent>>anyObject());
         verify(console).print(anyString());
@@ -215,11 +219,12 @@ public class ResetToCommitPresenterTest extends BaseTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
                 AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[4];
+                @SuppressWarnings("NonJREEmulationClassesInClientCode")
                 Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).reset(anyString(), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
+        }).when(service).reset(devMachine, anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
                                (AsyncRequestCallback<Void>)anyObject());
 
         presenter.onRevisionSelected(selectedRevision);
@@ -228,7 +233,7 @@ public class ResetToCommitPresenterTest extends BaseTest {
         verify(view).close();
         verify(selectedRevision).getId();
         verify(appContext).getCurrentProject();
-        verify(service).reset(anyString(), anyObject(), eq(PROJECT_PATH), eq(MIXED), (java.util.List<String>)anyObject(),
+        verify(service).reset(eq(devMachine), anyObject(), eq(PROJECT_PATH), eq(MIXED), (java.util.List<String>)anyObject(),
                               (AsyncRequestCallback<Void>)anyObject());
         verify(console).printError(anyString());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
