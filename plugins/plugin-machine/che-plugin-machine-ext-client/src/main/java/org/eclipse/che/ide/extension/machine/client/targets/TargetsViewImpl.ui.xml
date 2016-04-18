@@ -63,20 +63,13 @@
             margin-top: 10px;
         }
 
-        .architecturePanel {
-            height: 24px;
-            line-height: 24px;
-            margin-left: 0;
-            margin-top: 10px;
-            position: relative;
+        .architectureListBox {
+            width: 100%;
+            margin-bottom: 10px;
         }
 
-        .architectureListBox {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            width: 250px;
-            height: 24px;
+        .architectureListBox > label {
+            padding-left: 4px;
         }
 
         .propertiesPanel {
@@ -128,17 +121,6 @@
             user-select: text;
         }
 
-        .operation {
-            position: absolute;
-            bottom: 40px;
-            width: 100%;
-            height: 22px;
-        }
-
-        .operation button {
-            float: left;
-        }
-
         .footer {
             position: absolute;
             bottom: 11px;
@@ -154,6 +136,11 @@
             margin-right: 0px;
         }
 
+        .footer button:last-child {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
     </ui:style>
 
     <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.panel}">
@@ -189,10 +176,8 @@
                     <g:Label width="100%" text="Name" addStyleNames="{style.label} {style.delimiter}"/>
                     <g:TextBox width="100%" height="14px" ui:field="targetName" tabIndex="0"/>
 
-                    <g:FlowPanel width="100%" height="24px" addStyleNames="{style.architecturePanel}">
-                        <g:Label width="100px" text="Architecture" />
-                        <che:CustomListBox ui:field="architectureListBox" addStyleNames="{style.architectureListBox}" />
-                    </g:FlowPanel>
+                    <g:Label width="100px" text="Architecture" addStyleNames="{style.label} {style.delimiter}"/>
+                    <che:CustomListBox ui:field="architectureListBox" addStyleNames="{style.architectureListBox}" />
 
                     <g:Label width="100%" text="Host" addStyleNames="{style.label} {style.delimiter}"/>
                     <g:TextBox width="100%" height="14px" ui:field="host" tabIndex="0"/>
@@ -205,8 +190,6 @@
 
                     <g:Label width="100%" text="Password" addStyleNames="{style.label}"/>
                     <g:PasswordTextBox width="100%" height="14px" ui:field="password" tabIndex="0"/>
-
-                    <g:FlowPanel ui:field="operationPanel" styleName="{style.operation}" />
 
                     <g:FlowPanel ui:field="footer" styleName="{style.footer}" />
 

@@ -19,8 +19,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
-import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
-import org.eclipse.che.api.machine.gwt.client.events.MachineStartingHandler;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -60,7 +58,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
                                                                     MachineStateEvent.Handler,
                                                                     WorkspaceStartedHandler,
                                                                     WorkspaceStoppedHandler,
-                                                                    MachineStartingHandler,
                                                                     ActivePartChangedHandler {
     private final MachinePanelView             view;
     private final MachineServiceClient         service;
@@ -104,7 +101,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-        eventBus.addHandler(MachineStartingEvent.TYPE, this);
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
 
@@ -255,9 +251,8 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         showMachines(event.getWorkspace().getId());
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void onMachineStarting(final MachineStartingEvent event) {
+    public void onMachineCreating(MachineStateEvent event) {
         isMachineRunning = false;
 
         selectedMachine = event.getMachine();
@@ -267,10 +262,6 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         view.setData(rootNode);
 
         view.selectNode(existingMachineNodes.get(event.getMachine().getId()));
-    }
-
-    @Override
-    public void onMachineCreating(MachineStateEvent event) {
     }
 
     /** {@inheritDoc} */
