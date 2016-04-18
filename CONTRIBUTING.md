@@ -16,7 +16,7 @@ A great way to contribute to the project is to send a detailed report when you
 encounter an issue. We always appreciate a well-written, thorough bug report,
 and will thank you for it!
 
-Check that [our issue database](https://github.com/codenvy/che/issues)
+Check that [our issue database](https://github.com/eclipse/che/issues)
 doesn't already include that problem or suggestion before submitting an issue.
 If you find a match, you can use the "subscribe" button to get notified on
 updates. Do *not* leave random "+1" or "I have this too" comments, as they
@@ -79,16 +79,17 @@ Contact the project developers via the project's "dev" list.
 
 Bugs
 -----
-This project uses GitHub to track ongoing development and issues.  Please note, January 2015, Codenvy is still in the process of moving all Che issues from their internal Jira to GitHub.  So you may want to send an email to the che-dev alias to check on any issues if you do not see them in Bugzilla.
+This project uses GitHub to track ongoing development and issues.
 
-- [https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che](https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Che)
+- [Bugs](https://github.com/eclipse/che/issues)
+- [Issues](https://github.com/eclipse/che/issues)
 - [IRC (routes to slack)](http://webchat.freenode.net?randomnick=1&channels=%23eclipseche)
 
 Get Involved!
 --------------
 #### Report Bugs and Enhancements
 * Download one of the latest milestone builds [called nightly](http://eclipse.org/che). Take it for a test drive before the final release and report any bugs you find in GitHub.
-* [Report enhancements](https://github.com/codenvy/che/issues). Got an idea for a killer feature? Or maybe something you use often could use some tweaking? Post an enhancement request!
+* [Report enhancements](https://github.com/eclipse/che/issues). Got an idea for a killer feature? Or maybe something you use often could use some tweaking? Post an enhancement request!
 
 #### Fix Bugs or Implement Enhancements
 * Is there some bug that really bothers you? Instead of just reporting it, fix it.
