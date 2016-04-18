@@ -57,7 +57,7 @@ public class WsAgentLauncherImplTest {
     private static final long       WS_AGENT_MAX_START_TIME_MS    = 1000;
     private static final long       WS_AGENT_PING_DELAY_MS        = 1;
     private static final int        WS_AGENT_PING_CONN_TIMEOUT_MS = 1;
-    private static final String     WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789";
+    private static final String     WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789/";
     private static final String     WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
     private static final ServerImpl SERVER                        = new ServerImpl("ref",
                                                                                    "http",

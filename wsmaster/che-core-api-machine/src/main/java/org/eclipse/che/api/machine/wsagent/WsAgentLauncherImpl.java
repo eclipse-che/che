@@ -77,10 +77,12 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     @Override
     public void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException {
         final Machine devMachine = getMachineManager().getDevMachine(workspaceId);
-        final String wsAgentPingUrl = devMachine.getRuntime()
+        String wsAgentPingUrl = devMachine.getRuntime()
                                                 .getServers()
                                                 .get(Constants.WS_AGENT_PORT)
                                                 .getUrl();
+        if (!wsAgentPingUrl.endsWith("/"))
+            wsAgentPingUrl = wsAgentPingUrl.concat("/");
         try {
             getMachineManager().exec(devMachine.getId(),
                                      new CommandImpl(WS_AGENT_PROCESS_NAME, wsAgentStartCommandLine, "Arbitrary"),
