@@ -16,7 +16,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
-import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -180,7 +179,6 @@ public class MachinePanelPresenterTest {
         verify(eventBus).addHandler(MachineStateEvent.TYPE, presenter);
         verify(eventBus).addHandler(WorkspaceStartedEvent.TYPE, presenter);
         verify(eventBus).addHandler(WorkspaceStoppedEvent.TYPE, presenter);
-        verify(eventBus).addHandler(MachineStartingEvent.TYPE, presenter);
     }
 
     @Test
@@ -296,11 +294,13 @@ public class MachinePanelPresenterTest {
 
     @Test
     public void machineShouldBeAddedToTreeWhenItIsJustCreated() {
-        MachineStartingEvent startingEvent = mock(MachineStartingEvent.class);
+        when(selectedMachine1.getId()).thenReturn("machine1");
 
-        when(startingEvent.getMachine()).thenReturn(selectedMachine1);
+        MachineStateEvent stateEvent = mock(MachineStateEvent.class);
+        when(stateEvent.getMachineId()).thenReturn("machine1");
+        when(stateEvent.getMachine()).thenReturn(selectedMachine1);
 
-        presenter.onMachineStarting(startingEvent);
+        presenter.onMachineCreating(stateEvent);
 
         verify(view).setData(rootNode);
         verify(view).selectNode(machineNode1);
@@ -310,14 +310,14 @@ public class MachinePanelPresenterTest {
 
     @Test
     public void machineShouldBeSelectedWhenItIsRunning() {
-        MachineStartingEvent startingEvent = mock(MachineStartingEvent.class);
+        when(selectedMachine1.getId()).thenReturn("machine1");
 
-        when(startingEvent.getMachine()).thenReturn(selectedMachine1);
+        MachineStateEvent stateEvent = mock(MachineStateEvent.class);
+        when(stateEvent.getMachineId()).thenReturn("machine1");
         when(stateEvent.getMachine()).thenReturn(selectedMachine1);
 
-        presenter.onMachineStarting(startingEvent);
+        presenter.onMachineCreating(stateEvent);
         reset(view);
-
         presenter.onMachineRunning(stateEvent);
 
         verify(view).selectNode(machineNode1);
@@ -327,12 +327,13 @@ public class MachinePanelPresenterTest {
 
     @Test
     public void machineShouldBeRemovedFromTreeWhenItIsDestroyed() {
-        MachineStartingEvent startingEvent = mock(MachineStartingEvent.class);
+        when(selectedMachine1.getId()).thenReturn("machine1");
 
-        when(startingEvent.getMachine()).thenReturn(selectedMachine1);
+        MachineStateEvent stateEvent = mock(MachineStateEvent.class);
+        when(stateEvent.getMachineId()).thenReturn("machine1");
         when(stateEvent.getMachine()).thenReturn(selectedMachine1);
 
-        presenter.onMachineStarting(startingEvent);
+        presenter.onMachineCreating(stateEvent);
         reset(view);
         presenter.onMachineRunning(stateEvent);
 

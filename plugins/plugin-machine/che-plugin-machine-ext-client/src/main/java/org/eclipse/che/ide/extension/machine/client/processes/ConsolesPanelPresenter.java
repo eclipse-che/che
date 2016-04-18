@@ -213,6 +213,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
+        workspaceAgent.setActivePart(this);
+
         machineService.getMachine(event.getMachineId()).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machine) throws OperationException {

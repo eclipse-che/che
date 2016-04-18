@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.targets;
 
-import elemental.events.KeyboardEvent;
-
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -37,7 +35,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
+import elemental.events.KeyboardEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
@@ -73,53 +71,58 @@ public class TargetsViewImpl extends Window implements TargetsView {
     interface TargetsViewImplUiBinder extends UiBinder<Widget, TargetsViewImpl> {
     }
 
+    private EditCommandResources    commandResources;
+    private MachineResources     	machineResources;
+    private IconRegistry            iconRegistry;
 
-
-    private final EditCommandResources commandResources;
-    private final MachineResources     machineResources;
-    private final IconRegistry         iconRegistry;
-
-    private ActionDelegate delegate;
+    private ActionDelegate          delegate;
 
     @UiField(provided = true)
-    MachineLocalizationConstant machineLocale;
+    MachineLocalizationConstant     machineLocale;
 
     @UiField
-    TextBox filterTargets;
+    TextBox                         filterTargets;
 
     @UiField
-    SimplePanel targetsPanel;
+    SimplePanel                     targetsPanel;
 
-    private CategoriesList list;
+    private CategoriesList          list;
 
     @UiField
-    FlowPanel       hintPanel;
-    @UiField
-    FlowPanel       infoPanel;
-    @UiField
-    FlowPanel       propertiesPanel;
-    @UiField
-    TextBox         targetName;
-    @UiField
-    CustomListBox   architectureListBox;
-    @UiField
-    TextBox         host;
-    @UiField
-    TextBox         port;
-    @UiField
-    TextBox         userName;
-    @UiField
-    PasswordTextBox password;
-    @UiField
-    FlowPanel       operationPanel;
-    @UiField
-    FlowPanel       footer;
+    FlowPanel                       hintPanel;
 
-    private Button closeButton;
+    @UiField
+    FlowPanel                       infoPanel;
 
-    private Button saveButton;
-    private Button cancelButton;
-    private Button connectButton;
+    @UiField
+    FlowPanel                       propertiesPanel;
+
+    @UiField
+    TextBox                         targetName;
+
+    @UiField
+    CustomListBox                   architectureListBox;
+
+    @UiField
+    TextBox                         host;
+
+    @UiField
+    TextBox                         port;
+
+    @UiField
+    TextBox                         userName;
+
+    @UiField
+    PasswordTextBox                 password;
+
+    @UiField
+    FlowPanel                       footer;
+
+    private Button                  closeButton;
+
+    private Button                  saveButton;
+    private Button                  cancelButton;
+    private Button                  connectButton;
 
     @Inject
     public TargetsViewImpl(org.eclipse.che.ide.Resources resources,
@@ -196,9 +199,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
         });
         connectButton.addStyleName(this.resources.windowCss().primaryButton());
         connectButton.addStyleName(resources.Css().buttonLoader());
-
-        operationPanel.add(connectButton);
-        operationPanel.getElement().insertFirst(connectButton.getElement());
+        footer.add(connectButton);
 
         targetName.addKeyUpHandler(new KeyUpHandler() {
             @Override

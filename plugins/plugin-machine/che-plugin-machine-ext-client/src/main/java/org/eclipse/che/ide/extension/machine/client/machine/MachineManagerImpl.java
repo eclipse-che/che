@@ -21,7 +21,6 @@ import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
 import org.eclipse.che.api.machine.gwt.client.WsAgentStateController;
 import org.eclipse.che.api.machine.gwt.client.events.DevMachineStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.MachineStartingEvent;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -264,13 +263,13 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
         machinePromise.then(new Operation<MachineDto>() {
             @Override
             public void apply(final MachineDto machineDto) throws OperationException {
-                eventBus.fireEvent(new MachineStartingEvent(machineDto));
+                eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.CREATING));
 
                 subscribeToChannel(machineDto.getConfig()
-                                             .getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL)
-                                             .getParameter("channel")
-                                             .getDefaultValue(),
-                                   outputHandler);
+                                .getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL)
+                                .getParameter("channel")
+                                .getDefaultValue(),
+                        outputHandler);
 
                 RunningListener runningListener = null;
 
