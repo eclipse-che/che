@@ -1,3 +1,4 @@
+
 /*******************************************************************************
  * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
@@ -16,6 +17,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.RecipeServiceClient;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
@@ -31,6 +33,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.event.SshMachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -68,25 +71,24 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     private final WorkspaceServiceClient      workspaceServiceClient;
     private final EventBus                    eventBus;
 
-    private final List<Target> targets = new ArrayList<>();
-    private Target selectedTarget;
+    private final List<Target>            targets           = new ArrayList<>();
     private final Map<String, MachineDto> machinesByNameMap = new HashMap<>();
+    private final List<String>            architectures     = new ArrayList<>();
 
-    private final List<String>                          architectures = new ArrayList<>();
-
-    private StatusNotification                          connectNotification;
+    private StatusNotification connectNotification;
+    private Target             selectedTarget;
 
     @Inject
-    public TargetsPresenter(final TargetsView view,
-                            final RecipeServiceClient recipeServiceClient,
-                            final DtoFactory dtoFactory,
-                            final DialogFactory dialogFactory,
-                            final NotificationManager notificationManager,
-                            final MachineLocalizationConstant machineLocale,
-                            final AppContext appContext,
-                            final MachineServiceClient machineService,
-                            final WorkspaceServiceClient workspaceServiceClient,
-                            final EventBus eventBus) {
+    public TargetsPresenter(TargetsView view,
+                            RecipeServiceClient recipeServiceClient,
+                            DtoFactory dtoFactory,
+                            DialogFactory dialogFactory,
+                            NotificationManager notificationManager,
+                            MachineLocalizationConstant machineLocale,
+                            AppContext appContext,
+                            MachineServiceClient machineService,
+                            WorkspaceServiceClient workspaceServiceClient,
+                            EventBus eventBus) {
         this.view = view;
         this.recipeServiceClient = recipeServiceClient;
         this.dtoFactory = dtoFactory;
@@ -179,8 +181,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     /**
      * Determines whether machine is running or not.
      *
-     * @return
-     *      true for running machine
+     * @return true for running machine
      */
     private boolean isMachineRunning(MachineDto machine) {
         return machine != null && machine.getStatus() == RUNNING;
@@ -190,7 +191,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
      * Restore target properties from its recipe.
      *
      * @param target
-     *          target to restore
+     *         target to restore
      */
     private void restoreTarget(Target target) {
         if (target.getRecipe() == null || !target.getRecipe().getType().equalsIgnoreCase(SSH_CATEGORY)) {
@@ -364,8 +365,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         view.enableCancelButton(selectedTarget.isDirty());
 
         if (StringUtils.isNullOrEmpty(view.getTargetName()) ||
-                StringUtils.isNullOrEmpty(view.getHost()) ||
-                StringUtils.isNullOrEmpty(view.getPort())) {
+            StringUtils.isNullOrEmpty(view.getHost()) ||
+            StringUtils.isNullOrEmpty(view.getPort())) {
             view.enableSaveButton(false);
         } else {
             view.enableSaveButton(selectedTarget.isDirty());
@@ -394,16 +395,16 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         tags.add(SSH_CATEGORY);
 
         NewRecipe newRecipe = dtoFactory.createDto(NewRecipe.class)
-                .withName(selectedTarget.getName())
-                .withType(SSH_CATEGORY)
-                .withScript("{" +
-                        "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
-                        "\"host\": \"" + selectedTarget.getHost() + "\", " +
-                        "\"port\": \"" + selectedTarget.getPort() + "\", " +
-                        "\"username\": \"" + selectedTarget.getUserName() + "\", " +
-                        "\"password\": \"" + selectedTarget.getPassword() + "\"" +
-                        "}")
-                .withTags(tags);
+                                        .withName(selectedTarget.getName())
+                                        .withType(SSH_CATEGORY)
+                                        .withScript("{" +
+                                                    "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
+                                                    "\"host\": \"" + selectedTarget.getHost() + "\", " +
+                                                    "\"port\": \"" + selectedTarget.getPort() + "\", " +
+                                                    "\"username\": \"" + selectedTarget.getUserName() + "\", " +
+                                                    "\"password\": \"" + selectedTarget.getPassword() + "\"" +
+                                                    "}")
+                                        .withTags(tags);
 
         Promise<RecipeDescriptor> createRecipe = recipeServiceClient.createRecipe(newRecipe);
         createRecipe.then(new Operation<RecipeDescriptor>() {
@@ -427,19 +428,19 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
      */
     private void updateTarget() {
         RecipeUpdate recipeUpdate = dtoFactory.createDto(RecipeUpdate.class)
-                .withId(selectedTarget.getRecipe().getId())
-                .withName(view.getTargetName())
-                .withType(selectedTarget.getRecipe().getType())
-                .withTags(selectedTarget.getRecipe().getTags())
-                .withDescription(selectedTarget.getRecipe().getDescription())
-                .withPermissions(selectedTarget.getRecipe().getPermissions())
-                .withScript("{" +
-                        "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
-                        "\"host\": \"" + selectedTarget.getHost() + "\", " +
-                        "\"port\": \"" + selectedTarget.getPort() + "\", " +
-                        "\"username\": \"" + selectedTarget.getUserName() + "\", " +
-                        "\"password\": \"" + selectedTarget.getPassword() + "\"" +
-                        "}");
+                                              .withId(selectedTarget.getRecipe().getId())
+                                              .withName(view.getTargetName())
+                                              .withType(selectedTarget.getRecipe().getType())
+                                              .withTags(selectedTarget.getRecipe().getTags())
+                                              .withDescription(selectedTarget.getRecipe().getDescription())
+                                              .withPermissions(selectedTarget.getRecipe().getPermissions())
+                                              .withScript("{" +
+                                                          "\"architecture\": \"" + selectedTarget.getArchitecture() + "\", " +
+                                                          "\"host\": \"" + selectedTarget.getHost() + "\", " +
+                                                          "\"port\": \"" + selectedTarget.getPort() + "\", " +
+                                                          "\"username\": \"" + selectedTarget.getUserName() + "\", " +
+                                                          "\"password\": \"" + selectedTarget.getPassword() + "\"" +
+                                                          "}");
 
         Promise<RecipeDescriptor> updateRecipe = recipeServiceClient.updateRecipe(recipeUpdate);
         updateRecipe.then(new Operation<RecipeDescriptor>() {
@@ -510,7 +511,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     private void connect() {
         view.setConnectButtonText(null);
 
-        connectNotification = notificationManager.notify(machineLocale.targetsViewConnectProgress(selectedTarget.getName()), StatusNotification.Status.PROGRESS, true);
+        connectNotification = notificationManager.notify(machineLocale.targetsViewConnectProgress(selectedTarget.getName()),
+                                                         StatusNotification.Status.PROGRESS, true);
 
         String recipeURL = selectedTarget.getRecipe().getLink("get recipe script").getHref();
 
@@ -518,12 +520,12 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType("ssh-config").withLocation(recipeURL);
 
         MachineConfigDto configDto = dtoFactory.createDto(MachineConfigDto.class)
-                .withDev(false)
-                .withName(selectedTarget.getName())
-                .withSource(sourceDto)
-                .withLimits(limitsDto)
-                .withType(SSH_CATEGORY)
-                .withArchitecture(selectedTarget.getArchitecture());
+                                               .withDev(false)
+                                               .withName(selectedTarget.getName())
+                                               .withSource(sourceDto)
+                                               .withLimits(limitsDto)
+                                               .withType(SSH_CATEGORY)
+                                               .withArchitecture(selectedTarget.getArchitecture());
 
         Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
 
@@ -552,7 +554,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             public void apply(MachineDto machineDto) throws OperationException {
                 if (machineDto.getStatus() == RUNNING) {
                     eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
-                    onConnected();
+                    onConnected(machineDto);
                 } else {
                     new Timer() {
                         @Override
@@ -573,10 +575,12 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     /**
      * Displays a notification
      */
-    private void onConnected() {
+    private void onConnected(MachineDto machineDto) {
         connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(selectedTarget.getName()));
         connectNotification.setStatus(StatusNotification.Status.SUCCESS);
         updateTargets(selectedTarget.getName());
+
+        eventBus.fireEvent(SshMachineStateEvent.createSshMachineConnectedEvent(machineDto));
     }
 
     private void onConnectingFailed() {
@@ -602,7 +606,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
      * Destroys the machine.
      *
      * @param machine
-     *          machine to destroy
+     *         machine to destroy
      */
     private void disconnect(final MachineDto machine) {
         if (machine == null || machine.getStatus() != RUNNING) {
@@ -614,13 +618,17 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
-                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), StatusNotification.Status.SUCCESS, true);
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()),
+                                           StatusNotification.Status.SUCCESS,
+                                           true);
+                eventBus.fireEvent(SshMachineStateEvent.createSshMachineDisConnectedEvent(machine));
                 updateTargets(selectedTarget.getName());
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectError(selectedTarget.getName()), StatusNotification.Status.FAIL, true);
+                notificationManager.notify(machineLocale.targetsViewDisconnectError(selectedTarget.getName()),
+                                           StatusNotification.Status.FAIL, true);
                 updateTargets(selectedTarget.getName());
             }
         });
@@ -629,16 +637,16 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
     @Override
     public void onDeleteTarget(final Target target) {
         dialogFactory.createConfirmDialog("IDE", machineLocale.targetsViewDeleteConfirm(target.getName()),
-                new ConfirmCallback() {
-                    @Override
-                    public void accepted() {
-                        if (target.isConnected()) {
-                            disconnectAndDelete(target);
-                        } else {
-                            deleteTarget(target);
-                        }
-                    }
-                }, new CancelCallback() {
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  if (target.isConnected()) {
+                                                      disconnectAndDelete(target);
+                                                  } else {
+                                                      deleteTarget(target);
+                                                  }
+                                              }
+                                          }, new CancelCallback() {
                     @Override
                     public void cancelled() {
                     }
@@ -654,7 +662,12 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()),
+                                           StatusNotification.Status.SUCCESS,
+                                           true);
+
+                eventBus.fireEvent(SshMachineStateEvent.createSshMachineDisConnectedEvent(machine));
+
                 new Timer() {
                     @Override
                     public void run() {
@@ -665,7 +678,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectError(target.getName()), StatusNotification.Status.FAIL, true);
+                notificationManager
+                        .notify(machineLocale.targetsViewDisconnectError(target.getName()), StatusNotification.Status.FAIL, true);
                 updateTargets(target.getName());
             }
         });
@@ -675,7 +689,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
      * Deletes specified  target.
      *
      * @param target
-     *          target to delete
+     *         target to delete
      */
     private void deleteTarget(final Target target) {
         Promise<Void> deletePromice = recipeServiceClient.removeRecipe(target.getRecipe().getId());
@@ -688,7 +702,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 view.selectTarget(null);
                 view.showHintPanel();
 
-                notificationManager.notify(machineLocale.targetsViewDeleteSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
+                notificationManager.notify(machineLocale.targetsViewDeleteSuccess(target.getName()), StatusNotification.Status.SUCCESS,
+                                           true);
             }
         });
 
