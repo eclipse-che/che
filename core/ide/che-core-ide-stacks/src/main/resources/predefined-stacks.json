@@ -72,9 +72,79 @@
     }
   },
   {
+    "id": "android-default",
+    "creator": "ide",
+    "name": "Android",
+    "description": "Default Android Stack with Java 1.8, Maven 3.2.3, Android (21 api level).",
+    "scope": "general",
+    "tags": [
+      "Android",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Android",
+        "version": "21"
+      },
+      {
+        "name": "Java",
+        "version": "1.8"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.3"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_android"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null},
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-android.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "python-default",
     "creator": "ide",
-    "name": "Python 3.5",
+    "name": "Python",
     "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
     "scope": "general",
     "tags": [
@@ -138,31 +208,36 @@
       "mediaType": "image/svg+xml"
     }
   },
-  {
-    "id": "python-2.7",
+  { 
+    "id": "cpp-default",
     "creator": "ide",
-    "name": "Python 2.7",
-    "description": "Default Python Stack with Python 2.7.11, pip 8.1.1.",
+    "name": "C++",
+    "description": "Default C++ Stack with C++, gcc 4.8.4, GNU Make 3.81.",
     "scope": "general",
     "tags": [
-      "Python 2.7",
-      "pip",
+      "C++",
+      "gcc",
+      "make",
       "Ubuntu",
       "Git"
     ],
     "components": [
       {
-        "name": "Python",
-        "version": "2.7.11"
+        "name": "CPP",
+        "version": "4.8.4"
       },
       {
-        "name": "pip",
-        "version": "8.1.1"
+        "name": "gcc",
+        "version": "4.8.4"
+      },
+      {
+        "name": "Make",
+        "version": "3.81"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/ubuntu_python:2.7"
+      "origin": "codenvy/cpp_gcc"
     },
     "workspaceConfig": {
       "environments": [
@@ -201,7 +276,7 @@
       "users": {}
     },
     "stackIcon": {
-      "name": "type-python.svg",
+      "name": "type-cpp.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -960,6 +1035,73 @@
     },
     "stackIcon": {
       "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "python-2.7",
+    "creator": "ide",
+    "name": "Python 2.7",
+    "description": "Default Python Stack with Python 2.7.11, pip 8.1.1.",
+    "scope": "advanced",
+    "tags": [
+      "Python 2.7",
+      "pip",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Python",
+        "version": "2.7.11"
+      },
+      {
+        "name": "pip",
+        "version": "8.1.1"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_python:2.7"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null},
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-python.svg",
       "mediaType": "image/svg+xml"
     }
   },
