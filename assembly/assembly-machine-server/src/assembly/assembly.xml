@@ -40,10 +40,6 @@
             <directory>${project.basedir}/src/assembly/che-templates</directory>
             <outputDirectory>che-templates</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/assembly/webapps</directory>
-            <outputDirectory>webapps</outputDirectory>
-        </fileSet>
     </fileSets>
     <files>
         <file>
