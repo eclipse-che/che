@@ -346,7 +346,7 @@ export class CheWorkspace {
           return;
         }
 
-        this.statusDefers[workspaceId][message.eventType].forEach((defer) => {defer.resolve()});
+        this.statusDefers[workspaceId][message.eventType].forEach((defer) => {defer.resolve(message)});
         this.statusDefers[workspaceId][message.eventType].length = 0;
       });
     }

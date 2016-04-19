@@ -40,7 +40,7 @@ class IdeSvc {
     this.ideParams = new Map();
 
     this.currentStep = 0;
-    this.selectedWorkspace = null;
+    this.lastWorkspace = null;
 
     this.listeningChannels = [];
 
@@ -60,6 +60,9 @@ class IdeSvc {
       step.hasError = false;
     });
 
+    if (this.lastWorkspace) {
+      this.cleanupChannels(this.lastWorkspace.id);
+    }
   }
 
   getStepText(stepNumber) {
@@ -84,10 +87,6 @@ class IdeSvc {
     return this.$rootScope.ideIframeLink && (this.$rootScope.ideIframeLink !== null);
   }
 
-  setSelectedWorkspace(selectedWorkspace) {
-    this.selectedWorkspace = selectedWorkspace;
-  }
-
   handleError(error) {
     if (error.data.message) {
       this.steps[this.currentStep].logs += '\n' + error.data.message;
@@ -96,7 +95,9 @@ class IdeSvc {
     this.$log.error(error);
   }
 
-  startIde(noIdeLoader) {
+  startIde(workspace, noIdeLoader) {
+    this.lastWorkspace = workspace;
+
     let defer = this.$q.defer();
     if (!noIdeLoader) {
       this.ideLoaderSvc.addLoader();
@@ -104,30 +105,40 @@ class IdeSvc {
 
     this.currentStep = 1;
 
-    let bus = this.cheAPI.getWebsocket().getBus(this.selectedWorkspace.id);
+    let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
 
-    let startWorkspacePromise = this.startWorkspace(bus, this.selectedWorkspace);
-    startWorkspacePromise.then(() => {
-      let runningStatusPromise = this.cheWorkspace.fetchStatusChange(this.selectedWorkspace.id, 'RUNNING');
-      runningStatusPromise.then(() => {
-        // Now that the container is started, wait for the extension server. For this, needs to get runtime details
-        let promiseWorkspace = this.cheWorkspace.fetchWorkspaceDetails(this.selectedWorkspace.id);
-        promiseWorkspace.then(() => {
-          let websocketUrl = this.cheWorkspace.getWebsocketUrl(this.selectedWorkspace.id);
-          // try to connect
-          this.websocketReconnect = 50;
-          this.connectToExtensionServer(websocketUrl, this.selectedWorkspace.id);
-          defer.resolve();
-        }, (error) => {
-          this.handleError(error);
-          defer.reject(error);
-        });
+    let startWorkspaceDefer = this.$q.defer();
+    this.startWorkspace(bus, workspace).then(() => {
+      this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING').then(() => {
+        return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
+      }).then(() => {
+        startWorkspaceDefer.resolve();
+      }, (error) => {
+        this.handleError(error);
+        startWorkspaceDefer.reject(error);
+      });
+      this.cheWorkspace.fetchStatusChange(workspace.id, 'ERROR').then((data) => {
+        startWorkspaceDefer.reject(data);
       });
     }, (error) => {
-      defer.reject(error);
+      startWorkspaceDefer.reject(error);
     });
 
-    return defer.promise;
+    return startWorkspaceDefer.promise.then(() => {
+      if (workspace.id === this.lastWorkspace.id) {
+        // Now that the container is started, wait for the extension server. For this, needs to get runtime details
+        let websocketUrl = this.cheWorkspace.getWebsocketUrl(workspace.id);
+        // try to connect
+        this.websocketReconnect = 50;
+        this.connectToExtensionServer(websocketUrl, workspace.id);
+      }
+      return this.$q.resolve();
+    }, (error) => {
+      if (workspace.id === this.lastWorkspace.id) {
+        this.cleanupChannels(workspace.id);
+      }
+      return this.$q.reject(error);
+    });
   }
 
   startWorkspace(bus, data) {
@@ -234,8 +245,8 @@ class IdeSvc {
 
     // on success, create project
     websocketStream.onOpen(() => {
-      this.openIde();
-      this.cleanupChannels(websocketStream);
+      this.openIde(workspaceId);
+      this.cleanupChannels(workspaceId, websocketStream);
     });
 
     // on error, retry to connect or after a delay, abort
@@ -246,7 +257,7 @@ class IdeSvc {
           this.connectToExtensionServer(websocketURL, workspaceId);
         }, 1000);
       } else {
-        this.cleanupChannels(websocketStream);
+        this.cleanupChannels(workspaceId, websocketStream);
         this.steps[this.currentStep].hasError = true;
         this.$log.error('error when starting remote extension', error);
         // need to show the error
@@ -269,7 +280,11 @@ class IdeSvc {
     this.ideAction = ideAction;
   }
 
-  openIde(skipLoader) {
+  openLastStartedIde(skipLoader) {
+    this.openIde(this.lastWorkspace.id, skipLoader);
+  }
+
+  openIde(workspaceId, skipLoader) {
     this.$timeout(() => {
       this.currentStep = 3;
     }, 0);
@@ -287,11 +302,12 @@ class IdeSvc {
     let randVal = Math.floor((Math.random() * 1000000) + 1);
     let appendUrl = '?uid=' + randVal;
 
+    let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
     let contextPath = '';
-    let selfLink = this.getHrefLink(this.selectedWorkspace, 'self link');
-    let ideUrlLink = this.getHrefLink(this.selectedWorkspace, 'ide url');
+    let selfLink = this.getHrefLink(workspace, 'self link');
+    let ideUrlLink = this.getHrefLink(workspace, 'ide url');
 
-    if (selfLink.endsWith('ide/api/workspace/' + this.selectedWorkspace.id)) {
+    if (selfLink.endsWith('ide/api/workspace/' + workspace.id)) {
       contextPath = '/ide/';
     } else {
       contextPath = '/ws/';
@@ -312,7 +328,7 @@ class IdeSvc {
     }
 
     if (inDevMode) {
-      this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(this.proxySettings + contextPath + this.selectedWorkspace.config.name + appendUrl);
+      this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(this.proxySettings + contextPath + workspace.config.name + appendUrl);
     } else {
       this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
     }
@@ -332,12 +348,12 @@ class IdeSvc {
   /**
    * Cleanup the websocket channels (unsubscribe)
    */
-  cleanupChannels(websocketStream) {
+  cleanupChannels(workspaceId, websocketStream) {
     if (websocketStream != null) {
       websocketStream.close();
     }
 
-    let workspaceBus = this.cheAPI.getWebsocket().getBus(this.selectedWorkspace.id);
+    let workspaceBus = this.cheAPI.getWebsocket().getBus(workspaceId);
 
     if (workspaceBus != null) {
       this.listeningChannels.forEach((channel) => {
