@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Sergii Kabashniuk
