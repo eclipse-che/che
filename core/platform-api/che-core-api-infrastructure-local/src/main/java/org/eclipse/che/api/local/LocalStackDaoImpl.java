@@ -27,7 +27,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import java.io.IOException;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -52,7 +52,7 @@ public class LocalStackDaoImpl implements StackDao {
     @Inject
     public LocalStackDaoImpl(StackLocalStorage stackLocalStorage) throws IOException {
         this.stackStorage = stackLocalStorage;
-        this.stacks = new HashMap<>();
+        this.stacks = new LinkedHashMap<>();
         this.lock = new ReentrantReadWriteLock();
     }
 
