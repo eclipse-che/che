@@ -11,22 +11,16 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
-
-import org.eclipse.che.api.local.CheGuiceEverrestServlet;
-import org.eclipse.che.api.local.filters.WsMasterEnvironmentInitializationFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.websockets.WSConnectionTracker;
 
 /** @author andrew00x */
 @DynaModule
 public class WsMasterServletModule extends ServletModule {
     @Override
     protected void configureServlets() {
-        getServletContext().addListener(new WSConnectionTracker());
-
-        filter("/api/*").through(WsMasterEnvironmentInitializationFilter.class);
-
-        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(CheGuiceEverrestServlet.class);
+        getServletContext().addListener(new org.everrest.websockets.WSConnectionTracker());
+        filter("/api/*").through(org.eclipse.che.api.local.filters.WsMasterEnvironmentInitializationFilter.class);
+        serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(org.eclipse.che.api.local.CheGuiceEverrestServlet.class);
         install(new org.eclipse.che.swagger.deploy.BasicSwaggerConfigurationModule());
     }
 }
