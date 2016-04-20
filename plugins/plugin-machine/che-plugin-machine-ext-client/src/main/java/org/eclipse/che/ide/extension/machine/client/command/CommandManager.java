@@ -13,9 +13,9 @@ package org.eclipse.che.ide.extension.machine.client.command;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -83,7 +83,7 @@ public class CommandManager {
      * @param machine
      *         machine in which command will be executed
      */
-    public void execute(@NotNull CommandConfiguration command, @NotNull MachineDto machine) {
+    public void execute(@NotNull CommandConfiguration command, @NotNull Machine machine) {
         executeCommand(command, machine.getId());
     }
 
