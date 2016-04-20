@@ -27,7 +27,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
-import org.eclipse.che.api.machine.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.user.UserImpl;
@@ -143,8 +143,7 @@ public class MachineManagerTest {
                                                                                              "9090/udp",
                                                                                              "someprotocol",
                                                                                              "/some/path")),
-                                                            Collections.singletonMap("key1", "value1"),
-                                                            null);
+                                                            Collections.singletonMap("key1", "value1"));
         String workspaceId = "wsId";
         String environmentName = "env1";
 
@@ -212,7 +211,6 @@ public class MachineManagerTest {
                                                                       "9090/udp",
                                                                       "someprotocol",
                                                                       "/some/path")),
-                                     Collections.singletonMap("key1", "value1"),
-                                     null);
+                                     Collections.singletonMap("key1", "value1"));
     }
 }

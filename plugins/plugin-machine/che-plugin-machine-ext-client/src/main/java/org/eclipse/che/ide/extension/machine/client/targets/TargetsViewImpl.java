@@ -101,9 +101,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
     TextBox                         targetName;
 
     @UiField
-    CustomListBox                   architectureListBox;
-
-    @UiField
     TextBox                         host;
 
     @UiField
@@ -157,13 +154,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
             }
         }, KeyDownEvent.getType());
         targetsPanel.add(list);
-
-        architectureListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent changeEvent) {
-                delegate.onArchitectureChanged(architectureListBox.getValue());
-            }
-        });
 
         closeButton = createButton(coreLocale.close(), "targets.button.close",
                 new ClickHandler() {
@@ -240,14 +230,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
-    }
-
-    @Override
-    public void setAvailableArchitectures(List<String> architectures) {
-        architectureListBox.clear();
-        for (String architecture : architectures) {
-            architectureListBox.addItem(architecture);
-        }
     }
 
     @Override
@@ -444,16 +426,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
     @Override
     public String getTargetName() {
         return targetName.getValue();
-    }
-
-    @Override
-    public void setArchitecture(String architecture) {
-        architectureListBox.select(architecture);
-    }
-
-    @Override
-    public String getArchitecture() {
-        return architectureListBox.getValue();
     }
 
     @Override

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.machine.ssh;
+package org.eclipse.che.api.machine.server.terminal;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.inject.ConfigurationProperties;
@@ -26,8 +26,8 @@ import static java.util.stream.Collectors.toMap;
  */
 @Singleton
 public class WebsocketTerminalFilesPathProvider {
-    private static final String CONFIGURATION_PREFIX         = "machine.ssh.server.terminal.path_to_archive.";
-    private static final String CONFIGURATION_PREFIX_PATTERN = "machine\\.ssh\\.server\\.terminal\\.path_to_archive\\..+";
+    private static final String CONFIGURATION_PREFIX         = "machine.server.terminal.path_to_archive.";
+    private static final String CONFIGURATION_PREFIX_PATTERN = "machine\\.server\\.terminal\\.path_to_archive\\..+";
 
     private Map<String, String> archivesPaths;
 

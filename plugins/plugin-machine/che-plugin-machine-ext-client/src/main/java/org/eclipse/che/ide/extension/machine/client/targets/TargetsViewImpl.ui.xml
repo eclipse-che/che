@@ -63,15 +63,6 @@
             margin-top: 10px;
         }
 
-        .architectureListBox {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .architectureListBox > label {
-            padding-left: 4px;
-        }
-
         .propertiesPanel {
             width: 100%;
         }
@@ -175,9 +166,6 @@
 
                     <g:Label width="100%" text="Name" addStyleNames="{style.label} {style.delimiter}"/>
                     <g:TextBox width="100%" height="14px" ui:field="targetName" tabIndex="0"/>
-
-                    <g:Label width="100px" text="Architecture" addStyleNames="{style.label} {style.delimiter}"/>
-                    <che:CustomListBox ui:field="architectureListBox" addStyleNames="{style.architectureListBox}" />
 
                     <g:Label width="100%" text="Host" addStyleNames="{style.label} {style.delimiter}"/>
                     <g:TextBox width="100%" height="14px" ui:field="host" tabIndex="0"/>
