@@ -63,15 +63,6 @@ public class LocalDockerModule extends AbstractModule {
                                                                          String.class,
                                                                          Names.named("machine.docker.dev_machine.machine_env"))
                                                            .permitDuplicates();
-
-        Multibinder<String> allMachinesEnvVars = Multibinder.newSetBinder(binder(),
-                                                                          String.class,
-                                                                          Names.named("machine.docker.machine_env"));
-        allMachinesEnvVars.addBinding()
-                          .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.HttpProxyEnvVariableProvider.class);
-        allMachinesEnvVars.addBinding()
-                          .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.HttpsProxyEnvVariableProvider.class);
-
         debMachineEnvVars.addBinding()
                          .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.DockerApiHostEnvVariableProvider.class);
 
