@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.debugger.client.actions;
 
+import com.google.common.base.Optional;
+
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
+import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
@@ -42,15 +45,15 @@ import static org.mockito.Mockito.when;
 public class DebugActionTest {
 
     @Mock
-    private SelectDebugConfigurationComboBoxAction selectConfigurationAction;
+    private DebugConfigurationsManager   debugConfigurationsManager;
     @Mock
-    private DebuggerLocalizationConstant           localizationConstant;
+    private DebuggerLocalizationConstant localizationConstant;
     @Mock
-    private DebuggerResources                      javaRuntimeResources;
+    private DebuggerResources            javaRuntimeResources;
     @Mock
-    private DebuggerManager                        debuggerManager;
+    private DebuggerManager              debuggerManager;
     @Mock
-    private DialogFactory                          dialogFactory;
+    private DialogFactory                dialogFactory;
 
     @InjectMocks
     private DebugAction action;
@@ -72,7 +75,10 @@ public class DebugActionTest {
         connectionProperties.put("prop1", "val1");
         connectionProperties.put("prop2", "val2");
         when(debugConfiguration.getConnectionProperties()).thenReturn(connectionProperties);
-        when(selectConfigurationAction.getSelectedConfiguration()).thenReturn(debugConfiguration);
+        Optional configurationOptional = mock(Optional.class);
+        when(configurationOptional.isPresent()).thenReturn(Boolean.TRUE);
+        when(configurationOptional.get()).thenReturn(debugConfiguration);
+        when(debugConfigurationsManager.getCurrentDebugConfiguration()).thenReturn(configurationOptional);
 
         Debugger debugger = mock(Debugger.class);
         when(debugger.attachDebugger(anyMap())).thenReturn(mock(Promise.class));

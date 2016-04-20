@@ -44,7 +44,7 @@ public interface DebugConfigurationDto {
 
     Map<String, String> getConnectionProperties();
 
-    void setConnectionProperties(Map<String, String> attributes);
+    void setConnectionProperties(Map<String, String> connectionProperties);
 
-    DebugConfigurationDto withConnectionProperties(Map<String, String> attributes);
+    DebugConfigurationDto withConnectionProperties(Map<String, String> connectionProperties);
 }

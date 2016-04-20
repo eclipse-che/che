@@ -25,18 +25,16 @@ import org.eclipse.che.ide.ext.debugger.client.actions.DisconnectDebuggerAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.EditConfigurationsAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.EvaluateExpressionAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.ResumeExecutionAction;
-import org.eclipse.che.ide.ext.debugger.client.actions.SelectDebugConfigurationComboBoxAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.ShowHideDebuggerPanelAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.StepIntoAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.StepOutAction;
 import org.eclipse.che.ide.ext.debugger.client.actions.StepOverAction;
+import org.eclipse.che.ide.ext.debugger.client.configuration.DebugConfigurationsGroup;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_DEBUG_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
-import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 
 /**
@@ -52,23 +50,20 @@ import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 @Extension(title = "Debugger", version = "4.1.0")
 public class DebuggerExtension {
 
-    public static final String GROUP_DEBUG_CONFIGURATIONS_LIST = "DebugConfigurationsListGroup";
-
-    private static final String GROUP_DEBUG_TOOLBAR                          = "DebugGroupToolbar";
-    private static final String GROUP_DEBUG_CONFIGURATIONS_LIST_DISPLAY_NAME = "Debug";
-    private static final String EDIT_DEBUG_CONF_ID                           = "editDebugConfigurations";
-    private static final String DEBUG_ID                                     = "debug";
-    private static final String DISCONNECT_DEBUG_ID                          = "disconnectDebug";
-    private static final String STEP_INTO_ID                                 = "stepInto";
-    private static final String STEP_OVER_ID                                 = "stepOver";
-    private static final String STEP_OUT_ID                                  = "stepOut";
-    private static final String RESUME_EXECUTION_ID                          = "resumeExecution";
-    private static final String EVALUATE_EXPRESSION_ID                       = "evaluateExpression";
-    private static final String CHANGE_VARIABLE_VALUE_ID                     = "changeVariableValue";
-    private static final String SHOW_HIDE_DEBUGGER_PANEL_ID                  = "showHideDebuggerPanel";
+    private static final String EDIT_DEBUG_CONF_ID          = "editDebugConfigurations";
+    private static final String DEBUG_ID                    = "debug";
+    private static final String DISCONNECT_DEBUG_ID         = "disconnectDebug";
+    private static final String STEP_INTO_ID                = "stepInto";
+    private static final String STEP_OVER_ID                = "stepOver";
+    private static final String STEP_OUT_ID                 = "stepOut";
+    private static final String RESUME_EXECUTION_ID         = "resumeExecution";
+    private static final String EVALUATE_EXPRESSION_ID      = "evaluateExpression";
+    private static final String CHANGE_VARIABLE_VALUE_ID    = "changeVariableValue";
+    private static final String SHOW_HIDE_DEBUGGER_PANEL_ID = "showHideDebuggerPanel";
 
     @Inject
     public DebuggerExtension(DebuggerResources debuggerResources,
+                             DebuggerLocalizationConstant localizationConstants,
                              ActionManager actionManager,
                              DebugAction debugAction,
                              DisconnectDebuggerAction disconnectDebuggerAction,
@@ -81,7 +76,7 @@ public class DebuggerExtension {
                              ChangeVariableValueAction changeVariableValueAction,
                              ShowHideDebuggerPanelAction showHideDebuggerPanelAction,
                              EditConfigurationsAction editConfigurationsAction,
-                             SelectDebugConfigurationComboBoxAction selectDebugConfigurationComboBoxAction,
+                             DebugConfigurationsGroup configurationsGroup,
                              DebuggerPresenter debuggerPresenter,
                              KeyBindingAgent keyBinding) {
         debuggerResources.getCss().ensureInjected();
@@ -89,7 +84,6 @@ public class DebuggerExtension {
         final DefaultActionGroup runMenu = (DefaultActionGroup)actionManager.getAction(GROUP_RUN);
 
         // register actions
-        actionManager.registerAction("selectDebugConfigurationComboBox", selectDebugConfigurationComboBoxAction);
         actionManager.registerAction(EDIT_DEBUG_CONF_ID, editConfigurationsAction);
         actionManager.registerAction(DEBUG_ID, debugAction);
         actionManager.registerAction(DISCONNECT_DEBUG_ID, disconnectDebuggerAction);
@@ -101,9 +95,17 @@ public class DebuggerExtension {
         actionManager.registerAction(CHANGE_VARIABLE_VALUE_ID, changeVariableValueAction);
         actionManager.registerAction(SHOW_HIDE_DEBUGGER_PANEL_ID, showHideDebuggerPanelAction);
 
+        // create group for selecting (changing) debug configurations
+        final DefaultActionGroup debugConfigurationsGroup = new DefaultActionGroup(localizationConstants.debugConfigurationsActionTitle(),
+                                                                                   true,
+                                                                                   actionManager);
+        debugConfigurationsGroup.add(editConfigurationsAction);
+        debugConfigurationsGroup.addSeparator();
+        debugConfigurationsGroup.add(configurationsGroup);
+
         // add actions in main menu
         runMenu.addSeparator();
-        runMenu.add(editConfigurationsAction, LAST);
+        runMenu.add(debugConfigurationsGroup, LAST);
         runMenu.add(debugAction, LAST);
         runMenu.add(disconnectDebuggerAction, LAST);
         runMenu.addSeparator();
@@ -113,23 +115,6 @@ public class DebuggerExtension {
         runMenu.add(resumeExecutionAction, LAST);
         runMenu.addSeparator();
         runMenu.add(evaluateExpressionAction, LAST);
-
-        // add actions on central toolbar
-        final DefaultActionGroup debugToolbarGroup = new DefaultActionGroup(GROUP_DEBUG_TOOLBAR, false, actionManager);
-        actionManager.registerAction(GROUP_DEBUG_TOOLBAR, debugToolbarGroup);
-        debugToolbarGroup.add(selectDebugConfigurationComboBoxAction);
-        final DefaultActionGroup debugGroup = new DefaultActionGroup(actionManager);
-        debugGroup.add(debugAction);
-        debugToolbarGroup.add(debugGroup);
-        final DefaultActionGroup centralToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
-        centralToolbarGroup.add(debugToolbarGroup);
-
-        // add group for debug configurations list
-        final DefaultActionGroup debugConfigurationsList = new DefaultActionGroup(GROUP_DEBUG_CONFIGURATIONS_LIST_DISPLAY_NAME,
-                                                                                  true,
-                                                                                  actionManager);
-        actionManager.registerAction(GROUP_DEBUG_CONFIGURATIONS_LIST, debugConfigurationsList);
-        debugConfigurationsList.add(editConfigurationsAction, FIRST);
 
         // create debugger toolbar action group
         DefaultActionGroup debuggerToolbarActionGroup = new DefaultActionGroup(actionManager);
@@ -145,7 +130,7 @@ public class DebuggerExtension {
 
         // add actions in 'Debug' context menu
         final DefaultActionGroup debugContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_DEBUG_CONTEXT_MENU);
-        debugContextMenuGroup.add(debugConfigurationsList);
+        debugContextMenuGroup.add(debugAction);
         debugContextMenuGroup.addSeparator();
 
         // keys binding

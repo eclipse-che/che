@@ -11,9 +11,15 @@
 package org.eclipse.che.ide.ext.debugger.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.ext.debugger.client.configuration.DebugConfigurationAction;
+import org.eclipse.che.ide.ext.debugger.client.configuration.DebugConfigurationActionFactory;
+import org.eclipse.che.ide.ext.debugger.client.configuration.DebugConfigurationsManagerImpl;
 import org.eclipse.che.ide.ext.debugger.client.configuration.EditDebugConfigurationsView;
 import org.eclipse.che.ide.ext.debugger.client.configuration.EditDebugConfigurationsViewImpl;
 import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerToolbar;
@@ -28,6 +34,8 @@ import org.eclipse.che.ide.util.storage.BrowserLocalStorageProviderImpl;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
 /**
+ * GIN module for Debugger extension.
+ *
  * @author Andrey Plotnikov
  * @author Artem Zatsarynnyi
  */
@@ -40,6 +48,10 @@ public class DebuggerGinModule extends AbstractGinModule {
         bind(EvaluateExpressionView.class).to(EvaluateExpressionViewImpl.class).in(Singleton.class);
         bind(ChangeValueView.class).to(ChangeValueViewImpl.class).in(Singleton.class);
         bind(EditDebugConfigurationsView.class).to(EditDebugConfigurationsViewImpl.class).in(Singleton.class);
+
+        bind(DebugConfigurationsManager.class).to(DebugConfigurationsManagerImpl.class).in(Singleton.class);
+        install(new GinFactoryModuleBuilder().implement(Action.class, DebugConfigurationAction.class)
+                                             .build(DebugConfigurationActionFactory.class));
 
         bind(LocalStorageProvider.class).to(BrowserLocalStorageProviderImpl.class).in(Singleton.class);
         bind(ToolbarPresenter.class).annotatedWith(DebuggerToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
