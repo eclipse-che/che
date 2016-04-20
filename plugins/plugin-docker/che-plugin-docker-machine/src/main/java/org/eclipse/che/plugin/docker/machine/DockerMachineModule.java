@@ -47,7 +47,9 @@ public class DockerMachineModule extends AbstractModule {
 
         Multibinder<String> devMachineVolumes = Multibinder.newSetBinder(binder(),
                                                                          String.class,
-                                                                         Names.named("machine.docker.dev_machine.machine_volumes"));
+                                                                         Names.named("machine.docker.dev_machine.machine_volumes"))
+                                                           .permitDuplicates();
+
         Multibinder<String> machineVolumes = Multibinder.newSetBinder(binder(),
                                                                       String.class,
                                                                       Names.named("machine.docker.machine_volumes"));

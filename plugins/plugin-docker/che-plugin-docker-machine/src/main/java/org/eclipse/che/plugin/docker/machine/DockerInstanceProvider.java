@@ -121,11 +121,13 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.supportedRecipeTypes = Collections.singleton("dockerfile");
         this.projectFolderPath = projectFolderPath;
 
+        allMachinesSystemVolumes = filterEmptyAndNullValues(allMachinesSystemVolumes);
+        devMachineSystemVolumes = filterEmptyAndNullValues(devMachineSystemVolumes);
         if (SystemInfo.isWindows()) {
-            allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
-            devMachineSystemVolumes = escapePaths(devMachineSystemVolumes);
+            allMachinesSystemVolumes = escapePaths(filterEmptyAndNullValues(allMachinesSystemVolumes));
+            devMachineSystemVolumes = escapePaths(filterEmptyAndNullValues(devMachineSystemVolumes));
         }
-        this.commonMachineSystemVolumes = allMachinesSystemVolumes.toArray(new String[allMachinesEnvVariables.size()]);
+        this.commonMachineSystemVolumes = allMachinesSystemVolumes.toArray(new String[allMachinesSystemVolumes.size()]);
         final Set<String> devMachineVolumes = Sets.newHashSetWithExpectedSize(allMachinesSystemVolumes.size()
                                                                               + devMachineSystemVolumes.size());
         devMachineVolumes.addAll(allMachinesSystemVolumes);
