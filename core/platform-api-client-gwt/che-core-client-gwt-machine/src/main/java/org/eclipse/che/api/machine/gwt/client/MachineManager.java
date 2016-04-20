@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.gwt.client;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Promise;
@@ -68,7 +69,7 @@ public interface MachineManager {
      * @param machine
      *         contains information about machine state
      */
-    Promise<Void> destroyMachine(MachineDto machine);
+    Promise<Void> destroyMachine(Machine machine);
 
 
     /**
@@ -77,7 +78,7 @@ public interface MachineManager {
      * @param machine
      *         contains information about machine state
      */
-    void restartMachine(final MachineDto machine);
+    void restartMachine(final Machine machine);
 
     /**
      * Checks if the the status for dev machine is tracked by machine manager.

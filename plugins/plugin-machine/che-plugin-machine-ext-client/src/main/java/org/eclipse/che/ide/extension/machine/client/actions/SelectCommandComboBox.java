@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
@@ -72,12 +73,12 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
                                                                                 WsAgentStateHandler,
                                                                                 MachineStateEvent.Handler {
 
-    public static final String              GROUP_COMMANDS                 = "CommandsGroup";
-    public static final String              GROUP_MACHINES                 = "MachinesGroup";
+    public static final String GROUP_COMMANDS = "CommandsGroup";
+    public static final String GROUP_MACHINES = "MachinesGroup";
 
     private final MachineLocalizationConstant locale;
     private final MachineResources            resources;
-    private final Map<String, MachineDto>     registeredMachineMap;
+    private final Map<String, Machine>        registeredMachineMap;
     private final ActionManager               actionManager;
     private final WorkspaceServiceClient      workspaceServiceClient;
     private final MachineServiceClient        machineServiceClient;
@@ -283,7 +284,7 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
     }
 
     @Nullable
-    public MachineDto getSelectedMachine() {
+    public Machine getSelectedMachine() {
         if (machinesListWidget.getSelectedId() == null) {
             return null;
         }
@@ -337,14 +338,14 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
-        MachineDto machine = event.getMachine();
+        Machine machine = event.getMachine();
 
         addMachineAction(machine);
     }
 
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
-        MachineDto machine = event.getMachine();
+        Machine machine = event.getMachine();
 
         final String machineId = machine.getId();
 
@@ -367,7 +368,7 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
         updateMachineActions();
     }
 
-    private void addMachineAction(MachineDto machine) {
+    private void addMachineAction(Machine machine) {
         registeredMachineMap.put(machine.getId(), machine);
         updateMachineActions();
 
@@ -416,7 +417,7 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
         if (machineConfig.isDev()) {
             return locale.devMachineCategory();
         }
-        return  machineConfig.getType();
+        return machineConfig.getType();
     }
 
     private class MachineDtoListEntryComparator implements Comparator<Map.Entry<String, MachineDto>> {

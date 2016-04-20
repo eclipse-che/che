@@ -12,13 +12,12 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.gwt.client.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -35,13 +34,11 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     private final MachineLocalizationConstant locale;
     private final MachinePanelPresenter       panelPresenter;
     private final MachineManager              machineManager;
-    private final DialogFactory               dialogFactory;
 
     @Inject
     public DestroyMachineAction(MachineLocalizationConstant locale,
                                 MachinePanelPresenter panelPresenter,
-                                MachineManager machineManager,
-                                DialogFactory dialogFactory) {
+                                MachineManager machineManager) {
         super(Collections.singletonList(OPERATIONS_PERSPECTIVE_ID),
               locale.machineDestroyTitle(),
               locale.machineDestroyDescription(),
@@ -50,13 +47,12 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
         this.locale = locale;
         this.panelPresenter = panelPresenter;
         this.machineManager = machineManager;
-        this.dialogFactory = dialogFactory;
     }
 
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final MachineDto selectedMachine = panelPresenter.getSelectedMachineState();
+        final Machine selectedMachine = panelPresenter.getSelectedMachineState();
         event.getPresentation().setEnabled(selectedMachine != null
                                            && !selectedMachine.getConfig().isDev()
                                            && panelPresenter.isMachineRunning());
@@ -67,7 +63,7 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(@NotNull ActionEvent event) {
-        final MachineDto selectedMachine = panelPresenter.getSelectedMachineState();
+        final Machine selectedMachine = panelPresenter.getSelectedMachineState();
         if (selectedMachine == null) {
             return;
         }

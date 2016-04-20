@@ -70,8 +70,9 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
     private final MachineTreeNode              rootNode;
     private final List<MachineTreeNode>        machineNodes;
     private final AppContext                   appContext;
-    private       MachineDto                   selectedMachine;
-    private       boolean                      isMachineRunning;
+
+    private org.eclipse.che.api.core.model.machine.Machine selectedMachine;
+    private boolean                                        isMachineRunning;
 
     @Inject
     public MachinePanelPresenter(MachinePanelView view,
@@ -131,7 +132,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         });
     }
 
-    private void addNodeToTree(MachineDto machine) {
+    private void addNodeToTree(org.eclipse.che.api.core.model.machine.Machine machine) {
         MachineTreeNode machineNode = entityFactory.createMachineNode(rootNode, machine, null);
 
         existingMachineNodes.put(machine.getId(), machineNode);
@@ -150,7 +151,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
     /**
      * Returns selected machine state.
      */
-    public MachineDto getSelectedMachineState() {
+    public org.eclipse.che.api.core.model.machine.Machine getSelectedMachineState() {
         return selectedMachine;
     }
 
@@ -279,7 +280,7 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
      */
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
-        MachineDto machine = event.getMachine();
+        org.eclipse.che.api.core.model.machine.Machine machine = event.getMachine();
 
         MachineTreeNode deletedNode = existingMachineNodes.get(machine.getId());
 
