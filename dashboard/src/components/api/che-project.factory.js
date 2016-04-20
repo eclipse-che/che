@@ -65,17 +65,17 @@ export class CheProject {
     this.resolveMap = new Map();
 
     // remote call
-    this.remoteProjectsAPI = this.$resource('//:agent/api/ext/project/:workspaceId', {agent : 'agent', workspaceId: '@id'}, {
-      import: {method: 'POST', url: '//:agent/api/ext/project/:workspaceId/import/:path'},
-      create: {method: 'POST', url: '//:agent/api/ext/project/:workspaceId?name=:path'},
-      details: {method: 'GET', url:  '//:agent/api/ext/project/:workspaceId/:path'},
-      estimate: {method: 'GET', url: '//:agent/api/ext/project/:workspaceId/estimate/:path?type=:type'},
-      getPermissions: {method: 'GET', url: '//:agent/api/ext/project/:workspaceId/permissions/:path', isArray: true},
-      updatePermissions: {method: 'POST', url: '//:agent/api/ext/project/:workspaceId/permissions/:path', isArray: true},
-      rename: {method: 'POST', url: '//:agent/api/ext/project/:workspaceId/rename/:path?name=:name'},
-      remove: {method: 'DELETE', url: '//:agent/api/ext/project/:workspaceId/:path'},
-      resolve: {method: 'GET', url: '//:agent/api/ext/project/:workspaceId/resolve/:path', isArray: true},
-      update: {method: 'PUT', url: '//:agent/api/ext/project/:workspaceId/:path'}
+    this.remoteProjectsAPI = this.$resource('//:agent/wsagent/ext/project/:workspaceId', {agent : 'agent', workspaceId: '@id'}, {
+      import: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId/import/:path'},
+      create: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId?name=:path'},
+      details: {method: 'GET', url:  '//:agent/wsagent/ext/project/:workspaceId/:path'},
+      estimate: {method: 'GET', url: '//:agent/wsagent/ext/project/:workspaceId/estimate/:path?type=:type'},
+      getPermissions: {method: 'GET', url: '//:agent/wsagent/ext/project/:workspaceId/permissions/:path', isArray: true},
+      updatePermissions: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId/permissions/:path', isArray: true},
+      rename: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId/rename/:path?name=:name'},
+      remove: {method: 'DELETE', url: '//:agent/wsagent/ext/project/:workspaceId/:path'},
+      resolve: {method: 'GET', url: '//:agent/wsagent/ext/project/:workspaceId/resolve/:path', isArray: true},
+      update: {method: 'PUT', url: '//:agent/wsagent/ext/project/:workspaceId/:path'}
     });
   }
 

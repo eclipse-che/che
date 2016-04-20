@@ -35,7 +35,7 @@ public class WsAgentServletModule extends ServletModule {
         serve("/swaggerinit").with(io.swagger.jaxrs.config.DefaultJaxrsConfig.class, ImmutableMap
                 .of("api.version", "1.0",
                     "swagger.api.title", "Eclipse Che",
-                    "swagger.api.basepath", "/ide/ext"
+                    "swagger.api.basepath", "/wsagent/ext"
                    ));
     }
 }

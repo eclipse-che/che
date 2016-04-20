@@ -36,7 +36,7 @@
 
         window.IDE.config = {
             "restContext": "/ide/api",
-            "cheExtensionPath": "/ide/ext"
+            "cheExtensionPath": "/wsagent/ext"
         };
 
         /**
