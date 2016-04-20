@@ -102,6 +102,7 @@ public class BootstrapController {
                         MachineDto devMachineDto = ws.getRuntime().getDevMachine();
                         DevMachine devMachine = new DevMachine(devMachineDto);
                         appContext.setDevMachine(devMachine);
+                        appContext.setProjectsRoot(devMachineDto.getRuntime().projectsRoot());
                         wsAgentStateControllerProvider.get().initialize(devMachine);
                         startWsAgentComponents(components.values().iterator());
                     }
