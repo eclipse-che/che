@@ -8,24 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.env.local.client.inject;
+package org.eclipse.che.plugin.product.info.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.inject.Singleton;
 
-import org.eclipse.che.env.local.client.CheConnectionClosedInformer;
-import org.eclipse.che.env.local.client.CheWorkspaceStoppedHandler;
-import org.eclipse.che.ide.api.ConnectionClosedInformer;
+import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.plugin.product.info.client.CheProductInfoDataProvider;
 
 /**
- * @author Vitaly Parfonov
+ * @author Oleksii Orel
  */
 @ExtensionGinModule
-public class LocalEnvironmentGinModule extends AbstractGinModule {
+public class ProductInfoGinModule extends AbstractGinModule {
+    /** {@inheritDoc} */
     @Override
     protected void configure() {
-        bind(ConnectionClosedInformer.class).to(CheConnectionClosedInformer.class).in(Singleton.class);
-        bind(CheWorkspaceStoppedHandler.class).asEagerSingleton();
+        bind(ProductInfoDataProvider.class).to(CheProductInfoDataProvider.class);
     }
 }

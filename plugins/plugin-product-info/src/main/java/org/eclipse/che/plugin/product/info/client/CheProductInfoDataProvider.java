@@ -8,7 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.env.local.client;
+package org.eclipse.che.plugin.product.info.client;
+
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.ui.Resources;
@@ -21,6 +23,7 @@ import javax.inject.Inject;
  *
  * @author Alexander Andrienko
  */
+@Singleton
 public class CheProductInfoDataProvider implements ProductInfoDataProvider {
 
     private final LocalizationConstant locale;
