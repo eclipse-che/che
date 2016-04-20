@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.debugger.client.actions;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,6 +20,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
+import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
@@ -32,45 +34,52 @@ import java.util.Map;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * Action that allows to connect to the debugger with the selected debug configuration.
+ * Action that allows to connect to the debugger with the current debug configuration.
  *
  * @author Artem Zatsarynnyi
  */
 @Singleton
 public class DebugAction extends AbstractPerspectiveAction {
 
-    private final SelectDebugConfigurationComboBoxAction selectConfigurationAction;
-    private final DebuggerLocalizationConstant           localizationConstants;
-    private final DebuggerManager                        debuggerManager;
-    private final DialogFactory                          dialogFactory;
+    private final DebuggerLocalizationConstant localizationConstants;
+    private final DebuggerManager              debuggerManager;
+    private final DialogFactory                dialogFactory;
+    private final DebugConfigurationsManager   configurationsManager;
 
     @Inject
-    public DebugAction(SelectDebugConfigurationComboBoxAction selectConfigurationAction,
-                       DebuggerLocalizationConstant localizationConstants,
+    public DebugAction(DebuggerLocalizationConstant localizationConstants,
                        DebuggerResources resources,
                        DebuggerManager debuggerManager,
-                       DialogFactory dialogFactory) {
+                       DialogFactory dialogFactory,
+                       DebugConfigurationsManager debugConfigurationsManager) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               localizationConstants.debugActionTitle(),
               localizationConstants.debugActionDescription(),
               null,
               resources.debug());
-        this.selectConfigurationAction = selectConfigurationAction;
         this.localizationConstants = localizationConstants;
         this.debuggerManager = debuggerManager;
         this.dialogFactory = dialogFactory;
+        this.configurationsManager = debugConfigurationsManager;
     }
 
     @Override
     public void updateInPerspective(ActionEvent event) {
-        event.getPresentation().setVisible(selectConfigurationAction.getSelectedConfiguration() != null);
+        Optional<DebugConfiguration> configurationOptional = configurationsManager.getCurrentDebugConfiguration();
+
+        event.getPresentation().setEnabled(configurationOptional.isPresent());
+        if (configurationOptional.isPresent()) {
+            event.getPresentation().setText(localizationConstants.debugActionTitle() + " '" + configurationOptional.get().getName() + "'");
+        } else {
+            event.getPresentation().setText(localizationConstants.debugActionTitle());
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        final DebugConfiguration debugConfiguration = selectConfigurationAction.getSelectedConfiguration();
-        if (debugConfiguration != null) {
-            connect(debugConfiguration);
+        Optional<DebugConfiguration> configurationOptional = configurationsManager.getCurrentDebugConfiguration();
+        if (configurationOptional.isPresent()) {
+            connect(configurationOptional.get());
         }
     }
 

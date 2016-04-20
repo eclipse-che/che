@@ -39,7 +39,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -64,7 +63,6 @@ import java.util.Map;
  *
  * @author Artem Zatsarynnyi
  */
-@Singleton
 public class EditDebugConfigurationsViewImpl extends Window implements EditDebugConfigurationsView {
 
     private static final EditDebugConfigurationsViewImplUiBinder UI_BINDER = GWT.create(EditDebugConfigurationsViewImplUiBinder.class);
