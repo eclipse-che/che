@@ -78,7 +78,7 @@ public class RecipeDownloader {
                                               machineConfig.getSource().getLocation(),
                                               e.getLocalizedMessage()));
         } finally {
-            if (file != null && file.delete()) {
+            if (file != null && !file.delete()) {
                 LOG.error(String.format("Removal of recipe file %s failed.", file.getAbsolutePath()));
             }
         }
