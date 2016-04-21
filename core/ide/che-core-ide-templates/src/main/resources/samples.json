@@ -22,6 +22,108 @@
       "blank"
     ]
   },
+  {
+    "name": "c-simple-console",
+    "displayName": "c-simple-console",
+    "path": "/c-simple-console",
+    "description": "A simple Hello World in C.",
+    "projectType": "c",
+    "mixins": [],
+    "attributes": {},
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/c-simple-console.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "build and run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && gcc -o Hello Hello.c && ./Hello",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "cpp",
+      "gcc"
+    ]
+  },
+  {
+    "name": "mobile-android-simple",
+    "displayName": "mobile-android-simple",
+    "path": "/mobile-android-simple",
+    "description": "Simple Android Project.",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/mobile-android-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "mvn -f ${current.project.path} clean install",
+        "attributes": {
+          "previewUrl": "http://${server.port.6080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Android"
+    ]
+  },
+  {
+    "name": "mobile-android-hello-world",
+    "displayName": "mobile-android-hello-world",
+    "path": "/mobile-android-hello-world",
+    "description": "Simple Android Hello World.",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/mobile-android-hello-world.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "mvn -f ${current.project.path} clean install",
+        "attributes": {
+          "previewUrl": "http://${server.port.6080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Android"
+    ]
+  },
     {
     "name": "console-python3-simple",
     "displayName": "console-python3.5-simple",
@@ -115,7 +217,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && sudo bundle install",
+        "commandLine": "cd ${current.project.path} && bundle install",
         "attributes": {
           "previewUrl": ""
         }
@@ -123,7 +225,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && sudo rails server -b 0.0.0.0",
+        "commandLine": "cd ${current.project.path} && rails server -b 0.0.0.0",
         "attributes": {
           "previewUrl": "http://${server.port.3000}"
         }
