@@ -8,15 +8,31 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.env.local.client;
+package org.eclipse.che.plugin.product.info.client;
 
 import com.google.gwt.i18n.client.Messages;
 
-/** @author Vitalii Parfonov */
-public interface LocalizationConstant extends Messages {
-    @Key("messages.server.failure")
-    String messagesServerFailure();
 
-    @Key("connection.closed.dialog.title")
-    String connectionClosedDialogTitle();
+/**
+ * Che product information constant.
+ *
+ * @author Vitalii Parfonov
+ * @author Oleksii Orel
+ */
+public interface LocalizationConstant extends Messages {
+
+    @Key("che.tab.title")
+    String cheTabTitle();
+
+    @Key("che.tab.title.with.workspace.name")
+    String cheTabTitle(String workspaceName);
+
+    @Key("get.support.link")
+    String getSupportLink();
+
+    @Key("get.product.name")
+    String getProductName();
+
+    @Key("support.title")
+    String supportTitle();
 }
