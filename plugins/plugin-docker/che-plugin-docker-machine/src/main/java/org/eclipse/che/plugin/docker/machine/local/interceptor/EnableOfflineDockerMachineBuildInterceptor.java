@@ -30,7 +30,7 @@ import java.io.IOException;
  *
  * @author Alexander Garagatyi
  *
- * @see org.eclipse.che.plugin.docker.machine.DockerInstanceProvider#buildImage(Dockerfile, LineConsumer, String, boolean)
+ * @see org.eclipse.che.plugin.docker.machine.DockerInstanceProvider#buildImage(Dockerfile, LineConsumer, String, boolean, long, long)
  */
 public class EnableOfflineDockerMachineBuildInterceptor implements MethodInterceptor {
     private static final Logger LOG = LoggerFactory.getLogger(EnableOfflineDockerMachineBuildInterceptor.class);
@@ -64,7 +64,7 @@ public class EnableOfflineDockerMachineBuildInterceptor implements MethodInterce
         DockerImageIdentifier imageIdentifier = DockerImageIdentifierParser.parse(image);
         final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         dockerConnector.pull(imageIdentifier.getRepository(),
-                             imageIdentifier.getTag(),
+                             imageIdentifier.getTag() == null ? "latest" : imageIdentifier.getTag(),
                              imageIdentifier.getRegistry(),
                              currentProgressStatus -> {
                                  try {

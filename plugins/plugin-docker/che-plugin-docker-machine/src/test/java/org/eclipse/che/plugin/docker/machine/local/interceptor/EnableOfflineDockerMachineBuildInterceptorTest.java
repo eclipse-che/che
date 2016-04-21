@@ -56,7 +56,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
 
     @Test
     public void shouldProceedInterceptedMethodIfForcePullIsDisabled() throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.FALSE};
+        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.FALSE, 0L, 0L};
         when(methodInvocation.getArguments()).thenReturn(arguments);
 
 
@@ -69,7 +69,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
 
     @Test
     public void shouldPullDockerImageIfForcePullIsEnabled() throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE};
+        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE, 0L, 0L};
         when(methodInvocation.getArguments()).thenReturn(arguments);
         when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
         final String tag = "latest";
@@ -88,7 +88,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
 
     @Test(dataProvider = "throwableProvider")
     public void shouldIgnoreExceptionsOnDockerImagePullingIfForcePullIsEnabled(Throwable throwable) throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE};
+        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE, 0L, 0L};
         when(methodInvocation.getArguments()).thenReturn(arguments);
         when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
         final String tag = "latest";
@@ -102,6 +102,24 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
 
         assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
+    }
+
+    @Test
+    public void shouldPullLatestIfNoTagFoundInDockerfile() throws Throwable {
+        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE, 0L, 0L};
+        when(methodInvocation.getArguments()).thenReturn(arguments);
+        when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
+        final String repo = "my_repo/my_image";
+        when(dockerImage.getFrom()).thenReturn(repo);
+
+
+        interceptor.invoke(methodInvocation);
+
+
+        assertFalse((Boolean)arguments[3]);
+        verify(methodInvocation).proceed();
+        verify(dockerfile).getImages();
+        verify(dockerConnector).pull(eq(repo), eq("latest"), eq(null), any(ProgressMonitor.class));
     }
 
     @DataProvider(name = "throwableProvider")
