@@ -145,7 +145,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.consoleCommands = new HashMap<>();
         this.machineNodes = new HashMap<>();
 
-        this.fetchMachines();
+        fetchMachines();
 
         this.view.setDelegate(this);
         this.view.setTitle(localizationConstant.viewConsolesTitle());
@@ -274,6 +274,11 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         List<ProcessTreeNode> processTreeNodes = new ArrayList<ProcessTreeNode>();
         ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, processTreeNodes);
         machineNode.setRunning(true);
+
+        if (rootChildren.contains(machineNode)) {
+            rootChildren.remove(machineNode);
+        }
+
         rootChildren.add(machineNode);
         view.setProcessesData(rootNode);
 
@@ -383,7 +388,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         } else {
             if (selectedTreeNode.getParent() != null &&
                 selectedTreeNode.getParent().getType() == MACHINE_NODE) {
-                onAddTerminal(selectedTreeNode.getParent().getId());
+                onAddTerminal(appContext.getDevMachine().getId());
             }
         }
     }
@@ -649,12 +654,11 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         }
     }
 
-
-
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
         for (ProcessTreeNode processTreeNode : rootNode.getChildren()) {
             if (processTreeNode.getType() == MACHINE_NODE) {
+                onCloseTerminal(processTreeNode);
                 processTreeNode.setRunning(false);
                 if (processTreeNode.getChildren() != null) {
                     processTreeNode.getChildren().clear();
@@ -662,10 +666,11 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
             }
         }
 
+        rootNode.getChildren().clear();
+        rootChildren.clear();
+
         view.clear();
         view.selectNode(null);
         view.setProcessesData(rootNode);
     }
-
-
 }
