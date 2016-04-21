@@ -217,7 +217,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && sudo bundle install",
+        "commandLine": "cd ${current.project.path} && bundle install",
         "attributes": {
           "previewUrl": ""
         }
@@ -225,7 +225,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && sudo rails server -b 0.0.0.0",
+        "commandLine": "cd ${current.project.path} && rails server -b 0.0.0.0",
         "attributes": {
           "previewUrl": "http://${server.port.3000}"
         }
