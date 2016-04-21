@@ -239,11 +239,11 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
 
     @Override
     public void onAddTarget(String category) {
-        Target target = new Target("[new target]", SSH_CATEGORY);
-        target.setHost("127.0.0.1");
+        Target target = new Target("new_target", SSH_CATEGORY);
+        target.setHost("");
         target.setPort("22");
         target.setUserName("root");
-        target.setPassword("root");
+        target.setPassword("");
         target.setDirty(true);
         target.setConnected(false);
         targets.add(target);
@@ -340,13 +340,12 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             return;
         }
 
-        view.enableConnectButton(!selectedTarget.isDirty());
-
         if (selectedTarget.isConnected()) {
             view.setConnectButtonText("Disconnect");
         } else {
             view.setConnectButtonText("Connect");
         }
+        view.enableConnectButton(!selectedTarget.isDirty());
 
         view.enableCancelButton(selectedTarget.isDirty());
 
@@ -355,6 +354,19 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 StringUtils.isNullOrEmpty(view.getPort())) {
             view.enableSaveButton(false);
         } else {
+            if (selectedTarget.isDirty()) {
+                for (Target target : targets) {
+                    if (target == selectedTarget) {
+                        continue;
+                    }
+
+                    if (target.getName().equals(view.getTargetName())) {
+                        view.enableSaveButton(false);
+                        return;
+                    }
+                }
+            }
+
             view.enableSaveButton(selectedTarget.isDirty());
         }
     }
@@ -697,6 +709,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                     connectNotification.setStatus(StatusNotification.Status.SUCCESS);
                     updateTargets(machineDto.getConfig().getName());
                 } else {
+                    onConnectingFailed(null);
                 }
             }
         }).catchError(new Operation<PromiseError>() {
