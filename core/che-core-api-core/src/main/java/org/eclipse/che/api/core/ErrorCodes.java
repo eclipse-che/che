@@ -12,6 +12,7 @@ package org.eclipse.che.api.core;
 
 /**
  * Error codes that are used in exceptions.
+ * Defined error codes MUST BE in range <b>15000-32999</b> inclusive.
  *
  * @author Igor Vinokur
  */
