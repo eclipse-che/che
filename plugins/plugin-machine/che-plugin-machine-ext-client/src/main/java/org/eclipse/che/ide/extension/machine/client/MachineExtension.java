@@ -89,14 +89,16 @@ public class MachineExtension {
                             CustomCommandType arbitraryCommandType) {
         machineResources.getCss().ensureInjected();
 
-        workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
-        workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 machinePortProvider.get();
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
+
+                workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
+                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
+
+                consolesPanelPresenter.newTerminal();
             }
 
             @Override
