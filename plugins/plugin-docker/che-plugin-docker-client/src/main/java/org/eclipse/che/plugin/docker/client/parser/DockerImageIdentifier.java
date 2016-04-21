@@ -29,7 +29,7 @@ import java.util.Objects;
  * <br>my_private_registry:15800/my_image1:latest
  * <br>my_private_registry:15800/my_image1@sha256:6b019df8c73bb42e606225ef935760b9c428521eba4ad2519ef3ff4cdb3dbd69
  *
- * @author Alexander Garaagtyi
+ * @author Alexander Garagatyi
  */
 public class DockerImageIdentifier {
     private final String  registry;
@@ -37,10 +37,10 @@ public class DockerImageIdentifier {
     private final String  tag;
     private final String  digest;
 
-    public DockerImageIdentifier(String registry,
-                                 String repository,
-                                 String tag,
-                                 String digest) {
+    private DockerImageIdentifier(String registry,
+                                  String repository,
+                                  String tag,
+                                  String digest) {
         this.registry = registry;
         this.repository = repository;
         this.tag = tag;
