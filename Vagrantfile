@@ -32,8 +32,8 @@ Vagrant.configure(2) do |config|
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE"
     echo "."
     echo "."
-    curl -O "https://install.codenvycorp.com/che/eclipse-che-nightly.tar.gz"
-    tar xvfz eclipse-che-nightly.tar.gz &>/dev/null
+    curl -O "https://install.codenvycorp.com/che/eclipse-che-latest.tar.gz"
+    tar xvfz eclipse-che-latest.tar.gz &>/dev/null
     sudo chown -R vagrant:vagrant * &>/dev/null
     export JAVA_HOME=/usr &>/dev/null
 
