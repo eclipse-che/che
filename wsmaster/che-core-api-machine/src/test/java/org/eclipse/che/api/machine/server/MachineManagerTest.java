@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -50,6 +51,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -189,6 +191,20 @@ public class MachineManagerTest {
         manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME);
 
         verify(wsAgentLauncher, never()).startWsAgent(WS_ID);
+    }
+
+    @Test
+    public void shouldRemoveMachineFromRegistryIfInstanceDestroyingFailsOnDestroy() throws Exception {
+        final MachineConfigImpl machineConfig = createMachineConfig();
+        when(instance.getConfig()).thenReturn(machineConfig);
+        when(instance.getWorkspaceId()).thenReturn(WS_ID);
+        doThrow(new MachineException("test")).when(instance).destroy();
+
+        try {
+            manager.destroy(MACHINE_ID, false);
+        } catch (Exception e) {
+            verify(machineRegistry).remove(MACHINE_ID);
+        }
     }
 
     private static Path targetDir() throws Exception {
