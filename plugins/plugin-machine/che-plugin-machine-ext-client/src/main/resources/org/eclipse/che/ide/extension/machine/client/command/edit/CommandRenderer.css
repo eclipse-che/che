@@ -39,6 +39,7 @@
     text-align: center;
     margin-left: 2px;
     height: 100%;
+    padding: 0px 2px;
 }
 
 .categoryHeader span:first-child svg {

@@ -200,7 +200,7 @@ public class MachineExtension {
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
-        iconRegistry.registerIcon(new Icon("che.runtime.icon", machineResources.devMachine()));
+        iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
     }
 
     @Inject

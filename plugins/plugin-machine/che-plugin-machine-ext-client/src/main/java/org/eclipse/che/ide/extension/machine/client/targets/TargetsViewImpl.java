@@ -307,10 +307,10 @@ public class TargetsViewImpl extends Window implements TargetsView {
         categoriesList.add(new Category<>(SSH_CATEGORY, categoriesRenderer, new ArrayList<Target>(), categoriesEventDelegate));
     }
 
-    private DivElement createMachineLabel(String machineCategory) {
-        final DivElement machineLabel = Document.get().createDivElement();
+    private SpanElement createMachineLabel(String machineCategory) {
+        final SpanElement machineLabel = Document.get().createSpanElement();
 
-        Icon icon = iconRegistry.getIconIfExist(machineCategory + ".runtime.icon");
+        Icon icon = iconRegistry.getIconIfExist(machineCategory + ".machine.icon");
         if (icon != null) {
             machineLabel.appendChild(icon.getSVGImage().getElement());
             return machineLabel;
