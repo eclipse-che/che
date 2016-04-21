@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.local.provider.CheHostVfsRootDirProvider;
+import org.eclipse.che.plugin.docker.machine.local.provider.ExtraVolumeProvider;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
 
@@ -72,5 +73,10 @@ public class LocalDockerModule extends AbstractModule {
                 new org.eclipse.che.plugin.docker.machine.local.interceptor.EnableOfflineDockerMachineBuildInterceptor();
         requestInjection(offlineMachineBuildInterceptor);
         bindInterceptor(Matchers.subclassesOf(DockerInstanceProvider.class), names("buildImage"), offlineMachineBuildInterceptor);
+
+        Multibinder<String> devMachineVolumes = Multibinder.newSetBinder(binder(),
+                                                                         String.class,
+                                                                         Names.named("machine.docker.dev_machine.machine_volumes"));
+        devMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.local.provider.ExtraVolumeProvider.class);
     }
 }

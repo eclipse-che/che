@@ -121,11 +121,13 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.supportedRecipeTypes = Collections.singleton("dockerfile");
         this.projectFolderPath = projectFolderPath;
 
+        allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
+        devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
         if (SystemInfo.isWindows()) {
             allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
             devMachineSystemVolumes = escapePaths(devMachineSystemVolumes);
         }
-        this.commonMachineSystemVolumes = allMachinesSystemVolumes.toArray(new String[allMachinesEnvVariables.size()]);
+        this.commonMachineSystemVolumes = allMachinesSystemVolumes.toArray(new String[allMachinesSystemVolumes.size()]);
         final Set<String> devMachineVolumes = Sets.newHashSetWithExpectedSize(allMachinesSystemVolumes.size()
                                                                               + devMachineSystemVolumes.size());
         devMachineVolumes.addAll(allMachinesSystemVolumes);
@@ -142,8 +144,8 @@ public class DockerInstanceProvider implements InstanceProvider {
             devMachinePortsToExpose.put(serverConf.getPort(), Collections.emptyMap());
         }
 
-        allMachinesEnvVariables = filterEmptyAndNullValues(allMachinesEnvVariables);
-        devMachineEnvVariables = filterEmptyAndNullValues(devMachineEnvVariables);
+        allMachinesEnvVariables = removeEmptyAndNullValues(allMachinesEnvVariables);
+        devMachineEnvVariables = removeEmptyAndNullValues(devMachineEnvVariables);
         this.commonMachineEnvVariables = allMachinesEnvVariables;
         final HashSet<String> envVariablesForDevMachine = Sets.newHashSetWithExpectedSize(allMachinesEnvVariables.size() +
                                                                                           devMachineEnvVariables.size());
@@ -467,7 +469,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     /**
      * Returns set that contains all non empty and non nullable values from specified set
      */
-    protected Set<String> filterEmptyAndNullValues(Set<String> paths) {
+    protected Set<String> removeEmptyAndNullValues(Set<String> paths) {
         return paths.stream()
                     .filter(path -> !Strings.isNullOrEmpty(path))
                     .collect(Collectors.toSet());
