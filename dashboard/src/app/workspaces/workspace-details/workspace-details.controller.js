@@ -140,10 +140,24 @@ export class WorkspaceDetailsCtrl {
     promise.then(() => {
       this.showShowMore = false;
     }, (error) => {
-      let errorMessage = 'Unable to start this workspace. ';
-      if (error.data && error.data.message !== null) {
-        errorMessage += error.data.message;
-      }
+        let errorMessage;
+
+        if (!error || !error.data) {
+            errorMessage = 'Unable to start this workspace.';
+        } else if (error.data.errorCode === 10000 && error.data.attributes) {
+            let attributes = error.data.attributes;
+
+            errorMessage = 'Unable to start this workspace.' +
+            ' There are ' + attributes.workspaces_count + ' running workspaces consuming ' +
+            attributes.used_ram + attributes.ram_unit + ' RAM.' +
+            ' Your current RAM limit is ' + attributes.limit_ram + attributes.ram_unit +
+            '. This workspace requires an additional ' +
+            attributes.required_ram + attributes.ram_unit + '.' +
+            '  You can stop other workspaces to free resources.';
+        } else {
+            errorMessage = error.data.message;
+        }
+
       this.cheNotification.showError(errorMessage);
       this.$log.error(error);
     });
