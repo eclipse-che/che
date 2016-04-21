@@ -114,11 +114,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/info")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), org.eclipse.che.plugin.docker.client.json.SystemInfo.class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -135,11 +131,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/version")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), Version.class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -156,11 +148,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/images/json")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), Image[].class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -258,11 +246,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/images/" + image + "/json")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -432,11 +416,7 @@ public class DockerConnector {
                                                             .method("POST")
                                                             .path("/containers/" + container + "/wait")
                                                             .headers(headers)) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), ContainerExitStatus.class).getStatusCode();
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -459,11 +439,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/" + container + "/json")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -495,11 +471,7 @@ public class DockerConnector {
                                                             .query("stdout", 1)
                                                             .query("stderr", 1)
                                                             .headers(headers)) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             try (InputStream responseStream = response.getInputStream()) {
                 new LogMessagePumper(responseStream, containerLogsProcessor).start();
             }
@@ -536,11 +508,7 @@ public class DockerConnector {
                                                             .path(String.format("/containers/%s/copy", container))
                                                             .headers(headers)
                                                             .entity(entity)) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             // TarUtils uses apache commons compress library for working with tar archive and it fails
             // (e.g. doesn't unpack all files from archive in case of coping directory) when we try to use stream from docker remote API.
             // Docker sends tar contents as sequence of chunks and seems that causes problems for apache compress library.
@@ -620,11 +588,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/exec/" + execId + "/json")) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), ExecInfo.class);
         } catch (Exception e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -651,11 +615,7 @@ public class DockerConnector {
         }
 
         try {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             return parseResponseStreamAndClose(response.getInputStream(), ContainerProcesses.class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
@@ -781,11 +741,7 @@ public class DockerConnector {
             if (filters != null) {
                 connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(filters.getFilters())));
             }
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
 
             try (InputStream responseStream = response.getInputStream()) {
                 new MessagePumper<>(new JsonMessageReader<>(responseStream, Event.class), messageProcessor).start();
@@ -865,11 +821,7 @@ public class DockerConnector {
             if (memorySwapLimit != 0) {
                 connection.query("memswap", memorySwapLimit);
             }
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
@@ -921,11 +873,7 @@ public class DockerConnector {
                                                             .method("DELETE")
                                                             .path("/images/" + image)
                                                             .query("force", force ? 1 : 0)) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
         }
     }
 
@@ -970,11 +918,7 @@ public class DockerConnector {
             if (tag != null) {
                 connection.query("tag", tag);
             }
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
@@ -1095,11 +1039,7 @@ public class DockerConnector {
             if (tag != null) {
                 connection.query("tag", tag);
             }
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (OK.getStatusCode() != status) {
-                throw getDockerException(response);
-            }
+            final DockerResponse response = getDockerResponse(connection);
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
@@ -1239,5 +1179,14 @@ public class DockerConnector {
 
     private void createTarArchive(File tar, File... files) throws IOException {
         TarUtils.tarFiles(tar, 0, files);
+    }
+
+    private DockerResponse getDockerResponse(DockerConnection connection) throws IOException {
+        final DockerResponse response = connection.request();
+        final int status = response.getStatus();
+        if (OK.getStatusCode() != status) {
+            throw getDockerException(response);
+        }
+        return response;
     }
 }
