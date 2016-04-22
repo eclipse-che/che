@@ -51,12 +51,12 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DefaultWorkspaceValidatorTest {
-	
-	@Mock
-	private MachineInstanceProviders machineInstanceProviders;
-	@InjectMocks
-	private DefaultWorkspaceValidator wsValidator;
-	
+
+    @Mock
+    private MachineInstanceProviders machineInstanceProviders;
+    @InjectMocks
+    private DefaultWorkspaceValidator wsValidator;
+
     @BeforeMethod
     public void prepare() throws Exception {
         when(machineInstanceProviders.hasProvider("docker")).thenReturn(true);
