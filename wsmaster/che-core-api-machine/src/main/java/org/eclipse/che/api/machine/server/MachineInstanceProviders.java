@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides machines {link InstanceProvider} implementation by machine type
+ * Provides machines {@link InstanceProvider} implementation by machine type
  *
  * @author Alexander Garagatyi
  */
@@ -40,7 +40,7 @@ public class MachineInstanceProviders {
     }
 
     /**
-     * Returns {link InstanceProvider} implementation by machine type
+     * Returns {@link InstanceProvider} implementation by machine type
      *
      * @param machineType type of machine implementation
      * @return implementation of the machine {code InstanceProvider}
@@ -54,7 +54,7 @@ public class MachineInstanceProviders {
     }
     
     /**
-     * Checks if an {link InstanceProvider} implementation of the given machine type exists
+     * Checks if an {@link InstanceProvider} implementation of the given machine type exists
      *
      * @param machineType type of machine implementation
      * @return <code>true</code> if such implementation exists, <code>false</code> otherwise
@@ -64,7 +64,7 @@ public class MachineInstanceProviders {
     }
     
     /**
-     * Returns the machine types of all available {link InstanceProvider} implementations.
+     * Returns the machine types of all available {@link InstanceProvider} implementations.
      *
      * @return a collection of machine types
      */
