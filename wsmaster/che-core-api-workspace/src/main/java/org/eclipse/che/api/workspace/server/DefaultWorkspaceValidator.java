@@ -19,6 +19,8 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 
+import com.google.common.base.Joiner;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
@@ -126,7 +128,7 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
                       machineCfg.getType(),
                       machineCfg.getName(),
                       envName,
-                      String.join(", ", machineInstanceProviders.getProviderTypes()));
+                      Joiner.on(", ").join(machineInstanceProviders.getProviderTypes()));
 
         for (ServerConf serverConf : machineCfg.getServers()) {
             checkArgument(serverConf.getPort() != null && SERVER_PORT.matcher(serverConf.getPort()).matches(),

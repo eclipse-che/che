@@ -21,10 +21,12 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -49,16 +51,16 @@ import static org.mockito.Mockito.when;
  */
 @Listeners(MockitoTestNGListener.class)
 public class DefaultWorkspaceValidatorTest {
-    
-    private WorkspaceValidator wsValidator;
-
-    @BeforeClass
+	
+	@Mock
+	private MachineInstanceProviders machineInstanceProviders;
+	@InjectMocks
+	private DefaultWorkspaceValidator wsValidator;
+	
+    @BeforeMethod
     public void prepare() throws Exception {
-        MachineInstanceProviders machineInstanceProviders = Mockito.mock(MachineInstanceProviders.class);
         when(machineInstanceProviders.hasProvider("docker")).thenReturn(true);
-        when(machineInstanceProviders.getProviderTypes()).thenReturn(new String[] { "docker", "ssh" });
-        
-        wsValidator = new DefaultWorkspaceValidator(machineInstanceProviders);
+        when(machineInstanceProviders.getProviderTypes()).thenReturn(Arrays.asList(new String[] { "docker", "ssh" }));
     }
 
     @Test

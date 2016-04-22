@@ -15,6 +15,9 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -63,9 +66,9 @@ public class MachineInstanceProviders {
     /**
      * Returns the machine types of all available {link InstanceProvider} implementations.
      *
-     * @return an array of machine types
+     * @return a collection of machine types
      */
-    public String[] getProviderTypes() {
-        return instanceProviders.keySet().toArray(new String[instanceProviders.size()]);
+    public Collection<String> getProviderTypes() {
+        return Collections.unmodifiableSet(instanceProviders.keySet());
     }
 }
