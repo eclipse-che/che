@@ -347,6 +347,13 @@ export class CreateProjectCtrl {
     this.isReady = !('github' === tab || 'samples' === tab);
   }
 
+  /**
+   * Returns current selected tab
+   * @returns {string|*}
+   */
+  getCurrentTab() {
+    return this.currentTab;
+  }
 
   startWorkspace(bus, workspace) {
     // then we've to start workspace
