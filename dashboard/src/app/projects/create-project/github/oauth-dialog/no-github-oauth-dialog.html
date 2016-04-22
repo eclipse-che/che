@@ -1,9 +1,7 @@
 <md-dialog>
     <md-dialog-content class="no-github-oauth-content">
        <h4>GitHub oAuth is not configured</h4>
-       <div>Authentication with GitHub OAuth is not configured on {{noGithubOauthDialogController.name}} settings.
-       The detailed instructions can be found <a ng-href="{{noGithubOauthDialogController.link}}" target="_blank">here</a>.
-       </div>
+       <div>{{noGithubOauthDialogController.message}}</div>
     </md-dialog-content>
     <md-dialog-actions>
         <md-button ng-click="noGithubOauthDialogController.hide()" tabindex="0" type="button">Close</md-button>
