@@ -444,6 +444,8 @@ public class DockerInstanceProvider implements InstanceProvider {
             final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
             if (machine.getConfig().isDev()) {
                 node.bindWorkspace();
+                LOG.info("Machine with id '{}' backed by container '{}' has been deployed on node '{}'",
+                         machine.getId(), containerId, node.getHost());
             }
 
             dockerInstanceStopDetector.startDetection(containerId, machine.getId());
