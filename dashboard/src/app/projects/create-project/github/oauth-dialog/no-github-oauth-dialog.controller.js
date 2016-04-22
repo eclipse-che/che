@@ -24,9 +24,9 @@ export class NoGithubOauthDialogController {
    */
   constructor($mdDialog, $rootScope) {
     this.$mdDialog = $mdDialog;
-    
+
     this.name = $rootScope.branding.name;
-    this.link = $rootScope.branding.oauthDocs;
+    this.message = $rootScope.branding.oauthDocs;
   }
 
   /**

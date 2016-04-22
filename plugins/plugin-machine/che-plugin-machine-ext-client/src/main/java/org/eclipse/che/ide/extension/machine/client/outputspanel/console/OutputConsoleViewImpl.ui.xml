@@ -65,7 +65,7 @@
     </ui:style>
 
     <g:DockLayoutPanel ui:field="consolePanel" unit="PX" width="100%" height="100%">
-        <g:north size="18">
+        <g:north size="14">
             <g:FlowPanel ui:field="commandPanel" styleName="{style.background}">
                 <g:Label ui:field="commandTitle" text="{locale.viewProcessesCommandTitle}"
                          addStyleNames="{style.label} {style.noMargin} {resources.getCss.processHeaderTitle}"/>
