@@ -51,7 +51,7 @@ Vagrant.configure(2) do |config|
     echo "."
     echo "."
     echo "ECLIPSE CHE: SERVER BOOTING ~10s"
-    echo "AVAILABLE: http://192.16.28.30:8080"
+    echo "AVAILABLE: http://192.168.28.30:8080"
     echo "."
     echo "."
 
