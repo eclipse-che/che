@@ -16,17 +16,12 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistry;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ProjectNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
@@ -47,15 +42,14 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar
  * @author Dmitry Shnurenko
  */
 public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements CategoriesPageView.ActionDelegate {
-    private final static String DEFAULT_PARENT_DIRECTORY  = "/";
-    public final static  String DEFAULT_TEMPLATE_CATEGORY = "Samples";
+    public final static String DEFAULT_TEMPLATE_CATEGORY = "Samples";
 
     private final CategoriesPageView            view;
     private final ProjectTypeRegistry           projectTypeRegistry;
     private final ProjectTemplateRegistry       projectTemplateRegistry;
     private final ProjectWizardRegistry         wizardRegistry;
     private final PreSelectedProjectTypeManager preSelectedProjectTypeManager;
-    private final SelectionAgent                selectionAgent;
+    private final PathToParentProvider          pathToParentProvider;
 
     private ProjectTypeSelectionListener     projectTypeSelectionListener;
     private ProjectTemplateSelectionListener projectTemplateSelectionListener;
@@ -63,20 +57,25 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
     private ProjectTemplateDescriptor        selectedProjectTemplate;
     private boolean                          initialized;
 
+    private String newProjectPath;
+    private String oldProjectPath;
+    private String oldName;
+    private String newName;
+
     @Inject
     public CategoriesPagePresenter(CategoriesPageView view,
                                    ProjectTypeRegistry projectTypeRegistry,
                                    ProjectTemplateRegistry projectTemplateRegistry,
                                    ProjectWizardRegistry wizardRegistry,
                                    PreSelectedProjectTypeManager preSelectedProjectTypeManager,
-                                   SelectionAgent selectionAgent) {
+                                   PathToParentProvider pathToParentProvider) {
         super();
         this.view = view;
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectTemplateRegistry = projectTemplateRegistry;
         this.wizardRegistry = wizardRegistry;
         this.preSelectedProjectTypeManager = preSelectedProjectTypeManager;
-        this.selectionAgent = selectionAgent;
+        this.pathToParentProvider = pathToParentProvider;
 
         view.setDelegate(this);
         loadProjectTypesAndTemplates();
@@ -85,6 +84,8 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
     @Override
     public void init(ProjectConfigDto dataObject) {
         super.init(dataObject);
+        oldProjectPath = dataObject.getPath();
+        oldName = dataObject.getName();
         // this page may be reused so need to init it only once
         if (initialized) {
             return;
@@ -105,37 +106,14 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
             }
         }
 
-        view.setParentDirectory(getPathToParent());
+        view.setParentDirectory(pathToParentProvider.getPathToParent(wizardMode, dataObject));
         view.updateCategories(CREATE == wizardMode);
     }
 
-    private String getPathToParent() {
-        Selection<?> selection = selectionAgent.getSelection();
-        if (selection == null || selection.isEmpty()) {
-            return DEFAULT_PARENT_DIRECTORY;
-        }
-
-        if (selection.getAllElements().size() > 1) {
-            return DEFAULT_PARENT_DIRECTORY;
-        }
-
-        Object selectedElement = selection.getHeadElement();
-
-        if (selectedElement instanceof FolderReferenceNode) {
-            Node parent = ((FolderReferenceNode)selectedElement).getParent();
-            return getPath(parent);
-        } else if (selectedElement instanceof ProjectNode) {
-            Node parent = ((ProjectNode)selectedElement).getParent();
-            return getPath(parent);
-        }
-
-        return DEFAULT_PARENT_DIRECTORY;
-    }
 
     @Override
     public boolean isCompleted() {
-        final String projectName = dataObject.getName();
-        return projectName != null && NameUtils.checkProjectName(projectName) &&
+        return newName != null && NameUtils.checkProjectName(newName) &&
                (selectedProjectType != null || selectedProjectTemplate != null);
     }
 
@@ -179,24 +157,23 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
 
     @Override
     public void onParentDirectoryChanged() {
-        setPathInProjectConfig();
+        newProjectPath = getProjectPath();
     }
 
-    private void setPathInProjectConfig() {
+    private String getProjectPath() {
         String pathToParent = Path.valueOf(view.getParentDirectory())
                                   .makeAbsolute()
                                   .addTrailingSeparator()
                                   .toString();
 
-        String pathToProject = pathToParent + view.getName();
-        dataObject.setPath(pathToProject);
+        return pathToParent + view.getName();
     }
 
     @Override
     public void projectNameChanged(String name) {
-        setPathInProjectConfig();
+        newProjectPath = getProjectPath();
 
-        dataObject.setName(name);
+        newName = name;
         updateDelegate.updateControls();
 
         if (NameUtils.checkProjectName(name)) {
@@ -204,16 +181,6 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
         } else {
             view.showNameError();
         }
-    }
-
-    private String getPath(Node parent) {
-        if (parent instanceof ProjectNode) {
-            return ((ProjectNode)parent).getStorablePath() + '/';
-        } else if (parent instanceof FolderReferenceNode) {
-            return ((FolderReferenceNode)parent).getData().getPath() + '/';
-        }
-
-        return DEFAULT_PARENT_DIRECTORY;
     }
 
     @Override
@@ -255,6 +222,18 @@ public class CategoriesPagePresenter extends AbstractWizardPage<ProjectConfigDto
 
         view.setProjectTypes(projectTypes);
         view.setCategories(typesByCategory, templatesByCategory);
+    }
+
+    /** Saves changed name and path to project configuration. */
+    public void saveChanges() {
+        dataObject.setName(newName);
+        dataObject.setPath(newProjectPath);
+    }
+
+    /** Revert changed name and path to old values in project configuration. */
+    public void revertChanges() {
+        dataObject.setName(oldName);
+        dataObject.setPath(oldProjectPath);
     }
 
     public interface ProjectTypeSelectionListener {

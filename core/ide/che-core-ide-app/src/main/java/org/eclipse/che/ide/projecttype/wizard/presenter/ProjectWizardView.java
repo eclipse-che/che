@@ -29,7 +29,14 @@ public interface ProjectWizardView extends View<ProjectWizardView.ActionDelegate
 
     void setLoaderVisibility(boolean visible);
 
+    /** The method just close the dialog. For example after save button clicked. */
     void close();
+
+    /**
+     * The method close the dialog and revert changes which will be add to project config. For example after changing name or path
+     * of the project config and then press 'Esc' - window will be closed and all changes will be reverted.
+     */
+    void closeAndRevertChanges();
 
     void setNextButtonEnabled(boolean enabled);
 
@@ -49,5 +56,8 @@ public interface ProjectWizardView extends View<ProjectWizardView.ActionDelegate
 
         /** Performs any actions appropriate in response to the user having pressed the Cancel button */
         void onCancelClicked();
+
+        /** Reverts all changes which will be added before. */
+        void onChangesRevert();
     }
 }
