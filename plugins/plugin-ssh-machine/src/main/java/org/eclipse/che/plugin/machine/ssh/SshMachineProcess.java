@@ -23,6 +23,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
 
+import java.io.IOException;
+
 import static java.lang.String.format;
 
 /**
@@ -82,7 +84,8 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
         if (output == null) {
             sshProcess.start();
         } else {
-            sshProcess.start(output);
+            sshProcess.start(new PrefixingLineConsumer("[STDOUT] ", output),
+                             new PrefixingLineConsumer("[STDERR] ", output));
         }
     }
 
@@ -100,5 +103,26 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
     @Override
     public void kill() throws MachineException {
         sshProcess.kill();
+    }
+
+    private static class PrefixingLineConsumer implements LineConsumer {
+        private final String       prefix;
+        private final LineConsumer lineConsumer;
+
+        public PrefixingLineConsumer(String prefix, LineConsumer lineConsumer) {
+            this.prefix = prefix;
+            this.lineConsumer = lineConsumer;
+        }
+
+
+        @Override
+        public void writeLine(String line) throws IOException {
+            lineConsumer.writeLine(prefix + line);
+        }
+
+        @Override
+        public void close() throws IOException {
+            lineConsumer.close();
+        }
     }
 }
