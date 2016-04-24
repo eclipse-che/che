@@ -205,8 +205,9 @@ public class SubversionActionPresenter {
      */
     private void printOutput(List<String> output, SubversionOutputConsole console) {
         for (final String line : output) {
-            if (!line.trim().isEmpty()) {
-                String prefix = line.trim().substring(0, 1);
+            String trimLine = line.trim();
+            if (!trimLine.isEmpty()) {
+                String prefix = trimLine.substring(0, 1);
 
                 final String color = statusColors.getStatusColor(prefix);
                     if (color != null) {

@@ -210,10 +210,7 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
 
         if (projectName.getValue() != null && projectName.getValue().contains(" ")) {
             String tmp = projectName.getValue();
-            while (tmp.contains(" ")) {
-                tmp = tmp.replaceAll(" ", "-");
-            }
-            projectName.setValue(tmp);
+            projectName.setValue(tmp.replaceAll(" ", "-"));
         }
 
         delegate.onProjectNameChanged(projectName.getValue());

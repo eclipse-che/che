@@ -147,10 +147,7 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Proje
     }
 
     private boolean isSubversionUrlCorrect(final String url) {
-        if (isNullOrEmpty(url)) {
-            return false;
-        }
-        return SUBVERSION_REPOSITORY_REGEX.test(url);
+        return !isNullOrEmpty(url) && SUBVERSION_REPOSITORY_REGEX.test(url);
     }
 
     private String getUrl(String url, String relPath) {
