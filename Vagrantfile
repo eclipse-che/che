@@ -43,7 +43,7 @@ Vagrant.configure(2) do |config|
     echo "."
     echo "."
 
-    echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:192.168.28.28 --skip:client -g start
+    echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:192.168.28.30 --skip:client -g start
 
   SHELL
 
