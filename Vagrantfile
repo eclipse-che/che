@@ -31,7 +31,7 @@ Vagrant.configure(2) do |config|
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
 	    echo "."
 	    echo "."
-	    echo "ARTIK IDE: CONFIGURING SYSTEM PROXY"
+	    echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
 	    echo "."
 	    echo "."
 	    echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
