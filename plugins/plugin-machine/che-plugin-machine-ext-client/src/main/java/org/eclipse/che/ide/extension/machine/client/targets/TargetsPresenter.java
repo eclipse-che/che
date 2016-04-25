@@ -340,35 +340,75 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             return;
         }
 
+        // Update text of Connect / Disconnect button
         if (selectedTarget.isConnected()) {
             view.setConnectButtonText("Disconnect");
         } else {
             view.setConnectButtonText("Connect");
         }
-        view.enableConnectButton(!selectedTarget.isDirty());
 
-        view.enableCancelButton(selectedTarget.isDirty());
-
-        if (StringUtils.isNullOrEmpty(view.getTargetName()) ||
-                StringUtils.isNullOrEmpty(view.getHost()) ||
-                StringUtils.isNullOrEmpty(view.getPort())) {
+        // Disable Save and Cancel buttons and enable Connect for non dirty target.
+        if (!selectedTarget.isDirty()) {
+            view.enableConnectButton(true);
+            view.enableCancelButton(false);
             view.enableSaveButton(false);
-        } else {
-            if (selectedTarget.isDirty()) {
-                for (Target target : targets) {
-                    if (target == selectedTarget) {
-                        continue;
-                    }
 
-                    if (target.getName().equals(view.getTargetName())) {
-                        view.enableSaveButton(false);
-                        return;
-                    }
+            view.unmarkTargetName();
+            view.unmarkHost();
+            view.unmarkPort();
+            return;
+        }
+
+        view.enableConnectButton(false);
+        view.enableCancelButton(true);
+
+        // target name must be not empty
+        if (view.getTargetName().isEmpty()) {
+            view.markTargetNameInvalid();
+            view.enableSaveButton(false);
+            return;
+        }
+
+        boolean enableSave = true;
+
+        // check target name to being not empty
+        if (view.getTargetName().isEmpty()) {
+            enableSave = false;
+            view.markTargetNameInvalid();
+        } else {
+            boolean targetAlreadyExists = false;
+            for (Target target : targets) {
+                if (target != selectedTarget && target.getName().equals(view.getTargetName())) {
+                    targetAlreadyExists = true;
+                    break;
                 }
             }
 
-            view.enableSaveButton(selectedTarget.isDirty());
+            if (targetAlreadyExists) {
+                enableSave = false;
+                view.markTargetNameInvalid();
+            } else {
+                view.unmarkTargetName();
+            }
         }
+
+        // check host to being not empty
+        if (view.getHost().isEmpty()) {
+            enableSave = false;
+            view.markHostInvalid();
+        } else {
+            view.unmarkHost();
+        }
+
+        // check port to being not empty
+        if (view.getPort().isEmpty()) {
+            enableSave = false;
+            view.markPortInvalid();
+        } else {
+            view.unmarkPort();
+        }
+
+        view.enableSaveButton(enableSave);
     }
 
     @Override
@@ -700,24 +740,32 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
      * Ensures machine is started.
      */
     private void onConnected(final String machineId) {
-        machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+        // There is a little bug in machine service on the server side.
+        // The machine info is updated with a little delay after running a machine.
+        // Using timer must fix the problem.
+        new Timer() {
             @Override
-            public void apply(MachineDto machineDto) throws OperationException {
-                if (machineDto.getStatus() == RUNNING) {
-                    eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
-                    connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(machineDto.getConfig().getName()));
-                    connectNotification.setStatus(StatusNotification.Status.SUCCESS);
-                    updateTargets(machineDto.getConfig().getName());
-                } else {
-                    onConnectingFailed(null);
-                }
+            public void run() {
+                machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+                    @Override
+                    public void apply(MachineDto machineDto) throws OperationException {
+                        if (machineDto.getStatus() == RUNNING) {
+                            eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
+                            connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(machineDto.getConfig().getName()));
+                            connectNotification.setStatus(StatusNotification.Status.SUCCESS);
+                            updateTargets(machineDto.getConfig().getName());
+                        } else {
+                            onConnectingFailed(null);
+                        }
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        onConnectingFailed(null);
+                    }
+                });
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                onConnectingFailed(null);
-            }
-        });
+        }.schedule(500);
     }
 
     /**

@@ -108,6 +108,36 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
     String getPort();
 
     /**
+     * Adds error mark to target name field.
+     */
+    void markTargetNameInvalid();
+
+    /**
+     * Removes error mark from target name field.
+     */
+    void unmarkTargetName();
+
+    /**
+     * Adds error mark to host field.
+     */
+    void markHostInvalid();
+
+    /**
+     * Removes error mark from host field.
+     */
+    void unmarkHost();
+
+    /**
+     * Adds error mark to port field.
+     */
+    void markPortInvalid();
+
+    /**
+     * Removes error mark from port field.
+     */
+    void unmarkPort();
+
+    /**
      * Sets SSH user name.
      *
      * @param userName

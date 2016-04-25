@@ -98,13 +98,13 @@ public class TargetsViewImpl extends Window implements TargetsView {
     FlowPanel                       propertiesPanel;
 
     @UiField
-    TextBox                         targetName;
+    org.eclipse.che.ide.ui.TextBox  targetName;
 
     @UiField
-    TextBox                         host;
+    org.eclipse.che.ide.ui.TextBox  host;
 
     @UiField
-    TextBox                         port;
+    org.eclipse.che.ide.ui.TextBox  port;
 
     @UiField
     TextBox                         userName;
@@ -426,6 +426,36 @@ public class TargetsViewImpl extends Window implements TargetsView {
     @Override
     public String getTargetName() {
         return targetName.getValue();
+    }
+
+    @Override
+    public void markTargetNameInvalid() {
+        targetName.markInvalid();
+    }
+
+    @Override
+    public void unmarkTargetName() {
+        targetName.unmark();
+    }
+
+    @Override
+    public void markHostInvalid() {
+        host.markInvalid();
+    }
+
+    @Override
+    public void unmarkHost() {
+        host.unmark();
+    }
+
+    @Override
+    public void markPortInvalid() {
+        port.markInvalid();
+    }
+
+    @Override
+    public void unmarkPort() {
+        port.unmark();
     }
 
     @Override
