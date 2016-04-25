@@ -43,7 +43,7 @@ public class SshMachineImplTerminalLauncher implements MachineImplSpecificTermin
     // 1. named group 'os' that contains 1+ non-space characters
     // 2. space character
     // 3. named group 'architecture' that contains 1+ non-space characters
-    private static final Pattern UNAME_OUTPUT         = Pattern.compile("(?<os>[\\S]+) (?<architecture>[\\S]+)");
+    private static final Pattern UNAME_OUTPUT         = Pattern.compile("\\[STDOUT\\] (?<os>[\\S]+) (?<architecture>[\\S]+)");
     private static final String  DEFAULT_ARCHITECTURE = "linux_amd64";
 
     public static final String TERMINAL_LAUNCH_COMMAND_PROPERTY = "machine.ssh.server.terminal.run_command";
@@ -95,9 +95,9 @@ public class SshMachineImplTerminalLauncher implements MachineImplSpecificTermin
         ListLineConsumer lineConsumer = new ListLineConsumer();
         checkTerminalAlive.start(lineConsumer);
         String checkAliveText = lineConsumer.getText();
-        if ("not found".equals(checkAliveText)) {
+        if ("[STDOUT] not found".equals(checkAliveText)) {
             return false;
-        } else if (!"found".equals(checkAliveText)) {
+        } else if (!"[STDOUT] found".equals(checkAliveText)) {
             LOG.error("Unexpected output of websocket terminal check. Output:" + checkAliveText);
             return false;
         }
