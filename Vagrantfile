@@ -6,9 +6,16 @@
 #
 # Contributors:
 #   Codenvy, S.A. - initial API and implementation
+
+# Set to "<proto>://<user>:<pass>@<host>:<port>"
+$http_proxy  = ""
+$https_proxy = ""
+
 Vagrant.configure(2) do |config|
-  config.vm.box = "boxcutter/centos71-docker"
+  config.vm.box = "centos71-docker-java-v1.0"
+  config.vm.box_url = "https://install.codenvycorp.com/centos71-docker-java-v1.0.box"
   config.vm.box_download_insecure = true
+  config.ssh.insert_key = false
   config.vm.network :private_network, ip: "192.168.28.30"
   config.vm.define "che" do |che|
   end
@@ -17,15 +24,41 @@ Vagrant.configure(2) do |config|
     vb.name = "eclipse-che-vm"
   end
 
-  config.vm.provision "shell", inline: <<-SHELL
+  $script = <<-SHELL
+    HTTP_PROXY=$1
+    HTTPS_PROXY=$2
+
+    if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
+	    echo "."
+	    echo "."
+	    echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
+	    echo "."
+	    echo "."
+	    echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
+	    echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
+	    source /home/vagrant/.bashrc
+	    echo "HTTP PROXY set to: $HTTP_PROXY"
+	    echo "HTTPS PROXY set to: $HTTPS_PROXY"
+    fi
+
+    # Add the user in the VM to the docker group
     usermod -aG docker vagrant &>/dev/null
-    echo "."
-    echo "."
-    echo "ECLIPSE CHE: INSTALLING JAVA"
-    echo "."
-    echo "."
-    curl -H "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" -L -o jdk8-linux-x64.rpm "http://download.oracle.com/otn-pub/java/jdk/8u74-b02/jdk-8u74-linux-x64.rpm"
-    yum localinstall -y jdk8-linux-x64.rpm &>/dev/null
+
+    # Configure Docker daemon with the proxy
+    if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
+        mkdir /etc/systemd/system/docker.service.d
+    fi
+    if [ -n "$HTTP_PROXY" ]; then
+        printf "[Service]\nEnvironment=\"HTTP_PROXY=${HTTP_PROXY}\"" > /etc/systemd/system/docker.service.d/http-proxy.conf
+    fi
+    if [ -n "$HTTPS_PROXY" ]; then
+        printf "[Service]\nEnvironment=\"HTTPS_PROXY=${HTTPS_PROXY}\"" > /etc/systemd/system/docker.service.d/https-proxy.conf
+    fi
+    if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
+        printf "[Service]\nEnvironment=\"NO_PROXY=localhost,127.0.0.1\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
+        systemctl daemon-reload
+        systemctl restart docker
+    fi
 
     echo "."
     echo "."
@@ -43,17 +76,27 @@ Vagrant.configure(2) do |config|
     echo "."
     echo "."
 
+    if [ -n "$HTTP_PROXY" ]; then
+        sed -i "s|http.proxy=|http.proxy=${HTTP_PROXY}|" /home/vagrant/eclipse-che-*/conf/che.properties
+    fi
+    if [ -n "$HTTPS_PROXY" ]; then
+        sed -i "s|https.proxy=|https.proxy=${HTTPS_PROXY}|"  /home/vagrant/eclipse-che-*/conf/che.properties
+    fi
     echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:192.168.28.30 --skip:client -g start
-
   SHELL
 
-  config.vm.provision "shell", run: "always", inline: <<-SHELL
+  config.vm.provision "shell" do |s| 
+  	s.inline = $script
+  	s.args = [$http_proxy, $https_proxy]
+  end
+
+   config.vm.provision "shell", run: "always", inline: <<-SHELL
     echo "."
     echo "."
     echo "ECLIPSE CHE: SERVER BOOTING ~10s"
     echo "AVAILABLE: http://192.168.28.30:8080"
     echo "."
     echo "."
-
   SHELL
+
 end
