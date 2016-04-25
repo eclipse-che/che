@@ -73,34 +73,6 @@ export class CreateProjectCtrl {
 
     this.generateWorkspaceName();
 
-    this.headerSteps = [
-      {
-        id: '#create-project-source-id',
-        name: 'source',
-        link: 'create-project-source'
-      },
-      {
-        id: '#create-project-source-stack',
-        name: 'stack',
-        link: 'create-project-stack'
-      },
-      {
-        id: '#create-project-workspace',
-        name: 'workspace',
-        link: 'create-project-workspace'
-      },
-      {
-        id: '#create-project-source-template',
-        name: 'template',
-        link: 'create-project-template'
-      },
-      {
-        id: '#create-project-source-information',
-        name: 'metadata',
-        link: 'create-project-information'
-      }
-    ];
-
     this.messageBus = null;
     this.recipeUrl = null;
 
@@ -1058,42 +1030,9 @@ export class CreateProjectCtrl {
     return this.createProjectSvc.getIDELink();
   }
 
-  isElementVisible(index) {
-
-    // for each id, check last
-    var maxVisibleElement = 0;
-    for (var i = 0; i < this.headerSteps.length; i++) {
-      var visibleElement = this.isvisible(this.headerSteps[i].id);
-      if (visibleElement) {
-        maxVisibleElement = i;
-      }
-    }
-    return index <= maxVisibleElement;
-  }
-
   isResourceProblem() {
     let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
     return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
-  }
-
-  isvisible(elementName) {
-    let element = angular.element(elementName);
-    var windowElement = $(window);
-
-    var docViewTop = windowElement.scrollTop();
-    var docViewBottom = docViewTop + windowElement.height();
-
-    var offset = element.offset();
-    if (!offset) {
-      return false;
-    }
-
-    var elemTop = offset.top;
-    var elemBottom = elemTop + element.height();
-
-    // use elemTop if want to see all div or elemBottom if we see partially it
-    /*((elemTop <= docViewBottom) && (elemTop >= docViewTop));*/
-    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
   }
 
   setStackTab(stackTab) {
