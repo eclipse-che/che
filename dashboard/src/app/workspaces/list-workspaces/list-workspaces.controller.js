@@ -220,11 +220,16 @@ export class ListWorkspacesCtrl {
 
     let confirmationPromise = this.showDeleteWorkspacesConfirmation(queueLength);
     confirmationPromise.then(() => {
+      let numberToDelete = queueLength;
       let isError = false;
+      let deleteWorkspacePromises = [];
+      let workspaceName;
+
       checkedWorkspacesKeys.forEach((workspaceId) => {
         this.workspacesSelectedStatus[workspaceId] = false;
 
         let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+        workspaceName = workspace.config.name;
         let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(workspaceId, 'STOPPED');
 
         // stop workspace if it's status is RUNNING
@@ -233,29 +238,32 @@ export class ListWorkspacesCtrl {
         }
 
         // delete stopped workspace
-        stoppedStatusPromise
-          .then(() => {
-            return this.cheWorkspace.deleteWorkspaceConfig(workspaceId);
-          })
-          .then(() => {
+        let promise = stoppedStatusPromise.then(() => {
+          return this.cheWorkspace.deleteWorkspaceConfig(workspaceId);
+        }).then(() => {
             queueLength--;
-            if (!queueLength) {
-              if (isError) {
-                this.cheNotification.showError('Delete failed.');
-              } else {
-                this.cheNotification.showInfo('Has been successfully removed.');
-              }
-            }
-          }, (error) => {
-            queueLength--;
-            if (!queueLength) {
-              this.cheNotification('Delete failed.');
-            }
-            this.$log.error(error);
-          })
-          .then(() => {
-            this.getUserWorkspaces();
+          },
+          (error) => {
+            isError = true;
+            this.$log.error('Cannot delete workspace: ', error);
           });
+        deleteWorkspacePromises.push(promise);
+      });
+
+      this.$q.all(deleteWorkspacePromises).finally(() => {
+        this.getUserWorkspaces();
+
+        if (isError) {
+          this.cheNotification.showError('Delete failed.');
+        }
+        else {
+          if (numberToDelete === 1) {
+            this.cheNotification.showInfo(workspaceName + ' has been removed.');
+          }
+          else {
+            this.cheNotification.showInfo('Selected workspaces have been removed.');
+          }
+        }
       });
     });
   }
