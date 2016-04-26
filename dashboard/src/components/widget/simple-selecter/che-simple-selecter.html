@@ -4,7 +4,7 @@
          ng-class="{'che-simple-selector-active' : '{{cheSimpleSelecterCtrl.title}}' == cheSimpleSelecterCtrl.getSelected()}">
   <div layout="row">
     <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !cheSimpleSelecterCtrl.iconSrc}">
-      <img ng-if="cheSimpleSelecterCtrl.iconSrc" src="{{cheSimpleSelecterCtrl.iconSrc}}"/>
+      <img ng-if="cheSimpleSelecterCtrl.iconSrc" ng-src="{{cheSimpleSelecterCtrl.iconSrc}}"/>
     </div>
     <div flex="70" class="title">{{cheSimpleSelecterCtrl.title}}</div>
   </div>

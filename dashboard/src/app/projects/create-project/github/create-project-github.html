@@ -10,69 +10,63 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-    <div class="create-project-github-panel" layout="row" flex></div>
+<div class="create-project-github-panel" layout="row" flex></div>
 
+<p ng-if="createProjectGithubCtrl.state == 'LOAD_ERROR'" class="alert alert-danger" style="margin-bottom: 15px">
+  We have a problem authenticating you with GitHub.
+</p>
 
-    <p ng-if="createProjectGithubCtrl.state == 'LOAD_ERROR'" class="alert alert-danger" style="margin-bottom: 15px">
-        We have a problem authenticating you with GitHub.
-    </p>
-
-  <div layout="column" layout-align="space-around center" ng-show="createProjectGithubCtrl.state == 'NO_REPO'">
-    <div class="github-create-project-github-warningempty">Your GitHub repositories will appear here</div>
-    <div>GitHub repositories can easily be imported in {{createProjectGithubCtrl.productName}}</div>
-    <che-button-default class="github-create-project-github-button"
-                         che-button-icon="fa fa-github"
-                         che-button-title="Connect your github account"
-                         ng-click="createProjectGithubCtrl.authenticateWithGitHub()">
-    </che-button-default>
+<div layout="column" layout-align="space-around center" ng-show="createProjectGithubCtrl.state == 'NO_REPO'">
+  <div class="github-create-project-github-warningempty">Your GitHub repositories will appear here</div>
+  <div>GitHub repositories can easily be imported in {{createProjectGithubCtrl.productName}}</div>
+  <che-button-default class="github-create-project-github-button"
+                      che-button-icon="fa fa-github"
+                      che-button-title="Connect your github account"
+                      ng-click="createProjectGithubCtrl.authenticateWithGitHub()">
+  </che-button-default>
 </div>
 
-    <div ng-show="createProjectGithubCtrl.state === 'LOADING'">
-        <md-progress-linear md-mode="indeterminate"></md-progress-linear>&nbsp;
+<div ng-show="createProjectGithubCtrl.state === 'LOADING'">
+  <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+  &nbsp;
+</div>
+
+<div ng-if="createProjectGithubCtrl.state == 'LOADED'">
+  <div layout="row" layout-align="space-around center">
+
+    <div layout="row" flex="45" class="github-create-project-search-component">
+      <md-icon flex-gt-sm="5" md-font-icon="fa fa-search"></md-icon>
+      <input id="nameFilter" class="github-create-project-search-input" flex
+             ng-model="createProjectGithubCtrl.repositoryName" type="text" placeholder="Start typing here">
     </div>
-
-
-    <div ng-if="createProjectGithubCtrl.state == 'LOADED'">
-        <div layout="row" layout-align="space-around center">
-
-            <div layout="row" flex="45" class="github-create-project-search-component">
-                <md-icon flex-gt-sm="5" md-font-icon="fa fa-search"></md-icon>
-                <input id="nameFilter" class="github-create-project-search-input" flex ng-model="createProjectGithubCtrl.repositoryName" type="text" placeholder="Start typing here">
-            </div>
-            <div layout="row" flex="45" class="github-create-project-dropdown-component">
-                <select flex id="organizationFilter" class="github-create-project-select" ng-model="createProjectGithubCtrl.organizationName" ng-options="createProjectGithubCtrl.resolveOrganizationName(organization) group by createProjectGithubCtrl.resolveOrganizationType(organization) for organization in createProjectGithubCtrl.organizations">
-                    <option value="">All Organizations</option>
-                </select>
-            </div>
+    <div layout="row" flex="45" class="github-create-project-dropdown-component">
+      <select flex id="organizationFilter" class="github-create-project-select"
+              ng-model="createProjectGithubCtrl.organizationName"
+              ng-options="createProjectGithubCtrl.resolveOrganizationName(organization) group by createProjectGithubCtrl.resolveOrganizationType(organization) for organization in createProjectGithubCtrl.organizations">
+        <option value="">All Organizations</option>
+      </select>
+    </div>
+  </div>
+  <che-list class="github-create-project-repositories-list">
+    <che-list-item
+      ng-repeat="gitHubRepository in createProjectGithubCtrl.gitHubRepositories | githubFilterRepositories:createProjectGithubCtrl.organizationName:createProjectGithubCtrl.repositoryName | orderBy:'name'"
+      ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository)" flex-gt-sm="100" flex="33"
+      ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
+      <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row">
+        <div class="github-create-project-icons" flex-gt-sm="5">
+          <span ng-if="!gitHubRepository.fork" class="github-create-project-icon fa fa-folder"></span>
+          <span ng-if="gitHubRepository.fork" class="github-create-project-icon fa fa-code-fork" title="forked"></span>
+          <span ng-if="gitHubRepository.private" class="github-create-project-icon fa fa-lock" title="private"></span>
+        </div>
+        <div flex-gt-sm="45" layout="column">
+          <div class="github-create-project-repository-name">{{gitHubRepository.name}}</div>
+          <div class="github-create-project-repository-details">{{gitHubRepository.description}}</div>
         </div>
 
-        <che-list class="github-create-project-repositories-list">
-            <che-list-item ng-repeat="gitHubRepository in createProjectGithubCtrl.gitHubRepositories | githubFilterRepositories:createProjectGithubCtrl.organizationName:createProjectGithubCtrl.repositoryName | orderBy:'name'"
-                            ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository)" flex-gt-sm="100" flex="33" ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
-
-                <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row">
-                    <div class="github-create-project-icons" flex-gt-sm="5">
-                        <span ng-if="!gitHubRepository.fork" class="github-create-project-icon fa fa-folder"></span>
-                        <span ng-if="gitHubRepository.fork" class="github-create-project-icon fa fa-code-fork" title="forked"></span>
-                        <span ng-if="gitHubRepository.private" class="github-create-project-icon fa fa-lock" title="private"></span>
-                    </div>
-                    <div flex-gt-sm="45" layout="column">
-                        <div class="github-create-project-repository-name">{{gitHubRepository.name}}</div>
-                        <div class="github-create-project-repository-details">{{gitHubRepository.description}}</div>
-                    </div>
-
-
-
-                    <div flex-gt-sm="40">
-                        {{gitHubRepository.clone_url}}
-                    </div>
-                </div>
-
-
-            </che-list-item>
-        </che-list>
-
-
-
-
-    </div>
+        <div flex-gt-sm="40">
+          {{gitHubRepository.clone_url}}
+        </div>
+      </div>
+    </che-list-item>
+  </che-list>
+</div>
