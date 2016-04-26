@@ -53,8 +53,8 @@ public class StackLoader {
 
     @Inject
     public StackLoader(StackTypeAdaptersProvider stackTypeAdaptersProvider,
-                       @Named("stack.predefined.list.json") String stacksPath,
-                       @Named("stack.predefined.icons.folder") String stackIconFolder,
+                       @Named("che.stacks.default") String stacksPath,
+                       @Named("che.stacks.images.storage") String stackIconFolder,
                        StackDao stackDao) {
         this.stackJsonPath = Paths.get(stacksPath);
         this.stackIconFolderPath = Paths.get(stackIconFolder);

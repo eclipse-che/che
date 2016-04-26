@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.settings.property;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions;
@@ -43,6 +44,8 @@ import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarning
  *
  * @author Dmitry Shnurenko
  */
+
+@Singleton
 class PropertyNameManager {
 
     private final Map<ErrorWarningsOptions, String> names;

@@ -15,21 +15,37 @@
              xmlns:c='urn:import:com.google.gwt.user.cellview.client'
              xmlns:my='urn:import:org.eclipse.che.ide.jseditor.client.preference'>
 
-    <ui:with type="org.eclipse.che.ide.jseditor.client.preference.EditorPrefLocalizationConstant" field="constants" />
+    <ui:with type="org.eclipse.che.ide.jseditor.client.preference.EditorPrefLocalizationConstant" field="constants"/>
     <ui:style src="org/eclipse/che/ide/api/ui/style.css">
-        .section {
-            margin-top: 1em;
-            margin-bottom: 0.2em;
-            font-size: titleFontSize;
+        @eval editorPreferenceCategoryBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorPreferenceCategoryBackgroundColor();
+
+        .label {
+            position: absolute;
+            color: categoriesListItemTextColor;
+            margin-left: 10px;
+            line-height: 25px;
         }
+
+        .titleSection {
+            background-color: editorPreferenceCategoryBackgroundColor;
+            line-height: 25px;
+        }
+
+        .sectionLabel {
+            margin-left: 5px;
+        }
+
         .tables {
-            min-width: fill-available; 
-            min-width: -webkit-fill-available; 
+            float: right;
         }
     </ui:style>
 
-    <g:HTMLPanel>
-        <g:Label addStyleNames="{style.section}" text="{constants.keybindingsSectionLabel}" />
-        <c:CellTable ui:field="keyBindingSelection" addStyleNames="{style.tables}" />
-    </g:HTMLPanel>
+    <g:FlowPanel>
+        <g:FlowPanel addStyleNames="{style.titleSection}">
+            <g:Label text="{constants.keysSectionLabel}" addStyleNames="{style.sectionLabel}"/>
+        </g:FlowPanel>
+        <g:Label text="{constants.keybindingsLabel}" addStyleNames="{style.label}"/>
+        <c:CellTable ui:field="keyBindingSelection" addStyleNames="{style.tables}"/>
+    </g:FlowPanel>
 </ui:UiBinder>
+

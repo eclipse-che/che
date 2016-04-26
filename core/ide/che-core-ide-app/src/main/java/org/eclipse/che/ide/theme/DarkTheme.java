@@ -1464,4 +1464,9 @@ public class DarkTheme implements Theme {
     public String vcsConsoleChangesLineNumbersColor() {
         return "#00FFFF";
     }
+
+    @Override
+    public String editorPreferenceCategoryBackgroundColor() {
+        return "rgba(215, 215, 215, 0.10)";
+    }
 }

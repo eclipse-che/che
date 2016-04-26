@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Manager for preferences.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 public interface PreferencesManager {
 

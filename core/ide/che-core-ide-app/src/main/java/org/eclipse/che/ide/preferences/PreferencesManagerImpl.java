@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * The implementation of {@link PreferencesManager} for managing user preference.
  *
- * @author <a href="mailto:aplotnikov@codenvy.com">Andrey Plotnikov</a>
+ * @author Andrey Plotnikov
  */
 @Singleton
 public class PreferencesManagerImpl implements PreferencesManager {

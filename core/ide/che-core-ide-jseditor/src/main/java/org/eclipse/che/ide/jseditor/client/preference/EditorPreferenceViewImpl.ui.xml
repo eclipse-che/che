@@ -12,15 +12,15 @@
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-
-    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
-        .main{
-            margin: 5px;
+    <ui:style>
+        .scrollPanel {
+            overflow-x: hidden !important;
         }
     </ui:style>
-
-
-    <g:HTMLPanel styleName="{style.main}">
-        <g:SimplePanel ui:field="keymapsSection"/>
-    </g:HTMLPanel>
+    <g:ScrollPanel width="100%" height="100%" styleName="{style.scrollPanel}">
+        <g:HTMLPanel height="100%">
+            <g:SimplePanel ui:field="keymapsSection" height="46px" debugId="editorKeymapsSection"/>
+            <g:SimplePanel ui:field="editorPropertiesSection" debugId="editorPropertiesSection"/>
+        </g:HTMLPanel>
+    </g:ScrollPanel>
 </ui:UiBinder>

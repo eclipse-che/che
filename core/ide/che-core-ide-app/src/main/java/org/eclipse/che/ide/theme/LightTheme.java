@@ -1441,4 +1441,9 @@ public class LightTheme implements Theme {
     public String vcsConsoleChangesLineNumbersColor() {
         return "#66CCFF";
     }
+
+    @Override
+    public String editorPreferenceCategoryBackgroundColor() {
+        return "rgba(27, 27, 27, 0.10)";
+    }
 }

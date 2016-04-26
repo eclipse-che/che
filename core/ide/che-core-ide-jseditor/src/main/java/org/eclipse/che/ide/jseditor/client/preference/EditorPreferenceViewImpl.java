@@ -15,7 +15,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 import javax.inject.Inject;
@@ -28,6 +28,8 @@ public class EditorPreferenceViewImpl extends Composite implements EditorPrefere
 
     @UiField
     SimplePanel keymapsSection;
+    @UiField
+    SimplePanel editorPropertiesSection;
 
     @Inject
     public EditorPreferenceViewImpl() {
@@ -39,7 +41,12 @@ public class EditorPreferenceViewImpl extends Composite implements EditorPrefere
         return this.keymapsSection;
     }
 
+    @Override
+    public AcceptsOneWidget getEditorPropertiesContainer() {
+        return editorPropertiesSection;
+    }
+
     /** UI binder interface for the {@link EditorPreferenceViewImpl} component. */
-    interface EditorTypePreferenceViewImplUiBinder extends UiBinder<HTMLPanel, EditorPreferenceViewImpl> {
+    interface EditorTypePreferenceViewImplUiBinder extends UiBinder<ScrollPanel, EditorPreferenceViewImpl> {
     }
 }

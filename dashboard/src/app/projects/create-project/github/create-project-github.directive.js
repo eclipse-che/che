@@ -44,7 +44,8 @@ export class CreateProjectGithub {
     this.scope = {
       createProjectGitHubForm: '=cheForm',
       selectedRepository: '=cheRepositoryModel',
-      repositorySelectNotify: '&cheRepositorySelect'
+      repositorySelectNotify: '&cheRepositorySelect',
+      isCurrentTab: '=cheIsCurrentTab'
     };
   }
 

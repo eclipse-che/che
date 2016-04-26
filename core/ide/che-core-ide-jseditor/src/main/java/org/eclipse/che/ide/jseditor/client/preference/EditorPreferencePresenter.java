@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
+import org.eclipse.che.ide.jseditor.client.preference.editorproperties.EditorPropertiesPresenter;
 import org.eclipse.che.ide.jseditor.client.preference.keymaps.KeyMapsPreferencePresenter;
 
 /** Preference page presenter for the editors. */
@@ -25,12 +26,14 @@ public class EditorPreferencePresenter extends AbstractPreferencePagePresenter i
     private final EditorPreferenceView view;
 
     private final KeyMapsPreferencePresenter keymapsSection;
+    private final EditorPropertiesPresenter  editorPropertiesSection;
 
     @Inject
     public EditorPreferencePresenter(final EditorPreferenceView view,
                                      final EditorPrefLocalizationConstant constant,
                                      final EditorPreferenceResource resource,
-                                     final KeyMapsPreferencePresenter keymapsSection) {
+                                     final KeyMapsPreferencePresenter keymapsSection,
+                                     final EditorPropertiesPresenter editorPropertiesSection) {
 
         super(constant.editorTypeTitle(),
               constant.editorTypeCategory(),
@@ -38,18 +41,21 @@ public class EditorPreferencePresenter extends AbstractPreferencePagePresenter i
 
         this.view = view;
         this.keymapsSection = keymapsSection;
+        this.editorPropertiesSection = editorPropertiesSection;
 
         this.keymapsSection.setParent(this);
+        this.editorPropertiesSection.setParent(this);
     }
 
     @Override
     public boolean isDirty() {
-        return keymapsSection.isDirty();
+        return keymapsSection.isDirty() || editorPropertiesSection.isDirty();
     }
 
     @Override
     public void go(final AcceptsOneWidget container) {
         keymapsSection.go(view.getKeymapsContainer());
+        editorPropertiesSection.go(view.getEditorPropertiesContainer());
         container.setWidget(view);
     }
 
@@ -63,11 +69,17 @@ public class EditorPreferencePresenter extends AbstractPreferencePagePresenter i
         if (keymapsSection.isDirty()) {
             keymapsSection.storeChanges();
         }
+
+        if (editorPropertiesSection.isDirty()) {
+            editorPropertiesSection.storeChanges();
+        }
     }
 
     @Override
     public void revertChanges() {
         keymapsSection.refresh();
+        editorPropertiesSection.refresh();
+
         signalDirtyState();
     }
 
