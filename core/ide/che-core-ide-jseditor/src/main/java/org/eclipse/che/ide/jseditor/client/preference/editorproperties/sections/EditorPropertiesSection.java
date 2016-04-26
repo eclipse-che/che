@@ -8,16 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-/* style for CellTable cells. */
-.prefCell {
-    height: 2em;
-}
+package org.eclipse.che.ide.jseditor.client.preference.editorproperties.sections;
 
-.firstColumn {
-    width: 12em;
-}
+import java.util.List;
 
-.selectWidth {
-    width: 7em;
-    margin: 3px 0 3px 0;
+/**
+ * The interface provides methods to get info about editor's properties section.
+ *
+ * @author Roman Nikitenko
+ */
+public interface EditorPropertiesSection {
+
+    /** Returns IDs of properties which the section contains */
+    public List<String> getProperties();
+
+    /** Returns the title of editor's properties section */
+    public String getSectionTitle();
 }
