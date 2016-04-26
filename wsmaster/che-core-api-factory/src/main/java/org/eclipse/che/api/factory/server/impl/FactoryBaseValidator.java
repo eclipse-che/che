@@ -218,7 +218,7 @@ public abstract class FactoryBaseValidator {
 
         for (Action applicationAction : applicationActions) {
             String id = applicationAction.getId();
-            if ("openFile".equals(id) || "findReplace".equals(id) || "runCommand".equals(id)) {
+            if ("openFile".equals(id) || "findReplace".equals(id) || "runCommand".equals(id) || "newTerminal".equals(id)) {
                 throw new BadRequestException(format(FactoryConstants.INVALID_ACTION_SECTION, id));
             }
         }
