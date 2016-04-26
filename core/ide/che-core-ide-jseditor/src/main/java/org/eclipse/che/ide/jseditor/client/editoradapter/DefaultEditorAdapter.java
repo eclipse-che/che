@@ -262,7 +262,7 @@ public class DefaultEditorAdapter extends Composite implements EditorAdapter, Fi
 
     @Override
     public void onClose(final AsyncCallback<Void> callback) {
-        // the nested presenter is responsible for closing the editor _it owns_
+        // the nested presenter is responsible for closing the editor it owns
         this.nestedPresenter.onClose(callback);
     }
 
