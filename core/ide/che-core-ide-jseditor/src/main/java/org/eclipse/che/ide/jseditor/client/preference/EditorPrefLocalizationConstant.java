@@ -25,6 +25,12 @@ public interface EditorPrefLocalizationConstant extends Messages {
     @Key("editortype.category")
     String editorTypeCategory();
 
-    @DefaultMessage("Key Bindings")
-    String keybindingsSectionLabel();
+    @DefaultMessage("Keys")
+    String keysSectionLabel();
+
+    @DefaultMessage("Key Bindings:")
+    String keybindingsLabel();
+
+    @DefaultMessage("Editor settings")
+    String editorSettingsSectionLabel();
 }

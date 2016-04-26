@@ -31,7 +31,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 
 /**
  * Implementation of the {@link KeymapsPreferenceView}.
@@ -39,7 +39,7 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 public class KeymapsPreferenceViewImpl extends Composite implements KeymapsPreferenceView {
 
     /** UI binder interface for the {@link KeymapsPreferenceViewImpl} component. */
-    interface KeymapsPreferenceViewImplUiBinder extends UiBinder<HTMLPanel, KeymapsPreferenceViewImpl> {
+    interface KeymapsPreferenceViewImplUiBinder extends UiBinder<FlowPanel, KeymapsPreferenceViewImpl> {
     }
 
     /** The UI binder instance. */
@@ -85,8 +85,6 @@ public class KeymapsPreferenceViewImpl extends Composite implements KeymapsPrefe
                 return resources.cellStyle().prefCell() + " " + resources.cellStyle().firstColumn();
             }
         };
-
-        this.keyBindingSelection.addColumn(editorColumn);
 
         // disable row selection
         this.keyBindingSelection.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);

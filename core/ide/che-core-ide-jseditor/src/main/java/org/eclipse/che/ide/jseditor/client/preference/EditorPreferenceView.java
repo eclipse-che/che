@@ -17,4 +17,5 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface EditorPreferenceView extends IsWidget {
 
     AcceptsOneWidget getKeymapsContainer();
+    AcceptsOneWidget getEditorPropertiesContainer();
 }

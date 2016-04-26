@@ -8,16 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-/* style for CellTable cells. */
-.prefCell {
-    height: 2em;
-}
+package org.eclipse.che.ide.jseditor.client.preference.editorproperties;
 
-.firstColumn {
-    width: 12em;
-}
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.ImplementedBy;
 
-.selectWidth {
-    width: 7em;
-    margin: 3px 0 3px 0;
+/**
+ * The class provides special panel to store editor's sections.
+ *
+ * @author Roman Nikitenko
+ */
+@ImplementedBy(EditorPropertiesViewImpl.class)
+public interface EditorPropertiesView extends IsWidget{
+    AcceptsOneWidget getEditorSectionsContainer();
 }

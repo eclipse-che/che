@@ -1467,4 +1467,6 @@ public interface Theme {
     String vcsConsoleErrorColor();
     String vcsConsoleModifiedFilesColor();
     String vcsConsoleChangesLineNumbersColor();
+
+    String editorPreferenceCategoryBackgroundColor();
 }
