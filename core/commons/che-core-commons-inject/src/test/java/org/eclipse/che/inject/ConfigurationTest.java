@@ -29,6 +29,8 @@ import javax.inject.Named;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -56,6 +58,9 @@ public class ConfigurationTest {
         props.put("some.dir.in_tmp_dir", "${java.io.tmpdir}/some_dir");
         props.put("suffixed.PATH", "${PATH}" + java.io.File.pathSeparator + "some_path");
         props.put("nullable", "NULL");
+
+        final Map<String, String> envProps = new HashMap<>();
+        envProps.put("some.unresolvable.variable", "/home/${my.3rd.party.var}/other");
         injector = Guice.createInjector(
                 new URIConverter(),
                 new URLConverter(),
@@ -63,11 +68,17 @@ public class ConfigurationTest {
                 new StringArrayConverter(),
                 new PairConverter(),
                 new PairArrayConverter(),
-                new CodenvyBootstrap.ExtConfiguration(),
-                new CodenvyBootstrap.AbstractConfigurationModule() {
+                new CheBootstrap.ExtConfiguration(),
+                new CheBootstrap.AbstractConfigurationModule() {
                     @Override
                     protected void configure() {
                         bindProperties(props);
+                    }
+                },
+                new CheBootstrap.AbstractConfigurationModule() {
+                    @Override
+                    protected void configure() {
+                        bindEnvProperties("env.", envProps);
                     }
                 },
                 new MyModule());
@@ -156,6 +167,12 @@ public class ConfigurationTest {
                             System.getenv("PATH") + java.io.File.pathSeparator + "some_path");
     }
 
+    @Test
+    public void testInjectSystemPropertyWithUnresolvableVariableInConfiguration() {
+        Assert.assertEquals(injector.getInstance(TestComponent.class).unresolvableVar,
+                            "/home/${my.3rd.party.var}/other");
+    }
+
     public static class MyModule implements Module {
         @Override
         public void configure(Binder binder) {
@@ -228,6 +245,11 @@ public class ConfigurationTest {
         @Inject
         @Nullable
         String nullable;
+
+        @Named("env.some.unresolvable.variable")
+        @Inject
+        @Nullable
+        String unresolvableVar;
     }
 
     @Test
