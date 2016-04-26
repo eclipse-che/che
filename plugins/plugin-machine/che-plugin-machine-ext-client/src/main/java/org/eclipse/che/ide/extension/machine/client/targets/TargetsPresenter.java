@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.api.core.model.machine.MachineStatus.CREATING;
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
@@ -754,6 +755,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                             connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(machineDto.getConfig().getName()));
                             connectNotification.setStatus(StatusNotification.Status.SUCCESS);
                             updateTargets(machineDto.getConfig().getName());
+                        } else if (machineDto.getStatus() == CREATING) {
+                            onConnected(machineId);
                         } else {
                             onConnectingFailed(null);
                         }
@@ -765,7 +768,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                     }
                 });
             }
-        }.schedule(500);
+        }.schedule(1000);
     }
 
     /**
