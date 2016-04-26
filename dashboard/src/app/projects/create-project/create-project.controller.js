@@ -1237,4 +1237,12 @@ export class CreateProjectCtrl {
     });
     window.open('data:text/csv,' + encodeURIComponent(logs));
   }
+
+  getCreateButtonTitle() {
+    if (this.workspaceResource === 'from-stack') {
+      return "Create Workspace and Project";
+    } else {
+      return "Load Workspace and Create Project";
+    }
+  }
 }
