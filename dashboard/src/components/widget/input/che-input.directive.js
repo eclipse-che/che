@@ -70,7 +70,7 @@ export class CheInput {
           + '<div ng-messages="myForm.' + inputName + '.$error"></div>'
           + '</md-input-container>'
           + ''
-          + '    <div class="che-input-desktop" hide-sm hide-md layout="column" flex>'
+          + '    <div class="che-input-desktop" hide-xs hide-sm hide-md layout="column" flex>'
           + '<div layout="row" flex layout-align="space-around start">'
           + ' <label flex="15" class="che-input-desktop-label" ng-if="labelName">' + labelName + ': </label>'
           + ''
