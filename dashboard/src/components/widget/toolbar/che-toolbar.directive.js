@@ -132,7 +132,7 @@ export class CheToolbar {
       template += '<md-icon md-font-icon=\"fa fa-ellipsis-v\"></md-icon></div>';
       template += '<md-menu-content width=\"3\">';
       template += '<md-menu-item ng-repeat=\"item in ' + dropdownMenu + '" >';
-      template += '<md-button ng-click=\"item.onclick()\">{{item.title}}</md-button>';
+      template += '<md-button ng-click=\"item.onclick()\" ng-disabled=\"item.disabled()\">{{item.title}}</md-button>';
       template += '</md-menu-content></md-menu>';
     }
 
