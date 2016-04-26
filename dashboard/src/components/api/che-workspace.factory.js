@@ -68,7 +68,7 @@ export class CheWorkspace {
         return link.rel === 'wsagent';
       });
     }
-    return wsAgentLink ? wsAgentLink.href.replace(/^https?:\/\//,'').replace('/api/ext', '') : '';
+    return wsAgentLink ? wsAgentLink.href.replace(/^https?:\/\//,'').replace('/wsagent/ext', '') : '';
   }
 
   /**
@@ -299,13 +299,8 @@ export class CheWorkspace {
     let endpoint = runtimeData.devMachine.runtime.envVariables.CHE_API_ENDPOINT;
 
     var contextPath;
-    if (endpoint.endsWith('/ide/api')) {
-      contextPath = 'ide';
-    } else {
-      contextPath = 'api';
-    }
 
-    return 'ws://' + wsagentServerAddress + '/' + contextPath + '/ext/ws/' + workspaceId;
+    return 'ws://' + wsagentServerAddress + '/' + '/wsagent/ext/ws/' + workspaceId;
   }
 
   getIdeUrl(workspaceName) {

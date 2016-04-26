@@ -32,7 +32,7 @@ export class CheProjectType {
     // project types per workspace ID
     this.typesWorkspaces = new Map();
     // remote call
-    this.remoteProjectTypeAPI = this.$resource('//:agent/api/ext/project-type/:workspaceId');
+    this.remoteProjectTypeAPI = this.$resource('//:agent/wsagent/ext/project-type/:workspaceId');
 
   }
 

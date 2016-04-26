@@ -39,7 +39,7 @@ public class WsAgentServerConfProvider implements Provider<ServerConf> {
         return new ServerConfImpl(WSAGENT_REFERENCE,
                                   Constants.WS_AGENT_PORT,
                                   apiEndpoint.getScheme(),
-                                  "/api/ext");
+                                  "/wsagent/ext");
     }
 
 }
