@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.gwt.client;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
@@ -19,5 +20,5 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
  */
 public interface ProjectImportersServiceClient {
 
-    void getProjectImporters(String workspaceId, AsyncRequestCallback<ProjectImporterData> callback);
+    void getProjectImporters(DevMachine devMachine, AsyncRequestCallback<ProjectImporterData> callback);
 }

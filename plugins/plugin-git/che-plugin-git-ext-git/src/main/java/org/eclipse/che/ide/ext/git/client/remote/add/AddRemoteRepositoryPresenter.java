@@ -64,7 +64,7 @@ public class AddRemoteRepositoryPresenter implements AddRemoteRepositoryView.Act
         String url = view.getUrl();
         final ProjectConfigDto project = appContext.getCurrentProject().getRootProject();
 
-        service.remoteAdd(appContext.getWorkspaceId(), project, name, url, new AsyncRequestCallback<String>() {
+        service.remoteAdd(appContext.getDevMachine(), project, name, url, new AsyncRequestCallback<String>() {
             @Override
             protected void onSuccess(String result) {
                 callback.onSuccess(null);

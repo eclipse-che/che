@@ -159,11 +159,17 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
                 clickCount = 0;
                 delegate.onDoubleClick(notification);
                 break;
+
             case ONMOUSEOVER:
                 hideTimer.cancel();
                 break;
+
             case ONMOUSEOUT:
-                hideTimer.schedule(DEFAULT_TIME);
+                if (notification.getStatus() == PROGRESS) {
+                    hideTimer.cancel();
+                } else {
+                    hideTimer.schedule(DEFAULT_TIME);
+                }
                 break;
         }
     }
@@ -305,7 +311,9 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
                 break;
         }
 
-        if (PROGRESS != notification.getStatus()) {
+        if (PROGRESS == notification.getStatus()) {
+            hideTimer.cancel();
+        } else {
             hideTimer.schedule(DEFAULT_TIME);
         }
     }

@@ -50,12 +50,10 @@ export class CheUser {
     this.isUserInRoleMap = new Map();
 
     // fetch the user when we're initialized
+    this.userPromise = null;
     this.fetchUser();
 
     this.isLogged = false;
-
-    this.userPromise = null;
-
   }
 
   /**

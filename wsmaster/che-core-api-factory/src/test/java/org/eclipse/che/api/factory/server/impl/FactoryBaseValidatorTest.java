@@ -63,6 +63,7 @@ import static org.mockito.Mockito.when;
 @Listeners(value = {MockitoTestNGListener.class})
 public class FactoryBaseValidatorTest {
     private static final String VALID_REPOSITORY_URL = "http://github.com/codenvy/cloudide";
+    private static final String VALID_PROJECT_PATH   = "/cloudide";
     private static final String ID                   = "id";
 
     @Mock
@@ -105,7 +106,7 @@ public class FactoryBaseValidatorTest {
 
     @Test
     public void shouldBeAbleToValidateFactoryUrlObject() throws ApiException {
-        factory = prepareFactoryWithGivenStorage("git", VALID_REPOSITORY_URL);
+        factory = prepareFactoryWithGivenStorage("git", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         validator.validateProjects(factory);
         validator.validateProjects(factory);
         validator.validateAccountId(factory);
@@ -113,7 +114,7 @@ public class FactoryBaseValidatorTest {
 
     @Test
     public void shouldBeAbleToValidateFactoryUrlObjectIfStorageIsESBWSO2() throws ApiException {
-        factory = prepareFactoryWithGivenStorage("esbwso2", VALID_REPOSITORY_URL);
+        factory = prepareFactoryWithGivenStorage("esbwso2", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         validator.validateProjects(factory);
         validator.validateProjects(factory);
         validator.validateAccountId(factory);
@@ -121,12 +122,12 @@ public class FactoryBaseValidatorTest {
 
     @Test(expectedExceptions = ApiException.class,
           expectedExceptionsMessageRegExp =
-                  "The parameter project.storage.location has a value submitted http://codenvy.com/git/04%2 with a value that is " +
+                  "The parameter project.source.location has a value submitted http://codenvy.com/git/04%2 with a value that is " +
                   "unexpected. " +
                   "For more information, please visit http://docs.codenvy.com/user/project-lifecycle/#configuration-reference")
     public void shouldNotValidateIfStorageLocationContainIncorrectEncodedSymbol() throws ApiException {
         // given
-        factory = prepareFactoryWithGivenStorage("git", "http://codenvy.com/git/04%2");
+        factory = prepareFactoryWithGivenStorage("git", "http://codenvy.com/git/04%2", VALID_PROJECT_PATH);
 
         // when, then
         validator.validateProjects(factory);
@@ -136,7 +137,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateIfStorageLocationIsCorrectSsh() throws ApiException {
         // given
-        factory = prepareFactoryWithGivenStorage("git", "ssh://codenvy@review.gerrithub.io:29418/codenvy/exampleProject");
+        factory = prepareFactoryWithGivenStorage("git", "ssh://codenvy@review.gerrithub.io:29418/codenvy/exampleProject", "example-project");
 
         // when, then
         validator.validateProjects(factory);
@@ -145,7 +146,16 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateIfStorageLocationIsCorrectHttps() throws ApiException {
         // given
-        factory = prepareFactoryWithGivenStorage("git","https://github.com/codenvy/example.git");
+        factory = prepareFactoryWithGivenStorage("git","https://github.com/codenvy/example.git", "/example");
+
+        // when, then
+        validator.validateProjects(factory);
+    }
+
+    @Test
+    public void shouldValidateSubProjectWithNoLocation() throws ApiException {
+        // given
+        factory = prepareFactoryWithGivenStorage("git","null", "/cloudide/core");
 
         // when, then
         validator.validateProjects(factory);
@@ -158,9 +168,9 @@ public class FactoryBaseValidatorTest {
 
     @DataProvider(name = "badAdvancedFactoryUrlProvider")
     public Object[][] invalidParametersFactoryUrlProvider() throws UnsupportedEncodingException {
-        Factory adv1 = prepareFactoryWithGivenStorage("notagit", VALID_REPOSITORY_URL);
-        Factory adv2 = prepareFactoryWithGivenStorage("git", null);
-        Factory adv3 = prepareFactoryWithGivenStorage("git", "");
+        Factory adv1 = prepareFactoryWithGivenStorage("notagit", VALID_REPOSITORY_URL, VALID_PROJECT_PATH );
+        Factory adv2 = prepareFactoryWithGivenStorage("git", null, VALID_PROJECT_PATH);
+        Factory adv3 = prepareFactoryWithGivenStorage("git", "", VALID_PROJECT_PATH);
         return new Object[][]{
                 {adv1},// invalid vcs
                 {adv2},// invalid vcsurl
@@ -183,13 +193,14 @@ public class FactoryBaseValidatorTest {
     @Test(dataProvider = "validProjectNamesProvider")
     public void shouldBeAbleToValidateValidProjectName(String projectName) throws Exception {
         // given
-        prepareFactoryWithGivenStorage("git", VALID_REPOSITORY_URL);
+        prepareFactoryWithGivenStorage("git", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         factory.withWorkspace(newDto(WorkspaceConfigDto.class).withProjects(
                 Collections.singletonList(newDto(ProjectConfigDto.class).withType("type")
                                                                         .withName(projectName)
                                                                         .withSource(newDto(SourceStorageDto.class)
                                                                                             .withType("git")
-                                                                                            .withLocation(VALID_REPOSITORY_URL)))));
+                                                                                            .withLocation(VALID_REPOSITORY_URL))
+                                                                        .withPath(VALID_PROJECT_PATH))));
         // when, then
         validator.validateProjects(factory);
     }
@@ -376,7 +387,7 @@ public class FactoryBaseValidatorTest {
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
-    
+
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfrunCommandActionInsufficientParams() throws Exception {
         //given
@@ -505,12 +516,13 @@ public class FactoryBaseValidatorTest {
         };
     }
 
-    private Factory prepareFactoryWithGivenStorage(String type, String location) {
+    private Factory prepareFactoryWithGivenStorage(String type, String location, String path) {
         return factory.withWorkspace(newDto(WorkspaceConfigDto.class)
                                              .withProjects(Collections.singletonList(newDto(ProjectConfigDto.class)
                                                                                              .withSource(newDto(SourceStorageDto.class)
                                                                                                                  .withType(type)
                                                                                                                  .withLocation(
-                                                                                                                         location)))));
+                                                                                                                         location))
+                                                                                             .withPath(path))));
     }
 }

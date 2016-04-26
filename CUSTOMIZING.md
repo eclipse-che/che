@@ -7,7 +7,7 @@ A command is a process that is injected into your workspace. It's outputs are st
 
 #### Templates
 A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are loaded based upon the type of stack selected. You can add your own templates to the default Che distribution.
-* TODO: Reference Template Docs
+* [Create Templates](https://eclipse-che.readme.io/docs/templates)
 
 #### Stacks
 A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack. Tags define how the stack is presented in the stack library and also filters out the available project templates that a user sees when creating a project.

@@ -38,7 +38,8 @@
 }
 
 .treeRoot > .treeNode > .treeNodeBody > .leafIcon {
-    display: none;
+    visibility: hidden;
+    float:left;
 }
 
 .childrenContainer {
@@ -72,6 +73,7 @@
     position: relative;
     height: 18px;
     width: 18px;
+    float: left;
 }
 
 .expandControl svg {

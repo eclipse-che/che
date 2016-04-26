@@ -53,8 +53,9 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar
  */
 public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
 
-    private final ProjectWizardMode        mode;
-    private final ProjectServiceClient     projectServiceClient;
+    private final ProjectWizardMode mode;
+    private final AppContext        appContext;
+    private final ProjectServiceClient projectServiceClient;
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     private final DtoFactory               dtoFactory;
     private final DialogFactory            dialogFactory;
@@ -81,6 +82,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
                          CoreLocalizationConstant locale) {
         super(dataObject);
         this.mode = mode;
+        this.appContext = appContext;
         this.projectServiceClient = projectServiceClient;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.dtoFactory = dtoFactory;
@@ -122,7 +124,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
 
     private void createProject(final CompleteCallback callback) {
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient.createProject(workspaceId, dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+        projectServiceClient.createProject(appContext.getDevMachine(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
             @Override
             protected void onSuccess(ProjectConfigDto result) {
                 eventBus.fireEvent(new CreateProjectEvent(result));
@@ -141,7 +143,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         dataObject.setPath(new Path(getPathToSelectedNodeParent()).append(dataObject.getName()).toString());
 
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient.updateProject(workspaceId,
+        projectServiceClient.updateProject(appContext.getDevMachine(),
                                            dataObject.getPath(),
                                            dataObject,
                                            new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
@@ -215,7 +217,7 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         dataObject.setType(Constants.BLANK_ID);
         final Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
         projectServiceClient
-                .updateProject(workspaceId, dataObject.getPath(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+                .updateProject(appContext.getDevMachine(), dataObject.getPath(), dataObject, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
                     @Override
                     protected void onSuccess(ProjectConfigDto result) {
                         eventBus.fireEvent(new CreateProjectEvent(result));

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.gwt.client;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -17,26 +18,22 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.HTTPHeader;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * @author Vitaly Parfonov
  */
 public class ProjectImportersServiceClientImpl implements ProjectImportersServiceClient {
 
-    private final String              extPath;
     private final AsyncRequestFactory asyncRequestFactory;
 
     @Inject
-    public ProjectImportersServiceClientImpl(@Named("cheExtensionPath") String extPath,
-                                             AsyncRequestFactory asyncRequestFactory) {
-        this.extPath = extPath;
+    public ProjectImportersServiceClientImpl(AsyncRequestFactory asyncRequestFactory) {
         this.asyncRequestFactory = asyncRequestFactory;
     }
 
     @Override
-    public void getProjectImporters(String workspaceId, AsyncRequestCallback<ProjectImporterData> callback) {
-        asyncRequestFactory.createGetRequest(extPath + "/project-importers/" + workspaceId)
+    public void getProjectImporters(DevMachine devMachine, AsyncRequestCallback<ProjectImporterData> callback) {
+        asyncRequestFactory.createGetRequest(devMachine.getWsAgentBaseUrl() + "/project-importers/" + devMachine.getWorkspace())
                            .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                            .send(callback);
     }

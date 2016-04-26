@@ -53,13 +53,13 @@ public class NewTerminalAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabled(appContext.getDevMachineId() != null);
+        event.getPresentation().setEnabled(appContext.getDevMachine() != null);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(@NotNull ActionEvent event) {
-        consolesPanelPresenter.onAddTerminal(appContext.getDevMachineId());
+        consolesPanelPresenter.onAddTerminal(appContext.getDevMachine().getId());
         workspaceAgent.setActivePart(consolesPanelPresenter);
     }
 }

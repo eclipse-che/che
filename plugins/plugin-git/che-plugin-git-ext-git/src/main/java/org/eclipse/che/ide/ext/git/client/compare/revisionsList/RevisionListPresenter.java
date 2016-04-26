@@ -57,7 +57,6 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     private final GitLocalizationConstant locale;
     private final AppContext              appContext;
     private final NotificationManager     notificationManager;
-    private final String                  workspaceId;
 
     private ProjectConfigDto project;
     private Revision         selectedRevision;
@@ -82,8 +81,6 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
         this.notificationManager = notificationManager;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.selectionAgent = selectionAgent;
-        this.workspaceId = appContext.getWorkspaceId();
-
         this.view.setDelegate(this);
     }
 
@@ -142,7 +139,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
     /** Get list of revisions. */
     private void getRevisions() {
-        gitService.log(workspaceId, project, Collections.singletonList(selectedFile), false,
+        gitService.log(appContext.getDevMachine(), project, Collections.singletonList(selectedFile), false,
                        new AsyncRequestCallback<LogResponse>(dtoUnmarshallerFactory.newUnmarshaller(LogResponse.class)) {
 
                            @Override
@@ -175,7 +172,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     }
 
     private void compare() {
-        gitService.diff(workspaceId, project, Collections.singletonList(selectedFile), NAME_STATUS, false, 0, selectedRevision.getId(),
+        gitService.diff(appContext.getDevMachine(), project, Collections.singletonList(selectedFile), NAME_STATUS, false, 0, selectedRevision.getId(),
                         false, new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                             @Override
                             protected void onSuccess(String result) {

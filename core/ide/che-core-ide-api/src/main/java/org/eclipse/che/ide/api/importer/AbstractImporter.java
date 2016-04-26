@@ -33,7 +33,6 @@ public abstract class AbstractImporter {
     protected final AppContext appContext;
 
     protected final ProjectServiceClient                       projectService;
-    protected final String                                     workspaceId;
     protected final ImportProjectNotificationSubscriberFactory subscriberFactory;
 
     protected AbstractImporter(@NotNull AppContext appContext,
@@ -41,7 +40,6 @@ public abstract class AbstractImporter {
                                @NotNull ImportProjectNotificationSubscriberFactory subscriberFactory) {
         this.appContext = appContext;
         this.projectService = projectService;
-        this.workspaceId = appContext.getWorkspaceId();
         this.subscriberFactory = subscriberFactory;
     }
 

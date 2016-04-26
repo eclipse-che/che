@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -27,7 +28,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
-import org.eclipse.che.api.machine.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.user.UserImpl;
@@ -50,6 +51,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -143,8 +145,7 @@ public class MachineManagerTest {
                                                                                              "9090/udp",
                                                                                              "someprotocol",
                                                                                              "/some/path")),
-                                                            Collections.singletonMap("key1", "value1"),
-                                                            null);
+                                                            Collections.singletonMap("key1", "value1"));
         String workspaceId = "wsId";
         String environmentName = "env1";
 
@@ -192,6 +193,20 @@ public class MachineManagerTest {
         verify(wsAgentLauncher, never()).startWsAgent(WS_ID);
     }
 
+    @Test
+    public void shouldRemoveMachineFromRegistryIfInstanceDestroyingFailsOnDestroy() throws Exception {
+        final MachineConfigImpl machineConfig = createMachineConfig();
+        when(instance.getConfig()).thenReturn(machineConfig);
+        when(instance.getWorkspaceId()).thenReturn(WS_ID);
+        doThrow(new MachineException("test")).when(instance).destroy();
+
+        try {
+            manager.destroy(MACHINE_ID, false);
+        } catch (Exception e) {
+            verify(machineRegistry).remove(MACHINE_ID);
+        }
+    }
+
     private static Path targetDir() throws Exception {
         final URL url = Thread.currentThread().getContextClassLoader().getResource(".");
         assertNotNull(url);
@@ -212,7 +227,6 @@ public class MachineManagerTest {
                                                                       "9090/udp",
                                                                       "someprotocol",
                                                                       "/some/path")),
-                                     Collections.singletonMap("key1", "value1"),
-                                     null);
+                                     Collections.singletonMap("key1", "value1"));
     }
 }

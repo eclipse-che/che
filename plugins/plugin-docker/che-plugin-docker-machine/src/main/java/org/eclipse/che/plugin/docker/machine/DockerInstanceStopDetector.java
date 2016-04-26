@@ -128,6 +128,7 @@ public class DockerInstanceStopDetector {
                     if (containersOomTimestamps.getIfPresent(message.getId()) != null) {
                         instanceStateChangeType = InstanceStateEvent.Type.OOM;
                         containersOomTimestamps.invalidate(message.getId());
+                        LOG.info("OOM of container '{}' has been detected", message.getId());
                     } else {
                         instanceStateChangeType = InstanceStateEvent.Type.DIE;
                     }

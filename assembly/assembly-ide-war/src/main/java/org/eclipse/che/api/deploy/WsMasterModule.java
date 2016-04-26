@@ -14,40 +14,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.auth.AuthenticationService;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.core.notification.WSocketEventBusServer;
-import org.eclipse.che.api.core.rest.ApiInfoService;
-import org.eclipse.che.api.core.rest.CoreRestModule;
-import org.eclipse.che.api.local.LocalInfrastructureModule;
-import org.eclipse.che.api.machine.server.MachineModule;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
-import org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeLoader;
-import org.eclipse.che.api.machine.server.recipe.RecipeService;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader;
-import org.eclipse.che.api.project.server.template.ProjectTemplateRegistry;
-import org.eclipse.che.api.project.server.template.ProjectTemplateService;
-import org.eclipse.che.api.ssh.server.SshService;
-import org.eclipse.che.api.user.server.UserProfileService;
-import org.eclipse.che.api.user.server.UserService;
-import org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator;
-import org.eclipse.che.api.workspace.server.WorkspaceValidator;
-import org.eclipse.che.api.workspace.server.WorkspaceService;
-import org.eclipse.che.api.workspace.server.event.MachineStateListener;
-import org.eclipse.che.api.workspace.server.event.WorkspaceMessenger;
-import org.eclipse.che.everrest.CheAsynchronousJobPool;
-import org.eclipse.che.everrest.ETagResponseFilter;
-import org.eclipse.che.everrest.EverrestDownloadFileResponseFilter;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule;
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker;
-import org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker;
-import org.eclipse.che.plugin.docker.machine.local.LocalDockerModule;
-import org.everrest.core.impl.async.AsynchronousJobPool;
-import org.everrest.core.impl.async.AsynchronousJobService;
 import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
@@ -55,87 +23,72 @@ import org.everrest.guice.ServiceBindingHelper;
 public class WsMasterModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(WorkspaceService.class);
-        bind(ProjectTemplateRegistry.class);
-        bind(ProjectTemplateDescriptionLoader.class).asEagerSingleton();
-        bind(ProjectTemplateService.class);
-
-        bind(ApiInfoService.class);
-
-        bind(AuthenticationService.class);
-        bind(EverrestDownloadFileResponseFilter.class);
-        bind(ETagResponseFilter.class);
-
-        bind(UserService.class);
-        bind(UserProfileService.class);
-
-        bind(SshService.class);
+        bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
+        bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();
+        bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
+        bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
+        bind(org.eclipse.che.api.ssh.server.SshService.class);
+        bind(org.eclipse.che.api.machine.server.recipe.RecipeService.class);
+        bind(org.eclipse.che.api.machine.server.recipe.PermissionsChecker.class)
+                .to(org.eclipse.che.api.machine.server.recipe.PermissionsCheckerImpl.class);
+        bind(org.eclipse.che.api.user.server.UserService.class);
+        bind(org.eclipse.che.api.user.server.UserProfileService.class);
+        bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
+        bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
+        bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
+        bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
+        bind(org.everrest.core.impl.async.AsynchronousJobPool.class).to(org.eclipse.che.everrest.CheAsynchronousJobPool.class);
+        bind(org.eclipse.che.api.auth.AuthenticationService.class);
+        bind(ServiceBindingHelper.bindingKey(org.everrest.core.impl.async.AsynchronousJobService.class, "/async/{ws-id}"))
+                .to(org.everrest.core.impl.async.AsynchronousJobService.class);
+        bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker.class);
+        bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
+        bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
+        bind(org.eclipse.che.everrest.ETagResponseFilter.class);
 
         bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorProviderImpl.class);
         bind(org.eclipse.che.api.auth.oauth.OAuthTokenProvider.class)
                 .to(org.eclipse.che.security.oauth.OAuthAuthenticatorTokenProvider.class);
-
         bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
-        bind(RecipeService.class);
-        bind(PermissionsChecker.class).to(PermissionsCheckerImpl.class);
-
-//        bind(LocalFSMountStrategy.class).to(MappedDirectoryLocalFSMountStrategy.class);
-//
-//        bind(WorkspaceToDirectoryMappingService.class);
-
-        bind(WorkspaceMessenger.class).asEagerSingleton();
-
-
-        bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
-        bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
-
-        bind(WSocketEventBusServer.class);
-
-//        bind(VirtualFileSystemRegistry.class).to(LocalVirtualFileSystemRegistry.class);
-
-        install(new CoreRestModule());
-//        install(new AnalyticsModule());
-//        install(new FactoryModule());
-        install(new LocalDockerModule());
-        install(new MachineModule());
-        install(new LocalInfrastructureModule());
-
-        install(new DockerExtServerModule());
-        install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
-        install(new org.eclipse.che.swagger.deploy.DocsModule());
-
-        bind(DockerMachineExtServerChecker.class);
-        bind(DockerMachineTerminalChecker.class);
-
+        bind(org.eclipse.che.api.core.notification.WSocketEventBusServer.class);
         // additional ports for development of extensions
-        Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
-                                                                          ServerConf.class,
-                                                                          Names.named("machine.docker.dev_machine.machine_servers"));
-        machineServers.addBinding().toInstance(new ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http", null));
+        Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers = Multibinder.newSetBinder(binder(),
+                                                                                   org.eclipse.che.api.core.model.machine.ServerConf.class,
+                                                                                   Names.named("machine.docker.dev_machine.machine_servers"));
+        machineServers.addBinding().toInstance(
+                new org.eclipse.che.api.machine.server.model.impl.ServerConfImpl(Constants.WSAGENT_DEBUG_REFERENCE, "4403/tcp", "http",
+                                                                                 null));
 
-        bind(RecipeLoader.class);
+        bind(org.eclipse.che.api.machine.server.recipe.RecipeLoader.class);
         Multibinder.newSetBinder(binder(), String.class, Names.named("predefined.recipe.path"))
                    .addBinding()
                    .toInstance("predefined-recipes.json");
 
-        bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
-        bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
 
-        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
+        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
+                .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
+        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
-        bind(WorkspaceValidator.class).to(DefaultWorkspaceValidator.class);
-        bind(MachineStateListener.class).asEagerSingleton();
-        bind(org.eclipse.che.api.machine.wsagent.WsAgentLauncher.class)
-                .to(org.eclipse.che.api.machine.wsagent.WsAgentLauncherImpl.class);
-
-        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
+        bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
+                .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);
 
         bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+
+        install(new org.eclipse.che.api.core.rest.CoreRestModule());
+        install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
+        install(new org.eclipse.che.api.machine.server.MachineModule());
+        install(new org.eclipse.che.api.local.LocalInfrastructureModule());
+        install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
+        install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
+        install(new org.eclipse.che.swagger.deploy.DocsModule());
+        install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
+        install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
     }
 }

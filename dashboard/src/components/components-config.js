@@ -24,6 +24,8 @@ import {RoutingConfig} from './routing/routing-config';
 import {ValidatorConfig} from './validator/validator-config';
 import {WidgetConfig} from './widget/widget-config';
 
+import {CheStepsContainer} from './steps-container/steps-container.directive';
+
 export class ComponentsConfig {
 
   constructor(register) {
@@ -40,5 +42,6 @@ export class ComponentsConfig {
     new ValidatorConfig(register);
     new WidgetConfig(register);
 
+    register.directive('cheStepsContainer', CheStepsContainer);
   }
 }

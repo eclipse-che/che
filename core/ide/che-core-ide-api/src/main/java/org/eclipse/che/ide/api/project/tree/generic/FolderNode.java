@@ -37,7 +37,7 @@ import java.util.List;
 @Deprecated
 public class FolderNode extends ItemNode {
 
-    private final String workspaceId;
+    private final AppContext appContext;
 
     @Inject
     public FolderNode(@Assisted TreeNode<?> parent,
@@ -47,9 +47,8 @@ public class FolderNode extends ItemNode {
                       ProjectServiceClient projectService,
                       AppContext appContext,
                       DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        super(parent, data, treeStructure, eventBus,appContext, projectService, dtoUnmarshallerFactory);
-
-        this.workspaceId = appContext.getWorkspace().getId();
+        super(parent, data, treeStructure, eventBus, appContext, projectService, dtoUnmarshallerFactory);
+        this.appContext = appContext;
     }
 
     /** {@inheritDoc} */
@@ -105,7 +104,7 @@ public class FolderNode extends ItemNode {
     protected void getChildren(String path, final AsyncCallback<List<ItemReference>> callback) {
         final List<ItemReference> children = new ArrayList<>();
         final Unmarshallable<List<ItemReference>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(ItemReference.class);
-        projectServiceClient.getChildren(workspaceId, path, new AsyncRequestCallback<List<ItemReference>>(unmarshaller) {
+        projectServiceClient.getChildren(appContext.getDevMachine(), path, new AsyncRequestCallback<List<ItemReference>>(unmarshaller) {
             @Override
             protected void onSuccess(List<ItemReference> result) {
                 final boolean isShowHiddenItems = getTreeStructure().getSettings().isShowHiddenItems();

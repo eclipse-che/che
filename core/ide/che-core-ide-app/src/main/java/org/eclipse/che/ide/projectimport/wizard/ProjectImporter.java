@@ -52,9 +52,10 @@ import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 @Singleton
 public class ProjectImporter extends AbstractImporter {
 
-    private final CoreLocalizationConstant    localizationConstant;
-    private final EventBus                    eventBus;
-    private final ProjectResolver             projectResolver;
+    private final CoreLocalizationConstant localizationConstant;
+    private final EventBus                 eventBus;
+    private final AppContext               appContext;
+    private final ProjectResolver projectResolver;
     private final DialogFactory               dialogFactory;
     private final String                      restContext;
     private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
@@ -74,6 +75,7 @@ public class ProjectImporter extends AbstractImporter {
                            EventBus eventBus) {
         super(appContext, projectService, subscriberFactory);
         this.localizationConstant = localizationConstant;
+        this.appContext = appContext;
         this.projectResolver = projectResolver;
         this.dialogFactory = dialogFactory;
         this.restContext = restContext;
@@ -103,7 +105,7 @@ public class ProjectImporter extends AbstractImporter {
                                    @NotNull final SourceStorageDto sourceStorage) {
         final ProjectNotificationSubscriber subscriber = subscriberFactory.createSubscriber();
         subscriber.subscribe(projectName);
-        Promise<Void> importPromise = projectService.importProject(workspaceId, pathToProject, false, sourceStorage);
+        Promise<Void> importPromise = projectService.importProject(appContext.getDevMachine(), pathToProject, false, sourceStorage);
 
         importPromise.then(new Operation<Void>() {
             @Override

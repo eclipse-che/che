@@ -66,24 +66,9 @@
           <div layout="column"
                layout-align="center center"
                flex="auto">
-            <div class="create-project-working-log">
-              <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()"
-                             ng-hide="$index === createProjectCtrl.getCreationSteps().length-1"
-                             che-open-condition="($index === createProjectCtrl.getCurrentProgressStep())"
-                             che-close-condition="(0 === createProjectCtrl.getCurrentProgressStep())"
-                             ng-class="{'che-accordion-active': ($index === createProjectCtrl.getCurrentProgressStep()),
-                                        'che-accordion-error': createProjectCtrl.getCreationSteps()[$index].hasError}">
-                <div class="che-accordion-title">
-                  <span>{{createProjectCtrl.getCreationSteps()[$index].text}}{{$index < createProjectCtrl.getCurrentProgressStep() ? ' ... completed' : ''}}</span>
-                </div>
-                <div class="che-accordion-body" ng-show="createProjectCtrl.getCreationSteps()[$index].logs.length > 0">
-                  <che-logs-output che-title="{{createProjectCtrl.getCreationSteps()[$index].inProgressText}}"
-                                   che-text="createProjectCtrl.getCreationSteps()[$index].logs"
-                                   che-scrollback="100"
-                                   che-refresh-time="500"></che-logs-output>
-                </div>
-              </che-accordion>
-            </div>
+            <che-steps-container class="create-project-working-log"
+                                 che-all-steps="createProjectCtrl.getCreationSteps()"
+                                 che-current-step="createProjectCtrl.getCurrentProgressStep()"></che-steps-container>
           </div>
         </div>
         <!--bottom bar-->

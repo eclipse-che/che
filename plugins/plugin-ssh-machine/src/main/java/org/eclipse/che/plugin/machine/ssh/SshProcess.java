@@ -21,7 +21,9 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 public interface SshProcess {
     void start() throws MachineException;
 
-    void start(LineConsumer output) throws MachineException;
+    void start(LineConsumer outErr) throws MachineException;
+
+    void start(LineConsumer out, LineConsumer err) throws MachineException;
 
     int getExitCode();
 

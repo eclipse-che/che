@@ -74,12 +74,12 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, EMPTY_TEXT);
                 return callback;
             }
-        }).when(service).remoteAdd(anyString(), anyObject(), anyString(), anyString(), (AsyncRequestCallback<String>)anyObject());
+        }).when(service).remoteAdd(devMachine, anyObject(), anyString(), anyString(), (AsyncRequestCallback<String>)anyObject());
 
         presenter.showDialog(callback);
         presenter.onOkClicked();
 
-        verify(service).remoteAdd(anyString(), anyObject(), eq(REMOTE_NAME), eq(REMOTE_URI), (AsyncRequestCallback<String>)anyObject());
+        verify(service).remoteAdd(eq(devMachine), anyObject(), eq(REMOTE_NAME), eq(REMOTE_URI), (AsyncRequestCallback<String>)anyObject());
         verify(callback).onSuccess(eq((Void)null));
         verify(callback, never()).onFailure((Throwable)anyObject());
         verify(view).close();
@@ -96,13 +96,13 @@ public class AddRemoteRepositoryPresenterTest extends BaseTest {
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).remoteAdd(anyString(), anyObject(), anyString(), anyString(), (AsyncRequestCallback<String>)anyObject());
+        }).when(service).remoteAdd(devMachine, anyObject(), anyString(), anyString(), (AsyncRequestCallback<String>)anyObject());
 
 
         presenter.showDialog(callback);
         presenter.onOkClicked();
 
-        verify(service).remoteAdd(anyString(), anyObject(), eq(REMOTE_NAME), eq(REMOTE_URI), (AsyncRequestCallback<String>)anyObject());
+        verify(service).remoteAdd(eq(devMachine), anyObject(), eq(REMOTE_NAME), eq(REMOTE_URI), (AsyncRequestCallback<String>)anyObject());
         verify(callback).onFailure((Throwable)anyObject());
     }
 

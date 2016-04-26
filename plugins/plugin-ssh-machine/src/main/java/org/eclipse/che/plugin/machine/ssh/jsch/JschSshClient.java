@@ -29,6 +29,7 @@ import javax.inject.Named;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -149,7 +150,7 @@ public class JschSshClient implements SshClient {
             if (execCode != 0) {
                 throw new MachineException(format("Creation of folder %s failed. Exit code is %s", targetFolder, execCode));
             }
-        } catch (JSchException e) {
+        } catch (JSchException | IOException e) {
             throw new MachineException(format("Creation of folder %s failed. Error: %s", targetFolder, e.getLocalizedMessage()));
         }
 
@@ -211,14 +212,14 @@ public class JschSshClient implements SshClient {
             // apply permissions
             File file = new File(sourcePath);
             // read
-            int permissions = 4;
+            int permissions = 256;
             // execute
             if (file.canExecute()) {
-                permissions += 1;
+                permissions += 64;
             }
             // write
             if (file.canWrite()) {
-                permissions += 2;
+                permissions += 128;
             }
             channelSftp.chmod(permissions, absoluteTargetPath);
         } catch (SftpException e) {
@@ -236,64 +237,49 @@ public class JschSshClient implements SshClient {
         }
     }
 
-    private int execAndGetCode(String command) throws JSchException {
-        ChannelExec exec = null;
-        try {
-            exec = (ChannelExec)session.openChannel("exec");
-            exec.setCommand(command);
+    private int execAndGetCode(String command) throws JSchException, IOException {
+        ChannelExec exec = (ChannelExec)session.openChannel("exec");
+        exec.setCommand(command);
+
+        try (InputStream inStream = exec.getInputStream();
+             InputStream erStream = exec.getErrStream()) {
+
             exec.connect(connectionTimeout);
 
-            // todo fix that
-            // this method is used to run commands such as "pwd" or "mkdir -p /some/path"
-            // And we need to wait to check if it return 0. If command is still running method returns -1.
-            try {
-                // workaround exit code -1
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
-            }
-            return exec.getExitStatus();
+            // read streams to wait until command finishes its work
+            IoUtil.readStream(inStream);
+            IoUtil.readStream(erStream);
         } finally {
-            if (exec != null) {
-                exec.disconnect();
-            }
+            exec.disconnect();
         }
+
+        return exec.getExitStatus();
     }
 
     private String execAndGetOutput(String command) throws JSchException, MachineException, IOException {
-        ChannelExec exec = null;
-        try {
-            exec = (ChannelExec)session.openChannel("exec");
-            exec.setCommand(command);
+        ChannelExec exec = (ChannelExec)session.openChannel("exec");
+        exec.setCommand(command);
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(exec.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(exec.getInputStream()));
+             InputStream erStream = exec.getErrStream()) {
 
-                exec.connect(connectionTimeout);
+            exec.connect(connectionTimeout);
 
-                // todo fix that
-                // this method is used to run commands such as "pwd" or "mkdir -p /some/path"
-                // And we need to wait to check if it return 0. If command is still running method returns -1.
-                try {
-                    // workaround exit code -1
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {
-                }
-                if (exec.getExitStatus() != 0) {
-                    throw new MachineException(format("Error code: %s. Error: %s",
-                                                      exec.getExitStatus(),
-                                                      IoUtil.readAndCloseQuietly(exec.getErrStream())));
-                }
-
-                ListLineConsumer listLineConsumer = new ListLineConsumer();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    listLineConsumer.writeLine(line);
-                }
-                return listLineConsumer.getText();
+            ListLineConsumer listLineConsumer = new ListLineConsumer();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                listLineConsumer.writeLine(line);
             }
+            // read stream to wait until command finishes its work
+            IoUtil.readStream(erStream);
+            if (exec.getExitStatus() != 0) {
+                throw new MachineException(format("Error code: %s. Error: %s",
+                                                  exec.getExitStatus(),
+                                                  IoUtil.readAndCloseQuietly(exec.getErrStream())));
+            }
+            return listLineConsumer.getText();
         } finally {
-            if (exec != null) {
-                exec.disconnect();
-            }
+            exec.disconnect();
         }
     }
 }

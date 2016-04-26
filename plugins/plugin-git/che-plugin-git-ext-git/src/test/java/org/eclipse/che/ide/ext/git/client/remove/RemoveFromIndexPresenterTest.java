@@ -157,12 +157,12 @@ public class RemoveFromIndexPresenterTest extends BaseTest {
                 onSuccess.invoke(callback, EMPTY_TEXT);
                 return callback;
             }
-        }).when(service).remove(anyString(), anyObject(), anyObject(), anyBoolean(), anyObject());
+        }).when(service).remove(devMachine, anyObject(), anyObject(), anyBoolean(), anyObject());
 
         presenter.showDialog();
         presenter.onRemoveClicked();
 
-        verify(service).remove(anyString(), eq(rootProjectConfig), anyObject(), eq(REMOVED), anyObject());
+        verify(service).remove(eq(devMachine), eq(rootProjectConfig), anyObject(), eq(REMOVED), anyObject());
         verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(gitOutputConsoleFactory).create(REMOVE_FROM_INDEX_COMMAND_NAME);
         verify(console).print(anyString());
@@ -184,12 +184,12 @@ public class RemoveFromIndexPresenterTest extends BaseTest {
                 onFailure.invoke(callback, mock(Throwable.class));
                 return callback;
             }
-        }).when(service).remove(anyString(), anyObject(), anyObject(), anyBoolean(), anyObject());
+        }).when(service).remove(devMachine, anyObject(), anyObject(), anyBoolean(), anyObject());
 
         presenter.showDialog();
         presenter.onRemoveClicked();
 
-        verify(service).remove(anyString(), eq(rootProjectConfig), anyObject(), eq(REMOVED), anyObject());
+        verify(service).remove(eq(devMachine), eq(rootProjectConfig), anyObject(), eq(REMOVED), anyObject());
         verify(constant).removeFilesFailed();
         verify(gitOutputConsoleFactory).create(REMOVE_FROM_INDEX_COMMAND_NAME);
         verify(console).printError(anyString());

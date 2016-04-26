@@ -18,14 +18,11 @@ package org.eclipse.che.ide.ext.debugger.client;
 public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client.Messages {
 
     /* actions */
+    @Key("debugConfigurationsActionTitle")
+    String debugConfigurationsActionTitle();
+
     @Key("editDebugConfigurationsActionTitle")
     String editDebugConfigurationsActionTitle();
-
-    @Key("selectConfigurationActionText")
-    String selectConfigurationActionText();
-
-    @Key("selectConfigurationActionDescription")
-    String selectConfigurationActionDescription();
 
     @Key("breakpoints")
     String breakpoints();
@@ -72,6 +69,9 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     /* actions descriptions */
     @Key("editDebugConfigurationsActionDescription")
     String editDebugConfigurationsActionDescription();
+
+    @Key("debugConfigurationActionDescription")
+    String debugConfigurationActionDescription();
 
     @Key("resumeExecutionDescription")
     String resumeExecutionDescription();

@@ -18,13 +18,17 @@ import javax.validation.constraints.NotNull;
  * @author Valeriy Svydenko
  */
 public interface DropDownListFactory {
+
     /**
-     * Create an instance of {@link DropDownWidget} with a given identifier for registering.
+     * Create an instance of {@link DropDownWidget} managing action group registered in action manager.
      *
-     * @param listId
-     *         list identifier
-     * @return an instance of {@link DropDownWidget}
+     * @param actionGroupId
+     *          identifier of {@link org.eclipse.che.ide.api.action.ActionGroup} registered in action manager
+     *
+     * @return
+     *          an instance of {@link DropDownWidget}
      */
     @NotNull
-    DropDownWidget createList(@NotNull String listId);
+    DropDownWidget createDropDown(@NotNull String actionGroupId);
+
 }

@@ -27,6 +27,7 @@ export class CheRemoteWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = this.$resource('', {}, {
+        getDetails: {method: 'GET', url: authData.url + '/api/workspace/:workspaceId?token=' + authData.token},
         create: {method: 'POST', url: authData.url + '/api/workspace?account=:accountId&token=' + authData.token},
         startWorkspace: {method: 'POST', url : authData.url + '/api/workspace/:workspaceId/runtime?environment=:envName&token=' + authData.token}
       }
@@ -52,7 +53,12 @@ export class CheRemoteWorkspace {
     // subscribe to workspace events
     bus.subscribe('workspace:' + workspaceId, (message) => {
       if (message.eventType === 'RUNNING' && message.workspaceId === workspaceId) {
-        deferred.resolve();
+        let promise = this.remoteWorkspaceAPI.getDetails({workspaceId: workspaceId}, {}).$promise;
+        promise.then((workspace) => {
+          deferred.resolve(workspace);
+        }, (error) => {
+          deferred.reject(error);
+        });
       }
     });
 

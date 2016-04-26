@@ -12,7 +12,6 @@ package org.eclipse.che.ide.projectimport.local;
 
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
@@ -40,7 +39,6 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
     private final LocalZipImporterPageView      view;
     private final DtoFactory                    dtoFactory;
     private final String                        workspaceId;
-    private final String                        extPath;
     private final EventBus                      eventBus;
     private final ProjectServiceClient          projectServiceClient;
     private final ProjectNotificationSubscriber projectNotificationSubscriber;
@@ -50,20 +48,18 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
                                          DtoFactory dtoFactory,
                                          CoreLocalizationConstant locale,
                                          AppContext appContext,
-                                         @Named("cheExtensionPath") String extPath,
                                          EventBus eventBus,
                                          ProjectServiceClient projectServiceClient,
                                          ProjectNotificationSubscriber projectNotificationSubscriber) {
         this.view = view;
+        this.view.setDelegate(this);
         this.locale = locale;
         this.dtoFactory = dtoFactory;
         this.workspaceId = appContext.getWorkspace().getId();
-        this.extPath = extPath;
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.projectServiceClient = projectServiceClient;
         this.projectNotificationSubscriber = projectNotificationSubscriber;
-        this.view.setDelegate(this);
     }
 
     public void show() {
@@ -129,7 +125,7 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
         projectNotificationSubscriber.subscribe(projectName);
 
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(extPath + "/project/" + workspaceId + "/upload/zipproject/" + projectName + "?force=false");
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/" + workspaceId + "/upload/zipproject/" + projectName + "?force=false");
         view.submit();
         showProcessing(true);
     }
@@ -163,7 +159,7 @@ public class LocalZipImporterPagePresenter implements LocalZipImporterPageView.A
     }
 
     private void deleteProject(final String name) {
-        projectServiceClient.delete(appContext.getWorkspace().getId(), name, new AsyncRequestCallback<Void>() {
+        projectServiceClient.delete(appContext.getDevMachine(), name, new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
                 Log.info(LocalZipImporterPagePresenter.class, "Project " + name + " deleted.");

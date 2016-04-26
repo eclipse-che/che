@@ -16,6 +16,8 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -24,7 +26,6 @@ import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.Set;
  * @author Vlad Zhukovskiy
  */
 @Singleton
-public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceStoppedHandler {
+public class ServerPortProvider implements WsAgentStateHandler {
 
     public static final String KEY_TEMPLATE = "${server.port.%}";
 
@@ -63,14 +64,13 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
         this.commandPropertyRegistry = commandPropertyRegistry;
         this.appContext = appContext;
 
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
 
         registerProviders();
     }
 
     private void registerProviders() {
-        String devMachineId = appContext.getDevMachineId();
+        String devMachineId = appContext.getDevMachine().getId();
         if (devMachineId != null) {
             machineServiceClient.getMachine(devMachineId).then(registerProviders);
         }
@@ -90,12 +90,12 @@ public class ServerPortProvider implements WorkspaceStartedHandler, WorkspaceSto
     }
 
     @Override
-    public void onWorkspaceStarted(WorkspaceDto workspace) {
+    public void onWsAgentStarted(WsAgentStateEvent event) {
         registerProviders();
     }
 
     @Override
-    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+    public void onWsAgentStopped(WsAgentStateEvent event) {
         for (CommandPropertyValueProvider provider : providers) {
             commandPropertyRegistry.unregister(provider);
         }

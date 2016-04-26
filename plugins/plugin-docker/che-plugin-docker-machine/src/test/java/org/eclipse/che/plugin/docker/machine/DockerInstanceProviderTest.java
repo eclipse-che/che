@@ -273,8 +273,7 @@ public class DockerInstanceProviderTest {
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
                                                       asList(new ServerConfImpl("ref1", "8080", "https", null),
                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
-                                                      Collections.singletonMap("key1", "value1"),
-                                                      null),
+                                                      Collections.singletonMap("key1", "value1")),
                                 "machineId",
                                 WORKSPACE_ID,
                                 "envName",
@@ -308,8 +307,7 @@ public class DockerInstanceProviderTest {
                                                       new LimitsImpl(MEMORY_LIMIT_MB),
                                                       asList(new ServerConfImpl("ref1", "8080", "https", null),
                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
-                                                      Collections.singletonMap("key1", "value1"),
-                                                      null),
+                                                      Collections.singletonMap("key1", "value1")),
                                 "machineId",
                                 WORKSPACE_ID,
                                 "envName",
@@ -1722,7 +1720,6 @@ public class DockerInstanceProviderTest {
                                                                                                       "9090/udp",
                                                                                                       "someprotocol",
                                                                                                       null)),
-                                                                            Collections.singletonMap("key1", "value1"),
-                                                                            null));
+                                                                            Collections.singletonMap("key1", "value1")));
     }
 }

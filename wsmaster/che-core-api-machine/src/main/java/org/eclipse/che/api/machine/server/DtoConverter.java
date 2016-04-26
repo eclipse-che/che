@@ -54,8 +54,7 @@ public final class DtoConverter {
                                                                 .stream()
                                                                 .map(DtoConverter::asDto)
                                                                 .collect(Collectors.toList()))
-                                             .withEnvVariables(config.getEnvVariables())
-                                             .withArchitecture(config.getArchitecture());
+                                             .withEnvVariables(config.getEnvVariables());
     }
 
     /**

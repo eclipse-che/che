@@ -13,12 +13,12 @@
 <che-list-item flex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row">
     <div class="project-list-static-icon" layout-align="center center">
-      <che-list-item-checked class="project-type-icon"
+      <che-list-item-checked class="project-type-checked"
                               ng-model="projectItemCtrl.isSelect"
                               ng-show="projectItemCtrl.isSelectable"
                               che-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"
                               che-aria-label-checkbox="Project {{projectItemCtrl.project.name}}"></che-list-item-checked>
-      <md-icon ng-hide="projectItemCtrl.isSelectable" md-font-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"></md-icon>
+      <md-icon ng-hide="projectItemCtrl.isSelectable" class="project-type-icon" md-font-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank "></md-icon>
     </div>
     <div flex="40" layout="column" layout-align-gt="start center" layout-align-md="start center" layout-align-sm="center center" ng-click="projectItemCtrl.redirectToProjectDetails()">
       <div class="project-name"><a class="che-hover">{{projectItemCtrl.project.name}}</a>

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.gwt.client.events;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
@@ -19,10 +20,28 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
  *
  * @author Roman Nikitenko
  */
-public class DevMachineStateEvent extends GwtEvent<DevMachineStateHandler> {
+public class DevMachineStateEvent extends GwtEvent<DevMachineStateEvent.Handler> {
+
+    public interface Handler extends EventHandler {
+        /**
+         * Called when dev machine has been started.
+         *
+         * @param event
+         *         the fired {@link DevMachineStateEvent}
+         */
+        void onDevMachineStarted(DevMachineStateEvent event);
+
+        /**
+         * Called when dev machine has been destroyed.
+         *
+         * @param event
+         *         the fired {@link DevMachineStateEvent}
+         */
+        void onDevMachineDestroyed(DevMachineStateEvent event);
+    }
 
     /** Type class used to register this event. */
-    public static Type<DevMachineStateHandler> TYPE = new Type<>();
+    public static Type<DevMachineStateEvent.Handler> TYPE = new Type<>();
     private final MachineStatusEvent.EventType status;
     private final String                       machineId;
     private final String                       workspaceId;
@@ -44,7 +63,7 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateHandler> {
     }
 
     @Override
-    public Type<DevMachineStateHandler> getAssociatedType() {
+    public Type<DevMachineStateEvent.Handler> getAssociatedType() {
         return TYPE;
     }
 
@@ -70,16 +89,15 @@ public class DevMachineStateEvent extends GwtEvent<DevMachineStateHandler> {
     }
 
     @Override
-    protected void dispatch(DevMachineStateHandler handler) {
+    protected void dispatch(DevMachineStateEvent.Handler handler) {
         switch (status) {
             case RUNNING:
-                handler.onMachineStarted(this);
+                handler.onDevMachineStarted(this);
                 break;
             case DESTROYED:
-                handler.onMachineDestroyed(this);
-                break;
-            default:
+                handler.onDevMachineDestroyed(this);
                 break;
         }
     }
+
 }

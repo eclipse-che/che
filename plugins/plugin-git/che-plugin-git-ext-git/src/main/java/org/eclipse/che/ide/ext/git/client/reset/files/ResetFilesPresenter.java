@@ -58,7 +58,6 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
     private final AppContext              appContext;
     private final GitLocalizationConstant constant;
     private final NotificationManager     notificationManager;
-    private final String                  workspaceId;
 
     private CurrentProject  project;
     private List<IndexFile> indexedFiles;
@@ -86,15 +85,13 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         this.appContext = appContext;
         this.constant = constant;
         this.notificationManager = notificationManager;
-
-        this.workspaceId = appContext.getWorkspaceId();
     }
 
     /** Show dialog. */
     public void showDialog() {
         project = appContext.getCurrentProject();
 
-        service.status(workspaceId, project.getRootProject(),
+        service.status(appContext.getDevMachine(), project.getRootProject(),
                        new AsyncRequestCallback<Status>(dtoUnmarshallerFactory.newUnmarshaller(Status.class)) {
                            @Override
                            protected void onSuccess(Status result) {
@@ -132,7 +129,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                                String errorMassage = exception.getMessage() != null ? exception.getMessage() : constant.statusFailed();
                                GitOutputConsole console = gitOutputConsoleFactory.create(STATUS_COMMAND_NAME);
                                console.printError(errorMassage);
-                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                notificationManager.notify(errorMassage, project.getRootProject());
                            }
                        });
@@ -151,17 +148,17 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
         if (files.isEmpty()) {
             view.close();
             console.print(constant.nothingToReset());
-            consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
             notificationManager.notify(constant.nothingToReset(), project.getRootProject());
             return;
         }
         view.close();
 
-        service.reset(workspaceId, project.getRootProject(), "HEAD", ResetType.MIXED, files, new AsyncRequestCallback<Void>() {
+        service.reset(appContext.getDevMachine(), project.getRootProject(), "HEAD", ResetType.MIXED, files, new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
                 console.print(constant.resetFilesSuccessfully());
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(constant.resetFilesSuccessfully(), project.getRootProject());
             }
 
@@ -169,7 +166,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
             protected void onFailure(Throwable exception) {
                 String errorMassage = exception.getMessage() != null ? exception.getMessage() : constant.resetFilesFailed();
                 console.printError(errorMassage);
-                consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                 notificationManager.notify(errorMassage, project.getRootProject());
             }
         });

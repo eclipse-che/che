@@ -40,14 +40,13 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandResources;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
-import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.ArrayList;
@@ -56,6 +55,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer.MACHINE_LABELS_BY_CATEGORY_MAP;
+import static org.eclipse.che.ide.extension.machine.client.targets.TargetsPresenter.SSH_CATEGORY;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * @author Vitaliy Guliy
@@ -67,7 +72,9 @@ public class TargetsViewImpl extends Window implements TargetsView {
     }
 
     private EditCommandResources    commandResources;
+    private MachineResources     	machineResources;
     private IconRegistry            iconRegistry;
+
     private ActionDelegate          delegate;
 
     @UiField(provided = true)
@@ -91,25 +98,19 @@ public class TargetsViewImpl extends Window implements TargetsView {
     FlowPanel                       propertiesPanel;
 
     @UiField
-    TextBox                         targetName;
+    org.eclipse.che.ide.ui.TextBox  targetName;
 
     @UiField
-    CustomListBox                   architectureListBox;
+    org.eclipse.che.ide.ui.TextBox  host;
 
     @UiField
-    TextBox                         host;
-
-    @UiField
-    TextBox                         port;
+    org.eclipse.che.ide.ui.TextBox  port;
 
     @UiField
     TextBox                         userName;
 
     @UiField
     PasswordTextBox                 password;
-
-    @UiField
-    FlowPanel                       operationPanel;
 
     @UiField
     FlowPanel                       footer;
@@ -123,11 +124,13 @@ public class TargetsViewImpl extends Window implements TargetsView {
     @Inject
     public TargetsViewImpl(org.eclipse.che.ide.Resources resources,
                            MachineLocalizationConstant machineLocale,
+                           MachineResources machineResources,
                            CoreLocalizationConstant coreLocale,
                            EditCommandResources commandResources,
                            IconRegistry iconRegistry,
                            TargetsViewImplUiBinder uiBinder) {
         this.machineLocale = machineLocale;
+        this.machineResources = machineResources;
         this.commandResources = commandResources;
         this.iconRegistry = iconRegistry;
 
@@ -151,17 +154,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
             }
         }, KeyDownEvent.getType());
         targetsPanel.add(list);
-
-        architectureListBox.addItem("linux_amd64");
-        architectureListBox.addItem("linux_arm7");
-        architectureListBox.setSelectedIndex(0);
-
-        architectureListBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent changeEvent) {
-                delegate.onArchitectureChanged(architectureListBox.getValue());
-            }
-        });
 
         closeButton = createButton(coreLocale.close(), "targets.button.close",
                 new ClickHandler() {
@@ -197,9 +189,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
         });
         connectButton.addStyleName(this.resources.windowCss().primaryButton());
         connectButton.addStyleName(resources.Css().buttonLoader());
-
-        operationPanel.add(connectButton);
-        operationPanel.getElement().insertFirst(connectButton.getElement());
+        footer.add(connectButton);
 
         targetName.addKeyUpHandler(new KeyUpHandler() {
             @Override
@@ -235,7 +225,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
                 delegate.onPasswordChanged(password.getValue());
             }
         });
-
     }
 
     @Override
@@ -310,33 +299,45 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
     private void ensureSSHCategoryExists(List<Category<?>> categoriesList) {
         for (Category<?> category : categoriesList) {
-            if ("ssh".equalsIgnoreCase(category.getTitle())) {
+            if (SSH_CATEGORY.equalsIgnoreCase(category.getTitle())) {
                 return;
             }
         }
 
-        categoriesList.add(new Category<>("ssh", categoriesRenderer, new ArrayList<Target>(), categoriesEventDelegate));
+        categoriesList.add(new Category<>(SSH_CATEGORY, categoriesRenderer, new ArrayList<Target>(), categoriesEventDelegate));
+    }
+
+    private SpanElement createMachineLabel(String machineCategory) {
+        final SpanElement machineLabel = Document.get().createSpanElement();
+
+        Icon icon = iconRegistry.getIconIfExist(machineCategory + ".machine.icon");
+        if (icon != null) {
+            machineLabel.appendChild(icon.getSVGImage().getElement());
+            return machineLabel;
+        }
+
+        if (MACHINE_LABELS_BY_CATEGORY_MAP.containsKey(machineCategory)) {
+            machineLabel.setInnerText(MACHINE_LABELS_BY_CATEGORY_MAP.get(machineCategory));
+            machineLabel.setClassName(this.machineResources.getCss().dockerMachineLabel());
+            return machineLabel;
+        }
+
+        machineLabel.setInnerText(machineCategory.substring(0, 3));
+        machineLabel.setClassName(this.machineResources.getCss().differentMachineLabel());
+        return machineLabel;
+
     }
 
     private SpanElement renderCategoryHeader(final Category<Target> category) {
         SpanElement categoryHeaderElement = Document.get().createSpanElement();
         categoryHeaderElement.setClassName(commandResources.getCss().categoryHeader());
-
-        SpanElement iconElement = Document.get().createSpanElement();
-        iconElement.getStyle().setPaddingRight(4, Style.Unit.PX);
-        iconElement.getStyle().setPaddingLeft(2, Style.Unit.PX);
-        categoryHeaderElement.appendChild(iconElement);
-
-        Icon icon = iconRegistry.getIconIfExist(category.getTitle() + ".runtime.icon");
-        if (icon != null) {
-            iconElement.appendChild(icon.getSVGImage().getElement());
-        }
+        categoryHeaderElement.appendChild(createMachineLabel(category.getTitle()));
 
         SpanElement textElement = Document.get().createSpanElement();
         categoryHeaderElement.appendChild(textElement);
         textElement.setInnerText(category.getTitle());
 
-        if (!"docker".equalsIgnoreCase(category.getTitle())) {
+        if (SSH_CATEGORY.equalsIgnoreCase(category.getTitle())) {
             // Add button to create a target
             SpanElement buttonElement = Document.get().createSpanElement();
             buttonElement.appendChild(commandResources.addCommandButton().getSvg().getElement());
@@ -364,7 +365,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
                 @Override
                 public void renderElement(Element element, final Target target) {
                     element.setInnerText(target.getName());
-
+                    element.getStyle().setPaddingLeft(54, PX);
                     element.addClassName(commandResources.getCss().categorySubElementHeader());
                     element.setId("target-" + target.getName());
 
@@ -428,18 +429,33 @@ public class TargetsViewImpl extends Window implements TargetsView {
     }
 
     @Override
-    public void setArchitecture(String architecture) {
-        for (int i = 0; i < architectureListBox.getItemCount(); i++) {
-            if (architecture.equals(architectureListBox.getItemText(i))) {
-                architectureListBox.setSelectedIndex(i);
-                return;
-            }
-        }
+    public void markTargetNameInvalid() {
+        targetName.markInvalid();
     }
 
     @Override
-    public String getArchitecture() {
-        return architectureListBox.getValue();
+    public void unmarkTargetName() {
+        targetName.unmark();
+    }
+
+    @Override
+    public void markHostInvalid() {
+        host.markInvalid();
+    }
+
+    @Override
+    public void unmarkHost() {
+        host.unmark();
+    }
+
+    @Override
+    public void markPortInvalid() {
+        port.markInvalid();
+    }
+
+    @Override
+    public void unmarkPort() {
+        port.unmark();
     }
 
     @Override

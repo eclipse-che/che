@@ -54,7 +54,6 @@ public class PasteAction extends Action {
     private final NotificationManager      notificationManager;
     private final ProjectExplorerPresenter projectExplorer;
     private final RenameItemAction         renameItemAction;
-    private final String                   workspaceId;
 
     /** List of items to do. */
     private List<ResourceBasedNode<?>> itemsToProcess;
@@ -85,8 +84,6 @@ public class PasteAction extends Action {
         this.notificationManager = notificationManager;
         this.projectExplorer = projectExplorer;
         this.renameItemAction = renameItemAction;
-
-        this.workspaceId = appContext.getWorkspace().getId();
     }
 
     /** {@inheritDoc} */
@@ -215,7 +212,7 @@ public class PasteAction extends Action {
         try {
             /** Copy the item */
             projectServiceClient
-                    .copy(workspaceId, ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(), null,
+                    .copy(appContext.getDevMachine(), ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(), null,
                           copyCallback);
         } catch (Exception error) {
             /** Handle error and stop copying */
@@ -266,7 +263,7 @@ public class PasteAction extends Action {
                 try {
                     /** Copy the item, giving new name */
                     projectServiceClient
-                            .copy(workspaceId, ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
+                            .copy(appContext.getDevMachine(), ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
                                   value,
                                   copyCallback);
                 } catch (Exception error) {
@@ -294,12 +291,12 @@ public class PasteAction extends Action {
         try {
             /** Delete destination item */
             String deletePath = ((HasStorablePath)destination).getStorablePath() + "/" + item.getName();
-            projectServiceClient.delete(workspaceId, deletePath, new AsyncRequestCallback<Void>() {
+            projectServiceClient.delete(appContext.getDevMachine(), deletePath, new AsyncRequestCallback<Void>() {
                 @Override
                 protected void onSuccess(Void result) {
                     /** Copy the item */
                     projectServiceClient
-                            .copy(workspaceId, ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
+                            .copy(appContext.getDevMachine(), ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
                                   null,
                                   copyCallback);
                 }
@@ -365,7 +362,7 @@ public class PasteAction extends Action {
         try {
             /** Move the item */
             projectServiceClient
-                    .move(workspaceId, ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(), null,
+                    .move(appContext.getDevMachine(), ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(), null,
                           moveCallback);
         } catch (Exception error) {
             /** Handle error and stop moving */
@@ -420,7 +417,7 @@ public class PasteAction extends Action {
                 try {
                     /** Move the item, giving new name */
                     projectServiceClient
-                            .move(workspaceId, ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
+                            .move(appContext.getDevMachine(), ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
                                   value,
                                   moveCallback);
                 } catch (Exception error) {
@@ -452,12 +449,12 @@ public class PasteAction extends Action {
         try {
             /** Delete destination item */
             String deletePath = ((HasStorablePath)destination).getStorablePath() + "/" + item.getName();
-            projectServiceClient.delete(workspaceId, deletePath, new AsyncRequestCallback<Void>() {
+            projectServiceClient.delete(appContext.getDevMachine(), deletePath, new AsyncRequestCallback<Void>() {
                 @Override
                 protected void onSuccess(Void result) {
                     /** Move the item */
                     projectServiceClient
-                            .move(workspaceId, ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
+                            .move(appContext.getDevMachine(), ((HasStorablePath)item).getStorablePath(), ((HasStorablePath)destination).getStorablePath(),
                                   null,
                                   moveCallback);
                 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.2.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-ide-api</artifactId>
     <packaging>jar</packaging>
@@ -65,6 +65,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-client-gwt-machine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

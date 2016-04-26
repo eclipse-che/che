@@ -35,7 +35,7 @@ public class ExecuteSelectedCommandActionTest {
     @Mock
     private MachineResources            resources;
     @Mock
-    private SelectCommandComboBoxReady  selectCommandAction;
+    private SelectCommandComboBox       selectCommandAction;
     @Mock
     private CommandManager              commandManager;
     @Mock
@@ -68,4 +68,5 @@ public class ExecuteSelectedCommandActionTest {
 
         verify(commandManager).execute(command, machine);
     }
+
 }

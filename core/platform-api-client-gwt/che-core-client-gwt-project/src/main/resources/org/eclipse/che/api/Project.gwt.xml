@@ -16,6 +16,8 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name="org.eclipse.che.ide.Commons"/>
+    <inherits name="org.eclipse.che.api.Machine"/>
+    <inherits name="org.eclipse.che.api.Workspace"/>
     <source path='project/gwt'/>
     <source path='project/shared'/>
     <source path='vfs/impl/file'/>

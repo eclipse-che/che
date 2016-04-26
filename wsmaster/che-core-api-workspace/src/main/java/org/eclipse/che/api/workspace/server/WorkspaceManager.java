@@ -520,9 +520,10 @@ public class WorkspaceManager {
                 final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
                 hooks.beforeStart(workspace, env, accountId);
                 runtimes.start(workspace, env, recover);
-                LOG.info("Workspace '{}:{}' started by user '{}'",
+                LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
+                         workspace.getId(),
                          sessionUserNameOr("undefined"));
             } catch (RuntimeException | ServerException | NotFoundException | ConflictException | ForbiddenException ex) {
                 if (workspace.isTemporary()) {
@@ -551,10 +552,17 @@ public class WorkspaceManager {
             checkWorkspaceBeforeCreatingSnapshot(workspace);
         }
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
+            final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
+            LOG.info("Workspace '{}:{}' with id '{}' is being stopped by user '{}'",
+                     workspace.getNamespace(),
+                     workspace.getConfig().getName(),
+                     workspace.getId(),
+                     firstNonNull(stoppedBy, "undefined"));
             if (createSnapshot && !createSnapshotSync(workspace.getRuntime(), workspace.getNamespace(), workspace.getId())) {
-                LOG.warn("Could not create a snapshot of the workspace '{}:{}'. The workspace will be stopped",
+                LOG.warn("Could not create a snapshot of the workspace '{}:{}' with workspace id '{}'. The workspace will be stopped",
                          workspace.getNamespace(),
-                         workspace.getConfig().getName());
+                         workspace.getConfig().getName(),
+                         workspace.getId());
             }
             try {
                 runtimes.stop(workspace.getId());
@@ -564,10 +572,10 @@ public class WorkspaceManager {
                     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
                     workspaceDao.update(workspace);
                 }
-                final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
-                LOG.info("Workspace '{}:{}' stopped by user '{}'",
+                LOG.info("Workspace '{}:{}' with id '{}' stopped by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
+                         workspace.getId(),
                          firstNonNull(stoppedBy, "undefined"));
             } catch (RuntimeException | ConflictException | NotFoundException | ServerException ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
@@ -664,9 +672,10 @@ public class WorkspaceManager {
         hooks.beforeCreate(workspace, accountId);
         workspaceDao.create(workspace);
         hooks.afterCreate(workspace, accountId);
-        LOG.info("Workspace '{}:{}' created by user '{}'",
+        LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",
                  namespace,
                  workspace.getConfig().getName(),
+                 workspace.getId(),
                  sessionUserNameOr("undefined"));
         return workspace;
     }

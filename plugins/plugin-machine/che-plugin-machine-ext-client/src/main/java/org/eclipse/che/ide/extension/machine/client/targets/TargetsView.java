@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.targets;
 
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
@@ -77,22 +76,6 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
     String getTargetName();
 
     /**
-     * Sets target architecture.
-     *
-     * @param architecture
-     *          target architecture
-     */
-    void setArchitecture(String architecture);
-
-    /**
-     * Returns target architecture.
-     * 
-     * @return
-     *          target architecture
-     */
-    String getArchitecture();
-
-    /**
      * Sets SSH host value.
      *
      * @param host
@@ -123,6 +106,36 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
      *          value of port field
      */
     String getPort();
+
+    /**
+     * Adds error mark to target name field.
+     */
+    void markTargetNameInvalid();
+
+    /**
+     * Removes error mark from target name field.
+     */
+    void unmarkTargetName();
+
+    /**
+     * Adds error mark to host field.
+     */
+    void markHostInvalid();
+
+    /**
+     * Removes error mark from host field.
+     */
+    void unmarkHost();
+
+    /**
+     * Adds error mark to port field.
+     */
+    void markPortInvalid();
+
+    /**
+     * Removes error mark from port field.
+     */
+    void unmarkPort();
 
     /**
      * Sets SSH user name.
@@ -200,14 +213,13 @@ public interface TargetsView extends View<TargetsView.ActionDelegate> {
         // Perform actions when clicking Add target button
         void onAddTarget(String category);
 
+        // Is called when target is deleted
         void onDeleteTarget(Target target);
 
         // Perform actions when selecting a target
         void onTargetSelected(Target target);
 
         void onTargetNameChanged(String value);
-
-        void onArchitectureChanged(String value);
 
         void onHostChanged(String value);
 

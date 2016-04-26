@@ -7,5 +7,5 @@
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
   "supportEmail": "wish@codenvy.com",
-  "oauthDocs": "https://eclipse-che.readme.io/docs/git#ssh-key-management"
+  "oauthDocs": "Configure OAuth in the che.properties file."
 }

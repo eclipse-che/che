@@ -34,18 +34,18 @@ import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.api.machine.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -159,7 +159,10 @@ public class MachineManager {
                    ConflictException,
                    MachineException,
                    BadRequestException {
-        LOG.info("Creating machine [ws = {}: env = {}: machine = {}]", workspaceId, environmentName, machineConfig.getName());
+        LOG.info("Creating machine [ws = {}: env = {}: machine = {}]",
+                 workspaceId,
+                 environmentName,
+                 machineConfig.getName());
         final MachineImpl machine = createMachine(normalizeMachineConfig(machineConfig),
                                                   workspaceId,
                                                   environmentName,
@@ -393,9 +396,9 @@ public class MachineManager {
                                            .withError(e.getLocalizedMessage()));
 
             try {
+                machineRegistry.remove(machine.getId());
                 machineLogger.writeLine(String.format("[ERROR] %s", e.getLocalizedMessage()));
                 machineLogger.close();
-                machineRegistry.remove(machine.getId());
             } catch (IOException | NotFoundException e1) {
                 LOG.error(e1.getLocalizedMessage());
             }
@@ -498,7 +501,7 @@ public class MachineManager {
                                                   .setMachineName(machine.getConfig().getName())
                                                   .useCurrentCreationDate()
                                                   .build();
-        executor.submit(ThreadLocalPropagateContext.wrap(() -> {
+        executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 doSaveMachine(snapshot, machine);
             } catch (Exception ignored) {
@@ -804,10 +807,11 @@ public class MachineManager {
     private SnapshotImpl doSaveMachine(SnapshotImpl snapshot, Instance machine) throws SnapshotException, MachineException {
         final SnapshotImpl snapshotWithKey;
         try {
-            LOG.info("Creating snapshot of machine [ws = {}: env = {}: machine = {}]",
+            LOG.info("Creating snapshot of machine [ws = {}: env = {}: machine name = {}: machine id = {}]",
                      snapshot.getWorkspaceId(),
                      snapshot.getEnvName(),
-                     snapshot.getMachineName());
+                     snapshot.getMachineName(),
+                     machine.getId());
 
             snapshotWithKey = new SnapshotImpl(snapshot);
             snapshotWithKey.setInstanceKey(machine.saveToSnapshot(machine.getOwner()));
@@ -827,10 +831,11 @@ public class MachineManager {
             }
             snapshotDao.saveSnapshot(snapshotWithKey);
 
-            LOG.info("Snapshot of machine [ws = {}: env = {}: machine = {}] was successfully created, its id is '{}'",
+            LOG.info("Snapshot of machine [ws = {}: env = {}: machine name = {}: machine id = {}] was successfully created, its id is '{}'",
                      snapshot.getWorkspaceId(),
                      snapshot.getEnvName(),
                      snapshot.getMachineName(),
+                     machine.getId(),
                      snapshot.getId());
         } catch (MachineException | SnapshotException ex) {
             try {
@@ -848,28 +853,27 @@ public class MachineManager {
     }
 
     private void doDestroy(Instance machine) throws MachineException, NotFoundException {
-        LOG.info("Destroying machine [ws = {}: env = {}: machine = {}]",
+        LOG.info("Destroying machine [ws = {}: env = {}: machine name = {}: machine id = {}]",
                  machine.getWorkspaceId(),
                  machine.getEnvName(),
-                 machine.getConfig().getName());
-        machine.destroy();
-        LOG.info("Machine [ws = {}: env = {}: machine = {}] was successfully destroyed",
-                 machine.getWorkspaceId(),
-                 machine.getEnvName(),
-                 machine.getConfig().getName());
-        cleanupOnDestroy(machine, null);
-    }
+                 machine.getConfig().getName(),
+                 machine.getId());
 
-    private void cleanupOnDestroy(Instance machine, String message) throws NotFoundException, MachineException {
         try {
-            if (!Strings.isNullOrEmpty(message)) {
-                machine.getLogger().writeLine(message);
-            }
-            machine.getLogger().close();
-        } catch (IOException ignore) {
-        }
+            machineRegistry.remove(machine.getId());
+        } finally {
+            try {
+                machine.destroy();
 
-        machineRegistry.remove(machine.getId());
+                LOG.info("Machine [ws = {}: env = {}: machine name = {}: machine id = {}] was successfully destroyed",
+                         machine.getWorkspaceId(),
+                         machine.getEnvName(),
+                         machine.getConfig().getName(),
+                         machine.getId());
+            } catch (MachineException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+            }
+        }
 
         eventService.publish(newDto(MachineStatusEvent.class)
                                      .withEventType(MachineStatusEvent.EventType.DESTROYED)
@@ -941,6 +945,9 @@ public class MachineManager {
             if ((event.getType() == OOM) || (event.getType() == DIE)) {
                 try {
                     final Instance machine = getInstance(event.getMachineId());
+
+                    machineRegistry.remove(machine.getId());
+
                     String message = "Machine is destroyed. ";
                     if (event.getType() == OOM) {
                         message = message +
@@ -950,9 +957,22 @@ public class MachineManager {
                                   "the workspace RAM limit in the user dashboard.";
                     }
 
-                    cleanupOnDestroy(machine, message);
+                    try {
+                        if (!Strings.isNullOrEmpty(message)) {
+                            machine.getLogger().writeLine(message);
+                        }
+                        machine.getLogger().close();
+                    } catch (IOException ignore) {
+                    }
+
+                    eventService.publish(newDto(MachineStatusEvent.class)
+                                                 .withEventType(MachineStatusEvent.EventType.DESTROYED)
+                                                 .withDev(machine.getConfig().isDev())
+                                                 .withMachineId(machine.getId())
+                                                 .withWorkspaceId(machine.getWorkspaceId())
+                                                 .withMachineName(machine.getConfig().getName()));
                 } catch (NotFoundException | MachineException e) {
-                    LOG.debug(e.getLocalizedMessage(), e);
+                    LOG.warn(e.getLocalizedMessage(), e);
                 }
             }
         }

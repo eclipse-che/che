@@ -15,12 +15,15 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides machines {link InstanceProvider} implementation by machine type
+ * Provides machines {@link InstanceProvider} implementation by machine type
  *
  * @author Alexander Garagatyi
  */
@@ -37,16 +40,35 @@ public class MachineInstanceProviders {
     }
 
     /**
-     * Returns {link InstanceProvider} implementation by machine type
+     * Returns {@link InstanceProvider} implementation by machine type
      *
      * @param machineType type of machine implementation
      * @return implementation of the machine {code InstanceProvider}
      * @throws NotFoundException if no implementation found for provided machine type
      */
     public InstanceProvider getProvider(String machineType) throws NotFoundException {
-        if (instanceProviders.containsKey(machineType)) {
+        if (hasProvider(machineType)) {
             return instanceProviders.get(machineType);
         }
         throw new NotFoundException(String.format("Can't find machine provider for unsupported machine type '%s'", machineType));
+    }
+    
+    /**
+     * Checks if an {@link InstanceProvider} implementation of the given machine type exists
+     *
+     * @param machineType type of machine implementation
+     * @return <code>true</code> if such implementation exists, <code>false</code> otherwise
+     */
+    public boolean hasProvider(String machineType) {
+        return instanceProviders.containsKey(machineType);
+    }
+    
+    /**
+     * Returns the machine types of all available {@link InstanceProvider} implementations.
+     *
+     * @return a collection of machine types
+     */
+    public Collection<String> getProviderTypes() {
+        return Collections.unmodifiableSet(instanceProviders.keySet());
     }
 }

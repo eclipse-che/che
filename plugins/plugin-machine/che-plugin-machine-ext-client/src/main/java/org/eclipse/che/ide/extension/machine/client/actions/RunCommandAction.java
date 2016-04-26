@@ -30,13 +30,13 @@ public class RunCommandAction extends Action {
 
     public static final String NAME_PARAM_ID = "name";
 
-    private final SelectCommandComboBoxReady  selectCommandAction;
+    private final SelectCommandComboBox selectCommandAction;
     private final CommandManager              commandManager;
     private final MachineLocalizationConstant localizationConstant;
 
 
     @Inject
-    public RunCommandAction(SelectCommandComboBoxReady selectCommandAction,
+    public RunCommandAction(SelectCommandComboBox selectCommandAction,
                             MachineLocalizationConstant localizationConstant,
                             CommandManager commandManager) {
         this.selectCommandAction = selectCommandAction;
@@ -62,4 +62,5 @@ public class RunCommandAction extends Action {
             commandManager.execute(command);
         }
     }
+
 }

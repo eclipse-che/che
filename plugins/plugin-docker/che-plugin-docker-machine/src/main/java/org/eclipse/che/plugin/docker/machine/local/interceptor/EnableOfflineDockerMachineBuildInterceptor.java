@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.local.interceptor;
 
+import com.google.common.base.MoreObjects;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -30,7 +32,7 @@ import java.io.IOException;
  *
  * @author Alexander Garagatyi
  *
- * @see org.eclipse.che.plugin.docker.machine.DockerInstanceProvider#buildImage(Dockerfile, LineConsumer, String, boolean)
+ * @see org.eclipse.che.plugin.docker.machine.DockerInstanceProvider#buildImage(Dockerfile, LineConsumer, String, boolean, long, long)
  */
 public class EnableOfflineDockerMachineBuildInterceptor implements MethodInterceptor {
     private static final Logger LOG = LoggerFactory.getLogger(EnableOfflineDockerMachineBuildInterceptor.class);
@@ -64,7 +66,7 @@ public class EnableOfflineDockerMachineBuildInterceptor implements MethodInterce
         DockerImageIdentifier imageIdentifier = DockerImageIdentifierParser.parse(image);
         final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         dockerConnector.pull(imageIdentifier.getRepository(),
-                             imageIdentifier.getTag(),
+                             MoreObjects.firstNonNull(imageIdentifier.getTag(), "latest"),
                              imageIdentifier.getRegistry(),
                              currentProgressStatus -> {
                                  try {

@@ -12,9 +12,9 @@ package org.eclipse.che.ide.upload.folder;
 
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -25,8 +25,6 @@ import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
-
-import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.List;
 
@@ -39,33 +37,30 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.ActionDelegate {
 
-    private       UploadFolderFromZipView  view;
+    private final UploadFolderFromZipView  view;
     private final ProjectExplorerPresenter projectExplorer;
     private final CoreLocalizationConstant locale;
-    private       EditorAgent              editorAgent;
-    private       String                   restContext;
-    private       String                   workspaceId;
-    private       EventBus                 eventBus;
-    private       NotificationManager      notificationManager;
+    private final EditorAgent              editorAgent;
+    private final EventBus                 eventBus;
+    private final NotificationManager      notificationManager;
+    private final AppContext               appContext;
 
     @Inject
     public UploadFolderFromZipPresenter(UploadFolderFromZipView view,
-                                        @Named("cheExtensionPath") String restContext,
                                         AppContext appContext,
                                         EditorAgent editorAgent,
                                         EventBus eventBus,
                                         NotificationManager notificationManager,
                                         ProjectExplorerPresenter projectExplorer,
                                         CoreLocalizationConstant locale) {
-        this.restContext = restContext;
-        this.workspaceId = appContext.getWorkspace().getId();
+        this.appContext = appContext;
         this.editorAgent = editorAgent;
         this.eventBus = eventBus;
         this.view = view;
-        this.projectExplorer = projectExplorer;
-        this.locale = locale;
         this.view.setDelegate(this);
         this.view.setEnabledUploadButton(false);
+        this.projectExplorer = projectExplorer;
+        this.locale = locale;
         this.notificationManager = notificationManager;
     }
 
@@ -103,7 +98,7 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
     public void onUploadClicked() {
         view.setLoaderVisibility(true);
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(restContext + "/project/" + workspaceId + "/upload/zipfolder/" +
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/" + appContext.getDevMachine().getWorkspace() + "/upload/zipfolder/" +
                        ((HasStorablePath)getResourceBasedNode()).getStorablePath());
         view.submit();
     }

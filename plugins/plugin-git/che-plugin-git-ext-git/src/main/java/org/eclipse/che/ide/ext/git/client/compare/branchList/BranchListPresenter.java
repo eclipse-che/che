@@ -68,7 +68,6 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     private final GitLocalizationConstant  locale;
     private final AppContext               appContext;
     private final NotificationManager      notificationManager;
-    private final String                   workspaceId;
 
     private CurrentProject project;
     private Branch         selectedBranch;
@@ -98,8 +97,6 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
-        this.workspaceId = appContext.getWorkspaceId();
-
         this.view.setDelegate(this);
     }
 
@@ -133,7 +130,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
         pattern = path.replaceFirst(project.getPath(), "");
         pattern = (pattern.startsWith("/")) ? pattern.replaceFirst("/", "") : pattern;
 
-        gitService.diff(workspaceId, project, Collections.singletonList(pattern), NAME_STATUS, false, 0, selectedBranch.getName(), false,
+        gitService.diff(appContext.getDevMachine(), project, Collections.singletonList(pattern), NAME_STATUS, false, 0, selectedBranch.getName(), false,
                         new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                             @Override
                             protected void onSuccess(String result) {
@@ -185,7 +182,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
 
     /** Get list of branches from selected project. */
     private void getBranches() {
-        gitService.branchList(workspaceId, project.getRootProject(), LIST_ALL,
+        gitService.branchList(appContext.getDevMachine(), project.getRootProject(), LIST_ALL,
                               new AsyncRequestCallback<List<Branch>>(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class)) {
                                   @Override
                                   protected void onSuccess(List<Branch> result) {
@@ -199,7 +196,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                               (exception.getMessage() != null) ? exception.getMessage() : locale.branchesListFailed();
                                       GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                                       console.printError(errorMessage);
-                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachineId(), console);
+                                      consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                                       notificationManager.notify(locale.branchesListFailed(), FAIL, false);
                                   }
                               }

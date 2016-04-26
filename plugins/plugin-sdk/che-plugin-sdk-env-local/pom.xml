@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-sdk-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.2.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-sdk-env-local</artifactId>
     <packaging>jar</packaging>
@@ -64,10 +64,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.vectomatic</groupId>
-            <artifactId>lib-gwt-svg</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

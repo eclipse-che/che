@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.jdi.client.configuration;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -48,6 +49,8 @@ public class JavaDebugConfigurationPagePresenterTest {
     @Mock
     private AppContext                     appContext;
     @Mock
+    private DevMachine                     devMachine;
+    @Mock
     private EntityFactory                  entityFactory;
 
     @Mock
@@ -60,6 +63,9 @@ public class JavaDebugConfigurationPagePresenterTest {
     public void setUp() {
         when(configuration.getHost()).thenReturn(HOST);
         when(configuration.getPort()).thenReturn(PORT);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getId()).thenReturn("devMachine");
+
 
         pagePresenter.resetFrom(configuration);
     }

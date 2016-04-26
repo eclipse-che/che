@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.machine.gwt.client.DevMachine;
 import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -70,6 +71,8 @@ public class LocalZipImporterPagePresenterTest {
     @Mock
     private AppContext                    appContext;
     @Mock
+    private DevMachine                    devMachine;
+    @Mock
     private EventBus                      eventBus;
     @Mock
     private CoreLocalizationConstant      locale;
@@ -80,17 +83,18 @@ public class LocalZipImporterPagePresenterTest {
     @Mock
     private WorkspaceDto                  workspace;
 
+
     private LocalZipImporterPagePresenter presenter;
 
     @Before
     public void setUp() {
         when(appContext.getWorkspace()).thenReturn(workspace);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
 
         presenter = new LocalZipImporterPagePresenter(view,
                                                       dtoFactory,
                                                       locale,
                                                       appContext,
-                                                      "extPath",
                                                       eventBus,
                                                       projectServiceClient,
                                                       projectNotificationSubscriber);
@@ -207,6 +211,9 @@ public class LocalZipImporterPagePresenterTest {
     @Test
     public void onImportClickedWhenShouldImportAndOpenProjectTest() {
         when(view.getProjectName()).thenReturn(PROJECT_NAME);
+        final DevMachine devMachine = mock(DevMachine.class);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getWsAgentBaseUrl()).thenReturn("/rest");
         MessageDialog dialog = mock(MessageDialog.class);
 
         presenter.onImportClicked();

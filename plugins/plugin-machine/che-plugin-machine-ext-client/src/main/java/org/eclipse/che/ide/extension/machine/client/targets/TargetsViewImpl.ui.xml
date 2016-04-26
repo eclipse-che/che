@@ -13,7 +13,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
+             xmlns:ide='urn:import:org.eclipse.che.ide.ui'>
 
     <ui:with field='machineLocale' type='org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant'/>
 
@@ -61,22 +61,6 @@
 
         .delimiter {
             margin-top: 10px;
-        }
-
-        .architecturePanel {
-            height: 24px;
-            line-height: 24px;
-            margin-left: 0;
-            margin-top: 10px;
-            position: relative;
-        }
-
-        .architectureListBox {
-            position: absolute;
-            top: 0px;
-            right: 0px;
-            width: 250px;
-            height: 24px;
         }
 
         .propertiesPanel {
@@ -128,17 +112,6 @@
             user-select: text;
         }
 
-        .operation {
-            position: absolute;
-            bottom: 40px;
-            width: 100%;
-            height: 22px;
-        }
-
-        .operation button {
-            float: left;
-        }
-
         .footer {
             position: absolute;
             bottom: 11px;
@@ -154,6 +127,11 @@
             margin-right: 0px;
         }
 
+        .footer button:last-child {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
     </ui:style>
 
     <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.panel}">
@@ -187,26 +165,19 @@
                 <g:FlowPanel ui:field="propertiesPanel" styleName="{style.propertiesPanel}" visible="false">
 
                     <g:Label width="100%" text="Name" addStyleNames="{style.label} {style.delimiter}"/>
-                    <g:TextBox width="100%" height="14px" ui:field="targetName" tabIndex="0"/>
-
-                    <g:FlowPanel width="100%" height="24px" addStyleNames="{style.architecturePanel}">
-                        <g:Label width="100px" text="Architecture" />
-                        <che:CustomListBox ui:field="architectureListBox" addStyleNames="{style.architectureListBox}" />
-                    </g:FlowPanel>
+                    <ide:TextBox width="100%" height="14px" ui:field="targetName" tabIndex="0"/>
 
                     <g:Label width="100%" text="Host" addStyleNames="{style.label} {style.delimiter}"/>
-                    <g:TextBox width="100%" height="14px" ui:field="host" tabIndex="0"/>
+                    <ide:TextBox width="100%" height="14px" ui:field="host" tabIndex="0"/>
 
                     <g:Label width="100%" text="Port" addStyleNames="{style.label}"/>
-                    <g:TextBox width="100%" height="14px" ui:field="port" tabIndex="0"/>
+                    <ide:TextBox width="100%" height="14px" ui:field="port" tabIndex="0"/>
 
                     <g:Label width="100%" text="Login" addStyleNames="{style.label} {style.delimiter}"/>
                     <g:TextBox width="100%" height="14px" ui:field="userName" tabIndex="0"/>
 
                     <g:Label width="100%" text="Password" addStyleNames="{style.label}"/>
-                    <g:PasswordTextBox width="100%" height="14px" ui:field="password" tabIndex="0"/>
-
-                    <g:FlowPanel ui:field="operationPanel" styleName="{style.operation}" />
+                    <g:PasswordTextBox width="100%" height="18px" ui:field="password" tabIndex="0"/>
 
                     <g:FlowPanel ui:field="footer" styleName="{style.footer}" />
 

@@ -277,7 +277,7 @@ public class EditorAgentImpl implements EditorAgent {
 
         final String newFilePath = oldFilePath.replaceFirst(oldTargetPath, newTargetPath);
 
-        projectService.getItem(appContext.getWorkspace().getId(), newFilePath, new AsyncRequestCallback<ItemReference>(unmarshaller) {
+        projectService.getItem(appContext.getDevMachine(), newFilePath, new AsyncRequestCallback<ItemReference>(unmarshaller) {
             @Override
             protected void onSuccess(ItemReference result) {
                 FileReferenceNode fileReferenceNode = ((FileReferenceNode)editorPart.getEditorInput().getFile());
@@ -496,18 +496,13 @@ public class EditorAgentImpl implements EditorAgent {
     @Nullable
     @Override
     public EditorPartPresenter getLastEditor() {
-        EditorPartPresenter result = null;
-        for (EditorPartPresenter editor : openedEditors) {
-            result = editor;
-        }
-        return result;
+        return openedEditors.isEmpty() ? null : openedEditors.get(openedEditors.size() - 1);
     }
 
     /** {@inheritDoc} */
     @Nullable
     @Override
     public EditorPartPresenter getFirstEditor() {
-        Iterator<EditorPartPresenter> openedEditors = this.openedEditors.iterator();
-        return openedEditors.hasNext() ? openedEditors.next() : null;
+        return openedEditors.isEmpty() ? null : openedEditors.get(0);
     }
 }

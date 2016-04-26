@@ -63,7 +63,6 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
     private final CancelCallback           cancelCallback;
     private final DtoUnmarshallerFactory   factory;
     private final AppContext               appContext;
-    private final String                   workspaceId;
 
     private ProjectConfigDto projectConfig;
 
@@ -86,8 +85,6 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
         this.changeLocationWidget = changeLocationWidget;
         this.factory = factory;
         this.appContext = appContext;
-
-        this.workspaceId = appContext.getWorkspaceId();
 
         this.cancelCallback = new CancelCallback() {
             @Override
@@ -246,7 +243,7 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
     }
 
     private void deleteProject() {
-        projectService.delete(workspaceId, projectConfig.getPath(), new AsyncRequestCallback<Void>() {
+        projectService.delete(appContext.getDevMachine(), projectConfig.getPath(), new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
                 eventBus.fireEvent(new DeleteProjectEvent(projectConfig));
@@ -264,7 +261,7 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
     }
 
     private void updateProject() {
-        projectService.updateProject(workspaceId,
+        projectService.updateProject(appContext.getDevMachine(),
                                      projectConfig.getPath(),
                                      projectConfig,
                                      new AsyncRequestCallback<ProjectConfigDto>(factory.newUnmarshaller(ProjectConfigDto.class)) {

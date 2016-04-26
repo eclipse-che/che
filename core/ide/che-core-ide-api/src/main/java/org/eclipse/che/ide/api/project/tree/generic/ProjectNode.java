@@ -43,7 +43,8 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
                                                                                UpdateTreeNodeDataIterable {
     protected final ProjectServiceClient   projectServiceClient;
     protected final DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    protected final EventBus               eventBus;
+    private final   AppContext             appContext;
+    protected final EventBus eventBus;
 
     private final GenericTreeStructure treeStructure;
     private final String               workspaceId;
@@ -61,6 +62,7 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
         super(parent, data, treeStructure, eventBus);
 
         this.treeStructure = treeStructure;
+        this.appContext = appContext;
         this.eventBus = eventBus;
         this.projectServiceClient = projectService;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -132,7 +134,7 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
     /** {@inheritDoc} */
     @Override
     public void rename(final String newName, final RenameCallback renameCallback) {
-        projectServiceClient.rename(workspaceId, getPath(), newName, null, new AsyncRequestCallback<Void>() {
+        projectServiceClient.rename(appContext.getDevMachine(), getPath(), newName, null, new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
                 final String parentPath = ((StorableNode)getParent()).getPath();
@@ -150,7 +152,7 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
     /** {@inheritDoc} */
     public void updateData(final AsyncCallback<Void> asyncCallback, String newPath) {
         Unmarshallable<ProjectConfigDto> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient.getProject(workspaceId, newPath, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
+        projectServiceClient.getProject(appContext.getDevMachine(), newPath, new AsyncRequestCallback<ProjectConfigDto>(unmarshaller) {
             @Override
             protected void onSuccess(ProjectConfigDto result) {
                 setData(result);
@@ -205,7 +207,7 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
 
     protected void getModules(ProjectConfigDto project, final AsyncCallback<List<ProjectConfigDto>> callback) {
         final Unmarshallable<List<ProjectConfigDto>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient.getModules(workspaceId, project.getPath(), new AsyncRequestCallback<List<ProjectConfigDto>>(unmarshaller) {
+        projectServiceClient.getModules(appContext.getDevMachine(), project.getPath(), new AsyncRequestCallback<List<ProjectConfigDto>>(unmarshaller) {
             @Override
             protected void onSuccess(List<ProjectConfigDto> result) {
                 callback.onSuccess(result);
@@ -252,7 +254,7 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
     /** {@inheritDoc} */
     @Override
     public void delete(final DeleteCallback callback) {
-        projectServiceClient.delete(workspaceId, getPath(), new AsyncRequestCallback<Void>() {
+        projectServiceClient.delete(appContext.getDevMachine(), getPath(), new AsyncRequestCallback<Void>() {
             @Override
             protected void onSuccess(Void result) {
                 if (isRootProject()) {
@@ -283,7 +285,7 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
     protected void getChildren(String path, final AsyncCallback<List<ItemReference>> callback) {
         final List<ItemReference> children = new ArrayList<>();
         final Unmarshallable<List<ItemReference>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(ItemReference.class);
-        projectServiceClient.getChildren(workspaceId, path, new AsyncRequestCallback<List<ItemReference>>(unmarshaller) {
+        projectServiceClient.getChildren(appContext.getDevMachine(), path, new AsyncRequestCallback<List<ItemReference>>(unmarshaller) {
             @Override
             protected void onSuccess(List<ItemReference> result) {
                 final boolean isShowHiddenItems = getTreeStructure().getSettings().isShowHiddenItems();

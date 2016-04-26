@@ -36,7 +36,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 @Deprecated
 public class ModuleConfigProcessor extends AbstractResourceProcessor<ProjectConfigDto> {
 
-    private final String workspaceId;
+    private final AppContext appContext;
 
     @Inject
     public ModuleConfigProcessor(EventBus eventBus,
@@ -44,9 +44,9 @@ public class ModuleConfigProcessor extends AbstractResourceProcessor<ProjectConf
                                  AppContext appContext,
                                  DtoUnmarshallerFactory unmarshallerFactory) {
         super(eventBus, projectServiceClient, unmarshallerFactory);
-
-        workspaceId = appContext.getWorkspace().getId();
+        this.appContext = appContext;
     }
+
 
     @Override
     public Promise<ProjectConfigDto> delete(final HasDataObject<ProjectConfigDto> node) {
@@ -62,7 +62,7 @@ public class ModuleConfigProcessor extends AbstractResourceProcessor<ProjectConf
             return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<ProjectConfigDto>() {
                 @Override
                 public void makeCall(final AsyncCallback<ProjectConfigDto> callback) {
-                    projectService.deleteModule(workspaceId, parentPath, modulePath, new AsyncRequestCallback<Void>() {
+                    projectService.deleteModule(appContext.getDevMachine(), parentPath, modulePath, new AsyncRequestCallback<Void>() {
                         @Override
                         protected void onSuccess(Void result) {
                             callback.onSuccess(node.getData());

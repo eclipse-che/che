@@ -12,7 +12,6 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
@@ -35,20 +34,21 @@ public class DownloadItemAction extends Action {
 
     private final String BASE_URL;
 
-    private final DownloadContainer        downloadContainer;
+    private final AppContext appContext;
+    private final DownloadContainer downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
 
     @Inject
-    public DownloadItemAction(@Named("cheExtensionPath") String extPath,
-                              AppContext appContext,
+    public DownloadItemAction(AppContext appContext,
                               CoreLocalizationConstant locale,
                               DownloadContainer downloadContainer,
                               ProjectExplorerPresenter projectExplorer) {
         super(locale.downloadItemName(), locale.downloadItemDescription());
+        this.appContext = appContext;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
 
-        BASE_URL = extPath + "/project/" + appContext.getWorkspace().getId() + "/export/";
+        BASE_URL = "/project/" + appContext.getWorkspace().getId() + "/export/";
     }
 
     /** {@inheritDoc} */
@@ -88,9 +88,9 @@ public class DownloadItemAction extends Action {
         String path = normalizePath(node.getStorablePath());
 
         if (node instanceof FileReferenceNode) {
-            return BASE_URL + "file/" + path;
+            return appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URL + "file/" + path;
         }
-        return BASE_URL + path;
+        return appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URL + path;
     }
 
     private String normalizePath(String path) {

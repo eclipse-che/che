@@ -14,14 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
+import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateEvent;
-import org.eclipse.che.ide.extension.machine.client.machine.events.MachineStateHandler;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,23 +26,19 @@ import javax.validation.constraints.NotNull;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class DevMachineHostNameProvider implements CommandPropertyValueProvider, MachineStateHandler {
+public class DevMachineHostNameProvider implements CommandPropertyValueProvider, WsAgentStateHandler {
 
     private static final String KEY = "${machine.dev.hostname}";
 
     private final AppContext           appContext;
-    private final MachineServiceClient machineServiceClient;
 
     private String value;
 
     @Inject
-    public DevMachineHostNameProvider(EventBus eventBus, AppContext appContext, MachineServiceClient machineServiceClient) {
+    public DevMachineHostNameProvider(EventBus eventBus, AppContext appContext) {
         this.appContext = appContext;
-        this.machineServiceClient = machineServiceClient;
         this.value = "";
-
-        eventBus.addHandler(MachineStateEvent.TYPE, this);
-        updateValue();
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
     @NotNull
@@ -63,49 +54,15 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
     }
 
     @Override
-    public void onMachineRunning(MachineStateEvent event) {
-        final MachineDto machine = event.getMachine();
-        if (machine.getConfig().isDev()) {
-            machineServiceClient.getMachine(machine.getId()).then(new Operation<MachineDto>() {
-                @Override
-                public void apply(MachineDto machine) throws OperationException {
-                    final String hostName = machine.getRuntime().getProperties().get("config.hostname");
-
-                    if (hostName != null) {
-                        value = hostName;
-                    }
-                }
-            });
+    public void onWsAgentStarted(WsAgentStateEvent event) {
+        String hostName = appContext.getDevMachine().getRuntimeProperties().get("config.hostname");
+        if (hostName != null) {
+            value = hostName;
         }
     }
 
     @Override
-    public void onMachineDestroyed(MachineStateEvent event) {
-        final MachineDto machine = event.getMachine();
-        if (machine.getConfig().isDev()) {
-            value = "";
-        }
-    }
-
-    private void updateValue() {
-        final String devMachineId = appContext.getDevMachineId();
-        if (devMachineId == null) {
-            return;
-        }
-
-        machineServiceClient.getMachine(devMachineId).then(new Operation<MachineDto>() {
-            @Override
-            public void apply(MachineDto arg) throws OperationException {
-                final String hostName = arg.getRuntime().getProperties().get("config.hostname");
-                if (hostName != null) {
-                    value = hostName;
-                }
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                value = "";
-            }
-        });
+    public void onWsAgentStopped(WsAgentStateEvent event) {
+        value = "";
     }
 }

@@ -13,12 +13,12 @@ package org.eclipse.che.ide.ext.debugger.client.configuration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage.DirtyStateListener;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
+import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
@@ -29,10 +29,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Presenter for managing debug configurations.
@@ -42,15 +40,12 @@ import java.util.Set;
 @Singleton
 public class EditDebugConfigurationsPresenter implements EditDebugConfigurationsView.ActionDelegate {
 
-    private final EditDebugConfigurationsView       view;
-    private final DebugConfigurationTypeRegistry    debugConfigurationTypeRegistry;
-    private final DialogFactory                     dialogFactory;
-    private final DebuggerLocalizationConstant      locale;
-    private final CoreLocalizationConstant          coreLocale;
-    private final DebugConfigurationsManager        debugConfigurationsManager;
-    private final Set<ConfigurationChangedListener> configurationChangedListeners;
-    /** Set of the existing configuration names. */
-    private final Set<String>                       configurationNames;
+    private final EditDebugConfigurationsView    view;
+    private final DebugConfigurationTypeRegistry debugConfigurationTypeRegistry;
+    private final DialogFactory                  dialogFactory;
+    private final DebuggerLocalizationConstant   locale;
+    private final CoreLocalizationConstant       coreLocale;
+    private final DebugConfigurationsManager     debugConfigurationsManager;
 
     private DebugConfiguration                         editedConfiguration;
     private String                                     editedConfigurationOriginName;
@@ -69,8 +64,6 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         this.locale = locale;
         this.coreLocale = coreLocale;
         this.debugConfigurationsManager = debugConfigurationsManager;
-        configurationChangedListeners = new HashSet<>();
-        configurationNames = new HashSet<>();
 
         view.setDelegate(this);
     }
@@ -98,25 +91,29 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         updateConfiguration(selectedConfiguration);
 
         fetchConfigurations();
-        fireConfigurationUpdated(selectedConfiguration);
     }
 
-    private void updateConfiguration(final DebugConfiguration selectedConfiguration) {
+    private void updateConfiguration(DebugConfiguration selectedConfiguration) {
         if (editedConfigurationOriginName.trim().equals(selectedConfiguration.getName())) {
-            debugConfigurationsManager.removeConfiguration(selectedConfiguration.getName());
-            debugConfigurationsManager.addConfiguration(selectedConfiguration);
+            debugConfigurationsManager.removeConfiguration(selectedConfiguration);
+            debugConfigurationsManager.createConfiguration(selectedConfiguration.getType().getId(),
+                                                           selectedConfiguration.getName(),
+                                                           selectedConfiguration.getHost(),
+                                                           selectedConfiguration.getPort(),
+                                                           selectedConfiguration.getConnectionProperties());
         } else {
             onNameChanged();
-            //generate a new unique name if input one already exists
-            final String newName = getUniqueConfigurationName(selectedConfiguration.getType(), selectedConfiguration.getName());
 
+            debugConfigurationsManager.removeConfiguration(editedConfiguration);
+            DebugConfiguration conf = debugConfigurationsManager.createConfiguration(selectedConfiguration.getType().getId(),
+                                                                                     selectedConfiguration.getName(),
+                                                                                     selectedConfiguration.getHost(),
+                                                                                     selectedConfiguration.getPort(),
+                                                                                     selectedConfiguration.getConnectionProperties());
             if (selectedConfiguration.equals(view.getSelectedConfiguration())) {
                 //update selected configuration name
-                view.getSelectedConfiguration().setName(newName);
+                view.getSelectedConfiguration().setName(conf.getName());
             }
-
-            debugConfigurationsManager.removeConfiguration(editedConfigurationOriginName);
-            debugConfigurationsManager.addConfiguration(selectedConfiguration);
         }
     }
 
@@ -139,7 +136,7 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
     public void onAddClicked() {
         final DebugConfigurationType selectedType = view.getSelectedConfigurationType();
         if (selectedType != null) {
-            createNewConfiguration(selectedType, null, null);
+            createNewConfiguration(selectedType, null, new HashMap<String, String>());
         }
     }
 
@@ -183,43 +180,14 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
 
     private void createConfiguration(DebugConfigurationType type,
                                      String customName,
-                                     @Nullable Map<String, String> connectionProperties) {
-        final DebugConfiguration conf = new DebugConfiguration(type,
-                                                               getUniqueConfigurationName(type, customName),
-                                                               "localhost",
-                                                               8000,
-                                                               (connectionProperties != null) ? connectionProperties
-                                                                                              : new HashMap<String, String>());
-        debugConfigurationsManager.addConfiguration(conf);
-
+                                     Map<String, String> connectionProperties) {
+        final DebugConfiguration configuration = debugConfigurationsManager.createConfiguration(type.getId(),
+                                                                                                customName,
+                                                                                                "localhost",
+                                                                                                8000,
+                                                                                                connectionProperties);
         fetchConfigurations();
-        fireConfigurationAdded(conf);
-        view.setSelectedConfiguration(conf);
-    }
-
-    private String getUniqueConfigurationName(DebugConfigurationType configurationType, String customName) {
-        final String configurationName;
-
-        if (customName == null || customName.isEmpty()) {
-            configurationName = "Remote " + configurationType.getDisplayName();
-        } else {
-            if (!configurationNames.contains(customName)) {
-                return customName;
-            }
-            configurationName = customName + " copy";
-        }
-
-        if (!configurationNames.contains(configurationName)) {
-            return configurationName;
-        }
-
-        for (int count = 1; count < 1000; count++) {
-            if (!configurationNames.contains(configurationName + "-" + count)) {
-                return configurationName + "-" + count;
-            }
-        }
-
-        return configurationName;
+        view.setSelectedConfiguration(configuration);
     }
 
     @Override
@@ -231,11 +199,10 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         final ConfirmCallback confirmCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                debugConfigurationsManager.removeConfiguration(selectedConfiguration.getName());
+                debugConfigurationsManager.removeConfiguration(selectedConfiguration);
 
                 view.selectNextItem();
                 fetchConfigurations();
-                fireConfigurationRemoved(selectedConfiguration);
             }
         };
 
@@ -283,7 +250,6 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
                 updateConfiguration(editedConfiguration);
 
                 fetchConfigurations();
-                fireConfigurationUpdated(editedConfiguration);
                 handleConfigurationSelection(configuration);
             }
         };
@@ -354,9 +320,7 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         view.setCancelButtonState(false);
         view.setSaveButtonState(false);
 
-        final List<DebugConfiguration> configurationsList = debugConfigurationsManager.readConfigurations();
-
-        configurationNames.clear();
+        final List<DebugConfiguration> configurationsList = debugConfigurationsManager.getConfigurations();
 
         final Map<DebugConfigurationType, List<DebugConfiguration>> categories = new HashMap<>();
 
@@ -365,7 +329,6 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
             for (DebugConfiguration configuration : configurationsList) {
                 if (type.getId().equals(configuration.getType().getId())) {
                     settingsCategory.add(configuration);
-                    configurationNames.add(configuration.getName());
                     if (configuration.getName().equals(originName)) {
                         view.setSelectedConfiguration(configuration);
                     }
@@ -393,40 +356,5 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
             return false;
         }
         return editedPage.isDirty() || !editedConfigurationOriginName.equals(view.getConfigurationName());
-    }
-
-    private void fireConfigurationAdded(DebugConfiguration configuration) {
-        for (ConfigurationChangedListener listener : configurationChangedListeners) {
-            listener.onConfigurationAdded(configuration);
-        }
-    }
-
-    private void fireConfigurationRemoved(DebugConfiguration configuration) {
-        for (ConfigurationChangedListener listener : configurationChangedListeners) {
-            listener.onConfigurationRemoved(configuration);
-        }
-    }
-
-    private void fireConfigurationUpdated(DebugConfiguration configuration) {
-        for (ConfigurationChangedListener listener : configurationChangedListeners) {
-            listener.onConfigurationsUpdated(configuration);
-        }
-    }
-
-    public void addConfigurationsChangedListener(ConfigurationChangedListener listener) {
-        configurationChangedListeners.add(listener);
-    }
-
-    public void removeConfigurationsChangedListener(ConfigurationChangedListener listener) {
-        configurationChangedListeners.remove(listener);
-    }
-
-    /** Listener that will be called when debug configuration changed. */
-    public interface ConfigurationChangedListener {
-        void onConfigurationAdded(DebugConfiguration configuration);
-
-        void onConfigurationRemoved(DebugConfiguration configuration);
-
-        void onConfigurationsUpdated(DebugConfiguration configuration);
     }
 }
