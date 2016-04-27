@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.jdt.rest;
 
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
@@ -33,6 +35,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * @author Evgen Vidolob
@@ -72,6 +76,22 @@ public class JavaNavigationService {
     public List<Jar> getExternalLibraries(@QueryParam("projectpath") String projectPath) throws JavaModelException {
         IJavaProject project = MODEL.getJavaProject(projectPath);
         return navigation.getProjectDependecyJars(project);
+    }
+
+    @GET
+    @Path("find-type")
+    @Produces("application/json")
+    public OpenDeclarationDescriptor findType(@QueryParam("projectpath") String projectPath,
+                                              @QueryParam("fqn") String fqn) throws JavaModelException, ApiException {
+        if (isNullOrEmpty(projectPath)) {
+            throw new BadRequestException("Project path required");
+        }
+        if (isNullOrEmpty(fqn)) {
+            throw new BadRequestException("Fully qualified name required");
+        }
+
+        IJavaProject project = MODEL.getJavaProject(projectPath);
+        return navigation.findType(project, fqn);
     }
 
     /**

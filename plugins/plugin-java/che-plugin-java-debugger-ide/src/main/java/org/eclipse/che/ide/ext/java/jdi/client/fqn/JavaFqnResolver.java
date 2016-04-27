@@ -14,6 +14,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
 import org.eclipse.che.ide.ext.debugger.client.fqn.FqnResolver;
 
 import javax.validation.constraints.NotNull;
@@ -35,6 +36,9 @@ public class JavaFqnResolver implements FqnResolver {
     @NotNull
     @Override
     public String resolveFqn(@NotNull final VirtualFile file) {
+        if (file instanceof JavaFileNode) {
+            return ((JavaFileNode)file).getFqn();
+        }
         final HasProjectConfig projectNode = file.getProject();
         final List<String> sourceFolders = detectSourceFolders(projectNode);
 

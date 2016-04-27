@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.Jar;
@@ -220,6 +221,30 @@ public class JavaNavigation {
             element = element.getParent();
         }
         return null;
+    }
+
+    public OpenDeclarationDescriptor findType(IJavaProject project, String fqn) throws JavaModelException, NotFoundException {
+        IType type = project.findType(fqn);
+
+        if (type == null) {
+            throw new NotFoundException("Type with fully qualified name: " + fqn + " was not found");
+        }
+
+        OpenDeclarationDescriptor dto = DtoFactory.getInstance().createDto(OpenDeclarationDescriptor.class);
+
+        if (type.isBinary()) {
+            IClassFile classFile = type.getClassFile();
+
+            dto.setPath(classFile.getType().getFullyQualifiedName());
+            dto.setLibId(classFile.getAncestor(IPackageFragmentRoot.PACKAGE_FRAGMENT_ROOT).hashCode());
+            dto.setBinary(true);
+        } else {
+            ICompilationUnit compilationUnit = type.getCompilationUnit();
+
+            dto.setPath(compilationUnit.getPath().toOSString());
+            dto.setBinary(false);
+        }
+        return dto;
     }
 
     public List<Jar> getProjectDependecyJars(IJavaProject project) throws JavaModelException {

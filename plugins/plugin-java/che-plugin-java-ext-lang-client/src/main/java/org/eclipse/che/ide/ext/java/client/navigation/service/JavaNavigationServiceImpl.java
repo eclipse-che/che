@@ -68,6 +68,13 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
         requestFactory.createGetRequest(url).send(callback);
     }
 
+    @Override
+    public Promise<OpenDeclarationDescriptor> findDeclaration(String projectPath, String fqn) {
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/" + workspaceId + "/navigation/find-type?projectpath=" +
+                     projectPath + "&fqn=" + fqn;
+        return requestFactory.createGetRequest(url).send(unmarshallerFactory.newUnmarshaller(OpenDeclarationDescriptor.class));
+    }
+
     public void getExternalLibraries(String projectPath, AsyncRequestCallback<List<Jar>> callback) {
         String url =
                 appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/" + workspaceId + "/navigation/libraries?projectpath=" + projectPath;

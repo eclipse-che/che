@@ -40,6 +40,15 @@ public interface JavaNavigationService {
     void findDeclaration(String projectPath, String fqn, int offset, AsyncRequestCallback<OpenDeclarationDescriptor> callback);
 
     /**
+     * Find java type declaration for project with {@code projectPath} and {@code fqn}
+     *
+     * @param projectPath
+     *         path to the project
+     * @param fqn fully qualified name of java type
+     */
+    Promise<OpenDeclarationDescriptor> findDeclaration(String projectPath, String fqn);
+
+    /**
      * Receive all jar dependency's
      *
      * @param projectPath
