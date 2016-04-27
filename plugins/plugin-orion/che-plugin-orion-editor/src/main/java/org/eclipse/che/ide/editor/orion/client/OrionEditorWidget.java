@@ -354,7 +354,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         if (!changeHandlerAdded) {
             changeHandlerAdded = true;
             final OrionTextViewOverlay textView = this.editorOverlay.getTextView();
-            textView.addEventListener(OrionEventContants.MODEL_CHANGED_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
+            textView.addEventListener(OrionEventConstants.MODEL_CHANGED_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
 
                 @Override
                 public void onEvent() {
@@ -374,7 +374,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         if (!cursorHandlerAdded) {
             cursorHandlerAdded = true;
             final OrionTextViewOverlay textView = this.editorOverlay.getTextView();
-            textView.addEventListener(OrionEventContants.SELECTION_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
+            textView.addEventListener(OrionEventConstants.SELECTION_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
 
                 @Override
                 public void onEvent() {
@@ -394,7 +394,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         if (!focusHandlerAdded) {
             focusHandlerAdded = true;
             final OrionTextViewOverlay textView = this.editorOverlay.getTextView();
-            textView.addEventListener(OrionEventContants.FOCUS_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
+            textView.addEventListener(OrionEventConstants.FOCUS_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
 
                 @Override
                 public void onEvent() {
@@ -414,7 +414,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         if (!blurHandlerAdded) {
             blurHandlerAdded = true;
             final OrionTextViewOverlay textView = this.editorOverlay.getTextView();
-            textView.addEventListener(OrionEventContants.BLUR_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
+            textView.addEventListener(OrionEventConstants.BLUR_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
 
                 @Override
                 public void onEvent() {
@@ -434,7 +434,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         if (!scrollHandlerAdded) {
             scrollHandlerAdded = true;
             final OrionTextViewOverlay textView = this.editorOverlay.getTextView();
-            textView.addEventListener(OrionEventContants.SCROLL_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
+            textView.addEventListener(OrionEventConstants.SCROLL_EVENT, new OrionTextViewOverlay.EventHandlerNoParameter() {
 
                 @Override
                 public void onEvent() {
@@ -619,7 +619,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     public HandlerRegistration addGutterClickHandler(final GutterClickHandler handler) {
         if (!gutterClickHandlerAdded) {
             gutterClickHandlerAdded = true;
-            orionLineNumberRuler.addEventListener(OrionEventContants.RULER_CLICK_EVENT,
+            orionLineNumberRuler.addEventListener(OrionEventConstants.RULER_CLICK_EVENT,
                                                   new OrionExtRulerOverlay.EventHandler<OrionRulerClickEventOverlay>() {
                                                       @Override
                                                       public void onEvent(OrionRulerClickEventOverlay parameter) {

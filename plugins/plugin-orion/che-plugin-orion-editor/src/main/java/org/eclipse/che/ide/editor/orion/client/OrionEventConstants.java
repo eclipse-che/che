@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
-public interface OrionEventContants {
+public interface OrionEventConstants {
 
     /* not complete atm */
     String MODEL_CHANGED_EVENT = "ModelChanged";
