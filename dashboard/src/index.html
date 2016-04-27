@@ -54,7 +54,7 @@
     <che-nav-bar id="chenavbar" ></che-nav-bar>
   </md-sidenav>
   <div class="main-page ide-show" layout="column" flex ng-show="waitingLoaded && !showIDE">
-    <div role="main" ng-view layout="column" flex>
+    <div id="main-content" role="main" ng-view layout="column" flex>
     </div>
     <che-footer che-logo="{{branding.logoURL}}" che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Eclipse Che"></che-footer>
   </div>

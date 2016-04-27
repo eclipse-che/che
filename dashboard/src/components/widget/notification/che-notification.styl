@@ -1,16 +1,30 @@
+div#che-notification-container
+  position fixed
+  margin-right 20px
+  z-index 1000
+  top 20px
+
 md-toast.che-notification-info,
 md-toast.che-notification-error
-  transition-delay:0s
+  transition-delay 0s
+  transition .3s
   box-shadow-simple()
   che-border-radius(2px)
   width 588px
   max-height 288px
-  top 35px
-  bottom auto
-  right 20px
+  position relative
+  margin-bottom 5px
   left inherit
   background-color #ffffff
   border-color $night-foggy-sky-color
+
+md-toast.hide-notification
+  box-shadow none
+  overflow hidden
+  max-height 0
+  opacity 0
+  padding 0
+  margin 0
 
 md-toast.che-notification-info div,
 md-toast.che-notification-error div

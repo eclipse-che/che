@@ -55,6 +55,8 @@ import {CheToggleCtrl} from './toggle-button/che-toggle.controller';
 import {CheToggleButton} from './toggle-button/che-toggle-button.directive';
 import {CheToggle} from './toggle-button/che-toggle.directive';
 import {CheToolbar} from './toolbar/che-toolbar.directive';
+import {CheErrorNotification} from './notification/che-error-notification.directive';
+import {CheInfoNotification} from './notification/che-info-notification.directive';
 
 
 export class WidgetConfig {
@@ -125,7 +127,10 @@ export class WidgetConfig {
       .directive('cheToggleButton', CheToggleButton)
       .directive('cheToggle', CheToggle)
 
-      .directive('cheToolbar', CheToolbar);
+      .directive('cheToolbar', CheToolbar)
+    //notifications
+      .directive('cheErrorNotification', CheErrorNotification)
+      .directive('cheInfoNotification', CheInfoNotification)
 
   }
 }
