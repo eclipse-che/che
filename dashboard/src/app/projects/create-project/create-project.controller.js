@@ -875,37 +875,31 @@ export class CreateProjectCtrl {
    * @param workspace workspace for listening status
    */
   subscribeStatusChannel(workspace) {
-    let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
-    // subscribe to workspace events
-    let workspaceChannel = 'workspace:' + workspace.id;
-    this.listeningChannels.push(workspaceChannel);
-    bus.subscribe(workspaceChannel, (message) => {
-      if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-        this.createProjectSvc.setCurrentProgressStep(2);
-        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-        // need to show the error
-        this.$mdDialog.show(
-          this.$mdDialog.alert()
-            .title('Error when starting agent')
-            .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
-            .ariaLabel('Workspace agent start')
-            .ok('OK')
-        );
-      }
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then(() => {
+      this.createProjectSvc.setCurrentProgressStep(2);
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+      // need to show the error
+      this.$mdDialog.show(
+        this.$mdDialog.alert()
+          .title('Error when starting agent')
+          .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
+          .ariaLabel('Workspace agent start')
+          .ok('OK')
+      );
+    });
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'RUNNING').then(() => {
+      this.createProjectSvc.setCurrentProgressStep(2);
 
-      if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id) {
-        this.createProjectSvc.setCurrentProgressStep(2);
+      this.importProjectData.project.name = this.projectName;
 
-        this.importProjectData.project.name = this.projectName;
-
-        let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
-        promiseWorkspace.then(() => {
-          let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
-          // try to connect
-          this.websocketReconnect = 10;
-          this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
-        });
-      }
+      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+      promiseWorkspace.then(() => {
+        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id),
+          bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+        // try to connect
+        this.websocketReconnect = 10;
+        this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
+      });
     });
   }
 
@@ -923,7 +917,9 @@ export class CreateProjectCtrl {
         this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
       }
 
-      this.subscribeStatusChannel(workspace);
+      this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
+        this.subscribeStatusChannel(workspace);
+      });
 
       this.$timeout(() => {
         let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
