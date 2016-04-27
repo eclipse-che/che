@@ -12,10 +12,8 @@ package org.eclipse.che.api.local;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.name.Names;
 
 import org.eclipse.che.api.auth.AuthenticationDao;
-import org.eclipse.che.api.core.rest.permission.PermissionManager;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
@@ -48,8 +46,6 @@ public class LocalInfrastructureModule extends AbstractModule {
         bind(RecipeDao.class).to(LocalRecipeDaoImpl.class);
         bind(StackDao.class).to(LocalStackDaoImpl.class);
         bind(LocalStorageFactory.class);
-        bind(PermissionManager.class).annotatedWith(Names.named("service.workspace.permission_manager"))
-                                     .to(LocalWorkspacePermissionManager.class);
     }
 
 

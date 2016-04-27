@@ -25,6 +25,11 @@ public interface User {
         }
 
         @Override
+        public boolean hasPermission(String domain, String instance, String action) {
+            return false;
+        }
+
+        @Override
         public String getToken() {
             return null;
         }
@@ -51,6 +56,13 @@ public interface User {
      * @return {@code true} if user in role and {@code false} otherwise
      */
     boolean isMemberOf(String role);
+
+    /**
+     * Check does user have specified permission.
+     *
+     * @return {@code true} if user has permission to perform given action and {@code false} otherwise
+     */
+    boolean hasPermission(String domain, String instance, String action);
 
     /**
      * Get user auth token to be able to execute request as user
