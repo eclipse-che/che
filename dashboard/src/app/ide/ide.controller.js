@@ -125,23 +125,22 @@ class IdeCtrl {
     for (var i = 0; i < this.workspaces.length; i++) {
       if (this.workspaces[i].config.name === this.selectedWorkspaceName) {
         this.selectedWorkspace = this.workspaces[i];
-        this.ideSvc.setSelectedWorkspace(this.selectedWorkspace);
       }
     }
 
     if (this.selectedWorkspace) {
-      if (this.ideSvc.getPreventRedirection() && 'STARTING' === this.selectedWorkspace.status) {
+      if (this.ideSvc.getPreventRedirection()) {
         this.$rootScope.hideIdeLoader = false;
         this.ideLoaderSvc.addLoader();
       } else if ('RUNNING' === this.selectedWorkspace.status) {
         this.ideSvc.setPreventRedirection(false);
         this.ideSvc.init();
-        this.ideSvc.openIde();
+        this.ideSvc.openIde(this.selectedWorkspace.id);
       } else if ('STOPPED' === this.selectedWorkspace.status) {
         this.$rootScope.hideIdeLoader = false;
         this.$rootScope.hideLoader = true;
         this.ideSvc.init();
-        this.ideSvc.startIde();
+        this.ideSvc.startIde(this.selectedWorkspace);
       }
     } else {
       this.$rootScope.hideIdeLoader = true;

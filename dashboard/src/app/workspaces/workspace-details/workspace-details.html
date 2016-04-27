@@ -41,15 +41,15 @@
 
             </div>
           </div>
-          <div layout="row">
+          <div layout="row" flex>
             <che-label-container flex layout="row" che-label-name="State">
               <div layout="row">
                 <workspace-status-indicator che-status="workspaceDetailsCtrl.getWorkspaceStatus()"
                                             layout-align="start start"></workspace-status-indicator>
                 <che-link che-link-text="Show more"
-                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}?showLogs" che-no-padding-
+                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}?showLogs"
                           layout-align="end start"
-                          ng-show="(workspaceDetailsCtrl.showShowMore === true && workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING')"></che-link>
+                          ng-show="(workspaceDetailsCtrl.showShowMore === true && (workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'ERROR'))"></che-link>
               </div>
             </che-label-container>
             <div flex="none" flex-offset="5" layout="column" layout-align="end end">
@@ -63,6 +63,18 @@
                                   ng-click="workspaceDetailsCtrl.stopWorkspace()"></che-button-default>
             </div>
           </div>
+          <div layout="row" flex
+               ng-show="workspaceDetailsCtrl.errorMessage">
+            <div flex>
+              <div flex flex-offset="15">
+                <div class="workspace-details-description workspace-details-error-message">
+                  {{workspaceDetailsCtrl.errorMessage}}
+                </div>
+              </div>
+            </div>
+            <div flex="none" flex-offset="5">
+              <div class="workspace-details-error-message-alignment"></div>
+            </div>
           </div>
         </che-panel>
         <export-workspace workspace-id="{{workspaceDetailsCtrl.workspaceId}}"
@@ -74,7 +86,7 @@
             </label>
             <div layout="column" flex="85">
               <che-button-danger che-button-title="Delete"
-                                 ng-disabled="!(workspaceDetailsCtrl.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'STOPPED')"
+                                 ng-disabled="!(workspaceDetailsCtrl.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'STOPPED' || workspaceDetailsCtrl.getWorkspaceStatus() === 'ERROR')"
                                  ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"></che-button-danger>
             </div>
           </div>
