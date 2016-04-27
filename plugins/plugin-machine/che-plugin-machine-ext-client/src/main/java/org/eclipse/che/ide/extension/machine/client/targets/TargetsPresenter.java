@@ -651,6 +651,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
+                eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
                 notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
                 new Timer() {
                     @Override
