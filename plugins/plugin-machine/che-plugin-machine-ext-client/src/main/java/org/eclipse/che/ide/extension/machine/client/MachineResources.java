@@ -95,11 +95,6 @@ public interface MachineResources extends ClientBundle {
         /** Returns the CSS class name for 'Machine' console toolbar. */
         String consoleToolbar();
 
-        String commandConsole();
-
-        /** Style for console scrollable area */
-        String commandConsoleLines();
-
         /** Returns the CSS class name for tab-panel in 'Outputs' console. */
         String outputsConsoleTabsPanel();
 
@@ -170,10 +165,6 @@ public interface MachineResources extends ClientBundle {
         String processNavigation();
 
         String processOutputPanel();
-
-        String processHeaderTitle();
-
-        String processCommandValue();
 
         /** Returns the CSS class name for close button of process in 'Consoles' panel. */
         String processesPanelCloseButtonForProcess();
