@@ -303,6 +303,8 @@ class IdeSvc {
     let appendUrl = '?uid=' + randVal;
 
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+    this.lastWorkspace = workspace;
+
     let contextPath = '';
     let selfLink = this.getHrefLink(workspace, 'self link');
     let ideUrlLink = this.getHrefLink(workspace, 'ide url');
