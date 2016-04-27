@@ -11,35 +11,24 @@
 package org.eclipse.che.ide.jseditor.client.preference.keymaps;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
-import org.eclipse.che.ide.jseditor.client.keymap.KeymapValuesHolder;
+
+import java.util.List;
 
 /** View interface for the preference page for the editor keymap selection. */
 public interface KeymapsPreferenceView extends View<KeymapsPreferenceView.ActionDelegate> {
 
-    /**
-     * Sets the holder for selected keymap values.
-     *
-     * @param valuesHolder holder for keymaps
-     */
-    void setKeymapValuesHolder(KeymapValuesHolder valuesHolders);
-
-    /**
-     * Refreshes the view.
-     */
-    void refresh();
+    void setKeyBindings(List<Keymap> availableKeyBindings, Keymap currentKeyBinding);
 
     /** Action delegate for the keymap preference view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
 
         /**
-         * Action triggered when an keymap is selected for an editor type.
+         * Action triggered when an keymap is selected.
          *
-         * @param editorType the editor type
-         * @param keymap the new keymap
+         * @param keymap
+         *         the new keymap
          */
-        void editorKeymapChanged(EditorType editorType, Keymap keymap);
+        void onKeyBindingSelected(Keymap keymap);
     }
-
 }

@@ -37,7 +37,7 @@ public class AppearancePresenter extends AbstractPreferencePagePresenter impleme
                                CoreLocalizationConstant constant,
                                ThemeAgent themeAgent,
                                PreferencesManager preferencesManager) {
-        super(constant.appearanceTitle(), constant.appearanceCategory(), null);
+        super(constant.appearanceTitle(), constant.appearanceCategory());
         this.view = view;
         this.themeAgent = themeAgent;
         this.preferencesManager = preferencesManager;

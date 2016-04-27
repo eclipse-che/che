@@ -59,7 +59,7 @@ public class CredentialsPreferencesPresenter extends AbstractPreferencePagePrese
                                            CredentialsDialogFactory credentialsDialogFactory,
                                            AppContext appContext,
                                            DialogFactory dialogFactory) {
-        super(locale.dockerPreferencesTitle(), locale.dockerPreferencesCategory(), null);
+        super(locale.dockerPreferencesTitle(), locale.dockerPreferencesCategory());
         this.view = view;
         this.view.setDelegate(this);
         this.userProfileServiceClient = userProfileServiceClient;

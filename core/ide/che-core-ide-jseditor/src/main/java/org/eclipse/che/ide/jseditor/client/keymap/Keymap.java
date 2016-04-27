@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.keymap;
 
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Value object for keymaps.
@@ -30,16 +28,13 @@ public class Keymap {
     private final String     keymapKey;
     /** The name displayed to a user. */
     private final String     displayString;
-    private final EditorType editorType;
-
 
     /** The already built instances. */
     private static final Map<String, Keymap> instances = new HashMap<>();
 
-    private Keymap(final String key, final String displayString, final EditorType editorType) {
+    private Keymap(final String key, final String displayString) {
         this.keymapKey = key;
         this.displayString = displayString;
-        this.editorType = editorType;
     }
 
     /**
@@ -58,15 +53,6 @@ public class Keymap {
      */
     public String getDisplay() {
         return this.displayString;
-    }
-
-    /**
-     * Returns the editor type wjich the keymap is associated with.
-     *
-     * @return the editor type
-     */
-    public EditorType getEditorType() {
-        return this.editorType;
     }
 
     /**
@@ -91,26 +77,21 @@ public class Keymap {
      *         the key (must not already exist)
      * @param displayString
      *         the name displayed to a user
-     * @param editorType
-     *         the editor type this keymap is linked to
      * @return a new keymap instance
      */
-    public static Keymap newKeymap(final String key, final String displayString, final EditorType editorType) {
+    public static Keymap newKeymap(final String key, final String displayString) {
         if (key == null) {
             throw new IllegalArgumentException("Keymap key can't be null");
         }
         if (displayString == null) {
             throw new IllegalArgumentException("Keymap display string can't be null");
         }
-        if (editorType == null) {
-            throw new IllegalArgumentException("Keymap editor can't be null");
-        }
         if (fromKey(key) != null) {
             throw new RuntimeException("Keymap with key " + key + " already exists");
         }
 
-        Log.debug(Keymap.class, "Creation of new keymap " + key + " for editor type " + editorType);
-        Keymap keymap = new Keymap(key, displayString, editorType);
+        Log.debug(Keymap.class, "Creation of new keymap " + key);
+        Keymap keymap = new Keymap(key, displayString);
         instances.put(key, keymap);
         return keymap;
     }
@@ -122,26 +103,6 @@ public class Keymap {
      */
     public static List<Keymap> getInstances() {
         return new ArrayList<>(instances.values());
-    }
-
-    /**
-     * Return all instances of {@link Keymap} assicoated with the given editor type.
-     *
-     * @param editorType
-     *         the editor type
-     * @return keymaps for this editor type
-     */
-    public static List<Keymap> getInstances(final EditorType editorType) {
-        if (editorType == null) {
-            return null;
-        }
-        final List<Keymap> result = new ArrayList<>();
-        for (final Keymap keymap : instances.values()) {
-            if (editorType.equals(keymap.getEditorType())) {
-                result.add(keymap);
-            }
-        }
-        return result;
     }
 
     @Override

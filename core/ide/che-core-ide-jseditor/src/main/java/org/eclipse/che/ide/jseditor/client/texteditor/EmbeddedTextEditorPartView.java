@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionsSource;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
 
@@ -63,12 +62,11 @@ public interface EmbeddedTextEditorPartView extends RequiresResize,
     /**
      * Sets the initial state of the info panel.
      * @param mode the file mode
-     * @param editorType the editor implementation
      * @param keymap the current keymap
      * @param lineCount the number of lines
      * @param tabSize the tab size in this editor
      */
-    void initInfoPanel(String mode, EditorType editorType, Keymap keymap, int lineCount, int tabSize);
+    void initInfoPanel(String mode, Keymap keymap, int lineCount, int tabSize);
 
     /**
      * Update the location displayed in the info panel.

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.preferences;
 
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 /**
  * Abstract base implementation for all preference page implementations.
  * It's simpler to get started using Preferences.
@@ -29,60 +27,36 @@ public abstract class AbstractPreferencePagePresenter implements PreferencePageP
 
     private String category;
 
-    private SVGResource icon;
-
     /**
      * Create preference page.
      *
      * @param title
      * @param category
-     * @param icon
      */
-    public AbstractPreferencePagePresenter(String title, String category, SVGResource icon) {
+    public AbstractPreferencePagePresenter(String title, String category) {
         this.title = title;
         this.category = category;
-        this.icon = icon;
     }
 
     /**
      * Create preference page with a default category for grouping elements.
      *
      * @param title
-     * @param icon
-     */
-    public AbstractPreferencePagePresenter(String title, SVGResource icon) {
-        this(title, DEFAULT_CATEGORY, icon);
-    }
-
-
-    /**
-     * Create preference page.
-     *
-     * @param title
      */
     public AbstractPreferencePagePresenter(String title) {
-        this(title, DEFAULT_CATEGORY, null);
+        this(title, DEFAULT_CATEGORY);
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setUpdateDelegate(DirtyStateListener delegate) {
         this.delegate = delegate;
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getTitle() {
         return title;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public SVGResource getIcon() {
-        return icon;
-    }
-
-    /** {@inheritDoc} */
     @Override
     public String getCategory() {
         return category;

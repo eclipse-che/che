@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.debug.BreakpointManager;
 import org.eclipse.che.ide.debug.BreakpointRenderer;
 import org.eclipse.che.ide.jseditor.client.JsEditorConstants;
-import org.eclipse.che.ide.jseditor.client.JsEditorExtension;
 import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistant;
 import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistantFactory;
 import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistantImpl;
@@ -30,17 +29,11 @@ import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererFactory;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererImpl;
 import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
 import org.eclipse.che.ide.jseditor.client.document.DocumentStorage;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorTypeRegistry;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorTypeRegistryImpl;
 import org.eclipse.che.ide.jseditor.client.filetype.FileTypeIdentifier;
 import org.eclipse.che.ide.jseditor.client.filetype.MultipleMethodFileIdentifier;
 import org.eclipse.che.ide.jseditor.client.infopanel.InfoPanel;
 import org.eclipse.che.ide.jseditor.client.partition.DocumentPositionMap;
 import org.eclipse.che.ide.jseditor.client.partition.DocumentPositionMapImpl;
-import org.eclipse.che.ide.jseditor.client.prefmodel.DefaultEditorTypePrefReader;
-import org.eclipse.che.ide.jseditor.client.prefmodel.EditorPreferenceReader;
-import org.eclipse.che.ide.jseditor.client.prefmodel.KeymapPrefReader;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistAssistantImpl;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistWidgetFactory;
@@ -53,8 +46,6 @@ import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView
 import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartViewImpl;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @ExtensionGinModule
@@ -72,14 +63,6 @@ public class JsEditorGinModule extends AbstractGinModule {
 
         // Bind the file type identifier
         bind(FileTypeIdentifier.class).to(MultipleMethodFileIdentifier.class);
-
-        // editor registration
-        bind(EditorTypeRegistry.class).to(EditorTypeRegistryImpl.class).in(Singleton.class);
-
-        // bind the components that read/write editor preferences
-        bind(EditorPreferenceReader.class);
-        bind(DefaultEditorTypePrefReader.class);
-        bind(KeymapPrefReader.class);
 
         // bind the document storage
         bind(DocumentStorage.class);
@@ -115,14 +98,6 @@ public class JsEditorGinModule extends AbstractGinModule {
         // bind the quick assist widget factory
         install(new GinFactoryModuleBuilder()
                         .build(QuickAssistWidgetFactory.class));
-    }
-
-    // no real need to make it a singleton, it's a simple instantiation
-    @Provides
-    @Named(JsEditorExtension.DEFAULT_EDITOR_TYPE_INSTANCE)
-    @Inject
-    protected EditorType defaultEditorType(final @Named(JsEditorExtension.DEFAULT_EDITOR_TYPE_INJECT_NAME) String defaultEditorKey) {
-        return EditorType.fromKey(defaultEditorKey);
     }
 
     @Provides

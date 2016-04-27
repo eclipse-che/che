@@ -21,21 +21,16 @@ public class KeymapChangeEvent extends GwtEvent<KeymapChangeHandler> {
     /** Type instance for the event. */
     public static final Type<KeymapChangeHandler> TYPE = new Type<>();
 
-    /** The key of the editor type. */
-    private final String editorTypeKey;
     /** The key of the new keymap. */
     private final String keymapKey;
 
     /**
      * Creates a new keymap change event
      *
-     * @param editorTypeKey
-     *         the editor type which had a keymap change
      * @param keymapKey
      *         the new keymap
      */
-    public KeymapChangeEvent(final String editorTypeKey, final String keymapKey) {
-        this.editorTypeKey = editorTypeKey;
+    public KeymapChangeEvent(final String keymapKey) {
         this.keymapKey = keymapKey;
     }
 
@@ -50,15 +45,6 @@ public class KeymapChangeEvent extends GwtEvent<KeymapChangeHandler> {
     }
 
     /**
-     * Returns the editor type.
-     *
-     * @return the editor type
-     */
-    public String getEditorTypeKey() {
-        return editorTypeKey;
-    }
-
-    /**
      * Returns the keymap key.
      *
      * @return the keymap key
@@ -66,5 +52,4 @@ public class KeymapChangeEvent extends GwtEvent<KeymapChangeHandler> {
     public String getKeymapKey() {
         return keymapKey;
     }
-
 }

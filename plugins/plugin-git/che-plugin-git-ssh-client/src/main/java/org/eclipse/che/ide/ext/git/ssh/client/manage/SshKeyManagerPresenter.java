@@ -67,7 +67,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                   NotificationManager notificationManager,
                                   DialogFactory dialogFactory,
                                   GitSshKeyUploaderRegistry registry) {
-        super(constant.sshManagerTitle(), constant.sshManagerCategory(), null);
+        super(constant.sshManagerTitle(), constant.sshManagerCategory());
 
         this.view = view;
         this.appContext = appContext;

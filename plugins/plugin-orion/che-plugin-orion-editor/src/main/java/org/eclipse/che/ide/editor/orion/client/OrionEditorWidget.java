@@ -40,6 +40,7 @@ import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
 import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
+import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.text.Position;
 import org.eclipse.che.ide.api.text.Region;
 import org.eclipse.che.ide.api.text.RegionImpl;
@@ -70,7 +71,6 @@ import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModelEvent;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionProposal;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionReadyCallback;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionsSource;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.jseditor.client.events.CursorActivityEvent;
 import org.eclipse.che.ide.jseditor.client.events.CursorActivityHandler;
 import org.eclipse.che.ide.jseditor.client.events.GutterClickEvent;
@@ -89,7 +89,7 @@ import org.eclipse.che.ide.jseditor.client.keymap.KeymapChangeHandler;
 import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
 import org.eclipse.che.ide.jseditor.client.preference.editorproperties.EditorPropertiesManager;
-import org.eclipse.che.ide.jseditor.client.prefmodel.KeymapPrefReader;
+import org.eclipse.che.ide.jseditor.client.preference.keymaps.KeyMapsPreferencePresenter;
 import org.eclipse.che.ide.jseditor.client.requirejs.ModuleHolder;
 import org.eclipse.che.ide.jseditor.client.text.TextRange;
 import org.eclipse.che.ide.jseditor.client.texteditor.CompositeEditorWidget;
@@ -129,9 +129,9 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     private final EventBus                   eventBus;
     private final KeyModeInstances           keyModeInstances;
     private final JavaScriptObject           uiUtilsOverlay;
-    private final KeymapPrefReader           keymapPrefReader;
     private final ContentAssistWidgetFactory contentAssistWidgetFactory;
     private final DialogFactory              dialogFactory;
+    private final PreferencesManager preferencesManager;
 
     @UiField
     SimplePanel        panel;
@@ -169,11 +169,11 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     public OrionEditorWidget(final ModuleHolder moduleHolder,
                              final KeyModeInstances keyModeInstances,
                              final EventBus eventBus,
-                             final KeymapPrefReader keymapPrefReader,
                              final EditorPropertiesManager editorPropertiesManager,
                              final Provider<OrionKeyBindingModule> keyBindingModuleProvider,
                              final ContentAssistWidgetFactory contentAssistWidgetFactory,
                              final DialogFactory dialogFactory,
+                             final PreferencesManager preferencesManager,
                              @Assisted final List<String> editorModes,
                              @Assisted final WidgetInitializedCallback widgetInitializedCallback) {
         this.keyBindingModuleProvider = keyBindingModuleProvider;
@@ -182,9 +182,9 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         this.keyModeInstances = keyModeInstances;
         this.eventBus = eventBus;
         this.dialogFactory = dialogFactory;
+        this.preferencesManager = preferencesManager;
         initWidget(UIBINDER.createAndBindUi(this));
 
-        this.keymapPrefReader = keymapPrefReader;
         this.editorPropertiesManager = editorPropertiesManager;
 
         this.codeEditWidgetModule = moduleHolder.getModule("CodeEditWidget").cast();
@@ -450,7 +450,8 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     }
 
     private void setupKeymode() {
-        final String propertyValue = this.keymapPrefReader.readPref(OrionEditorExtension.ORION_EDITOR_KEY);
+        final String propertyValue = preferencesManager.getValue(KeyMapsPreferencePresenter.KEYMAP_PREF_KEY);
+
         Keymap keymap;
         try {
             keymap = Keymap.fromKey(propertyValue);
@@ -459,11 +460,6 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
             return;
         }
         selectKeyMode(keymap);
-    }
-
-    @Override
-    public EditorType getEditorType() {
-        return EditorType.getInstance(OrionEditorExtension.ORION_EDITOR_KEY);
     }
 
     @Override

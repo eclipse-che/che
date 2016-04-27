@@ -24,7 +24,7 @@ import javax.inject.Inject;
 public class EditorPreferenceViewImpl extends Composite implements EditorPreferenceView {
 
     /** The UI binder instance. */
-    private static final EditorTypePreferenceViewImplUiBinder UIBINDER = GWT.create(EditorTypePreferenceViewImplUiBinder.class);
+    private static final EditorPreferenceViewImplUiBinder UIBINDER = GWT.create(EditorPreferenceViewImplUiBinder.class);
 
     @UiField
     SimplePanel keymapsSection;
@@ -47,6 +47,6 @@ public class EditorPreferenceViewImpl extends Composite implements EditorPrefere
     }
 
     /** UI binder interface for the {@link EditorPreferenceViewImpl} component. */
-    interface EditorTypePreferenceViewImplUiBinder extends UiBinder<ScrollPanel, EditorPreferenceViewImpl> {
+    interface EditorPreferenceViewImplUiBinder extends UiBinder<ScrollPanel, EditorPreferenceViewImpl> {
     }
 }

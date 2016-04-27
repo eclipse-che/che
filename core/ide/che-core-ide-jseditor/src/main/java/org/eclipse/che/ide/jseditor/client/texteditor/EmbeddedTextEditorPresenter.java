@@ -811,7 +811,6 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
 
             // initialize info panel
             editorView.initInfoPanel(editorWidget.getMode(),
-                                     editorWidget.getEditorType(),
                                      editorWidget.getKeymap(),
                                      document.getLineCount(),
                                      configuration.getTabWidth());

@@ -28,7 +28,6 @@ import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.jseditor.client.codeassist.AdditionalInfoCallback;
 import org.eclipse.che.ide.jseditor.client.codeassist.AdditionalInformationWidget;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionsSource;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.jseditor.client.events.CursorActivityEvent;
 import org.eclipse.che.ide.jseditor.client.events.CursorActivityHandler;
 import org.eclipse.che.ide.jseditor.client.infopanel.InfoPanel;
@@ -146,9 +145,9 @@ public class EmbeddedTextEditorPartViewImpl extends Composite implements Embedde
     }
 
     @Override
-    public void initInfoPanel(final String mode, final EditorType editorType, final Keymap keymap,
+    public void initInfoPanel(final String mode, final Keymap keymap,
                               final int lineCount, final int tabSize) {
-        this.infoPanel.createDefaultState(mode, editorType, keymap, lineCount, tabSize);
+        this.infoPanel.createDefaultState(mode, keymap, lineCount, tabSize);
     }
 
     @Override

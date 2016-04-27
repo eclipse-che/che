@@ -13,15 +13,10 @@ package org.eclipse.che.ide.jseditor.client.defaulteditor;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.jseditor.client.JsEditorExtension;
 import org.eclipse.che.ide.jseditor.client.editorconfig.AutoSaveTextEditorConfiguration;
 import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorTypeRegistry;
 import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
 import org.eclipse.che.ide.util.loging.Log;
-
-import javax.inject.Named;
 
 /**
  * This class provides an abstract implementation of the {@link EditorProvider}
@@ -39,11 +34,7 @@ import javax.inject.Named;
 public abstract class AbstractEditorProvider implements EditorProvider {
 
     @Inject
-    private EditorTypeRegistry editorTypeRegistry;
-
-    @Inject
-    @Named(JsEditorExtension.DEFAULT_EDITOR_TYPE_INSTANCE)
-    private EditorType defaultEditorType;
+    private EditorBuilder editorBuilder;
 
     /** Returns configuration for initializing an editor returned by {@link #getEditor()} method. */
     protected TextEditorConfiguration getEditorConfiguration() {
@@ -52,13 +43,12 @@ public abstract class AbstractEditorProvider implements EditorProvider {
 
     @Override
     public ConfigurableTextEditor getEditor() {
-        EditorBuilder builder = editorTypeRegistry.getRegisteredBuilder(defaultEditorType);
-        if (builder == null) {
+        if (editorBuilder == null) {
             Log.debug(AbstractEditorProvider.class, "No builder registered for default editor type - giving up.");
             return null;
         }
 
-        ConfigurableTextEditor editor = builder.buildEditor();
+        ConfigurableTextEditor editor = editorBuilder.buildEditor();
         editor.initialize(getEditorConfiguration());
         return editor;
     }

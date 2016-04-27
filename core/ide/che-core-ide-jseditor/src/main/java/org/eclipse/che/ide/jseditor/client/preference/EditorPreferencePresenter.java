@@ -31,13 +31,10 @@ public class EditorPreferencePresenter extends AbstractPreferencePagePresenter i
     @Inject
     public EditorPreferencePresenter(final EditorPreferenceView view,
                                      final EditorPrefLocalizationConstant constant,
-                                     final EditorPreferenceResource resource,
                                      final KeyMapsPreferencePresenter keymapsSection,
                                      final EditorPropertiesPresenter editorPropertiesSection) {
 
-        super(constant.editorTypeTitle(),
-              constant.editorTypeCategory(),
-              resource.editorPrefIconTemporary());// TODO use svg icon when the PreferencesPagePresenter allow it
+        super(constant.editorTypeTitle(), constant.editorTypeCategory());
 
         this.view = view;
         this.keymapsSection = keymapsSection;

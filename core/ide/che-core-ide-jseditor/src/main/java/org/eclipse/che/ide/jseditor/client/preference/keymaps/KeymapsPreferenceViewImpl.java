@@ -10,28 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.preference.keymaps;
 
-
-import java.util.Map.Entry;
-
-import javax.inject.Inject;
-
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorTypeRegistry;
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
-import org.eclipse.che.ide.jseditor.client.keymap.KeymapValuesHolder;
-import org.eclipse.che.ide.jseditor.client.preference.EditorPrefLocalizationConstant;
-import org.eclipse.che.ide.jseditor.client.preference.EditorPreferenceResource;
-
-import com.google.gwt.cell.client.Cell.Context;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
-import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+
+import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
+import org.eclipse.che.ide.jseditor.client.preference.EditorPrefLocalizationConstant;
+import org.eclipse.che.ide.ui.listbox.CustomListBox;
+
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  * Implementation of the {@link KeymapsPreferenceView}.
@@ -45,49 +37,19 @@ public class KeymapsPreferenceViewImpl extends Composite implements KeymapsPrefe
     /** The UI binder instance. */
     private static final KeymapsPreferenceViewImplUiBinder UIBINDER = GWT.create(KeymapsPreferenceViewImplUiBinder.class);
 
-    private final EditorTypeRegistry                 editorTypeRegistry;
-    private final EditorPreferenceResource.CellStyle cellStyle;
-
-    private KeymapSelectionColumn keymapSelectionColumn;
-
     private ActionDelegate     delegate;
-    private KeymapValuesHolder valuesHolder;
 
     @UiField(provided = true)
     EditorPrefLocalizationConstant constants;
 
-    @UiField(provided = true)
-    CellTable<EditorType> keyBindingSelection;
-
+    @UiField
+    CustomListBox keyBindingSelection;
 
     @Inject
-    public KeymapsPreferenceViewImpl(final EditorTypeRegistry editorTypeRegistry,
-                                     final EditorPreferenceResource resources,
-                                     final EditorPrefLocalizationConstant constants) {
-        this.keyBindingSelection = new CellTable<EditorType>(5, resources);
-
+    public KeymapsPreferenceViewImpl(final EditorPrefLocalizationConstant constants) {
         this.constants = constants;
 
         initWidget(UIBINDER.createAndBindUi(this));
-
-        this.editorTypeRegistry = editorTypeRegistry;
-        this.cellStyle = resources.cellStyle();
-
-        // build keybinding selection table
-        final TextColumn<EditorType> editorColumn = new TextColumn<EditorType>() {
-            @Override
-            public String getValue(final EditorType type) {
-                return editorTypeRegistry.getName(type);
-            }
-
-            @Override
-            public String getCellStyleNames(final Context context, final EditorType object) {
-                return resources.cellStyle().prefCell() + " " + resources.cellStyle().firstColumn();
-            }
-        };
-
-        // disable row selection
-        this.keyBindingSelection.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
     }
 
     @Override
@@ -95,41 +57,21 @@ public class KeymapsPreferenceViewImpl extends Composite implements KeymapsPrefe
         this.delegate = delegate;
     }
 
-    private void handleEditorKeymapChanged(final EditorType editorType, final Keymap keymap) {
-        this.delegate.editorKeymapChanged(editorType, keymap);
-    }
-
     @Override
-    protected void onLoad() {
-        setSelectionFromValuesHolder();
-    }
+    public void setKeyBindings(List<Keymap> availableKeyBindings, Keymap currentKeyBinding) {
+        keyBindingSelection.clear();
 
-    protected void setSelectionFromValuesHolder() {
-        // delayed until the view is displayed
-        keyBindingSelection.setRowData(editorTypeRegistry.getEditorTypes());
-        for (final Entry<EditorType, Keymap> entry : this.valuesHolder) {
-            keymapSelectionColumn.setSelection(entry.getKey(), entry.getValue());
-        }
-        keyBindingSelection.redraw();
-    }
-
-    public void setKeymapValuesHolder(final KeymapValuesHolder newValue) {
-        this.valuesHolder = newValue;
-
-        final FieldUpdater<EditorType, Keymap> fieldUpdater = new FieldUpdater<EditorType, Keymap>() {
-            @Override
-            public void update(final int index, final EditorType object, final Keymap value) {
-                handleEditorKeymapChanged(object, value);
+        for (Keymap keymap : availableKeyBindings) {
+            keyBindingSelection.addItem(keymap.getDisplay(), keymap.getKey());
+            if (currentKeyBinding != null && keymap.getKey().equals(currentKeyBinding.getKey())) {
+                keyBindingSelection.setSelectedIndex(availableKeyBindings.indexOf(keymap));
             }
-        };
-
-        keymapSelectionColumn = new KeymapSelectionColumn(valuesHolder, fieldUpdater, cellStyle.selectWidth());
-        keyBindingSelection.addColumn(keymapSelectionColumn);
+        }
     }
 
-    @Override
-    public void refresh() {
-        setSelectionFromValuesHolder();
+    @UiHandler("keyBindingSelection")
+    void handleSelectionChanged(ChangeEvent event) {
+        final String value = keyBindingSelection.getValue(keyBindingSelection.getSelectedIndex());
+        delegate.onKeyBindingSelected(Keymap.fromKey(value));
     }
-
 }

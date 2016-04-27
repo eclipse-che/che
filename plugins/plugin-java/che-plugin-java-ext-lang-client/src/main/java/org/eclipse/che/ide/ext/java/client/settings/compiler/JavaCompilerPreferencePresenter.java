@@ -79,7 +79,7 @@ public class JavaCompilerPreferencePresenter extends AbstractPreferencePagePrese
                                            @JavaCompilerPreferenceManager PreferencesManager preferencesManager,
                                            Provider<NotificationManager> notificationManagerProvider,
                                            EventBus eventBus) {
-        super(locale.compilerSetup(), CATEGORY, null);
+        super(locale.compilerSetup(), CATEGORY);
 
         this.view = view;
         this.propertyFactory = propertyFactory;

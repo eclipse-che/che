@@ -19,16 +19,15 @@ import com.google.gwt.user.client.ui.RequiresResize;
 
 import org.eclipse.che.ide.api.text.Region;
 import org.eclipse.che.ide.api.texteditor.UndoableEditor;
+import org.eclipse.che.ide.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.jseditor.client.codeassist.AdditionalInfoCallback;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionProposal;
 import org.eclipse.che.ide.jseditor.client.codeassist.CompletionsSource;
 import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
 import org.eclipse.che.ide.jseditor.client.events.HasCursorActivityHandlers;
 import org.eclipse.che.ide.jseditor.client.events.HasGutterClickHandlers;
 import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
-import org.eclipse.che.ide.hotkeys.HotKeyItem;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -126,13 +125,6 @@ public interface EditorWidget extends IsWidget,
      * @return the selected range
      */
     Region getSelectedRange();
-
-    /**
-     * Returns the editor type for this editor.
-     *
-     * @return the editor type
-     */
-    EditorType getEditorType();
 
     /**
      * Returns the current keymap in the editor.

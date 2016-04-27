@@ -32,7 +32,7 @@ public interface EditorPreferenceSection extends Presenter {
     void refresh();
 
     /** Interface for the parent presenter that owns the section. */
-    public interface ParentPresenter {
+    interface ParentPresenter {
         /** Asks to trigger a dirty state action. */
         void signalDirtyState();
     }

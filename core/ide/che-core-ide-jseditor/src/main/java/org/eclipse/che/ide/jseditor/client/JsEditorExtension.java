@@ -17,29 +17,20 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.jseditor.client.inject.PlainTextFileType;
 import org.eclipse.che.ide.jseditor.client.popup.PopupResources;
-import org.eclipse.che.ide.jseditor.client.preference.EditorPreferenceResource;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorResources;
 
 @Extension(title = "Common Editor", version = "3.1.0")
 public class JsEditorExtension {
 
-    /** The default editor injection name. */
-    public static final String DEFAULT_EDITOR_TYPE_INJECT_NAME = "DefaultEditorType";
-
-    /** The default editor injection name. */
-    public static final String DEFAULT_EDITOR_TYPE_INSTANCE = "DefaultEditorType";
-
     @Inject
     public JsEditorExtension(final FileTypeRegistry fileTypeRegistry,
                              final @PlainTextFileType FileType plainText,
-                             final EditorPreferenceResource editorPreferenceResource,
                              final EditorResources editorResources,
                              final PopupResources popupResources) {
         // register text/plain file type
         fileTypeRegistry.registerFileType(plainText);
 
         // ensure css injection
-        editorPreferenceResource.cellStyle().ensureInjected();
         editorResources.editorCss().ensureInjected();
         popupResources.popupStyle().ensureInjected();
     }

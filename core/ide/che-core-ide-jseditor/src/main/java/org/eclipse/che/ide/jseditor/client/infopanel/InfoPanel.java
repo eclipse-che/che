@@ -10,19 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.infopanel;
 
-import javax.inject.Inject;
-
-import com.google.gwt.user.client.ui.FlowPanel;
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
-import org.eclipse.che.ide.jseditor.client.text.TextPosition;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
+import org.eclipse.che.ide.jseditor.client.text.TextPosition;
+
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +82,6 @@ public class InfoPanel extends Composite {
      * @param tabSize the space-equivalent width of a tabulation character
      */
     public void createDefaultState(final String fileContentDescription,
-                                   final EditorType editorType,
                                    final Keymap keymap,
                                    final int numberOfLines, final int tabSize) {
         setFileType(fileContentDescription);

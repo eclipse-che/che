@@ -12,6 +12,7 @@
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'
              xmlns:c='urn:import:com.google.gwt.user.cellview.client'
              xmlns:my='urn:import:org.eclipse.che.ide.jseditor.client.preference'>
 
@@ -45,7 +46,7 @@
             <g:Label text="{constants.keysSectionLabel}" addStyleNames="{style.sectionLabel}"/>
         </g:FlowPanel>
         <g:Label text="{constants.keybindingsLabel}" addStyleNames="{style.label}"/>
-        <c:CellTable ui:field="keyBindingSelection" addStyleNames="{style.tables}"/>
+        <che:CustomListBox ui:field="keyBindingSelection" addStyleNames="{style.tables}"/>
     </g:FlowPanel>
 </ui:UiBinder>
 

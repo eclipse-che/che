@@ -60,7 +60,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                   UploadSshKeyPresenter uploadSshKeyPresenter,
                                   NotificationManager notificationManager,
                                   DialogFactory dialogFactory) {
-        super(constant.sshManagerTitle(), constant.sshManagerCategory(), null);
+        super(constant.sshManagerTitle(), constant.sshManagerCategory());
 
         this.view = view;
         this.dialogFactory = dialogFactory;
