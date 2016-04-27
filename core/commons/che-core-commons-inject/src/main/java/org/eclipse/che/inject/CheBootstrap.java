@@ -23,6 +23,8 @@ import org.eclipse.che.inject.lifecycle.DestroyModule;
 import org.eclipse.che.inject.lifecycle.Destroyer;
 import org.eclipse.che.inject.lifecycle.InitModule;
 import org.everrest.guice.servlet.EverrestGuiceContextListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -94,6 +96,8 @@ public class CheBootstrap extends EverrestGuiceContextListener {
      */
     private static final String COMPLIANT_WEB_INF_RESOURCES = "codenvy";
 
+    private static final Logger LOG = LoggerFactory.getLogger(CheBootstrap.class);
+
     /**
      * Environment variable that is used to override some Che settings properties.
      */
@@ -157,7 +161,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         @Override
         protected void configure() {
             // binds environment variables visible as prefixed with "env."
-            bindProperties("env.", System.getenv());
+            bindEnvProperties("env.", System.getenv());
             // binds system properties visible as prefixed with "sys."
             bindProperties("sys.", System.getProperties());
             String extConfig = System.getenv(CHE_LOCAL_CONF_DIR);
@@ -202,19 +206,19 @@ public class CheBootstrap extends EverrestGuiceContextListener {
             bindProperties(null, properties.entrySet());
         }
 
-        protected void bindProperties(Map<String, String> properties) {
-            bindProperties(null, properties.entrySet());
-        }
-
         protected void bindProperties(String prefix, Properties properties) {
             bindProperties(prefix, properties.entrySet());
         }
 
-        protected void bindProperties(String prefix, Map<String, String> properties) {
-            bindProperties(prefix, properties.entrySet());
+        protected void bindEnvProperties(String prefix, Map<String, String> properties) {
+            bindProperties(prefix, properties.entrySet(), true);
         }
 
         protected <K, V> void bindProperties(String prefix, Iterable<Map.Entry<K, V>> properties) {
+           bindProperties(prefix, properties, false);
+        }
+
+        protected <K, V> void bindProperties(String prefix, Iterable<Map.Entry<K, V>> properties, boolean skipUnresolved) {
             StringBuilder buf = null;
             for (Map.Entry<K, V> e : properties) {
                 String pValue = (String)e.getValue();
@@ -239,11 +243,16 @@ public class CheBootstrap extends EverrestGuiceContextListener {
                             if (actual == null) {
                                 actual = System.getenv(name);
                             }
-                            if (actual == null) {
+                            if (actual != null) {
+                                buf.append(actual);
+                            } else if (skipUnresolved) {
+                                buf.append(pValue.substring(i, j));
+                                LOG.warn("Environment variable " + name + " cannot be resolved, leaving as is.");
+                            } else {
                                 throw new ConfigurationException(
                                         "Property " + name + " is not found as system property or environment variable.");
                             }
-                            buf.append(actual);
+
                             start = matcher.end();
                         } while (matcher.find());
                         buf.append(pValue.substring(start));
