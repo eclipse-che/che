@@ -30,5 +30,6 @@
         <module>che-core-api-user</module>
         <module>che-core-api-factory</module>
         <module>che-core-api-ssh</module>
+        <module>che-core-api-ssh-shared</module>
     </modules>
 </project>
