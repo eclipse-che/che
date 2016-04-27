@@ -104,7 +104,7 @@ describe('CheProjectType', function(){
       factory.fetchTypes(workspaceId);
 
       // expecting a GET
-      httpBackend.expectGET('//' + agentUrl + '/api/ext/project-type/' + workspaceId);
+      httpBackend.expectGET('//' + agentUrl + '/wsagent/ext/project-type/' + workspaceId);
 
       // flush command
       httpBackend.flush();

@@ -122,6 +122,7 @@ public class DockerInstanceStopDetector {
             switch (message.getStatus()) {
                 case "oom":
                     containersOomTimestamps.put(message.getId(), message.getId());
+                    LOG.info("OOM of process in container {} has been detected", message.getId());
                     break;
                 case "die":
                     InstanceStateEvent.Type instanceStateChangeType;

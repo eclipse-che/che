@@ -73,34 +73,6 @@ export class CreateProjectCtrl {
 
     this.generateWorkspaceName();
 
-    this.headerSteps = [
-      {
-        id: '#create-project-source-id',
-        name: 'source',
-        link: 'create-project-source'
-      },
-      {
-        id: '#create-project-source-stack',
-        name: 'stack',
-        link: 'create-project-stack'
-      },
-      {
-        id: '#create-project-workspace',
-        name: 'workspace',
-        link: 'create-project-workspace'
-      },
-      {
-        id: '#create-project-source-template',
-        name: 'template',
-        link: 'create-project-template'
-      },
-      {
-        id: '#create-project-source-information',
-        name: 'metadata',
-        link: 'create-project-information'
-      }
-    ];
-
     this.messageBus = null;
     this.recipeUrl = null;
 
@@ -903,37 +875,31 @@ export class CreateProjectCtrl {
    * @param workspace workspace for listening status
    */
   subscribeStatusChannel(workspace) {
-    let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
-    // subscribe to workspace events
-    let workspaceChannel = 'workspace:' + workspace.id;
-    this.listeningChannels.push(workspaceChannel);
-    bus.subscribe(workspaceChannel, (message) => {
-      if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-        this.createProjectSvc.setCurrentProgressStep(2);
-        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-        // need to show the error
-        this.$mdDialog.show(
-          this.$mdDialog.alert()
-            .title('Error when starting agent')
-            .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
-            .ariaLabel('Workspace agent start')
-            .ok('OK')
-        );
-      }
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then(() => {
+      this.createProjectSvc.setCurrentProgressStep(2);
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+      // need to show the error
+      this.$mdDialog.show(
+        this.$mdDialog.alert()
+          .title('Error when starting agent')
+          .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
+          .ariaLabel('Workspace agent start')
+          .ok('OK')
+      );
+    });
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'RUNNING').then(() => {
+      this.createProjectSvc.setCurrentProgressStep(2);
 
-      if (message.eventType === 'RUNNING' && message.workspaceId === workspace.id) {
-        this.createProjectSvc.setCurrentProgressStep(2);
+      this.importProjectData.project.name = this.projectName;
 
-        this.importProjectData.project.name = this.projectName;
-
-        let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
-        promiseWorkspace.then(() => {
-          let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
-          // try to connect
-          this.websocketReconnect = 10;
-          this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
-        });
-      }
+      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+      promiseWorkspace.then(() => {
+        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id),
+          bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+        // try to connect
+        this.websocketReconnect = 10;
+        this.connectToExtensionServer(websocketUrl, workspace.id, this.importProjectData.project.name, this.importProjectData, bus);
+      });
     });
   }
 
@@ -951,7 +917,9 @@ export class CreateProjectCtrl {
         this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
       }
 
-      this.subscribeStatusChannel(workspace);
+      this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
+        this.subscribeStatusChannel(workspace);
+      });
 
       this.$timeout(() => {
         let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
@@ -1058,42 +1026,9 @@ export class CreateProjectCtrl {
     return this.createProjectSvc.getIDELink();
   }
 
-  isElementVisible(index) {
-
-    // for each id, check last
-    var maxVisibleElement = 0;
-    for (var i = 0; i < this.headerSteps.length; i++) {
-      var visibleElement = this.isvisible(this.headerSteps[i].id);
-      if (visibleElement) {
-        maxVisibleElement = i;
-      }
-    }
-    return index <= maxVisibleElement;
-  }
-
   isResourceProblem() {
     let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
     return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
-  }
-
-  isvisible(elementName) {
-    let element = angular.element(elementName);
-    var windowElement = $(window);
-
-    var docViewTop = windowElement.scrollTop();
-    var docViewBottom = docViewTop + windowElement.height();
-
-    var offset = element.offset();
-    if (!offset) {
-      return false;
-    }
-
-    var elemTop = offset.top;
-    var elemBottom = elemTop + element.height();
-
-    // use elemTop if want to see all div or elemBottom if we see partially it
-    /*((elemTop <= docViewBottom) && (elemTop >= docViewTop));*/
-    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
   }
 
   setStackTab(stackTab) {
@@ -1236,5 +1171,13 @@ export class CreateProjectCtrl {
       logs += step.logs + '\n';
     });
     window.open('data:text/csv,' + encodeURIComponent(logs));
+  }
+
+  getCreateButtonTitle() {
+    if (this.workspaceResource === 'from-stack') {
+      return "Create Workspace and Project";
+    } else {
+      return "Load Workspace and Create Project";
+    }
   }
 }

@@ -55,7 +55,9 @@ class IdeLoaderCtrl {
   openRunningIde() {
     this.ideSvc.setPreventRedirection(false);
     this.ideSvc.init();
-    this.ideSvc.openIde(true);
+
+    // open last running workspace
+    this.ideSvc.openLastStartedIde(true);
   }
 }
 

@@ -71,7 +71,7 @@ public class LocalStackDaoTest {
         final Path targetDir = Paths.get(url.toURI()).getParent();
         storageRoot = targetDir.resolve("stack");
         stackJsonPath = storageRoot.resolve("stacks.json");
-        parentIconFolder = storageRoot.resolve("stack_img").resolve("stackdskhfdskf");
+        parentIconFolder = storageRoot.resolve("images").resolve("stackdskhfdskf");
         pathToIcon = parentIconFolder.resolve("java-type.svg");
         stackDao = new LocalStackDaoImpl(new StackLocalStorage(storageRoot.toString(), new StackTypeAdaptersProvider()));
     }

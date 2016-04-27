@@ -29,8 +29,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +132,11 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
                          .filter(ws -> ws.getNamespace().equals(namespace))
                          .map(WorkspaceImpl::new)
                          .collect(toList());
+    }
+
+    @Override
+    public List<WorkspaceImpl> getWorkspaces(String username) throws ServerException {
+        return new ArrayList<>(workspaces.values());
     }
 
     private Optional<WorkspaceImpl> find(String name, String owner) {
