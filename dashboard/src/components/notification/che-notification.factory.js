@@ -16,47 +16,95 @@
  */
 export class CheNotification {
 
-  /**
-   * Default constructor that is using resource injection
-   * @ngInject for Dependency injection
-   */
-  constructor($mdToast) {
-    this.$mdToast = $mdToast;
-  }
+    /**
+     * Default constructor that is using resource injection
+     * @ngInject for Dependency injection
+     */
+    constructor($timeout, $document, cheUIElementsInjectorService) {
+        this.$timeout = $timeout;
+        this.cheUIElementsInjectorService = cheUIElementsInjectorService;
+        this.$document = $document;
 
-  showInfo(text) {
-    this.$mdToast.hide();
-    this.$mdToast.show({
-      template: '<md-toast class="che-notification-info" layout="row" flex layout-align="start start">' +
-      '<i class="che-notification-info-icon fa fa-check fa-2x"></i>' +
-      '<div flex="90" layout="column" layout-align="start start">' +
-      '<span flex class="che-notification-info-title"><b>Success</b></span>' +
-      '<span flex class="che-notification-message">' + text + '</span>' +
-      '</div>' +
-      '<i class="che-notification-close-icon fa fa-times" ng-click="cheNotificationCtrl.hideNotification()"/>' +
-      '</md-toast>',
-      autoWrap: false,
-      controller: 'CheNotificationController',
-      controllerAs: 'cheNotificationCtrl',
-      hideDelay: 3000
-    });
-  }
+        this.mainContentElementId = 'main-content';
+        this.notificationContainerElementId = 'che-notification-container';
 
-  showError(text) {
-    this.$mdToast.hide();
-    this.$mdToast.show({
-      template: '<md-toast class="che-notification-error" layout="row" layout-align="start start">' +
-      '<i class="che-notification-error-icon fa fa-exclamation-triangle fa-2x"></i>' +
-      '<div flex="90" layout="column" layout-align="start start">' +
-      '<span flex class="che-notification-error-title"><b>Failed</b></span>' +
-      '<span flex class="che-notification-message">' + text + '</span>' +
-      '</div>' +
-      '<i class="che-notification-close-icon fa fa-times" ng-click="cheNotificationCtrl.hideNotification()"/>' +
-      '</md-toast>',
-      autoWrap: false,
-      controller: 'CheNotificationController',
-      controllerAs: 'cheNotificationCtrl',
-      hideDelay: 20000
-    });
-  }
+        this.maxNotificationCount = 10;
+        //time in milliseconds
+        this.infoNotificationDisplayTime = 3000;
+        this.errorNotificationDisplayTime = 20000;
+
+        //initialise counter of notifications
+        this.currentNotificationNumber = 0;
+    }
+
+    _getNextNotificationId() {
+        this.currentNotificationNumber++;
+
+        if (this.currentNotificationNumber > this.maxNotificationCount) {
+            this.currentNotificationNumber = 1;
+        }
+
+        return 'che-notification-' + this.currentNotificationNumber;
+    }
+
+    _getNotificationContainer() {
+        let notificationContainerElement = this.$document[0].getElementById(this.notificationContainerElementId);
+
+        if (notificationContainerElement) {
+            return notificationContainerElement;
+        }
+
+        let offsetRight = 0;
+
+        let bodyElement = this.$document[0].getElementsByTagName('body')[0];
+        let parentElement = this.$document[0].getElementById(this.mainContentElementId);
+
+        if (parentElement) {
+            offsetRight = bodyElement.offsetWidth - (parentElement.offsetLeft + parentElement.offsetWidth);
+        }
+
+        let jqAdditionalElement = angular.element('<div></div>');
+        // set attributes into the additional element
+        jqAdditionalElement.attr('id', this.notificationContainerElementId);
+        jqAdditionalElement.attr('style', 'right:' + offsetRight + 'px;');
+
+        this.cheUIElementsInjectorService.injectAdditionalElement(bodyElement, jqAdditionalElement);
+
+        return jqAdditionalElement;
+    }
+
+    _removeNotification(jqNotificationElement) {
+        jqNotificationElement.attr('style', 'max-height:0;padding:0;opacity:0;');
+        this.$timeout(() => {
+            jqNotificationElement.remove();
+        }, 300);
+    }
+
+    showInfo(text) {
+        let notificationId = this._getNextNotificationId();
+        let jqInfoNotificationElement = angular.element('<che-info-notification/>');
+
+        jqInfoNotificationElement.attr('che-info-text', text);
+        jqInfoNotificationElement.attr('id', notificationId);
+
+        this.cheUIElementsInjectorService.injectAdditionalElement(this._getNotificationContainer(), jqInfoNotificationElement);
+
+        this.$timeout(() => {
+            this._removeNotification(jqInfoNotificationElement);
+        }, this.infoNotificationDisplayTime);
+    }
+
+    showError(text) {
+        let notificationId = this._getNextNotificationId();
+        let jqErrorNotificationElement = angular.element('<che-error-notification/>');
+
+        jqErrorNotificationElement.attr('che-error-text', text);
+        jqErrorNotificationElement.attr('id', notificationId);
+
+        this.cheUIElementsInjectorService.injectAdditionalElement(this._getNotificationContainer(), jqErrorNotificationElement);
+
+        this.$timeout(() => {
+            this._removeNotification(jqErrorNotificationElement);
+        }, this.errorNotificationDisplayTime);
+    }
 }
