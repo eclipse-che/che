@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.terminal;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
@@ -25,6 +27,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
@@ -41,6 +45,7 @@ public class MachineTerminalLauncher {
     private final EventService                                     eventService;
     private final MachineManager                                   machineManager;
     private final Map<String, MachineImplSpecificTerminalLauncher> terminalLaunchers;
+    private final ExecutorService                                  executor;
 
     @Inject
     public MachineTerminalLauncher(EventService eventService,
@@ -51,6 +56,10 @@ public class MachineTerminalLauncher {
         this.terminalLaunchers = machineImplLaunchers.stream()
                                                      .collect(toMap(MachineImplSpecificTerminalLauncher::getMachineType,
                                                                     Function.identity()));
+        this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineTerminalLauncher-%d")
+                                                                                .setDaemon(true)
+                                                                                .build());
+
     }
 
     @PostConstruct
@@ -59,22 +68,24 @@ public class MachineTerminalLauncher {
             @Override
             public void onEvent(MachineStatusEvent event) {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
-                    try {
-                        final Instance machine = machineManager.getInstance(event.getMachineId());
+                    executor.execute(() -> {
+                        try {
+                            final Instance machine = machineManager.getInstance(event.getMachineId());
 
-                        MachineImplSpecificTerminalLauncher terminalLauncher = terminalLaunchers.get(machine.getConfig()
-                                                                                                            .getType());
-                        if (terminalLauncher == null) {
-                            LOG.warn("Terminal launcher implementation was not found for machine {} with type {}.",
-                                     machine.getId(),
-                                     machine.getConfig().getType());
-                        } else {
-                            terminalLauncher.launchTerminal(machine);
+                            MachineImplSpecificTerminalLauncher terminalLauncher = terminalLaunchers.get(machine.getConfig()
+                                                                                                                .getType());
+                            if (terminalLauncher == null) {
+                                LOG.warn("Terminal launcher implementation was not found for machine {} with type {}.",
+                                         machine.getId(),
+                                         machine.getConfig().getType());
+                            } else {
+                                terminalLauncher.launchTerminal(machine);
+                            }
+                        } catch (MachineException | NotFoundException e) {
+                            LOG.error(e.getLocalizedMessage(), e);
+                            // TODO send event that terminal is unavailable
                         }
-                    } catch (MachineException | NotFoundException e) {
-                        LOG.error(e.getLocalizedMessage(), e);
-                        // TODO send event that terminal is unavailable
-                    }
+                    });
                 }
             }
         });
