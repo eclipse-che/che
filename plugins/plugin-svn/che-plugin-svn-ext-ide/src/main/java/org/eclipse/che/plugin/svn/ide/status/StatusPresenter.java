@@ -28,6 +28,7 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -78,7 +79,7 @@ public class StatusPresenter extends SubversionActionPresenter {
                            @Override
                            protected void onFailure(final Throwable exception) {
                                String errorMessage = exception.getMessage();
-                               notificationManager.notify(constants.statusFailed() + " - " + errorMessage, FAIL, true);
+                               notificationManager.notify(constants.statusFailed() + " - " + errorMessage, FAIL, FLOAT_MODE);
                            }
                        });
     }

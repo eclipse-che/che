@@ -35,6 +35,7 @@ import javax.validation.constraints.NotNull;
 
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType;
 import static org.eclipse.che.api.machine.gwt.client.MachineManager.MachineOperationType.RESTART;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -104,7 +105,7 @@ class MachineStatusNotifier {
         final String workspaceId = appContext.getWorkspace().getId();
         final String wsChannel = MACHINE_STATUS_WS_CHANNEL + workspaceId + ":" + machineName;
 
-        final StatusNotification notification = notificationManager.notify("", PROGRESS, false);
+        final StatusNotification notification = notificationManager.notify("", PROGRESS, NOT_EMERGE_MODE);
 
         final Unmarshallable<MachineStatusEvent> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(MachineStatusEvent.class);
         final MessageHandler messageHandler = new SubscriptionHandler<MachineStatusEvent>(unmarshaller) {

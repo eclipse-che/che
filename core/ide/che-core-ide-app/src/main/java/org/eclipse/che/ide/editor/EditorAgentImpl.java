@@ -70,6 +70,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 
 /** @author Evgen Vidolob */
@@ -430,7 +431,7 @@ public class EditorAgentImpl implements EditorAgent {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
-                notificationManager.notify(coreLocalizationConstant.someFilesCanNotBeSaved(), StatusNotification.Status.FAIL, true);
+                notificationManager.notify(coreLocalizationConstant.someFilesCanNotBeSaved(), StatusNotification.Status.FAIL, FLOAT_MODE);
             }
 
             @Override

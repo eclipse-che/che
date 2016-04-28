@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.push;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.PushResponse;
@@ -20,20 +22,18 @@ import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchFilterByRemote;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringMapUnmarshaller;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -43,11 +43,12 @@ import java.util.Map;
 
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
 
 /**
  * Presenter for pushing changes to remote repository.
@@ -126,7 +127,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                                    GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                                    console.printError(errorMessage);
                                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.remoteListFailed(), FAIL, true, project.getRootProject());
+                                   notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                                    view.setEnablePushButton(false);
                                }
                            }
@@ -161,7 +162,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.localBranchesListFailed(), FAIL, true, project.getRootProject());
+                notificationManager.notify(constant.localBranchesListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                 view.setEnablePushButton(false);
             }
         });
@@ -211,7 +212,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                         GitOutputConsole console = gitOutputConsoleFactory.create(CONFIG_COMMAND_NAME);
                         console.printError(constant.failedGettingConfig());
                         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                        notificationManager.notify(constant.failedGettingConfig(), FAIL, true, project.getRootProject());
+                        notificationManager.notify(constant.failedGettingConfig(), FAIL, FLOAT_MODE, project.getRootProject());
                     }
                 });
             }
@@ -222,7 +223,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
                 GitOutputConsole console = gitOutputConsoleFactory.create(BRANCH_LIST_COMMAND_NAME);
                 console.printError(errorMessage);
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.remoteBranchesListFailed(), FAIL, true, project.getRootProject());
+                notificationManager.notify(constant.remoteBranchesListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                 view.setEnablePushButton(false);
             }
 
@@ -290,7 +291,7 @@ public class PushToRemotePresenter implements PushToRemoteView.ActionDelegate {
     @Override
     public void onPushClicked() {
         final StatusNotification notification =
-                notificationManager.notify(constant.pushProcess(), PROGRESS, true, project.getRootProject());
+                notificationManager.notify(constant.pushProcess(), PROGRESS, FLOAT_MODE, project.getRootProject());
 
         final String repository = view.getRepository();
         final GitOutputConsole console = gitOutputConsoleFactory.create(PUSH_COMMAND_NAME);

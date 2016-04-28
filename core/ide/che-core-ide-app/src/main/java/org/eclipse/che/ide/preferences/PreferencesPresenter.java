@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -151,7 +152,7 @@ public class PreferencesPresenter implements PreferencesView.ActionDelegate, Pre
                     return preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
                         @Override
                         public void apply(PromiseError error) throws OperationException {
-                            notificationManagerProvider.get().notify(locale.unableToSavePreference(), error.getMessage(), FAIL, true);
+                            notificationManagerProvider.get().notify(locale.unableToSavePreference(), error.getMessage(), FAIL, FLOAT_MODE);
                             promiseErrorList.add(error);
                         }
                     });
@@ -179,7 +180,7 @@ public class PreferencesPresenter implements PreferencesView.ActionDelegate, Pre
                     return preferencesManager.loadPreferences().catchError(new Operation<PromiseError>() {
                         @Override
                         public void apply(PromiseError error) throws OperationException {
-                            notificationManagerProvider.get().notify(locale.unableToLoadPreference(), error.getMessage(), FAIL, true);
+                            notificationManagerProvider.get().notify(locale.unableToLoadPreference(), error.getMessage(), FAIL, FLOAT_MODE);
                         }
                     });
                 }

@@ -22,18 +22,18 @@ import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.tree.TreeNode;
 import org.eclipse.che.ide.api.project.tree.TreeStructure;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.plugin.svn.ide.SubversionClientService;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.common.StatusColors;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
-import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
-import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-import org.eclipse.che.plugin.svn.shared.InfoResponse;
-import org.eclipse.che.plugin.svn.shared.SubversionItem;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
+import org.eclipse.che.plugin.svn.ide.SubversionClientService;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.common.StatusColors;
+import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
+import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
+import org.eclipse.che.plugin.svn.shared.InfoResponse;
+import org.eclipse.che.plugin.svn.shared.SubversionItem;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;
@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -110,7 +111,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                                          protected void onSuccess(InfoResponse result) {
                                              if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
                                                  printErrors(result.getErrorOutput(), constants.commandInfo());
-                                                 notificationManager.notify("Unable to execute subversion command", FAIL, true);
+                                                 notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
                                                  return;
                                              }
 
@@ -125,7 +126,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                                     protected void onSuccess(InfoResponse result) {
                                         if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
                                             printErrors(result.getErrorOutput(), constants.commandInfo());
-                                            notificationManager.notify("Unable to execute subversion command", FAIL, true);
+                                            notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
                                             return;
                                         }
 
@@ -151,14 +152,14 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
                                     @Override
                                     protected void onFailure(Throwable exception) {
-                                        notificationManager.notify(exception.getMessage(), FAIL, true);
+                                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                                     }
                                 });
                     }
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, true);
+                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                     }
                 });
     }
@@ -181,7 +182,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, true);
+                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                     }
                 });
     }
@@ -254,7 +255,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                             protected void onSuccess(final InfoResponse result) {
                                 if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
                                     printErrors(result.getErrorOutput(), constants.commandInfo());
-                                    notificationManager.notify("Unable to execute subversion command", FAIL, true);
+                                    notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
                                     return;
                                 }
 
@@ -275,7 +276,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
                             @Override
                             protected void onFailure(Throwable exception) {
-                                notificationManager.notify(exception.getMessage(), FAIL, true);
+                                notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                             }
                         });
             }

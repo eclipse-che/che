@@ -10,17 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.fetch;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
@@ -29,9 +32,6 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +39,7 @@ import java.util.List;
 
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -117,7 +118,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                                    GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                                    console.printError(constant.remoteListFailed());
                                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.remoteListFailed(), FAIL, true, project.getRootProject());
+                                   notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                                    view.setEnableFetchButton(false);
                                }
                            });
@@ -155,7 +156,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                                    GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
                                    console.printError(errorMessage);
                                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.branchesListFailed(), FAIL, true, project.getRootProject());
+                                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                                    view.setEnableFetchButton(false);
                                }
                            });
@@ -169,7 +170,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         boolean removeDeletedRefs = view.isRemoveDeletedRefs();
 
         final StatusNotification notification =
-                notificationManager.notify(constant.fetchProcess(), PROGRESS, true, project.getRootProject());
+                notificationManager.notify(constant.fetchProcess(), PROGRESS, FLOAT_MODE, project.getRootProject());
         final GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
         try {
             service.fetch(appContext.getDevMachine(), project.getRootProject(), remoteName, getRefs(), removeDeletedRefs,

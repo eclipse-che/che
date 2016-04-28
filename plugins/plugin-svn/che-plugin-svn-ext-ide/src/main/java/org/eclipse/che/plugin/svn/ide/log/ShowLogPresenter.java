@@ -27,6 +27,7 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -94,7 +95,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                     protected void onSuccess(InfoResponse result) {
                         if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
                             printErrors(result.getErrorOutput(), constants.commandInfo());
-                            notificationManager.notify("Unable to execute subversion command", FAIL, true);
+                            notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
                             return;
                         }
 
@@ -106,7 +107,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, true);
+                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                     }
                 });
 
@@ -127,7 +128,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, true);
+                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                     }
                 });
     }

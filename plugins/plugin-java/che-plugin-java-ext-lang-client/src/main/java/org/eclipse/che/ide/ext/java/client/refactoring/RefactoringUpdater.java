@@ -42,6 +42,7 @@ import static com.google.common.base.Predicates.not;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.filter;
 import static org.eclipse.che.api.promises.client.js.Promises.resolve;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -262,7 +263,7 @@ public class RefactoringUpdater {
         return new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(locale.failedToProcessRefactoringOperation(), arg.getMessage(), FAIL, true);
+                notificationManager.notify(locale.failedToProcessRefactoringOperation(), arg.getMessage(), FAIL, FLOAT_MODE);
             }
         };
     }

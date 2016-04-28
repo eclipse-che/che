@@ -10,25 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.status;
 
-import org.eclipse.che.ide.api.theme.Style;
-import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.api.git.shared.StatusFormat.LONG;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -81,7 +82,7 @@ public class StatusCommandPresenter {
 
                                @Override
                                protected void onFailure(Throwable exception) {
-                                   notificationManager.notify(constant.statusFailed(), FAIL, true, project.getRootProject());
+                                   notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                                }
                            });
     }

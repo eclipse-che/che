@@ -21,6 +21,7 @@ import org.eclipse.che.ide.rest.RestContext;
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -80,7 +81,7 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
             view.close();
             callback.onSuccess(null);
         } else {
-            notificationManager.notify(constant.failedToUploadSshKey(), result, FAIL, true);
+            notificationManager.notify(constant.failedToUploadSshKey(), result, FAIL, FLOAT_MODE);
             callback.onFailure(new Throwable(result));
         }
     }

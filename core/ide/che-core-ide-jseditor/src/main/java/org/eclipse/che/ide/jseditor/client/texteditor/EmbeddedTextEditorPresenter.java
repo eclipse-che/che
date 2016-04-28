@@ -90,6 +90,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -487,7 +488,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
 
             @Override
             public void onFailure(Throwable caught) {
-                notificationManager.notify(constant.failedToUpdateContentOfFiles(), caught.getMessage(), FAIL, false);
+                notificationManager.notify(constant.failedToUpdateContentOfFiles(), caught.getMessage(), FAIL, NOT_EMERGE_MODE);
                 if (callback != null) {
                     callback.onFailure(caught);
                 }

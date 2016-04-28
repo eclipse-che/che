@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
@@ -253,7 +254,7 @@ public class JavaRefactoringRename implements FileEventHandler {
                 if (result.getSeverity() > WARNING) {
                     undoChanges();
 
-                    notificationManager.notify(locale.failedToRename(), result.getEntries().get(0).getMessage(), FAIL, true);
+                    notificationManager.notify(locale.failedToRename(), result.getEntries().get(0).getMessage(), FAIL, FLOAT_MODE);
                 } else {
                     onTargetRenamed(result);
                 }
@@ -265,7 +266,7 @@ public class JavaRefactoringRename implements FileEventHandler {
 
                 undoChanges();
 
-                notificationManager.notify(locale.failedToRename(), arg.getMessage(), FAIL, true);
+                notificationManager.notify(locale.failedToRename(), arg.getMessage(), FAIL, FLOAT_MODE);
             }
         });
     }

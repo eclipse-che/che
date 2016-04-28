@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -112,7 +113,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                             .catchError(new Operation<PromiseError>() {
                                 @Override
                                 public void apply(PromiseError arg) throws OperationException {
-                                    notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, true);
+                                    notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
                                 }
                             });
     }
@@ -161,7 +162,7 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
                             .catchError(new Operation<PromiseError>() {
                                 @Override
                                 public void apply(PromiseError arg) throws OperationException {
-                                    notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, true);
+                                    notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
                                 }
                             });
     }

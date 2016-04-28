@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -217,6 +218,6 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         } else {
             errorMessage = constants.commitFailed();
         }
-        this.notificationManager.notify(errorMessage, FAIL, true);
+        this.notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
     }
 }

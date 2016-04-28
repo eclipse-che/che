@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -172,7 +174,7 @@ public class DebuggerPresenterTest extends BaseTest {
 
         verify(promiseString).catchError(operationPromiseErrorCaptor.capture());
         operationPromiseErrorCaptor.getValue().apply(promiseError);
-        notificationManager.notify(any(), eq(ERROR_MESSAGE), eq(FAIL), eq(true));
+        notificationManager.notify(any(), eq(ERROR_MESSAGE), eq(FAIL), eq(FLOAT_MODE));
         verify(constant).failedToGetVariableValueTitle();
     }
 
@@ -194,7 +196,7 @@ public class DebuggerPresenterTest extends BaseTest {
         doReturn(title).when(this.constant).debuggerConnectingTitle(address);
 
         presenter.onDebuggerAttached(debuggerDescriptor, promiseVoid);
-        notificationManager.notify(eq(address), eq(PROGRESS), eq(true));
+        notificationManager.notify(eq(address), eq(PROGRESS), eq(FLOAT_MODE));
     }
 
     @Test
@@ -206,7 +208,7 @@ public class DebuggerPresenterTest extends BaseTest {
         doReturn(description).when(this.constant).debuggerDisconnectedDescription(address);
 
         presenter.onDebuggerDisconnected();
-        notificationManager.notify(eq(title), eq(description), eq(SUCCESS), eq(false));
+        notificationManager.notify(eq(title), eq(description), eq(SUCCESS), eq(NOT_EMERGE_MODE));
     }
 
     @Test

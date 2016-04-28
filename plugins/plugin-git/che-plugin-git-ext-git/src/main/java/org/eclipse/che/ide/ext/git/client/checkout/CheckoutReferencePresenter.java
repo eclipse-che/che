@@ -36,6 +36,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.loging.Log;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -146,7 +147,7 @@ public class CheckoutReferencePresenter implements CheckoutReferenceView.ActionD
                                  GitOutputConsole console = gitOutputConsoleFactory.create(CHECKOUT_COMMAND_NAME);
                                  console.printError(errorMessage);
                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                 notificationManager.notify(constant.checkoutFailed(), FAIL, true, project);
+                                 notificationManager.notify(constant.checkoutFailed(), FAIL, FLOAT_MODE, project);
                              }
                          }
                         );

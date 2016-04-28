@@ -45,6 +45,7 @@ import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -126,14 +127,14 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
     @Override
     public void tryStartWorkspace() {
         if (this.workspaceId == null) {
-            notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceIdUndefined(), FAIL, true);
+            notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceIdUndefined(), FAIL, FLOAT_MODE);
             return;
         }
 
         getWorkspaceToStart().then(checkWorkspaceIsStarted()).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(locale.workspaceNotReady(workspaceId), locale.workspaceGetFailed(), FAIL, true);
+                notificationManager.notify(locale.workspaceNotReady(workspaceId), locale.workspaceGetFailed(), FAIL, FLOAT_MODE);
                 Log.error(getClass(), arg.getMessage());
             }
         });
@@ -148,7 +149,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
                 if (!RUNNING.equals(workspace.getStatus())) {
-                    notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, true);
+                    notificationManager.notify(locale.failedToLoadFactory(), locale.workspaceNotRunning(), FAIL, FLOAT_MODE);
                     throw new OperationException(locale.workspaceNotRunning());
                 } else {
                     startWorkspace().apply(workspace);

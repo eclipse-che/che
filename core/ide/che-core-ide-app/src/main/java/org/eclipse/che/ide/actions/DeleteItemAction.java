@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper.createFromCallback;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -169,7 +170,7 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
 
                     @Override
                     protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, false);
+                        notificationManager.notify(exception.getMessage(), FAIL, NOT_EMERGE_MODE);
                     }
                 });
             }
@@ -203,7 +204,7 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
 
                         @Override
                         protected void onFailure(Throwable exception) {
-                            notificationManager.notify(locale.deleteAddToIndexIndexFailedToUpdate(), exception.getMessage(), FAIL, false);
+                            notificationManager.notify(locale.deleteAddToIndexIndexFailedToUpdate(), exception.getMessage(), FAIL, NOT_EMERGE_MODE);
                         }
                     });
                 } catch (WebSocketException e) {

@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -85,7 +86,7 @@ public class WorkspaceSnapshotCreator {
      *         id of the workspace to create snapshot from.
      */
     public void createSnapshot(String workspaceId) {
-        notification = notificationManager.notify(locale.createSnapshotProgress(), PROGRESS, true);
+        notification = notificationManager.notify(locale.createSnapshotProgress(), PROGRESS, FLOAT_MODE);
         workspaceService.createSnapshot(workspaceId)
                         .catchError(new Operation<PromiseError>() {
                             @Override
