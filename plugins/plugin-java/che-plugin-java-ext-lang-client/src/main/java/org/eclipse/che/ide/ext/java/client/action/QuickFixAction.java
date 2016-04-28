@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 /**
  * Action to show Quick fix in editor.
@@ -45,8 +45,8 @@ public class QuickFixAction extends JavaEditorAction {
         if(activeEditor == null){
             return;
         }
-        if(activeEditor instanceof EmbeddedTextEditorPresenter) {
-            ((EmbeddedTextEditorPresenter)activeEditor).showQuickAssist();
+        if(activeEditor instanceof TextEditorPresenter) {
+            ((TextEditorPresenter)activeEditor).showQuickAssist();
         }
     }
 }

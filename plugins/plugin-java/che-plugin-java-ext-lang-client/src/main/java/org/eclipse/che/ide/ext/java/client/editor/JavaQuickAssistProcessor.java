@@ -30,7 +30,7 @@ import org.eclipse.che.ide.jseditor.client.link.HasLinkedMode;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistInvocationContext;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.jseditor.client.text.LinearRange;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -107,7 +107,7 @@ public class JavaQuickAssistProcessor implements QuickAssistProcessor {
                 /*final Map<Annotation, Position> problems =*/
                 int offset = collectQuickFixableAnnotations(range, document, annotations, goToClosest, problems);
                 if (offset != range.getStartOffset()) {
-                    EmbeddedTextEditorPresenter presenter = ((EmbeddedTextEditorPresenter)textEditor);
+                    TextEditorPresenter presenter = ((TextEditorPresenter)textEditor);
                     presenter.getCursorModel().setCursorPosition(offset);
                 }
 

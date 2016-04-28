@@ -62,12 +62,11 @@ public class TextEditorInit<T extends EditorWidget> {
     private static final String CONTENT_ASSIST = "Content assist";
     private static final String QUICK_FIX      = "Quick fix";
 
-    private final TextEditorConfiguration        configuration;
-    private final EventBus                       generalEventBus;
-    private final CodeAssistantFactory           codeAssistantFactory;
-    private final EmbeddedTextEditorPresenter<T> textEditor;
-    private final QuickAssistAssistant           quickAssist;
-
+    private final TextEditorConfiguration configuration;
+    private final EventBus                generalEventBus;
+    private final CodeAssistantFactory    codeAssistantFactory;
+    private final TextEditorPresenter<T>  textEditor;
+    private final QuickAssistAssistant    quickAssist;
 
     /**
      * The quick assist assistant.
@@ -76,8 +75,7 @@ public class TextEditorInit<T extends EditorWidget> {
                           final EventBus generalEventBus,
                           final CodeAssistantFactory codeAssistantFactory,
                           final QuickAssistAssistant quickAssist,
-                          final EmbeddedTextEditorPresenter<T> textEditor) {
-
+                          final TextEditorPresenter<T> textEditor) {
         this.configuration = configuration;
         this.generalEventBus = generalEventBus;
         this.codeAssistantFactory = codeAssistantFactory;

@@ -21,7 +21,7 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
 import org.eclipse.che.ide.jseditor.client.codeassist.HasCompletionInformation;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 /**
  * @author Evgen Vidolob
@@ -51,8 +51,8 @@ public class QuickDocumentationAction extends JavaEditorAction {
         if(activeEditor == null){
             return;
         }
-        if(activeEditor instanceof EmbeddedTextEditorPresenter && activeEditor instanceof HasCompletionInformation) {
-            if (((EmbeddedTextEditorPresenter)activeEditor).isCompletionProposalsShowing() ) {
+        if(activeEditor instanceof TextEditorPresenter && activeEditor instanceof HasCompletionInformation) {
+            if (((TextEditorPresenter)activeEditor).isCompletionProposalsShowing() ) {
                 ((HasCompletionInformation)activeEditor).showCompletionInformation();
                 return;
             }

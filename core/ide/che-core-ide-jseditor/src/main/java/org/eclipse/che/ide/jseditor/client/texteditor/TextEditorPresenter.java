@@ -93,89 +93,90 @@ import java.util.Map;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
- * Presenter part for the embedded variety of editor implementations.
+ * Presenter part for the editor implementations.
  */
-public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends AbstractEditorPresenter implements EmbeddedTextEditor,
-                                                                                                            FileEventHandler,
-                                                                                                            UndoableEditor,
-                                                                                                            HasBreakpointRenderer,
-                                                                                                            HasReadOnlyProperty,
-                                                                                                            HandlesTextOperations,
-                                                                                                            EditorWithAutoSave,
-                                                                                                            EditorWithErrors,
-                                                                                                            HasHotKeyItems,
-                                                                                                            Delegate {
-
+public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorPresenter implements EmbeddedTextEditor,
+                                                                                                    FileEventHandler,
+                                                                                                    UndoableEditor,
+                                                                                                    HasBreakpointRenderer,
+                                                                                                    HasReadOnlyProperty,
+                                                                                                    HandlesTextOperations,
+                                                                                                    EditorWithAutoSave,
+                                                                                                    EditorWithErrors,
+                                                                                                    HasHotKeyItems,
+                                                                                                    Delegate {
     /** File type used when we have no idea of the actual content type. */
-    public final static String DEFAULT_CONTENT_TYPE = "text/plain";
+    public static final String DEFAULT_CONTENT_TYPE = "text/plain";
 
     private static final String TOGGLE_LINE_BREAKPOINT = "Toggle line breakpoint";
 
-    private final WorkspaceAgent           workspaceAgent;
-    private final EditorWidgetFactory<T>   editorWidgetFactory;
-    private final EditorModule<T>          editorModule;
-    private final JsEditorConstants        constant;
-
+    private final CodeAssistantFactory       codeAssistantFactory;
+    private final BreakpointManager          breakpointManager;
+    private final BreakpointRendererFactory  breakpointRendererFactory;
+    private final DialogFactory              dialogFactory;
     private final DocumentStorage            documentStorage;
+    private final JsEditorConstants          constant;
+    private final EditorWidgetFactory<T>     editorWidgetFactory;
+    private final EditorModule<T>            editorModule;
+    private final EmbeddedTextEditorPartView editorView;
     private final EventBus                   generalEventBus;
     private final FileTypeIdentifier         fileTypeIdentifier;
-    private final DialogFactory              dialogFactory;
-    private final CodeAssistantFactory       codeAssistantFactory;
     private final QuickAssistantFactory      quickAssistantFactory;
-    private final BreakpointManager          breakpointManager;
-    private final EmbeddedTextEditorPartView editorView;
+    private final WorkspaceAgent             workspaceAgent;
+    private final NotificationManager        notificationManager;
+
     /** The editor handle for this editor. */
-    private final EditorHandle handle = new EditorHandle() {
-    };
+    private final EditorHandle handle;
+
+    private HasKeybindings           keyBindingsManager;
     private List<EditorUpdateAction> updateActions;
     private TextEditorConfiguration  configuration;
     private EditorWidget             editorWidget;
     private Document                 document;
     private CursorModelWithHandler   cursorModel;
     private QuickAssistAssistant     quickAssistant;
-    private HasKeybindings keyBindingsManager = new TemporaryKeybindingsManager();
-    private LoaderFactory       loaderFactory;
-    private NotificationManager notificationManager;
+    private LoaderFactory            loaderFactory;
     /** The editor's error state. */
-    private EditorState         errorState;
-    private boolean delayedFocus = false;
-    private boolean isFocused    = false;
-    private BreakpointRendererFactory breakpointRendererFactory;
-    private BreakpointRenderer        breakpointRenderer;
-    private List<String>              fileTypes;
-
-    private TextPosition cursorPosition;
+    private EditorState              errorState;
+    private boolean                  delayedFocus;
+    private boolean                  isFocused;
+    private BreakpointRenderer       breakpointRenderer;
+    private List<String>             fileTypes;
+    private TextPosition             cursorPosition;
 
     @AssistedInject
-    public EmbeddedTextEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
-                                       final BreakpointManager breakpointManager,
-                                       final BreakpointRendererFactory breakpointRendererFactory,
-                                       final DialogFactory dialogFactory,
-                                       final DocumentStorage documentStorage,
-                                       final JsEditorConstants constant,
-                                       @Assisted final EditorWidgetFactory<T> editorWidgetFactory,
-                                       final EditorModule<T> editorModule,
-                                       final EmbeddedTextEditorPartView editorView,
-                                       final EventBus eventBus,
-                                       final FileTypeIdentifier fileTypeIdentifier,
-                                       final QuickAssistantFactory quickAssistantFactory,
-                                       final WorkspaceAgent workspaceAgent,
-                                       final NotificationManager notificationManager) {
-
+    public TextEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
+                               final BreakpointManager breakpointManager,
+                               final BreakpointRendererFactory breakpointRendererFactory,
+                               final DialogFactory dialogFactory,
+                               final DocumentStorage documentStorage,
+                               final JsEditorConstants constant,
+                               @Assisted final EditorWidgetFactory<T> editorWidgetFactory,
+                               final EditorModule<T> editorModule,
+                               final EmbeddedTextEditorPartView editorView,
+                               final EventBus eventBus,
+                               final FileTypeIdentifier fileTypeIdentifier,
+                               final QuickAssistantFactory quickAssistantFactory,
+                               final WorkspaceAgent workspaceAgent,
+                               final NotificationManager notificationManager) {
+        this.codeAssistantFactory = codeAssistantFactory;
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
-        this.codeAssistantFactory = codeAssistantFactory;
-        this.constant = constant;
         this.dialogFactory = dialogFactory;
         this.documentStorage = documentStorage;
-        this.editorView = editorView;
-        this.editorModule = editorModule;
+        this.constant = constant;
         this.editorWidgetFactory = editorWidgetFactory;
-        this.fileTypeIdentifier = fileTypeIdentifier;
+        this.editorModule = editorModule;
+        this.editorView = editorView;
         this.generalEventBus = eventBus;
+        this.fileTypeIdentifier = fileTypeIdentifier;
         this.quickAssistantFactory = quickAssistantFactory;
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
+
+        keyBindingsManager = new TemporaryKeybindingsManager();
+        handle = new EditorHandle() {
+        };
 
         this.editorView.setDelegate(this);
         eventBus.addHandler(FileEvent.TYPE, this);
@@ -267,7 +268,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
                 int currentLine = editorWidget.getDocument().getCursorPosition().getLine();
                 breakpointManager.changeBreakpointState(currentLine);
             }
-        }),  TOGGLE_LINE_BREAKPOINT);
+        }), TOGGLE_LINE_BREAKPOINT);
     }
 
     private void setupFileContentUpdateHandler() {
@@ -501,7 +502,6 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
 
     @Override
     public void doSaveAs() {
-        // TODO not implemented
     }
 
     @Override
@@ -668,7 +668,6 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
         }
     }
 
-    /** {@inheritDoc} */
     @Override
     public List<HotKeyItem> getHotKeys() {
         return editorWidget.getHotKeys();
@@ -751,7 +750,6 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
         return this.isFocused;
     }
 
-    /** {@inheritDoc} */
     @Override
     public void setFocus() {
         editorWidget.setFocus();
@@ -841,10 +839,7 @@ public class EmbeddedTextEditorPresenter<T extends EditorWidget> extends Abstrac
 
                     isInitialized = true;
                 }
-
             });
-
         }
     }
-
 }

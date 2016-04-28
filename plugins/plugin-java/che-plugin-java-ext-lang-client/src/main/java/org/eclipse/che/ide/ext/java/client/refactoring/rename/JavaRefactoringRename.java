@@ -45,7 +45,7 @@ import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
 import org.eclipse.che.ide.jseditor.client.link.LinkedModel;
 import org.eclipse.che.ide.jseditor.client.link.LinkedModelData;
 import org.eclipse.che.ide.jseditor.client.link.LinkedModelGroup;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
@@ -277,8 +277,8 @@ public class JavaRefactoringRename implements FileEventHandler {
     }
 
     private void undoChanges() {
-        if (linkedEditor instanceof EmbeddedTextEditorPresenter) {
-            ((EmbeddedTextEditorPresenter)linkedEditor).getUndoRedo().undo();
+        if (linkedEditor instanceof TextEditorPresenter) {
+            ((TextEditorPresenter)linkedEditor).getUndoRedo().undo();
         }
     }
 

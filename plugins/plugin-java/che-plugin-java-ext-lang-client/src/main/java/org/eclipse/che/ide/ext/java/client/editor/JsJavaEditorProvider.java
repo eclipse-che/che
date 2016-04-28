@@ -16,7 +16,7 @@ import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
 import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
@@ -53,8 +53,8 @@ public class JsJavaEditorProvider extends AbstractEditorProvider {
 
         final ConfigurableTextEditor textEditor = super.getEditor();
 
-        if (textEditor instanceof EmbeddedTextEditorPresenter) {
-            final EmbeddedTextEditorPresenter<?> editor = (EmbeddedTextEditorPresenter<?>)textEditor;
+        if (textEditor instanceof TextEditorPresenter) {
+            final TextEditorPresenter<?> editor = (TextEditorPresenter<?>)textEditor;
             final TextEditorConfiguration configuration = configurationFactory.create(editor);
             editor.initialize(configuration);
             editor.addEditorUpdateAction(new EditorUpdateAction() {

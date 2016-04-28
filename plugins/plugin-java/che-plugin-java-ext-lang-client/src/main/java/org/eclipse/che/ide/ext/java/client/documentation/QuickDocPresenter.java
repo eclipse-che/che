@@ -18,7 +18,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -48,12 +48,12 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
             return;
         }
 
-        if (!(activeEditor instanceof EmbeddedTextEditorPresenter)) {
-            Log.error(getClass(), "Quick Document support only EmbeddedTextEditorPresenter as editor");
+        if (!(activeEditor instanceof TextEditorPresenter)) {
+            Log.error(getClass(), "Quick Document support only TextEditorPresenter as editor");
             return;
         }
 
-        EmbeddedTextEditorPresenter editor = ((EmbeddedTextEditorPresenter)activeEditor);
+        TextEditorPresenter editor = ((TextEditorPresenter)activeEditor);
         int offset = editor.getCursorOffset();
         final PositionConverter.PixelCoordinates coordinates = editor.getPositionConverter().offsetToPixel(offset);
         view.show(appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/" + appContext.getDevMachine().getWorkspace() + "/javadoc/find?fqn=" +

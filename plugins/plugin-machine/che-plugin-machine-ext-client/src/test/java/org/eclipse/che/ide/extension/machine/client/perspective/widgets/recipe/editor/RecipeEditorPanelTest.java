@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
 import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,11 +55,11 @@ public class RecipeEditorPanelTest {
     private OrionTextEditorFactory orionTextEditorFactory;
 
     @Mock
-    private VirtualFile                                    recipeFile;
+    private VirtualFile                            recipeFile;
     @Mock
-    private RecipeEditorPanel.ActionDelegate               delegate;
+    private RecipeEditorPanel.ActionDelegate       delegate;
     @Mock
-    private EmbeddedTextEditorPresenter<OrionEditorWidget> editor;
+    private TextEditorPresenter<OrionEditorWidget> editor;
 
     private RecipeEditorPanel presenter;
 

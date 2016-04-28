@@ -45,17 +45,17 @@ import org.eclipse.che.ide.jseditor.client.texteditor.EditorModule;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidgetFactory;
 import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
- * {@link EmbeddedTextEditorPresenter} using orion.
+ * {@link TextEditorPresenter} using orion.
  * This class is only defined to allow the Gin binding to be performed.
  */
-public class OrionEditorPresenter extends EmbeddedTextEditorPresenter<OrionEditorWidget> implements HasAnnotationRendering,
-                                                                                                    HasLinkedMode,
-                                                                                                    HasCompletionInformation,
-                                                                                                    HasGutter {
+public class OrionEditorPresenter extends TextEditorPresenter<OrionEditorWidget> implements HasAnnotationRendering,
+                                                                                            HasLinkedMode,
+                                                                                            HasCompletionInformation,
+                                                                                            HasGutter {
 
     private final AnnotationRendering rendering = new AnnotationRendering();
 

@@ -32,7 +32,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.jseditor.client.document.Document;
 import org.eclipse.che.ide.jseditor.client.popup.PopupResources;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class OpenImplementationPresenterTest {
     private JavaLocalizationConstant locale;
 
     @Mock
-    private EmbeddedTextEditorPresenter           editorPartPresenter;
+    private TextEditorPresenter                   editorPartPresenter;
     @Mock
     private EditorInput                           editorInput;
     @Mock

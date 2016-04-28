@@ -11,13 +11,13 @@
 package org.eclipse.che.ide.ext.java.client.editor;
 
 import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 /**
  * Factory of reconciler factories for java documents.
  */
 public interface JavaReconcilerStrategyFactory {
-    JavaReconcilerStrategy create(EmbeddedTextEditorPresenter< ? > editor,
+    JavaReconcilerStrategy create(TextEditorPresenter< ? > editor,
                                   JavaCodeAssistProcessor codeAssistProcessor,
                                   AnnotationModel annotationModel);
 }

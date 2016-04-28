@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.paraminfo.ParametersHintsPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 /**
  * @author Dmitry Shnurenko
@@ -42,10 +42,10 @@ public class ParametersHintsAction extends JavaEditorAction {
     @Override
     public void actionPerformed(ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (!(activeEditor instanceof EmbeddedTextEditorPresenter)) {
+        if (!(activeEditor instanceof TextEditorPresenter)) {
             return;
         }
 
-        parametersHintsPresenter.show((EmbeddedTextEditorPresenter)activeEditor);
+        parametersHintsPresenter.show((TextEditorPresenter)activeEditor);
     }
 }

@@ -40,7 +40,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.jseditor.client.popup.PopupResources;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
 import org.eclipse.che.ide.jseditor.client.text.LinearRange;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.util.loging.Log;
@@ -64,7 +64,7 @@ public class OpenImplementationPresenter {
     private final PopupResources           popupResources;
     private final JavaLocalizationConstant locale;
 
-    private EmbeddedTextEditorPresenter activeEditor;
+    private TextEditorPresenter activeEditor;
 
     @Inject
     public OpenImplementationPresenter(JavaNavigationService javaNavigationService,
@@ -94,11 +94,11 @@ public class OpenImplementationPresenter {
      *         the active editor
      */
     public void show(final EditorPartPresenter editorPartPresenter) {
-        if (!(editorPartPresenter instanceof EmbeddedTextEditorPresenter)) {
-            Log.error(getClass(), "Open Declaration support only EmbeddedTextEditorPresenter as editor");
+        if (!(editorPartPresenter instanceof TextEditorPresenter)) {
+            Log.error(getClass(), "Open Declaration support only TextEditorPresenter as editor");
             return;
         }
-        activeEditor = ((EmbeddedTextEditorPresenter)editorPartPresenter);
+        activeEditor = ((TextEditorPresenter)editorPartPresenter);
         final VirtualFile file = activeEditor.getEditorInput().getFile();
 
         String projectPath = file.getProject().getProjectConfig().getPath();
@@ -121,9 +121,9 @@ public class OpenImplementationPresenter {
                 } else if (overridingSize > 1) {
                     openOneImplementation(implementationsDescriptor,
                                           noImplementationWidget,
-                                          (EmbeddedTextEditorPresenter)editorPartPresenter);
+                                          (TextEditorPresenter)editorPartPresenter);
                 } else if (!isNullOrEmpty(implementationsDescriptor.getMemberName()) && overridingSize == 0) {
-                    showNoImplementations(noImplementationWidget, (EmbeddedTextEditorPresenter)editorPartPresenter);
+                    showNoImplementations(noImplementationWidget, (TextEditorPresenter)editorPartPresenter);
                 }
             }
         }).catchError(new Operation<PromiseError>() {
@@ -159,7 +159,7 @@ public class OpenImplementationPresenter {
         });
     }
 
-    private void showNoImplementations(NoImplementationWidget noImplementationWidget, EmbeddedTextEditorPresenter editorPartPresenter) {
+    private void showNoImplementations(NoImplementationWidget noImplementationWidget, TextEditorPresenter editorPartPresenter) {
         int offset = editorPartPresenter.getCursorOffset();
         PositionConverter.PixelCoordinates coordinates = editorPartPresenter.getPositionConverter().offsetToPixel(offset);
         Type type = dtoFactory.createDto(Type.class);
@@ -170,7 +170,7 @@ public class OpenImplementationPresenter {
 
     private void openOneImplementation(ImplementationsDescriptorDTO implementationsDescriptor,
                                        NoImplementationWidget implementationWidget,
-                                       EmbeddedTextEditorPresenter editorPartPresenter) {
+                                       TextEditorPresenter editorPartPresenter) {
         int offset = editorPartPresenter.getCursorOffset();
         PositionConverter.PixelCoordinates coordinates = editorPartPresenter.getPositionConverter().offsetToPixel(offset);
         for (Type type : implementationsDescriptor.getImplementations()) {
@@ -232,13 +232,13 @@ public class OpenImplementationPresenter {
     }
 
     private void setCursorPosition(final Region region) {
-        if (!(editorAgent.getActiveEditor() instanceof EmbeddedTextEditorPresenter)) {
+        if (!(editorAgent.getActiveEditor() instanceof TextEditorPresenter)) {
             return;
         }
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                EmbeddedTextEditorPresenter editor = (EmbeddedTextEditorPresenter)editorAgent.getActiveEditor();
+                TextEditorPresenter editor = (TextEditorPresenter)editorAgent.getActiveEditor();
                 editor.setFocus();
                 editor.getDocument().setSelectedRange(LinearRange.createWithStart(region.getOffset()).andLength(0), true);
             }

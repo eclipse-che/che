@@ -54,7 +54,7 @@ import static org.mockito.Mockito.verify;
  * @author Andrienko Alexander
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class EmbeddedTextEditorPresenterTest {
+public class TextEditorPresenterTest {
 
     @Mock
     private DocumentStorage                   documentStorage;
@@ -89,12 +89,12 @@ public class EmbeddedTextEditorPresenterTest {
     private Map<String, CodeAssistProcessor> codeAssistProcessors;
 
     @InjectMocks
-    private EmbeddedTextEditorPresenter<EditorWidget> embeddedTextEditorPresenter;
+    private TextEditorPresenter<EditorWidget> textEditorPresenter;
 
     @Test
     public void activateEditorIfEditorWidgetNotNull() throws EditorInitException {
         initializeAndInitEditor();
-        embeddedTextEditorPresenter.activate();
+        textEditorPresenter.activate();
 
         verify(editorWidget).refresh();
         verify(editorWidget).setFocus();
@@ -104,11 +104,11 @@ public class EmbeddedTextEditorPresenterTest {
     public void activateEditorIfEditorWidgetNull() throws Exception {
         reset(editorView, eventBus);
 
-        embeddedTextEditorPresenter.activate();
+        textEditorPresenter.activate();
 
-        Field delayedFocus = EmbeddedTextEditorPresenter.class.getDeclaredField("delayedFocus");
+        Field delayedFocus = TextEditorPresenter.class.getDeclaredField("delayedFocus");
         delayedFocus.setAccessible(true);
-        boolean fieldValue = (boolean)delayedFocus.get(embeddedTextEditorPresenter);
+        boolean fieldValue = (boolean)delayedFocus.get(textEditorPresenter);
 
         assertTrue(fieldValue);
     }
@@ -118,15 +118,15 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(contentFormatter).when(configuration).getContentFormatter();
         initializeAndInitEditor();
 
-        embeddedTextEditorPresenter.doOperation(TextEditorOperations.FORMAT);
+        textEditorPresenter.doOperation(TextEditorOperations.FORMAT);
 
         verify(contentFormatter).format(document);
     }
 
     @Test
     public void shouldFormatOperationWhenDocumentAndFormatterAreNull() throws EditorInitException {
-        embeddedTextEditorPresenter.initialize(configuration);
-        embeddedTextEditorPresenter.doOperation(TextEditorOperations.FORMAT);
+        textEditorPresenter.initialize(configuration);
+        textEditorPresenter.doOperation(TextEditorOperations.FORMAT);
 
         verify(contentFormatter, never()).format(document);
     }
@@ -135,8 +135,8 @@ public class EmbeddedTextEditorPresenterTest {
     public void shouldFormatOperationWhenFormatterIsNotNullButDocumentIsNull() throws EditorInitException {
         doReturn(contentFormatter).when(configuration).getContentFormatter();
 
-        embeddedTextEditorPresenter.initialize(configuration);
-        embeddedTextEditorPresenter.doOperation(TextEditorOperations.FORMAT);
+        textEditorPresenter.initialize(configuration);
+        textEditorPresenter.doOperation(TextEditorOperations.FORMAT);
 
         verify(contentFormatter, never()).format(document);
     }
@@ -146,7 +146,7 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(null).when(configuration).getContentFormatter();
         initializeAndInitEditor();
 
-        embeddedTextEditorPresenter.doOperation(TextEditorOperations.FORMAT);
+        textEditorPresenter.doOperation(TextEditorOperations.FORMAT);
 
         verify(contentFormatter, never()).format(document);
     }
@@ -157,7 +157,7 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(false).when(codeAssistProcessors).isEmpty();
         initializeAndInitEditor();
 
-        assertTrue(embeddedTextEditorPresenter.canDoOperation(TextEditorOperations.CODEASSIST_PROPOSALS));
+        assertTrue(textEditorPresenter.canDoOperation(TextEditorOperations.CODEASSIST_PROPOSALS));
     }
 
     @Test
@@ -166,7 +166,7 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(true).when(codeAssistProcessors).isEmpty();
         initializeAndInitEditor();
 
-        assertFalse(embeddedTextEditorPresenter.canDoOperation(TextEditorOperations.CODEASSIST_PROPOSALS));
+        assertFalse(textEditorPresenter.canDoOperation(TextEditorOperations.CODEASSIST_PROPOSALS));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(null).when(configuration).getContentAssistantProcessors();
         initializeAndInitEditor();
 
-        assertFalse(embeddedTextEditorPresenter.canDoOperation(TextEditorOperations.CODEASSIST_PROPOSALS));
+        assertFalse(textEditorPresenter.canDoOperation(TextEditorOperations.CODEASSIST_PROPOSALS));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(contentFormatter).when(configuration).getContentFormatter();
         initializeAndInitEditor();
 
-        assertTrue(embeddedTextEditorPresenter.canDoOperation(TextEditorOperations.FORMAT));
+        assertTrue(textEditorPresenter.canDoOperation(TextEditorOperations.FORMAT));
     }
 
     @Test
@@ -190,11 +190,11 @@ public class EmbeddedTextEditorPresenterTest {
         doReturn(null).when(configuration).getContentFormatter();
         initializeAndInitEditor();
 
-        assertFalse(embeddedTextEditorPresenter.canDoOperation(TextEditorOperations.FORMAT));
+        assertFalse(textEditorPresenter.canDoOperation(TextEditorOperations.FORMAT));
     }
 
     /**
-     * This method initialize EmbeddedTextEditorPresenter for testing
+     * This method initialize TextEditorPresenter for testing
      * @throws EditorInitException
      */
     public void initializeAndInitEditor() throws EditorInitException {
@@ -209,9 +209,9 @@ public class EmbeddedTextEditorPresenterTest {
                                                                             Matchers.<WidgetInitializedCallback>anyObject());
         doReturn(document).when(editorWidget).getDocument();
 
-        embeddedTextEditorPresenter.injectAsyncLoader(loaderFactory);
-        embeddedTextEditorPresenter.initialize(configuration);
-        embeddedTextEditorPresenter.init(editorInput, editorCallback);
+        textEditorPresenter.injectAsyncLoader(loaderFactory);
+        textEditorPresenter.initialize(configuration);
+        textEditorPresenter.init(editorInput, editorCallback);
 
         verify(documentStorage).getDocument(any(VirtualFile.class), callBackCaptor.capture());
 

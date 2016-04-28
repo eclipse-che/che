@@ -27,7 +27,7 @@ import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
 import org.eclipse.che.ide.jseditor.client.document.Document;
 import org.eclipse.che.ide.jseditor.client.reconciler.DirtyRegion;
 import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -36,17 +36,17 @@ import java.util.List;
 public class JavaReconcilerStrategy implements ReconcilingStrategy {
 
 
-    private final EmbeddedTextEditorPresenter<?> editor;
-    private final JavaCodeAssistProcessor        codeAssistProcessor;
-    private final AnnotationModel                annotationModel;
-    private final HandlerRegistration            handlerRegistration;
-    private       SemanticHighlightRenderer      highlighter;
-    private       JavaReconcileClient            client;
-    private       VirtualFile                    file;
+    private final TextEditorPresenter<?>    editor;
+    private final JavaCodeAssistProcessor   codeAssistProcessor;
+    private final AnnotationModel           annotationModel;
+    private final HandlerRegistration       handlerRegistration;
+    private       SemanticHighlightRenderer highlighter;
+    private       JavaReconcileClient       client;
+    private       VirtualFile               file;
     private boolean first = true;
 
     @AssistedInject
-    public JavaReconcilerStrategy(@Assisted @NotNull final EmbeddedTextEditorPresenter<?> editor,
+    public JavaReconcilerStrategy(@Assisted @NotNull final TextEditorPresenter<?> editor,
                                   @Assisted final JavaCodeAssistProcessor codeAssistProcessor,
                                   @Assisted final AnnotationModel annotationModel,
                                   final JavaReconcileClient client,

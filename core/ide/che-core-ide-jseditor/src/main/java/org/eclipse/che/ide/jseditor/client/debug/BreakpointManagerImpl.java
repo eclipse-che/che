@@ -44,7 +44,7 @@ import org.eclipse.che.ide.debug.HasBreakpointRenderer;
 import org.eclipse.che.ide.debug.dto.BreakpointDto;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
@@ -233,8 +233,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
      */
     private boolean isCodeExecutable(final VirtualFile activeFile, int lineNumber) {
         EditorPartPresenter editor = getEditorForFile(activeFile.getPath());
-        if (editor instanceof EmbeddedTextEditorPresenter) {
-            Document document = ((EmbeddedTextEditorPresenter)editor).getDocument();
+        if (editor instanceof TextEditorPresenter) {
+            Document document = ((TextEditorPresenter)editor).getDocument();
             return !document.getLineContent(lineNumber).trim().isEmpty();
         }
 
