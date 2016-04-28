@@ -17,8 +17,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.model.stack.Stack;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
+import org.eclipse.che.api.workspace.shared.stack.Stack;
 
 import org.eclipse.che.commons.annotation.Nullable;
 

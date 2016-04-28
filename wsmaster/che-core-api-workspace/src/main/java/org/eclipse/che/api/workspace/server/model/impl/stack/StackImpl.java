@@ -16,10 +16,10 @@ import org.eclipse.che.api.machine.server.recipe.PermissionsImpl;
 import org.eclipse.che.api.machine.shared.Group;
 import org.eclipse.che.api.machine.shared.Permissions;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.stack.Stack;
-import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
-import org.eclipse.che.api.workspace.server.model.stack.StackSource;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
+import org.eclipse.che.api.workspace.shared.stack.Stack;
+import org.eclipse.che.api.workspace.shared.stack.StackComponent;
+import org.eclipse.che.api.workspace.shared.stack.StackSource;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 

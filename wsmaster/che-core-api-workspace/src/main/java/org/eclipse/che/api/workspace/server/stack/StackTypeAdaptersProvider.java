@@ -28,9 +28,6 @@ import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsAdapter;
 import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
 import org.eclipse.che.api.machine.shared.Group;
 import org.eclipse.che.api.machine.shared.Permissions;
-import org.eclipse.che.api.workspace.server.model.stack.Stack;
-import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
-import org.eclipse.che.api.workspace.server.model.stack.StackSource;
 import org.eclipse.che.api.workspace.server.stack.adapters.CommandAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.EnvironmentAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.LimitsAdapter;
@@ -42,6 +39,8 @@ import org.eclipse.che.api.workspace.server.stack.adapters.StackIconAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.StackSourceAdapter;
 import org.eclipse.che.api.workspace.server.stack.adapters.WorkspaceConfigAdapter;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
+import org.eclipse.che.api.workspace.shared.stack.StackComponent;
+import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
 import java.util.HashMap;
 import java.util.Map;

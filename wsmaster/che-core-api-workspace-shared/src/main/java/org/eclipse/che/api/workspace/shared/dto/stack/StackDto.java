@@ -13,8 +13,8 @@ package org.eclipse.che.api.workspace.shared.dto.stack;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.recipe.PermissionsDescriptor;
-import org.eclipse.che.api.workspace.server.model.stack.Stack;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.model.stack;
+package org.eclipse.che.api.workspace.shared.stack;
 
 /**
  * Defines the interface that describes the stack source. It is a part of the {@link Stack}
