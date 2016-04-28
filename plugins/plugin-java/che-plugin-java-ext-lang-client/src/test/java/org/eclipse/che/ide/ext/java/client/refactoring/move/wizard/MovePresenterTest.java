@@ -54,6 +54,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
@@ -271,7 +272,7 @@ public class MovePresenterTest {
 
         verify(locale).showPreviewError();
         verify(promiseError).getMessage();
-        verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(true));
+        verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(FLOAT_MODE));
     }
 
     @Test
@@ -330,7 +331,7 @@ public class MovePresenterTest {
 
         verify(locale).applyMoveError();
         verify(promiseError).getMessage();
-        verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(true));
+        verify(notificationManager).notify(anyString(), anyString(), eq(FAIL), eq(FLOAT_MODE));
     }
 
     @Test

@@ -51,6 +51,7 @@ import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.INFO;
@@ -130,7 +131,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), Status.FAIL, true);
+                notificationManager.notify(error.getMessage(), Status.FAIL, FLOAT_MODE);
             }
         });
     }
@@ -192,7 +193,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(locale.showPackagesError(), error.getMessage(), Status.FAIL, true);
+                notificationManager.notify(locale.showPackagesError(), error.getMessage(), Status.FAIL, FLOAT_MODE);
             }
         });
     }
@@ -216,7 +217,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(locale.showPreviewError(), error.getMessage(), Status.FAIL, true);
+                notificationManager.notify(locale.showPreviewError(), error.getMessage(), Status.FAIL, FLOAT_MODE);
             }
         });
     }
@@ -249,7 +250,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(locale.applyMoveError(), error.getMessage(), Status.FAIL, true);
+                notificationManager.notify(locale.applyMoveError(), error.getMessage(), Status.FAIL, FLOAT_MODE);
             }
         });
     }

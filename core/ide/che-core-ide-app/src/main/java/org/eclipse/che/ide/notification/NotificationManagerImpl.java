@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.NotificationObserver;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
+import org.eclipse.che.ide.api.notification.StatusNotificationListener;
 import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -31,8 +32,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Enum.valueOf;
 import static org.eclipse.che.ide.api.notification.ReadState.READ;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 
 /**
  * The implementation of {@link NotificationManager}.
@@ -49,23 +52,21 @@ import static org.eclipse.che.ide.api.notification.ReadState.READ;
 @Singleton
 public class NotificationManagerImpl extends BasePresenter implements NotificationManager,
                                                                       NotificationObserver,
+                                                                      StatusNotificationListener,
                                                                       NotificationManagerView.ActionDelegate,
                                                                       HasView {
     public static final String TITLE   = "Events";
     public static final String TOOLTIP = "Event Log";
 
-    private       NotificationManagerView view;
-    private       NotificationContainer   nContainer;
-    private       NotificationPopupStack  nPopupStack;
-    private List<Notification> notifications = new ArrayList<>();
+    private final NotificationManagerView view;
+    private final NotificationContainer   nContainer;
+    private final NotificationPopupStack  nPopupStack;
+    private final List<Notification> notifications = new ArrayList<>();
 
     private Resources resources;
 
     /** Count of unread notifications */
     private int unread = 0;
-
-    /** Flag that display panel open state */
-    private boolean opened;
 
     /**
      * Create instance of notification panel.
@@ -106,11 +107,9 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
     public void onValueChanged() {
         unread = 0;
 
-        if (!opened) {
-            for (Notification notification : notifications) {
-                if (!notification.isRead()) {
-                    unread++;
-                }
+        for (Notification notification : notifications) {
+            if (!notification.isRead()) {
+                unread++;
             }
         }
 
@@ -129,8 +128,8 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
         notification.addObserver(this);
         notifications.add(notification);
 
-        if (notification instanceof StatusNotification && ((StatusNotification)notification).isBalloon()) {
-            nPopupStack.push((StatusNotification)notification);
+        if (notification instanceof StatusNotification) {
+            handleStatusNotification((StatusNotification)notification);
         }
 
         nContainer.addNotification(notification);
@@ -144,6 +143,18 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
         });
 
         return notification;
+    }
+
+    /** Performs appropriate actions for correct displaying of {@link StatusNotification} */
+    private void handleStatusNotification(StatusNotification notification) {
+        DisplayMode displayMode = notification.getDisplayMode();
+        if (!displayMode.equals(NOT_EMERGE_MODE)) {
+            nPopupStack.push(notification);
+        }
+
+        if (displayMode.equals(EMERGE_MODE)) {
+            notification.setStatusListener(this);
+        }
     }
 
     /** {@inheritDoc} */
@@ -176,33 +187,38 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     /** {@inheritDoc} */
     @Override
-    public StatusNotification notify(String title, Status status, boolean balloon) {
-        return notify(new StatusNotification(title, status, balloon));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public StatusNotification notify(String title, Status status, boolean balloon, NotificationListener listener) {
-        return null;
+    public StatusNotification notify(String title,
+                                     Status status,
+                                     DisplayMode displayMode) {
+        return notify(new StatusNotification(title, status, displayMode));
     }
 
     /** {@inheritDoc} */
     @Override
     public StatusNotification notify(String title,
-                                     String content,
                                      Status status,
-                                     boolean balloon) {
-        return notify(title, content, status, balloon, (NotificationListener)null);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public StatusNotification notify(String title,
-                                     String content,
-                                     Status status,
-                                     boolean balloon,
+                                     DisplayMode displayMode,
                                      NotificationListener listener) {
-        return notify(title, content, status, balloon, listener, null);
+        return notify(new StatusNotification(title, status, displayMode, listener));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public StatusNotification notify(String title,
+                                     String content,
+                                     Status status,
+                                     DisplayMode displayMode) {
+        return notify(title, content, status, displayMode, (NotificationListener)null);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public StatusNotification notify(String title,
+                                     String content,
+                                     Status status,
+                                     DisplayMode displayMode,
+                                     NotificationListener listener) {
+        return notify(title, content, status, displayMode, listener, null);
     }
 
     /** {@inheritDoc} */
@@ -242,18 +258,18 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
     public StatusNotification notify(String title,
                                      String content,
                                      Status status,
-                                     boolean balloon,
+                                     DisplayMode displayMode,
                                      ProjectConfigDto project) {
-        return notify(title, content, status, balloon, null, project);
+        return notify(title, content, status, displayMode, null, project);
     }
 
     /** {@inheritDoc} */
     @Override
     public StatusNotification notify(String title,
                                      Status status,
-                                     boolean balloon,
+                                     DisplayMode displayMode,
                                      ProjectConfigDto project) {
-        return notify(title, null, status, balloon, null, project);
+        return notify(title, null, status, displayMode, null, project);
     }
 
     /** {@inheritDoc} */
@@ -261,20 +277,20 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
     public StatusNotification notify(String title,
                                      String content,
                                      Status status,
-                                     boolean balloon,
+                                     DisplayMode displayMode,
                                      NotificationListener listener,
                                      ProjectConfigDto project) {
-        return notify(new StatusNotification(title, content, status, balloon, project, listener));
+        return notify(new StatusNotification(title, content, status, displayMode, project, listener));
     }
 
     /** {@inheritDoc} */
     @Override
     public StatusNotification notify(String title,
                                      Status status,
-                                     boolean balloon,
+                                     DisplayMode displayMode,
                                      NotificationListener listener,
                                      ProjectConfigDto project) {
-        return notify(title, null, status, balloon, listener, project);
+        return notify(title, null, status, displayMode, listener, project);
     }
 
     /**
@@ -356,6 +372,14 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
         for (Notification notification : notifications) {
             notification.setState(READ);
+        }
+    }
+
+    @Override
+    public void onNotificationStatusChanged(StatusNotification notification) {
+        if (notification.getDisplayMode().equals(EMERGE_MODE)) {
+            nPopupStack.remove(notification);//to avoid displaying of notification a few times
+            nPopupStack.push(notification);
         }
     }
 }

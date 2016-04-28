@@ -14,6 +14,8 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
+
 /**
  * The manager for notifications. Used to show notifications and change their states.
  *
@@ -73,13 +75,13 @@ public interface NotificationManager extends PartPresenter {
      *         title
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @return notification object
      */
     StatusNotification notify(String title,
                               Status status,
-                              boolean balloon);
+                              DisplayMode displayMode);
 
     /**
      * Show notification.
@@ -105,14 +107,14 @@ public interface NotificationManager extends PartPresenter {
      *         content
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @return notification object
      */
     StatusNotification notify(String title,
                               String content,
                               Status status,
-                              boolean balloon);
+                              DisplayMode displayMode);
 
     /**
      * Show status notification.
@@ -123,8 +125,8 @@ public interface NotificationManager extends PartPresenter {
      *         content
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param listener
      *         notification event listener
      * @return notification object
@@ -132,7 +134,7 @@ public interface NotificationManager extends PartPresenter {
     StatusNotification notify(String title,
                               String content,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               NotificationListener listener);
 
     /**
@@ -142,15 +144,15 @@ public interface NotificationManager extends PartPresenter {
      *         title
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param listener
      *         notification event listener
      * @return notification object
      */
     StatusNotification notify(String title,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               NotificationListener listener);
 
     /**
@@ -222,8 +224,8 @@ public interface NotificationManager extends PartPresenter {
      *         content
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param project
      *         provide project information to which notification belongs
      * @return notification object
@@ -231,7 +233,7 @@ public interface NotificationManager extends PartPresenter {
     StatusNotification notify(String title,
                               String content,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               ProjectConfigDto project);
 
     /**
@@ -241,15 +243,15 @@ public interface NotificationManager extends PartPresenter {
      *         title
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param project
      *         provide project information to which notification belongs
      * @return notification object
      */
     StatusNotification notify(String title,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               ProjectConfigDto project);
 
     /**
@@ -261,8 +263,8 @@ public interface NotificationManager extends PartPresenter {
      *         content
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param listener
      *         notification event listener
      * @param project
@@ -272,7 +274,7 @@ public interface NotificationManager extends PartPresenter {
     StatusNotification notify(String title,
                               String content,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               NotificationListener listener,
                               ProjectConfigDto project);
 
@@ -283,8 +285,8 @@ public interface NotificationManager extends PartPresenter {
      *         title
      * @param status
      *         notification status
-     * @param balloon
-     *         true if notification should be balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param listener
      *         notification event listener
      * @param project
@@ -293,7 +295,7 @@ public interface NotificationManager extends PartPresenter {
      */
     StatusNotification notify(String title,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               NotificationListener listener,
                               ProjectConfigDto project);
 

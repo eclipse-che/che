@@ -19,6 +19,7 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.inject.Inject;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -68,7 +69,7 @@ public class AskCredentialsPresenter implements AskCredentialsDelegate {
 
     private void saveCredentials(final String username, final String password) {
         final StatusNotification notification =
-                new StatusNotification(constants.notificationSavingCredentials(repositoryUrl), PROGRESS, true);
+                new StatusNotification(constants.notificationSavingCredentials(repositoryUrl), PROGRESS, FLOAT_MODE);
         this.notificationManager.notify(notification);
         this.clientService.saveCredentials(this.repositoryUrl, username, password, new AsyncRequestCallback<Void>() {
             @Override

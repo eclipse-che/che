@@ -33,6 +33,7 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.history.HistoryPresenter.LOG_COMMAND_NAME;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -109,7 +110,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                             GitOutputConsole console = gitOutputConsoleFactory.create(LOG_COMMAND_NAME);
                             console.printError(errorMessage);
                             consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                            notificationManager.notify(constant.logFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
+                            notificationManager.notify(constant.logFailed(), FAIL, FLOAT_MODE, appContext.getCurrentProject().getRootProject());
                         }
                     }
                    );
@@ -175,7 +176,7 @@ public class ResetToCommitPresenter implements ResetToCommitView.ActionDelegate 
                               String errorMessage = (exception.getMessage() != null) ? exception.getMessage() : constant.resetFail();
                               console.printError(errorMessage);
                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                              notificationManager.notify(constant.resetFail(), FAIL, true, project);
+                              notificationManager.notify(constant.resetFail(), FAIL, FLOAT_MODE, project);
                           }
                       });
     }

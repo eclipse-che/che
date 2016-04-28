@@ -40,6 +40,7 @@ import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -126,7 +127,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
                     isTerminalConnected = false;
-                    notificationManager.notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, true);
+                    notificationManager.notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, FLOAT_MODE);
 
                     tryToReconnect();
 
@@ -187,7 +188,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
             public void onError() {
                 isTerminalConnected = false;
 
-                notificationManager.notify(locale.connectionFailedWithTerminal(), locale.terminalErrorConnection(), FAIL, true);
+                notificationManager.notify(locale.connectionFailedWithTerminal(), locale.terminalErrorConnection(), FAIL, FLOAT_MODE);
 
                 tryToReconnect();
             }

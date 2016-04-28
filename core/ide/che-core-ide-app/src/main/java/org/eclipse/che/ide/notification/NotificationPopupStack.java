@@ -92,6 +92,16 @@ public class NotificationPopupStack implements NotificationActionDelegate {
         stack.push(notification);
     }
 
+    /**
+     * Remove notification from message stack.
+     *
+     * @param notification
+     *         notification that need to remove
+     */
+    public void remove(@NotNull StatusNotification notification) {
+        stack.remove(notification);
+        onClose(notification);
+    }
 
     /** {@inheritDoc} */
     @Override

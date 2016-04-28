@@ -34,6 +34,7 @@ import org.eclipse.che.ide.util.UUID;
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -95,7 +96,7 @@ public class CommandManager {
 
     private void executeCommand(@NotNull CommandConfiguration configuration, @NotNull String machineId) {
         if (machineId == null) {
-            notificationManager.notify(localizationConstant.failedToExecuteCommand(), localizationConstant.noDevMachine(), FAIL, true);
+            notificationManager.notify(localizationConstant.failedToExecuteCommand(), localizationConstant.noDevMachine(), FAIL, FLOAT_MODE);
             return;
         }
 

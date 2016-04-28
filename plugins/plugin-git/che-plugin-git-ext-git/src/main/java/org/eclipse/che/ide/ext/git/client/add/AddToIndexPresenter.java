@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -123,7 +124,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
                            protected void onFailure(Throwable exception) {
                                console.printError(exception.getMessage() != null ? exception.getMessage() : constant.statusFailed());
                                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                               notificationManager.notify(constant.statusFailed(), FAIL, true, project.getRootProject());
+                               notificationManager.notify(constant.statusFailed(), FAIL, FLOAT_MODE, project.getRootProject());
                            }
                        });
     }
@@ -303,7 +304,7 @@ public class AddToIndexPresenter implements AddToIndexView.ActionDelegate {
         String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.addFailed();
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-        notificationManager.notify(constant.addFailed(), FAIL, true, project.getRootProject());
+        notificationManager.notify(constant.addFailed(), FAIL, FLOAT_MODE, project.getRootProject());
     }
 
     /**

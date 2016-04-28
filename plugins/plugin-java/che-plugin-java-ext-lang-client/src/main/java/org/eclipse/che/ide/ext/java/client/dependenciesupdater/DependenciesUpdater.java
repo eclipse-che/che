@@ -32,6 +32,7 @@ import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult.Status.SUCCESS;
 
@@ -80,7 +81,7 @@ public class DependenciesUpdater {
 
         final String path = config.getPath();
 
-        final StatusNotification notification = new StatusNotification(locale.updatingDependencies(path), PROGRESS, true);
+        final StatusNotification notification = new StatusNotification(locale.updatingDependencies(path), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
         Unmarshallable<ClassPathBuilderResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(ClassPathBuilderResult.class);

@@ -43,6 +43,7 @@ import java.util.List;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
 import static org.eclipse.che.api.git.shared.MergeResult.MergeStatus.ALREADY_UP_TO_DATE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.merge.Reference.RefType.LOCAL_BRANCH;
 import static org.eclipse.che.ide.ext.git.client.merge.Reference.RefType.REMOTE_BRANCH;
@@ -126,7 +127,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                protected void onFailure(Throwable exception) {
                                    console.printError(exception.getMessage());
                                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.branchesListFailed(), FAIL, true, project);
+                                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE, project);
                                }
                            });
 
@@ -149,7 +150,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                                protected void onFailure(Throwable exception) {
                                    console.printError(exception.getMessage());
                                    consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.branchesListFailed(), FAIL, true, project);
+                                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE, project);
                                }
                            });
 
@@ -194,7 +195,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
                               console.printError(exception.getMessage());
                               consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
                               notificationManager
-                                      .notify(constant.mergeFailed(), FAIL, true, appContext.getCurrentProject().getRootProject());
+                                      .notify(constant.mergeFailed(), FAIL, FLOAT_MODE, appContext.getCurrentProject().getRootProject());
                           }
                       });
     }

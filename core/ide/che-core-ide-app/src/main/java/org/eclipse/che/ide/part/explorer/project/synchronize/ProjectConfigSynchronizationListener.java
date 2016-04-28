@@ -40,6 +40,7 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -248,14 +249,14 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
             protected void onSuccess(Void result) {
                 eventBus.fireEvent(new DeleteProjectEvent(projectConfig));
 
-                notificationManager.notify(locale.projectRemoved(projectConfig.getName()), StatusNotification.Status.SUCCESS, true);
+                notificationManager.notify(locale.projectRemoved(projectConfig.getName()), StatusNotification.Status.SUCCESS, FLOAT_MODE);
             }
 
             @Override
             protected void onFailure(Throwable exception) {
                 Log.error(getClass(), exception);
 
-                notificationManager.notify(locale.projectRemoveError(projectConfig.getName()), FAIL, true);
+                notificationManager.notify(locale.projectRemoveError(projectConfig.getName()), FAIL, FLOAT_MODE);
             }
         });
     }
@@ -274,7 +275,7 @@ public class ProjectConfigSynchronizationListener implements BeforeExpandNodeEve
                                          protected void onFailure(Throwable exception) {
                                              Log.error(getClass(), exception);
 
-                                             notificationManager.notify(locale.projectUpdateError(projectConfig.getName()), FAIL, true);
+                                             notificationManager.notify(locale.projectUpdateError(projectConfig.getName()), FAIL, FLOAT_MODE);
                                          }
                                      });
     }

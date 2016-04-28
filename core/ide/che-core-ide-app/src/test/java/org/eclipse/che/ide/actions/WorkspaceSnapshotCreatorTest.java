@@ -20,6 +20,7 @@ import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,9 +30,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -74,7 +76,7 @@ public class WorkspaceSnapshotCreatorTest {
 
     @Before
     public void setup () throws Exception {
-        when(notificationManager.notify(anyString(), any(StatusNotification.Status.class), anyBoolean()))
+        when(notificationManager.notify(anyString(), any(StatusNotification.Status.class), (DisplayMode)anyObject()))
                 .thenReturn(notification);
         when(notification.getStatus()).thenReturn(StatusNotification.Status.PROGRESS);
     }
@@ -83,7 +85,7 @@ public class WorkspaceSnapshotCreatorTest {
     public void shouldShowNotificationWhenCreatingSnapshot() {
         snapshotCreator.createSnapshot("workspace123");
 
-        verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.PROGRESS), eq(true));
+        verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.PROGRESS), eq(FLOAT_MODE));
     }
 
     @Test

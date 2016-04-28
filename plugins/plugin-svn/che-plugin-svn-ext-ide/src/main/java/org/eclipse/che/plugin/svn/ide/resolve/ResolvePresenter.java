@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 public class ResolvePresenter extends SubversionActionPresenter implements ResolveView.ActionDelegate {
@@ -92,7 +93,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
 
                                                   @Override
                                                   public void onFailure(Throwable exception) {
-                                                      notificationManager.notify(exception.getMessage(), FAIL, true);
+                                                      notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                                                   }
                                               });
     }
@@ -154,7 +155,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
 
                                                 @Override
                                                 public void onFailure(Throwable exception) {
-                                                    notificationManager.notify(exception.getMessage(), FAIL, true);
+                                                    notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
                                                 }
                                             });
         }

@@ -92,6 +92,8 @@ import java.util.Map;
 
 import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
 import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -197,7 +199,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     public void onWsAgentStopped(WsAgentStateEvent event) {
         view.removeAllNodes();
         notificationManager.notify(locale.projectExplorerExtensionServerStopped(),
-                                   locale.projectExplorerExtensionServerStoppedDescription(), FAIL, false);
+                                   locale.projectExplorerExtensionServerStoppedDescription(), FAIL, NOT_EMERGE_MODE);
     }
 
     /** {@inheritDoc} */
@@ -288,7 +290,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                 }).catchError(new Operation<PromiseError>() {
                     @Override
                     public void apply(PromiseError arg) throws OperationException {
-                        notificationManager.notify(locale.projectExplorerProjectConfigurationFailed(descriptor.getName()), FAIL, true,
+                        notificationManager.notify(locale.projectExplorerProjectConfigurationFailed(descriptor.getName()), FAIL, FLOAT_MODE,
                                                    descriptor);
                         Log.warn(getClass(), arg.getMessage());
                     }
@@ -485,7 +487,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 Log.warn(getClass(), arg.getMessage());
-                notificationManager.notify(locale.failedToUpdateProject(project.getName()), FAIL, false, project);
+                notificationManager.notify(locale.failedToUpdateProject(project.getName()), FAIL, NOT_EMERGE_MODE, project);
             }
         });
     }

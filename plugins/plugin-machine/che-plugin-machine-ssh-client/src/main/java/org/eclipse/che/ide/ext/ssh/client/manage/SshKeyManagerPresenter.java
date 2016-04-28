@@ -34,6 +34,7 @@ import org.eclipse.che.ide.ui.dialogs.InputCallback;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -108,7 +109,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                .catchError(new Operation<PromiseError>() {
                    @Override
                    public void apply(PromiseError arg) throws OperationException {
-                       notificationManager.notify(arg.getMessage(), FAIL, true);
+                       notificationManager.notify(arg.getMessage(), FAIL, FLOAT_MODE);
                    }
                });
     }
@@ -139,7 +140,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                .catchError(new Operation<PromiseError>() {
                    @Override
                    public void apply(PromiseError arg) throws OperationException {
-                       notificationManager.notify(constant.failedToGenerateSshKey(), arg.getMessage(), FAIL, true);
+                       notificationManager.notify(constant.failedToGenerateSshKey(), arg.getMessage(), FAIL, FLOAT_MODE);
                    }
                });
     }
@@ -192,7 +193,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                .catchError(new Operation<PromiseError>() {
                    @Override
                    public void apply(PromiseError arg) throws OperationException {
-                       notificationManager.notify(constant.failedToLoadSshKeys(), FAIL, true);
+                       notificationManager.notify(constant.failedToLoadSshKeys(), FAIL, FLOAT_MODE);
                    }
                });
     }

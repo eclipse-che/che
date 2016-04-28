@@ -38,6 +38,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPARING_IDENTICAL_VALUES;
 import static org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorWarningsOptions.COMPILER_UNUSED_IMPORT;
@@ -247,6 +248,6 @@ public class JavaCompilerPreferencePresenterTest {
         errorOperationCaptor.getValue().apply(promiseError);
 
         verify(preferencesManager).loadPreferences();
-        verify(notificationManager).notify(anyString(), eq(FAIL), eq(true));
+        verify(notificationManager).notify(anyString(), eq(FAIL), eq(FLOAT_MODE));
     }
 }

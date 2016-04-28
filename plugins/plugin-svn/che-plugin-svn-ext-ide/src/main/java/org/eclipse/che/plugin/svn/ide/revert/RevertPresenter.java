@@ -33,6 +33,7 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -79,7 +80,7 @@ public class RevertPresenter extends SubversionActionPresenter {
         final ConfirmCallback okCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                final StatusNotification notification = new StatusNotification(constants.revertStarted(), PROGRESS, true);
+                final StatusNotification notification = new StatusNotification(constants.revertStarted(), PROGRESS, FLOAT_MODE);
                 notificationManager.notify(notification);
 
                 subversionClientService.revert(project.getRootProject().getPath(),
