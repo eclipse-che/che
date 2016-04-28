@@ -18,7 +18,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
-import org.eclipse.che.api.workspace.server.model.stack.StackSource;
+import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
 import java.lang.reflect.Type;
 

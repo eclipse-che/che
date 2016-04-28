@@ -8,19 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared;
+package org.eclipse.che.api.workspace.shared.dto.stack;
 
-import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
+import org.eclipse.che.api.workspace.shared.stack.StackSource;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Permissible interface should be implemented by data objects which require access.
- * It is commonly used with the {@link PermissionsChecker}.
- *
  * @author Alexander Andrienko
  */
-public interface Permissible {
-    /**
-     * Returns {@link Permissions} for access to the data object.
-     */
-    Permissions getPermissions();
+@DTO
+public interface StackSourceDto extends StackSource {
+    void setType(String type);
+
+    StackSourceDto withType(String type);
+
+    void setOrigin(String origin);
+
+    StackSourceDto withOrigin(String origin);
 }

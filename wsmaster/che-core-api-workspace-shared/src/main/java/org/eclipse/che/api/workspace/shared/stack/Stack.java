@@ -8,12 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.model.stack;
+package org.eclipse.che.api.workspace.shared.stack;
 
 import com.sun.istack.internal.Nullable;
 
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.shared.Permissible;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 import java.util.List;
 

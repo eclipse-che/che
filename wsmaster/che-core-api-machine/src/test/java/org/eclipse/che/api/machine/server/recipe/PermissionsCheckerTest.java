@@ -16,7 +16,6 @@ import org.eclipse.che.api.machine.shared.ManagedRecipe;
 //import org.eclipse.che.api.workspace.server.dao.Member;
 //import org.eclipse.che.api.workspace.server.dao.MemberDao;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -26,7 +25,6 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 

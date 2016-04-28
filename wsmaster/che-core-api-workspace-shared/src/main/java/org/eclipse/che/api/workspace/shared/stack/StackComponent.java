@@ -8,21 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.shared.dto.stack;
-
-import org.eclipse.che.api.workspace.server.model.stack.StackSource;
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.api.workspace.shared.stack;
 
 /**
+ * Defines the interface that describes the stack component. It is a part of the {@link Stack}.
+ *
  * @author Alexander Andrienko
  */
-@DTO
-public interface StackSourceDto extends StackSource {
-    void setType(String type);
+public interface StackComponent {
 
-    StackSourceDto withType(String type);
+    /**
+     * Returns the name of the component.
+     * The name is unique per stack. (e.g. "jdk").
+     */
+    String getName();
 
-    void setOrigin(String origin);
-
-    StackSourceDto withOrigin(String origin);
+    /**
+     * Returns the version of the component. (e.g. "1.8")
+     */
+    String getVersion();
 }

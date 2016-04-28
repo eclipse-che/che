@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.dto.stack;
 
-import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
+
+import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
