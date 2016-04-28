@@ -19,10 +19,10 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.server.model.stack.Stack;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
+import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

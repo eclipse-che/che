@@ -20,8 +20,9 @@ class IdeListItemNavbarCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(ideSvc) {
+  constructor(ideSvc, cheWorkspace) {
     this.ideSvc = ideSvc;
+    this.cheWorkspace = cheWorkspace;
   }
 
   displayIDE() {
@@ -32,7 +33,12 @@ class IdeListItemNavbarCtrl {
     return this.ideSvc.hasIdeLink();
   }
 
-
+  /**
+   * Check if last opened in IDE workspace is available
+   */
+  isWorkspaceAvailable() {
+    return this.ideSvc.lastWorkspace != null && this.cheWorkspace.getWorkspaceById(this.ideSvc.lastWorkspace.id) != null;
+  }
 }
 
 

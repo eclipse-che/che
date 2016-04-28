@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl.stack;
 
-import org.eclipse.che.api.workspace.server.model.stack.StackComponent;
+import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 
 import java.util.Objects;
 

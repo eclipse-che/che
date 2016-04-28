@@ -25,10 +25,15 @@
     <packaging>pom</packaging>
     <name>Che Master Parent</name>
     <modules>
+        <module>che-core-api-machine-shared</module>
         <module>che-core-api-machine</module>
+        <module>che-core-api-workspace-shared</module>
         <module>che-core-api-workspace</module>
+        <module>che-core-api-user-shared</module>
         <module>che-core-api-user</module>
+        <module>che-core-api-factory-shared</module>
         <module>che-core-api-factory</module>
         <module>che-core-api-ssh</module>
+        <module>che-core-api-ssh-shared</module>
     </modules>
 </project>

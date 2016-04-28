@@ -24,8 +24,6 @@ import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.GroupDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.PermissionsDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.model.stack.Stack;
-import org.eclipse.che.api.workspace.server.model.stack.StackSource;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
@@ -36,6 +34,8 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
+import org.eclipse.che.api.workspace.shared.stack.Stack;
+import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
 import java.util.List;
 
