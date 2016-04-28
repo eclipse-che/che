@@ -103,9 +103,6 @@ public class MachineService extends Service {
                    NotFoundException {
 
         final Machine machine = machineManager.getMachine(machineId);
-
-        checkCurrentUserPermissions(machine);
-
         return injectLinks(DtoConverter.asDto(machine));
     }
 
@@ -149,8 +146,6 @@ public class MachineService extends Service {
             throws NotFoundException,
                    ServerException,
                    ForbiddenException {
-
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
 
         machineManager.destroy(machineId, true);
     }
@@ -202,8 +197,6 @@ public class MachineService extends Service {
                    BadRequestException {
 
         requiredNotNull(newSnapshotDescriptor, "Snapshot description");
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
-
         return injectLinks(DtoConverter.asDto(machineManager.save(machineId,
                                                                   EnvironmentContext.getCurrent().getUser().getId(),
                                                                   newSnapshotDescriptor.getDescription())));
@@ -222,8 +215,6 @@ public class MachineService extends Service {
             throws ForbiddenException,
                    NotFoundException,
                    ServerException {
-
-        checkCurrentUserPermissions(machineManager.getSnapshot(snapshotId));
 
         machineManager.removeSnapshot(snapshotId);
     }
@@ -252,8 +243,6 @@ public class MachineService extends Service {
 
         requiredNotNull(command, "Command description");
         requiredNotNull(command.getCommandLine(), "Commandline");
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
-
         return injectLinks(DtoConverter.asDto(machineManager.exec(machineId, command, outputChannel)), machineId);
     }
 
@@ -273,8 +262,6 @@ public class MachineService extends Service {
             throws NotFoundException,
                    ServerException,
                    ForbiddenException {
-
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
 
         return machineManager.getProcesses(machineId)
                              .stream()
@@ -300,8 +287,6 @@ public class MachineService extends Service {
                    ForbiddenException,
                    ServerException {
 
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
-
         machineManager.stopProcess(machineId, processId);
     }
 
@@ -322,8 +307,6 @@ public class MachineService extends Service {
                    ForbiddenException,
                    ServerException,
                    IOException {
-
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
 
         addLogsToResponse(machineManager.getMachineLogReader(machineId), httpServletResponse);
     }
@@ -348,8 +331,6 @@ public class MachineService extends Service {
                    ForbiddenException,
                    ServerException,
                    IOException {
-
-        checkCurrentUserPermissions(machineManager.getMachine(machineId));
 
         addLogsToResponse(machineManager.getProcessLogReader(machineId, pid), httpServletResponse);
     }
@@ -394,9 +375,6 @@ public class MachineService extends Service {
                    ServerException {
 
         final Instance machine = machineManager.getInstance(machineId);
-
-        checkCurrentUserPermissions(machine);
-
         return machine.readFileContent(path, startFrom, limit);
     }
 
@@ -456,10 +434,6 @@ public class MachineService extends Service {
 
         final Instance sourceMachine = machineManager.getInstance(sourceMachineId);
         final Instance targetMachine = machineManager.getInstance(targetMachineId);
-
-        checkCurrentUserPermissions(sourceMachine);
-        checkCurrentUserPermissions(targetMachine);
-
         targetMachine.copy(sourceMachine, sourcePath, targetPath, overwrite);
     }
 
@@ -620,26 +594,6 @@ public class MachineService extends Service {
         httpServletResponse.setContentType("text/plain");
         CharStreams.copy(logsReader, httpServletResponse.getWriter());
         httpServletResponse.getWriter().flush();
-    }
-
-    private void checkCurrentUserPermissions(SnapshotImpl snapshot) throws ForbiddenException, ServerException {
-        checkCurrentUserPermissions(snapshot.getWorkspaceId());
-    }
-
-    private void checkCurrentUserPermissions(Machine machine) throws ForbiddenException, ServerException {
-        checkCurrentUserPermissions(machine.getWorkspaceId());
-    }
-
-    private void checkCurrentUserPermissions(String workspaceId) throws ForbiddenException, ServerException {
-        // TODO
-//        try {
-//            final Member member = memberDao.getWorkspaceMember(workspaceId, EnvironmentContext.getCurrent().getUser().getId());
-//            if (member.getRoles().contains("workspace/admin") || member.getRoles().contains("workspace/developer")) {
-//                return;
-//            }
-//        } catch (NotFoundException ignored) {
-//        }
-//        throw new ForbiddenException("You are not a member of workspace " + workspaceId);
     }
 
     /**
