@@ -54,6 +54,8 @@ export class CreateWorkspaceCtrl {
     this.recipeScript = null;
     this.importWorkspace = '';
     this.defaultWorkspaceName = null;
+
+    cheAPI.cheWorkspace.fetchWorkspaces();
   }
 
   /**

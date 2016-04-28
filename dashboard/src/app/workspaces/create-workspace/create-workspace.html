@@ -44,6 +44,7 @@
                  che-place-holder="Name of the workspace"
                  ng-model="createWorkspaceCtrl.workspaceName"
                  required
+                 unique-workspace-name="createWorkspaceCtrl.workspaceName"
                  ng-minlength="3"
                  ng-maxlength="20"
                  ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -53,6 +54,7 @@
         </div>
         <div ng-message="minlength">The name has to be more then 3 characters long.</div>
         <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+        <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
       </che-input>
       <che-workspace-ram-allocation-slider ng-model="createWorkspaceCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
     </che-panel>
