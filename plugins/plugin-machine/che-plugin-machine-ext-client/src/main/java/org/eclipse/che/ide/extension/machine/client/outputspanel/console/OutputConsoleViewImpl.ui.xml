@@ -13,54 +13,81 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
              xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="resources" type="org.eclipse.che.ide.extension.machine.client.MachineResources"/>
     <ui:with field="locale" type="org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant"/>
 
-    <ui:style>
-        @def fontSize 11px;
-        @def outputFontFamily 'Droid Sans Mono', monospace;
-        @eval editorPanelBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorPanelBackgroundColor();
-        @eval outputLinkColor org.eclipse.che.ide.api.theme.Style.getOutputLinkColor();
-
+    <ui:style  src="org/eclipse/che/ide/api/ui/style.css">
         .background {
             background-color: editorPanelBackgroundColor;
             -webkit-user-select: none;
             user-select: none;
             -moz-user-select: none;
-            margin-top: -2px;
+            line-height: 14px;
             padding-left: 6px;
         }
 
         .label {
             width: 60px;
-            display: inline-block;
         }
 
-        .noMargin {
-            margin: 0;
-        }
-
-        .link {
+        a.link {
             font-size: fontSize;
             font-family: outputFontFamily;
-            color: outputLinkColor !important;
+            color: outputLinkColor;
         }
 
         .link:hover {
             text-decoration: underline;
         }
 
-        .value {
+        div.value {
             white-space: nowrap;
             text-overflow: ellipsis;
-            display: inline-block;
             -webkit-user-select: text;
             user-select: text;
             -moz-user-select: text;
             width: literal("calc(100% - 60px)");
             overflow: hidden;
-            margin-top: 3px;
-            margin-bottom: -3px;
+            color: successColor;
+        }
+
+        .commandTitle {
+            font-family: outputFontFamily;
+            display: inline-block;
+            color: mainFontColor;
+            font-size: fontSize;
+            float: left;
+            margin: 0;
+        }
+
+        .commandConsole {
+            background-color: outputBackgroundColor;
+            -moz-user-select: text;
+            -webkit-user-select: text;
+            user-select: text;
+            color: outputFontColor;
+            outline: none;
+            border-top: 1px solid separatorColor;
+            -webkit-box-shadow: outputBoxShadow;
+            -moz-box-shadow: outputBoxShadow;
+            box-shadow: outputBoxShadow;
+            padding: 1px 3px 3px 3px;
+            margin-bottom: 3px;
+        }
+
+        .commandConsole pre {
+            font-family: outputFontFamily;
+            font-size: fontSize;
+        }
+
+        .commandConsoleLines {
+            width: 100%;
+        }
+
+        .commandConsoleLines > pre {
+            word-wrap: break-word;
+            width: inherit;
+            padding: 0;
+            margin: 0;
         }
     </ui:style>
 
@@ -68,23 +95,23 @@
         <g:north size="14">
             <g:FlowPanel ui:field="commandPanel" styleName="{style.background}">
                 <g:Label ui:field="commandTitle" text="{locale.viewProcessesCommandTitle}"
-                         addStyleNames="{style.label} {style.noMargin} {resources.getCss.processHeaderTitle}"/>
+                         addStyleNames="{style.label} {style.commandTitle}"/>
                 <g:Label ui:field="commandLabel"
-                         addStyleNames="{style.noMargin} {style.value} {resources.getCss.processHeaderTitle} {resources.getCss.processCommandValue}"/>
+                         addStyleNames="{style.value} {style.commandTitle}"/>
             </g:FlowPanel>
         </g:north>
-        <g:north size="18">
+        <g:north size="14">
             <g:FlowPanel ui:field="previewPanel" styleName="{style.background}">
                 <g:Label text="preview:"
-                         addStyleNames="{style.label} {style.noMargin} {resources.getCss.processHeaderTitle}"/>
+                         addStyleNames="{style.label} {style.commandTitle}"/>
                 <g:Anchor ui:field="previewUrlLabel" target="_blank" title="Open in new window"
-                          addStyleNames="{style.noMargin} {style.link} {style.value} {resources.getCss.processHeaderTitle} {resources.getCss.processCommandValue}"/>
+                          addStyleNames="{style.link} {style.value} {style.commandTitle}"/>
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:ScrollPanel ui:field="scrollPanel" debugId="commandConsoleScrollPanel" addStyleNames="{resources.getCss.commandConsole}">
+            <g:ScrollPanel ui:field="scrollPanel" debugId="commandConsoleScrollPanel" addStyleNames="{style.commandConsole}">
                 <g:FlowPanel width="100%" ui:field="consoleLines" debugId="commandConsoleLines"
-                             styleName="{resources.getCss.commandConsoleLines}"/>
+                             styleName="{style.commandConsoleLines}"/>
             </g:ScrollPanel>
         </g:center>
     </g:DockLayoutPanel>
