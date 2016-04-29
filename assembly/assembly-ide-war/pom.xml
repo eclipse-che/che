@@ -477,7 +477,7 @@
                         WEB-INF/lib/che-core-git-impl-native-*.jar,
                         WEB-INF/lib/che-plugin-java-*.jar,
                         WEB-INF/lib/che-jdt-ext-machine-*.jar,
-                        WEB-INF/lib/che-plugin-machine-ext-client*.jar,
+                        WEB-INF/lib/che-plugin-machine-ide*.jar,
                         WEB-INF/lib/che-plugin-orion-*.jar,
                         WEB-INF/lib/che-core-commons-gwt-*.jar,
                         WEB-INF/lib/che-core-ide-api-*.jar,
