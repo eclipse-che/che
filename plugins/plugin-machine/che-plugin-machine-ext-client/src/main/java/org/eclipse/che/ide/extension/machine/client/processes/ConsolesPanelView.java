@@ -78,14 +78,12 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
     ProcessTreeNode getNodeById(@NotNull String nodeId);
 
     /**
-     * Sets new running state for a process.
+     * Sets visibility of 'Stop process' button for node with given ID
      *
      * @param nodeId
-     *         process node ID
-     * @param running
-     *         running or not
+     *         id of process node
      */
-    void setProcessRunning(String nodeId, boolean running);
+    void setStopButtonVisibility(String nodeId, boolean visible);
 
     interface ActionDelegate extends BaseActionDelegate {
 

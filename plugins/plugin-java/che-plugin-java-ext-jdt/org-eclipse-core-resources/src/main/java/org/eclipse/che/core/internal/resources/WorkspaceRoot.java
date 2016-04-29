@@ -11,10 +11,6 @@
 
 package org.eclipse.che.core.internal.resources;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.core.resources.IContainer;
@@ -27,7 +23,6 @@ import org.eclipse.core.runtime.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +35,14 @@ import java.util.concurrent.ConcurrentMap;
  * @author Valeriy Svydenko
  */
 public class WorkspaceRoot extends Container implements IWorkspaceRoot {
-    public static final  String PROJECT_INNER_SETTING_DIR = ".codenvy";
-    private static final Logger LOG                       = LoggerFactory.getLogger(WorkspaceRoot.class);
+    public static final  String                         PROJECT_INNER_SETTING_DIR = ".codenvy";
+    private static final Logger                         LOG                       = LoggerFactory.getLogger(WorkspaceRoot.class);
     /**
      * As an optimization, we store a table of project handles
      * that have been requested from this root.  This maps project
      * name strings to project handles.
      */
-    private final ConcurrentMap<String, Project> projectTable = new ConcurrentHashMap<>(16);
+    private final        ConcurrentMap<String, Project> projectTable              = new ConcurrentHashMap<>(16);
 
     protected WorkspaceRoot(IPath path, Workspace workspace) {
         super(path, workspace);
@@ -99,8 +94,6 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
         Project result = projectTable.get(name);
         if (result == null) {
             IPath projectPath = new Path(null, name).makeAbsolute();
-//            String message = "Path for project must have only one segment."; //$NON-NLS-1$
-//            Assert.isLegal(projectPath.segmentCount() == ICoreConstants.PROJECT_SEGMENT_LENGTH, message);
             //try to get the project using a canonical name
             String canonicalName = projectPath.toOSString(); //.lastSegment();
             result = projectTable.get(canonicalName);
@@ -116,43 +109,14 @@ public class WorkspaceRoot extends Container implements IWorkspaceRoot {
     public IProject[] getProjects() {
         ProjectRegistry projectRegistry = workspace.getProjectRegistry();
         List<IProject> projects = new ArrayList<>();
-        try {
-            List<RegisteredProject> rootProjects = projectRegistry.getProjects();
-            for (RegisteredProject rootProject : rootProjects) {
-                Project project = new Project(new Path(rootProject.getPath()), workspace);
+        List<RegisteredProject> rootProjects = projectRegistry.getProjects();
+        for (RegisteredProject rootProject : rootProjects) {
+            Project project = new Project(new Path(rootProject.getPath()), workspace);
 
-                projects.add(project);
-
-                addAllModules(projects, rootProject, projectRegistry);
-            }
-        } catch (ServerException | NotFoundException | ForbiddenException | IOException | ConflictException e) {
-            LOG.error(e.getMessage(), e);
+            projects.add(project);
         }
 
         return projects.toArray(new IProject[projects.size()]);
-    }
-
-    private void addAllModules(List<IProject> projects,
-                               RegisteredProject rootProject,
-                               ProjectRegistry projectRegistry) throws IOException,
-                                                              ForbiddenException,
-                                                              ConflictException,
-                                                              NotFoundException,
-                                                              ServerException {
-        List<String> modules = projectRegistry.getProjects(rootProject.getPath());
-
-        for (String modulePath : modules) {
-            addModules(projects, modulePath, projectRegistry);
-        }
-    }
-
-    private void addModules(List<IProject> projects, String modulePath, ProjectRegistry projectRegistry) throws ServerException {
-        Project mp = new Project(new Path(modulePath), workspace);
-        projects.add(mp);
-
-        for (String module : projectRegistry.getProjects(modulePath)) {
-            addModules(projects, module, projectRegistry);
-        }
     }
 
     @Override

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -19,6 +17,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.util.Util;
 
 public class SetContainerOperation extends ChangeClasspathOperation {
 
@@ -30,7 +29,7 @@ public class SetContainerOperation extends ChangeClasspathOperation {
      * Creates a new SetContainerOperation.
      */
     public SetContainerOperation(IPath containerPath, IJavaProject[] affectedProjects, IClasspathContainer[] respectiveContainers) {
-        super(new IJavaElement[]{JavaModelManager.getJavaModelManager().getJavaModel()}, !ResourcesPlugin.getWorkspace().isTreeLocked());
+        super(new IJavaElement[]{JavaModelManager.getJavaModelManager().getJavaModel()}, /*!ResourcesPlugin.getWorkspace().isTreeLocked()*/ false);
         this.containerPath = containerPath;
         this.affectedProjects = affectedProjects;
         this.respectiveContainers = respectiveContainers;

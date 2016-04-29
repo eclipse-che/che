@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes;
 
-import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -30,7 +30,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import elemental.js.dom.JsElement;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
@@ -42,7 +41,6 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -378,19 +376,16 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     }
 
     @Override
-    public void setProcessRunning(String nodeId, boolean running) {
+    public void setStopButtonVisibility(String nodeId, boolean visible) {
         ProcessTreeNode processTreeNode = processTreeNodes.get(nodeId);
         if (processTreeNode == null) {
             return;
         }
 
-        processTreeNode.setRunning(running);
-
-        JsElement spanElement = (JsElement)processTreeNode.getTreeNodeElement().getFirstChild().getChildNodes().item(1);
-        if (running) {
-            spanElement.setAttribute("running", "true");
+        if (visible) {
+            processTreeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().hideStopButton());
         } else {
-            spanElement.setAttribute("running", "false");
+            processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
         }
     }
 

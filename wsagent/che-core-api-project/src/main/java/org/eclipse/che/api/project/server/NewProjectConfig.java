@@ -44,7 +44,7 @@ public class NewProjectConfig implements ProjectConfig {
      * @param attributes
      * @param origin
      */
-    NewProjectConfig(String path,
+    public NewProjectConfig(String path,
                      String type,
                      List<String> mixins,
                      String name,

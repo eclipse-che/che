@@ -172,5 +172,6 @@ public interface MachineResources extends ClientBundle {
         /** Returns the CSS class name for stop button of process in 'Consoles' panel. */
         String processesPanelStopButtonForProcess();
 
+        String hideStopButton();
     }
 }

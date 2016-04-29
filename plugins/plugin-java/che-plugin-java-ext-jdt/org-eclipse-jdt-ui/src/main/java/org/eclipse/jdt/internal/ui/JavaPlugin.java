@@ -14,8 +14,10 @@ package org.eclipse.jdt.internal.ui;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.che.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -141,11 +143,15 @@ public class JavaPlugin {
 
     private ImageDescriptorRegistry fImageDescriptorRegistry;
     private String                  settingsDir;
+    private final ResourcesPlugin resourcesPlugin;
+    private final ProjectRegistry registry;
     private String                  cahPath;
 
     @Inject
-    public JavaPlugin(@Named("che.jdt.settings.dir") String settingsDir) {
+    public JavaPlugin(@Named("che.jdt.settings.dir") String settingsDir, ResourcesPlugin resourcesPlugin, ProjectRegistry registry) {
         this.settingsDir = settingsDir;
+        this.resourcesPlugin = resourcesPlugin;
+        this.registry = registry;
         fgJavaPlugin = this;
         cahPath = settingsDir + CODEASSIST_LRU_HISTORY;
     }

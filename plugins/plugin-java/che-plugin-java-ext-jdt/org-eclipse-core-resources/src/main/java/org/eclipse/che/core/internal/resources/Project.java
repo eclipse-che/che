@@ -11,6 +11,7 @@
 
 package org.eclipse.che.core.internal.resources;
 
+import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
@@ -18,10 +19,13 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.content.IContentTypeMatcher;
 
 import java.net.URI;
@@ -137,7 +141,12 @@ public class Project extends Container implements IProject {
 
             @Override
             public String[] getNatureIds() {
-                Map<String, List<String>> attributes = workspace.getProjectRegistry().getProject(path.toString()).getAttributes();
+                RegisteredProject project = workspace.getProjectRegistry().getProject(path.toString());
+                if (project == null) {
+                    ResourcesPlugin.log(new Status(IStatus.ERROR, "resource", "Can't find project: " + path.toOSString()));
+                    return new String[0];
+                }
+                Map<String, List<String>> attributes = project.getAttributes();
                 String language = "";
                 if (attributes.containsKey("language")) {
                     language = attributes.get("language").get(0);
@@ -304,13 +313,14 @@ public class Project extends Container implements IProject {
     }
 
     @Override
-    public void setDescription(IProjectDescription iProjectDescription, IProgressMonitor iProgressMonitor) throws CoreException {
-        throw new UnsupportedOperationException();
+    public void setDescription(IProjectDescription description, IProgressMonitor monitor) throws CoreException {
+        // funnel all operations to central method
+        setDescription(description, IResource.KEEP_HISTORY, monitor);
     }
 
     @Override
     public void setDescription(IProjectDescription iProjectDescription, int i, IProgressMonitor iProgressMonitor) throws CoreException {
-        throw new UnsupportedOperationException();
+        //ignore
     }
 
     @Override

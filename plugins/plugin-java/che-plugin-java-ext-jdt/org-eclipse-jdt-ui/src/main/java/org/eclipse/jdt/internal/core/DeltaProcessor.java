@@ -2847,12 +2847,12 @@ public class DeltaProcessor {
 
         public IPackageFragmentRoot getPackageFragmentRoot() {
             IPackageFragmentRoot tRoot = null;
-//			Object target = JavaModel.getTarget(this.rootPath, false/*don't check existence*/);
-//			if (target instanceof IResource) {
-//				tRoot = this.project.getPackageFragmentRoot((IResource)target);
-//			} else {
+			Object target = JavaModel.getTarget(this.rootPath, false/*don't check existence*/);
+			if (target instanceof IResource) {
+				tRoot = this.project.getPackageFragmentRoot((IResource)target);
+			} else {
             tRoot = this.project.getPackageFragmentRoot(this.rootPath.toOSString());
-//			}
+			}
             return tRoot;
         }
 

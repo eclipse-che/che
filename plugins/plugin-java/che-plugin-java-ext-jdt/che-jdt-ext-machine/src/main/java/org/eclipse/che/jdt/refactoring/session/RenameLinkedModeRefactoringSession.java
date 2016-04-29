@@ -45,9 +45,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.RegionImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.RegionImpl;
 
 /**
  * The class contains methods for the refactoring that uses the linked editor.

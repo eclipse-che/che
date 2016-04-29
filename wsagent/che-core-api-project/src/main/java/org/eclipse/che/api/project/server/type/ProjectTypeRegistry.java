@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -220,6 +219,10 @@ public class ProjectTypeRegistry {
     protected final void init(ProjectTypeDef type) throws ProjectTypeConstraintException {
         initRecursively(type, type.getId());
 
+        if (!type.factoriesToOverride.isEmpty()) {
+            overrideFactories(type);
+        }
+
         this.projectTypes.put(type.getId(), type);
 
         LOG.debug("Project Type registered: " + type.getId());
@@ -254,5 +257,23 @@ public class ProjectTypeRegistry {
             }
             initRecursively(myType, superTypeId);
         }
+    }
+
+    private final void overrideFactories(ProjectTypeDef myType) throws ProjectTypeConstraintException {
+        for (Map.Entry<String, ValueProviderFactory> entry : myType.factoriesToOverride.entrySet()) {
+            Attribute old = myType.getAttribute(entry.getKey());
+            if (old == null || !old.isVariable()) {
+                throw new ProjectTypeConstraintException("Can not override Value Provider Factory. Variable not defined: "
+                                                         + myType.getId() + ":" + entry.getKey());
+            }
+
+            myType.attributes.put(old.getName(), new Variable(old.getId(),
+                                                              old.getName(),
+                                                              old.getDescription(),
+                                                              old.isRequired(),
+                                                              entry.getValue()));
+
+        }
+
     }
 }

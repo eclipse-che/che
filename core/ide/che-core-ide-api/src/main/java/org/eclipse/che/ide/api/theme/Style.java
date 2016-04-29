@@ -31,6 +31,10 @@ public class Style {
         return theme.getMainFontColor();
     }
 
+    public static String getLoaderProgressStatusColor() {
+        return theme.loaderProgressStatusColor();
+    }
+
     public static String getRadioButtonBackgroundColor() {
         return theme.getRadioButtonBackgroundColor();
     }

@@ -357,9 +357,72 @@ public interface JavaLocalizationConstant extends Messages {
     @Key("unable.to.load.java.compiler.errors.warnings.settings")
     String unableToLoadJavaCompilerErrorsWarningsSettings();
 
+    @Key("project.classpath.action.description")
+    String projectClasspathDescriptions();
+
+    @Key("project.classpath.action.title")
+    String projectClasspathTitle();
+
+    @Key("libraries.property.name")
+    String librariesPropertyName();
+
+    @Key("java.build.path.category")
+    String javaBuildPathCategory();
+
+    @Key("library.title")
+    String libraryTitle();
+
+    @Key("button.remove")
+    String removeElementButton();
+
+    @Key("button.addJar")
+    String addJarButton();
+
+    @Key("messages.promptSaveChanges")
+    String messagesPromptSaveChanges();
+
+    @Key("unsavedChanges.title")
+    String unsavedChangesTitle();
+
+    @Key("button.addClassFolder")
+    String buttonAddClassFolder();
+
+    @Key("button.done")
+    String buttonDone();
+
+    @Key("button.addFolder")
+    String buttonAddFolder();
+
+    @Key("source.property.name")
+    String sourcePropertyName();
+
+    @Key("source.title")
+    String sourceTitle();
+
+    @Key("mark.directory.as.group")
+    String markDirectoryAs();
+
+    @Key("mark.directory.as.source.description")
+    String markDirectoryAsSourceDescription();
+
+    @Key("mark.directory.as.source.action")
+    String markDirectoryAsSourceAction();
+
+    @Key("unmark.directory.as.source.action")
+    String unmarkDirectoryAsSourceAction();
+
+    @Key("unmark.directory.as.source.description")
+    String unmarkDirectoryAsSourceDescription();
+
     @Key("parameter.info")
     String parameterInfo();
 
     @Key("parameter.info.description")
     String parameterInfoDescription();
+
+    @Key("button.Save")
+    String buttonSave();
+
+    @Key("button.continue")
+    String buttonContinue();
 }

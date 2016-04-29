@@ -1,0 +1,125 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.plugin.maven.client.editor;
+
+import elemental.dom.Text;
+import elemental.events.Event;
+import elemental.events.EventListener;
+import elemental.html.AnchorElement;
+import elemental.html.DivElement;
+
+import com.google.gwt.dom.client.Element;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
+import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
+import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
+import org.eclipse.che.plugin.maven.client.MavenResources;
+import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
+import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView;
+import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.HasNotificationPanel;
+import org.eclipse.che.ide.util.dom.Elements;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+
+/**
+ * Shows message about decompiled class and invoke downloading sources
+ *
+ * @author Evgen Vidolob
+ */
+@Singleton
+public class ClassFileSourcesDownloader implements EditorOpenedEventHandler {
+
+    private final EventBus                  eventBus;
+    private final MavenServerServiceClient  client;
+    private final MavenLocalizationConstant constant;
+    private final MavenResources            resources;
+    private final NotificationManager       notificationManager;
+
+    @Inject
+    public ClassFileSourcesDownloader(EventBus eventBus,
+                                      MavenServerServiceClient client,
+                                      MavenLocalizationConstant constant,
+                                      MavenResources resources,
+                                      NotificationManager notificationManager) {
+        this.eventBus = eventBus;
+        this.client = client;
+        this.constant = constant;
+        this.resources = resources;
+        this.notificationManager = notificationManager;
+        eventBus.addHandler(EditorOpenedEvent.TYPE, this);
+        resources.css().ensureInjected();
+    }
+
+    @Override
+    public void onEditorOpened(EditorOpenedEvent event) {
+        EditorPartPresenter editor = event.getEditor();
+        VirtualFile file = editor.getEditorInput().getFile();
+        if (file instanceof JarFileNode) {
+            final JarFileNode jarFileNode = (JarFileNode)file;
+            if (jarFileNode.isContentGenerated()) {
+                if (editor instanceof EmbeddedTextEditorPresenter) {
+                    final EmbeddedTextEditorPresenter presenter = (EmbeddedTextEditorPresenter)editor;
+                    EmbeddedTextEditorPartView view = presenter.getView();
+                    final DivElement divElement = Elements.createDivElement();
+                    divElement.setClassName(resources.css().editorInfoPanel());
+                    Text textNode = Elements.createTextNode(constant.mavenClassDecompiled());
+                    DivElement decompiledElement = Elements.createDivElement();
+                    decompiledElement.appendChild(textNode);
+                    decompiledElement.setClassName(resources.css().editorMessage());
+                    divElement.appendChild(decompiledElement);
+                    AnchorElement anchorElement = Elements.createAnchorElement();
+                    anchorElement.appendChild(Elements.createTextNode(constant.mavenDownloadSources()));
+                    anchorElement.setHref("#");
+                    anchorElement.setClassName(resources.css().downloadLink());
+
+                    divElement.appendChild(anchorElement);
+                    final HasNotificationPanel.NotificationRemover remover = view.addNotification((Element)divElement);
+                    anchorElement.setOnclick(new EventListener() {
+                        @Override
+                        public void handleEvent(Event evt) {
+                            downloadSources(jarFileNode, remover);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private void downloadSources(JarFileNode jarFileNode, final HasNotificationPanel.NotificationRemover remover) {
+        final String path = jarFileNode.getPath();
+        Promise<Boolean> promise =
+                client.downloadSources(jarFileNode.getProject().getProjectConfig().getPath(), path);
+        promise.then(new Operation<Boolean>() {
+            @Override
+            public void apply(Boolean arg) throws OperationException {
+                if(arg){
+                    eventBus.fireEvent(new FileContentUpdateEvent(path));
+                } else {
+                    notificationManager.notify(constant.mavenClassDownloadFailed(path), StatusNotification.Status.FAIL, EMERGE_MODE);
+                }
+                remover.remove();
+            }
+        });
+    }
+}

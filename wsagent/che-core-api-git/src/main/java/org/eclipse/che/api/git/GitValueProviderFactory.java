@@ -17,9 +17,10 @@ import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 
 import javax.inject.Singleton;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
 
     @Override
     public ValueProvider newInstance(final FolderEntry folder) {
-        return new ValueProvider() {
+        return new ReadonlyValueProvider() {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
                 if (folder == null) {
