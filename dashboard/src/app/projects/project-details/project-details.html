@@ -26,12 +26,14 @@
                         che-place-holder="Name of the project"
                         ng-model="projectDetailsCtrl.projectDetails.name"
                         required
+                        unique-project-name="projectDetailsCtrl.workspace"
                         ng-maxlength="128"
                         ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
               <div ng-message="required">A name is required.</div>
               <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
               <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
               <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+              <div ng-message="uniqueProjectName">This project name is already used.</div>
             </che-input>
             <che-input che-form="projectInformationForm"
                         che-name="description"

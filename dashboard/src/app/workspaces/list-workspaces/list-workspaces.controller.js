@@ -241,6 +241,7 @@ export class ListWorkspacesCtrl {
         let promise = stoppedStatusPromise.then(() => {
           return this.cheWorkspace.deleteWorkspaceConfig(workspaceId);
         }).then(() => {
+            this.workspacesById.delete(workspaceId);
             queueLength--;
           },
           (error) => {
