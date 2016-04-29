@@ -54,6 +54,7 @@ export class CreateProjectGithubCtrl {
     this.state = 'IDLE';
     this.isGitHubOAuthProviderAvailable = false;
 
+
     let oAuthProviderPromise = this.cheAPI.getOAuthProvider().fetchOAuthProviders().then(() => {
       this.isGitHubOAuthProviderAvailable = this.cheAPI.getOAuthProvider().isOAuthProviderRegistered('github');
     });
@@ -74,6 +75,8 @@ export class CreateProjectGithubCtrl {
       if (this.isGitHubOAuthProviderAvailable) {
         this.currentUserId = this.user.id;
         this.askLoad();
+      } else {
+        this.state = 'NO_REPO';
       }
     });
   }
