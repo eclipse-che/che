@@ -300,7 +300,7 @@ export class CheWorkspace {
 
     var contextPath;
 
-    return 'ws://' + wsagentServerAddress + '/' + '/wsagent/ext/ws/' + workspaceId;
+    return 'ws://' + wsagentServerAddress + '/wsagent/ext/ws/' + workspaceId;
   }
 
   getIdeUrl(workspaceName) {
