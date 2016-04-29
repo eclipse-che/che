@@ -34,14 +34,19 @@ export class CheErrorNotification {
      */
     template(element, attrs) {
         let errorText = attrs['cheErrorText'] || '';
-        return '<md-toast ng-class="{\'hide-notification\' : isHide}"' +
-            'class="che-notification-error" layout="row" layout-align="start start">' +
+        return '<md-toast  class="che-notification-error" layout="row" layout-align="start start">' +
             '<i class="che-notification-error-icon fa fa-exclamation-triangle fa-2x"></i>' +
             '<div flex="90" layout="column" layout-align="start start">' +
             '<span flex class="che-notification-error-title"><b>Failed</b></span>' +
             '<span flex class="che-notification-message">' + errorText + '</span>' +
             '</div>' +
-            '<i class="che-notification-close-icon fa fa-times" ng-click="isHide=true"/>' +
+            '<i class="che-notification-close-icon fa fa-times" ng-click="hideNotification()"/>' +
             '</md-toast>';
+    }
+
+    link($scope, element) {
+        $scope.hideNotification = ()=> {
+            element.addClass('hide-notification');
+        };
     }
 }
