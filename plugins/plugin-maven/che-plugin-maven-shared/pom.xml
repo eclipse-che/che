@@ -118,7 +118,7 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.extension.maven.shared.dto</package>
+                                <package>org.eclipse.che.plugin.maven.shared.dto</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                             <genClassName>org.eclipse.che.plugin.maven.server.dto.DtoServerImpls</genClassName>
@@ -133,7 +133,7 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.extension.maven.shared.dto</package>
+                                <package>org.eclipse.che.plugin.maven.shared.dto</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                             <genClassName>org.eclipse.che.plugin.maven.client.dto.DtoServerImpls</genClassName>

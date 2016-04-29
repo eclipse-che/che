@@ -52,6 +52,8 @@ export class WorkspaceDetailsCtrl {
 
     // show link 'Show more' if true
     this.showShowMore = false;
+
+    this.cheWorkspace.fetchWorkspaces();
   }
 
   //Update the workspace data to be displayed.

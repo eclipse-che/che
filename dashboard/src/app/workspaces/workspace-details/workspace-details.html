@@ -25,12 +25,14 @@
                          che-place-holder="Name of the workspace"
                          ng-model="workspaceDetailsCtrl.newName"
                          required
+                         unique-workspace-name="workspaceDetailsCtrl.newName"
                          ng-maxlength="128"
                          ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
                 <div ng-message="required">A name is required.</div>
                 <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
                 <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
                 <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+                <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
               </che-input>
             </ng-form>
             <div flex="none" flex-offset="5" layout="column" layout-align="end end">
