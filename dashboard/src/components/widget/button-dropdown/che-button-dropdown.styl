@@ -3,31 +3,35 @@ che-button-dropdown .md-button.md-accent.md-raised.md-hue-2
   box-shadow-simple()
   font-size 1.6em
   font-weight bold
-  width auto
+  width 100%
   line-height 34px
   height 30px
-  padding-right 10px
+  padding-right 8px
   margin 0
   transform none
 
 che-button-dropdown
   height 36px
 
+che-button-dropdown div
+  outline none
+
 .che-button-dropdown-separator
   border-left solid 1px $background-color
-  margin-right 10px
+  margin-right 5px
 
 che-button-dropdown .che-button-dropdown-elements
   z-index 1
   left 0
   position absolute
   margin-top -6px
-  margin-left 10px
-  width 260px
+  width 100%
   color $label-info-color
+  padding 0 10px
 
 che-button-dropdown .che-button-dropdown-elements ul
   list-style none
+  padding 0
 
 che-button-dropdown .che-button-dropdown-elements ul li
   che-border-radius(2px)
@@ -58,7 +62,7 @@ che-button-dropdown .che-button-click-area:focus
   color $background-color
   text-decoration none
   font-size 0.8em
-  padding 0px 30px
+  padding 0
   outline none
 
 .che-button-dropdown i
@@ -68,8 +72,7 @@ che-button-dropdown .che-button-click-area:focus
 
 .che-button-dropdown-icon
   color $background-color
-  margin-left -2px
-  margin-top -12px
+  margin -12px 3px 0
   font-size 32px
   outline none
 
@@ -77,5 +80,5 @@ che-button-dropdown .che-button-click-area:focus
   background-color $default-border-color !important
   opacity 0.8
 
-che-button-dropdown:not(div:disabled) .md-button:hover
+.che-button-dropdown:not([disabled]):hover
   che-brightness(90%)

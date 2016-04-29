@@ -75,6 +75,8 @@ export class CheNavBarCtrl {
         $scope.$broadcast('navbar-selected:clear');
       }
     });
+
+    cheAPI.cheWorkspace.fetchWorkspaces();
   }
 
   isImsAvailable() {
@@ -98,5 +100,9 @@ export class CheNavBarCtrl {
 
   isUser() {
     return this.cheUser.isUser();
+  }
+
+  getWorkspacesNumber() {
+    return this.cheAPI.cheWorkspace.getWorkspaces().length;
   }
 }
