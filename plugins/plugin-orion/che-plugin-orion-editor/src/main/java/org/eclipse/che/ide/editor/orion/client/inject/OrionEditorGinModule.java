@@ -26,7 +26,7 @@ import org.eclipse.che.ide.jseditor.client.defaulteditor.EditorBuilder;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorModule;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidgetFactory;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenterFactory;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenterFactory;
 
 @ExtensionGinModule
 public class OrionEditorGinModule extends AbstractGinModule {
@@ -42,7 +42,7 @@ public class OrionEditorGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder()
                         .implement(new TypeLiteral<TextEditorPresenter<OrionEditorWidget>>() {
                         }, OrionEditorPresenter.class)
-                        .build(new TypeLiteral<EmbeddedTextEditorPresenterFactory<OrionEditorWidget>>() {
+                        .build(new TypeLiteral<TextEditorPresenterFactory<OrionEditorWidget>>() {
                         }));
 
         bind(EditorBuilder.class).to(OrionEditorBuilder.class);

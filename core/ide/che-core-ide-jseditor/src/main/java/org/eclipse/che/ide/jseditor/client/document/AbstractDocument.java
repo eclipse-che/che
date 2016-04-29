@@ -15,7 +15,7 @@ import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.jseditor.client.text.TextRange;
 
 /** An abstract implementation of {@link Document}. */
-public abstract class AbstractEmbeddedDocument implements Document, DocumentHandle {
+public abstract class AbstractDocument implements Document, DocumentHandle {
 
     /** The document event bus. */
     private final DocumentEventBus eventBus = new DocumentEventBus();
@@ -76,5 +76,4 @@ public abstract class AbstractEmbeddedDocument implements Document, DocumentHand
     public void setSelectedRange(final LinearRange range, final boolean show) {
      // does nothing by default
     }
-
 }

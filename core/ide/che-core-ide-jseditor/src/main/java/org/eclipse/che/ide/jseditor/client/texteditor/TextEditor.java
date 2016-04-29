@@ -12,14 +12,49 @@ package org.eclipse.che.ide.jseditor.client.texteditor;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.text.TextRange;
+import org.eclipse.che.ide.jseditor.client.editorconfig.EditorUpdateAction;
+import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
+import org.eclipse.che.ide.jseditor.client.keymap.KeyBinding;
+import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
 import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
+import org.eclipse.che.ide.jseditor.client.text.TextRange;
+import org.eclipse.che.ide.texteditor.selection.CursorModelWithHandler;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Public view on the editor component.
  */
 public interface TextEditor extends EditorPartPresenter {
+
+    /**
+     * Initializes this editor with the configuration and document provider.
+     *
+     * @param configuration
+     *         the configuration of this editor.
+     */
+    void initialize(@NotNull TextEditorConfiguration configuration);
+
+    /**
+     * Returns the text editor configuration that was used for initialization.
+     *
+     * @return the text editor configuration
+     */
+    TextEditorConfiguration getConfiguration();
+
+    /**
+     * @return the text editor view implementation
+     */
+    TextEditorPartView getView();
+
+    /**
+     * Add an editor-specific key binding.
+     *
+     * @param keyBinding
+     *         the key binding
+     */
+    void addKeybinding(KeyBinding keyBinding);
 
     /**
      * Closes this text editor after optionally saving changes.
@@ -74,6 +109,19 @@ public interface TextEditor extends EditorPartPresenter {
     TextPosition getCursorPosition();
 
     /**
+     * Returns the cursor model for the editor.
+     * @return the cursor model
+     */
+    CursorModelWithHandler getCursorModel();
+
+    /**
+     * Returns a position converter relative to this editor (pixel coordinates <-> line char positions).
+     *
+     * @return a position converter
+     */
+    PositionConverter getPositionConverter();
+
+    /**
      * Returns the cursor position as an offset from the start.
      * @return the cursor position
      */
@@ -93,4 +141,13 @@ public interface TextEditor extends EditorPartPresenter {
 
     /** Give the focus to the editor. */
     void setFocus();
+
+    /** Calls all editor update actions for this editor. */
+    void refreshEditor();
+
+    /**
+     *  Adds an editor update action for this editor.
+     *  @param action the action to add
+     */
+    void addEditorUpdateAction(EditorUpdateAction action);
 }

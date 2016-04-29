@@ -10,28 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.texteditor;
 
-import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
+import org.eclipse.che.ide.jseditor.client.keymap.KeyBinding;
 
 /**
  * Interface for components that handles key bindings.
  */
-public interface HasKeybindings {
+public interface HasKeyBindings {
 
     /**
      * Adds a key bindings.
      *
-     * @param keybinding
+     * @param keyBinding
      *         the new binding
      */
-    void addKeybinding(Keybinding keybinding);
+    void addKeyBinding(KeyBinding keyBinding);
 
     /**
      * Adds a key bindings.
      *
-     * @param keybinding
+     * @param keyBinding
      *         the new binding
      * @param actionDescription
      *         action description
      */
-    void addKeybinding(Keybinding keybinding, String actionDescription);
+    void addKeyBinding(KeyBinding keyBinding, String actionDescription);
 }

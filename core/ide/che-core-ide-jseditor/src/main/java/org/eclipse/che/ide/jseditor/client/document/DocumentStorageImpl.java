@@ -36,7 +36,7 @@ public class DocumentStorageImpl implements DocumentStorage {
     }
 
     @Override
-    public void getDocument(@NotNull final VirtualFile file, @NotNull final EmbeddedDocumentCallback callback) {
+    public void getDocument(@NotNull final VirtualFile file, @NotNull final DocumentCallback callback) {
         file.getContent().then(new Operation<String>() {
             @Override
             public void apply(String result) throws OperationException {
@@ -92,5 +92,4 @@ public class DocumentStorageImpl implements DocumentStorage {
     @Override
     public void documentClosed(final Document document) {
     }
-
 }

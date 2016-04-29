@@ -18,7 +18,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay.EventHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
-import org.eclipse.che.ide.jseditor.client.document.AbstractEmbeddedDocument;
+import org.eclipse.che.ide.jseditor.client.document.AbstractDocument;
 import org.eclipse.che.ide.jseditor.client.document.Document;
 import org.eclipse.che.ide.jseditor.client.events.CursorActivityHandler;
 import org.eclipse.che.ide.jseditor.client.events.DocumentChangeEvent;
@@ -33,7 +33,7 @@ import org.eclipse.che.ide.jseditor.client.text.TextRange;
  *
  * @author "Mickaël Leduque"
  */
-public class OrionDocument extends AbstractEmbeddedDocument {
+public class OrionDocument extends AbstractDocument {
 
     /** The maximum number of lines that may be visible at the top of the text view after setting selection range. */
     private final static int MARGIN_TOP = 15;
@@ -46,7 +46,6 @@ public class OrionDocument extends AbstractEmbeddedDocument {
     public OrionDocument(OrionTextViewOverlay textViewOverlay,
                          HasCursorActivityHandlers hasCursorActivityHandlers,
                          OrionEditorOverlay editorOverlay) {
-
         this.textViewOverlay = textViewOverlay;
         this.hasCursorActivityHandlers = hasCursorActivityHandlers;
         this.editorOverlay = editorOverlay;

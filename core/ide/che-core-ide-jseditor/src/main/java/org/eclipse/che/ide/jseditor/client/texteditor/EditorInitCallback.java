@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.jseditor.client.texteditor;
 
 import org.eclipse.che.ide.jseditor.client.JsEditorConstants;
-import org.eclipse.che.ide.jseditor.client.document.DocumentStorage.EmbeddedDocumentCallback;
+import org.eclipse.che.ide.jseditor.client.document.DocumentStorage.DocumentCallback;
 import org.eclipse.che.ide.rest.AsyncRequestLoader;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
@@ -19,7 +19,7 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
  * Composite callback that waits for both the editor module initialization and the document content.
  * @param <T> the type of the editor widget
  */
-abstract class EditorInitCallback<T extends EditorWidget> implements EmbeddedDocumentCallback, EditorModule.EditorModuleReadyCallback {
+abstract class EditorInitCallback<T extends EditorWidget> implements DocumentCallback, EditorModule.EditorModuleReadyCallback {
 
     /** Loader used to wait for editor impl initialization. */
     private final AsyncRequestLoader loader;

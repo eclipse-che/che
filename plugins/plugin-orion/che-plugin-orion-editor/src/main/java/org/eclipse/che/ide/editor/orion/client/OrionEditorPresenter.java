@@ -44,7 +44,7 @@ import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorModule;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidgetFactory;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
@@ -68,7 +68,7 @@ public class OrionEditorPresenter extends TextEditorPresenter<OrionEditorWidget>
                                 final JsEditorConstants constant,
                                 @Assisted final EditorWidgetFactory<OrionEditorWidget> editorWigetFactory,
                                 final EditorModule<OrionEditorWidget> editorModule,
-                                final EmbeddedTextEditorPartView editorView,
+                                final TextEditorPartView editorView,
                                 final EventBus eventBus,
                                 final FileTypeIdentifier fileTypeIdentifier,
                                 final QuickAssistantFactory quickAssistantFactory,

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.texteditor.selection;
 
-
 import org.eclipse.che.ide.api.texteditor.CursorModel;
 import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
 
@@ -23,7 +22,7 @@ public interface CursorModelWithHandler extends CursorModel {
 
     Remover addCursorHandler(CursorHandler handler);
 
-    public interface CursorHandler {
+    interface CursorHandler {
         void onCursorChange(int line, int column, boolean isExplicitChange);
     }
 }

@@ -82,7 +82,7 @@ import org.eclipse.che.ide.jseditor.client.events.ScrollHandler;
 import org.eclipse.che.ide.jseditor.client.gutter.Gutter;
 import org.eclipse.che.ide.jseditor.client.gutter.Gutters;
 import org.eclipse.che.ide.jseditor.client.gutter.HasGutter;
-import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
+import org.eclipse.che.ide.jseditor.client.keymap.KeyBinding;
 import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
 import org.eclipse.che.ide.jseditor.client.keymap.KeymapChangeEvent;
 import org.eclipse.che.ide.jseditor.client.keymap.KeymapChangeHandler;
@@ -508,36 +508,36 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     }
 
     @Override
-    public void addKeybinding(final Keybinding keybinding) {
-        addKeybinding(keybinding, "");
+    public void addKeyBinding(final KeyBinding keyBinding) {
+        addKeyBinding(keyBinding, "");
     }
 
     @Override
-    public void addKeybinding(final Keybinding keybinding, String actionDescription) {
+    public void addKeyBinding(final KeyBinding keyBinding, String actionDescription) {
         OrionKeyStrokeOverlay strokeOverlay;
         if (UserAgent.isMac()) {
-            strokeOverlay = OrionKeyStrokeOverlay.create(keybinding.getKeyCode(),
-                                                         keybinding.isCmd(),
-                                                         keybinding.isShift(),
-                                                         keybinding.isAlt(),
-                                                         keybinding.isControl(),
+            strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCode(),
+                                                         keyBinding.isCmd(),
+                                                         keyBinding.isShift(),
+                                                         keyBinding.isAlt(),
+                                                         keyBinding.isControl(),
                                                          "keydown",
                                                          keyBindingModuleProvider.get());
         } else {
-            strokeOverlay = OrionKeyStrokeOverlay.create(keybinding.getKeyCode(),
-                                                         keybinding.isControl(),
-                                                         keybinding.isShift(),
-                                                         keybinding.isAlt(),
+            strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCode(),
+                                                         keyBinding.isControl(),
+                                                         keyBinding.isShift(),
+                                                         keyBinding.isAlt(),
                                                          false,
                                                          "keydown",
                                                          keyBindingModuleProvider.get());
         }
-        String actionId = "che-action-" + keybinding.getAction().toString();
+        String actionId = "che-action-" + keyBinding.getAction().toString();
         editorOverlay.getTextView().setKeyBinding(strokeOverlay, actionId);
         editorOverlay.getTextView().setAction(actionId, new Action() {
             @Override
             public void onAction() {
-                keybinding.getAction().action();
+                keyBinding.getAction().action();
             }
         }, actionDescription);
     }

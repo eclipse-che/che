@@ -39,7 +39,6 @@ public class ImageViewerProvider implements EditorProvider {
         return "Codenvy Image Viewer";
     }
 
-    /** {@inheritDoc} */
     @Override
     public EditorPartPresenter getEditor() {
         return editorProvider.get();

@@ -16,9 +16,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
 
 import javax.inject.Inject;
@@ -70,7 +68,7 @@ public class InfoPanel extends Composite {
     HTMLPanel      encoding;
 
     @Inject
-    public InfoPanel(final EventBus eventBus) {
+    public InfoPanel() {
         initWidget(UIBINDER.createAndBindUi(this));
     }
 
@@ -81,9 +79,7 @@ public class InfoPanel extends Composite {
      * @param numberOfLines the file number of lines
      * @param tabSize the space-equivalent width of a tabulation character
      */
-    public void createDefaultState(final String fileContentDescription,
-                                   final Keymap keymap,
-                                   final int numberOfLines, final int tabSize) {
+    public void createDefaultState(final String fileContentDescription, final int numberOfLines, final int tabSize) {
         setFileType(fileContentDescription);
     }
 

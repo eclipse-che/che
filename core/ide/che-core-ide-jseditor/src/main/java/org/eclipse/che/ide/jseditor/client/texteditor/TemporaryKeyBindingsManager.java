@@ -13,27 +13,24 @@ package org.eclipse.che.ide.jseditor.client.texteditor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
+import org.eclipse.che.ide.jseditor.client.keymap.KeyBinding;
 
-/** Hold {@link org.eclipse.che.ide.jseditor.client.keymap.Keybinding} until the editor is ready to accept them. */
-public class TemporaryKeybindingsManager implements HasKeybindings {
+/** Hold {@link KeyBinding} until the editor is ready to accept them. */
+public class TemporaryKeyBindingsManager implements HasKeyBindings {
 
-    private final List<Keybinding> bindings = new ArrayList<>();
+    private final List<KeyBinding> bindings = new ArrayList<>();
 
-    /** {@inheritDoc} */
     @Override
-    public void addKeybinding(final Keybinding keybinding) {
-        this.bindings.add(keybinding);
+    public void addKeyBinding(final KeyBinding keyBinding) {
+        this.bindings.add(keyBinding);
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void addKeybinding(Keybinding keybinding, String actionDescription) {
-        this.bindings.add(keybinding);
+    public void addKeyBinding(KeyBinding keyBinding, String actionDescription) {
+        this.bindings.add(keyBinding);
     }
 
-    /** {@inheritDoc} */
-    public List<Keybinding> getbindings() {
+    public List<KeyBinding> getbindings() {
         return this.bindings;
     }
 }

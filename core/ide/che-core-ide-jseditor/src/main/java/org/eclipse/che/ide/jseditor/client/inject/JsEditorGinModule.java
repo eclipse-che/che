@@ -27,7 +27,7 @@ import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistantImpl;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointManagerImpl;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererFactory;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererImpl;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
+import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultTextEditorProvider;
 import org.eclipse.che.ide.jseditor.client.document.DocumentStorage;
 import org.eclipse.che.ide.jseditor.client.filetype.FileTypeIdentifier;
 import org.eclipse.che.ide.jseditor.client.filetype.MultipleMethodFileIdentifier;
@@ -42,8 +42,8 @@ import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
 import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilerFactory;
 import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilerWithAutoSave;
 import org.eclipse.che.ide.jseditor.client.requirejs.ModuleHolder;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartViewImpl;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPartView;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPartViewImpl;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.inject.Singleton;
@@ -58,8 +58,8 @@ public class JsEditorGinModule extends AbstractGinModule {
     protected void configure() {
         bind(ModuleHolder.class).in(Singleton.class);
 
-        // the embedded editor view
-        bind(EmbeddedTextEditorPartView.class).to(EmbeddedTextEditorPartViewImpl.class);
+        // the text editor view
+        bind(TextEditorPartView.class).to(TextEditorPartViewImpl.class);
 
         // Bind the file type identifier
         bind(FileTypeIdentifier.class).to(MultipleMethodFileIdentifier.class);
@@ -68,7 +68,7 @@ public class JsEditorGinModule extends AbstractGinModule {
         bind(DocumentStorage.class);
 
         // bind the default editor
-        bind(EditorProvider.class).annotatedWith(Names.named("defaultEditor")).to(DefaultEditorProvider.class);
+        bind(EditorProvider.class).annotatedWith(Names.named("defaultEditor")).to(DefaultTextEditorProvider.class);
 
         // bind the info panel
         bind(InfoPanel.class);

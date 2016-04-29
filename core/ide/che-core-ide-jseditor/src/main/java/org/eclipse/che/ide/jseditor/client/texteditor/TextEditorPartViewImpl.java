@@ -42,7 +42,7 @@ import javax.inject.Inject;
  * 
  * @author "Mickaël Leduque"
  */
-public class EmbeddedTextEditorPartViewImpl extends Composite implements EmbeddedTextEditorPartView {
+public class TextEditorPartViewImpl extends Composite implements TextEditorPartView {
 
     /** The UI binder for the component. */
     private final static EditorViewUiBinder uibinder = GWT.create(EditorViewUiBinder.class);
@@ -62,12 +62,11 @@ public class EmbeddedTextEditorPartViewImpl extends Composite implements Embedde
     private PopupResources popupResources;
 
     @Inject
-    public EmbeddedTextEditorPartViewImpl(final InfoPanel infoPanel) {
+    public TextEditorPartViewImpl(final InfoPanel infoPanel) {
         this.infoPanel = infoPanel;
 
         final HTMLPanel panel = uibinder.createAndBindUi(this);
         initWidget(panel);
-
     }
 
     @Override
@@ -147,7 +146,7 @@ public class EmbeddedTextEditorPartViewImpl extends Composite implements Embedde
     @Override
     public void initInfoPanel(final String mode, final Keymap keymap,
                               final int lineCount, final int tabSize) {
-        this.infoPanel.createDefaultState(mode, keymap, lineCount, tabSize);
+        this.infoPanel.createDefaultState(mode, lineCount, tabSize);
     }
 
     @Override
@@ -156,8 +155,7 @@ public class EmbeddedTextEditorPartViewImpl extends Composite implements Embedde
     }
 
     @Override
-    public void updateInfoPanelUnfocused(final int linecount) {
-//        this.infoPanel.displayLineCount(linecount);
+    public void updateInfoPanelUnfocused(final int lineCount) {
     }
 
     /**
@@ -165,6 +163,6 @@ public class EmbeddedTextEditorPartViewImpl extends Composite implements Embedde
      * 
      * @author "Mickaël Leduque"
      */
-    interface EditorViewUiBinder extends UiBinder<HTMLPanel, EmbeddedTextEditorPartViewImpl> {
+    interface EditorViewUiBinder extends UiBinder<HTMLPanel, TextEditorPartViewImpl> {
     }
 }

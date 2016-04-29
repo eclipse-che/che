@@ -42,7 +42,7 @@ public interface EditorWidget extends IsWidget,
                                       HasFocusHandlers,
                                       HasGutterClickHandlers,
                                       /* extended capabilities */
-                                      HasKeybindings,
+                                      HasKeyBindings,
                                       HasTextMarkers,
                                       LineStyler.HasLineStyler,
                                       UndoableEditor {

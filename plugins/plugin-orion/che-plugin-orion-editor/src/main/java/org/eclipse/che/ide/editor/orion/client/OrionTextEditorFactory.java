@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidgetFactory;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenterFactory;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenterFactory;
 
 /** Editor presenter factory that produces orion-based editors. */
 public class OrionTextEditorFactory {
@@ -26,7 +26,7 @@ public class OrionTextEditorFactory {
 
     /** The base {@link TextEditorPresenter} factory. */
     @Inject
-    private EmbeddedTextEditorPresenterFactory<OrionEditorWidget> presenterFactory;
+    private TextEditorPresenterFactory<OrionEditorWidget> presenterFactory;
 
     public TextEditorPresenter<OrionEditorWidget> createTextEditor() {
         return this.presenterFactory.createTextEditor(this.editorWidgetFactory);

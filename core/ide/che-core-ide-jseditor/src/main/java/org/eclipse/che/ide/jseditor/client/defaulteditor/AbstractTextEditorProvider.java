@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.jseditor.client.editorconfig.AutoSaveTextEditorConfiguration;
 import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -23,7 +23,7 @@ import org.eclipse.che.ide.util.loging.Log;
  * interface to minimize the effort required to implement this interface.
  * <p>To implement an editor provider, the programmer needs only to extend this class and provide an
  * implementation for the {@link #getId()} and {@link #getDescription()} methods.
- * <p>The method {@link #getEditor()} returns {@link ConfigurableTextEditor}
+ * <p>The method {@link #getEditor()} returns {@link TextEditor}
  * that is initialized by configuration returned by {@link #getEditorConfiguration()} method.
  * <p>The method {@link #getEditorConfiguration()} returns {@link AutoSaveTextEditorConfiguration}
  * instance and may be overridden in order to provide another configuration for the editor
@@ -31,7 +31,7 @@ import org.eclipse.che.ide.util.loging.Log;
  *
  * @author Artem Zatsarynnyi
  */
-public abstract class AbstractEditorProvider implements EditorProvider {
+public abstract class AbstractTextEditorProvider implements EditorProvider {
 
     @Inject
     private EditorBuilder editorBuilder;
@@ -42,13 +42,13 @@ public abstract class AbstractEditorProvider implements EditorProvider {
     }
 
     @Override
-    public ConfigurableTextEditor getEditor() {
+    public TextEditor getEditor() {
         if (editorBuilder == null) {
-            Log.debug(AbstractEditorProvider.class, "No builder registered for default editor type - giving up.");
+            Log.debug(AbstractTextEditorProvider.class, "No builder registered for default editor type - giving up.");
             return null;
         }
 
-        ConfigurableTextEditor editor = editorBuilder.buildEditor();
+        final TextEditor editor = editorBuilder.buildEditor();
         editor.initialize(getEditorConfiguration());
         return editor;
     }

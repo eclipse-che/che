@@ -65,7 +65,7 @@ public class TextEditorPresenterTest {
     @Mock
     private EditorModule<EditorWidget>        editorModule;
     @Mock
-    private EmbeddedTextEditorPartView        editorView;
+    private TextEditorPartView                editorView;
     @Mock
     private EventBus                          eventBus;
     @Mock

@@ -17,28 +17,37 @@ public interface LineStyler {
 
     /**
      * Adds the styles to the line.
-     * @param lineNumber the line number
-     * @param styles the styles to add
+     *
+     * @param lineNumber
+     *         the line number
+     * @param styles
+     *         the styles to add
      */
     void addLineStyles(int lineNumber, String... styles);
 
     /**
      * Removes the styles on the line.
-     * @param lineNumber the line number
-     * @param styles the styles to remove
+     *
+     * @param lineNumber
+     *         the line number
+     * @param styles
+     *         the styles to remove
      */
     void removeLineStyles(int lineNumber, String... styles);
 
     /**
      * Removes all styles on the line.
-     * @param lineNumber the line number
+     *
+     * @param lineNumber
+     *         the line number
      */
     void clearLineStyles(int lineNumber);
 
     /** Components that hold a line styler. */
-    public interface HasLineStyler {
+    interface HasLineStyler {
         /**
          * Returns the LineStyler instance
+         *
          * @return the line styler instance
          */
         LineStyler getLineStyler();

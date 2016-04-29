@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.web.js.editor;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractEditorProvider;
+import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 
 /**
@@ -21,7 +21,7 @@ import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
  *
  * @author Evgen Vidolob
  */
-public class JsEditorProvider extends AbstractEditorProvider {
+public class JsEditorProvider extends AbstractTextEditorProvider {
     private final JsEditorConfigurationProvider configurationProvider;
 
     @Inject

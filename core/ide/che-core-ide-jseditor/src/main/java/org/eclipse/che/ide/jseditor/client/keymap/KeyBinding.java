@@ -13,21 +13,21 @@ package org.eclipse.che.ide.jseditor.client.keymap;
 /**
  * Description of a key binding.
  */
-public class Keybinding {
+public class KeyBinding {
     /** Is the control key pressed? */
     private final boolean control;
     /** Is the shift key pressed? */
     private final boolean shift;
     /** Is the alt key pressed? */
     private final boolean alt;
-    /** Is the cmdkey pressed? */
+    /** Is the cmd key pressed? */
     private final boolean cmd;
     /** The key code. */
     private final int keycode;
     /** The action taken on the key binding. */
     private final KeyBindingAction action;
 
-    public Keybinding(final boolean control, final boolean shift, final boolean alt,
+    public KeyBinding(final boolean control, final boolean shift, final boolean alt,
                       final boolean cmd, final int keycode, final KeyBindingAction action) {
         this.control = control;
         this.shift = shift;

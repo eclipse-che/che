@@ -30,9 +30,8 @@ import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.jseditor.client.editorconfig.DefaultTextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -168,7 +167,7 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
         editor.init(new RecipeEditorInput(fileType, file), new OpenEditorCallbackImpl());
     }
 
-    private EmbeddedTextEditor getEditor() {
+    private TextEditor getEditor() {
         TextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
         editor.initialize(new DefaultTextEditorConfiguration());
 

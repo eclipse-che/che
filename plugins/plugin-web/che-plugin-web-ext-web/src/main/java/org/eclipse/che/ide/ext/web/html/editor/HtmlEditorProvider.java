@@ -13,13 +13,13 @@ package org.eclipse.che.ide.ext.web.html.editor;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractEditorProvider;
+import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 
 /**
  * {@link EditorProvider} for HTML files.
  */
-public class HtmlEditorProvider extends AbstractEditorProvider {
+public class HtmlEditorProvider extends AbstractTextEditorProvider {
     private final HTMLEditorConfigurationProvider configurationProvider;
 
     @Inject

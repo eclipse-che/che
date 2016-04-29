@@ -22,16 +22,16 @@ import org.eclipse.che.ide.util.ListenerManager.Dispatcher;
 import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
 
 /**
- * {@link CursorModelWithHandler} implementation for the embedded editors.
+ * {@link CursorModelWithHandler} implementation for the text editors.
  *
  * @author "Mickaël Leduque"
  */
-class EmbeddedEditorCursorModel implements CursorModelWithHandler, CursorActivityHandler {
+class TextEditorCursorModel implements CursorModelWithHandler, CursorActivityHandler {
 
     private final Document document;
     private final ListenerManager<CursorHandler> cursorHandlerManager = ListenerManager.create();
 
-    public EmbeddedEditorCursorModel(final Document document) {
+    public TextEditorCursorModel(final Document document) {
         this.document = document;
         this.document.addCursorHandler(this);
     }

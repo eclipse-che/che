@@ -53,7 +53,7 @@ import org.eclipse.che.ide.jseditor.client.codeassist.CompletionsSource;
 import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererFactory;
 import org.eclipse.che.ide.jseditor.client.document.Document;
 import org.eclipse.che.ide.jseditor.client.document.DocumentStorage;
-import org.eclipse.che.ide.jseditor.client.document.DocumentStorage.EmbeddedDocumentCallback;
+import org.eclipse.che.ide.jseditor.client.document.DocumentStorage.DocumentCallback;
 import org.eclipse.che.ide.jseditor.client.editorconfig.EditorUpdateAction;
 import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.jseditor.client.events.CompletionRequestEvent;
@@ -65,7 +65,7 @@ import org.eclipse.che.ide.jseditor.client.formatter.ContentFormatter;
 import org.eclipse.che.ide.jseditor.client.gutter.Gutters;
 import org.eclipse.che.ide.jseditor.client.gutter.HasGutter;
 import org.eclipse.che.ide.jseditor.client.keymap.KeyBindingAction;
-import org.eclipse.che.ide.jseditor.client.keymap.Keybinding;
+import org.eclipse.che.ide.jseditor.client.keymap.KeyBinding;
 import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistProcessor;
@@ -76,7 +76,7 @@ import org.eclipse.che.ide.jseditor.client.text.LinearRange;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
 import org.eclipse.che.ide.jseditor.client.text.TextRange;
 import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget.WidgetInitializedCallback;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView.Delegate;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPartView.Delegate;
 import org.eclipse.che.ide.texteditor.selection.CursorModelWithHandler;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
@@ -95,7 +95,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 /**
  * Presenter part for the editor implementations.
  */
-public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorPresenter implements EmbeddedTextEditor,
+public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorPresenter implements TextEditor,
                                                                                                     FileEventHandler,
                                                                                                     UndoableEditor,
                                                                                                     HasBreakpointRenderer,
@@ -110,25 +110,25 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
 
     private static final String TOGGLE_LINE_BREAKPOINT = "Toggle line breakpoint";
 
-    private final CodeAssistantFactory       codeAssistantFactory;
-    private final BreakpointManager          breakpointManager;
-    private final BreakpointRendererFactory  breakpointRendererFactory;
-    private final DialogFactory              dialogFactory;
-    private final DocumentStorage            documentStorage;
-    private final JsEditorConstants          constant;
-    private final EditorWidgetFactory<T>     editorWidgetFactory;
-    private final EditorModule<T>            editorModule;
-    private final EmbeddedTextEditorPartView editorView;
-    private final EventBus                   generalEventBus;
-    private final FileTypeIdentifier         fileTypeIdentifier;
-    private final QuickAssistantFactory      quickAssistantFactory;
-    private final WorkspaceAgent             workspaceAgent;
-    private final NotificationManager        notificationManager;
+    private final CodeAssistantFactory      codeAssistantFactory;
+    private final BreakpointManager         breakpointManager;
+    private final BreakpointRendererFactory breakpointRendererFactory;
+    private final DialogFactory             dialogFactory;
+    private final DocumentStorage           documentStorage;
+    private final JsEditorConstants         constant;
+    private final EditorWidgetFactory<T>    editorWidgetFactory;
+    private final EditorModule<T>           editorModule;
+    private final TextEditorPartView        editorView;
+    private final EventBus                  generalEventBus;
+    private final FileTypeIdentifier        fileTypeIdentifier;
+    private final QuickAssistantFactory     quickAssistantFactory;
+    private final WorkspaceAgent            workspaceAgent;
+    private final NotificationManager       notificationManager;
 
     /** The editor handle for this editor. */
     private final EditorHandle handle;
 
-    private HasKeybindings           keyBindingsManager;
+    private HasKeyBindings           keyBindingsManager;
     private List<EditorUpdateAction> updateActions;
     private TextEditorConfiguration  configuration;
     private EditorWidget             editorWidget;
@@ -153,7 +153,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                                final JsEditorConstants constant,
                                @Assisted final EditorWidgetFactory<T> editorWidgetFactory,
                                final EditorModule<T> editorModule,
-                               final EmbeddedTextEditorPartView editorView,
+                               final TextEditorPartView editorView,
                                final EventBus eventBus,
                                final FileTypeIdentifier fileTypeIdentifier,
                                final QuickAssistantFactory quickAssistantFactory,
@@ -174,7 +174,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
 
-        keyBindingsManager = new TemporaryKeybindingsManager();
+        keyBindingsManager = new TemporaryKeyBindingsManager();
         handle = new EditorHandle() {
         };
 
@@ -262,7 +262,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                 }
             }
         });
-        this.editorWidget.addKeybinding(new Keybinding(true, false, false, false, KeyCodes.KEY_F8, new KeyBindingAction() {
+        this.editorWidget.addKeyBinding(new KeyBinding(true, false, false, false, KeyCodes.KEY_F8, new KeyBindingAction() {
             @Override
             public void action() {
                 int currentLine = editorWidget.getDocument().getCursorPosition().getLine();
@@ -290,7 +290,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
          * -restore current cursor position
          */
         final TextPosition currentCursor = getCursorPosition();
-        this.documentStorage.getDocument(document.getFile(), new EmbeddedDocumentCallback() {
+        this.documentStorage.getDocument(document.getFile(), new DocumentCallback() {
 
             @Override
             public void onDocumentReceived(final String content) {
@@ -403,7 +403,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     @Override
-    public EmbeddedTextEditorPartView getView() {
+    public TextEditorPartView getView() {
         return this.editorView;
     }
 
@@ -596,9 +596,9 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     @Override
-    public void addKeybinding(final Keybinding keybinding) {
+    public void addKeybinding(final KeyBinding keyBinding) {
         // the actual HasKeyBindings object can change, so use indirection
-        getHasKeybindings().addKeybinding(keybinding);
+        getHasKeybindings().addKeyBinding(keyBinding);
     }
 
     private List<String> detectFileType(final VirtualFile file) {
@@ -625,7 +625,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         }
     }
 
-    public HasKeybindings getHasKeybindings() {
+    public HasKeyBindings getHasKeybindings() {
         return this.keyBindingsManager;
     }
 
@@ -656,15 +656,15 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     private void switchHasKeybinding() {
-        final HasKeybindings current = getHasKeybindings();
-        if (!(current instanceof TemporaryKeybindingsManager)) {
+        final HasKeyBindings current = getHasKeybindings();
+        if (!(current instanceof TemporaryKeyBindingsManager)) {
             return;
         }
         // change the key binding instance and add all bindings to the new one
         this.keyBindingsManager = this.editorWidget;
-        final List<Keybinding> bindings = ((TemporaryKeybindingsManager)current).getbindings();
-        for (final Keybinding binding : bindings) {
-            this.keyBindingsManager.addKeybinding(binding);
+        final List<KeyBinding> bindings = ((TemporaryKeyBindingsManager)current).getbindings();
+        for (final KeyBinding binding : bindings) {
+            this.keyBindingsManager.addKeyBinding(binding);
         }
     }
 
@@ -803,7 +803,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
 
             document = editorWidget.getDocument();
             document.setFile(input.getFile());
-            cursorModel = new EmbeddedEditorCursorModel(document);
+            cursorModel = new TextEditorCursorModel(document);
 
             editorWidget.setTabSize(configuration.getTabWidth());
 

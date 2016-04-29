@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.defaulteditor;
 
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 
 public interface EditorBuilder {
 
-    ConfigurableTextEditor buildEditor();
-
+    TextEditor buildEditor();
 }

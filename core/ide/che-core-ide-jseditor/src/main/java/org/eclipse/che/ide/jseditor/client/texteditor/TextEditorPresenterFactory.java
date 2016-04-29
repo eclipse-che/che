@@ -12,12 +12,17 @@ package org.eclipse.che.ide.jseditor.client.texteditor;
 
 /**
  * Factory for {@link TextEditorPresenter} objects.
- * @param <T> the type of the editor
+ *
+ * @param <T>
+ *         the type of the editor
  */
-public interface EmbeddedTextEditorPresenterFactory<T extends EditorWidget> {
+public interface TextEditorPresenterFactory<T extends EditorWidget> {
+
     /**
      * Create an instance of {@link TextEditorPresenter}.
-     * @param editorWidgetFactory the {@link EditorWidget} factory tu use
+     *
+     * @param editorWidgetFactory
+     *         the {@link EditorWidget} factory tu use
      * @return a new {@link TextEditorPresenter}
      */
     TextEditorPresenter<T> createTextEditor(EditorWidgetFactory<T> editorWidgetFactory);

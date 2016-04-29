@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.jseditor.client.defaulteditor;
 
-public class DefaultEditorProvider extends AbstractEditorProvider {
+public class DefaultTextEditorProvider extends AbstractTextEditorProvider {
 
     @Override
     public String getId() {

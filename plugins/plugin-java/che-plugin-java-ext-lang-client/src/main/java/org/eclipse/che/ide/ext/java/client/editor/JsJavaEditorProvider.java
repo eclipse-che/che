@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractEditorProvider;
+import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.jseditor.client.editorconfig.EditorUpdateAction;
 import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
 import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
 
 import javax.inject.Inject;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import static org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
 
 /** EditorProvider that provides a text editor configured for java source files. */
-public class JsJavaEditorProvider extends AbstractEditorProvider {
+public class JsJavaEditorProvider extends AbstractTextEditorProvider {
 
     private static final Logger LOG = Logger.getLogger(JsJavaEditorProvider.class.getName());
 
@@ -48,10 +48,10 @@ public class JsJavaEditorProvider extends AbstractEditorProvider {
     }
 
     @Override
-    public ConfigurableTextEditor getEditor() {
+    public TextEditor getEditor() {
         LOG.fine("JsJavaEditor instance creation.");
 
-        final ConfigurableTextEditor textEditor = super.getEditor();
+        final TextEditor textEditor = super.getEditor();
 
         if (textEditor instanceof TextEditorPresenter) {
             final TextEditorPresenter<?> editor = (TextEditorPresenter<?>)textEditor;
