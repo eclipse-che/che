@@ -161,9 +161,11 @@ public class UploadFolderFromZipViewImpl extends Window implements UploadFolderF
     @NotNull
     public String getFileName() {
         String fileName = file.getFilename();
-        if (fileName.contains("/") || fileName.contains("\\")) {
-            int index = fileName.contains("\\") ? fileName.lastIndexOf("\\") + 1 : fileName.lastIndexOf("/") + 1;
-            fileName = fileName.substring(index);
+        if (fileName.contains("/")) {
+            return fileName.substring(fileName.lastIndexOf("/") + 1);
+        }
+        if (fileName.contains("\\")) {
+            return fileName.substring(fileName.lastIndexOf("\\") + 1);
         }
         return fileName;
     }
