@@ -44,8 +44,7 @@
     height: 100% !important;
 }
 
-.machineConsole,
-.commandConsole {
+.machineConsole {
     background-color: outputBackgroundColor;
     -moz-user-select: text;
     -webkit-user-select: text;
@@ -60,21 +59,9 @@
     margin-bottom: 3px;
 }
 
-.machineConsole pre,
-.commandConsole pre {
+.machineConsole pre {
     font-family: outputFontFamily;
     font-size: fontSize;
-}
-
-.commandConsoleLines {
-    width: 100%;
-}
-
-.commandConsoleLines > pre {
-    width: 100%;
-    word-wrap: break-word;
-    padding: 0;
-    margin: 0;
 }
 
 .consoleToolbar {
@@ -403,16 +390,6 @@
     -webkit-user-select: auto;
     user-select: text;
     background-color: outputBackgroundColor;
-}
-
-div.processHeaderTitle {
-    font-size: fontSize;
-    font-family: outputFontFamily;
-    color: mainFontColor;
-}
-
-.processCommandValue {
-    color: successColor !important;
 }
 
 .processesPanelStopButtonForProcess {
