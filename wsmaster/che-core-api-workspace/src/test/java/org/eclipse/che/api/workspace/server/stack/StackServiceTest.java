@@ -23,19 +23,15 @@ import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
-import org.eclipse.che.api.machine.shared.Permissible;
-import org.eclipse.che.api.machine.shared.dto.recipe.GroupDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.PermissionsDescriptor;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
-import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
+import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -62,33 +58,29 @@ import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACK_BY_ID;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_STACK;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
+import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
-import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
-import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_STACK;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACK_BY_ID;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static java.util.Collections.singletonList;
 
 /**
  * Test for {@link @StackService}
@@ -137,13 +129,12 @@ public class StackServiceTest {
     private static LinkedList<String> ROLES  = new LinkedList<>(Collections.singletonList("user"));
 
     private List<String> tags = asList("java", "maven");
-    private StackDto              stackDto;
-    private StackImpl             stackImpl;
-    private StackImpl             foreignStack;
-    private StackSourceImpl       stackSourceImpl;
-    private List<StackComponent>  componentsImpl;
-    private StackIcon             stackIcon;
-    private PermissionsDescriptor permissionsDescriptor;
+    private StackDto             stackDto;
+    private StackImpl            stackImpl;
+    private StackImpl            foreignStack;
+    private StackSourceImpl      stackSourceImpl;
+    private List<StackComponent> componentsImpl;
+    private StackIcon            stackIcon;
 
     private StackSourceDto          stackSourceDto;
     private List<StackComponentDto> componentsDto;
@@ -156,8 +147,6 @@ public class StackServiceTest {
 
     @Mock
     StackComponentImpl stackComponent;
-    @Mock
-    PermissionsChecker checker;
 
     @InjectMocks
     StackService service;
@@ -231,12 +220,6 @@ public class StackServiceTest {
                                 .setWorkspaceConfig(workspaceConfig)
                                 .setStackIcon(stackIcon)
                                 .build();
-
-        Map<String, List<String>> userPermission = new HashMap<>();
-        userPermission.put(USER_ID, asList("read", "write"));
-        GroupDescriptor group = newDto(GroupDescriptor.class).withName("user").withAcl(asList("read", "write", "search"));
-        List<GroupDescriptor> groupPermission = singletonList(group);
-        permissionsDescriptor = newDto(PermissionsDescriptor.class).withUsers(userPermission).withGroups(groupPermission);
     }
 
     @BeforeMethod
@@ -304,41 +287,6 @@ public class StackServiceTest {
 
     @Test
     public void newStackShouldBeCreatedForUser() throws ConflictException, ServerException {
-        stackShouldBeCreated();
-    }
-
-    @Test
-    public void nonSystemUserShouldNotCreateStackWithPublicPermissions() {
-        stackDto.setPermissions(permissionsDescriptor);
-        when(checker.hasPublicSearchPermission(any(PermissionsDescriptor.class))).thenReturn(true);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType(APPLICATION_JSON)
-                                         .body(stackDto)
-                                         .when()
-                                         .post(SECURE_PATH + "/stack");
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedErrorMessage = "User '" + USER_ID + "' doesn't has access to use 'public: search' permission";
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedErrorMessage);
-    }
-
-    @Test
-    public void newStackShouldBeCreatedForSystemAdminWhenPermissionNonNull() throws ConflictException, ServerException {
-        ROLES.add("system/admin");
-
-        stackDto.setPermissions(permissionsDescriptor);
-
-        stackShouldBeCreated();
-    }
-
-    @Test
-    public void newStackShouldBeCreatedForSystemManagerWhenPermissionNonNull() throws ConflictException, ServerException {
-        ROLES.add("system/manager");
-
-        stackDto.setPermissions(permissionsDescriptor);
-
         stackShouldBeCreated();
     }
 
@@ -410,7 +358,7 @@ public class StackServiceTest {
     /** Get stack by id */
 
     @Test
-    public void stackByIdShouldBeReturnedForStackOwner() throws NotFoundException, ServerException {
+    public void stackByIdShouldBeReturned() throws NotFoundException, ServerException {
         when(stackDao.getById(STACK_ID)).thenReturn(stackImpl);
 
         Response response = given().auth()
@@ -433,87 +381,6 @@ public class StackServiceTest {
         assertEquals(result.getCreator(), stackImpl.getCreator());
     }
 
-    @Test
-    public void foreignStackShouldBeReturnedIfUserHasPermission() throws ServerException, NotFoundException {
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), eq(USER_ID), eq("read"))).thenReturn(true);
-
-        sendRequestAndGetForeignStackById();
-    }
-
-    @Test
-    public void foreignStackShouldNotBeReturnedIfUserHasNotPermission() throws ServerException, NotFoundException {
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), eq(USER_ID), eq("read"))).thenReturn(false);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .get(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedMessage = format("User '%s' doesn't has access to stack '%s'", USER_ID, stackImpl.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedMessage);
-    }
-
-    @Test
-    public void foreignStackByIdShouldBeReturnedForSystemAdmin() throws NotFoundException, ServerException {
-        ROLES.add("system/admin");
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), eq("not this admin"), eq("read"))).thenReturn(true);
-
-        sendRequestAndGetForeignStackById();
-    }
-
-    @Test
-    public void foreignStackByIdShouldBeReturnedForSystemAdmin2() throws NotFoundException, ServerException {
-        ROLES.add("system/admin");
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), eq("not this admin"), eq("read"))).thenReturn(false);
-
-        sendRequestAndGetForeignStackById();
-    }
-
-    @Test
-    public void foreignStackByIdShouldBeReturnedForSystemManager() throws NotFoundException, ServerException {
-        ROLES.add("system/manager");
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), eq("not this manager"), eq("read"))).thenReturn(true);
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-
-        sendRequestAndGetForeignStackById();
-    }
-
-    @Test
-    public void foreignStackByIdShouldBeReturnedForSystemManager2() throws NotFoundException, ServerException {
-        ROLES.add("system/manager");
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), eq("not this manager"), eq("read"))).thenReturn(false);
-
-        sendRequestAndGetForeignStackById();
-    }
-
-    private void sendRequestAndGetForeignStackById() throws NotFoundException, ServerException {
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .get(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 200);
-        StackDto result = unwrapDto(response, StackDto.class);
-        assertEquals(result.getId(), foreignStack.getId());
-        assertEquals(result.getName(), foreignStack.getName());
-        assertEquals(result.getDescription(), foreignStack.getDescription());
-        assertEquals(result.getScope(), foreignStack.getScope());
-        assertEquals(result.getTags().get(0), foreignStack.getTags().get(0));
-        assertEquals(result.getTags().get(1), foreignStack.getTags().get(1));
-        assertEquals(result.getComponents().get(0).getName(), foreignStack.getComponents().get(0).getName());
-        assertEquals(result.getComponents().get(0).getVersion(), foreignStack.getComponents().get(0).getVersion());
-        assertEquals(result.getSource().getType(), foreignStack.getSource().getType());
-        assertEquals(result.getSource().getOrigin(), foreignStack.getSource().getOrigin());
-        assertEquals(result.getCreator(), foreignStack.getCreator());
-    }
-
     /** Update stack */
 
     @Test
@@ -533,50 +400,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void shouldThrowForbiddenExceptionWhenUserTryUpdatePredefinedStack()
-            throws NotFoundException, ServerException, ConflictException {
-        final String updateSuffix = " updated";
-        final String newScope = "advanced";
-        StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
-                                             .withId(STACK_ID)
-                                             .withName(NAME + updateSuffix)
-                                             .withDescription(DESCRIPTION + updateSuffix)
-                                             .withScope(newScope)
-                                             .withCreator(CREATOR + 1)
-                                             .withTags(tags)
-                                             .withSource(stackSourceDto)
-                                             .withComponents(componentsDto);
-
-        StackImpl updatedStack = StackImpl.builder().setId(STACK_ID)
-                                          .setName(NAME + updateSuffix)
-                                          .setDescription(DESCRIPTION + updateSuffix)
-                                          .setScope(newScope)
-                                          .setCreator(CREATOR + 1)
-                                          .setTags(tags)
-                                          .setSource(stackSourceImpl)
-                                          .setComponents(componentsImpl)
-                                          .setStackIcon(stackIcon)
-                                          .build();
-
-        when(stackDao.getById(STACK_ID)).thenReturn(updatedStack);
-        when(checker.hasAccess(any(Permissible.class), eq(CREATOR), anyString())).thenReturn(false);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedMessage = format("User '%s' doesn't has access to update stack '%s'", USER_ID, stackImpl.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedMessage);
-        verify(stackDao).getById(STACK_ID);
-        verify(stackDao, never()).update(any());
-    }
-
-    @Test
-    public void StackShouldBeUpdated() throws NotFoundException, ServerException, ConflictException {
+    public void stackShouldBeUpdated() throws NotFoundException, ServerException, ConflictException {
         final String updatedDescription = "some description";
         final String updatedScope = "advanced";
         StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
@@ -593,8 +417,8 @@ public class StackServiceTest {
         updateStack.setDescription(updatedDescription);
         updateStack.setScope(updatedScope);
 
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
         when(stackDao.getById(STACK_ID)).thenReturn(stackImpl).thenReturn(updateStack);
+        when(stackDao.update(any())).thenReturn(updateStack).thenReturn(updateStack);
 
         Response response = given().auth()
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -634,9 +458,8 @@ public class StackServiceTest {
                                              .withSource(stackSourceDto)
                                              .withComponents(componentsDto);
 
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-
         when(stackDao.getById(anyString())).thenReturn(foreignStack);
+        when(stackDao.update(any())).thenReturn(foreignStack);
 
         Response response = given().auth()
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -662,321 +485,36 @@ public class StackServiceTest {
 
         verify(stackDao).update(any());
         verify(stackDao).getById(STACK_ID);
-    }
-
-    @Test
-    public void systemAdminShouldUpdateStackWithNonNullPermissionDescriptor() throws ServerException, NotFoundException {
-        ROLES.add("system/admin");
-
-        StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
-                                             .withId(STACK_ID)
-                                             .withName(NAME)
-                                             .withDescription(DESCRIPTION)
-                                             .withScope(SCOPE)
-                                             .withTags(tags)
-                                             .withSource(stackSourceDto)
-                                             .withComponents(componentsDto)
-                                             .withPermissions(permissionsDescriptor);
-
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 200);
-        StackDto result = unwrapDto(response, StackDto.class);
-
-        assertEquals(result.getId(), updatedStackDto.getId());
-        assertEquals(result.getName(), updatedStackDto.getName());
-        assertEquals(result.getDescription(), updatedStackDto.getDescription());
-        assertEquals(result.getScope(), updatedStackDto.getScope());
-        assertEquals(result.getTags().get(0), updatedStackDto.getTags().get(0));
-        assertEquals(result.getTags().get(1), updatedStackDto.getTags().get(1));
-        assertEquals(result.getComponents().get(0).getName(), updatedStackDto.getComponents().get(0).getName());
-        assertEquals(result.getComponents().get(0).getVersion(), updatedStackDto.getComponents().get(0).getVersion());
-        assertEquals(result.getSource().getType(), updatedStackDto.getSource().getType());
-        assertEquals(result.getSource().getOrigin(), updatedStackDto.getSource().getOrigin());
-        assertEquals(result.getCreator(), FOREIGN_CREATOR);
-
-        verify(stackDao).update(any());
-        verify(stackDao).getById(STACK_ID);
-    }
-
-    @Test
-    public void stackOwnerShouldUpdateStackWithNonNullAndNonPublicPermissionDescriptor() throws ServerException, NotFoundException {
-        StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
-                                             .withId(STACK_ID)
-                                             .withName(NAME)
-                                             .withDescription(DESCRIPTION)
-                                             .withScope(SCOPE)
-                                             .withTags(tags)
-                                             .withSource(stackSourceDto)
-                                             .withComponents(componentsDto)
-                                             .withPermissions(permissionsDescriptor);
-
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-
-        when(stackDao.getById(anyString())).thenReturn(stackImpl);
-        when(checker.hasPublicSearchPermission(any())).thenReturn(false);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 200);
-        StackDto result = unwrapDto(response, StackDto.class);
-
-        assertEquals(result.getId(), updatedStackDto.getId());
-        assertEquals(result.getName(), updatedStackDto.getName());
-        assertEquals(result.getDescription(), updatedStackDto.getDescription());
-        assertEquals(result.getScope(), updatedStackDto.getScope());
-        assertEquals(result.getTags().get(0), updatedStackDto.getTags().get(0));
-        assertEquals(result.getTags().get(1), updatedStackDto.getTags().get(1));
-        assertEquals(result.getComponents().get(0).getName(), updatedStackDto.getComponents().get(0).getName());
-        assertEquals(result.getComponents().get(0).getVersion(), updatedStackDto.getComponents().get(0).getVersion());
-        assertEquals(result.getSource().getType(), updatedStackDto.getSource().getType());
-        assertEquals(result.getSource().getOrigin(), updatedStackDto.getSource().getOrigin());
-        assertEquals(result.getCreator(), USER_ID);
-
-        verify(stackDao).update(any());
-        verify(stackDao).getById(STACK_ID);
-    }
-
-    @Test
-    public void userShouldNotUpdateForeignStackIfHeHasNotPermissionUpdateAcl() throws ServerException, NotFoundException {
-        StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
-                                             .withId(STACK_ID)
-                                             .withName(NAME)
-                                             .withDescription(DESCRIPTION)
-                                             .withScope(SCOPE)
-                                             .withTags(tags)
-                                             .withSource(stackSourceDto)
-                                             .withComponents(componentsDto)
-                                             .withPermissions(permissionsDescriptor);
-
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("update_acl"))).thenReturn(false);
-
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-        when(checker.hasPublicSearchPermission(any())).thenReturn(false);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedMessage = format("User '%s' doesn't has access to update stack '%s' permissions", USER_ID, stackImpl.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedMessage);
-        verify(stackDao).getById(STACK_ID);
-        verify(stackDao, never()).update(any());
-    }
-
-    @Test
-    public void userShouldNotUpdateForeignStackWithPublicSearchPermissions() throws ServerException, NotFoundException {
-        StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
-                                             .withId(STACK_ID)
-                                             .withName(NAME)
-                                             .withDescription(DESCRIPTION)
-                                             .withScope(SCOPE)
-                                             .withTags(tags)
-                                             .withSource(stackSourceDto)
-                                             .withComponents(componentsDto)
-                                             .withPermissions(permissionsDescriptor);
-
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("update_acl"))).thenReturn(true);
-        when(checker.hasPublicSearchPermission(any())).thenReturn(true);
-        when(stackDao.getById(anyString())).thenReturn(foreignStack);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedMessage = format("User '%s' doesn't has access to use 'public: search' permission", USER_ID, stackImpl.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedMessage);
-        verify(stackDao).getById(STACK_ID);
-        verify(stackDao, never()).update(any());
-    }
-
-    @Test
-    public void userStackOwnerCanNotUpdateStackWithPublicSearchPermissions() throws NotFoundException, ServerException {
-        StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
-                                             .withId(STACK_ID)
-                                             .withName(NAME)
-                                             .withDescription(DESCRIPTION)
-                                             .withScope(SCOPE)
-                                             .withTags(tags)
-                                             .withSource(stackSourceDto)
-                                             .withComponents(componentsDto)
-                                             .withPermissions(permissionsDescriptor);
-
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-
-        when(stackDao.getById(anyString())).thenReturn(stackImpl);
-        when(checker.hasPublicSearchPermission(any())).thenReturn(true);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedMessage = format("User '%s' doesn't has access to use 'public: search' permission", USER_ID);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedMessage);
-        verify(stackDao).getById(STACK_ID);
-        verify(stackDao, never()).update(any());
     }
 
     /** Delete stack */
 
     @Test
-    public void stackShouldBeDeletedByStackOwner() throws ServerException, NotFoundException {
-        when(stackDao.getById(STACK_ID)).thenReturn(stackImpl);
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-
+    public void stackShouldBeDeleted() throws ServerException, NotFoundException {
         Response response = given().auth()
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                    .when()
                                    .delete(SECURE_PATH + "/stack/" + STACK_ID);
 
-        verify(stackDao).getById(STACK_ID);
-        verify(stackDao).remove(any());
+        verify(stackDao).remove(eq(STACK_ID));
         assertEquals(response.getStatusCode(), 204);
     }
 
-    @Test
-    public void adminShouldDeleteStackForeignStack() throws ServerException, NotFoundException {
-        ROLES.add("system/admin");
-        when(stackDao.getById(STACK_ID)).thenReturn(foreignStack);
-        when(checker.hasAccess(any(StackImpl.class), anyString(), eq("write"))).thenReturn(true);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .delete(SECURE_PATH + "/stack/" + STACK_ID);
-
-        verify(stackDao).getById(STACK_ID);
-        verify(stackDao).remove(any());
-        assertEquals(response.getStatusCode(), 204);
-    }
-
-    @Test
-    public void shouldThrowForbiddenExceptionWhenWeTryDeleteAlienStack() throws NotFoundException, ServerException {
-        StackImpl stack = StackImpl.builder()
-                                   .setId(STACK_ID)
-                                   .setName(NAME)
-                                   .setDescription(DESCRIPTION)
-                                   .setScope(SCOPE)
-                                   .setCreator("someUser")
-                                   .setTags(tags)
-                                   .setSource(stackSourceImpl)
-                                   .setComponents(componentsImpl)
-                                   .setStackIcon(stackIcon)
-                                   .build();
-
-        when(stackDao.getById(STACK_ID)).thenReturn(stack);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .delete(SECURE_PATH + "/stack/" + STACK_ID);
-
-        verify(stackDao).getById(STACK_ID);
-        assertEquals(response.getStatusCode(), 403);
-        String expectedErrorMessage = format("User '%s' doesn't has access to stack with id '%s'", USER_ID, STACK_ID);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedErrorMessage);
-    }
-
-    /** Get stacks by creator */
-
-    @Test
-    public void createdStacksShouldBeReturned() throws ServerException {
-        when(stackDao.getByCreator(USER_ID, 0, 1)).thenReturn(Collections.singletonList(stackImpl));
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .get(SECURE_PATH + "/stack?skipCount=0&maxItems=1");
-
-        assertEquals(response.getStatusCode(), 200);
-        StackDto result = DtoFactory.getInstance()
-                                    .createListDtoFromJson(response.body().print(), StackDto.class)
-                                    .get(0);
-
-        assertEquals(result.getId(), stackImpl.getId());
-        assertEquals(result.getName(), stackImpl.getName());
-        assertEquals(result.getDescription(), stackImpl.getDescription());
-        assertEquals(result.getScope(), stackImpl.getScope());
-        assertEquals(result.getTags().get(0), stackImpl.getTags().get(0));
-        assertEquals(result.getTags().get(1), stackImpl.getTags().get(1));
-        assertEquals(result.getComponents().get(0).getName(), stackImpl.getComponents().get(0).getName());
-        assertEquals(result.getComponents().get(0).getVersion(), stackImpl.getComponents().get(0).getVersion());
-        assertEquals(result.getSource().getType(), stackImpl.getSource().getType());
-        assertEquals(result.getSource().getOrigin(), stackImpl.getSource().getOrigin());
-        assertEquals(result.getCreator(), stackImpl.getCreator());
-        verify(stackDao).getByCreator(USER_ID, 0, 1);
-    }
-
-    @Test
-    public void shouldBeReturnedStackList() throws ServerException {
-        when(stackDao.getByCreator(anyString(), anyInt(), anyInt())).thenReturn(singletonList(stackImpl));
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .get(SECURE_PATH + "/stack/");
-
-        verify(stackDao).getByCreator(anyString(), anyInt(), anyInt());
-        assertEquals(response.getStatusCode(), 200);
-        List<StackDto> result = unwrapListDto(response, StackDto.class);
-        assertEquals(result.get(0).getId(), stackImpl.getId());
-        assertEquals(result.get(0).getName(), stackImpl.getName());
-        assertEquals(result.get(0).getDescription(), stackImpl.getDescription());
-        assertEquals(result.get(0).getScope(), stackImpl.getScope());
-        assertEquals(result.get(0).getTags().get(0), stackImpl.getTags().get(0));
-        assertEquals(result.get(0).getTags().get(1), stackImpl.getTags().get(1));
-        assertEquals(result.get(0).getComponents().get(0).getName(), stackImpl.getComponents().get(0).getName());
-        assertEquals(result.get(0).getComponents().get(0).getVersion(), stackImpl.getComponents().get(0).getVersion());
-        assertEquals(result.get(0).getSource().getType(), stackImpl.getSource().getType());
-        assertEquals(result.get(0).getSource().getOrigin(), stackImpl.getSource().getOrigin());
-        assertEquals(result.get(0).getCreator(), stackImpl.getCreator());
-
-        verify(stackDao).getByCreator(anyString(), anyInt(), anyInt());
-    }
-
-    /** Search stack by tags*/
+    /** Search stack by tags */
     @Test
     public void shouldReturnsAllStacksWhenListTagsIsEmpty() throws ServerException {
         StackImpl stack2 = new StackImpl(stackImpl);
         stack2.setTags(singletonList("subversion"));
         List<StackImpl> stacks = asList(stackImpl, stack2);
-        when(stackDao.searchStacks(anyList(), anyInt(), anyInt())).thenReturn(stacks);
+        when(stackDao.searchStacks(anyString(), anyList(), anyInt(), anyInt())).thenReturn(stacks);
 
         Response response = given().auth()
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                    .when()
-                                   .get(SECURE_PATH + "/stack/list");
+                                   .get(SECURE_PATH + "/stack");
 
-        verify(stackDao).searchStacks(anyList(), anyInt(), anyInt());
         assertEquals(response.getStatusCode(), 200);
+        verify(stackDao).searchStacks(anyString(), anyList(), anyInt(), anyInt());
 
         List<StackDto> result = unwrapListDto(response, StackDto.class);
         assertEquals(result.size(), 2);
@@ -988,15 +526,15 @@ public class StackServiceTest {
     public void shouldReturnsStackByTagList() throws ServerException {
         StackImpl stack2 = new StackImpl(stackImpl);
         stack2.setTags(singletonList("Subversion"));
-        when(stackDao.searchStacks(eq(singletonList("Subversion")), anyInt(), anyInt())).thenReturn(singletonList(stack2));
+        when(stackDao.searchStacks(anyString(), eq(singletonList("Subversion")), anyInt(), anyInt())).thenReturn(singletonList(stack2));
 
         Response response = given().auth()
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                    .when()
-                                   .get(SECURE_PATH + "/stack/list?tags=Subversion");
+                                   .get(SECURE_PATH + "/stack?tags=Subversion");
 
-        verify(stackDao).searchStacks(eq(singletonList("Subversion")), anyInt(), anyInt());
         assertEquals(response.getStatusCode(), 200);
+        verify(stackDao).searchStacks(anyString(), eq(singletonList("Subversion")), anyInt(), anyInt());
 
         List<StackDto> result = unwrapListDto(response, StackDto.class);
         assertEquals(result.size(), 1);
@@ -1077,36 +615,6 @@ public class StackServiceTest {
         verify(stackDao).update(any());
     }
 
-    @Test
-    public void stackIconSholdNotBeDeletedForForeignUserWithoutPermissions() throws NotFoundException, ServerException {
-        when(checker.hasAccess(foreignStack, USER_ID, "write")).thenReturn(false);
-        when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .delete(SECURE_PATH + "/stack/" + foreignStack.getId() + "/icon");
-
-        String expectedErrorMessage = format("User '%s' doesn't has access to stack with id '%s'", USER_ID, STACK_ID);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedErrorMessage);
-        assertEquals(response.getStatusCode(), 403);
-        verify(stackDao).getById(foreignStack.getId());
-        verify(stackDao, never()).update(foreignStack);
-    }
-
-
-    @Test
-    public void stackIconShouldBeDeletedIfUserHasPermissions() throws ServerException, NotFoundException {
-        when(checker.hasAccess(foreignStack, USER_ID, "write")).thenReturn(true);
-        when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .delete(SECURE_PATH + "/stack/" + foreignStack.getId() + "/icon");
-        assertEquals(response.getStatusCode(), 204);
-        verify(stackDao).getById(foreignStack.getId());
-        verify(stackDao).update(foreignStack);
-    }
-
     /** Update stack icon */
 
     @Test
@@ -1128,8 +636,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void foreignStackIconShouldBeUploadedForAdmin() throws NotFoundException, ServerException {
-        ROLES.add("system/admin");
+    public void foreignStackIconShouldBeUploadedForUser() throws NotFoundException, ServerException {
         File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
         when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
 
@@ -1143,44 +650,6 @@ public class StackServiceTest {
         assertEquals(response.getStatusCode(), 200);
         verify(stackDao).getById(foreignStack.getId());
         verify(stackDao).update(any());
-    }
-
-    @Test
-    public void foreignStackIconShouldBeUploadedForUserWithPermissions() throws NotFoundException, ServerException {
-        File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
-        when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(), any(), any())).thenReturn(true);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .multiPart("type-java.svg", file, "image/svg+xml")
-                                   .contentType(MULTIPART_FORM_DATA)
-                                   .post(SECURE_PATH + "/stack/" + stackImpl.getId() + "/icon");
-
-        assertEquals(response.getStatusCode(), 200);
-        verify(stackDao).getById(foreignStack.getId());
-        verify(stackDao).update(any());
-    }
-
-    @Test
-    public void stackIconShouldNotBeUploadedForUserWithoutPermissions() throws NotFoundException, ServerException {
-        File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
-        when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
-        when(checker.hasAccess(any(), any(), any())).thenReturn(false);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .when()
-                                   .multiPart("type-java.svg", file, "image/svg+xml")
-                                   .contentType(MULTIPART_FORM_DATA)
-                                   .post(SECURE_PATH + "/stack/" + stackImpl.getId() + "/icon");
-
-        assertEquals(response.getStatusCode(), 403);
-        String expectedErrorMessage = format("User '%s' doesn't has access to stack with id '%s'", USER_ID, STACK_ID);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedErrorMessage);
-        verify(stackDao).getById(foreignStack.getId());
-        verify(stackDao, never()).update(any());
     }
 
     private static <T> T unwrapDto(Response response, Class<T> dtoClass) {

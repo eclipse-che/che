@@ -13,21 +13,17 @@ package org.eclipse.che.api.local;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.machine.server.recipe.adapters.GroupAdapter;
-import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsAdapter;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.shared.Group;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
-import org.eclipse.che.api.machine.shared.Permissions;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -50,14 +46,13 @@ import static java.util.stream.Collectors.toMap;
 @Singleton
 public class LocalRecipeDaoImpl implements RecipeDao {
 
-    private final Map<String, ManagedRecipe> recipes;
-    private final ReadWriteLock              lock;
-    private final LocalStorage               recipeStorage;
+    private final Map<String, RecipeImpl> recipes;
+    private final ReadWriteLock           lock;
+    private final LocalStorage            recipeStorage;
 
     @Inject
     public LocalRecipeDaoImpl(LocalStorageFactory storageFactory) throws IOException {
-        Map<Class<?>, Object> adapters = ImmutableMap.of(Permissions.class, new PermissionsAdapter(), Group.class, new GroupAdapter());
-        this.recipeStorage = storageFactory.create("recipes.json", adapters);
+        this.recipeStorage = storageFactory.create("recipes.json");
         this.recipes = new HashMap<>();
         lock = new ReentrantReadWriteLock();
     }
@@ -78,7 +73,7 @@ public class LocalRecipeDaoImpl implements RecipeDao {
     }
 
     @Override
-    public void create(ManagedRecipe recipe) throws ConflictException {
+    public void create(RecipeImpl recipe) throws ConflictException {
         lock.writeLock().lock();
         try {
             if (recipes.containsKey(recipe.getId())) {
@@ -91,10 +86,10 @@ public class LocalRecipeDaoImpl implements RecipeDao {
     }
 
     @Override
-    public void update(ManagedRecipe update) throws NotFoundException {
+    public RecipeImpl update(RecipeImpl update) throws NotFoundException {
         lock.writeLock().lock();
         try {
-            final RecipeImpl target = (RecipeImpl)recipes.get(update.getId());
+            final RecipeImpl target = recipes.get(update.getId());
             if (target == null) {
                 throw new NotFoundException(format("Recipe with id '%s' was not found", update.getId()));
             }
@@ -107,12 +102,14 @@ public class LocalRecipeDaoImpl implements RecipeDao {
             if (update.getName() != null) {
                 target.setName(update.getName());
             }
-            if (update.getPermissions() != null) {
-                target.setPermissions(update.getPermissions());
-            }
             if (!update.getTags().isEmpty()) {
                 target.setTags(update.getTags());
             }
+            if (!update.getAcl().isEmpty()) {
+                target.setAcl(update.getAcl());
+            }
+
+            return new RecipeImpl(target);
         } finally {
             lock.writeLock().unlock();
         }
@@ -129,21 +126,21 @@ public class LocalRecipeDaoImpl implements RecipeDao {
     }
 
     @Override
-    public ManagedRecipe getById(String id) throws NotFoundException {
+    public RecipeImpl getById(String id) throws NotFoundException {
         lock.readLock().lock();
         try {
-            final ManagedRecipe recipe = recipes.get(id);
+            final RecipeImpl recipe = recipes.get(id);
             if (recipe == null) {
                 throw new NotFoundException(format("Recipe with id %s was not found", id));
             }
-            return recipe;
+            return new RecipeImpl(recipe);
         } finally {
             lock.readLock().unlock();
         }
     }
 
     @Override
-    public List<ManagedRecipe> search(final List<String> tags, final String type, int skipCount, int maxItems) {
+    public List<RecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException {
         lock.readLock().lock();
         try {
             return FluentIterable.from(recipes.values())
@@ -153,25 +150,6 @@ public class LocalRecipeDaoImpl implements RecipeDao {
                                      public boolean apply(ManagedRecipe recipe) {
                                          return (tags == null || recipe.getTags().containsAll(tags))
                                                 && (type == null || type.equals(recipe.getType()));
-                                     }
-                                 })
-                                 .limit(maxItems)
-                                 .toList();
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
-    public List<ManagedRecipe> getByCreator(final String creator, int skipCount, int maxItems) {
-        lock.readLock().lock();
-        try {
-            return FluentIterable.from(recipes.values())
-                                 .skip(skipCount)
-                                 .filter(new Predicate<ManagedRecipe>() {
-                                     @Override
-                                     public boolean apply(ManagedRecipe recipe) {
-                                         return recipe.getCreator().equals(creator);
                                      }
                                  })
                                  .limit(maxItems)

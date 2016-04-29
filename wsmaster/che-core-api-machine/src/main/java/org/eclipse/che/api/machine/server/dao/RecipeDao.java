@@ -13,6 +13,7 @@ package org.eclipse.che.api.machine.server.dao;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    void create(ManagedRecipe recipe) throws ConflictException, ServerException;
+    void create(RecipeImpl recipe) throws ConflictException, ServerException;
 
     /**
      * Updates existing recipe
@@ -45,6 +46,7 @@ public interface RecipeDao {
      *
      * @param recipe
      *         recipe update
+     * @return updated instance of the recipe
      * @throws NullPointerException
      *         when {@code recipe} is not specified
      * @throws NotFoundException
@@ -52,7 +54,7 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    void update(ManagedRecipe recipe) throws NotFoundException, ServerException;
+    RecipeImpl update(RecipeImpl recipe) throws NotFoundException, ServerException;
 
     /**
      * Removes existing recipe
@@ -82,10 +84,10 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any error occurs
      */
-    ManagedRecipe getById(String id) throws NotFoundException, ServerException;
+    RecipeImpl getById(String id) throws NotFoundException, ServerException;
 
     /**
-     * Searches for recipes which type is equal to specified {@code type}
+     * Searches for recipes which have read permissions for specified user and type is equal to specified {@code type}
      * and tags contain all of specified {@code tags}.
      * <p/>
      * Not specified {@code tags} or {@code type} will not take a part of search,
@@ -95,9 +97,9 @@ public interface RecipeDao {
      * is equal to specified {@code type} will be returned,
      * when both {@code type} and {@code tags} are {@code null} then all available
      * recipes will be returned.
-     * <p/>
-     * <b>Note that only recipes which contains <i>public: search</i> permission take a part of search</b>
      *
+     * @param user
+     *         user id for permission checking
      * @param tags
      *         recipe tags to search recipes, may be {@code null}
      * @param type
@@ -113,25 +115,5 @@ public interface RecipeDao {
      * @throws ServerException
      *         when any error occurs
      */
-    List<ManagedRecipe> search(List<String> tags, String type, int skipCount, int maxItems) throws ServerException;
-
-    /**
-     * Returns recipes which creator is equal to specified {@code creator} or
-     * empty list when such recipes were not found
-     *
-     * @param creator
-     *         recipe creator to search recipes
-     * @param skipCount
-     *         count of items which should be skipped,
-     *         if found items contain fewer than {@code skipCount} items
-     *         then empty list will be returned
-     * @param maxItems
-     *         max count of items to fetch
-     * @return recipes which creator matches to specified {@code creator}
-     * @throws NullPointerException
-     *         when recipe {@code creator} is not specified
-     * @throws ServerException
-     *         when any error occurs
-     */
-    List<ManagedRecipe> getByCreator(String creator, int skipCount, int maxItems) throws ServerException;
+    List<RecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException;
 }

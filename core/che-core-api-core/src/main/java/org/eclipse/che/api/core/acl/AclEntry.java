@@ -8,19 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared;
+package org.eclipse.che.api.core.acl;
 
-
+import java.util.List;
 
 /**
- * Permissible interface should be implemented by data objects which require access.
- * It is commonly used with the {@link org.eclipse.che.api.machine.server.recipe.PermissionsChecker}.
+ * This is the interface used for representing one entry in an Access Control List (ACL).
  *
- * @author Alexander Andrienko
+ * @author Sergii Leschenko
  */
-public interface Permissible {
+public interface AclEntry {
     /**
-     * Returns {@link Permissions} for access to the data object.
+     * Returns user id or '*' for all users
      */
-    Permissions getPermissions();
+    String getUser();
+
+    /**
+     * Returns list of actions which are allowed to perform for specified user
+     */
+    List<String> getActions();
 }

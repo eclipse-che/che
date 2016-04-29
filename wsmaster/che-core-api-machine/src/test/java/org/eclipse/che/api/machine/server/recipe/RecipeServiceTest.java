@@ -16,10 +16,7 @@ import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.GroupDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
-import org.eclipse.che.api.machine.shared.dto.recipe.PermissionsDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -40,13 +37,10 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.core.UriInfo;
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import static com.jayway.restassured.RestAssured.given;
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
@@ -74,13 +68,11 @@ public class RecipeServiceTest {
     static final LinkedList<String> ROLES   = new LinkedList<>(asList("user"));
 
     @Mock
-    RecipeDao          recipeDao;
+    RecipeDao     recipeDao;
     @Mock
-    PermissionsChecker permissionsChecker;
-    @Mock
-    UriInfo            uriInfo;
+    UriInfo       uriInfo;
     @InjectMocks
-    RecipeService      service;
+    RecipeService service;
 
     @BeforeMethod
     public void setUpUriInfo() throws NoSuchFieldException, IllegalAccessException {
@@ -157,12 +149,10 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldCreateNewRecipe() throws Exception {
-        final GroupDescriptor group = newDto(GroupDescriptor.class).withName("public").withAcl(asList("read"));
         final NewRecipe newRecipe = newDto(NewRecipe.class).withType("docker")
                                                            .withName("name")
                                                            .withScript("FROM ubuntu\n")
-                                                           .withTags(asList("java", "mongo"))
-                                                           .withPermissions(newDto(PermissionsDescriptor.class).withGroups(asList(group)));
+                                                           .withTags(asList("java", "mongo"));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -172,69 +162,21 @@ public class RecipeServiceTest {
                                          .post(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 201);
-        verify(recipeDao).create(any(ManagedRecipe.class));
+        verify(recipeDao).create(any(RecipeImpl.class));
         final RecipeDescriptor descriptor = unwrapDto(response, RecipeDescriptor.class);
         assertNotNull(descriptor.getId());
         assertEquals(descriptor.getName(), newRecipe.getName());
         assertEquals(descriptor.getCreator(), USER_ID);
         assertEquals(descriptor.getScript(), newRecipe.getScript());
         assertEquals(descriptor.getTags(), newRecipe.getTags());
-        assertEquals(descriptor.getPermissions(), newRecipe.getPermissions());
-    }
-
-    @Test
-    public void shouldNotBeAbleToCreateNewRecipeWithPublicSearchPermissionForUser() {
-        final GroupDescriptor group = newDto(GroupDescriptor.class).withName("public").withAcl(asList("read", "search"));
-        PermissionsDescriptor permissions = newDto(PermissionsDescriptor.class).withGroups(asList(group));
-        final NewRecipe newRecipe = newDto(NewRecipe.class).withType("docker")
-                                                           .withName("name")
-                                                           .withScript("FROM ubuntu\n")
-                                                           .withPermissions(permissions);
-        when(permissionsChecker.hasPublicSearchPermission(any(PermissionsDescriptor.class))).thenReturn(true);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .body(newRecipe)
-                                         .when()
-                                         .post(SECURE_PATH + "/recipe");
-
-        assertEquals(response.getStatusCode(), 403);
-        final ServiceError error = unwrapDto(response, ServiceError.class);
-        assertEquals(error.getMessage(), "User " + USER_ID + " doesn't have access to use 'public: search' permission");
-    }
-
-    @Test
-    public void shouldBeAbleToCreateNewRecipeWithPublicSearchPermissionForSystemAdmin() {
-        ROLES.add("system/admin");
-
-        final GroupDescriptor group = newDto(GroupDescriptor.class).withName("public").withAcl(asList("read", "search"));
-        final NewRecipe newRecipe = newDto(NewRecipe.class).withType("docker")
-                                                           .withName("name")
-                                                           .withScript("FROM ubuntu\n")
-                                                           .withPermissions(newDto(PermissionsDescriptor.class).withGroups(asList(group)));
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .body(newRecipe)
-                                         .when()
-                                         .post(SECURE_PATH + "/recipe");
-
-        assertEquals(response.getStatusCode(), 201);
-        final RecipeDescriptor descriptor = unwrapDto(response, RecipeDescriptor.class);
-        assertEquals(descriptor.getPermissions(), newRecipe.getPermissions());
     }
 
     @Test
     public void shouldBeAbleToGetRecipeScript() throws Exception {
-        final Map<String, List<String>> users = Collections.singletonMap(USER_ID, asList("read", "write"));
-        final ManagedRecipe recipe = new RecipeImpl().withCreator("other-user")
-                                                     .withId("recipe123")
-                                                     .withScript("FROM ubuntu\n")
-                                                     .withPermissions(new PermissionsImpl(users, null));
+        final RecipeImpl recipe = new RecipeImpl().withCreator("other-user")
+                                                  .withId("recipe123")
+                                                  .withScript("FROM ubuntu\n");
         when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "read")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -246,35 +188,14 @@ public class RecipeServiceTest {
     }
 
     @Test
-    public void shouldThrowForbiddenExceptionWhenUserDoesNotHaveReadAccessToRecipeScript() throws Exception {
-        final ManagedRecipe recipe = new RecipeImpl().withCreator("someone2")
-                                                     .withId("recipe123")
-                                                     .withScript("FROM ubuntu\n");
-        when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "read")).thenReturn(false);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .get(SECURE_PATH + "/recipe/" + recipe.getId());
-
-        assertEquals(response.getStatusCode(), 403);
-        final String expMessage = format("User %s doesn't have access to recipe %s", USER_ID, recipe.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expMessage);
-    }
-
-    @Test
     public void shouldBeAbleToGetRecipe() throws Exception {
-        final Map<String, List<String>> users = Collections.singletonMap(USER_ID, asList("read", "write"));
-        final ManagedRecipe recipe = new RecipeImpl().withCreator("someone2")
-                                                     .withId("recipe123")
-                                                     .withName("name")
-                                                     .withType("docker")
-                                                     .withScript("FROM ubuntu\n")
-                                                     .withTags(asList("java", "mognodb"))
-                                                     .withPermissions(new PermissionsImpl(users, null));
+        final RecipeImpl recipe = new RecipeImpl().withCreator("someone2")
+                                                  .withId("recipe123")
+                                                  .withName("name")
+                                                  .withType("docker")
+                                                  .withScript("FROM ubuntu\n")
+                                                  .withTags(asList("java", "mognodb"));
         when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "read")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -289,43 +210,22 @@ public class RecipeServiceTest {
         assertEquals(descriptor.getScript(), recipe.getScript());
         assertEquals(descriptor.getTags(), recipe.getTags());
         assertEquals(descriptor.getCreator(), recipe.getCreator());
-        assertEquals(PermissionsImpl.fromDescriptor(descriptor.getPermissions()), recipe.getPermissions());
-    }
-
-    @Test
-    public void shouldBeAbleToGetCreatedRecipes() throws Exception {
-        final ManagedRecipe recipe1 = new RecipeImpl().withId("id1")
-                                                      .withCreator(USER_ID)
-                                                      .withType("docker")
-                                                      .withScript("script1 content");
-        final ManagedRecipe recipe2 = new RecipeImpl().withId("id2")
-                                                      .withCreator(USER_ID)
-                                                      .withType("docker")
-                                                      .withScript("script2 content");
-        when(recipeDao.getByCreator(eq(USER_ID), any(int.class), any(int.class))).thenReturn(asList(recipe1, recipe2));
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .get(SECURE_PATH + "/recipe");
-
-        assertEquals(response.getStatusCode(), 200);
-        assertEquals(unwrapDtoList(response, RecipeDescriptor.class).size(), 2);
     }
 
     @Test
     public void shouldBeAbleToSearchRecipes() throws Exception {
-        final ManagedRecipe recipe1 = new RecipeImpl().withId("id1")
-                                                      .withCreator(USER_ID)
-                                                      .withType("docker")
-                                                      .withScript("script1 content")
-                                                      .withTags(asList("java"));
-        final ManagedRecipe recipe2 = new RecipeImpl().withId("id2")
-                                                      .withCreator(USER_ID)
-                                                      .withType("docker")
-                                                      .withScript("script2 content")
-                                                      .withTags(asList("java", "mongodb"));
-        when(recipeDao.search(eq(asList("java", "mongodb")),
+        final RecipeImpl recipe1 = new RecipeImpl().withId("id1")
+                                                   .withCreator(USER_ID)
+                                                   .withType("docker")
+                                                   .withScript("script1 content")
+                                                   .withTags(asList("java"));
+        final RecipeImpl recipe2 = new RecipeImpl().withId("id2")
+                                                   .withCreator(USER_ID)
+                                                   .withType("docker")
+                                                   .withScript("script2 content")
+                                                   .withTags(asList("java", "mongodb"));
+        when(recipeDao.search(eq("user123"),
+                              eq(asList("java", "mongodb")),
                               eq("docker"),
                               any(int.class),
                               any(int.class))).thenReturn(asList(recipe1, recipe2));
@@ -335,7 +235,7 @@ public class RecipeServiceTest {
                                          .when()
                                          .queryParameter("tags", asList("java", "mongodb"))
                                          .queryParameter("type", "docker")
-                                         .get(SECURE_PATH + "/recipe/list");
+                                         .get(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(unwrapDtoList(response, RecipeDescriptor.class).size(), 2);
@@ -343,13 +243,12 @@ public class RecipeServiceTest {
 
     @Test
     public void shouldBeAbleToRemoveRecipe() throws Exception {
-        final ManagedRecipe recipe = new RecipeImpl().withId("id")
-                                                     .withCreator(USER_ID)
-                                                     .withType("docker")
-                                                     .withScript("script1 content")
-                                                     .withTags(asList("java"));
+        final RecipeImpl recipe = new RecipeImpl().withId("id")
+                                                  .withCreator(USER_ID)
+                                                  .withType("docker")
+                                                  .withScript("script1 content")
+                                                  .withTags(asList("java"));
         when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "write")).thenReturn(true);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -361,44 +260,21 @@ public class RecipeServiceTest {
     }
 
     @Test
-    public void shouldNotBeAbleToRemoveRecipeIfUserDoesNotHaveWritePermission() throws Exception {
-        final ManagedRecipe recipe = new RecipeImpl().withId("id")
-                                                     .withCreator("some user")
-                                                     .withType("docker")
-                                                     .withScript("script1 content")
-                                                     .withTags(asList("java"));
-        when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "write")).thenReturn(false);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .delete(SECURE_PATH + "/recipe/" + recipe.getId());
-
-        assertEquals(response.getStatusCode(), 403);
-        final String expMessage = format("User %s doesn't have access to recipe %s", USER_ID, recipe.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expMessage);
-    }
-
-    @Test
     public void shouldBeAbleToUpdateRecipe() throws Exception {
-        ROLES.add("system/admin");
-        final ManagedRecipe recipe = new RecipeImpl().withId("id")
-                                                     .withCreator(USER_ID)
-                                                     .withType("docker")
-                                                     .withScript("script1 content")
-                                                     .withTags(asList("java"));
-        when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "write")).thenReturn(true);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "update_acl")).thenReturn(true);
+        final RecipeImpl recipe = new RecipeImpl().withId("id")
+                                                  .withCreator(USER_ID)
+                                                  .withType("docker")
+                                                  .withScript("script1 content")
+                                                  .withTags(asList("java"));
+        final RecipeImpl updatedRecipe = new RecipeImpl(recipe).withType("new-type")
+                                                               .withScript("new script content")
+                                                               .withTags(asList("java", "mongodb"));
+        when(recipeDao.update(any())).thenReturn(updatedRecipe);
 
-        //prepare update
-        GroupDescriptor group = newDto(GroupDescriptor.class).withName("public").withAcl(asList("read"));
         RecipeUpdate update = newDto(RecipeUpdate.class).withId(recipe.getId())
                                                         .withType("new-type")
                                                         .withScript("new script content")
-                                                        .withTags(asList("java", "mongodb"))
-                                                        .withPermissions(newDto(PermissionsDescriptor.class).withGroups(asList(group)));
+                                                        .withTags(asList("java", "mongodb"));
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -408,8 +284,7 @@ public class RecipeServiceTest {
                                          .put(SECURE_PATH + "/recipe");
 
         assertEquals(response.getStatusCode(), 200);
-        verify(recipeDao).update(any(RecipeUpdate.class));
-        verify(recipeDao, times(2)).getById("id");
+        verify(recipeDao).update(any(RecipeImpl.class));
     }
 
     @Test
@@ -435,60 +310,6 @@ public class RecipeServiceTest {
         assertEquals(response.getStatusCode(), 400);
     }
 
-    @Test
-    public void shouldThrowForbiddenExceptionWhenUserDoesNotHaveAccessToUpdateRecipe() throws Exception {
-        final ManagedRecipe recipe = new RecipeImpl().withId("id")
-                                                     .withCreator("some_foreign_user")
-                                                     .withType("docker")
-                                                     .withScript("script1 content")
-                                                     .withTags(asList("java"));
-        when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "write")).thenReturn(false);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .body(newDto(RecipeUpdate.class).withId("id"))
-                                         .when()
-                                         .put(SECURE_PATH + "/recipe");
-
-        assertEquals(response.getStatusCode(), 403);
-        final String expMessage = format("User %s doesn't have access to update recipe %s", USER_ID, recipe.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expMessage);
-        verify(recipeDao).getById(recipe.getId());
-    }
-
-    @Test
-    public void shouldThrowForbiddenExceptionWhenUserDoesNotHaveAccessToUpdateRecipePermissions() throws Exception {
-        final ManagedRecipe recipe = new RecipeImpl().withId("id")
-                                                     .withCreator("some_foreign_user")
-                                                     .withType("docker")
-                                                     .withScript("script1 content")
-                                                     .withTags(asList("java"));
-        when(recipeDao.getById(recipe.getId())).thenReturn(recipe);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "write")).thenReturn(true);
-        when(permissionsChecker.hasAccess(recipe, USER_ID, "update_acl")).thenReturn(false);
-
-        //prepare update
-        GroupDescriptor group = newDto(GroupDescriptor.class).withName("public").withAcl(asList("read"));
-        RecipeUpdate update = newDto(RecipeUpdate.class).withId("id")
-                                                        .withType("new-type")
-                                                        .withScript("new script content")
-                                                        .withTags(asList("java", "mongodb"))
-                                                        .withPermissions(newDto(PermissionsDescriptor.class).withGroups(asList(group)));
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType("application/json")
-                                         .body(update)
-                                         .when()
-                                         .put(SECURE_PATH + "/recipe");
-
-        assertEquals(response.getStatusCode(), 403);
-        final String expMessage = format("User %s doesn't have access to update recipe %s permissions", USER_ID, recipe.getId());
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expMessage);
-    }
-
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
 
@@ -504,4 +325,5 @@ public class RecipeServiceTest {
     private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
         return FluentIterable.from(DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass)).toList();
     }
+
 }

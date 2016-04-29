@@ -10,19 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.stack.image;
 
-import java.util.Arrays;
-import java.util.Set;
-
 import com.google.common.base.Objects;
 
 import org.eclipse.che.commons.annotation.Nullable;
+
+import java.util.Arrays;
+import java.util.Set;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Class for storing {@link org.eclipse.che.api.workspace.server.model.stack.Stack} icon data
+ * Class for storing {@link org.eclipse.che.api.workspace.shared.stack.Stack} icon data
  *
  * @author Alexander Andrienko
  */

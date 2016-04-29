@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.toList;
 public class EnvironmentImpl implements Environment {
 
     private String                  name;
-    private Recipe                  recipe;
+    private RecipeImpl              recipe;
     private List<MachineConfigImpl> machineConfigs;
 
     public EnvironmentImpl(String name, Recipe recipe, List<? extends MachineConfig> machineConfigs) {

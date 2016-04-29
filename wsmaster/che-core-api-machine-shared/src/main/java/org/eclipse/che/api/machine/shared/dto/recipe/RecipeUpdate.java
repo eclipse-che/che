@@ -43,12 +43,6 @@ public interface RecipeUpdate extends ManagedRecipe {
 
     RecipeUpdate withTags(List<String> tags);
 
-    PermissionsDescriptor getPermissions();
-
-    void setPermissions(PermissionsDescriptor permissions);
-
-    RecipeUpdate withPermissions(PermissionsDescriptor permissions);
-
     void setDescription(String description);
 
     RecipeUpdate withDescription(String description);

@@ -10,33 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
-
-import javax.validation.constraints.NotNull;
-
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
-import java.util.ArrayList;
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.gwt.http.client.RequestBuilder.DELETE;
 import static com.google.gwt.http.client.RequestBuilder.PUT;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newCallback;
-import static org.eclipse.che.api.promises.client.callback.PromiseHelper.newPromise;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
@@ -46,6 +38,7 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  *
  * @author Artem Zatsarynnyi
  * @author Valeriy Svydenko
+ * @author Sergii Leschenko
  */
 public class RecipeServiceClientImpl implements RecipeServiceClient {
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
@@ -64,196 +57,73 @@ public class RecipeServiceClientImpl implements RecipeServiceClient {
         this.baseHttpUrl = restContext + "/recipe";
     }
 
-    /** {@inheritDoc} */
     @Override
     public Promise<RecipeDescriptor> createRecipe(@NotNull final NewRecipe newRecipe) {
-        return newPromise(new RequestCall<RecipeDescriptor>() {
-            @Override
-            public void makeCall(AsyncCallback<RecipeDescriptor> callback) {
-                createRecipe(newRecipe, callback);
-            }
-        });
+        return asyncRequestFactory.createPostRequest(baseHttpUrl, newRecipe)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Creating recipe..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class));
     }
 
-    private void createRecipe(@NotNull final NewRecipe newRecipe, @NotNull AsyncCallback<RecipeDescriptor> callback) {
-        asyncRequestFactory.createPostRequest(baseHttpUrl, newRecipe)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Creating recipe..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class)));
-    }
-
-    /** {@inheritDoc} */
     @Override
     public Promise<String> getRecipeScript(@NotNull final String id) {
-        return newPromise(new RequestCall<String>() {
-            @Override
-            public void makeCall(AsyncCallback<String> callback) {
-                getRecipeScript(id, callback);
-            }
-        });
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + id + "/script")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Getting recipe script..."))
+                                  .send(new StringUnmarshaller());
     }
 
-    private void getRecipeScript(@NotNull String id, @NotNull AsyncCallback<String> callback) {
-        final String url = baseHttpUrl + '/' + id + "/script";
-        asyncRequestFactory.createGetRequest(url)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting recipe script..."))
-                           .send(newCallback(callback, new StringUnmarshaller()));
-    }
-
-    /** {@inheritDoc} */
     @Override
     public Promise<RecipeDescriptor> getRecipe(@NotNull final String id) {
-        return newPromise(new RequestCall<RecipeDescriptor>() {
-            @Override
-            public void makeCall(AsyncCallback<RecipeDescriptor> callback) {
-                getRecipe(id, callback);
-            }
-        });
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + id)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Getting recipe..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class));
     }
 
-    private void getRecipe(@NotNull String id, @NotNull AsyncCallback<RecipeDescriptor> callback) {
-        final String url = baseHttpUrl + '/' + id;
-        asyncRequestFactory.createGetRequest(url)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting recipe..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class)));
-    }
-
-    /** {@inheritDoc} */
     @Override
     public Promise<List<RecipeDescriptor>> getAllRecipes() {
-        return newPromise(new RequestCall<List<RecipeDescriptor>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<RecipeDescriptor>> callback) {
-                getRecipes(0, -1, callback);
-            }
-        }).then(new Function<List<RecipeDescriptor>, List<RecipeDescriptor>>() {
-            @Override
-            public List<RecipeDescriptor> apply(List<RecipeDescriptor> arg) throws FunctionException {
-                final ArrayList<RecipeDescriptor> descriptors = new ArrayList<>();
-                for (RecipeDescriptor descriptor : arg) {
-                    descriptors.add(descriptor);
-                }
-                return descriptors;
-            }
-        });
+        return searchRecipes(Collections.<String>emptyList(), null, 0, 0);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public Promise<List<RecipeDescriptor>> getRecipes(final int skipCount, final int maxItems) {
-        return newPromise(new RequestCall<List<RecipeDescriptor>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<RecipeDescriptor>> callback) {
-                getRecipes(skipCount, maxItems, callback);
-            }
-        }).then(new Function<List<RecipeDescriptor>, List<RecipeDescriptor>>() {
-            @Override
-            public List<RecipeDescriptor> apply(List<RecipeDescriptor> arg) throws FunctionException {
-                final ArrayList<RecipeDescriptor> descriptors = new ArrayList<>();
-                for (RecipeDescriptor descriptor : arg) {
-                    descriptors.add(descriptor);
-                }
-                return descriptors;
-            }
-        });
-    }
-
-    private void getRecipes(int skipCount, int maxItems, @NotNull AsyncCallback<List<RecipeDescriptor>> callback) {
-        String url = baseHttpUrl + "/list?skipCount=" + skipCount;
-        if (maxItems > 0) {
-            url += "&maxItems=" + maxItems;
-        }
-
-        asyncRequestFactory.createGetRequest(url)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting recipes..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newListUnmarshaller(RecipeDescriptor.class)));
-    }
-
-    /** {@inheritDoc} */
     @Override
     public Promise<List<RecipeDescriptor>> searchRecipes(@NotNull final List<String> tags,
                                                          @Nullable final String type,
                                                          final int skipCount,
                                                          final int maxItems) {
-        return newPromise(new RequestCall<List<RecipeDescriptor>>() {
-            @Override
-            public void makeCall(AsyncCallback<List<RecipeDescriptor>> callback) {
-                searchRecipes(tags, type, skipCount, maxItems, callback);
-            }
-        }).then(new Function<List<RecipeDescriptor>, List<RecipeDescriptor>>() {
-            @Override
-            public List<RecipeDescriptor> apply(List<RecipeDescriptor> arg) throws FunctionException {
-                final ArrayList<RecipeDescriptor> descriptors = new ArrayList<>();
-                for (RecipeDescriptor descriptor : arg) {
-                    descriptors.add(descriptor);
-                }
-                return descriptors;
-            }
-        });
-    }
-
-    private void searchRecipes(@NotNull List<String> tags,
-                               @Nullable String type,
-                               int skipCount,
-                               int maxItems,
-                               @NotNull AsyncCallback<List<RecipeDescriptor>> callback) {
         final StringBuilder tagsParam = new StringBuilder();
         for (String tag : tags) {
-            tagsParam.append("tags=").append(tag).append("&");
-        }
-        if (tagsParam.length() > 0) {
-            tagsParam.deleteCharAt(tagsParam.length() - 1); // delete last ampersand
+            tagsParam.append("&tags=").append(tag);
         }
 
-        final String url = baseHttpUrl + "/list?" + tagsParam.toString() +
-                           (tagsParam.length() > 0 ? '&' : "") +
-                           "type=" + type +
-                           "&skipCount=" + skipCount +
-                           "&maxItems=" + maxItems;
-        asyncRequestFactory.createGetRequest(url)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Searching recipes..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newListUnmarshaller(RecipeDescriptor.class)));
+        String url = baseHttpUrl + "?skipCount=" + skipCount +
+                     "&maxItems=" + maxItems +
+                     tagsParam.toString();
+
+        if (type != null) {
+            url += "type=" + type;
+        }
+
+        return asyncRequestFactory.createGetRequest(url)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Searching recipes..."))
+                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(RecipeDescriptor.class));
     }
 
-    /** {@inheritDoc} */
     @Override
     public Promise<RecipeDescriptor> updateRecipe(@NotNull final RecipeUpdate recipeUpdate) {
-        return newPromise(new RequestCall<RecipeDescriptor>() {
-            @Override
-            public void makeCall(AsyncCallback<RecipeDescriptor> callback) {
-                updateCommand(recipeUpdate, callback);
-            }
-        });
+        return asyncRequestFactory.createRequest(PUT, baseHttpUrl, recipeUpdate, false)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Updating recipe..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class));
     }
 
-    private void updateCommand(@NotNull RecipeUpdate recipeUpdate, @NotNull AsyncCallback<RecipeDescriptor> callback) {
-        final String url = baseHttpUrl;
-        asyncRequestFactory.createRequest(PUT, url, recipeUpdate, false)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Updating recipe..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(RecipeDescriptor.class)));
-    }
-
-    /** {@inheritDoc} */
     @Override
     public Promise<Void> removeRecipe(@NotNull final String id) {
-        return newPromise(new RequestCall<Void>() {
-            @Override
-            public void makeCall(AsyncCallback<Void> callback) {
-                removeRecipe(id, callback);
-            }
-        });
-    }
-
-    private void removeRecipe(@NotNull String id, @NotNull AsyncCallback<Void> callback) {
-        asyncRequestFactory.createRequest(DELETE, baseHttpUrl + '/' + id, null, false)
-                           .loader(loaderFactory.newLoader("Deleting recipe..."))
-                           .send(newCallback(callback));
+        return asyncRequestFactory.createRequest(DELETE, baseHttpUrl + '/' + id, null, false)
+                                  .loader(loaderFactory.newLoader("Deleting recipe..."))
+                                  .send();
     }
 }

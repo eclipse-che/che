@@ -751,17 +751,6 @@ export class CreateProjectCtrl {
     let recipe = {
       type: 'docker',
       name: recipeName,
-      permissions: {
-        groups: [
-          {
-            name: 'public',
-            acl: [
-              'read'
-            ]
-          }
-        ],
-        users: {}
-      },
       script: recipeScript
     };
 
