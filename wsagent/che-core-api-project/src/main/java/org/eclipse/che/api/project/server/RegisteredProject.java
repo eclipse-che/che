@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
 
@@ -116,12 +116,22 @@ public class RegisteredProject implements ProjectConfig {
             } else {
                 // variable
                 final Variable variable = (Variable)definition;
-                final ValueProviderFactory valueProviderFactory = variable.getValueProviderFactory();
 
-                if (valueProviderFactory != null) {
-                    // read-only.
+                // value provided
+                if (variable.isValueProvided()) {
+
+                    final ValueProvider valueProvider = variable.getValueProviderFactory().newInstance(folder);
+
                     if (folder != null) {
-                        value = new AttributeValue(valueProviderFactory.newInstance(folder).getValues(name));
+
+                        if (!valueProvider.isSettable() || value.isEmpty()) {
+                            // get provided value
+                            value = new AttributeValue(valueProvider.getValues(name));
+                        } else {
+                            // set provided (not empty) value
+                            valueProvider.setValues(name, value.getList());
+                        }
+
                     } else {
                         continue;
                     }

@@ -26,23 +26,59 @@ public class StatusNotification extends Notification {
         FAIL
     }
 
-    private Status  status;
-    private boolean balloon;
+    public enum DisplayMode {
+        /** Notification will be float as balloon during the notification is in progress status */
+        FLOAT_MODE,
+
+        /** Notification will be emerge as balloon only when status is changed */
+        EMERGE_MODE,
+
+        /** Notification won't be emerge at all */
+        NOT_EMERGE_MODE
+    }
+
+    private Status                     status;
+    private DisplayMode                displayMode;
+    private StatusNotificationListener statusListener;
 
     /**
-     * Creates status notification object with specified title, status and balloon flag.
+     * Creates status notification object with specified title, status and display mode.
      *
      * @param title
      *         notification title (required)
      * @param status
      *         notification status (required)
-     * @param balloon
-     *         true if need to show this notification as balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      */
-    public StatusNotification(String title, Status status, boolean balloon) {
+    public StatusNotification(String title,
+                              Status status,
+                              DisplayMode displayMode) {
         super(title);
         this.status = status;
-        this.balloon = balloon;
+        this.displayMode = displayMode;
+    }
+
+    /**
+     * Creates status notification object with specified title, status and display mode.
+     *
+     * @param title
+     *         notification title (required)
+     * @param status
+     *         notification status (required)
+     * @param displayMode
+     *         mode of displaying of the notification
+     * @param listener
+     *         event listener that handle mouse events (optional)
+     */
+    public StatusNotification(String title,
+                              Status status,
+                              DisplayMode displayMode,
+                              NotificationListener listener) {
+        super(title);
+        this.status = status;
+        this.displayMode = displayMode;
+        this.listener = listener;
     }
 
     /**
@@ -54,8 +90,8 @@ public class StatusNotification extends Notification {
      *         notification content (optional)
      * @param status
      *         notification status (required)
-     * @param balloon
-     *         true if need to show this notification as balloon
+     * @param displayMode
+     *         mode of displaying of the notification
      * @param project
      *         project which name will be displayed in the notification (optional)
      * @param listener
@@ -64,12 +100,12 @@ public class StatusNotification extends Notification {
     public StatusNotification(String title,
                               String content,
                               Status status,
-                              boolean balloon,
+                              DisplayMode displayMode,
                               ProjectConfigDto project,
                               NotificationListener listener) {
         super(title, content, project, listener);
         this.status = status;
-        this.balloon = balloon;
+        this.displayMode = displayMode;
     }
 
     /**
@@ -95,27 +131,33 @@ public class StatusNotification extends Notification {
         if (status == null) {
             throw new IllegalArgumentException("Status shouldn't be a null");
         }
+        boolean isStatusChanged = this.status != status;
         this.status = status;
+
+        if (isStatusChanged && statusListener != null) {
+            statusListener.onNotificationStatusChanged(this);
+        }
         setUnreadState();
     }
 
     /**
-     * Return the state if notification should be showed as balloon notification.
+     * Sets display mode
      *
-     * @return true if notification should be balloon also
+     * @param displayMode
+     *         mode of displaying of the notification
      */
-    public boolean isBalloon() {
-        return balloon;
+    public void setDisplayMode(DisplayMode displayMode) {
+        this.displayMode = displayMode;
+        setUnreadState();
     }
 
-    /**
-     * Set balloon state
-     *
-     * @param balloon
-     *         true if notification should be balloon
-     */
-    public void setBalloon(boolean balloon) {
-        this.balloon = balloon;
-        setUnreadState();
+    /** Returns the display mode of notification */
+    public DisplayMode getDisplayMode() {
+        return displayMode;
+    }
+
+    /** Sets listener for being notified about changes of notification status.*/
+    public void setStatusListener(StatusNotificationListener statusListener) {
+        this.statusListener = statusListener;
     }
 }

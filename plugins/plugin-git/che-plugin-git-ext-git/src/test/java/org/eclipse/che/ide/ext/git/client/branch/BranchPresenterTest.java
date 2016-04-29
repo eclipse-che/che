@@ -42,6 +42,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_CREATE_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_DELETE_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_LIST_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_RENAME_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.patcher.WindowPatcher.RETURNED_MESSAGE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -55,10 +60,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_LIST_COMMAND_NAME;
-import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_RENAME_COMMAND_NAME;
-import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_DELETE_COMMAND_NAME;
-import static org.eclipse.che.ide.ext.git.client.branch.BranchPresenter.BRANCH_CREATE_COMMAND_NAME;
 
 /**
  * Testing {@link BranchPresenter} functionality.
@@ -169,7 +170,7 @@ public class BranchPresenterTest extends BaseTest {
         verify(gitOutputConsoleFactory).create(BRANCH_LIST_COMMAND_NAME);
         verify(console).printError(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), anyObject(), eq(true), eq(rootProjectConfig));
+        verify(notificationManager).notify(anyString(), anyObject(), eq(FLOAT_MODE), eq(rootProjectConfig));
         verify(constant, times(2)).branchesListFailed();
     }
 
@@ -279,7 +280,7 @@ public class BranchPresenterTest extends BaseTest {
         verify(gitOutputConsoleFactory).create(BRANCH_RENAME_COMMAND_NAME);
         verify(console).printError(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), anyObject(), eq(true), eq(rootProjectConfig));
+        verify(notificationManager).notify(anyString(), anyObject(), eq(FLOAT_MODE), eq(rootProjectConfig));
         verify(constant, times(2)).branchRenameFailed();
     }
 
@@ -313,7 +314,7 @@ public class BranchPresenterTest extends BaseTest {
         verify(gitOutputConsoleFactory).create(BRANCH_DELETE_COMMAND_NAME);
         verify(console).printError(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), anyObject(), eq(true), eq(rootProjectConfig));
+        verify(notificationManager).notify(anyString(), anyObject(), eq(FLOAT_MODE), eq(rootProjectConfig));
     }
 
     @Test
@@ -430,7 +431,7 @@ public class BranchPresenterTest extends BaseTest {
 
         verify(selectedBranch, times(2)).getDisplayName();
         verify(selectedBranch).isRemote();
-        verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.FAIL), eq(true), eq(rootProjectConfig));
+        verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.FAIL), eq(FLOAT_MODE), eq(rootProjectConfig));
     }
 
     @Test
@@ -475,7 +476,7 @@ public class BranchPresenterTest extends BaseTest {
         verify(gitOutputConsoleFactory).create(BRANCH_CREATE_COMMAND_NAME);
         verify(console).printError(anyString());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), anyObject(), eq(true), eq(rootProjectConfig));
+        verify(notificationManager).notify(anyString(), anyObject(), eq(FLOAT_MODE), eq(rootProjectConfig));
     }
 
     @Test

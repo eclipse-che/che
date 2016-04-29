@@ -24,7 +24,7 @@ import org.eclipse.che.ide.jseditor.client.text.TextPosition;
  *
  * @author "Mickaël Leduque"
  */
-public interface TextEditorPartView extends RequiresResize, IsWidget {
+public interface TextEditorPartView extends RequiresResize, IsWidget, HasNotificationPanel {
 
     /**
      * Invoke the code complete dialog.

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
-import com.google.api.client.util.Collections2;
-import com.google.common.collect.Lists;
-
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
@@ -20,10 +17,8 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.Collections;
 import java.util.List;
 
 /**

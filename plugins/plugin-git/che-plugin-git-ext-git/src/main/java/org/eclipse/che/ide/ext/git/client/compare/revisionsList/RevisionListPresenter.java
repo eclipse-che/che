@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
-import org.eclipse.che.ide.ext.git.client.compare.FileStatus;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
@@ -33,10 +32,10 @@ import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Collections;
 
 import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.NAME_STATUS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.defineStatus;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -155,7 +154,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
                                                                      locale.initCommitWasNotPerformed(),
                                                                      null).show();
                                } else {
-                                   notificationManager.notify(locale.logFailed(), FAIL, false);
+                                   notificationManager.notify(locale.logFailed(), FAIL, NOT_EMERGE_MODE);
                                }
 
                            }
@@ -193,7 +192,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
                             @Override
                             protected void onFailure(Throwable exception) {
-                                notificationManager.notify(locale.diffFailed(), FAIL, false);
+                                notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
                             }
                         });
     }

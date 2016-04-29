@@ -25,6 +25,8 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationObserver;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
+import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.notification.NotificationManagerView.NotificationActionDelegate;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -35,13 +37,14 @@ import static com.google.gwt.user.client.Event.ONCLICK;
 import static com.google.gwt.user.client.Event.ONDBLCLICK;
 import static com.google.gwt.user.client.Event.ONMOUSEOUT;
 import static com.google.gwt.user.client.Event.ONMOUSEOVER;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 
 /**
  * Widget for showing notification popup.
  * <p/>
  * {@link Notification} in this case must extends {@link StatusNotification}. Status may have one of three values {@link
- * StatusNotification.Status}.
+ * Status}.
  * By default, if the {@link Notification} is set to <code>Status.PROGRESS</code>, then hide timer won't be handle popup closing, but if
  * the popup has status <code>Status.SUCCESS</code> or <code>Status.FAIL</code> then hide timer will perform automatically hide popup
  * widget in 5 seconds.
@@ -60,7 +63,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PRO
  * @author Vlad Zhukovskyi
  * @see {@link Notification}.
  * @see {@link StatusNotification}.
- * @see {@link StatusNotification.Status}.
+ * @see {@link Status}.
  */
 public class NotificationPopup extends SimplePanel implements NotificationObserver {
 
@@ -175,7 +178,7 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
     }
 
     /**
-     * Return an icon based on {@link org.eclipse.che.ide.api.notification.StatusNotification.Status}.
+     * Return an icon based on {@link Status}.
      *
      * @return SVG image that represents icon status
      */
@@ -278,7 +281,7 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
      * <ul>
      * <li>{@link Notification#title}</li>
      * <li>{@link Notification#content}</li>
-     * <li>Icon and background color based on {@link StatusNotification.Status}</li>
+     * <li>Icon and background color based on {@link Status}</li>
      * </ul>
      */
     private void update() {
@@ -299,7 +302,9 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
         removeStyleName(resources.notificationCss().notificationStatusSuccess());
         removeStyleName(resources.notificationCss().notificationStatusFail());
 
-        switch (notification.getStatus()) {
+        DisplayMode displayMode = notification.getDisplayMode();
+        Status status = notification.getStatus();
+        switch (status) {
             case PROGRESS:
                 setStyleName(resources.notificationCss().notificationStatusProgress(), true);
                 break;
@@ -311,11 +316,11 @@ public class NotificationPopup extends SimplePanel implements NotificationObserv
                 break;
         }
 
-        if (PROGRESS == notification.getStatus()) {
+        if (FLOAT_MODE == displayMode && PROGRESS == status) {
             hideTimer.cancel();
-        } else {
-            hideTimer.schedule(DEFAULT_TIME);
+            return;
         }
+        hideTimer.schedule(DEFAULT_TIME);
     }
 
     /** {@inheritDoc} */

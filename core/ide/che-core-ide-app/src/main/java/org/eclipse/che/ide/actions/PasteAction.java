@@ -37,6 +37,7 @@ import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialog;
 
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -216,7 +217,7 @@ public class PasteAction extends Action {
                           copyCallback);
         } catch (Exception error) {
             /** Handle error and stop copying */
-            notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+            notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
             dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
         }
     }
@@ -268,7 +269,7 @@ public class PasteAction extends Action {
                                   copyCallback);
                 } catch (Exception error) {
                     /** Handle error and stop copying */
-                    notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+                    notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
                     dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
                 }
             }
@@ -304,13 +305,13 @@ public class PasteAction extends Action {
                 @Override
                 protected void onFailure(Throwable error) {
                     /** Handle error and stop copying */
-                    notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+                    notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
                     dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
                 }
             });
         } catch (Exception error) {
             /** Handle error and stop copying */
-            notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+            notificationManager.notify(localization.failedToCopyItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
             dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
         }
     }
@@ -336,7 +337,7 @@ public class PasteAction extends Action {
 
             /** Handle error and stop copying */
             notificationManager
-                    .notify(localization.failedToCopyItems(), exception.getMessage(), FAIL, true, destination.getProjectConfig());
+                    .notify(localization.failedToCopyItems(), exception.getMessage(), FAIL, FLOAT_MODE, destination.getProjectConfig());
             dialogFactory.createMessageDialog("ERROR", exception.getMessage(), null).show();
         }
     };
@@ -366,7 +367,7 @@ public class PasteAction extends Action {
                           moveCallback);
         } catch (Exception error) {
             /** Handle error and stop moving */
-            notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+            notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
             dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
 
             /** Clears item list to disable Paste button */
@@ -422,7 +423,7 @@ public class PasteAction extends Action {
                                   moveCallback);
                 } catch (Exception error) {
                     /** Handle error and stop moving */
-                    notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+                    notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
                     dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
 
                     /** Clears item list to disable Paste button */
@@ -462,7 +463,7 @@ public class PasteAction extends Action {
                 @Override
                 protected void onFailure(Throwable error) {
                     /** Handle error and stop moving */
-                    notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+                    notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
                     dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
 
                     /** Clears item list to disable Paste button */
@@ -471,7 +472,7 @@ public class PasteAction extends Action {
             });
         } catch (Exception error) {
             /** Handle error and stop copying */
-            notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, true, item.getProjectConfig());
+            notificationManager.notify(localization.failedToMoveItems(), error.getMessage(), FAIL, FLOAT_MODE, item.getProjectConfig());
             dialogFactory.createMessageDialog("ERROR", error.getMessage(), null).show();
 
             /** Clears item list to disable Paste button */
@@ -500,7 +501,7 @@ public class PasteAction extends Action {
 
             /** Handle error and stop moving */
             notificationManager
-                    .notify(localization.failedToMoveItems(), exception.getMessage(), FAIL, true, destination.getProjectConfig());
+                    .notify(localization.failedToMoveItems(), exception.getMessage(), FAIL, FLOAT_MODE, destination.getProjectConfig());
             dialogFactory.createMessageDialog("ERROR", exception.getMessage(), null).show();
 
             /** Clears item list to disable Paste button */

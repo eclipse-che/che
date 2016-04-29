@@ -573,7 +573,7 @@ tag if no children*/);
 			if (xmlPath.isAbsolute()) {
 				if (projectPath != null && projectPath.isPrefixOf(xmlPath)) {
 					if (xmlPath.segment(0).equals(projectPath.segment(0))) {
-						xmlPath = xmlPath.removeFirstSegments(1);
+						xmlPath = xmlPath.removeFirstSegments(projectPath.segmentCount());
 						xmlPath = xmlPath.makeRelative();
 					} else {
 						xmlPath = xmlPath.makeAbsolute();

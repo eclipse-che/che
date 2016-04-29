@@ -11,7 +11,7 @@
 
 package org.eclipse.che.jdt.rest;
 
-import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
+import org.eclipse.che.plugin.java.server.classpath.ClassPathBuilder;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
 
 import javax.inject.Inject;

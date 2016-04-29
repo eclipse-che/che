@@ -158,6 +158,17 @@ public class TextEditorPartViewImpl extends Composite implements TextEditorPartV
     public void updateInfoPanelUnfocused(final int lineCount) {
     }
 
+    @Override
+    public NotificationRemover addNotification(final com.google.gwt.dom.client.Element element) {
+        getElement().insertFirst(element);
+        return new NotificationRemover() {
+            @Override
+            public void remove() {
+                element.removeFromParent();
+            }
+        };
+    }
+
     /**
      * UI binder interface for this component.
      * 

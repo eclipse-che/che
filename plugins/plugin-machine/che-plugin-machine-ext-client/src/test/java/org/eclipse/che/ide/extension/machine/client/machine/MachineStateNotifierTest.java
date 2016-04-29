@@ -40,7 +40,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -115,7 +115,7 @@ public class MachineStateNotifierTest {
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(SOME_TEXT);
         when(machineConfig.getName()).thenReturn(SOME_TEXT);
-        when(notificationManager.notify(anyString(), eq(PROGRESS), anyBoolean())).thenReturn(notification);
+        when(notificationManager.notify(anyString(), eq(PROGRESS), anyObject())).thenReturn(notification);
         stateNotifier.trackMachine(machine, MachineManager.MachineOperationType.START);
 
         verify(notification).setTitle(eq(SOME_TEXT));
@@ -132,7 +132,7 @@ public class MachineStateNotifierTest {
         when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(SOME_TEXT);
         when(machineConfig.getName()).thenReturn(SOME_TEXT);
-        when(notificationManager.notify(anyString(), eq(PROGRESS), anyBoolean())).thenReturn(notification);
+        when(notificationManager.notify(anyString(), eq(PROGRESS), anyObject())).thenReturn(notification);
         stateNotifier.trackMachine(machine, MachineManager.MachineOperationType.DESTROY);
 
         verify(notification).setTitle(eq(SOME_TEXT));

@@ -47,10 +47,10 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.dialogs.InputCallback;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.List;
 
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
@@ -241,7 +241,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                                               @Override
                                               protected void onFailure(Throwable exception) {
                                                   notificationManager
-                                                          .notify(exception.getLocalizedMessage(), FAIL, true, project.getProjectConfig());
+                                                          .notify(exception.getLocalizedMessage(), FAIL, FLOAT_MODE, project.getProjectConfig());
                                               }
                                           });
             }
@@ -264,7 +264,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(arg.getMessage(), FAIL, true, projectToUpdate);
+                notificationManager.notify(arg.getMessage(), FAIL, FLOAT_MODE, projectToUpdate);
             }
         });
     }
@@ -399,7 +399,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         printGitMessage(errorMessage, console);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-        notificationManager.notify(errorMessage, FAIL, true, project.getRootProject());
+        notificationManager.notify(errorMessage, FAIL, FLOAT_MODE, project.getRootProject());
     }
 
     private void printGitMessage(String messageText, GitOutputConsole console) {
@@ -409,5 +409,4 @@ public class BranchPresenter implements BranchView.ActionDelegate {
             console.printError(line);
         }
     }
-
 }

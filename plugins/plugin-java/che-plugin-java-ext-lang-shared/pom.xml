@@ -135,7 +135,7 @@
                                 <package>org.eclipse.che.ide.ext.java.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls</genClassName>
+                            <genClassName>org.eclipse.che.plugin.java.server.dto.DtoServerImpls</genClassName>
                             <impl>server</impl>
                         </configuration>
                     </execution>

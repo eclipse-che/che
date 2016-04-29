@@ -29,6 +29,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -69,7 +70,7 @@ public class AddPresenter extends SubversionActionPresenter {
         }
 
         final List<String> selectedPaths = getSelectedPaths();
-        final StatusNotification notification = new StatusNotification(constants.addStarted(selectedPaths.size()), PROGRESS, true);
+        final StatusNotification notification = new StatusNotification(constants.addStarted(selectedPaths.size()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
         service.add(projectPath, selectedPaths, null, false, true, false, false,

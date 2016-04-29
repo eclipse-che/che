@@ -11,6 +11,8 @@
 
 package org.eclipse.che.core.internal.resources;
 
+import com.google.inject.Provider;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -75,8 +77,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.project.server.Constants.CODENVY_DIR;
-
 /**
  * @author Evgen Vidolob
  */
@@ -85,7 +85,6 @@ public class Workspace implements IWorkspace {
     //$NON-NLS-1$ //$NON-NLS-2$
     private static final Logger         LOG           = LoggerFactory.getLogger(Workspace.class);
     protected final      IWorkspaceRoot defaultRoot   = new WorkspaceRoot(Path.ROOT, this);
-    private final FolderEntry projectsRoot;
     /**
      * Work manager should never be accessed directly because accessor
      * asserts that workspace is still open.
@@ -95,29 +94,32 @@ public class Workspace implements IWorkspace {
      * The currently installed team hook.
      */
     protected TeamHook teamHook = null;
-    private String               wsPath;
-    private ProjectManager       projectManager;
-    private ProjectRegistry      projectRegistry;
+    private       String                    wsPath;
+    private final Provider<ProjectRegistry> projectRegistry;
+    private final Provider<ProjectManager>  projectManager;
     /**
      * Scheduling rule factory. This field is null if the factory has not been used
      * yet.  The accessor method should be used rather than accessing this field
      * directly.
      */
-    private IResourceRuleFactory ruleFactory;
+    private       IResourceRuleFactory      ruleFactory;
     private IUndoContext undoContext = new UndoContext();
 
-    public Workspace(String path, ProjectManager projectManager, ProjectRegistry projectRegistry) {
+    public Workspace(String path, Provider<ProjectRegistry> projectRegistry, Provider<ProjectManager> projectManager) {
         this.wsPath = path;
-        this.projectManager = projectManager;
         this.projectRegistry = projectRegistry;
-        try {
-            projectsRoot = projectManager.getProjectsRoot();
-        } catch (ServerException e) {
-            throw new IllegalStateException(e);
-        }
+        this.projectManager = projectManager;
         _workManager = new WorkManager(this);
         _workManager.startup(null);
         _workManager.postWorkspaceStartup();
+    }
+
+    private FolderEntry getProjectsRoot() {
+        try {
+             return  projectManager.get().getProjectsRoot();
+        } catch (ServerException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public static WorkspaceDescription defaultWorkspaceDescription() {
@@ -141,7 +143,7 @@ public class Workspace implements IWorkspace {
     }
 
     public String getAbsoluteWorkspacePath() {
-        return wsPath;
+        return getProjectsRoot().getVirtualFile().toIoFile().getAbsolutePath();
     }
 
     public Resource newResource(IPath path, int type) {
@@ -724,7 +726,7 @@ public class Workspace implements IWorkspace {
 
     public ResourceInfo getResourceInfo(IPath path) {
         try {
-            VirtualFileEntry child = projectsRoot.getChild(path.toOSString());
+            VirtualFileEntry child = getProjectsRoot().getChild(path.toOSString());
             if (child != null) {
                 return newElement(getType(child));
             }
@@ -740,15 +742,10 @@ public class Workspace implements IWorkspace {
         if (file.isFile()) {
             return IResource.FILE;
         } else {
-            try {
-                FolderEntry folder = (FolderEntry)file;
-                if (folder.getChild(CODENVY_DIR) != null /*projectManager.isProjectFolder(folder)*/) {
-                    return IResource.PROJECT;
-                } else {
-                    return IResource.FOLDER;
-                }
-            } catch (ServerException e) {
-                LOG.error(e.getMessage(), e);
+            FolderEntry folder = (FolderEntry)file;
+            if (projectRegistry.get().getProject(folder.getPath().toString()) != null) {
+                return IResource.PROJECT;
+            } else {
                 return IResource.FOLDER;
             }
         }
@@ -778,7 +775,7 @@ public class Workspace implements IWorkspace {
     public IResource[] getChildren(IPath path) {
 
         try {
-            VirtualFileEntry parent = projectsRoot.getChild(path.toOSString());
+            VirtualFileEntry parent = getProjectsRoot().getChild(path.toOSString());
             if (parent != null && parent.isFolder()) {
                 FolderEntry folder = (FolderEntry)parent;
                 List<VirtualFileEntry> children = folder.getChildren();
@@ -806,19 +803,23 @@ public class Workspace implements IWorkspace {
             switch (resource.getType()) {
                 case IResource.FILE:
                     String newName = path.lastSegment();
-                    VirtualFileEntry child = projectsRoot.getChild(path.removeLastSegments(1).toOSString());
+                    VirtualFileEntry child = getProjectsRoot().getChild(path.removeLastSegments(1).toOSString());
+                    if(child == null){
+                        throw new NotFoundException("Can't find parent folder: "+  path.removeLastSegments(1).toOSString());
+                    }
                     FolderEntry entry = (FolderEntry)child;
+
                     entry.createFile(newName, new byte[0]);
                     break;
                 case IResource.FOLDER:
-                    projectsRoot.createFolder(path.toOSString());
+                    getProjectsRoot().createFolder(path.toOSString());
                     break;
                 case IResource.PROJECT:
                     ProjectConfigImpl projectConfig = new ProjectConfigImpl();
                     projectConfig.setPath(resource.getName());
                     projectConfig.setName(resource.getName());
                     projectConfig.setType(BaseProjectType.ID);
-                    projectManager.createProject(projectConfig, new HashMap<>());
+                    projectManager.get().createProject(projectConfig, new HashMap<>());
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -831,7 +832,7 @@ public class Workspace implements IWorkspace {
 
     public void setFileContent(File file, InputStream content) {
         try {
-            VirtualFileEntry child = projectsRoot.getChild(file.getFullPath().toOSString());
+            VirtualFileEntry child = getProjectsRoot().getChild(file.getFullPath().toOSString());
             if (child.isFile()) {
                 FileEntry f = (FileEntry)child;
                 f.updateContent(content);
@@ -854,7 +855,7 @@ public class Workspace implements IWorkspace {
 
     public void delete(Resource resource) {
         try {
-            projectManager.delete(resource.getFullPath().toOSString());
+            projectManager.get().delete(resource.getFullPath().toOSString());
         } catch (ServerException | ForbiddenException | ConflictException | NotFoundException e) {
             LOG.error(e.getMessage(), e);
         }
@@ -862,6 +863,7 @@ public class Workspace implements IWorkspace {
 
     void write(File file, InputStream content, int updateFlags, boolean append, IProgressMonitor monitor) throws CoreException {
         try {
+            FolderEntry projectsRoot = getProjectsRoot();
             VirtualFileEntry child = projectsRoot.getChild(file.getFullPath().toOSString());
             if (child == null) {
                 projectsRoot.createFile(file.getFullPath().toOSString(), content);
@@ -877,8 +879,8 @@ public class Workspace implements IWorkspace {
     public void standardMoveFile(IFile file, IFile destination, int updateFlags, IProgressMonitor monitor) throws CoreException {
         VirtualFileEntry child = null;
         try {
-            child = projectsRoot.getChild(file.getFullPath().toOSString());
-            projectManager.moveTo(child.getPath().toString(),
+            child = getProjectsRoot().getChild(file.getFullPath().toOSString());
+            projectManager.get().moveTo(child.getPath().toString(),
                                   destination.getFullPath().removeLastSegments(1).toOSString(),
                                   destination.getName(),
                                   true);
@@ -891,8 +893,8 @@ public class Workspace implements IWorkspace {
     public void standardMoveFolder(IFolder folder, IFolder destination, int updateFlags, IProgressMonitor monitor) throws CoreException {
         VirtualFileEntry child = null;
         try {
-            child = projectsRoot.getChild(folder.getFullPath().toOSString());
-            projectManager.moveTo(child.getPath().toString(),
+            child = getProjectsRoot().getChild(folder.getFullPath().toOSString());
+            projectManager.get().moveTo(child.getPath().toString(),
                                   destination.getFullPath().removeLastSegments(1).toOSString(),
                                   destination.getName(),
                                   true);
@@ -910,8 +912,9 @@ public class Workspace implements IWorkspace {
 
     }
 
-    /** Returns project registry associated with this workspace */
+
+    /** Returns project manager associated with this workspace */
     public ProjectRegistry getProjectRegistry() {
-        return projectRegistry;
+        return projectRegistry.get();
     }
 }

@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
+import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
@@ -28,7 +29,8 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
-import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 
 /**
  * Uploads SSH keys for github.com.
@@ -124,7 +126,7 @@ public class GitHubSshKeyUploader implements SshKeyUploader, OAuthCallback {
         if (OAuthStatus.LOGGED_IN.equals(authStatus)) {
             uploadKey(userId, callback);
         } else {
-            notificationManager.notify(constant.authorizationFailed(), StatusNotification.Status.FAIL, true);
+            notificationManager.notify(constant.authorizationFailed(), StatusNotification.Status.FAIL, FLOAT_MODE);
             callback.onFailure(new Exception(constant.authorizationFailed()));
         }
     }

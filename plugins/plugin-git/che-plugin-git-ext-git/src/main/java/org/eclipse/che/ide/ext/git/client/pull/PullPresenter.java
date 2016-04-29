@@ -40,14 +40,15 @@ import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
 import static org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPresenter.BRANCH_LIST_COMMAND_NAME;
+import static org.eclipse.che.ide.ext.git.client.remote.RemotePresenter.REMOTE_REPO_COMMAND_NAME;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter pulling changes from remote repository.
@@ -183,7 +184,7 @@ public class PullPresenter implements PullView.ActionDelegate {
         final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
 
         final StatusNotification notification =
-                notificationManager.notify(constant.pullProcess(), PROGRESS, true, project.getRootProject());
+                notificationManager.notify(constant.pullProcess(), PROGRESS, FLOAT_MODE, project.getRootProject());
 
         gitServiceClient.pull(appContext.getDevMachine(), project.getRootProject(), getRefs(), remoteName,
                               new AsyncRequestCallback<PullResponse>(dtoUnmarshallerFactory.newUnmarshaller(PullResponse.class)) {
@@ -273,7 +274,7 @@ public class PullPresenter implements PullView.ActionDelegate {
         GitOutputConsole console = gitOutputConsoleFactory.create(commandName);
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-        notificationManager.notify(errorMessage, FAIL, true, project.getRootProject());
+        notificationManager.notify(errorMessage, FAIL, FLOAT_MODE, project.getRootProject());
     }
 
     /** {@inheritDoc} */

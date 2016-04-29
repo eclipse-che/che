@@ -21,7 +21,7 @@ export class CheInfoNotification {
      */
     constructor() {
         this.restrict = 'E';
-        this.replace= true;
+        this.replace = true;
 
         this.scope = {};
     }
@@ -34,14 +34,19 @@ export class CheInfoNotification {
      */
     template(element, attrs) {
         let infoText = attrs['cheInfoText'] || '';
-        return '<md-toast  ng-class="{\'hide-notification\' : isHide}"' +
-            ' class="che-notification-info" layout="row" flex layout-align="start start">' +
+        return '<md-toast class="che-notification-info" layout="row" flex layout-align="start start">' +
             '<i class="che-notification-info-icon fa fa-check fa-2x"></i>' +
             '<div flex="90" layout="column" layout-align="start start">' +
             '<span flex class="che-notification-info-title"><b>Success</b></span>' +
             '<span flex class="che-notification-message">' + infoText + '</span>' +
             '</div>' +
-            '<i class="che-notification-close-icon fa fa-times" ng-click="isHide=true"/>' +
+            '<i class="che-notification-close-icon fa fa-times" ng-click="hideNotification()"/>' +
             '</md-toast>';
+    }
+
+    link($scope, element) {
+        $scope.hideNotification = ()=> {
+            element.addClass('hide-notification');
+        };
     }
 }

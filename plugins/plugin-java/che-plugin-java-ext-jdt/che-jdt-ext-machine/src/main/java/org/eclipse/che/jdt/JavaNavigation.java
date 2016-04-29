@@ -21,6 +21,7 @@ import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.JarEntry.JarEntryType;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Field;
@@ -270,7 +271,7 @@ public class JavaNavigation {
         if (type.isBinary()) {
             unit = type.getClassFile();
             compilationUnit.setPath(((IClassFile)unit).getType().getFullyQualifiedName());
-        }   else {
+        } else {
             unit = type.getCompilationUnit();
             compilationUnit.setProjectPath(unit.getJavaProject().getPath().toOSString());
             compilationUnit.setPath(unit.getResource().getFullPath().toOSString());
@@ -670,7 +671,7 @@ public class JavaNavigation {
         return NO_ENTRIES;
     }
 
-    public String getContent(IJavaProject project, int rootId, String path) throws CoreException {
+    public ClassContent getContent(IJavaProject project, int rootId, String path) throws CoreException {
         IPackageFragmentRoot root = getPackageFragmentRoot(project, rootId);
         if (root == null) {
             return null;
@@ -686,7 +687,7 @@ public class JavaNavigation {
                     ZipEntry entry = jar.getEntry(path.substring(1));
                     if (entry != null) {
                         try (InputStream stream = jar.getInputStream(entry)) {
-                            return IoUtil.readStream(stream);
+                            return createContent(IoUtil.readStream(stream), false);
                         } catch (IOException e) {
                             LOG.error("Can't read file content: " + entry.getName(), e);
                         }
@@ -720,31 +721,39 @@ public class JavaNavigation {
         return null;
     }
 
-    public String getContent(IJavaProject project, String path) throws JavaModelException {
+    public ClassContent getContent(IJavaProject project, String path) throws JavaModelException {
         //java class or file
         IType type = project.findType(path);
         if (type != null) {
             if (type.isBinary()) {
                 IClassFile classFile = type.getClassFile();
                 if (classFile.getSourceRange() != null) {
-                    return classFile.getSource();
+                    return createContent(classFile.getSource(), false);
                 } else {
-                    return sourcesGenerator.generateSource(classFile.getType());
+
+                    return createContent(sourcesGenerator.generateSource(classFile.getType()), true);
                 }
             } else {
-                return type.getCompilationUnit().getSource();
+                return createContent(type.getCompilationUnit().getSource(), false);
             }
         }
         throw new JavaModelException(new JavaModelStatus(0, "Can't find type: " + path));
     }
 
-    private String readFileContent(JarEntryFile file) {
+    private ClassContent readFileContent(JarEntryFile file) {
         try (InputStream stream = (file.getContents())) {
-            return IoUtil.readStream(stream);
+            return createContent(IoUtil.readStream(stream), false);
         } catch (IOException | CoreException e) {
             LOG.error("Can't read file content: " + file.getFullPath(), e);
         }
         return null;
+    }
+
+    private ClassContent createContent(String content, boolean generated) {
+        ClassContent classContent = DtoFactory.newDto(ClassContent.class);
+        classContent.setContent(content);
+        classContent.setGenerated(generated);
+        return classContent;
     }
 
     private JarEntryFile findJarFile(JarEntryDirectory directory, String path) {

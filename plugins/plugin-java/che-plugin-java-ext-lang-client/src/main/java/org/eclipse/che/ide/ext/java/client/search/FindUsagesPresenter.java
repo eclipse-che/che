@@ -37,6 +37,7 @@ import org.eclipse.che.ide.rest.HTTPStatus;
 import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -134,7 +135,7 @@ public class FindUsagesPresenter extends BasePresenter implements FindUsagesView
                     return;
                 }
                 Log.error(getClass(), arg);
-                manager.notify(localizationConstant.failedToProcessFindUsage(), arg.getMessage(), FAIL, true);
+                manager.notify(localizationConstant.failedToProcessFindUsage(), arg.getMessage(), FAIL, FLOAT_MODE);
             }
         });
 
@@ -143,9 +144,9 @@ public class FindUsagesPresenter extends BasePresenter implements FindUsagesView
     private void handleError(int statusCode, String message) {
         if (statusCode == HTTPStatus.BAD_REQUEST) {
             manager.notify(localizationConstant.failedToProcessFindUsage(),
-                           JSONParser.parseLenient(message).isObject().get("message").isString().stringValue(), FAIL, true);
+                           JSONParser.parseLenient(message).isObject().get("message").isString().stringValue(), FAIL, FLOAT_MODE);
         } else {
-            manager.notify(localizationConstant.failedToProcessFindUsage(), message, FAIL, true);
+            manager.notify(localizationConstant.failedToProcessFindUsage(), message, FAIL, FLOAT_MODE);
         }
     }
 

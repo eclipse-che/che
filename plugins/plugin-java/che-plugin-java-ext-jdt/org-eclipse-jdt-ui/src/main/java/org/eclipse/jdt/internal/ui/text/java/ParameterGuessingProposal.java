@@ -33,10 +33,10 @@ import org.eclipse.jface.text.link.InclusivePositionUpdater;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.swt.graphics.Point;
 
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedDataImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.RegionImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedDataImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.RegionImpl;
 
 
 /**

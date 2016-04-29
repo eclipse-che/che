@@ -87,10 +87,6 @@
             <artifactId>che-plugin-java-ext-lang-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-maven</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
         </dependency>

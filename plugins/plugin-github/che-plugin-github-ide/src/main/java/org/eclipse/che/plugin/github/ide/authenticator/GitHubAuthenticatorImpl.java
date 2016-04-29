@@ -25,13 +25,13 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
-import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
 import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
 import org.eclipse.che.ide.ext.git.ssh.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.security.oauth.JsOAuthWindow;
 import org.eclipse.che.security.oauth.OAuthCallback;
 import org.eclipse.che.security.oauth.OAuthStatus;
@@ -39,6 +39,7 @@ import org.eclipse.che.security.oauth.OAuthStatus;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
@@ -146,7 +147,7 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
                 @Override
                 public void onSuccess(Void result) {
                     callback.onSuccess(authStatus);
-                    notificationManager.notify(locale.authMessageKeyUploadSuccess(), SUCCESS, true);
+                    notificationManager.notify(locale.authMessageKeyUploadSuccess(), SUCCESS, FLOAT_MODE);
                 }
 
                 @Override

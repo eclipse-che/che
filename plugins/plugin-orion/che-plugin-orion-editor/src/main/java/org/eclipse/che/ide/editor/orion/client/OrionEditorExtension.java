@@ -36,6 +36,8 @@ import javax.inject.Inject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+
 @Extension(title = "Orion Editor", version = "1.1.0")
 @Singleton
 public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
@@ -172,7 +174,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
             return;
         }
         initFailedWarnedOnce = true;
-        notificationManager.notify(errorMessage, StatusNotification.Status.FAIL, true);
+        notificationManager.notify(errorMessage, StatusNotification.Status.FAIL, FLOAT_MODE);
         LOG.log(Level.SEVERE, errorMessage + " - ", e);
         callback.onFailure(e);
     }

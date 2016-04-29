@@ -25,6 +25,7 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.JavaUtils;
 import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
@@ -34,6 +35,8 @@ import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
 import org.eclipse.che.ide.ui.dialogs.input.InputValidator;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Action to create new Java package.
@@ -42,9 +45,6 @@ import javax.validation.constraints.NotNull;
  */
 @Singleton
 public class NewPackageAction extends AbstractNewResourceAction {
-
-    private static final String MAVEN = "maven";
-
     private final AppContext appContext;
     private final InputValidator nameValidator = new NameValidator();
 
@@ -61,7 +61,7 @@ public class NewPackageAction extends AbstractNewResourceAction {
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         CurrentProject project = appContext.getCurrentProject();
-        if (project == null || !MAVEN.equals(project.getRootProject().getType())) {
+        if (project == null || !isJavaProject(project)) {
             e.getPresentation().setEnabledAndVisible(false);
             return;
         }
@@ -145,5 +145,12 @@ public class NewPackageAction extends AbstractNewResourceAction {
             }
             return null;
         }
+    }
+
+    private boolean isJavaProject(CurrentProject project) {
+        Map<String, List<String>> attributes = project.getProjectConfig().getAttributes();
+        return attributes.containsKey(Constants.LANGUAGE)
+               && attributes.get(Constants.LANGUAGE) != null
+               && "java".equals(attributes.get(Constants.LANGUAGE).get(0));
     }
 }

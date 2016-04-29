@@ -154,6 +154,8 @@ export class CreateProjectCtrl {
     this.projectName = null;
     this.projectDescription = null;
     this.defaultWorkspaceName = null;
+
+    cheAPI.cheWorkspace.getWorkspaces();
   }
 
   /**
