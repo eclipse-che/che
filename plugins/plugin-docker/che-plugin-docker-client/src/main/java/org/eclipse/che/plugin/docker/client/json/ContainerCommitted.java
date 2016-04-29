@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.client.json;
 /**
  * @author andrew00x
  */
-public class ContainerCommited {
+public class ContainerCommitted {
     private String id;
 
     public String getId() {
@@ -26,7 +26,7 @@ public class ContainerCommited {
 
     @Override
     public String toString() {
-        return "ContainerCommited{" +
+        return "ContainerCommitted{" +
                "id='" + id + '\'' +
                '}';
     }

@@ -13,8 +13,12 @@ package org.eclipse.che.plugin.docker.client.json;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-/** @author andrew00x */
+/**
+ * @author andrew00x
+ * @author Mykola Morhun
+ */
 public class ContainerInfo {
     private String          id;
     // Date format: yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX
@@ -38,6 +42,8 @@ public class ContainerInfo {
     private String[]        execIDs;
     private int             restartCount;
     private String          logPath;
+    /** Node is used for Docker Swarm */
+    private Node            node;
 
     private Map<String, String>  volumes   = new HashMap<>();
     private Map<String, Boolean> volumesRW = new HashMap<>();
@@ -226,6 +232,14 @@ public class ContainerInfo {
         this.logPath = logPath;
     }
 
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
+    }
+
     @Override
     public String toString() {
         return "ContainerInfo{" +
@@ -252,6 +266,46 @@ public class ContainerInfo {
                ", logPath='" + logPath + '\'' +
                ", volumes=" + volumes +
                ", volumesRW=" + volumesRW +
+               ", node=" + node +
                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ContainerInfo that = (ContainerInfo)o;
+        return restartCount == that.restartCount &&
+               Objects.equals(id, that.id) &&
+               Objects.equals(created, that.created) &&
+               Objects.equals(appArmorProfile, that.appArmorProfile) &&
+               Objects.equals(path, that.path) &&
+               Arrays.equals(args, that.args) &&
+               Objects.equals(config, that.config) &&
+               Objects.equals(state, that.state) &&
+               Objects.equals(image, that.image) &&
+               Objects.equals(networkSettings, that.networkSettings) &&
+               Objects.equals(resolvConfPath, that.resolvConfPath) &&
+               Objects.equals(hostConfig, that.hostConfig) &&
+               Objects.equals(driver, that.driver) &&
+               Objects.equals(execDriver, that.execDriver) &&
+               Objects.equals(hostnamePath, that.hostnamePath) &&
+               Objects.equals(hostsPath, that.hostsPath) &&
+               Objects.equals(mountLabel, that.mountLabel) &&
+               Objects.equals(name, that.name) &&
+               Objects.equals(processLabel, that.processLabel) &&
+               Arrays.equals(execIDs, that.execIDs) &&
+               Objects.equals(logPath, that.logPath) &&
+               Objects.equals(node, that.node) &&
+               Objects.equals(volumes, that.volumes) &&
+               Objects.equals(volumesRW, that.volumesRW);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(id, created, appArmorProfile, path, Arrays.hashCode(args), config, state, image, networkSettings, resolvConfPath,
+                      hostConfig, driver, execDriver, hostnamePath, hostsPath, mountLabel, name, processLabel, Arrays.hashCode(execIDs),
+                      restartCount, logPath, node, volumes, volumesRW);
     }
 }

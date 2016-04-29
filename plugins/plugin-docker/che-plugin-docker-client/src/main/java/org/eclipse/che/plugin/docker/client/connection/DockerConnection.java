@@ -18,19 +18,20 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Mykola Morhun
  */
 public abstract class DockerConnection implements Closeable {
     private String    method;
     private String    path;
     private Entity<?> entity;
     private StringBuilder         query   = new StringBuilder();
-    private List<Pair<String, ?>> headers = Collections.emptyList();
+    private List<Pair<String, ?>> headers = new LinkedList<>();
 
     public DockerConnection method(String method) {
         this.method = method;
@@ -61,8 +62,13 @@ public abstract class DockerConnection implements Closeable {
         return this;
     }
 
+    public DockerConnection header(String key, Object value) {
+        this.headers.add(Pair.of(key, value));
+        return this;
+    }
+
     public DockerConnection headers(List<Pair<String, ?>> headers) {
-        this.headers = headers;
+        this.headers.addAll(headers);
         return this;
     }
 
@@ -71,6 +77,10 @@ public abstract class DockerConnection implements Closeable {
         return this;
     }
 
+    /**
+     * @deprecated use {@link #entity(byte[])} instead
+     */
+    @Deprecated
     public DockerConnection entity(String entity) {
         this.entity = new StringEntity(entity);
         return this;

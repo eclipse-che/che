@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.docker.client;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author andrew00x
@@ -39,4 +40,19 @@ public class Exec {
                ", id='" + id + '\'' +
                '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Exec exec = (Exec)o;
+        return Arrays.equals(command, exec.command) &&
+               Objects.equals(id, exec.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Arrays.hashCode(command), id);
+    }
+
 }
