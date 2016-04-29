@@ -166,7 +166,7 @@ public class DebuggerTest extends BaseTest {
         doReturn(messageBus).when(messageBusProvider).getMachineMessageBus();
 
         doReturn(localStorage).when(localStorageProvider).get();
-        doReturn(DEBUG_INFO).when(localStorage).getItem(debugger.LOCAL_STORAGE_DEBUGGER_KEY);
+        doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_KEY);
         doReturn(debuggerInfo).when(dtoFactory).createDtoFromJson(DEBUG_INFO, DebuggerInfo.class);
 
         doReturn(fgnResolver).when(fqnResolverFactory).getResolver(anyString());
