@@ -41,7 +41,7 @@
   background-color inherit
   color $che-logo-blue-color
   box-shadow none
-  border 1px solid $che-logo-blue-color
+  border 1px solid $disabled-color
   che-border-radius(2px)
   height 18px
   line-height 18px
@@ -49,16 +49,33 @@
   font-size 9pt
   padding 0 5px
 
+.che-footer-input:hover
+  background-color $light-gray-color
+  border-color $stroke-color
+
+.che-footer-input:focus
+  background-color inherit
+  border-color $che-logo-blue-color
+
 .che-footer-input::-webkit-input-placeholder
   color $che-logo-blue-color
   font-size 9pt
+
+.che-footer-input:focus::-webkit-input-placeholder
+  color lighten($che-logo-blue-color, 80%)
 
 .che-footer-input:-moz-placeholder
   /* Mozilla Firefox 4 to 18 */
   color $che-purple-color
   font-size 9pt
 
+.che-footer-input:focus:-moz-placeholder
+  color lighten($che-logo-blue-color, 80%)
+
 .che-footer-input::-moz-placeholder
   /* Mozilla Firefox 19+ */
   color $che-purple-color
   font-size 9pt
+
+.che-footer-input:focus::-moz-placeholder
+  color lighten($che-logo-blue-color, 80%)
