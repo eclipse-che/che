@@ -38,52 +38,8 @@ public class ProjectTypeTest {
 
     @Before
     public void setUp() throws Exception {
-//        // Bind components
-//        injector = Guice.createInjector(new AbstractModule() {
-//            @Override
-//            protected void configure() {
-//
-//                install(new ProjectApiModule());
-//
-//                Multibinder<ValueProviderFactory> valueProviderMultibinder = Multibinder.newSetBinder(binder(), ValueProviderFactory.class);
-//                valueProviderMultibinder.addBinding().to(MyVPFactory.class);
-//
-//                Multibinder<ProjectTypeDef> projectTypesMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
-//                projectTypesMultibinder.addBinding().to(MyProjectType.class);
-//
-//                bind(ProjectTypeRegistry.class);
-//            }
-//        });
-    }
 
-//    @Test
-//    public void testProjectTypeService() throws Exception {
-//        ProjectTypeRegistry registry = injector.getInstance(ProjectTypeRegistry.class);
-//
-//        ProjectTypeService service = new ProjectTypeService(registry);
-//
-//        assertEquals(2, service.getProjectTypes().size());
-//    }
-//
-//    @Test
-//    public void testProjectTypeDefinition() throws Exception {
-//        ProjectTypeRegistry registry = injector.getInstance(ProjectTypeRegistry.class);
-//
-//        ProjectTypeDef type = registry.getProjectType("my");
-//
-//        assertNotNull(type);
-//        assertEquals(1, type.getParents().size());
-//        assertEquals(BaseProjectType.ID, type.getParents().get(0));
-//        assertNotNull(((Variable)type.getAttribute("var")).getValueProviderFactory());
-//        Assert.assertNull(type.getAttribute("var").getValue());
-//        assertEquals(3, type.getAttributes().size());
-//        assertNotNull(type.getAttribute("const"));
-//        assertEquals(new AttributeValue("const_value"), type.getAttribute("const").getValue());
-//        assertEquals(new AttributeValue("value"), type.getAttribute("var1").getValue());
-//        Assert.assertTrue(type.getAttribute("var1").isRequired());
-//        Assert.assertTrue(type.getAttribute("var1").isVariable());
-//        Assert.assertFalse(type.getAttribute("const").isVariable());
-//    }
+    }
 
     @Test
     public void testInvalidPTDefinition() throws Exception {
@@ -334,6 +290,9 @@ public class ProjectTypeTest {
         assertEquals(list.get(3).getId(), "blank");
     }
 
+
+
+
     @Singleton
     public static class MyVPFactory implements ValueProviderFactory {
 
@@ -342,7 +301,7 @@ public class ProjectTypeTest {
             return new MyValueProvider();
         }
 
-        public static class MyValueProvider implements ValueProvider {
+        public static class MyValueProvider extends ReadonlyValueProvider {
 
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
@@ -350,6 +309,7 @@ public class ProjectTypeTest {
             }
         }
     }
+
 
     @Singleton
     public static class MyProjectType extends ProjectTypeDef {

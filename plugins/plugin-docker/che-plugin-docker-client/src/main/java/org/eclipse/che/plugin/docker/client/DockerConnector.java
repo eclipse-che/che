@@ -93,7 +93,7 @@ public class DockerConnector {
     private final DockerConnectionFactory connectionFactory;
 
     @Inject
-    public DockerConnector(DockerConnectorConfiguration connectorConfiguration, 
+    public DockerConnector(DockerConnectorConfiguration connectorConfiguration,
                            DockerConnectionFactory connectionFactory) {
         this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
         this.initialAuthConfig = connectorConfiguration.getAuthConfigs();

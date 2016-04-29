@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
 
-import org.eclipse.jdt.internal.core.ClasspathChange;
-import org.eclipse.jdt.internal.core.JavaElementDelta;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -55,12 +53,12 @@ public abstract class ChangeClasspathOperation extends JavaModelOperation {
 //			// delta, indexing and classpath markers are going to be created by the delta processor
 //			// while handling the resource change (either .classpath change, or project touched)
 //
-//			// however ensure project references are updated
-//			// since some clients rely on the project references when run inside an IWorkspaceRunnable
-//			new ProjectReferenceChange(project, change.oldResolvedClasspath).updateProjectReferencesIfNecessary();
+			// however ensure project references are updated
+			// since some clients rely on the project references when run inside an IWorkspaceRunnable
+			new ProjectReferenceChange(project, change.oldResolvedClasspath).updateProjectReferencesIfNecessary();
 //
-//			// and ensure that external folders are updated as well
-//			new ExternalFolderChange(project, change.oldResolvedClasspath).updateExternalFoldersIfNecessary(refreshExternalFolder, null);
+			// and ensure that external folders are updated as well
+			new ExternalFolderChange(project, change.oldResolvedClasspath).updateExternalFoldersIfNecessary(refreshExternalFolder, null);
 
 		} else {
 			DeltaProcessingState state = JavaModelManager.getDeltaState();
@@ -81,11 +79,11 @@ public abstract class ChangeClasspathOperation extends JavaModelOperation {
 			}
 			if ((result & ClasspathChange.HAS_PROJECT_CHANGE) != 0) {
 				// ensure project references are updated on next build
-//				state.addProjectReferenceChange(project, change.oldResolvedClasspath);
+				state.addProjectReferenceChange(project, change.oldResolvedClasspath);
 			}
 			if ((result & ClasspathChange.HAS_LIBRARY_CHANGE) != 0) {
 				// ensure external folders are updated on next build
-//				state.addExternalFolderChange(project, change.oldResolvedClasspath);
+				state.addExternalFolderChange(project, change.oldResolvedClasspath);
 			}
 		}
 	}

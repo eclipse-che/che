@@ -73,6 +73,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -276,7 +277,7 @@ public class JavaModelManager {
         deltaState = new DeltaProcessingState(this);
         this.nonChainingJars = new HashSet();//loadClasspathListCache(NON_CHAINING_JARS_CACHE);
         this.invalidArchives = new HashSet(); //loadClasspathListCache(INVALID_ARCHIVES_CACHE);
-        this.externalFiles = new HashSet(); //loadClasspathListCache(EXTERNAL_FILES_CACHE);
+        this.externalFiles = new CopyOnWriteArraySet<>(); //loadClasspathListCache(EXTERNAL_FILES_CACHE);
         this.assumedExternalFiles = new HashSet(); //loadClasspathListCache(ASSUMED_EXTERNAL_FILES_CACHE);
         String includeContainerReferencedLib = System.getProperty(RESOLVE_REFERENCED_LIBRARIES_FOR_CONTAINERS);
         containerInitializersCache.put(JREContainerInitializer.JRE_CONTAINER, new JREContainerInitializer());
@@ -2784,12 +2785,12 @@ public class JavaModelManager {
                 this.writtingRawClasspath = true;
                 if (newReferencedEntries == null) newReferencedEntries = this.referencedEntries;
 
-//                // write .classpath
-//                if (!javaProject.writeFileEntries(newRawClasspath, newReferencedEntries, newOutputLocation)) {
-//                    return false;
-//                }
-//                // store new raw classpath, new output and new status, and null out resolved info
-//                setRawClasspath(newRawClasspath, newReferencedEntries, newOutputLocation, JavaModelStatus.VERIFIED_OK);
+                // write .classpath
+                if (!javaProject.writeFileEntries(newRawClasspath, newReferencedEntries, newOutputLocation)) {
+                    return false;
+                }
+                // store new raw classpath, new output and new status, and null out resolved info
+                setRawClasspath(newRawClasspath, newReferencedEntries, newOutputLocation, JavaModelStatus.VERIFIED_OK);
             } finally {
                 this.writtingRawClasspath = false;
             }
@@ -2861,6 +2862,20 @@ public class JavaModelManager {
                 buffer.append(requestor);
             }
             return buffer.toString();
+        }
+    }
+
+    /**
+     * Adds a path to the external files cache. It is the responsibility of callers to
+     * determine the file's existence, as determined by  {@link File#isFile()}.
+     */
+    public void addExternalFile(IPath path) {
+        // unlikely to be null
+        if (this.externalFiles == null) {
+            this.externalFiles = Collections.synchronizedSet(new HashSet());
+        }
+        if(this.externalFiles != null) {
+            this.externalFiles.add(path);
         }
     }
 

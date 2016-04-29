@@ -39,7 +39,11 @@ import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServ
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServiceImpl;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.libraries.LibEntryPresenter;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.sources.SourceEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaClassInterceptor;
+import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaContentRootInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.TestContentRootDecorator;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
@@ -82,6 +86,7 @@ public class JavaGinModule extends AbstractGinModule {
                 GinMapBinder.newMapBinder(binder(), String.class, SettingsProvider.class);
         mapBinder.addBinding("java").to(JavaNodeSettingsProvider.class);
 
+        GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(JavaContentRootInterceptor.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(JavaClassInterceptor.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(TestContentRootDecorator.class);
 
@@ -102,6 +107,8 @@ public class JavaGinModule extends AbstractGinModule {
         GinMultibinder.newSetBinder(binder(), PreferencesManager.class).addBinding().to(ErrorsWarningsPreferenceManager.class);
 
         GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class).addBinding().to(CurrentClassFQNProvider.class);
+        GinMultibinder.newSetBinder(binder(), ClasspathPagePresenter.class).addBinding().to(LibEntryPresenter.class);
+        GinMultibinder.newSetBinder(binder(), ClasspathPagePresenter.class).addBinding().to(SourceEntryPresenter.class);
     }
 
     @Provides

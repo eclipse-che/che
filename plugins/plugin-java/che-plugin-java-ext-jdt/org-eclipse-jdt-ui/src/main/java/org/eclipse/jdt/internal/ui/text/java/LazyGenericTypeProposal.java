@@ -49,9 +49,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.RegionImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.RegionImpl;
 
 
 /**

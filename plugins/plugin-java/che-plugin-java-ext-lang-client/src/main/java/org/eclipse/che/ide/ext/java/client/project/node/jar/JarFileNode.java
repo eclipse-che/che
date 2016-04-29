@@ -30,8 +30,10 @@ import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
@@ -47,6 +49,8 @@ import java.util.List;
 public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, HasAction {
 
     private final IconRegistry iconRegistry;
+    private final DtoUnmarshallerFactory unmarshallerFactory;
+    private boolean contentGenerated;
 
     @Inject
     public JarFileNode(@Assisted JarEntry jarEntry,
@@ -54,9 +58,11 @@ public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, Ha
                        @Assisted ProjectConfigDto projectConfig,
                        @Assisted NodeSettings nodeSettings,
                        @NotNull JavaNodeManager nodeManager,
-                       @NotNull IconRegistry iconRegistry) {
+                       @NotNull IconRegistry iconRegistry,
+                       @NotNull DtoUnmarshallerFactory unmarshallerFactory) {
         super(jarEntry, libId, projectConfig, nodeSettings, nodeManager);
         this.iconRegistry = iconRegistry;
+        this.unmarshallerFactory = unmarshallerFactory;
     }
 
     /** {@inheritDoc} */
@@ -136,12 +142,14 @@ public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, Ha
             @Override
             public void makeCall(final AsyncCallback<String> callback) {
                 JavaNavigationService javaService = nodeManager.getJavaService();
+                Unmarshallable<ClassContent> unmarshaller = unmarshallerFactory.newUnmarshaller(ClassContent.class);
                 if (libId != null) {
                     javaService.getContent(getProjectConfig().getPath(), libId, getData().getPath(),
-                                           new AsyncRequestCallback<String>(new StringUnmarshaller()) {
+                                           new AsyncRequestCallback<ClassContent>(unmarshaller) {
                                                @Override
-                                               protected void onSuccess(String result) {
-                                                   callback.onSuccess(result);
+                                               protected void onSuccess(ClassContent result) {
+                                                   JarFileNode.this.contentGenerated = result.isGenerated();
+                                                   callback.onSuccess(result.getContent());
                                                }
 
                                                @Override
@@ -151,10 +159,11 @@ public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, Ha
                                            });
                 } else {
                     javaService.getContent(getProjectConfig().getPath(), getData().getPath(),
-                                           new AsyncRequestCallback<String>(new StringUnmarshaller()) {
+                                           new AsyncRequestCallback<ClassContent>(unmarshaller) {
                                                @Override
-                                               protected void onSuccess(String result) {
-                                                   callback.onSuccess(result);
+                                               protected void onSuccess(ClassContent result) {
+                                                   JarFileNode.this.contentGenerated = result.isGenerated();
+                                                   callback.onSuccess(result.getContent());
                                                }
 
                                                @Override
@@ -175,6 +184,10 @@ public class JarFileNode extends AbstractJarEntryNode implements VirtualFile, Ha
 
     private boolean isClassFile() {
         return getData().getName().endsWith(".class");
+    }
+
+    public boolean isContentGenerated() {
+        return contentGenerated;
     }
 
     private SVGImage getFileIcon() {

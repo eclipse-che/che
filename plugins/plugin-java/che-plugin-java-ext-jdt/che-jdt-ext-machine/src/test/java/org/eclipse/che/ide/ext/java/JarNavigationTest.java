@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java;
 
 import org.eclipse.che.ide.ext.java.shared.Jar;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
 import org.eclipse.che.jdt.JavaNavigation;
@@ -128,16 +129,16 @@ public class JarNavigationTest extends BaseTest {
     public void testJavaSource() throws Exception {
         String javaHome = System.getProperty("java.home") + "/lib/rt.jar";
         IPackageFragmentRoot root = project.getPackageFragmentRoot(new File(javaHome).getPath());
-        String content = navigation.getContent(project, root.hashCode(), "java.lang.Object");
-        assertThat(content).isNotNull().isNotEmpty().contains("public class Object");
+        ClassContent content = navigation.getContent(project, root.hashCode(), "java.lang.Object");
+        assertThat(content.getContent()).isNotNull().isNotEmpty().contains("public class Object");
     }
 
     @Test
     public void testNonJavaFileContent() throws Exception {
         String javaHome = System.getProperty("java.home") + "/lib/ext/zipfs.jar";
         IPackageFragmentRoot root = project.getPackageFragmentRoot(new File(javaHome).getPath());
-        String content = navigation.getContent(project, root.hashCode(), "/META-INF/services/java.nio.file.spi.FileSystemProvider");
-        assertThat(content).isNotNull().isNotEmpty().contains("");
+        ClassContent content = navigation.getContent(project, root.hashCode(), "/META-INF/services/java.nio.file.spi.FileSystemProvider");
+        assertThat(content.getContent()).isNotNull().isNotEmpty().contains("");
     }
 
     @Test
@@ -168,16 +169,16 @@ public class JarNavigationTest extends BaseTest {
     public void testExternalJarFileContentInRoot() throws Exception {
         String javaHome = getClass().getResource("/temp").getPath() + "/ws/test/gwt-user.jar";
         IPackageFragmentRoot root = project.getPackageFragmentRoot(new File(javaHome).getPath());
-        String content = navigation.getContent(project, root.hashCode(), "/about.html");
-        assertThat(content).isNotNull().contains("<p>The Eclipse Foundation makes available all content in this plug-in");
+        ClassContent content = navigation.getContent(project, root.hashCode(), "/about.html");
+        assertThat(content.getContent()).isNotNull().contains("<p>The Eclipse Foundation makes available all content in this plug-in");
     }
 
     @Test
     public void testFileContentInPackage() throws Exception {
         String javaHome = getClass().getResource("/temp").getPath() + "/ws/test/gwt-user.jar";
         IPackageFragmentRoot root = project.getPackageFragmentRoot(new File(javaHome).getPath());
-        String content = navigation.getContent(project, root.hashCode(), "/com/google/gwt/user/User.gwt.xml");
-        assertThat(content).isNotNull().contains("<!-- Combines all user facilities into a single module for convenience.     -->")
+        ClassContent content = navigation.getContent(project, root.hashCode(), "/com/google/gwt/user/User.gwt.xml");
+        assertThat(content.getContent()).isNotNull().contains("<!-- Combines all user facilities into a single module for convenience.     -->")
                            .contains("<!-- Most new code should inherit this module.                              -->")
         .contains("<inherits name=\"com.google.gwt.core.Core\"/>");
     }

@@ -11,7 +11,7 @@
 
 package org.eclipse.che.jdt.refactoring;
 
-import org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls;
+import org.eclipse.che.plugin.java.server.dto.DtoServerImpls;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeCreationResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.MoveSettings;

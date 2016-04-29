@@ -65,8 +65,6 @@ public class ProcessTreeNode {
         this.icon = icon;
         this.children = children;
 
-        running = true;
-
         switch (type) {
             case MACHINE_NODE:
                 id = ((MachineDto)data).getId();

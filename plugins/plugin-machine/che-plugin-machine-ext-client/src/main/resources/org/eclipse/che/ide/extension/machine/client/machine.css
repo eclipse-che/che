@@ -402,7 +402,6 @@
     border-radius: 2px;
     box-sizing: border-box;
     cursor: pointer;
-    display: none;
 }
 
 .processesPanelStopButtonForProcess:hover {
@@ -434,14 +433,6 @@
     opacity: 1;
 }
 
-.processTree span[running="false"] span {
-    color: gray;
-}
-
-.processTree div:HOVER > span[running="true"] .processesPanelStopButtonForProcess {
-    display: block;
-}
-
-.processTree div[selected="true"] > span[running="true"] .processesPanelStopButtonForProcess {
-    display: block;
+.hideStopButton .processesPanelStopButtonForProcess {
+    display: none;
 }

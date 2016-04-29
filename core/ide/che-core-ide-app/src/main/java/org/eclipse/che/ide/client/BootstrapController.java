@@ -35,7 +35,6 @@ import org.eclipse.che.api.workspace.gwt.client.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;

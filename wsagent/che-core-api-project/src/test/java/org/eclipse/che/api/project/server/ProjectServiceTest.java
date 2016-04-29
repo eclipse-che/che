@@ -31,7 +31,7 @@ import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ValueProvider;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -638,7 +638,7 @@ public class ProjectServiceTest {
 
         String errMessage = "File /check not found";
 
-        final ValueProviderFactory vpf1 = projectFolder -> new ValueProvider() {
+        final ValueProviderFactory vpf1 = projectFolder -> new ReadonlyValueProvider() {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
 
@@ -701,7 +701,7 @@ public class ProjectServiceTest {
         root.createFolder("testEstimateProjectGood").createFolder("check");
         root.createFolder("testEstimateProjectBad");
 
-        final ValueProviderFactory vpf1 = projectFolder -> new ValueProvider() {
+        final ValueProviderFactory vpf1 = projectFolder -> new ReadonlyValueProvider() {
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {
 

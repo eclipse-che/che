@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public class JREContainerInitializer extends ClasspathContainerInitializer {
 
-    public static final String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
+    public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
     private static StandardVMType standardVMType     = new StandardVMType();
 
     @Override

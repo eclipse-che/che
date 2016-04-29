@@ -25,9 +25,10 @@ import java.util.Map;
  */
 public abstract class ProjectTypeDef implements ProjectType {
 
-    protected final Map<String, Attribute> attributes;
-    protected final List<String>           parents;
-    protected final List<String>           ancestors;
+    protected final Map<String, Attribute>            attributes;
+    protected final List<String>                      parents;
+    protected final List<String>                      ancestors;
+    protected final Map<String, ValueProviderFactory> factoriesToOverride;
 
     protected final String  id;
     protected final String  displayName;
@@ -39,6 +40,7 @@ public abstract class ProjectTypeDef implements ProjectType {
         ancestors = new ArrayList<>();
         attributes = new HashMap<>();
         parents = new ArrayList<>();
+        factoriesToOverride = new HashMap<>();
 
         this.id = id;
         this.displayName = displayName;
@@ -137,6 +139,18 @@ public abstract class ProjectTypeDef implements ProjectType {
 
     protected void addVariableDefinition(String name, String description, boolean required, ValueProviderFactory factory) {
         attributes.put(name, new Variable(id, name, description, required, factory));
+    }
+
+    /**
+     * Sets new value for ValueProviderFactory
+     * Useful if child project type needs to redefine ValueProviderFactory of parent PT attribute
+     * todo check if attribute is provided
+     * @param name attribute name
+     * @param factory to set
+     * @return true if attribute found and factory set
+     */
+    protected void setValueProviderFactory(String name, ValueProviderFactory factory) {
+        this.factoriesToOverride.put(name, factory);
     }
 
     protected void addAttributeDefinition(Attribute attr) {

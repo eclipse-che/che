@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent.ProjectUpdatedHandler;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.project.node.ProjectNode;
 
@@ -201,6 +202,15 @@ public class AppContextImpl implements AppContext, SelectionChangedHandler, WsAg
             final HasProjectConfig hasProjectConfig = (HasProjectConfig)headElement;
             final ProjectConfigDto module = (hasProjectConfig).getProjectConfig();
             currentProject.setProjectConfig(module);
+        }
+
+        if (headElement instanceof VirtualFile) {
+            HasProjectConfig project = ((VirtualFile)headElement).getProject();
+            if (project != null && project.getProjectConfig() != null) {
+                currentProject.setProjectConfig(project.getProjectConfig());
+                currentProject.setRootProject(project.getProjectConfig());
+                browserQueryFieldRenderer.setProjectName(project.getProjectConfig().getName());
+            }
         }
 
         if (headElement instanceof Node) {

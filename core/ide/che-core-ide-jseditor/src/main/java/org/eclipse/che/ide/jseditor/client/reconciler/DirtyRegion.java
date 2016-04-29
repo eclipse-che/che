@@ -35,11 +35,15 @@ public class DirtyRegion implements TypedRegion {
 
     /**
      * Creates a new dirty region.
-     * 
-     * @param offset the offset within the document where the change occurred
-     * @param length the length of the text within the document that changed
-     * @param type the type of change that this region represents: {@link #INSERT} {@link #REMOVE}
-     * @param text the substitution text
+     *
+     * @param offset
+     *         the offset within the document where the change occurred
+     * @param length
+     *         the length of the text within the document that changed
+     * @param type
+     *         the type of change that this region represents: {@link #INSERT} {@link #REMOVE}
+     * @param text
+     *         the substitution text
      */
     public DirtyRegion(int offset, int length, String type, String text) {
         fOffset = offset;
@@ -50,8 +54,9 @@ public class DirtyRegion implements TypedRegion {
 
     /**
      * Computes the normalized type value to ensure that the implementation can use object identity rather than equality.
-     * 
-     * @param type the type value
+     *
+     * @param type
+     *         the type value
      * @return the normalized type value or <code>null</code>
      * @since 3.1
      */
@@ -63,30 +68,24 @@ public class DirtyRegion implements TypedRegion {
         return null;
     }
 
-    /*
-     * @see ITypedRegion#getOffset()
-     */
+    /** Returns the offset of the region. */
     public int getOffset() {
         return fOffset;
     }
 
-    /*
-     * @see ITypedRegion#getLength()
-     */
+    /** Returns the length of the region. */
     public int getLength() {
         return fLength;
     }
 
-    /*
-     * @see ITypedRegion#getType
-     */
+    /** Returns the content type of the region. */
     public String getType() {
         return fType;
     }
 
     /**
      * Returns the text that changed as part of the region change.
-     * 
+     *
      * @return the changed text
      */
     public String getText() {
@@ -95,8 +94,9 @@ public class DirtyRegion implements TypedRegion {
 
     /**
      * Modify the receiver so that it encompasses the region specified by the dirty region.
-     * 
-     * @param dr the dirty region with which to merge
+     *
+     * @param dr
+     *         the dirty region with which to merge
      */
     void mergeWith(DirtyRegion dr) {
         int start = Math.min(fOffset, dr.fOffset);

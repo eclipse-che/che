@@ -171,7 +171,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     public void onProcessFinished(ProcessFinishedEvent event) {
         for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
             if (entry.getValue().isFinished()) {
-                view.setProcessRunning(entry.getKey(), false);
+                view.setStopButtonVisibility(entry.getKey(), false);
             }
         }
     }
@@ -584,8 +584,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
         for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
             String nodeId = entry.getKey();
-            if (selectedNodeId.equals(nodeId)) {
-                view.setProcessRunning(nodeId, !entry.getValue().isFinished());
+            if (selectedNodeId.equals(nodeId) && !entry.getValue().isFinished()) {
+                view.setStopButtonVisibility(selectedNodeId, true);
+            } else {
+                view.setStopButtonVisibility(nodeId, false);
             }
         }
     }

@@ -22,6 +22,7 @@ import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
+import org.eclipse.che.api.project.server.type.Variable;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -61,6 +62,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         projectTypeRegistry.registerProjectType(new PT3());
         projectTypeRegistry.registerProjectType(new PT4NoGen());
         projectTypeRegistry.registerProjectType(new M2());
+        projectTypeRegistry.registerProjectType(new PTsettableVP());
 
         projectHandlerRegistry.register(new PT3.SrcGenerator());
 
@@ -491,6 +493,30 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         assertEquals("/testDetectedProjectsNotSerialized2", persistedProjectConfig.getPath());
     }
 
+    @Test
+    public void testSettableValueProvider() throws Exception {
+
+        assertTrue(((Variable)projectTypeRegistry.getProjectType("settableVPPT").getAttribute("my")).isValueProvided());
+
+        ProjectConfig pc = new NewProjectConfig("/testSettableValueProvider", "settableVPPT", null, "", "", new HashMap<>(), null);
+
+        pm.createProject(pc, null);
+
+        RegisteredProject project = pm.getProject("/testSettableValueProvider");
+
+        assertEquals(1, project.getAttributes().size());
+        assertEquals("notset", project.getAttributes().get("my").get(0));
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("my", new AttributeValue("set").getList());
+        pc = new NewProjectConfig("/testSettableValueProvider", "settableVPPT", null, "", "", attributes, null);
+
+        pm.updateProject(pc);
+        project = pm.getProject("/testSettableValueProvider");
+        assertEquals("set", project.getAttributes().get("my").get(0));
+
+    }
+
      /* ---------------------------------- */
     /* private */
     /* ---------------------------------- */
@@ -536,6 +562,8 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
             }
         });
     }
+
+
 
 
 

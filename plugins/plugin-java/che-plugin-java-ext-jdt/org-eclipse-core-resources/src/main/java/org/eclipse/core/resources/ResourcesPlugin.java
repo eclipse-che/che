@@ -12,6 +12,7 @@
 package org.eclipse.core.resources;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
@@ -192,21 +193,16 @@ public class ResourcesPlugin {
     private static Workspace workspace = null;
     private static String          indexPath;
     private static String          workspacePath;
-    private final  ProjectManager  projectManager;
-    private final  ProjectRegistry projectRegistry;
     private static String          pluginId;
 
     @Inject
-    public ResourcesPlugin(@Named("che.jdt.workspace.index.dir") String indexPath,
-                           @Named("che.user.workspaces.storage") String workspacePath,
-                           ProjectManager projectManager,
-                           ProjectRegistry projectRegistry) {
+    public ResourcesPlugin(@Named("che.jdt.workspace.index.dir") String indexPath, @Named("che.user.workspaces.storage") String workspacePath,
+                           Provider<ProjectRegistry> projectRegistry, Provider<ProjectManager> projectManager) {
         ResourcesPlugin.indexPath = indexPath;
         ResourcesPlugin.workspacePath = workspacePath;
-        this.projectManager = projectManager;
-        this.projectRegistry = projectRegistry;
         pluginId = "cheWsPlugin";
         EFS.setWsPath(workspacePath);
+        workspace = new Workspace(workspacePath, projectRegistry, projectManager);
     }
 
     public static String getPathToWorkspace() {
@@ -223,7 +219,7 @@ public class ResourcesPlugin {
 
     @PostConstruct
     public void start() {
-        workspace = new Workspace(workspacePath, projectManager, projectRegistry);
+
     }
 
     /**

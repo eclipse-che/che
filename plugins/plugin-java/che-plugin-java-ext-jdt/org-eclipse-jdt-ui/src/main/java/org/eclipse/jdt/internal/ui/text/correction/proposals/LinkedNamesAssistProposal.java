@@ -39,9 +39,9 @@ import org.eclipse.swt.graphics.Point;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.RegionImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.RegionImpl;
 
 
 /**

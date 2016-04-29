@@ -46,7 +46,7 @@
     <inherits name='org.eclipse.che.ide.gdb.GdbExtension'/>
     <inherits name='org.eclipse.che.ide.ext.java.jdi.JavaDebuggerExtension'/>
     <inherits name='org.eclipse.che.ide.extension.machine.Machine'/>
-    <inherits name='org.eclipse.che.ide.extension.maven.Maven'/>
+    <inherits name='org.eclipse.che.plugin.maven.Maven'/>
     <inherits name='org.eclipse.che.ide.ext.gwt.GWT'/>
     <inherits name='org.eclipse.che.ide.ext.dashboard.Dashboard'/>
     <inherits name='org.eclipse.che.ide.ext.ssh.MachineSsh'/>
@@ -61,6 +61,7 @@
     <inherits name='org.eclipse.che.plugin.product.info.ProductInfo'/>
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
     <inherits name='org.eclipse.che.plugin.python.Python'/>
+    <inherits name='org.eclipse.che.plugin.java.plain.PlainJava'/>
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
 

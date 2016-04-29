@@ -40,7 +40,7 @@ public abstract class BaseTest {
     protected static EventService    eventService      = new EventService();
     protected static ResourcesPlugin plugin            /*= new ResourcesPlugin("target/index", workspacePath,
                                                                              new DummyProjectManager(workspacePath, eventService))*/;
-    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set");
+    protected static JavaPlugin      javaPlugin        = new JavaPlugin(wsPath + "/set", null, null);
     protected static FileBuffersPlugin
                                      fileBuffersPlugin = new FileBuffersPlugin();
 

@@ -20,9 +20,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.swt.graphics.Point;
 
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
-import static org.eclipse.che.ide.ext.java.server.dto.DtoServerImpls.RegionImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedModeModelImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.LinkedPositionGroupImpl;
+import static org.eclipse.che.plugin.java.server.dto.DtoServerImpls.RegionImpl;
 
 /**
  * A method proposal with filled in argument names.
