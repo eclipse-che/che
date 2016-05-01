@@ -23,7 +23,7 @@ public class TestExtensionManagerGenerator {
 
     @Test
     public void shouldMatchExtensions() {
-        List<String> correct = new ArrayList<String>();
+        List<String> correct = new ArrayList<>();
         correct.add("@Singleton @Extension  (title = \"Demo extension1\", id = \"ide.ext.demo\", version = \"2.0.0\")"
                     + "public class DemoExtension");
         // no whitespace after Extension keyword
@@ -38,7 +38,7 @@ public class TestExtensionManagerGenerator {
 
     @Test
     public void shouldNotMatchExtensions() {
-        List<String> incorrect = new ArrayList<String>();
+        List<String> incorrect = new ArrayList<>();
         // no "@" char before extension
         incorrect.add("@Singleton Extension  (title = \"Demo extension1\", id = \"ide.ext.demo\", version = \"2.0.0\")"
                       + "public class DemoExtension");

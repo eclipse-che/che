@@ -51,18 +51,7 @@ public class IDEInjectorGenerator {
     public static void main(String[] args) {
 
         try {
-            String rootDirPath = ".";
-            // try to read argument
-            if (args.length == 1) {
-                if (args[0].startsWith(GeneratorUtils.ROOT_DIR_PARAMETER)) {
-                    rootDirPath = args[0].substring(GeneratorUtils.ROOT_DIR_PARAMETER.length());
-                } else {
-                    System.err.print("Wrong usage. There is only one allowed argument : "
-                                     + GeneratorUtils.ROOT_DIR_PARAMETER);//NOSONAR
-                    System.exit(1);//NOSONAR
-                }
-            }
-            File rootFolder = new File(rootDirPath);
+            File rootFolder = GeneratorUtils.generateRootFolder(args);
             System.out.println(" ------------------------------------------------------------------------ ");
             System.out.println(String.format("Searching for GinModules in %s", rootFolder.getAbsolutePath()));
             System.out.println(" ------------------------------------------------------------------------ ");
@@ -86,7 +75,7 @@ public class IDEInjectorGenerator {
         File extManager = new File(rootFolder, IDE_INJECTOR_PATH);
         StringBuilder builder = new StringBuilder();
         // declare package name
-        builder.append("package " + "org.eclipse.che.ide.client.inject;\n\n");
+        builder.append("package org.eclipse.che.ide.client.inject;\n\n");
 
         // declare imports
         builder.append("import org.eclipse.che.ide.client.BootstrapController;\n");
@@ -113,10 +102,14 @@ public class IDEInjectorGenerator {
         builder.append("{\n");
         builder.append("\n");
         // define method
-        builder.append(GeneratorUtils.TAB + "/**\n");
-        builder.append(GeneratorUtils.TAB + " * @return the instance of BootstrapController\n");
-        builder.append(GeneratorUtils.TAB + " */\n");
-        builder.append(GeneratorUtils.TAB + "BootstrapController getBootstrapController();\n");
+        builder.append(GeneratorUtils.TAB);
+        builder.append("/**\n");
+        builder.append(GeneratorUtils.TAB);
+        builder.append(" * @return the instance of BootstrapController\n");
+        builder.append(GeneratorUtils.TAB);
+        builder.append(" */\n");
+        builder.append(GeneratorUtils.TAB);
+        builder.append("BootstrapController getBootstrapController();\n");
         // close class definition
         builder.append("\n");
         builder.append("}\n");
@@ -126,7 +119,7 @@ public class IDEInjectorGenerator {
     }
 
     /**
-     * Generate codeblock with all the GinModules
+     * Generate a block of code with all the GinModules
      *
      * @param builder
      */
@@ -138,7 +131,11 @@ public class IDEInjectorGenerator {
             String ginModuleFQN = entryIterator.next();
             String hasComma = entryIterator.hasNext() ? "," : "";
             // add ModuleDeclaration
-            builder.append(GeneratorUtils.TAB + ginModuleFQN + ".class " + hasComma + "\n");
+            builder.append(GeneratorUtils.TAB);
+            builder.append(ginModuleFQN);
+            builder.append(".class ");
+            builder.append(hasComma);
+            builder.append("\n");
         }
     }
 
