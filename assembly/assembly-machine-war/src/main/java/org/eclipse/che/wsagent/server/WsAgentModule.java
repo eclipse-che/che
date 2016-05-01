@@ -14,6 +14,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.ApiEndpointAccessibilityChecker;
+import org.eclipse.che.ApiEndpointProvider;
+import org.eclipse.che.EventBusURLProvider;
+import org.eclipse.che.UriApiEndpointProvider;
+import org.eclipse.che.UserTokenProvider;
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.ApiInfoService;
@@ -53,7 +58,7 @@ public class WsAgentModule extends AbstractModule {
     protected void configure() {
         bind(ApiInfoService.class);
 
-        bind(PreferenceDao.class).to(org.eclipse.che.api.local.RemotePreferenceDao.class);
+        bind(PreferenceDao.class).to(org.eclipse.che.RemotePreferenceDao.class);
 
         bind(OAuthTokenProvider.class).to(RemoteOAuthTokenProvider.class);
         bind(SshServiceClient.class).to(HttpSshServiceClient.class);
