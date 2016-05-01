@@ -62,6 +62,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>wsmaster-local</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-account</artifactId>
         </dependency>
         <dependency>
@@ -71,10 +75,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-infrastructure-local</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

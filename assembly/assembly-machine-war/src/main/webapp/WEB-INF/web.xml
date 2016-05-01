@@ -22,7 +22,7 @@
         <param-value>/ext</param-value>
     </context-param>
     <listener>
-        <listener-class>org.eclipse.che.inject.CodenvyBootstrap</listener-class>
+        <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
     </listener>
     <listener>
         <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
