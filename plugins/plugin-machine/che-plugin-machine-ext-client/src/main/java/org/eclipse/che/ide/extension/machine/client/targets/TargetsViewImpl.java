@@ -170,7 +170,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
                 delegate.onSaveClicked();
             }
         });
-        saveButton.addStyleName(this.resources.windowCss().primaryButton());
+        saveButton.addStyleName(Window.resources.windowCss().primaryButton());
         footer.add(saveButton);
 
         cancelButton = createButton(coreLocale.cancel(), "targets.button.cancel", new ClickHandler() {
@@ -187,7 +187,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
                 delegate.onConnectClicked();
             }
         });
-        connectButton.addStyleName(this.resources.windowCss().primaryButton());
+        connectButton.addStyleName(Window.resources.windowCss().primaryButton());
         connectButton.addStyleName(resources.Css().buttonLoader());
         footer.add(connectButton);
 
