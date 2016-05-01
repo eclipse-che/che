@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.util;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Generate a random UUID.
  *
@@ -50,7 +52,7 @@ public class UUID {
         char[] uuid = new char[len];
         // Compact form
         for (int i = 0; i < len; i++) {
-            uuid[i] = CHARS[(int)(Math.random() * radix)];
+            uuid[i] = CHARS[ThreadLocalRandom.current().nextInt(radix)];
         }
         return new String(uuid);
     }
@@ -71,7 +73,7 @@ public class UUID {
         // per rfc4122, sec. 4.1.5
         for (int i = 0; i < 36; i++) {
             if (uuid[i] == 0) {
-                r = (int)(Math.random() * 16);
+                r = ThreadLocalRandom.current().nextInt(16);
                 uuid[i] = CHARS[(i == 19) ? (r & 0x3) | 0x8 : r & 0xf];
             }
         }
