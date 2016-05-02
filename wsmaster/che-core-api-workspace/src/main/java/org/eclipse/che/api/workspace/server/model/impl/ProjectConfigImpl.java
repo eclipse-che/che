@@ -36,8 +36,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     private String                    type;
     private List<String>              mixins;
     private Map<String, List<String>> attributes;
-    private List<ProjectConfig>       modules;
-    private SourceStorageImpl         storage;
+    private SourceStorageImpl         source;
     //private String                    contentRoot;
 
     public ProjectConfigImpl() {
@@ -49,7 +48,6 @@ public class ProjectConfigImpl implements ProjectConfig {
         description = projectConfig.getDescription();
         type = projectConfig.getType();
         mixins = new ArrayList<>(projectConfig.getMixins());
-//        modules = new ArrayList<>(projectConfig.getModules() != null ? projectConfig.getModules() : Collections.<ProjectConfig>emptyList());
         attributes = projectConfig.getAttributes()
                                   .entrySet()
                                   .stream()
@@ -58,7 +56,7 @@ public class ProjectConfigImpl implements ProjectConfig {
         SourceStorage sourceStorage = projectConfig.getSource();
 
         if (sourceStorage != null) {
-            storage = new SourceStorageImpl(sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
+            source = new SourceStorageImpl(sourceStorage.getType(), sourceStorage.getLocation(), sourceStorage.getParameters());
         }
 
 //        contentRoot = projectConfig.getContentRoot();
@@ -120,25 +118,13 @@ public class ProjectConfigImpl implements ProjectConfig {
         return attributes;
     }
 
-//    @Override
-//    public List<ProjectConfig> getModules() {
-//        if (modules == null) {
-//            modules = new ArrayList<>();
-//        }
-//        return modules;
-//    }
-
-//    public void setModules(List<ProjectConfig> modules) {
-//        this.modules = modules;
-//    }
-
     public void setAttributes(Map<String, List<String>> attributes) {
         this.attributes = attributes;
     }
 
     @Override
     public SourceStorage getSource() {
-        return storage;
+        return source;
     }
 
 //    @Override
@@ -151,7 +137,7 @@ public class ProjectConfigImpl implements ProjectConfig {
 //    }
 
     public void setSource(SourceStorageImpl sourceStorage) {
-        this.storage = sourceStorage;
+        this.source = sourceStorage;
     }
 
     @Override
@@ -165,8 +151,7 @@ public class ProjectConfigImpl implements ProjectConfig {
                && Objects.equals(type, other.type)
                && getMixins().equals(other.getMixins())
                && getAttributes().equals(other.getAttributes())
-//               && getModules().equals(other.getModules())
-               && Objects.equals(storage, other.getSource());
+               && Objects.equals(source, other.getSource());
                //&& Objects.equals(contentRoot, other.getContentRoot());
     }
 
@@ -179,8 +164,7 @@ public class ProjectConfigImpl implements ProjectConfig {
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + getMixins().hashCode();
         hash = hash * 31 + getAttributes().hashCode();
-//        hash = hash * 31 + getModules().hashCode();
-        hash = hash * 31 + Objects.hashCode(storage);
+        hash = hash * 31 + Objects.hashCode(source);
         //hash = hash * 31 + Objects.hashCode(contentRoot);
         return hash;
     }
@@ -194,8 +178,7 @@ public class ProjectConfigImpl implements ProjectConfig {
                ", type='" + type + '\'' +
                ", mixins=" + mixins +
                ", attributes=" + attributes +
-               ", modules=" + modules +
-               ", storage=" + storage +
+               ", source=" + source +
 //               ", contentRoot='" + contentRoot + '\'' +
                '}';
     }
