@@ -186,7 +186,6 @@ function set_environment_variables {
   SDK_DIR="${CHE_HOME}/sdk"
 
   PLUGIN_IDE_DIR="${PLUGIN_DIR}/ide"
-  PLUGIN_WSMASTER_DIR="${PLUGIN_DIR}/ws-master"
   PLUGIN_WSAGENT_DIR="${PLUGIN_DIR}/ws-agent"
   
   # The IDE project that will be built with the extension
@@ -202,17 +201,16 @@ function set_environment_variables {
   PLUGIN_ASSEMBLY_DIR="${SDK_DIR}/assembly-main"
 
   if $USE_DEBUG; then
-    echo $CHE_HOME
-    echo $JAVA_HOME
-    echo $PLUGIN_DIR
-    echo $SDK_DIR
-    echo $PLUGIN_IDE_DIR
-    echo $PLUGIN_WSMASTER_DIR
-    echo $PLUGIN_WSAGENT_DIR
-    echo $PLUGIN_IDE_WAR_DIR
-    echo $PLUGIN_MACHINE_WAR_DIR
-    echo $PLUGIN_MACHINE_SERVER_DIR
-    echo $PLUGIN_ASSEMBLY_DIR
+    echo "CHE_HOME                  = " $CHE_HOME
+    echo "JAVA_HOME                 = " $JAVA_HOME
+    echo "PLUGIN_DIR                = " $PLUGIN_DIR
+    echo "SDK_DIR                   = " $SDK_DIR
+    echo "PLUGIN_IDE_DIR            = " $PLUGIN_IDE_DIR
+    echo "PLUGIN_WSAGENT_DIR        = " $PLUGIN_WSAGENT_DIR
+    echo "PLUGIN_IDE_WAR_DIR        = " $PLUGIN_IDE_WAR_DIR
+    echo "PLUGIN_IDE_WAR_DIR        = " $PLUGIN_MACHINE_WAR_DIR
+    echo "PLUGIN_MACHINE_SERVER_DIR = " $PLUGIN_MACHINE_SERVER_DIR
+    echo "PLUGIN_ASSEMBLY_DIR       = " $PLUGIN_ASSEMBLY_DIR
   fi
 }
 
@@ -264,15 +262,6 @@ if [ "${USE_HELP}" == "false" ]; then
               `"${CHE_HOME}/sdk/che-plugin-sdk-logger.jar":`
               `"${CHE_HOME}/sdk/che-plugin-sdk-logger-core.jar" `
               `org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_IDE_DIR}" `
-              `--extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
-
-      echo_stage "CHE SDK: Adding extensions as dependencies to ws-master"
-
-      # Performs dependency injection of your plug-ins into che ide.war pom.xml & GWT module
-      java -cp "${CHE_HOME}/sdk/che-plugin-sdk-tools.jar":`
-              `"${CHE_HOME}/sdk/che-plugin-sdk-logger.jar":`
-              `"${CHE_HOME}/sdk/che-plugin-sdk-logger-core.jar" `
-              `org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSMASTER_DIR}" `
               `--extResourcesDir="${PLUGIN_IDE_WAR_DIR}"
     fi
 
