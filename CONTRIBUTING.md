@@ -95,6 +95,10 @@ Get Involved!
 * Is there some bug that really bothers you? Instead of just reporting it, fix it.
 * Hope on che-dev@eclipse.org or #eclipseche to discuss feature enhancements and the branching process.
 
+#### Submit PRs for New Templates and Stacks
+* We love having people add new stacks (environments for running projects) and sample projects.
+* See our [CUSTOMIZING.md](https://github.com/eclipse/che/blob/master/CUSTOMIZING.md#templates) for instructions.
+
 #### Become a Committer
 * Committers gain additional rights around managing the repositories and setting the release scope.
 * Ongoing plug-in contributors are also welcome to be elevated as committers.
