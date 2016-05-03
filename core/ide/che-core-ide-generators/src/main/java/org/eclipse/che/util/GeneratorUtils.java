@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +19,14 @@ import java.util.regex.Pattern;
 public class GeneratorUtils {
 
     /** CLI Argument */
-    public static final String ROOT_DIR_PARAMETER = "--rootDir=";
+    public static final String  ROOT_DIR_PARAMETER   = "--rootDir=";
+    /** Reg Exp that matches the package declaration */
+    public static final Pattern PACKAGE_PATTERN      = Pattern
+            .compile(".*package\\s+([a-zA_Z_][\\.\\w]*);.*", Pattern.DOTALL);
+    /** Current Package name, used to avoid miss-hits of Extension's lookup */
+    static final        String  COM_CODENVY_IDE_UTIL = "org.eclipse.che.ide.util";
+    public static final String  TAB                  = "   ";
+    public static final String  TAB2                 = TAB + TAB;
 
     /**
      * Extracts Package declaration from file
@@ -29,7 +37,7 @@ public class GeneratorUtils {
      * @throws IOException
      */
     public static String getClassFQN(String fileName, String content) throws IOException {
-        Matcher matcher = GeneratorUtils.PACKAGE_PATTERN.matcher(content);
+        Matcher matcher = PACKAGE_PATTERN.matcher(content);
         if (!matcher.matches()) {
             throw new IOException(String.format("Class %s doesn't seem to be valid. Package declaration is missing.",
                                                 fileName));
@@ -41,12 +49,24 @@ public class GeneratorUtils {
         return matcher.group(1);
     }
 
-    /** Reg Exp that matches the package declaration */
-    public static final Pattern PACKAGE_PATTERN      = Pattern
-            .compile(".*package\\s+([a-zA_Z_][\\.\\w]*);.*", Pattern.DOTALL);
-    /** Current Package name, used to avoid miss-hits of Extension's lookup */
-    static final        String  COM_CODENVY_IDE_UTIL = "org.eclipse.che.ide.util";
-    public static final String  TAB                  = "   ";
-    public static final String  TAB2                 = TAB + TAB;
-
+    /**
+     * Generates root dir
+     *
+     * @param args
+     * @return File
+     */
+    public static File getRootFolder(String[] args) {
+        String rootDirPath = ".";
+        // try to read argument
+        if (args.length == 1) {
+            if (args[0].startsWith(ROOT_DIR_PARAMETER)) {
+                rootDirPath = args[0].substring(ROOT_DIR_PARAMETER.length());
+            } else {
+                System.err.print("Wrong usage. There is only one allowed argument : "
+                        + ROOT_DIR_PARAMETER);//NOSONAR
+                System.exit(1);//NOSONAR
+            }
+        }
+        return new File(rootDirPath);
+    }
 }

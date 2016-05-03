@@ -29,7 +29,7 @@ public final class IgnoreUnExistedResourcesReflectionConfigurationBuilder {
         configurationBuilder=  ConfigurationBuilder.build();
         configurationBuilder.setUrls(configurationBuilder.getUrls()
                                                          .stream()
-                                                         .filter(input -> !input.getProtocol().equals("file") ||
+                                                         .filter(input -> !"file".equals(input.getProtocol()) ||
                                                                                              new File(input.getFile()).exists())
                                                          .collect(Collectors.toList()));
 
