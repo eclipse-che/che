@@ -55,10 +55,7 @@ public class ConstantPartitioner implements DocumentPartitioner {
     @Override
     public void onDocumentChange(final DocumentChangeEvent event) {
         final int removed = event.getLength();
-        int added = 0;
-        if (event.getText() != null) {
-            added = event.getText().length();
-        }
+        int added = event.getText() == null ? 0 : event.getText().length();
         final int sizeDelta = added - removed;
         this.documentLength += sizeDelta;
     }

@@ -40,8 +40,8 @@ public class DocumentPositionMapImpl implements DocumentPositionMap {
         }
 
         if (!containsPositionCategory(category)) {
-            this.positions.put(category, new ArrayList<TypedPosition>());
-            this.endPositions.put(category, new ArrayList<TypedPosition>());
+            this.positions.put(category, new ArrayList<>());
+            this.endPositions.put(category, new ArrayList<>());
         }
     }
 
@@ -78,22 +78,19 @@ public class DocumentPositionMapImpl implements DocumentPositionMap {
 
     @Override
     public boolean containsPositionCategory(final String category) {
-        if (category != null) {
-            return this.positions.containsKey(category);
-        }
-        return false;
+        return category != null && this.positions.containsKey(category);
     }
 
     protected int computeIndexInPositionList(final List<TypedPosition> positions, final int offset,
                                              final boolean orderedByOffset) {
-        if (positions.size() == 0) {
+        if (positions.isEmpty()) {
             return 0;
         }
 
         int left = 0;
         int right = positions.size() - 1;
-        int mid = 0;
-        Position p = null;
+        int mid;
+        Position p;
 
         while (left < right) {
 
@@ -309,7 +306,7 @@ public class DocumentPositionMapImpl implements DocumentPositionMap {
                                             boolean canEndAfter) throws BadPositionCategoryException {
         if (canStartBefore && canEndAfter || (!canStartBefore && !canEndAfter)) {
             List<TypedPosition> documentPositions;
-            if (canStartBefore && canEndAfter) {
+            if (canStartBefore) {
                 if (offset < this.contentLength / 2) {
                     documentPositions = getStartingPositions(category, 0, offset + length);
                 } else {
@@ -319,7 +316,7 @@ public class DocumentPositionMapImpl implements DocumentPositionMap {
                 documentPositions = getStartingPositions(category, offset, length);
             }
 
-            final List<TypedPosition> list = new ArrayList<TypedPosition>(documentPositions.size());
+            final List<TypedPosition> list = new ArrayList<>(documentPositions.size());
 
             final Position region = new Position(offset, length);
 
@@ -331,13 +328,11 @@ public class DocumentPositionMapImpl implements DocumentPositionMap {
 
             return list;
         } else if (canStartBefore) {
-            final List<TypedPosition> list = getEndingPositions(category, offset, length);
-            return list;
+            return getEndingPositions(category, offset, length);
         } else {
             Assert.isLegal(canEndAfter && !canStartBefore);
 
-            final List<TypedPosition> list = getStartingPositions(category, offset, length);
-            return list;
+            return getStartingPositions(category, offset, length);
         }
     }
 

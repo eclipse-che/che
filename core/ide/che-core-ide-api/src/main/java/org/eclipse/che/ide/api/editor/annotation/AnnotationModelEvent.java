@@ -37,13 +37,13 @@ public class AnnotationModelEvent extends GwtEvent<AnnotationModelHandler> {
     private final AnnotationModel annotationModel;
 
     /** The added annotations. */
-    private final Set<Annotation> addedAnnotations = new HashSet<Annotation>();
+    private final Set<Annotation> addedAnnotations = new HashSet<>();
 
     /** The removed annotations. */
-    private final Map<Annotation, Position> removedAnnotations = new HashMap<Annotation, Position>();
+    private final Map<Annotation, Position> removedAnnotations = new HashMap<>();
 
     /** The changed annotations. */
-    private final Set<Annotation> changedAnnotations = new HashSet<Annotation>();
+    private final Set<Annotation> changedAnnotations = new HashSet<>();
 
     /**
      * Creates a new annotation model event for the given model.

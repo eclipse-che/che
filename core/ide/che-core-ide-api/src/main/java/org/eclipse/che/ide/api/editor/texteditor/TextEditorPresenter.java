@@ -184,11 +184,11 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
             quickAssistant = quickAssistantFactory.createQuickAssistant(this);
             quickAssistant.setQuickAssistProcessor(processor);
         }
-        new TextEditorInit<T>(configuration,
-                              generalEventBus,
-                              this.codeAssistantFactory,
-                              this.quickAssistant,
-                              this).init();
+        new TextEditorInit<>(configuration,
+                             generalEventBus,
+                             this.codeAssistantFactory,
+                             this.quickAssistant,
+                             this).init();
 
         if (editorModule.isError()) {
             displayErrorPanel(constant.editorInitErrorMessage());
@@ -537,11 +537,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     @Override
     public String getContentType() {
         // Before the editor content is ready, the content type is not defined
-        if (this.fileTypes == null || this.fileTypes.isEmpty()) {
-            return null;
-        } else {
-            return this.fileTypes.get(0);
-        }
+        return this.fileTypes == null || this.fileTypes.isEmpty() ? null : this.fileTypes.get(0);
     }
 
     @Override
@@ -613,11 +609,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     public HasTextMarkers getHasTextMarkers() {
-        if (this.editorWidget != null) {
-            return this.editorWidget;
-        } else {
-            return null;
-        }
+        return this.editorWidget != null ? this.editorWidget : null;
     }
 
     public HasKeyBindings getHasKeybindings() {
@@ -700,10 +692,8 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                 return true;
             }
         }
-        if (TextEditorOperations.FORMAT == operation) {
-            if (getConfiguration().getContentFormatter() != null) {
+        if (TextEditorOperations.FORMAT == operation && getConfiguration().getContentFormatter() != null) {
                 return true;
-            }
         }
         return false;
     }
@@ -759,10 +749,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private ReconcilerWithAutoSave getAutoSave() {
         Reconciler reconciler = getConfiguration().getReconciler();
 
-        if (reconciler != null && reconciler instanceof ReconcilerWithAutoSave) {
-            return ((ReconcilerWithAutoSave)reconciler);
-        }
-        return null;
+        return reconciler != null && reconciler instanceof ReconcilerWithAutoSave ? (ReconcilerWithAutoSave)reconciler : null;
     }
 
     @Override

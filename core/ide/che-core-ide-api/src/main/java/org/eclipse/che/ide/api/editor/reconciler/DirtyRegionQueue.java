@@ -60,13 +60,7 @@ class DirtyRegionQueue {
     }
 
     private static boolean nullSafeStringsEquals(final String s1, final String s2) {
-        if (s1 == s2) {
-            return true;
-        }
-        if (s1 == null) {
-            return false;
-        }
-        return s1.equals(s2);
+        return s1 == s2 || s1 != null && s1.equals(s2);
     }
 
     /**
@@ -76,7 +70,7 @@ class DirtyRegionQueue {
      */
     private DirtyRegion getLastDirtyRegion() {
         final int size = fDirtyRegions.size();
-        return (size == 0 ? null : (DirtyRegion)fDirtyRegions.get(size - 1));
+        return (size == 0 ? null : fDirtyRegions.get(size - 1));
     }
 
     /**

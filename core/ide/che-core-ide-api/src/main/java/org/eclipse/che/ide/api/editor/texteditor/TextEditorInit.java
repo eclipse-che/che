@@ -102,7 +102,7 @@ public class TextEditorInit<T extends EditorWidget> {
                 addQuickAssistKeyBinding();
             }
         };
-        new DocReadyWrapper<TextEditorInit<T>>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
+        new DocReadyWrapper<>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
     }
 
     /**

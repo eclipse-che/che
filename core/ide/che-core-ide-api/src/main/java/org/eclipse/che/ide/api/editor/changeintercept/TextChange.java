@@ -58,7 +58,7 @@ public final class TextChange {
      * @return the new content.
      */
     public String getNewText() {
-        return this. newText;
+        return this.newText;
     }
 
     @Override

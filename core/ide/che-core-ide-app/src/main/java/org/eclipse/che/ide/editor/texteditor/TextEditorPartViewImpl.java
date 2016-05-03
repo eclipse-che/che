@@ -77,7 +77,7 @@ public class TextEditorPartViewImpl extends Composite implements TextEditorPartV
     @Override
     public void showCompletionProposals(final EditorWidget editorWidget, final CompletionsSource source) {
         editorWidget.showCompletionProposals(source, new AdditionalInfoCallback() {
-            
+
             @Override
             public Element onAdditionalInfoNeeded(final float pixelX, final float pixelY, final Element infoWidget) {
                 final AdditionalInformationWidget popup = new AdditionalInformationWidget(popupResources);

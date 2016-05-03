@@ -136,9 +136,8 @@ public final class Presentation {
      * @param imageResource image resource
      */
     public void setImageResource(ImageResource imageResource) {
-        ImageResource oldImaheResource = imageResource;
         this.imageResource = imageResource;
-        firePropertyChange(PROP_ICON, oldImaheResource, imageResource);
+        firePropertyChange(PROP_ICON, imageResource, imageResource);
     }
 
     /**
@@ -147,9 +146,8 @@ public final class Presentation {
      * @param svgResource icon SVG resource
      */
     public void setSVGResource(SVGResource svgResource) {
-        SVGResource oldSVGResource = svgResource;
         this.svgResource = svgResource;
-        firePropertyChange(PROP_ICON, oldSVGResource, svgResource);
+        firePropertyChange(PROP_ICON, svgResource, svgResource);
     }
 
     /**
@@ -158,9 +156,8 @@ public final class Presentation {
      * @param htmlResource html resource
      */
     public void setHTMLResource(String htmlResource) {
-        String oldHTMLRersource = htmlResource;
         this.htmlResource = htmlResource;
-        firePropertyChange(PROP_ICON, oldHTMLRersource, htmlResource);
+        firePropertyChange(PROP_ICON, htmlResource, htmlResource);
     }
 
     public boolean isVisible() {
