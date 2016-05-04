@@ -10,12 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.rest;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -27,6 +21,12 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceDescriptor;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides basic functionality to access remote {@link Service Service}. Basically provides next information about {@code Service}:
@@ -91,23 +91,21 @@ public class RemoteServiceDescriptor {
     }
 
     public ServiceDescriptor getServiceDescriptor() throws IOException, ServerException {
-        ServiceDescriptor myServiceDescriptor = serviceDescriptor;
-        if (myServiceDescriptor == null) {
+        if (serviceDescriptor == null) {
             synchronized (this) {
-                myServiceDescriptor = serviceDescriptor;
-                if (myServiceDescriptor == null) {
+                if (serviceDescriptor == null) {
                     try {
-                        myServiceDescriptor = serviceDescriptor = requestFactory.fromUrl(baseUrl)
-                                                                                .useOptionsMethod()
-                                                                                .request()
-                                                                                .as(getServiceDescriptorClass(), null);
+                        serviceDescriptor = requestFactory.fromUrl(baseUrl)
+                                                          .useOptionsMethod()
+                                                          .request()
+                                                          .as(getServiceDescriptorClass(), null);
                     } catch (NotFoundException | ConflictException | UnauthorizedException | BadRequestException | ForbiddenException e) {
                         throw new ServerException(e.getServiceError());
                     }
                 }
             }
         }
-        return myServiceDescriptor;
+        return serviceDescriptor;
     }
 
     protected Class<? extends ServiceDescriptor> getServiceDescriptorClass() {
