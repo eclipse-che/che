@@ -95,7 +95,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
     /** {@inheritDoc} */
     @Override
     public ImageResource getTitleImage() {
-        return input.getImageResource();
+        return null;
     }
 
     /** {@inheritDoc} */

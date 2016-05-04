@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor;
 
-import com.google.gwt.resources.client.ImageResource;
-
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
@@ -35,12 +33,6 @@ public class RecipeEditorInput implements EditorInput {
     }
 
     /** {@inheritDoc} */
-    @Override
-    public String getContentDescription() {
-        return fileType.getContentDescription();
-    }
-
-    /** {@inheritDoc} */
     @NotNull
     @Override
     public String getToolTipText() {
@@ -57,15 +49,8 @@ public class RecipeEditorInput implements EditorInput {
     /** {@inheritDoc} */
     @NotNull
     @Override
-    public ImageResource getImageResource() {
-        return fileType.getImage();
-    }
-
-    /** {@inheritDoc} */
-    @NotNull
-    @Override
     public SVGResource getSVGResource() {
-        return fileType.getSVGImage();
+        return fileType.getImage();
     }
 
     /** {@inheritDoc} */

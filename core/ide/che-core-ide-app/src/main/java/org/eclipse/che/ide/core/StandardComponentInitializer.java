@@ -411,7 +411,7 @@ public class StandardComponentInitializer {
         newGroup.addSeparator();
 
         actionManager.registerAction("newXmlFile", newXmlFileAction);
-        newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getSVGImage());
+        newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getImage());
         newGroup.addAction(newXmlFileAction);
 
         actionManager.registerAction("uploadFile", uploadFileAction);

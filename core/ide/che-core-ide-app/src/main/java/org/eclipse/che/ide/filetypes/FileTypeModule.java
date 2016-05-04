@@ -15,7 +15,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -34,83 +33,83 @@ public class FileTypeModule extends AbstractGinModule {
     @Singleton
     @Named("XMLFileType")
     protected FileType provideXMLFile(Resources resources) {
-        return new FileType("XML file", resources.xmlFile(), MimeType.TEXT_XML, "xml");
+        return new FileType(resources.xmlFile(), "xml");
     }
 
     @Provides
     @Singleton
     @Named("TXTFileType")
     protected FileType provideTXTFile(Resources resources) {
-        return new FileType("TXT File", resources.defaultFile(), MimeType.TEXT_PLAIN, "txt");
+        return new FileType(resources.defaultFile(), "txt");
     }
 
     @Provides
     @Singleton
     @Named("JsonFileType")
     protected FileType provideJsonFile(Resources resources) {
-        return new FileType("Json file", resources.jsonFile(), MimeType.APPLICATION_JSON, "json");
+        return new FileType(resources.jsonFile(), "json");
     }
 
     @Provides
     @Singleton
     @Named("MDFileType")
     protected FileType provideMDFile(Resources resources) {
-        return new FileType("MD File", resources.mdFile(), MimeType.TEXT_MARKDOWN, "md");
+        return new FileType(resources.mdFile(), "md");
     }
 
     @Provides
     @Singleton
     @Named("PNGFileType")
     protected FileType providePNGFile(Resources resources) {
-        return new FileType("PNG Image", resources.defaultImage(), MimeType.IMAGE_PNG, "png");
+        return new FileType(resources.defaultImage(), "png");
     }
 
     @Provides
     @Singleton
     @Named("BMPFileType")
     protected FileType provideBMPFile(Resources resources) {
-        return new FileType("Bitmap Image", resources.defaultImage(), MimeType.IMAGE_BMP, "bmp");
+        return new FileType(resources.defaultImage(), "bmp");
     }
 
     @Provides
     @Singleton
     @Named("GIFFileType")
     protected FileType provideGIFFile(Resources resources) {
-        return new FileType("GIF Image", resources.defaultImage(), MimeType.IMAGE_GIF, "gif");
+        return new FileType(resources.defaultImage(), "gif");
     }
 
     @Provides
     @Singleton
     @Named("ICOFileType")
     protected FileType provideICOFile(Resources resources) {
-        return new FileType("ICO Image", resources.defaultImage(), MimeType.IMAGE_X_ICON, "ico");
+        return new FileType(resources.defaultImage(), "ico");
     }
 
     @Provides
     @Singleton
     @Named("SVGFileType")
     protected FileType provideSVGFile(Resources resources) {
-        return new FileType("SVG Image", resources.defaultImage(), MimeType.IMAGE_SVG_XML, "svg");
+        return new FileType(resources.defaultImage(), "svg");
     }
 
     @Provides
     @Singleton
     @Named("JPEFileType")
     protected FileType provideJPEFile(Resources resources) {
-        return new FileType("JPEG Image", resources.defaultImage(), MimeType.IMAGE_JPEG, "jpe");
+        return new FileType(resources.defaultImage(), "jpe");
     }
 
     @Provides
     @Singleton
     @Named("JPEGFileType")
     protected FileType provideJPEGFile(Resources resources) {
-        return new FileType("JPEG Image", resources.defaultImage(), MimeType.IMAGE_JPEG, "jpeg");
+        return new FileType(resources.defaultImage(), "jpeg");
     }
 
     @Provides
     @Singleton
     @Named("JPGFileType")
     protected FileType provideJPGFile(Resources resources) {
-        return new FileType("JPEG Image", resources.defaultImage(), MimeType.IMAGE_JPEG, "jpg");
+        return new FileType(resources.defaultImage(), "jpg");
     }
 }

@@ -16,7 +16,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
@@ -46,20 +45,20 @@ public class CppGinModule extends AbstractGinModule {
     @Singleton
     @Named("CFileType")
     protected FileType provideCFile() {
-        return new FileType("C", CppResources.INSTANCE.cFile(), MimeType.TEXT_C, C_EXT);
+        return new FileType(CppResources.INSTANCE.cFile(), C_EXT);
     }
 
     @Provides
     @Singleton
     @Named("CppFileType")
     protected FileType provideCppFile() {
-        return new FileType("C++", CppResources.INSTANCE.cppFile(), MimeType.TEXT_CPP, CPP_EXT);
+        return new FileType(CppResources.INSTANCE.cppFile(), CPP_EXT);
     }
 
     @Provides
     @Singleton
     @Named("HFileType")
     protected FileType provideHeaderFile() {
-        return new FileType("C Header", CppResources.INSTANCE.cHeaderFile(), MimeType.TEXT_H, H_EXT);
+        return new FileType(CppResources.INSTANCE.cHeaderFile(), H_EXT);
     }
 }

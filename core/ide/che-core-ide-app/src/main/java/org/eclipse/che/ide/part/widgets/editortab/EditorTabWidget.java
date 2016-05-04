@@ -141,7 +141,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         if (part instanceof EditorPartPresenter) {
             VirtualFile changedFile = ((EditorPartPresenter)part).getEditorInput().getFile();
             FileType fileType = fileTypeRegistry.getFileTypeByFile(changedFile);
-            icon = fileType.getSVGImage();
+            icon = fileType.getImage();
             iconPanel.setWidget(getIcon());
         }
     }

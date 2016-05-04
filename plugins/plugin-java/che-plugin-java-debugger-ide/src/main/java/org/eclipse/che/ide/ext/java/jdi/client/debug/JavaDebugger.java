@@ -89,14 +89,11 @@ public class JavaDebugger extends AbstractDebugger {
 
     @Override
     protected String pathToFqn(VirtualFile file) {
-        List<String> mimeTypes = fileTypeRegistry.getFileTypeByFile(file).getMimeTypes();
+        String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
 
-        if (!mimeTypes.isEmpty()) {
-            String mediaType = mimeTypes.get(0);
-            FqnResolver resolver = fqnResolverFactory.getResolver(mediaType);
-            if (resolver != null) {
-                return resolver.resolveFqn(file);
-            }
+        FqnResolver resolver = fqnResolverFactory.getResolver(fileExtension);
+        if (resolver != null) {
+            return resolver.resolveFqn(file);
         }
 
         return null;

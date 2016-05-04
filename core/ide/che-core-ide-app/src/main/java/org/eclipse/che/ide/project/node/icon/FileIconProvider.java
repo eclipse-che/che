@@ -44,7 +44,7 @@ public class FileIconProvider implements NodeIconProvider {
         FileType fileType = fileTypeRegistry.getFileTypeByNamePattern(fileName);
 
         if (fileType != unknownFileType) {
-            return fileType.getSVGImage();
+            return fileType.getImage();
         }
 
         final String extension = getFileExtension(fileName);
@@ -56,7 +56,7 @@ public class FileIconProvider implements NodeIconProvider {
         fileType = fileTypeRegistry.getFileTypeByExtension(extension);
 
         if (fileType != unknownFileType) {
-            return fileType.getSVGImage();
+            return fileType.getImage();
         }
 
         return null;

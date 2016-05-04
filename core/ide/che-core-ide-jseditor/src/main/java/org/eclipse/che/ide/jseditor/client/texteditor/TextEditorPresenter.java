@@ -444,7 +444,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
 
     @Override
     public ImageResource getTitleImage() {
-        return input.getImageResource();
+        return null;
     }
 
     @Override

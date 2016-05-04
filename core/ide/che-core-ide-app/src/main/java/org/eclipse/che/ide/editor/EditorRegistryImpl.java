@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.extension.SDK;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import java.util.Map;
 @SDK(title = "ide.api.editorRegistry")
 public class EditorRegistryImpl implements EditorRegistry {
 
-    private Map<String, List<EditorProvider>> registry;
+    private Map<FileType, List<EditorProvider>> registry;
     private EditorProvider                    defaultProvider;
 
     @Inject
@@ -48,10 +49,10 @@ public class EditorRegistryImpl implements EditorRegistry {
     /** {@inheritDoc} */
     @Override
     public void register(@NotNull FileType fileType, @NotNull EditorProvider provider) {
-        if (!registry.containsKey(fileType.getId())) {
-            registry.put(fileType.getId(), new ArrayList<EditorProvider>());
+        if (!registry.containsKey(fileType)) {
+            registry.put(fileType, new ArrayList<EditorProvider>());
         }
-        registry.get(fileType.getId()).add(provider);
+        registry.get(fileType).add(provider);
     }
 
     @Override
@@ -63,9 +64,8 @@ public class EditorRegistryImpl implements EditorRegistry {
     /** {@inheritDoc} */
     @Override
     public EditorProvider getEditor(@NotNull FileType fileType) {
-        //todo add logic to receive default editor form user preferences
-        if (registry.containsKey(fileType.getId()) && !registry.get(fileType.getId()).isEmpty()) {
-            return registry.get(fileType.getId()).get(0);
+        if (registry.containsKey(fileType) && !registry.get(fileType).isEmpty()) {
+            return registry.get(fileType).get(0);
         }
         return defaultProvider;
     }
@@ -73,8 +73,8 @@ public class EditorRegistryImpl implements EditorRegistry {
     @Override
     public List<EditorProvider> getAllEditorsForFileType(@NotNull FileType fileType) {
         List<EditorProvider> result = new ArrayList<>();
-        if (registry.containsKey(fileType.getId())) {
-            result.addAll(registry.get(fileType.getId()));
+        if (registry.containsKey(fileType)) {
+            result.addAll(registry.get(fileType));
         }
         return result;
     }

@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.debug.BreakpointManager;
 import org.eclipse.che.ide.debug.BreakpointRenderer;
-import org.eclipse.che.ide.jseditor.client.JsEditorConstants;
 import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistant;
 import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistantFactory;
 import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistantImpl;
@@ -50,9 +49,6 @@ import javax.inject.Singleton;
 
 @ExtensionGinModule
 public class JsEditorGinModule extends AbstractGinModule {
-
-    /** The default text file type: text/plain. */
-    private static final String CONTENT_TYPE_TEXT_PLAIN = "text/plain";
 
     @Override
     protected void configure() {
@@ -103,10 +99,7 @@ public class JsEditorGinModule extends AbstractGinModule {
     @Provides
     @Singleton
     @PlainTextFileType
-    protected FileType textPlainFileType(final JsEditorConstants constants) {
-        return new FileType(constants.defaultEditorDescription(),
-                            (SVGResource)null,
-                            CONTENT_TYPE_TEXT_PLAIN,
-                            (String)null);
+    protected FileType textPlainFileType() {
+        return new FileType((SVGResource)null, null);
     }
 }

@@ -19,9 +19,6 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface JsEditorConstants extends Messages {
 
-    @DefaultMessage("Default Editor")
-    String defaultEditorDescription();
-
     @DefaultMessage("Close")
     String askWindowCloseTitle();
 

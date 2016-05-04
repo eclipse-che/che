@@ -15,12 +15,9 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.ext.web.WebExtensionResource;
-
-import java.util.Arrays;
 
 /**
  * Adds custom binding for Editors.
@@ -38,55 +35,55 @@ public class WebModule extends AbstractGinModule {
     @Singleton
     @Named("CSSFileType")
     protected FileType provideCSSFile(WebExtensionResource res) {
-        return new FileType("CSS file", res.cssFile(), MimeType.TEXT_CSS, "css");
+        return new FileType(res.cssFile(), "css");
     }
 
     @Provides
     @Singleton
     @Named("LESSFileType")
     protected FileType provideLESSFile(WebExtensionResource res) {
-        return new FileType("Leaner CSS file", res.lessFile(), MimeType.TEXT_CSS, "less");
+        return new FileType(res.lessFile(), "less");
     }
 
     @Provides
     @Singleton
     @Named("JSFileType")
     protected FileType provideJSFile(WebExtensionResource res) {
-        return new FileType("javaScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "js");
+        return new FileType(res.jsFile(), "js");
     }
     
     @Provides
     @Singleton
     @Named("ES6FileType")
     protected FileType provideES6File(WebExtensionResource res) {
-        return new FileType("ECMAScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "es6");
+        return new FileType(res.jsFile(), "es6");
     }
     
     @Provides
     @Singleton
     @Named("JSXFileType")
     protected FileType provideJSXFile(WebExtensionResource res) {
-        return new FileType("JSX JavaScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "jsx");
+        return new FileType(res.jsFile(), "jsx");
     }
     
     @Provides
     @Singleton
     @Named("TypeScript")
     protected FileType provideTypeScriptFile(WebExtensionResource res) {
-        return new FileType("TypeScript", res.jsFile(), MimeType.TEXT_JAVASCRIPT, "ts");
+        return new FileType(res.jsFile(), "ts");
     }
 
     @Provides
     @Singleton
     @Named("HTMLFileType")
     protected FileType provideHTMLFile(WebExtensionResource res) {
-        return new FileType("HTML file", res.htmlFile(), MimeType.TEXT_HTML, "html");
+        return new FileType(res.htmlFile(), "html");
     }
 
     @Provides
     @Singleton
     @Named("PHPFileType")
     protected FileType providePHPFile(WebExtensionResource res) {
-        return new FileType("PHP file", res.phpFile(), Arrays.asList(MimeType.APPLICATION_X_PHP, "text/x-php"), "php");
+        return new FileType(res.phpFile(), "php");
     }
 }

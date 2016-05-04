@@ -152,7 +152,7 @@ public class EditorTabWidgetTest {
 
         when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
         when(fileTypeRegistry.getFileTypeByFile(file)).thenReturn(fileType);
-        when(fileType.getSVGImage()).thenReturn(icon);
+        when(fileType.getImage()).thenReturn(icon);
         when(editorInput.getFile()).thenReturn(file);
 
         tab.update(editorPartPresenter);

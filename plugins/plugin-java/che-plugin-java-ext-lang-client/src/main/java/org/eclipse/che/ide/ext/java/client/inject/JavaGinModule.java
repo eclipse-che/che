@@ -18,7 +18,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
@@ -115,21 +114,21 @@ public class JavaGinModule extends AbstractGinModule {
     @Singleton
     @Named("JavaFileType")
     protected FileType provideJavaFile() {
-        return new FileType("Java", JavaResources.INSTANCE.javaFile(), MimeType.TEXT_X_JAVA, "java");
+        return new FileType(JavaResources.INSTANCE.javaFile(), "java");
     }
 
     @Provides
     @Singleton
     @Named("JavaClassFileType")
     protected FileType provideJavaClassFile() {
-        return new FileType("Java Class", JavaResources.INSTANCE.javaFile(), MimeType.APPLICATION_JAVA_CLASS, "class");
+        return new FileType(JavaResources.INSTANCE.javaFile(), "class");
     }
 
     @Provides
     @Singleton
     @Named("JspFileType")
     protected FileType provideJspFile() {
-        return new FileType("Jsp", JavaResources.INSTANCE.jspFile(), MimeType.APPLICATION_JSP, "jsp");
+        return new FileType(JavaResources.INSTANCE.jspFile(), "jsp");
     }
 
 
@@ -137,6 +136,6 @@ public class JavaGinModule extends AbstractGinModule {
     @Singleton
     @Named("JsfFileType")
     protected FileType provideJsfFile() {
-        return new FileType("Jsf", JavaResources.INSTANCE.jsfFile(), MimeType.TEXT_X_JAVA, "jsf");
+        return new FileType(JavaResources.INSTANCE.jsfFile(), "jsf");
     }
 }

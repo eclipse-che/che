@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -18,8 +17,6 @@ import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import java.util.List;
 
 /**
  * Base action for Java editor related action.
@@ -50,14 +47,8 @@ public abstract class JavaEditorAction extends ProjectAction {
         if (editorAgent.getActiveEditor() != null) {
             EditorInput input = editorAgent.getActiveEditor().getEditorInput();
             VirtualFile file = input.getFile();
-            final List<String> mimeTypes = fileTypeRegistry.getFileTypeByFile(file).getMimeTypes();
-            if (mimeTypes == null || mimeTypes.isEmpty()) {
-                return;
-            }
-            String mediaType = mimeTypes.get(0);
-            if (mediaType != null && (mediaType.equals(MimeType.TEXT_X_JAVA) ||
-                                      mediaType.equals(MimeType.TEXT_X_JAVA_SOURCE) ||
-                                      mediaType.equals(MimeType.APPLICATION_JAVA_CLASS))) {
+            final String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
+            if (fileExtension.equals("java") || fileExtension.equals("class")) {
                 e.getPresentation().setEnabledAndVisible(true);
                 return;
             }

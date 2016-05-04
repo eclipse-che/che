@@ -15,14 +15,10 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.debug.DebuggerManager;
-import org.eclipse.che.ide.ext.java.jdi.client.debug.JavaDebugger;
 import org.eclipse.che.ide.ext.debugger.client.fqn.FqnResolverFactory;
-import org.eclipse.che.ide.ext.java.jdi.client.fqn.JavaFqnResolver;
+import org.eclipse.che.ide.ext.java.jdi.client.debug.JavaDebugger;
 import org.eclipse.che.ide.ext.java.jdi.client.fqn.JavaClassFqnResolver;
-
-import static org.eclipse.che.ide.MimeType.APPLICATION_JAVA_CLASS;
-import static org.eclipse.che.ide.MimeType.TEXT_X_JAVA;
-import static org.eclipse.che.ide.MimeType.TEXT_X_JAVA_SOURCE;
+import org.eclipse.che.ide.ext.java.jdi.client.fqn.JavaFqnResolver;
 
 /**
  * Extension allows debug Java web applications.
@@ -44,9 +40,7 @@ public class JavaRuntimeExtension {
                                 JavaFqnResolver javaFqnResolver,
                                 JavaClassFqnResolver javaClassFqnResolver) {
         debuggerManager.registeredDebugger(JavaDebugger.ID, javaDebugger);
-        resolverFactory.addResolver(TEXT_X_JAVA, javaFqnResolver);
-        resolverFactory.addResolver("application/java", javaFqnResolver);
-        resolverFactory.addResolver(APPLICATION_JAVA_CLASS, javaClassFqnResolver);
-        resolverFactory.addResolver(TEXT_X_JAVA_SOURCE, javaFqnResolver);
+        resolverFactory.addResolver("java", javaFqnResolver);
+        resolverFactory.addResolver("class", javaClassFqnResolver);
     }
 }

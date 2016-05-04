@@ -186,7 +186,7 @@ public class DebuggerTest extends BaseTest {
         debugger.addObserver(observer);
 
         FileType fileType = mock(FileType.class);
-        doReturn(Collections.singletonList("application/java")).when(fileType).getMimeTypes();
+        doReturn("java").when(fileType).getExtension();
         doReturn(fileType).when(fileTypeRegistry).getFileTypeByFile(eq(file));
     }
 
