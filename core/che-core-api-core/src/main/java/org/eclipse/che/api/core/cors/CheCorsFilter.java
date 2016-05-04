@@ -113,6 +113,7 @@ public class CheCorsFilter implements Filter {
                                                          "X-Requested-With," +
                                                          "accept," +
                                                          "Origin," +
+                                                         "Authorization," +
                                                          "Access-Control-Request-Method," +
                                                          "Access-Control-Request-Headers");
             filterParams.put(PARAM_CORS_EXPOSED_HEADERS, "JAXRS-Body-Provided");
