@@ -38,9 +38,6 @@ new Che packages and assemblies with your plug-ins.
   /plugins/ide        -> IDE extension, compiled with GWT & packaged into new ws-master Web
                          application.
 
-  /plugins/ws-master  -> Server-side extension & packaged into new ws-master Web application with 
-                         the IDE.
-
   /plugins/ws-agent   -> Server-side extension that runs in workspace machine & packaged into new 
                          ws-agent Web application.
 

@@ -25,7 +25,6 @@
     <modules>
         <module>che-core-api-account</module>
         <module>che-core-api-auth</module>
-        <module>che-core-api-infrastructure-local</module>
     </modules>
     <properties>
         <specification.version>1.0-beta2</specification.version>

@@ -35,5 +35,6 @@
         <module>che-core-api-factory</module>
         <module>che-core-api-ssh</module>
         <module>che-core-api-ssh-shared</module>
+        <module>wsmaster-local</module>
     </modules>
 </project>
