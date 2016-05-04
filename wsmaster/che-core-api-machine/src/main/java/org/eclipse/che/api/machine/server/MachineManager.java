@@ -1011,7 +1011,7 @@ public class MachineManager {
         executor.shutdown();
 
         try {
-            for (MachineImpl machine : machineRegistry.getMachines()) {
+            machineRegistry.getMachines().parallelStream().forEach(machine -> {
                 try {
                     destroy(machine.getId(), false);
                 } catch (NotFoundException ignore) {
@@ -1019,7 +1019,7 @@ public class MachineManager {
                 } catch (Exception e) {
                     LOG.warn(e.getMessage());
                 }
-            }
+            });
         } catch (MachineException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
