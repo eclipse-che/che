@@ -334,17 +334,11 @@ export class CheWorkspace {
    */
   getWebsocketUrl(workspaceId) {
     let workspace = this.workspacesById.get(workspaceId);
-    if (!workspace || !workspace.runtime || !workspace.runtime.links) {
+    if (!workspace || !workspace.runtime || !workspace.runtime.devMachine) {
       return '';
     }
-
-    for (let i = 0; i < workspace.runtime.links.length; i++) {
-      let link = workspace.runtime.links[i];
-      if (link.rel === 'wsagent.websocket') {
-        return link.href;
-      }
-    }
-    return '';
+    let websocketLink = this.lodash.find(workspace.runtime.devMachine.links, l => l.rel === "wsagent.websocket");
+    return websocketLink ? websocketLink.href : '';
   }
 
   getIdeUrl(workspaceName) {
