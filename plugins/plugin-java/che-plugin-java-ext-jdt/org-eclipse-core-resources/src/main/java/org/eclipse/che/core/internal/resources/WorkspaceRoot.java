@@ -20,8 +20,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -35,8 +33,6 @@ import java.util.concurrent.ConcurrentMap;
  * @author Valeriy Svydenko
  */
 public class WorkspaceRoot extends Container implements IWorkspaceRoot {
-    public static final  String                         PROJECT_INNER_SETTING_DIR = ".codenvy";
-    private static final Logger                         LOG                       = LoggerFactory.getLogger(WorkspaceRoot.class);
     /**
      * As an optimization, we store a table of project handles
      * that have been requested from this root.  This maps project

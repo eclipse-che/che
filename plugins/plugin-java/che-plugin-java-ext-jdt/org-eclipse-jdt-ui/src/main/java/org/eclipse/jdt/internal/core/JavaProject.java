@@ -11,15 +11,15 @@
 
 package org.eclipse.jdt.internal.core;
 
-import org.eclipse.che.core.internal.resources.WorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.che.api.project.server.Constants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -76,7 +76,6 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.nio.file.DirectoryStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,7 +97,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
     /**
      * Name of file containing project classpath
      */
-    public static final String INNER_DIR = WorkspaceRoot.PROJECT_INNER_SETTING_DIR;
+    public static final String INNER_DIR = Constants.CODENVY_DIR;
     public static final String CLASSPATH_FILENAME = INNER_DIR + "/classpath";
 
     /**
@@ -115,99 +114,25 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
      */
     public static final    IClasspathEntry[]                          INVALID_CLASSPATH = new IClasspathEntry[0];
     private static final   Logger                                     LOG               = LoggerFactory.getLogger(JavaProject.class);
-    private final          DirectoryStream.Filter<java.nio.file.Path> jarFilter         = new DirectoryStream.Filter<java.nio.file.Path>() {
-        @Override
-        public boolean accept(java.nio.file.Path entry) throws IOException {
-            return entry.getFileName().toString().endsWith("jar");
-        }
-    };
-    private          String                workspacePath;
-    private volatile SearchableEnvironment nameEnvironment;
-    private          String                projectPath;
-    private          String                tempDir;
-    private          String                wsId;
-    private          File                  projectDir;
-    private          IClasspathEntry[]     rawClassPath;
-    private          ResolvedClasspath     resolvedClasspath;
+
     protected        IProject              project;
 
     public JavaProject(IProject project, JavaElement parent) {
         super(parent);
         this.project = project;
-        IFolder folder = project.getFolder(INNER_DIR);
-        if(!folder.exists()){
-            try {
-                folder.create(true, true, null);
-            } catch (CoreException e) {
-                JavaPlugin.log(e);
+
+        //create
+        if(project.exists()) {
+            IFolder folder = project.getFolder(INNER_DIR);
+            if (!folder.exists()) {
+                try {
+                    folder.create(true, true, null);
+                } catch (CoreException e) {
+                    JavaPlugin.log(e);
+                }
             }
         }
     }
-
-//    public JavaProject(File root, String projectPath, String tempDir, String ws, Map<String, String> options, JavaElement parent) {
-//        super(parent);
-//        this.projectPath = projectPath;
-//        this.tempDir = tempDir;
-//        wsId = ws;
-//        workspacePath = root.getPath();
-//        int index = projectPath.lastIndexOf('/');
-//        projectName = index < 0 ? projectPath : projectPath.substring(index + 1);
-//        this.projectDir = new File(root, projectPath);
-//        this.options = options;
-//        List<IClasspathEntry> paths = new LinkedList<>();
-//        try {
-//            if (index <= 0) {
-//                // project in root folder
-//                addSources(projectDir, paths);
-//            } else {
-//                // module of project - add this module and all modules in parent projects
-//                index = projectPath.indexOf('/', 1);
-//                File parent = new File(root, projectPath.substring(1, index));
-//                LinkedList<File> q = new LinkedList<>();
-//                q.add(parent);
-//                while (!q.isEmpty()) {
-//                    File f = q.poll();
-//                    addSources(f, paths);
-//                    File[] l = f.listFiles();
-//                    for (File c : l) {
-//                        if (c.isDirectory()
-//                            && new File(c, Constants.CODENVY_PROJECT_FILE_RELATIVE_PATH).exists()) {
-//
-//                            q.add(c);
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (IOException e) {
-//            LOG.error("Can't find sources folder attribute", e);
-//        }
-//
-//        paths.add(JavaCore.newContainerEntry(new Path("codenvy:Jre")));
-//        File depDir = new File(tempDir, wsId + projectPath);
-//        try {
-//            if (depDir.exists()) {
-//                try (DirectoryStream<java.nio.file.Path> deps =
-//                             Files.newDirectoryStream(depDir.toPath(), jarFilter)) {
-//
-//                    for (java.nio.file.Path dep : deps) {
-//                        String name = dep.getFileName().toString();
-//                        File srcJar =
-//                                new File(dep.getParent().toFile(), "sources/" + name.substring(0, name.lastIndexOf('.')) + "-sources
-// .jar");
-//                        IPath srcPath = null;
-//                        if (srcJar.exists()) {
-//                            srcPath = new Path(srcJar.getAbsolutePath());
-//                        }
-//                        paths.add(JavaCore.newLibraryEntry(new Path(dep.toAbsolutePath().toString()), srcPath, null));
-//                    }
-//                }
-//            }
-//
-//        } catch (IOException e) {
-//            LOG.error("Can't find jar dependency's: ", e);
-//        }
-//        rawClassPath = paths.toArray(new IClasspathEntry[paths.size()]);
-//    }
 
     /**
      * Returns true if the given project is accessible and it has
@@ -241,46 +166,6 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
             return secondOutputLocation == null;
         return firstOutputLocation.equals(secondOutputLocation);
     }
-
-//    private void addSources(File projectDir, List<IClasspathEntry> paths) throws IOException {
-//        File codenvy = new File(projectDir, Constants.CODENVY_PROJECT_FILE_RELATIVE_PATH);
-//        List<File> sources = new LinkedList<>();
-//
-//        final ProjectJson projectJson;
-//        try (FileInputStream in = new FileInputStream(codenvy)) {
-//            projectJson = ProjectJson.load(in);
-//        }
-//
-////        Builders defBuilder = projectJson.getBuilders();
-//
-//        if (defBuilder != null) {
-//            if ("maven".equals(defBuilder.getDefault())) {
-//                File pom = new File(projectDir, "pom.xml");
-//                if (pom.exists()) {
-//                    for (String src : MavenUtils.getSourceDirectories(pom)) {
-//                        sources.add(new File(projectDir, src));
-//                    }
-//                }
-//            } else if ("ant".equals(defBuilder.getDefault())) {
-//                File build = new File(projectDir, "build.xml");
-//                if (build.exists()) {
-//                    for (String src : AntUtils.getSourceDirectories(build)) {
-//                        sources.add(new File(projectDir, src));
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (sources.isEmpty()) {
-//            sources.add(projectDir);
-//        }
-//
-//        for (File source : sources) {
-//            if (source.exists()) {
-//                paths.add(JavaCore.newSourceEntry(new Path(source.getAbsolutePath())));
-//            }
-//        }
-//    }
 
     /**
      * Computes the package fragment roots identified by the given entry.
@@ -1701,10 +1586,6 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
         return project.getFullPath();
     }
 
-    public String getProjectPath(){
-        return projectPath;
-    }
-
     @Override
     public IJavaElement getPrimaryElement() {
         throw new UnsupportedOperationException();
@@ -1923,14 +1804,6 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
      */
     public SearchableEnvironment newSearchableNameEnvironment(WorkingCopyOwner owner) throws JavaModelException {
         return new SearchableEnvironment(this, owner);
-    }
-
-    public String getWsId() {
-        return wsId;
-    }
-
-    public String getWorkspacePath() {
-        return workspacePath;
     }
 
     /**
@@ -2309,14 +2182,6 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
         } catch (ClasspathEntry.AssertionFailedException e) {
             Util.log(e, "Exception while reading " + getPath().append(JavaProject.CLASSPATH_FILENAME)); //$NON-NLS-1$
             return new IClasspathEntry[][] {JavaProject.INVALID_CLASSPATH, ClasspathEntry.NO_ENTRIES};
-        }
-    }
-
-    public synchronized void creteNewNameEnvironment() {
-        try {
-            nameEnvironment = new SearchableEnvironment(this, (ICompilationUnit[])null);
-        } catch (JavaModelException e) {
-            LOG.error("Can't create SearchableEnvironment", e);
         }
     }
 
