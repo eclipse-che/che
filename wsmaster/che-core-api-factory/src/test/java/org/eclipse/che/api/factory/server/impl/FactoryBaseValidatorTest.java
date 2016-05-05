@@ -12,11 +12,8 @@ package org.eclipse.che.api.factory.server.impl;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
-import org.eclipse.che.api.account.server.dao.Member;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryConstants;
@@ -57,7 +54,6 @@ import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @Listeners(value = {MockitoTestNGListener.class})
@@ -66,8 +62,6 @@ public class FactoryBaseValidatorTest {
     private static final String VALID_PROJECT_PATH   = "/cloudide";
     private static final String ID                   = "id";
 
-    @Mock
-    private AccountDao accountDao;
 
     @Mock
     private UserDao userDao;
@@ -79,29 +73,24 @@ public class FactoryBaseValidatorTest {
     private FactoryBuilder builder;
 
     @Mock
-    private HttpServletRequest      request;
+    private HttpServletRequest request;
 
     private TesterFactoryBaseValidator validator;
-
-    private Member member;
 
     private Factory factory;
 
     @BeforeMethod
     public void setUp() throws ParseException, NotFoundException, ServerException {
         factory = newDto(Factory.class)
-                          .withV("4.0")
-                          .withCreator(newDto(Author.class)
-                                               .withAccountId(ID)
-                                               .withUserId("userid"));
+                .withV("4.0")
+                .withCreator(newDto(Author.class)
+                                     .withAccountId(ID)
+                                     .withUserId("userid"));
 
         User user = new User().withId("userid");
 
-        member = new Member().withUserId("userid")
-                             .withRoles(Collections.singletonList("account/owner"));
-        when(accountDao.getMembers(anyString())).thenReturn(Collections.singletonList(member));
         when(userDao.getById("userid")).thenReturn(user);
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
     }
 
     @Test
@@ -137,7 +126,8 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateIfStorageLocationIsCorrectSsh() throws ApiException {
         // given
-        factory = prepareFactoryWithGivenStorage("git", "ssh://codenvy@review.gerrithub.io:29418/codenvy/exampleProject", "example-project");
+        factory =
+                prepareFactoryWithGivenStorage("git", "ssh://codenvy@review.gerrithub.io:29418/codenvy/exampleProject", "example-project");
 
         // when, then
         validator.validateProjects(factory);
@@ -146,7 +136,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateIfStorageLocationIsCorrectHttps() throws ApiException {
         // given
-        factory = prepareFactoryWithGivenStorage("git","https://github.com/codenvy/example.git", "/example");
+        factory = prepareFactoryWithGivenStorage("git", "https://github.com/codenvy/example.git", "/example");
 
         // when, then
         validator.validateProjects(factory);
@@ -155,7 +145,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateSubProjectWithNoLocation() throws ApiException {
         // given
-        factory = prepareFactoryWithGivenStorage("git","null", "/cloudide/core");
+        factory = prepareFactoryWithGivenStorage("git", "null", "/cloudide/core");
 
         // when, then
         validator.validateProjects(factory);
@@ -168,7 +158,7 @@ public class FactoryBaseValidatorTest {
 
     @DataProvider(name = "badAdvancedFactoryUrlProvider")
     public Object[][] invalidParametersFactoryUrlProvider() throws UnsupportedEncodingException {
-        Factory adv1 = prepareFactoryWithGivenStorage("notagit", VALID_REPOSITORY_URL, VALID_PROJECT_PATH );
+        Factory adv1 = prepareFactoryWithGivenStorage("notagit", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         Factory adv2 = prepareFactoryWithGivenStorage("git", null, VALID_PROJECT_PATH);
         Factory adv3 = prepareFactoryWithGivenStorage("git", "", VALID_PROJECT_PATH);
         return new Object[][]{
@@ -245,24 +235,6 @@ public class FactoryBaseValidatorTest {
         validator.validateAccountId(factory);
     }
 
-    @Test(expectedExceptions = ApiException.class)
-    public void shouldNotValidateIfAccountDoesNotExist() throws ApiException {
-        when(accountDao.getMembers(anyString())).thenReturn(Collections.<Member>emptyList());
-
-        validator.validateAccountId(factory);
-    }
-
-    @Test(expectedExceptions = ApiException.class, expectedExceptionsMessageRegExp = "You are not authorized to use this accountId.")
-    public void shouldNotValidateIfFactoryOwnerIsNotOrgidOwner()
-            throws ApiException, ParseException {
-        Member wrongMember = member;
-        wrongMember.setUserId("anotheruserid");
-        when(accountDao.getMembers(anyString())).thenReturn(Arrays.asList(wrongMember));
-
-        // when, then
-        validator.validateAccountId(factory);
-    }
-
     @Test
     public void shouldValidateIfCurrentTimeBeforeSinceUntil() throws Exception {
         Long currentTime = new Date().getTime();
@@ -274,7 +246,7 @@ public class FactoryBaseValidatorTest {
     }
 
     @Test(expectedExceptions = ApiException.class,
-            expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCE_MESSAGE)
+          expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCE_MESSAGE)
     public void shouldNotValidateIfSinceBeforeCurrent() throws ApiException {
         factory.withPolicies(newDto(Policies.class)
                                      .withSince(1L));
@@ -282,7 +254,7 @@ public class FactoryBaseValidatorTest {
     }
 
     @Test(expectedExceptions = ApiException.class,
-            expectedExceptionsMessageRegExp = FactoryConstants.INVALID_UNTIL_MESSAGE)
+          expectedExceptionsMessageRegExp = FactoryConstants.INVALID_UNTIL_MESSAGE)
     public void shouldNotValidateIfUntilBeforeCurrent() throws ApiException {
         factory.withPolicies(newDto(Policies.class)
                                      .withUntil(1L));
@@ -290,7 +262,7 @@ public class FactoryBaseValidatorTest {
     }
 
     @Test(expectedExceptions = ApiException.class,
-            expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCEUNTIL_MESSAGE)
+          expectedExceptionsMessageRegExp = FactoryConstants.INVALID_SINCEUNTIL_MESSAGE)
     public void shouldNotValidateIfUntilBeforeSince() throws ApiException {
         factory.withPolicies(newDto(Policies.class)
                                      .withSince(2L)
@@ -300,7 +272,7 @@ public class FactoryBaseValidatorTest {
     }
 
     @Test(expectedExceptions = ApiException.class,
-            expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_UNTIL_MESSAGE)
+          expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_UNTIL_MESSAGE)
     public void shouldNotValidateIfUntilBeforeCurrentTime() throws ApiException {
         Long currentTime = new Date().getTime();
         factory.withPolicies(newDto(Policies.class)
@@ -321,7 +293,7 @@ public class FactoryBaseValidatorTest {
     }
 
     @Test(expectedExceptions = ApiException.class,
-            expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_SINCE_MESSAGE)
+          expectedExceptionsMessageRegExp = FactoryConstants.ILLEGAL_FACTORY_BY_SINCE_MESSAGE)
     public void shouldNotValidateIfUntilSinceAfterCurrentTime() throws ApiException {
         Long currentTime = new Date().getTime();
         factory.withPolicies(newDto(Policies.class)
@@ -340,7 +312,7 @@ public class FactoryBaseValidatorTest {
                                        .withSince(System.currentTimeMillis() + 1_000_000)
                                        .withUntil(System.currentTimeMillis() + 10_000_000)
                                        .withReferer("codenvy.com"));
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
 
         validator.validateAccountId(factory);
     }
@@ -349,7 +321,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateOpenfileActionIfInWrongSectionOnAppClosed() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         List<Action> actions = Arrays.asList(newDto(Action.class)
                                                      .withId("openFile"));
         Ide ide = newDto(Ide.class)
@@ -363,7 +335,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateFindReplaceActionIfInWrongSectionOnAppLoaded() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         List<Action> actions = Arrays.asList(newDto(Action.class)
                                                      .withId("findReplace"));
         Ide ide = newDto(Ide.class)
@@ -377,7 +349,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfOpenfileActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         List<Action> actions = Arrays.asList(newDto(Action.class)
                                                      .withId("openFile"));
         Ide ide = newDto(Ide.class)
@@ -391,7 +363,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfrunCommandActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         List<Action> actions = Arrays.asList(newDto(Action.class)
                                                      .withId("openFile"));
         Ide ide = newDto(Ide.class)
@@ -405,12 +377,12 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfOpenWelcomePageActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         List<Action> actions = Arrays.asList(newDto(Action.class)
-                                                .withId("openWelcomePage"));
+                                                     .withId("openWelcomePage"));
         Ide ide = newDto(Ide.class)
-                     .withOnAppLoaded((newDto(OnAppLoaded.class)
-                                          .withActions(actions)));
+                .withOnAppLoaded((newDto(OnAppLoaded.class)
+                        .withActions(actions)));
         Factory factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
@@ -419,7 +391,7 @@ public class FactoryBaseValidatorTest {
     @Test(expectedExceptions = BadRequestException.class)
     public void shouldNotValidateIfFindReplaceActionInsufficientParams() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         Map<String, String> params = new HashMap<>();
         params.put("in", "pom.xml");
         // find is missing!
@@ -438,7 +410,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateFindReplaceAction() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         Map<String, String> params = new HashMap<>();
         params.put("in", "pom.xml");
         params.put("find", "123");
@@ -457,7 +429,7 @@ public class FactoryBaseValidatorTest {
     @Test
     public void shouldValidateOpenfileAction() throws Exception {
         //given
-        validator = new TesterFactoryBaseValidator(accountDao, preferenceDao);
+        validator = new TesterFactoryBaseValidator(preferenceDao);
         Map<String, String> params = new HashMap<>();
         params.put("file", "pom.xml");
         List<Action> actions = Arrays.asList(newDto(Action.class)
@@ -477,29 +449,29 @@ public class FactoryBaseValidatorTest {
         return new Object[][]{
                 {
                         newDto(Factory.class)
-                           .withV("4.0")
-                           .withIde(newDto(Ide.class)
-                                       .withOnAppLoaded(newDto(OnAppLoaded.class)
-                                                           .withActions(singletonList(newDto(Action.class)
-                                                                                         .withId("openWelcomePage")
-                                                                                         .withProperties(
-                                                                                                 ImmutableMap
-                                                                                                         .<String,
-                                                                                                                 String>builder()
-                                                                                                         .put("authenticatedTitle",
-                                                                                                              "title")
-                                                                                                         .put("authenticatedIconUrl",
-                                                                                                              "url")
-                                                                                                         .put("authenticatedContentUrl",
-                                                                                                              "url")
-                                                                                                         .put("nonAuthenticatedTitle",
-                                                                                                              "title")
-                                                                                                         .put("nonAuthenticatedIconUrl",
-                                                                                                              "url")
-                                                                                                         .put("nonAuthenticatedContentUrl",
-                                                                                                              "url")
-                                                                                                         .build()))
-                                                                       )))},
+                                .withV("4.0")
+                                .withIde(newDto(Ide.class)
+                                                 .withOnAppLoaded(newDto(OnAppLoaded.class)
+                                                                          .withActions(singletonList(newDto(Action.class)
+                                                                                                             .withId("openWelcomePage")
+                                                                                                             .withProperties(
+                                                                                                                     ImmutableMap
+                                                                                                                             .<String,
+                                                                                                                                     String>builder()
+                                                                                                                             .put("authenticatedTitle",
+                                                                                                                                  "title")
+                                                                                                                             .put("authenticatedIconUrl",
+                                                                                                                                  "url")
+                                                                                                                             .put("authenticatedContentUrl",
+                                                                                                                                  "url")
+                                                                                                                             .put("nonAuthenticatedTitle",
+                                                                                                                                  "title")
+                                                                                                                             .put("nonAuthenticatedIconUrl",
+                                                                                                                                  "url")
+                                                                                                                             .put("nonAuthenticatedContentUrl",
+                                                                                                                                  "url")
+                                                                                                                             .build()))
+                                                                                      )))},
 
                 {newDto(Factory.class)
                          .withV("4.0")

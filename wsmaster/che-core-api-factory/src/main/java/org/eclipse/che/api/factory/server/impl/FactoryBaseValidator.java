@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.impl;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
-import org.eclipse.che.api.account.server.dao.Member;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -47,12 +45,9 @@ import static java.lang.System.currentTimeMillis;
 public abstract class FactoryBaseValidator {
     private static final Pattern PROJECT_NAME_VALIDATOR = Pattern.compile("^[\\\\\\w\\\\\\d]+[\\\\\\w\\\\\\d_.-]*$");
 
-    private final AccountDao    accountDao;
     private final PreferenceDao preferenceDao;
 
-    public FactoryBaseValidator(AccountDao accountDao,
-                                PreferenceDao preferenceDao) {
-        this.accountDao = accountDao;
+    public FactoryBaseValidator(PreferenceDao preferenceDao) {
         this.preferenceDao = preferenceDao;
     }
 
@@ -119,16 +114,6 @@ public abstract class FactoryBaseValidator {
             throw new ForbiddenException("Current user is not allowed to use this method.");
         }
 
-        final List<Member> members = accountDao.getMembers(accountId);
-        if (members.isEmpty()) {
-            throw new ForbiddenException(format(FactoryConstants.PARAMETRIZED_ILLEGAL_ACCOUNTID_PARAMETER_MESSAGE, accountId));
-        }
-
-        if (members.stream().noneMatch(member -> member.getUserId()
-                                                       .equals(userId) && member.getRoles()
-                                                                                .contains("account/owner"))) {
-            throw new ForbiddenException("You are not authorized to use this accountId.");
-        }
     }
 
     /**

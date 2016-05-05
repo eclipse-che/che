@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.impl;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
@@ -26,9 +24,8 @@ import javax.inject.Singleton;
 @Singleton
 public class FactoryAcceptValidatorImpl extends FactoryBaseValidator implements FactoryAcceptValidator {
     @Inject
-    public FactoryAcceptValidatorImpl(AccountDao accountDao,
-                                      PreferenceDao preferenceDao) {
-        super(accountDao, preferenceDao);
+    public FactoryAcceptValidatorImpl(PreferenceDao preferenceDao) {
+        super(preferenceDao);
     }
 
     @Override
