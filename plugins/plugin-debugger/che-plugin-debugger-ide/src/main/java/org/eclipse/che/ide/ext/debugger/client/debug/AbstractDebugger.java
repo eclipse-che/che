@@ -217,8 +217,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
             final Location fLocation = location;
             if (location != null) {
                 currentLocation = location;
-                activeFileHandler.openFile(fqnToPath(location),
-                                           location.getClassName(),
+                activeFileHandler.openFile(location.getClassName(),
                                            location.getLineNumber(),
                                            new AsyncCallback<VirtualFile>() {
                                                @Override

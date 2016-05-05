@@ -92,6 +92,7 @@ import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_CONTE
 import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_PROJECT;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent.EventType.UPDATED;
 
 /**
  * Project API.
@@ -221,7 +222,10 @@ public class ProjectService extends Service {
             projectConfigDto.setPath(path);
         }
 
-        return asDto(projectManager.updateProject(projectConfigDto));
+        RegisteredProject registeredProject = projectManager.updateProject(projectConfigDto);
+        eventService.publish(new ProjectItemModifiedEvent(UPDATED, workspace, path, path, true));
+
+        return asDto(registeredProject);
     }
 
     @DELETE

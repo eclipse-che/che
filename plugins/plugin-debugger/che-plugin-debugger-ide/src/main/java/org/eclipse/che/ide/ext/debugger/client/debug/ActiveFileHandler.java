@@ -14,8 +14,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 
-import java.util.List;
-
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
  *
@@ -23,7 +21,15 @@ import java.util.List;
  */
 public interface ActiveFileHandler {
 
-    void openFile(final List<String> filePaths,
-                  final String className,
-                  final int lineNumber,
-                  final AsyncCallback<VirtualFile> callback);}
+    /**
+     * Open file, scroll to the debug line and do some actions from {@code callback}
+     *
+     * @param filePath
+     *         path to the source file
+     * @param lineNumber
+     *         number of the current debug line
+     * @param callback
+     *         some action which should be performed after opening file
+     */
+    void openFile(String filePath, int lineNumber, AsyncCallback<VirtualFile> callback);
+}

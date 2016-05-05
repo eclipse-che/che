@@ -25,16 +25,13 @@ import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.ext.debugger.client.debug.ActiveFileHandler;
-import org.eclipse.che.ide.ext.debugger.client.debug.DebuggerPresenter;
 import org.eclipse.che.ide.jseditor.client.document.Document;
 import org.eclipse.che.ide.jseditor.client.text.TextPosition;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 
@@ -59,21 +56,18 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
     }
 
     @Override
-    public void openFile(final List<String> filePaths,
-                         final String className,
-                         final int lineNumber,
-                         final AsyncCallback<VirtualFile> callback) {
+    public void openFile(final String filePath, final int lineNumber, final AsyncCallback<VirtualFile> callback) {
         VirtualFile activeFile = null;
         final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor != null) {
             activeFile = activeEditor.getEditorInput().getFile();
         }
 
-        if (activeFile == null || !filePaths.contains(activeFile.getPath())) {
-            openFile(className, filePaths, 0, new AsyncCallback<VirtualFile>() {
+        if (activeFile == null || !filePath.equals(activeFile.getPath())) {
+            openFile(filePath, new AsyncCallback<VirtualFile>() {
                 @Override
                 public void onSuccess(VirtualFile result) {
-                    scrollEditorToExecutionPoint((EmbeddedTextEditorPresenter)editorAgent.getActiveEditor(), lineNumber);
+                    scrollEditorToExecutionPoint((TextEditor)editorAgent.getActiveEditor(), lineNumber);
                     callback.onSuccess(result);
                 }
 
@@ -83,26 +77,15 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
                 }
             });
         } else {
-            scrollEditorToExecutionPoint((EmbeddedTextEditorPresenter)activeEditor, lineNumber);
+            scrollEditorToExecutionPoint((TextEditor)activeEditor, lineNumber);
             callback.onSuccess(activeFile);
         }
     }
 
     /**
      * Tries to open file from the project.
-     * If fails then method will try to find resource from external dependencies.
      */
-    private void openFile(@NotNull final String className,
-                          final List<String> filePaths,
-                          final int pathNumber,
-                          final AsyncCallback<VirtualFile> callback) {
-        if (pathNumber == filePaths.size()) {
-            Log.error(DebuggerPresenter.class, "Can't open resource " + className);
-            return;
-        }
-
-        String filePath = filePaths.get(pathNumber);
-
+    private void openFile(@NotNull final String filePath, final AsyncCallback<VirtualFile> callback) {
         projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(filePath)).then(new Operation<Node>() {
             @Override
             public void apply(final Node node) throws OperationException {
@@ -116,8 +99,7 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                // try another path
-                openFile(className, filePaths, pathNumber + 1, callback);
+                callback.onFailure(error.getCause());
             }
         });
     }
@@ -151,7 +133,7 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
         });
     }
 
-    private void scrollEditorToExecutionPoint(EmbeddedTextEditorPresenter editor, int lineNumber) {
+    private void scrollEditorToExecutionPoint(TextEditor editor, int lineNumber) {
         Document document = editor.getDocument();
 
         if (document != null) {
