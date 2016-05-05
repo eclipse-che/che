@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file;
 
+import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 

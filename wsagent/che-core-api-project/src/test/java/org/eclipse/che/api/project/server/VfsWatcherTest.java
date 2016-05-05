@@ -13,7 +13,7 @@ package org.eclipse.che.api.project.server;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
 import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.vfs.impl.file.FileWatcherEventType;
+import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

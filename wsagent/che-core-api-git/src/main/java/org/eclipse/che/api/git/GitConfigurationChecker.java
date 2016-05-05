@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.git;
 
-import org.eclipse.che.api.project.server.Constants;
+import org.eclipse.che.api.project.shared.Constants;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

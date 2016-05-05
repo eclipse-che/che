@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file;
+package org.eclipse.che.api.project.shared.dto.event;
 
 /**
  * @author andrew00x

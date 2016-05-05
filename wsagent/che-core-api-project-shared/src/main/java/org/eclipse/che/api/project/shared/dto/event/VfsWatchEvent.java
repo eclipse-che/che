@@ -11,7 +11,6 @@
 package org.eclipse.che.api.project.shared.dto.event;
 
 import org.eclipse.che.api.core.notification.EventOrigin;
-import org.eclipse.che.api.vfs.impl.file.FileWatcherEventType;
 import org.eclipse.che.dto.shared.DTO;
 
 /**

@@ -20,6 +20,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.shared.*;
+import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 
 import javax.inject.Inject;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_PROJECT_TYPES;
 
 /**
  * ProjectTypeService
@@ -55,7 +58,7 @@ public class ProjectTypeService extends Service {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @GenerateLink(rel = Constants.LINK_REL_PROJECT_TYPES)
+    @GenerateLink(rel = LINK_REL_PROJECT_TYPES)
     @ApiOperation(value = "Get project types",
             responseContainer = "List",
             response = ProjectTypeDto.class)
