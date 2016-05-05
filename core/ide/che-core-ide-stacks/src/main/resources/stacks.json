@@ -1,346 +1,5 @@
 [
   {
-    "id": "rails-default",
-    "creator": "ide",
-    "name": "Rails",
-    "description": "Default Rails Stack with Ruby 2.3.0, Rails 4.2.6, Bundler 1.11.2.",
-    "scope": "general",
-    "tags": [
-      "Ruby",
-      "Rails",
-      "Bundler",
-      "Ubuntu",
-      "Git"
-    ],
-    "components": [
-      {
-        "name": "Ruby",
-        "version": "2.3.0"
-      },
-      {
-        "name": "Rails",
-        "version": "4.2.6"
-      },
-      {
-        "name": "Bundler",
-        "version": "1.11.2"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/ubuntu_rails"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null},
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-ruby.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "android-default",
-    "creator": "ide",
-    "name": "Android",
-    "description": "Default Android Stack with Java 1.8, Maven 3.2.3, Android (21 api level).",
-    "scope": "general",
-    "tags": [
-      "Android",
-      "Ubuntu",
-      "Git"
-    ],
-    "components": [
-      {
-        "name": "Android",
-        "version": "21"
-      },
-      {
-        "name": "Java",
-        "version": "1.8"
-      },
-      {
-        "name": "Maven",
-        "version": "3.2.3"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/ubuntu_android"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null},
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-android.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "python-default",
-    "creator": "ide",
-    "name": "Python",
-    "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
-    "scope": "general",
-    "tags": [
-      "Python 3.5",
-      "pip",
-      "Ubuntu",
-      "Git"
-    ],
-    "components": [
-      {
-        "name": "Python",
-        "version": "3.5.1"
-      },
-      {
-        "name": "pip",
-        "version": "8.1.1"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/ubuntu_python:latest"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null},
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-python.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  { 
-    "id": "cpp-default",
-    "creator": "ide",
-    "name": "C++",
-    "description": "Default C++ Stack with C++, gcc 4.8.4, GNU Make 3.81.",
-    "scope": "general",
-    "tags": [
-      "C++",
-      "gcc",
-      "make",
-      "Ubuntu",
-      "Git"
-    ],
-    "components": [
-      {
-        "name": "CPP",
-        "version": "4.8.4"
-      },
-      {
-        "name": "gcc",
-        "version": "4.8.4"
-      },
-      {
-        "name": "Make",
-        "version": "3.81"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/cpp_gcc"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null},
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-cpp.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "blank-default",
-    "creator": "ide",
-    "name": "Blank",
-    "description": "Default Blank Stack.",
-    "scope": "general",
-    "tags": [
-      "Blank",
-      "Ubuntu",
-      "Git",
-      "Subversion"
-    ],
-    "components": [
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/ubuntu_jdk8"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null
-    },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-blank.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
     "id": "java-default",
     "creator": "ide",
     "name": "Java",
@@ -419,6 +78,289 @@
     },
     "stackIcon": {
       "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "blank-default",
+    "creator": "ide",
+    "name": "Blank",
+    "description": "Default Blank Stack.",
+    "scope": "general",
+    "tags": [
+      "Blank",
+      "Ubuntu",
+      "Git",
+      "Subversion"
+    ],
+    "components": [
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-blank.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "android-default",
+    "creator": "ide",
+    "name": "Android",
+    "description": "Default Android Stack with Java 1.8, Maven 3.2.3, Android (21 api level).",
+    "scope": "general",
+    "tags": [
+      "Android",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Android",
+        "version": "21"
+      },
+      {
+        "name": "Java",
+        "version": "1.8"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.3"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_android"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-android.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "aspnet-default",
+    "creator": "ide",
+    "name": "ASP.net",
+    "description": "Default ASP.net Stack with DNX and libuv.",
+    "scope": "general",
+    "tags": [
+      "Debian",
+      "ASP",
+      "Git",
+      "mono",
+      "libc6",
+      "dnx",
+      "libuv"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "7.9"
+      },
+      {
+        "name": "Mono",
+        "version": "4.0.5.1"
+      },
+      {
+        "name": "DNX",
+        "version": "1.0.0-rc1-final"
+      },
+      {
+        "name": "libuv",
+        "version": "1.4.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/aspnet"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-aspnet.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  { 
+    "id": "cpp-default",
+    "creator": "ide",
+    "name": "C++",
+    "description": "Default C++ Stack with C++, gcc 4.8.4, GNU Make 3.81.",
+    "scope": "general",
+    "tags": [
+      "C++",
+      "gcc",
+      "make",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "CPP",
+        "version": "4.8.4"
+      },
+      {
+        "name": "gcc",
+        "version": "4.8.4"
+      },
+      {
+        "name": "Make",
+        "version": "3.81"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/cpp_gcc"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-cpp.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -596,210 +538,30 @@
     }
   },
   {
-    "id": "aspnet-default",
+    "id": "python-default",
     "creator": "ide",
-    "name": "ASP.net",
-    "description": "Default ASP.net Stack with DNX and libuv.",
+    "name": "Python",
+    "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
     "scope": "general",
     "tags": [
-      "Debian",
-      "ASP",
-      "Git",
-      "mono",
-      "libc6",
-      "dnx",
-      "libuv"
-    ],
-    "components": [
-      {
-        "name": "Debian",
-        "version": "7.9"
-      },
-      {
-        "name": "Mono",
-        "version": "4.0.5.1"
-      },
-      {
-        "name": "DNX",
-        "version": "1.0.0-rc1-final"
-      },
-      {
-        "name": "libuv",
-        "version": "1.4.2"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/aspnet"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null
-    },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-aspnet.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "java-debian",
-    "creator": "ide",
-    "name": "Java Debian",
-    "description": "Java JDK Stack on Debian.",
-    "scope": "advanced",
-    "tags": [
-      "Java",
-      "JDK",
-      "Maven",
-      "Tomcat",
-      "Debian",
+      "Python 3.5",
+      "pip",
+      "Ubuntu",
       "Git"
     ],
     "components": [
       {
-        "name": "Debian",
-        "version": "jessie"
+        "name": "Python",
+        "version": "3.5.1"
       },
       {
-        "name": "JDK",
-        "version": "1.8.0_45"
-      },
-      {
-        "name": "Maven",
-        "version": "3.2.2"
-      },
-      {
-        "name": "Tomcat",
-        "version": "8.0.24"
+        "name": "pip",
+        "version": "8.1.1"
       }
     ],
     "source": {
       "type": "image",
-      "origin": "codenvy/debian_jdk8"
-    },
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null,
-      "commands": [
-        {
-          "commandLine": "mvn clean install -f ${current.project.path}",
-          "name": "newMaven",
-          "type": "mvn"
-        }
-      ]
-    },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    },
-    "stackIcon": {
-      "name": "type-java.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "selenium",
-    "creator": "ide",
-    "name": "Selenium",
-    "description": "Stack with Selenium and Chrome on Ubuntu.",
-    "scope": "advanced",
-    "tags": [
-      "Selenium",
-      "Ubuntu",
-      "Chrome",
-      "noVNC",
-      "xserver",
-      "blackbox",
-      "webdriver",
-      "x11vnc"
-    ],
-    "components": [
-      {
-        "name": "noVNC",
-        "version": "---"
-      },
-      {
-        "name": "Selenium webdriver",
-        "version": "---"
-      },
-      {
-        "name": "Google Chrome",
-        "version": "---"
-      },
-      {
-        "name": "Blackbox",
-        "version": "---"
-      },
-      {
-        "name": "Supervisor",
-        "version": "---"
-      }
-    ],
-    "source": {
-      "type": "image",
-      "origin": "codenvy/selenium"
+      "origin": "codenvy/ubuntu_python:latest"
     },
     "workspaceConfig": {
       "environments": [
@@ -837,6 +599,83 @@
         }
       ],
       "users": {}
+    },
+    "stackIcon": {
+      "name": "type-python.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "rails-default",
+    "creator": "ide",
+    "name": "Rails",
+    "description": "Default Rails Stack with Ruby 2.3.0, Rails 4.2.6, Bundler 1.11.2.",
+    "scope": "general",
+    "tags": [
+      "Ruby",
+      "Rails",
+      "Bundler",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Ruby",
+        "version": "2.3.0"
+      },
+      {
+        "name": "Rails",
+        "version": "4.2.6"
+      },
+      {
+        "name": "Bundler",
+        "version": "1.11.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_rails"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-ruby.svg",
+      "mediaType": "image/svg+xml"
     }
   },
   {
@@ -882,63 +721,6 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    }
-  },
-  {
-    "id": "ubuntu",
-    "creator": "ide",
-    "name": "Ubuntu",
-    "description": "Simple stack with Ubuntu (latest).",
-    "scope": "advanced",
-    "tags": [
-      "Ubuntu"
-    ],
-    "components": [
-      {
-        "name": "Ubuntu",
-        "version": "---"
-      }
-    ],
-    "workspaceConfig": {
-      "environments": [
-        {
-          "name": "default",
-          "recipe": null,
-          "machineConfigs": [
-            {
-              "name": "default",
-              "limits": {
-                "ram": 1000
-              },
-              "source": {
-                "location": "stub",
-                "type": "dockerfile"
-              },
-              "type": "docker",
-              "dev": true
-            }
-          ]
-        }
-      ],
-      "name": "default",
-      "defaultEnv": "default",
-      "description": null
-    },
-    "source": {
-      "type": "dockerfile",
-      "origin": "FROM codenvy/ubuntu_jre\nCMD tail -f /dev/null"
     },
     "permissions": {
       "groups": [
@@ -1039,6 +821,91 @@
     }
   },
   {
+    "id": "java-debian",
+    "creator": "ide",
+    "name": "Java Debian",
+    "description": "Java JDK Stack on Debian.",
+    "scope": "advanced",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "Debian",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "jessie"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/debian_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "newMaven",
+          "type": "mvn"
+        }
+      ]
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "python-2.7",
     "creator": "ide",
     "name": "Python 2.7",
@@ -1087,7 +954,8 @@
       ],
       "name": "default",
       "defaultEnv": "default",
-      "description": null},
+      "description": null
+    },
     "permissions": {
       "groups": [
         {
@@ -1103,6 +971,86 @@
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "selenium",
+    "creator": "ide",
+    "name": "Selenium",
+    "description": "Stack with Selenium and Chrome on Ubuntu.",
+    "scope": "advanced",
+    "tags": [
+      "Selenium",
+      "Ubuntu",
+      "Chrome",
+      "noVNC",
+      "xserver",
+      "blackbox",
+      "webdriver",
+      "x11vnc"
+    ],
+    "components": [
+      {
+        "name": "noVNC",
+        "version": "---"
+      },
+      {
+        "name": "Selenium webdriver",
+        "version": "---"
+      },
+      {
+        "name": "Google Chrome",
+        "version": "---"
+      },
+      {
+        "name": "Blackbox",
+        "version": "---"
+      },
+      {
+        "name": "Supervisor",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/selenium"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
     }
   },
   {
@@ -1186,5 +1134,62 @@
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
     }
- }
+ },
+ {
+    "id": "ubuntu",
+    "creator": "ide",
+    "name": "Ubuntu",
+    "description": "Simple stack with Ubuntu (latest).",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu"
+    ],
+    "components": [
+      {
+        "name": "Ubuntu",
+        "version": "---"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "source": {
+      "type": "dockerfile",
+      "origin": "FROM codenvy/ubuntu_jre\nCMD tail -f /dev/null"
+    },
+    "permissions": {
+      "groups": [
+        {
+          "acl": [
+            "read",
+            "search"
+          ],
+          "name": "public"
+        }
+      ],
+      "users": {}
+    }
+  }
 ]
