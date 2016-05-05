@@ -53,7 +53,6 @@ public class DeltaProcessingTest extends BaseTest {
         assertThat(answer).isNotNull();
 
         JavaModelManager.getJavaModelManager().deltaState.resourceChanged(event);
-        project.creteNewNameEnvironment();
 
         answer =
                 project.newSearchableNameEnvironment(DefaultWorkingCopyOwner.PRIMARY).findType(CharOperation.splitOn('.', "org.eclipse.che.test.MyClass".toCharArray()));
@@ -71,7 +70,6 @@ public class DeltaProcessingTest extends BaseTest {
 
         assertThat(answer).isNotNull();
         JavaModelManager.getJavaModelManager().deltaState.resourceChanged(event);
-        project.creteNewNameEnvironment();
         answer =
                 project.newSearchableNameEnvironment(DefaultWorkingCopyOwner.PRIMARY).findType(CharOperation.splitOn('.', "org.eclipse.che.test.MyClass".toCharArray()));
         assertThat(answer).isNull();
@@ -90,10 +88,9 @@ public class DeltaProcessingTest extends BaseTest {
         assertThat(answer).isNull();
 
         FileOutputStream outputStream = new FileOutputStream(new File(workspace, "/test/src/main/java/org/eclipse/che/test/NewClass.java"));
-        outputStream.write("packageorg.eclipse.che.test;\n public class NewClass{}\n".getBytes());
+        outputStream.write("package org.eclipse.che.test;\n public class NewClass{}\n".getBytes());
         outputStream.close();
         JavaModelManager.getJavaModelManager().deltaState.resourceChanged(event);
-        project.creteNewNameEnvironment();
         answer =
                 project.newSearchableNameEnvironment(DefaultWorkingCopyOwner.PRIMARY).findType(CharOperation.splitOn('.', "org.eclipse.che.test.NewClass".toCharArray()));
         assertThat(answer).isNotNull();
