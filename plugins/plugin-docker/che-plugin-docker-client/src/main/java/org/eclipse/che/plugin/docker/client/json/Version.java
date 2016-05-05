@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json;
 
+import java.util.Objects;
+
 /**
  * @author Anton Korneta
  */
 public class Version {
     private String version;
-    private String aPIVersion;
+    private String apiVersion;
     private String goVersion;
     private String gitCommit;
     private String os;
@@ -29,12 +31,12 @@ public class Version {
         this.version = version;
     }
 
-    public String getaPIVersion() {
-        return aPIVersion;
+    public String getApiVersion() {
+        return apiVersion;
     }
 
-    public void setaPIVersion(String aPIVersion) {
-        this.aPIVersion = aPIVersion;
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
     }
 
     public String getGoVersion() {
@@ -73,11 +75,30 @@ public class Version {
     public String toString() {
         return "Version{" +
                "Version='" + version + '\'' +
-               ", APIVersion='" + aPIVersion + '\'' +
+               ", APIVersion='" + apiVersion + '\'' +
                ", GoVersion='" + goVersion + '\'' +
                ", GitCommit='" + gitCommit + '\'' +
                ", Os='" + os + '\'' +
                ", Arch='" + arch + '\'' +
                '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Version version1 = (Version)o;
+        return Objects.equals(version, version1.version) &&
+               Objects.equals(apiVersion, version1.apiVersion) &&
+               Objects.equals(goVersion, version1.goVersion) &&
+               Objects.equals(gitCommit, version1.gitCommit) &&
+               Objects.equals(os, version1.os) &&
+               Objects.equals(arch, version1.arch);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version, apiVersion, goVersion, gitCommit, os, arch);
+    }
+
 }

@@ -14,7 +14,7 @@
   <md-toolbar class="flex-shrink-none">
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarCtrl.email"></md-progress-linear>
     <div ng-show="navbarCtrl.email">
-      <section class="navbar-top-dropdown" layout="column" layout-align="center center">
+      <section class="navbar-top-dropdown" layout="column" layout-align="center left">
         <che-button-dropdown che-button-dropdown-href="#/create-project?resetProgress" che-button-dropdown-label="New Project"
                              che-button-dropdown-controller="navbarCtrl"
                              ng-if="navbarCtrl.isUser()"></che-button-dropdown>
@@ -37,7 +37,7 @@
               <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="fa fa-server fa-lg icon">&nbsp;</i>
-                  <span>Workspaces</span>
+                  <span>Workspaces</span><span ng-show="navbarCtrl.getWorkspacesNumber()">&nbsp;({{navbarCtrl.getWorkspacesNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>

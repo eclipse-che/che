@@ -1,10 +1,15 @@
 <div ng-disabled="cheButtonDropdownCtrl.isDisabled"
-     class="che-button-dropdown md-accent md-raised md-hue-2 md-button md-default-theme" layout="row" layout-align="start center">
-  <span class="che-button-click-area" ng-click="cheButtonDropdownCtrl.redirect(cheButtonDropdownCtrl.href)">{{cheButtonDropdownCtrl.labelText}}</span>
-  <span class="che-button-dropdown-separator"></span>
-  <md-icon class="che-button-dropdown-icon" ng-click="cheButtonDropdownCtrl.toggleDropDown()"
-           ng-blur="cheButtonDropdownCtrl.disableDropDown()" md-font-icon="fa fa-caret-down"></md-icon>
-  </md-button>
+     class="che-button-dropdown md-accent md-raised md-hue-2 md-button md-default-theme" flex layout-align="start center">
+  <div layout="row">
+    <div flex ng-click="cheButtonDropdownCtrl.redirect(cheButtonDropdownCtrl.href)">
+      <span class="che-button-click-area">{{cheButtonDropdownCtrl.labelText}}</span>
+    </div>
+    <div ng-click="cheButtonDropdownCtrl.toggleDropDown()">
+      <span class="che-button-dropdown-separator"></span>
+      <md-icon class="che-button-dropdown-icon" ng-blur="cheButtonDropdownCtrl.disableDropDown()"
+               md-font-icon="fa fa-caret-down"></md-icon>
+    </div>
+  </div>
 </div>
 <div class="che-button-dropdown-elements" ng-show="cheButtonDropdownCtrl.showDropdown">
   <ul>
