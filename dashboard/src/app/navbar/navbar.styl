@@ -18,6 +18,7 @@ $menu-font-size = 1em
 $submenu-font-size = 0.9em
 
 .navbar-top-dropdown
+  margin: 0 10px
   height 60px
 
 /* restore non-allcaps */
@@ -48,6 +49,9 @@ $submenu-font-size = 0.9em
   line-height 12px
   text-align center
 
+.left-sidebar-menu .navbar-subsection-item.md-no-proxy
+  padding 0
+
 .admin-navbar-menu .navbar-subsection md-list
   padding-top 4px
 
@@ -56,9 +60,7 @@ $submenu-font-size = 0.9em
   margin-top -4px
 
 .admin-navbar-menu .navbar-identity span
-  padding-top 8px
-  padding-left 24px
-  padding-bottom 8px
+  padding-left 3px
 
 /* text color */
 .admin-navbar-menu .navbar-header,
@@ -106,7 +108,12 @@ $submenu-font-size = 0.9em
 .admin-navbar-menu .left-sidebar-menu md-list-item > a.md-button .navbar-item,
 .admin-navbar-menu .left-sidebar-menu md-menu > a.md-button .navbar-item,
 .navbar-submenu-content md-menu-item > a.md-button .navbar-item
-  padding-left 46px
+  padding-left 10px
+
+.admin-navbar-menu .left-sidebar-menu md-list-item > a.md-button .navbar-item.navbar-item-no-icon,
+.admin-navbar-menu .left-sidebar-menu md-menu > a.md-button .navbar-item.navbar-item-no-icon,
+.navbar-submenu-content md-menu-item > a.md-button .navbar-item.navbar-item-no-icon
+  padding-left 51px
 
 .admin-navbar-menu md-list-item a.md-button .navbar-item
   padding-left 87px
@@ -189,7 +196,7 @@ $submenu-font-size = 0.9em
 
 .navbar-identity
   outline 0
-  cursor pointer
+  padding-left 7px
 
 .admin-navbar-menu section a.md-button
   font-size $submenu-font-size

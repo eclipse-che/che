@@ -47,6 +47,7 @@ export class CheButtonDropdownCtrl {
       return;
     }
     this.$window.location.href = newPath;
+    this.disableDropDown();
   }
 
 }
