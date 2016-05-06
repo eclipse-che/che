@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.context;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.factory.shared.dto.Factory;
@@ -34,7 +35,6 @@ import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.project.node.ProjectNode;
 
-import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 

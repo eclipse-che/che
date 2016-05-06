@@ -17,8 +17,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 /** Implementation of the {@link EditorPreferenceView}. */
 public class EditorPreferenceViewImpl extends Composite implements EditorPreferenceView {

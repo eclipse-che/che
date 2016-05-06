@@ -23,6 +23,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.codeassist.AdditionalInfoCallback;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
@@ -35,8 +36,6 @@ import org.eclipse.che.ide.api.editor.keymap.Keymap;
 import org.eclipse.che.ide.editor.texteditor.infopanel.InfoPanel;
 import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
-
-import javax.inject.Inject;
 
 /**
  * Implementation of the View part of the editors.

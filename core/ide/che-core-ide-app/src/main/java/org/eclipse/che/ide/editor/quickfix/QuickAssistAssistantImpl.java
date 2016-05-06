@@ -13,6 +13,7 @@ package org.eclipse.che.ide.editor.quickfix;
 import elemental.dom.Element;
 import elemental.html.ClientRect;
 
+import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -23,7 +24,6 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistInvocationContext;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
-import javax.inject.Inject;
 import java.util.List;
 
 /** Implementation for {@link QuickAssistAssistant}. */

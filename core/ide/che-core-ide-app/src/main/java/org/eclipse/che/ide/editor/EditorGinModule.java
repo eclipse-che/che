@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.ide.api.editor.EditorProvider;
@@ -40,8 +41,6 @@ import org.eclipse.che.ide.api.editor.reconciler.ReconcilerFactory;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.editor.texteditor.TextEditorPartViewImpl;
-
-import javax.inject.Singleton;
 
 @ExtensionGinModule
 public class EditorGinModule extends AbstractGinModule {

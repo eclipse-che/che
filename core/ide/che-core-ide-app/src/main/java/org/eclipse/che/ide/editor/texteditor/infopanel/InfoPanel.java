@@ -16,10 +16,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 

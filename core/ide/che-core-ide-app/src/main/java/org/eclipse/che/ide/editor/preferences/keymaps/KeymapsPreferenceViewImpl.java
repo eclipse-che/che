@@ -17,12 +17,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.keymap.Keymap;
 import org.eclipse.che.ide.editor.preferences.EditorPrefLocalizationConstant;
 import org.eclipse.che.ide.ui.listbox.CustomListBox;
 
-import javax.inject.Inject;
 import java.util.List;
 
 /**

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
@@ -18,7 +19,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 
-import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 
