@@ -10,29 +10,29 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.impl;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.UserDao;
-
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Tests for {@link org.eclipse.che.api.factory.server.impl.FactoryAcceptValidatorImpl} and {@link FactoryCreateValidatorImpl}
  */
 @Listeners(value = {MockitoTestNGListener.class})
 public class FactoryCreateAndAcceptValidatorsImplsTest {
-
-    @Mock
-    private AccountDao accountDao;
 
     @Mock
     private UserDao userDao;
@@ -54,8 +54,8 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        acceptValidator = new FactoryAcceptValidatorImpl(accountDao, preferenceDao);
-        createValidator = new FactoryCreateValidatorImpl(accountDao, preferenceDao, workspaceConfigValidator);
+        acceptValidator = new FactoryAcceptValidatorImpl(preferenceDao);
+        createValidator = new FactoryCreateValidatorImpl(preferenceDao, workspaceConfigValidator);
     }
 
     @Test
