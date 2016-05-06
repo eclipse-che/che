@@ -10,26 +10,20 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-toolbar che-title="Opening IDE">
 
-</che-toolbar>
-<md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
-                    ng-hide="ideCtrl.hasData"></md-progress-linear>
-
-<md-content id="open-ide-page" md-scroll-y flex class="open-ide-page" md-theme="maincontent-theme">
-
-    <div ng-hide="ideCtrl.selectedWorkspace">
-        No workspace selected. Unable to open IDE
+<div flex class="open-ide-page" md-theme="maincontent-theme">
+  <div class="ide-page-loader"
+       layout="column" layout-align="center center">
+    <div ng-hide="ideCtrl.selectedWorkspace">No workspace selected. Unable to open IDE</div>
+    <div ng-show="ideCtrl.selectedWorkspace">Redirecting to the IDE for workspace
+      {{ideCtrl.selectedWorkspace.config.name}}... Please Wait.
     </div>
-
-    <div ng-show="loadingIDE && ideCtrl.selectedWorkspace" layout="column" layout-align="center center">
-        Redirecting to the IDE for workspace {{ideCtrl.selectedWorkspace.name}}... Please Wait.
-        <img style="width: 300px" src="assets/images/loader.svg" />
+    <div layout="column" class="ide-page-loader-content" ng-show="ideCtrl.selectedWorkspace">
+      <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+      </div>
     </div>
-    <div ng-hide="loadingIDE">
-        <che-button-primary che-button-title="Restore IDE window"
-                             ng-click="ideCtrl.displayIDE()"></che-button-primary>
-    </div>
-
-
-</md-content>
+  </div>
+</div>

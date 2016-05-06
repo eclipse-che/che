@@ -16,7 +16,7 @@ export class CheNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI) {
+  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, $rootScope) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
