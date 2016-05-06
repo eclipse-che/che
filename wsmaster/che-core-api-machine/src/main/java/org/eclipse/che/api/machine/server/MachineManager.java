@@ -884,7 +884,8 @@ public class MachineManager {
     }
 
     private void createMachineLogsDir(String machineId) throws MachineException {
-        if (!new File(machineLogsDir, machineId).mkdirs()) {
+        File dir = new File(machineLogsDir, machineId);
+        if (!dir.exists() && !dir.mkdirs()) {
             throw new MachineException("Can't create folder for the logs of machine");
         }
     }
