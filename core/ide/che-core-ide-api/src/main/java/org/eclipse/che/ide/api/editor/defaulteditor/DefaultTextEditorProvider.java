@@ -14,11 +14,11 @@ public class DefaultTextEditorProvider extends AbstractTextEditorProvider {
 
     @Override
     public String getId() {
-        return "codenvyDefaultEditor";
+        return "cheDefaultEditor";
     }
 
     @Override
     public String getDescription() {
-        return "Codenvy Default Editor";
+        return "Che Default Editor";
     }
 }
