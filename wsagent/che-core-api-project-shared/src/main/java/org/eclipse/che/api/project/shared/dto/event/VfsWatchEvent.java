@@ -8,11 +8,32 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file;
+package org.eclipse.che.api.project.shared.dto.event;
+
+import org.eclipse.che.api.core.notification.EventOrigin;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * @author andrew00x
+ * @author gazarenkov
  */
-public enum FileWatcherEventType {
-    CREATED, DELETED, MODIFIED
+@EventOrigin("vfs")
+@DTO
+public interface VfsWatchEvent {
+
+    String VFS_CHANNEL = "vfs";
+
+    String getPath();
+
+    VfsWatchEvent withPath(String path);
+
+
+    FileWatcherEventType getType();
+
+    VfsWatchEvent withType(FileWatcherEventType type);
+
+
+    boolean isFile();
+
+    VfsWatchEvent withFile(boolean isFile);
+
 }

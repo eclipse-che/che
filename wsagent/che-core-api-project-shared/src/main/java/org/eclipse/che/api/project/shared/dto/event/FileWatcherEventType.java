@@ -8,16 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.shared;
+package org.eclipse.che.api.project.shared.dto.event;
 
 /**
- * @author Vitalii Parfonov
+ * @author andrew00x
  */
-public class Constants {
-
-    public static final String BLANK_ID                  = "blank";
-    public static final String VCS_PROVIDER_NAME         = "vcs.provider.name";
-
-    private Constants() {
-    }
+public enum FileWatcherEventType {
+    CREATED, DELETED, MODIFIED
 }

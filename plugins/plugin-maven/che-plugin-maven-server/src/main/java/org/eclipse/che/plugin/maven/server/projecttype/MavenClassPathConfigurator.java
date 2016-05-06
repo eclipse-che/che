@@ -19,7 +19,7 @@ import org.eclipse.che.ide.maven.tools.Model;
 
 import java.io.ByteArrayInputStream;
 
-import static org.eclipse.che.api.project.server.Constants.CODENVY_DIR;
+import static org.eclipse.che.api.project.shared.Constants.CODENVY_DIR;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
 
