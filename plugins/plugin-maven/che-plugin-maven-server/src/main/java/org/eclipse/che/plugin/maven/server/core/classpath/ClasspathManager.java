@@ -63,7 +63,7 @@ public class ClasspathManager {
     private final MavenProjectManager   projectManager;
     private final MavenTerminal         terminal;
     private final MavenProgressNotifier notifier;
-    private final File                  localRepository;
+    private File                        localRepository;
 
     @Inject
     public ClasspathManager(@Named("che.user.workspaces.storage") String workspacePath,
@@ -80,6 +80,11 @@ public class ClasspathManager {
         MavenServerWrapper mavenServer = wrapperManager.getMavenServer(MavenWrapperManager.ServerType.DOWNLOAD);
         try {
             localRepository = mavenServer.getLocalRepository();
+        }
+         catch (RuntimeException e) {
+             // We can got this exception if maven not install in system
+             // This is temporary solution will be fix more accurate in https://jira.codenvycorp.com/browse/CHE-1120
+            LOG.error("Maven server not started looks like you don't have Maven in your path");
         } finally {
             wrapperManager.release(mavenServer);
         }
