@@ -38,7 +38,7 @@ public class DtoFactoryVisitorRegistryGenerator {
     protected static final String              REGISTRY_PATH      =
             "org/eclipse/che/ide/client/DtoFactoryVisitorRegistry.java";
     /** Map containing <FullFQN, ClassName> */
-    protected static final Map<String, String> dtoFactoryVisitors = new HashMap<String, String>();
+    protected static final Map<String, String> dtoFactoryVisitors = new HashMap<>();
 
     /**
      * Entry point. --rootDir is the optional parameter.
@@ -47,21 +47,9 @@ public class DtoFactoryVisitorRegistryGenerator {
      */
     public static void main(String[] args) {
         try {
-            String rootDirPath = ".";
-            // try to read argument
-            if (args.length == 1) {
-                if (args[0].startsWith(GeneratorUtils.ROOT_DIR_PARAMETER)) {
-                    rootDirPath = args[0].substring(GeneratorUtils.ROOT_DIR_PARAMETER.length());
-                } else {
-                    System.err.print("Wrong usage. There is only one allowed argument : "
-                                     + GeneratorUtils.ROOT_DIR_PARAMETER);//NOSONAR
-                    System.exit(1);//NOSONAR
-                }
-            }
-
-            File rootFolder = new File(rootDirPath);
+            File rootFolder = GeneratorUtils.getRootFolder(args);
             System.out.println(" ------------------------------------------------------------------------ ");
-            System.out.println(String.format("Searching for DTO"));
+            System.out.println("Searching for DTO");
             System.out.println(" ------------------------------------------------------------------------ ");
 
             // find all DtoFactoryVisitors
@@ -100,7 +88,7 @@ public class DtoFactoryVisitorRegistryGenerator {
         File outFile = new File(rootFolder, REGISTRY_PATH);
 
         StringBuilder builder = new StringBuilder();
-        builder.append("package " + "org.eclipse.che.ide.client;\n\n");
+        builder.append("package org.eclipse.che.ide.client;\n\n");
         generateImports(builder);
         generateClass(builder);
 
@@ -139,17 +127,14 @@ public class DtoFactoryVisitorRegistryGenerator {
         builder.append("\n");
 
         // field
-        builder.append(GeneratorUtils.TAB
-                       +
-                       "/** Contains the map will all the DtoFactoryVisitor Providers <FullClassFQN, Provider>. */\n");
-        builder.append(GeneratorUtils.TAB
-                       + "protected final Map<String, Provider> providers = new HashMap<>();\n\n");
+        builder.append(GeneratorUtils.TAB)
+               .append("/** Contains the map with all the DtoFactoryVisitor Providers <FullClassFQN, Provider>. */\n");
+        builder.append(GeneratorUtils.TAB).append("protected final Map<String, Provider> providers = new HashMap<>();\n\n");
 
         // generate constructor
-
-        builder.append(GeneratorUtils.TAB + "/** Constructor that accepts all found DtoFactoryVisitor Providers. */\n");
-        builder.append(GeneratorUtils.TAB + "@Inject\n");
-        builder.append(GeneratorUtils.TAB + "public DtoFactoryVisitorRegistry(\n");
+        builder.append(GeneratorUtils.TAB).append("/** Constructor that accepts all found DtoFactoryVisitor Providers. */\n");
+        builder.append(GeneratorUtils.TAB).append("@Inject\n");
+        builder.append(GeneratorUtils.TAB).append("public DtoFactoryVisitorRegistry(\n");
 
         // paste args here
         Iterator<Entry<String, String>> entryIterator = dtoFactoryVisitors.entrySet().iterator();
@@ -161,11 +146,11 @@ public class DtoFactoryVisitorRegistryGenerator {
             // fullFQN classNameToLowerCase,
             String classFQN = String.format("Provider<%s>", entry.getKey());
             String variableName = entry.getValue().toLowerCase();
-            builder.append(GeneratorUtils.TAB2 + classFQN + " " + variableName + hasComma + "\n");
+            builder.append(GeneratorUtils.TAB2).append(classFQN).append(" ").append(variableName).append(hasComma).append("\n");
         }
 
-        builder.append(GeneratorUtils.TAB + ")\n");
-        builder.append(GeneratorUtils.TAB + "{\n");
+        builder.append(GeneratorUtils.TAB).append(")\n");
+        builder.append(GeneratorUtils.TAB).append("{\n");
 
         // paste add here
         for (Entry<String, String> entries : dtoFactoryVisitors.entrySet()) {
@@ -173,20 +158,19 @@ public class DtoFactoryVisitorRegistryGenerator {
             String variableName = entries.getValue().toLowerCase();
 
             String putStatement = String.format("this.providers.put(\"%s\", %s);%n", fullFqn, variableName);
-            builder.append(GeneratorUtils.TAB2 + putStatement);
+            builder.append(GeneratorUtils.TAB2).append(putStatement);
         }
 
         // close constructor
-        builder.append(GeneratorUtils.TAB + "}\n\n");
+        builder.append(GeneratorUtils.TAB).append("}\n\n");
 
         // generate getter
-        builder.append(GeneratorUtils.TAB
-                       +
-                       "/** Returns  the map will all the DtoFactoryVisitor Providers <FullClassFQN, Provider>. */\n");
-        builder.append(GeneratorUtils.TAB + "public Map<String, Provider> getDtoFactoryVisitors()\n");
-        builder.append(GeneratorUtils.TAB + "{\n");
-        builder.append(GeneratorUtils.TAB2 + "return providers;\n");
-        builder.append(GeneratorUtils.TAB + "}\n");
+        builder.append(GeneratorUtils.TAB)
+               .append("/** Returns the map with all the DtoFactoryVisitor Providers <FullClassFQN, Provider>. */\n");
+        builder.append(GeneratorUtils.TAB).append("public Map<String, Provider> getDtoFactoryVisitors()\n");
+        builder.append(GeneratorUtils.TAB).append("{\n");
+        builder.append(GeneratorUtils.TAB2).append("return providers;\n");
+        builder.append(GeneratorUtils.TAB).append("}\n");
 
         // close class
         builder.append("}\n");
