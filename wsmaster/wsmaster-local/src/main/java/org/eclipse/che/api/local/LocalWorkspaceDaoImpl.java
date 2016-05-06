@@ -69,6 +69,9 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     @PostConstruct
     public synchronized void loadWorkspaces() {
         workspaces.putAll(localStorage.loadMap(new TypeToken<Map<String, WorkspaceImpl>>() {}));
+        for (WorkspaceImpl workspace : workspaces.values()) {
+            workspace.setRuntime(null);
+        }
     }
 
     @PreDestroy
@@ -86,6 +89,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));
         }
+        workspace.setRuntime(null);
         workspace.setStatus(WorkspaceStatus.STOPPED);
         workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
         return workspace;
@@ -98,6 +102,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
             throw new NotFoundException("Workspace with id " + workspace.getId() + " was not found");
         }
         workspace.setStatus(null);
+        workspace.setRuntime(null);
         workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
         return workspace;
     }
