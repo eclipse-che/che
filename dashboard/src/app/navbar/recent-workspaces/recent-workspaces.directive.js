@@ -11,26 +11,25 @@
 'use strict';
 
 /**
- * Defines a directive for displaying full screen loader displayed to load the IDE
- * @author Florent Benoit
+ * @ngdoc directive
+ * @name navbar.directive:NavbarRecentWorkspaces
+ * @description This class is handling the directive of the listing recent opened workspaces in the navbar
+ * @author Oleksii Kurinnyi
  */
-class IdeLoader {
+export class NavbarRecentWorkspaces {
+
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict='E';
-    this.templateUrl = 'app/ide/ide-loader/ide-loader.html';
+  constructor() {
+    this.restrict = 'E';
+    this.templateUrl = 'app/navbar/recent-workspaces/recent-workspaces.html';
 
-
-    this.controller = 'IdeLoaderCtrl';
-    this.controllerAs = 'ideLoaderCtrl';
+    this.controller = 'NavbarRecentWorkspacesController';
+    this.controllerAs = 'navbarRecentWorkspacesController';
     this.bindToController = true;
   }
 
 }
-
-export default IdeLoader;
-
