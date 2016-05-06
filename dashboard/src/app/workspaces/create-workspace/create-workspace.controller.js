@@ -23,7 +23,7 @@ export class CreateWorkspaceCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, cheNotification, lodash) {
+  constructor($location, cheAPI, cheNotification, lodash, $rootScope) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
@@ -56,6 +56,8 @@ export class CreateWorkspaceCtrl {
     this.defaultWorkspaceName = null;
 
     cheAPI.cheWorkspace.fetchWorkspaces();
+
+    $rootScope.showIDE = false;
   }
 
   /**

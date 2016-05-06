@@ -156,6 +156,8 @@ export class CreateProjectCtrl {
     this.defaultWorkspaceName = null;
 
     cheAPI.cheWorkspace.getWorkspaces();
+
+    $rootScope.showIDE = false;
   }
 
   /**

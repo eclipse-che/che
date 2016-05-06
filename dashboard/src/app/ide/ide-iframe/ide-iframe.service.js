@@ -41,7 +41,7 @@ class IdeIFrameSvc {
 
       let $scope = angular.element($target).scope();
       let insertHtml = this.$compile($div)($scope);
-      $target.append(insertHtml);
+      $('body').find('.main-page').append(insertHtml);
 
     }
   }
