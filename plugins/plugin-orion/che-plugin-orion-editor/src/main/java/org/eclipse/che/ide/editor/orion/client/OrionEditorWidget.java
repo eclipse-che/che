@@ -36,16 +36,42 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModelEvent;
+import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
+import org.eclipse.che.ide.api.editor.codeassist.CompletionReadyCallback;
+import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
+import org.eclipse.che.ide.api.editor.events.CursorActivityEvent;
+import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
+import org.eclipse.che.ide.api.editor.events.GutterClickEvent;
+import org.eclipse.che.ide.api.editor.events.GutterClickHandler;
+import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
+import org.eclipse.che.ide.api.editor.gutter.Gutter;
+import org.eclipse.che.ide.api.editor.gutter.Gutters;
+import org.eclipse.che.ide.api.editor.gutter.HasGutter;
+import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
+import org.eclipse.che.ide.api.editor.keymap.Keymap;
+import org.eclipse.che.ide.api.editor.keymap.KeymapChangeEvent;
+import org.eclipse.che.ide.api.editor.keymap.KeymapChangeHandler;
+import org.eclipse.che.ide.api.editor.link.LinkedMode;
+import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.text.Position;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.RegionImpl;
+import org.eclipse.che.ide.api.editor.text.TextRange;
+import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
+import org.eclipse.che.ide.api.editor.texteditor.CompositeEditorWidget;
+import org.eclipse.che.ide.api.editor.texteditor.ContentInitializedHandler;
+import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent;
 import org.eclipse.che.ide.api.event.EditorSettingsChangedEvent.EditorSettingsChangedHandler;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
+import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.text.Position;
-import org.eclipse.che.ide.api.text.Region;
-import org.eclipse.che.ide.api.text.RegionImpl;
-import org.eclipse.che.ide.api.text.annotation.Annotation;
-import org.eclipse.che.ide.api.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
@@ -65,38 +91,12 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
-import org.eclipse.che.ide.hotkeys.HotKeyItem;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModelEvent;
-import org.eclipse.che.ide.jseditor.client.codeassist.CompletionProposal;
-import org.eclipse.che.ide.jseditor.client.codeassist.CompletionReadyCallback;
-import org.eclipse.che.ide.jseditor.client.codeassist.CompletionsSource;
-import org.eclipse.che.ide.jseditor.client.events.CursorActivityEvent;
-import org.eclipse.che.ide.jseditor.client.events.CursorActivityHandler;
-import org.eclipse.che.ide.jseditor.client.events.GutterClickEvent;
-import org.eclipse.che.ide.jseditor.client.events.GutterClickHandler;
-import org.eclipse.che.ide.jseditor.client.events.HasCursorActivityHandlers;
-import org.eclipse.che.ide.jseditor.client.events.HasScrollHandlers;
-import org.eclipse.che.ide.jseditor.client.events.ScrollEvent;
-import org.eclipse.che.ide.jseditor.client.events.ScrollHandler;
-import org.eclipse.che.ide.jseditor.client.gutter.Gutter;
-import org.eclipse.che.ide.jseditor.client.gutter.Gutters;
-import org.eclipse.che.ide.jseditor.client.gutter.HasGutter;
-import org.eclipse.che.ide.jseditor.client.keymap.KeyBinding;
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
-import org.eclipse.che.ide.jseditor.client.keymap.KeymapChangeEvent;
-import org.eclipse.che.ide.jseditor.client.keymap.KeymapChangeHandler;
-import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
-import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
-import org.eclipse.che.ide.jseditor.client.preference.editorproperties.EditorPropertiesManager;
-import org.eclipse.che.ide.jseditor.client.preference.keymaps.KeyMapsPreferencePresenter;
-import org.eclipse.che.ide.jseditor.client.requirejs.ModuleHolder;
-import org.eclipse.che.ide.jseditor.client.text.TextRange;
-import org.eclipse.che.ide.jseditor.client.texteditor.CompositeEditorWidget;
-import org.eclipse.che.ide.jseditor.client.texteditor.ContentInitializedHandler;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget;
-import org.eclipse.che.ide.jseditor.client.texteditor.LineStyler;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
+import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
+import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
+import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
+import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
+import org.eclipse.che.ide.requirejs.ModuleHolder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -303,7 +303,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     }
 
     @Override
-    public org.eclipse.che.ide.jseditor.client.document.Document getDocument() {
+    public org.eclipse.che.ide.api.editor.document.Document getDocument() {
         if (this.embeddedDocument == null) {
             this.embeddedDocument = new OrionDocument(this.editorOverlay.getTextView(), this, editorOverlay);
         }
@@ -806,7 +806,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     /**
      * Custom callback to pass given value to native javascript function.
      */
-    private class InputCallback implements org.eclipse.che.ide.ui.dialogs.InputCallback {
+    private class InputCallback implements org.eclipse.che.ide.api.dialogs.InputCallback {
 
         private JavaScriptObject callback;
 

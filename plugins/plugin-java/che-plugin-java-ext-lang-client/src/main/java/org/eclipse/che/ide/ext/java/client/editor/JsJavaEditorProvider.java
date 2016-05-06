@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractTextEditorProvider;
-import org.eclipse.che.ide.jseditor.client.editorconfig.EditorUpdateAction;
-import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
-import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
+import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
 
-import static org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
+import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
 
 /** EditorProvider that provides a text editor configured for java source files. */
 public class JsJavaEditorProvider extends AbstractTextEditorProvider {

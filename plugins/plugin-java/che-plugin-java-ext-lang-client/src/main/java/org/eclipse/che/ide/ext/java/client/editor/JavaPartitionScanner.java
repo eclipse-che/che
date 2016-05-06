@@ -15,11 +15,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.eclipse.che.ide.api.text.rules.Token;
-import org.eclipse.che.ide.api.text.rules.TokenImpl;
+import org.eclipse.che.ide.api.editor.text.rules.Token;
+import org.eclipse.che.ide.api.editor.text.rules.TokenImpl;
 import org.eclipse.che.ide.ext.java.jdt.JavaPartitions;
-import org.eclipse.che.ide.jseditor.client.partition.PartitionScanner;
-import org.eclipse.che.ide.jseditor.client.partition.StringCharacterScanner;
+import org.eclipse.che.ide.api.editor.partition.PartitionScanner;
+import org.eclipse.che.ide.api.editor.partition.StringCharacterScanner;
 import org.eclipse.che.ide.ext.java.jdt.text.rules.CharacterScanner;
 
 /**

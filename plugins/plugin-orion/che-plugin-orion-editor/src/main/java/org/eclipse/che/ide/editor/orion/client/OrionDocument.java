@@ -18,15 +18,15 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay.EventHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
-import org.eclipse.che.ide.jseditor.client.document.AbstractDocument;
-import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.events.CursorActivityHandler;
-import org.eclipse.che.ide.jseditor.client.events.DocumentChangeEvent;
-import org.eclipse.che.ide.jseditor.client.events.HasCursorActivityHandlers;
-import org.eclipse.che.ide.jseditor.client.position.PositionConverter;
-import org.eclipse.che.ide.jseditor.client.text.LinearRange;
-import org.eclipse.che.ide.jseditor.client.text.TextPosition;
-import org.eclipse.che.ide.jseditor.client.text.TextRange;
+import org.eclipse.che.ide.api.editor.document.AbstractDocument;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
+import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.HasCursorActivityHandlers;
+import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.text.TextRange;
 
 /**
  * The implementation of {@link Document} for Orion.

@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.hotkeys.HotKeyResources;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;

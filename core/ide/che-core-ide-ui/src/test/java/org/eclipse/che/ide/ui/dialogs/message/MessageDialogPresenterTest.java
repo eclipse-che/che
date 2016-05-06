@@ -11,9 +11,8 @@
 package org.eclipse.che.ide.ui.dialogs.message;
 
 import org.eclipse.che.ide.ui.dialogs.BaseTest;
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

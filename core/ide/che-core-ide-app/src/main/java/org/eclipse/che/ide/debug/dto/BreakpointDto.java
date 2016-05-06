@@ -12,6 +12,7 @@ package org.eclipse.che.ide.debug.dto;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.ide.api.debug.Breakpoint;
 
 /**
  * {@link DTO} object to preserve breakpoints between user's sessions.
@@ -25,9 +26,9 @@ public interface BreakpointDto {
 
     int getLineNumber();
 
-    void setType(org.eclipse.che.ide.debug.Breakpoint.Type type);
+    void setType(Breakpoint.Type type);
 
-    org.eclipse.che.ide.debug.Breakpoint.Type getType();
+    Breakpoint.Type getType();
 
     void setMessage(String message);
 

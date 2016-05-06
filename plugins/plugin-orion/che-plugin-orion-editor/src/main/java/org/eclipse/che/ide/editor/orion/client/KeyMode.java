@@ -12,7 +12,7 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.gwt.core.shared.GWT;
 
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
+import org.eclipse.che.ide.api.editor.keymap.Keymap;
 
 /**
  * Keymaps supported by Orion.

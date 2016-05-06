@@ -13,15 +13,15 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.ide.api.text.Position;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.ext.java.client.JavaCss;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModelImpl;
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPositionMap;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorResources;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorResources.EditorCss;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
+import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
+import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
+import org.eclipse.che.ide.api.editor.texteditor.EditorResources.EditorCss;
 
 import java.util.ArrayList;
 import java.util.HashMap;

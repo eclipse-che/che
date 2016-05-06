@@ -22,7 +22,6 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.api.Project"/>
     <inherits name="org.eclipse.che.ide.Core"/>
-    <inherits name="org.eclipse.che.ide.jseditor.JsEditor"/>
 
     <source path="ide"/>
     <source path="shared"/>

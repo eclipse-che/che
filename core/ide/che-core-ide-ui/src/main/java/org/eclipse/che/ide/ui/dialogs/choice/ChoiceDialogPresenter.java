@@ -14,7 +14,8 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;

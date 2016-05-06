@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.paraminfo.ParametersHintsPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * @author Dmitry Shnurenko

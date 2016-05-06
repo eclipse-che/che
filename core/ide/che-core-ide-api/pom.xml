@@ -98,6 +98,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.gwt.gwtmockito</groupId>
+            <artifactId>gwtmockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
             <scope>test</scope>
@@ -205,12 +210,12 @@
                         <exclude>**/*.png</exclude>
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.jpg</exclude>
-                        <exclude>**/ide/api/text/TextSelection.java</exclude>
-                        <exclude>**/ide/api/text/TextSelectionImpl.java</exclude>
-                        <exclude>**/ide/api/text/TypedPosition.java</exclude>
+                        <exclude>**/ide/api/editor/text/TypedPosition.java</exclude>
                         <exclude>**/ide/api/text/annotation/AnnotationModelEvent.java</exclude>
-                        <exclude>**/ide/api/text/rules/**/*.*</exclude>
-                        <exclude>**/ide/api/text/undo/**/*.*</exclude>
+                        <exclude>**/ide/api/editor/text/rules/**/*.*</exclude>
+                        <exclude>**/org/eclipse/che/ide/api/editor/reconciler/DirtyRegion.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/api/editor/reconciler/DirtyRegionQueue.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/api/editor/annotation/AnnotationModelEvent.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

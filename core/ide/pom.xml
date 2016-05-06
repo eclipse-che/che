@@ -27,7 +27,6 @@
         <module>che-core-ide-generators</module>
         <module>che-core-ide-ui</module>
         <module>che-core-ide-app</module>
-        <module>che-core-ide-jseditor</module>
         <module>che-core-ide-templates</module>
         <module>che-core-ide-stacks</module>
     </modules>

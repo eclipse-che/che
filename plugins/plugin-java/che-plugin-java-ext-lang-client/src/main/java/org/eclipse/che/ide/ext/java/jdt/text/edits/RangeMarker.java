@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text.edits;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
 import org.eclipse.che.ide.ext.java.jdt.text.Document;
 
 /** A range marker can be used to track positions when executing text edits. */

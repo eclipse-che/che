@@ -13,10 +13,10 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.ext.java.shared.dto.HighlightedPosition;
-import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.text.TextPosition;
-import org.eclipse.che.ide.jseditor.client.text.TextRange;
-import org.eclipse.che.ide.jseditor.client.texteditor.HasTextMarkers;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.text.TextRange;
+import org.eclipse.che.ide.api.editor.texteditor.HasTextMarkers;
 import org.eclipse.che.ide.ext.java.client.Resources;
 
 import java.util.ArrayList;

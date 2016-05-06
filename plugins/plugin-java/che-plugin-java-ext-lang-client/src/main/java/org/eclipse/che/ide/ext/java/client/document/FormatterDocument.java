@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.java.client.document;
 
 import org.eclipse.che.ide.ext.java.jdt.text.AbstractDocument;
 import org.eclipse.che.ide.ext.java.jdt.text.ConfigurableLineTracker;
-import org.eclipse.che.ide.jseditor.client.document.Document;
+import org.eclipse.che.ide.api.editor.document.Document;
 
 /**
  * This class realises adapter for manipulation object with type

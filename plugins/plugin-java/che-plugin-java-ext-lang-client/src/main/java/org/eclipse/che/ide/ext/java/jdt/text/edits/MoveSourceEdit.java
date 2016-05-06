@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text.edits;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
-import org.eclipse.che.ide.api.text.Region;
-import org.eclipse.che.ide.api.text.RegionImpl;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.RegionImpl;
 import org.eclipse.che.ide.ext.java.jdt.text.Document;
 
 import java.util.ArrayList;

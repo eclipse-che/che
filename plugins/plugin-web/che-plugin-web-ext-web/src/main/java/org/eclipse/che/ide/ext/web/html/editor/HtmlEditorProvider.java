@@ -13,8 +13,8 @@ package org.eclipse.che.ide.ext.web.html.editor;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.AbstractTextEditorProvider;
-import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 
 /**
  * {@link EditorProvider} for HTML files.

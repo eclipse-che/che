@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.notification.NotificationListener;
 import org.eclipse.che.ide.api.notification.ReadState;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.part.PartStackPresenter;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

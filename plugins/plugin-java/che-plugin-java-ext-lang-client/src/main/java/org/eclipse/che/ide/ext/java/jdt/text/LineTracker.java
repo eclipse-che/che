@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
-import org.eclipse.che.ide.api.text.Region;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.Region;
 
 /**
  * A line tracker maps character positions to line numbers and vice versa. Initially the line tracker is informed about its

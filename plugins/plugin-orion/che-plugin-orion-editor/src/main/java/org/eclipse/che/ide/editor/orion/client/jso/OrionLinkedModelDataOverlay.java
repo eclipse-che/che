@@ -14,7 +14,7 @@ package org.eclipse.che.ide.editor.orion.client.jso;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 
-import org.eclipse.che.ide.jseditor.client.link.LinkedModelData;
+import org.eclipse.che.ide.api.editor.link.LinkedModelData;
 
 import java.util.List;
 

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPositionMap;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorHandle;
+import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
+import org.eclipse.che.ide.api.editor.texteditor.EditorHandle;
 
 /**
  * Factory for {@link JavaAnnotationModel} instances.

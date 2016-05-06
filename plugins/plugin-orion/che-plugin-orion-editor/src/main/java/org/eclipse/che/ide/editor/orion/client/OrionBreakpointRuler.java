@@ -19,8 +19,8 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay;
-import org.eclipse.che.ide.jseditor.client.gutter.Gutter;
-import org.eclipse.che.ide.jseditor.client.gutter.Gutters;
+import org.eclipse.che.ide.api.editor.gutter.Gutter;
+import org.eclipse.che.ide.api.editor.gutter.Gutters;
 import org.eclipse.che.ide.util.dom.Elements;
 
 /**

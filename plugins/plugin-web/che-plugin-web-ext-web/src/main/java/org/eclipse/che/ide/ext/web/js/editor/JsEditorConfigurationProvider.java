@@ -18,7 +18,7 @@ import org.eclipse.che.ide.ext.web.html.editor.AutoEditStrategyFactory;
 import com.google.inject.Inject;
 
 /**
- * Provider for HTML Editor configuration.
+ * Provider for JS Editor configuration.
  * 
  * @author Florent Benoit
  */
@@ -34,9 +34,8 @@ public class JsEditorConfigurationProvider implements Provider<JsEditorConfigura
     @Inject
     private DefaultCodeAssistProcessor chainedCodeAssistProcessor;
 
-
     /**
-     * Build a new instance of JsEditor Configuration
+     * Build a new instance of JS Editor configuration
      * 
      * @return
      */

@@ -13,8 +13,8 @@ package org.eclipse.che.plugin.svn.ide.common.threechoices;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;

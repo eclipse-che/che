@@ -13,9 +13,7 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import elemental.dom.Element;
 import elemental.js.dom.JsElement;
 
-import com.google.gwt.user.client.ui.Image;
-
-import org.eclipse.che.ide.api.text.annotation.Annotation;
+import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.runtime.Assert;

@@ -68,11 +68,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-jseditor</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
             <scope>provided</scope>
@@ -101,7 +96,6 @@
                 <configuration>
                     <excludes>
                         <exclude>**/*.svg</exclude>
-                        <exclude>**/*.png</exclude>
                     </excludes>
                 </configuration>
             </plugin>

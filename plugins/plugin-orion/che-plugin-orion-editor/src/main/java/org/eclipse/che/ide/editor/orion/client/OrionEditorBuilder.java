@@ -12,10 +12,10 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.jseditor.client.defaulteditor.EditorBuilder;
-import org.eclipse.che.ide.jseditor.client.editorconfig.AutoSaveTextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
+import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * Builder for Orion editor.

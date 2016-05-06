@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text.edits;
 
-import org.eclipse.che.ide.api.text.Region;
+import org.eclipse.che.ide.api.editor.text.Region;
 
 import java.util.ArrayList;
 import java.util.Arrays;

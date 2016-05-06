@@ -18,8 +18,8 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.texteditor.HandlesTextOperations;
-import org.eclipse.che.ide.api.texteditor.TextEditorOperations;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesTextOperations;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 
 /**
  * Calls editor complete(Ctrl+Space)

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import javax.inject.Singleton;
 
-import org.eclipse.che.ide.jseditor.client.texteditor.AbstractEditorModule;
+import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule;
 
 /**
  * {@link EditorModule} for the orion editor.

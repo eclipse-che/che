@@ -1,0 +1,152 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.ide.api.editor.texteditor;
+
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
+import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.text.TextRange;
+
+import javax.validation.constraints.NotNull;
+
+/**
+ * Public view on the editor component.
+ */
+public interface TextEditor extends EditorPartPresenter {
+
+    /**
+     * Initializes this editor with the configuration and document provider.
+     *
+     * @param configuration
+     *         the configuration of this editor.
+     */
+    void initialize(@NotNull TextEditorConfiguration configuration);
+
+    /**
+     * Returns the text editor configuration that was used for initialization.
+     *
+     * @return the text editor configuration
+     */
+    TextEditorConfiguration getConfiguration();
+
+    /**
+     * @return the text editor view implementation
+     */
+    TextEditorPartView getView();
+
+    /**
+     * Add an editor-specific key binding.
+     *
+     * @param keyBinding
+     *         the key binding
+     */
+    void addKeybinding(KeyBinding keyBinding);
+
+    /**
+     * Closes this text editor after optionally saving changes.
+     *
+     * @param save
+     *         <code>true</code> if unsaved changed should be saved, and <code>false</code> if unsaved changed should be discarded
+     */
+    void close(boolean save);
+
+    /**
+     * Returns whether the text in this text editor can be changed by the user.
+     *
+     * @return <code>true</code> if it can be edited, and <code>false</code> if it is read-only
+     */
+    boolean isEditable();
+
+    /**
+     * Abandons all modifications applied to this text editor's input element's textual presentation since the last save operation.
+     */
+    void doRevertToSaved();
+
+    /**
+     * Returns the document backing the text content.
+     * @return the document
+     */
+    Document getDocument();
+
+    /**
+     * Return the content type of the editor content.<br>
+     * Returns null if the type is not known yet.
+     *
+     * @return the content type
+     */
+    String getContentType();
+
+    /**
+     * Returns the selection range as a {@link TextRange} (i.e. two line, char objects: start en end).
+     * @return the selection range
+     */
+    TextRange getSelectedTextRange();
+
+    /**
+     * Returns the selection range as a {@link LinearRange} (ie.e a start offset and a length).
+     * @return the selection range
+     */
+    LinearRange getSelectedLinearRange();
+
+    /**
+     * Returns the cursor position as a {@link TextPosition} object (a line char position).
+     * @return the cursor position
+     */
+    TextPosition getCursorPosition();
+
+    /**
+     * Returns the cursor model for the editor.
+     * @return the cursor model
+     */
+    CursorModelWithHandler getCursorModel();
+
+    /**
+     * Returns a position converter relative to this editor (pixel coordinates <-> line char positions).
+     *
+     * @return a position converter
+     */
+    PositionConverter getPositionConverter();
+
+    /**
+     * Returns the cursor position as an offset from the start.
+     * @return the cursor position
+     */
+    int getCursorOffset();
+
+    /**
+     * Displays a message to the user.
+     * @param message message
+     */
+    void showMessage(String message);
+
+    /**
+     * Returns focus state of the text editor
+     * @return <code>true</code> if the text editor is focused or <code>false</code> otherwise
+     */
+    boolean isFocused();
+
+    /** Give the focus to the editor. */
+    void setFocus();
+
+    /** Calls all editor update actions for this editor. */
+    void refreshEditor();
+
+    /**
+     *  Adds an editor update action for this editor.
+     *  @param action the action to add
+     */
+    void addEditorUpdateAction(EditorUpdateAction action);
+}

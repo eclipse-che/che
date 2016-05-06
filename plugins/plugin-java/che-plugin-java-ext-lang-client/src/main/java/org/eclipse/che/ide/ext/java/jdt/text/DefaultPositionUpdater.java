@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.BadPositionCategoryException;
-import org.eclipse.che.ide.api.text.Position;
+import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
+import org.eclipse.che.ide.api.editor.text.Position;
 
 /**
  * Default implementation of {@link PositionUpdater}.

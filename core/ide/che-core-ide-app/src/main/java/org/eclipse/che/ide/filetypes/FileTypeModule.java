@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 public class FileTypeModule extends AbstractGinModule {
     @Override
     protected void configure() {
-
     }
 
     @Provides

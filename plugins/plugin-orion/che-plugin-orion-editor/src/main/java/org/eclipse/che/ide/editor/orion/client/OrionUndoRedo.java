@@ -13,7 +13,7 @@ package org.eclipse.che.ide.editor.orion.client;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-import org.eclipse.che.ide.api.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionUndoStackOverlay;
 
 /**

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.TypedRegion;
+import org.eclipse.che.ide.api.editor.text.TypedRegion;
 
 /**
  * A document partitioner divides a document into a set of disjoint text partitions. Each partition has a content type, an offset,

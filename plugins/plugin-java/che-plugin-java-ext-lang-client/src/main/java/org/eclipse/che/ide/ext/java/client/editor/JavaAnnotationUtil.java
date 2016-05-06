@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import org.eclipse.che.ide.api.text.annotation.Annotation;
+import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 
 public final class JavaAnnotationUtil {
 

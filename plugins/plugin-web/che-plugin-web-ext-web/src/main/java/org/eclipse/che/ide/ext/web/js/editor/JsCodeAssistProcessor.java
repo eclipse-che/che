@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.js.editor;
 
-import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistProcessor;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 
 
 /**

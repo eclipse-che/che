@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.che.ide.ext.java.jdt.JavaPartitions;
-import org.eclipse.che.ide.jseditor.client.changeintercept.ChangeInterceptorProvider;
-import org.eclipse.che.ide.jseditor.client.changeintercept.CloseCStyleCommentChangeInterceptor;
-import org.eclipse.che.ide.jseditor.client.changeintercept.TextChangeInterceptor;
+import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
+import org.eclipse.che.ide.api.editor.changeintercept.CloseCStyleCommentChangeInterceptor;
+import org.eclipse.che.ide.api.editor.changeintercept.TextChangeInterceptor;
 
 /** Provider for {@link TextChangeInterceptor}s for java. */
 public class JavaChangeInterceptorProvider implements ChangeInterceptorProvider {

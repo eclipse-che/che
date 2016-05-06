@@ -12,7 +12,7 @@
 package org.eclipse.che.ide.ext.java.jdt.text.rules;
 
 
-import org.eclipse.che.ide.api.text.rules.Token;
+import org.eclipse.che.ide.api.editor.text.rules.Token;
 import org.eclipse.che.ide.ext.java.jdt.text.Document;
 
 /**

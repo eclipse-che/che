@@ -13,7 +13,7 @@ package org.eclipse.che.env.local.client;
 import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import static org.eclipse.che.ide.websocket.events.WebSocketClosedEvent.CLOSE_ABNORMAL;

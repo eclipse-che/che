@@ -17,11 +17,11 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.eclipse.che.ide.ext.java.jdt.JavaPartitions;
-import org.eclipse.che.ide.jseditor.client.partition.DefaultPartitioner;
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner;
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPositionMap;
-import org.eclipse.che.ide.jseditor.client.partition.PartitionScanner;
-import org.eclipse.che.ide.jseditor.client.partition.PartitionerFactory;
+import org.eclipse.che.ide.api.editor.partition.DefaultPartitioner;
+import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
+import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
+import org.eclipse.che.ide.api.editor.partition.PartitionScanner;
+import org.eclipse.che.ide.api.editor.partition.PartitionerFactory;
 
 /**
  * Factory of document partitioner for java documents.

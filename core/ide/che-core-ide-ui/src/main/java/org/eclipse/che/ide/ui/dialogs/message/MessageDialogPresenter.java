@@ -10,18 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.dialogs.message;
 
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
-
-import static org.eclipse.che.ide.ui.dialogs.message.MessageDialogView.ActionDelegate;
 
 /**
  * {@link MessageDialog} implementation.

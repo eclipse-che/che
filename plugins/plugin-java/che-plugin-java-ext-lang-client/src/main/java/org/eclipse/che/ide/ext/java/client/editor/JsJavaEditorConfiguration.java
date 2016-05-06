@@ -14,23 +14,23 @@ import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.changeintercept.ChangeInterceptorProvider;
-import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistProcessor;
-import org.eclipse.che.ide.jseditor.client.editorconfig.DefaultTextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.formatter.ContentFormatter;
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner;
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPositionMap;
-import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistProcessor;
-import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
-import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilerFactory;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
+import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
+import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
+import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
+import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.reconciler.ReconcilerFactory;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.eclipse.che.ide.jseditor.client.partition.DefaultPartitioner.DEFAULT_PARTITIONING;
-import static org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
+import static org.eclipse.che.ide.api.editor.partition.DefaultPartitioner.DEFAULT_PARTITIONING;
+import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
 
 /**
  * Text editor configuration for java files.

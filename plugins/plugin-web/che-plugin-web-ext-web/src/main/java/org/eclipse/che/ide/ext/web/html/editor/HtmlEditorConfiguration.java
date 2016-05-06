@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.html.editor;
 
-import org.eclipse.che.ide.jseditor.client.changeintercept.ChangeInterceptorProvider;
-import org.eclipse.che.ide.jseditor.client.changeintercept.TextChangeInterceptor;
-import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistProcessor;
-import org.eclipse.che.ide.jseditor.client.editorconfig.AutoSaveTextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner;
+import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
+import org.eclipse.che.ide.api.editor.changeintercept.TextChangeInterceptor;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
+import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 
 import java.util.ArrayList;
 import java.util.HashMap;

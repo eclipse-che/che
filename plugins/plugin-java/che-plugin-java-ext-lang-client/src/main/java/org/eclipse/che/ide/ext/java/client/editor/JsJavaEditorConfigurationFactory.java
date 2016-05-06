@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 public interface JsJavaEditorConfigurationFactory {
     JsJavaEditorConfiguration create(TextEditorPresenter< ? > editor);

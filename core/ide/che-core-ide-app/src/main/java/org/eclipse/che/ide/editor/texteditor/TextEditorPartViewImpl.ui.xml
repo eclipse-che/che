@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent"><!-- required for html entities -->
+
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:my="urn:import:org.eclipse.che.ide.editor.texteditor.infopanel">
+    <ui:style>
+        .editorZone-layout {
+            display: flex;
+            display: -webkit-flex;
+
+            flex-flow: column;
+            -webkit-flex-flow: column;
+
+            justify-content: flex-start;
+            -webkit-justify-content: flex-start;
+
+            align-items: stretch;
+            -webkit-align-items: stretch;
+        }
+        .editorZone-editor {
+            flex-grow: 1;
+            -webkit-flex-grow: 1;
+            flex-shrink: 1;
+            -webkit-flex-shrink: 1;
+            
+            display: -webkit-flex;
+            display: flex;
+        }
+        .editorZone-infopanel {
+            flex-grow: 0; /* don't allow growth if there is space available */
+            -webkit-flex-grow: 0;
+            flex-shrink: 0; /* don't allow to shrink if there is not enough space */
+            -webkit-flex-shrink: 0;
+        }
+
+    </ui:style>
+
+    <g:HTMLPanel width="100%" height="100%" addStyleNames="{style.editorZone-layout}">
+        <g:SimplePanel ui:field="editorPanel" addStyleNames="{style.editorZone-editor}" />
+        <my:InfoPanel ui:field="infoPanel" addStyleNames="{style.editorZone-infopanel}" />
+    </g:HTMLPanel>
+
+</ui:UiBinder>

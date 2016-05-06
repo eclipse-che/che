@@ -16,7 +16,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAttributesOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionStyleOverlay;
-import org.eclipse.che.ide.jseditor.client.texteditor.LineStyler;
+import org.eclipse.che.ide.api.editor.texteditor.LineStyler;
 
 /**
  * Implementation of {@link LineStyler} for orion.

@@ -26,10 +26,10 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingModule;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
-import org.eclipse.che.ide.jseditor.client.requirejs.RequireJsLoader;
-import org.eclipse.che.ide.jseditor.client.requirejs.RequirejsErrorHandler.RequireError;
-import org.eclipse.che.ide.jseditor.client.texteditor.AbstractEditorModule.EditorInitializer;
-import org.eclipse.che.ide.jseditor.client.texteditor.AbstractEditorModule.InitializerCallback;
+import org.eclipse.che.ide.requirejs.RequireJsLoader;
+import org.eclipse.che.ide.requirejs.RequirejsErrorHandler.RequireError;
+import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.EditorInitializer;
+import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.InitializerCallback;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;

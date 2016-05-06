@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text.edits;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
-import org.eclipse.che.ide.api.text.BadPositionCategoryException;
-import org.eclipse.che.ide.api.text.Position;
-import org.eclipse.che.ide.api.text.Region;
-import org.eclipse.che.ide.api.text.TypedRegion;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.BadPositionCategoryException;
+import org.eclipse.che.ide.api.editor.text.Position;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.ext.java.jdt.text.BadPartitioningException;
 import org.eclipse.che.ide.ext.java.jdt.text.Document;
 import org.eclipse.che.ide.ext.java.jdt.text.DocumentListener;

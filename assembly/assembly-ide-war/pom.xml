@@ -150,10 +150,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-jseditor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>wsmaster-local</artifactId>
         </dependency>
         <dependency>
@@ -482,7 +478,6 @@
                         WEB-INF/lib/che-core-commons-gwt-*.jar,
                         WEB-INF/lib/che-core-ide-api-*.jar,
                         WEB-INF/lib/che-core-ide-app-*.jar,
-                        WEB-INF/lib/che-core-ide-jseditor-*.jar,
                         WEB-INF/lib/che-core-ide-ui-*.jar</packagingExcludes>
                 </configuration>
             </plugin>
