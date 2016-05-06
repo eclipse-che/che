@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.debug.BreakpointManager;
+import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerLocalizationConstant;
 import org.eclipse.che.ide.ext.debugger.client.DebuggerResources;
 

@@ -13,8 +13,8 @@ package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModel;
+import org.eclipse.che.ide.api.editor.link.LinkedMode;
+import org.eclipse.che.ide.api.editor.link.LinkedModel;
 
 /**
  * @author Evgen Vidolob
@@ -106,7 +106,7 @@ public class OrionLinkedModeOverlay extends JavaScriptObject implements LinkedMo
         this._annotationModel.addEventListener("Changed", annotationListener, true);
         this.annotationListener = annotationListener;
         var func = function (param) {
-            listener.@org.eclipse.che.ide.jseditor.client.link.LinkedMode.LinkedModeListener::onLinkedModeExited(*)(param.isSuccessful,
+            listener.@org.eclipse.che.ide.api.editor.link.LinkedMode.LinkedModeListener::onLinkedModeExited(*)(param.isSuccessful,
                 start, end);
         };
         $wnd.che_handels[listener] = func;

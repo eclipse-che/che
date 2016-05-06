@@ -14,47 +14,48 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.ide.debug.BreakpointManager;
+import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
-import org.eclipse.che.ide.jseditor.client.JsEditorConstants;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModelEvent;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModelHandler;
-import org.eclipse.che.ide.jseditor.client.annotation.ClearAnnotationModelEvent;
-import org.eclipse.che.ide.jseditor.client.annotation.ClearAnnotationModelHandler;
-import org.eclipse.che.ide.jseditor.client.annotation.HasAnnotationRendering;
-import org.eclipse.che.ide.jseditor.client.codeassist.CodeAssistantFactory;
-import org.eclipse.che.ide.jseditor.client.codeassist.HasCompletionInformation;
-import org.eclipse.che.ide.jseditor.client.debug.BreakpointRendererFactory;
-import org.eclipse.che.ide.jseditor.client.document.DocumentHandle;
-import org.eclipse.che.ide.jseditor.client.document.DocumentStorage;
-import org.eclipse.che.ide.jseditor.client.filetype.FileTypeIdentifier;
-import org.eclipse.che.ide.jseditor.client.gutter.Gutter;
-import org.eclipse.che.ide.jseditor.client.gutter.HasGutter;
-import org.eclipse.che.ide.jseditor.client.link.HasLinkedMode;
-import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModel;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModelData;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModelGroup;
-import org.eclipse.che.ide.jseditor.client.quickfix.QuickAssistantFactory;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorModule;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidget;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidgetFactory;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPartView;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModelEvent;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModelHandler;
+import org.eclipse.che.ide.api.editor.annotation.ClearAnnotationModelEvent;
+import org.eclipse.che.ide.api.editor.annotation.ClearAnnotationModelHandler;
+import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistantFactory;
+import org.eclipse.che.ide.api.editor.codeassist.HasCompletionInformation;
+import org.eclipse.che.ide.api.debug.BreakpointRendererFactory;
+import org.eclipse.che.ide.api.editor.document.DocumentHandle;
+import org.eclipse.che.ide.api.editor.document.DocumentStorage;
+import org.eclipse.che.ide.api.editor.filetype.FileTypeIdentifier;
+import org.eclipse.che.ide.api.editor.gutter.Gutter;
+import org.eclipse.che.ide.api.editor.gutter.HasGutter;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
+import org.eclipse.che.ide.api.editor.link.LinkedMode;
+import org.eclipse.che.ide.api.editor.link.LinkedModel;
+import org.eclipse.che.ide.api.editor.link.LinkedModelData;
+import org.eclipse.che.ide.api.editor.link.LinkedModelGroup;
+import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
+import org.eclipse.che.ide.api.editor.texteditor.EditorModule;
+import org.eclipse.che.ide.api.editor.texteditor.EditorWidget;
+import org.eclipse.che.ide.api.editor.texteditor.EditorWidgetFactory;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 /**
- * {@link EmbeddedTextEditorPresenter} using orion.
+ * {@link TextEditorPresenter} using orion.
  * This class is only defined to allow the Gin binding to be performed.
  */
-public class OrionEditorPresenter extends EmbeddedTextEditorPresenter<OrionEditorWidget> implements HasAnnotationRendering,
-                                                                                                    HasLinkedMode,
-                                                                                                    HasCompletionInformation,
-                                                                                                    HasGutter {
+public class OrionEditorPresenter extends TextEditorPresenter<OrionEditorWidget> implements HasAnnotationRendering,
+                                                                                            HasLinkedMode,
+                                                                                            HasCompletionInformation,
+                                                                                            HasGutter {
 
     private final AnnotationRendering rendering = new AnnotationRendering();
 
@@ -64,14 +65,15 @@ public class OrionEditorPresenter extends EmbeddedTextEditorPresenter<OrionEdito
                                 final BreakpointRendererFactory breakpointRendererFactory,
                                 final DialogFactory dialogFactory,
                                 final DocumentStorage documentStorage,
-                                final JsEditorConstants constant,
+                                final EditorLocalizationConstants constant,
                                 @Assisted final EditorWidgetFactory<OrionEditorWidget> editorWigetFactory,
                                 final EditorModule<OrionEditorWidget> editorModule,
-                                final EmbeddedTextEditorPartView editorView,
+                                final TextEditorPartView editorView,
                                 final EventBus eventBus,
                                 final FileTypeIdentifier fileTypeIdentifier,
                                 final QuickAssistantFactory quickAssistantFactory,
-                                final WorkspaceAgent workspaceAgent) {
+                                final WorkspaceAgent workspaceAgent,
+                                final NotificationManager notificationManager) {
         super(codeAssistantFactory,
               breakpointManager,
               breakpointRendererFactory,
@@ -84,7 +86,8 @@ public class OrionEditorPresenter extends EmbeddedTextEditorPresenter<OrionEdito
               eventBus,
               fileTypeIdentifier,
               quickAssistantFactory,
-              workspaceAgent);
+              workspaceAgent,
+              notificationManager);
     }
 
     @Override

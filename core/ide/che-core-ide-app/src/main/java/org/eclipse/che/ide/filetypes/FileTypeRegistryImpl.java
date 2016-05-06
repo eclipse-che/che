@@ -72,19 +72,6 @@ public class FileTypeRegistryImpl implements FileTypeRegistry {
     }
 
     @Override
-    public FileType getFileTypeByMimeType(String mimeType) {
-        if (!Strings.isNullOrEmpty(mimeType)) {
-            for (FileType type : fileTypes) {
-                if (type.getMimeTypes() != null && type.getMimeTypes().contains(mimeType)) {
-                    return type;
-                }
-            }
-        }
-
-        return unknownFileType;
-    }
-
-    @Override
     public FileType getFileTypeByNamePattern(String name) {
         if (!Strings.isNullOrEmpty(name)) {
             for (FileType type : fileTypes) {

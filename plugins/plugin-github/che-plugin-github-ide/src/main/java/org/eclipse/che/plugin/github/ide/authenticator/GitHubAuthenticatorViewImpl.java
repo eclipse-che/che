@@ -19,9 +19,9 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
-import org.eclipse.che.ide.ui.dialogs.CancelCallback;
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 /**
  * @author Roman Nikitenko

@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.text.Position;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
@@ -39,17 +39,17 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactori
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.LinkedRenameRefactoringApply;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSession;
-import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.link.HasLinkedMode;
-import org.eclipse.che.ide.jseditor.client.link.LinkedMode;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModel;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModelData;
-import org.eclipse.che.ide.jseditor.client.link.LinkedModelGroup;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
-import org.eclipse.che.ide.ui.dialogs.CancelCallback;
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
+import org.eclipse.che.ide.api.editor.link.LinkedMode;
+import org.eclipse.che.ide.api.editor.link.LinkedModel;
+import org.eclipse.che.ide.api.editor.link.LinkedModelData;
+import org.eclipse.che.ide.api.editor.link.LinkedModelGroup;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -278,8 +278,8 @@ public class JavaRefactoringRename implements FileEventHandler {
     }
 
     private void undoChanges() {
-        if (linkedEditor instanceof EmbeddedTextEditorPresenter) {
-            ((EmbeddedTextEditorPresenter)linkedEditor).getUndoRedo().undo();
+        if (linkedEditor instanceof TextEditorPresenter) {
+            ((TextEditorPresenter)linkedEditor).getUndoRedo().undo();
         }
     }
 

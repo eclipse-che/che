@@ -54,15 +54,6 @@ public interface FileTypeRegistry {
     FileType getFileTypeByExtension(String extension);
 
     /**
-     * Returns the file type for the specified MIME-type.
-     *
-     * @param mimeType
-     *         MIME-type for which file type need to find
-     * @return file type or default file type if no file type found
-     */
-    FileType getFileTypeByMimeType(String mimeType);
-
-    /**
      * Returns the file type which pattern matches the specified file name.
      *
      * @param name

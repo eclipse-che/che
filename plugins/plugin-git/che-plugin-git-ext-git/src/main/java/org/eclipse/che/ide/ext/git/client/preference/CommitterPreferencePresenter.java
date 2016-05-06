@@ -39,7 +39,7 @@ public class CommitterPreferencePresenter extends AbstractPreferencePagePresente
     public CommitterPreferencePresenter(CommitterPreferenceView view,
                                         GitLocalizationConstant constant,
                                         PreferencesManager preferencesManager) {
-        super(constant.committerTitle(), constant.committerPreferenceCategory(), null);
+        super(constant.committerTitle(), constant.committerPreferenceCategory());
         this.view = view;
         this.preferencesManager = preferencesManager;
 

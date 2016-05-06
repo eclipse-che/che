@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.ext.java.client.action.ProposalAction;
-import org.eclipse.che.ide.jseditor.client.codeassist.CompletionProposal;
+import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**

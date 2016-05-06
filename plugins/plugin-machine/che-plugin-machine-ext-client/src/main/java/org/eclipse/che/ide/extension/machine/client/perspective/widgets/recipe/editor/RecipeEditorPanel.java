@@ -20,20 +20,18 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.api.texteditor.HandlesUndoRedo;
-import org.eclipse.che.ide.api.texteditor.HasReadOnlyProperty;
-import org.eclipse.che.ide.api.texteditor.UndoableEditor;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
+import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
-import org.eclipse.che.ide.jseditor.client.editorconfig.DefaultTextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -52,7 +50,6 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
     private final FileTypeRegistry       fileTypeRegistry;
     private final RecipeDescriptor       recipeDescriptor;
     private final OrionTextEditorFactory orionTextEditorFactory;
-    private final NotificationManager    notificationManager;
 
     private EditorPartPresenter editor;
     private ActionDelegate      delegate;
@@ -64,11 +61,9 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
     public RecipeEditorPanel(RecipeFileFactory recipeFileFactory,
                              FileTypeRegistry fileTypeRegistry,
                              OrionTextEditorFactory orionTextEditorFactory,
-                             NotificationManager notificationManager,
                              RecipeEditorView view,
                              @Assisted @NotNull RecipeDescriptor recipeDescriptor) {
         this.view = view;
-        this.notificationManager = notificationManager;
         this.recipeFileFactory = recipeFileFactory;
         this.orionTextEditorFactory = orionTextEditorFactory;
         this.fileTypeRegistry = fileTypeRegistry;
@@ -172,9 +167,9 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
         editor.init(new RecipeEditorInput(fileType, file), new OpenEditorCallbackImpl());
     }
 
-    private EmbeddedTextEditor getEditor() {
-        EmbeddedTextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
-        editor.initialize(new DefaultTextEditorConfiguration(), notificationManager);
+    private TextEditor getEditor() {
+        TextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
+        editor.initialize(new DefaultTextEditorConfiguration());
 
         return editor;
     }

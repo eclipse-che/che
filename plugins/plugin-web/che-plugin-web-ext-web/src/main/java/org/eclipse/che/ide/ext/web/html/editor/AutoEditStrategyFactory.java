@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.html.editor;
 
-import org.eclipse.che.ide.jseditor.client.changeintercept.TextChangeInterceptor;
+import org.eclipse.che.ide.api.editor.changeintercept.TextChangeInterceptor;
 
 /**
  * Allows to define a new AutoEditStrategy based on text editor and content type.

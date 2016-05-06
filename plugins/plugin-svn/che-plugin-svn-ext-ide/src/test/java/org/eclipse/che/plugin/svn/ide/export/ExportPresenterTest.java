@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.svn.ide.export;
 
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.plugin.svn.ide.common.BaseSubversionPresenterTest;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Test;
 import org.mockito.Mock;
 

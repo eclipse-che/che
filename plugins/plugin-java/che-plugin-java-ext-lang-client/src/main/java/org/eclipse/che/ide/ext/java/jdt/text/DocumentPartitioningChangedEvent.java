@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.Region;
-import org.eclipse.che.ide.api.text.RegionImpl;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.RegionImpl;
 import org.eclipse.che.ide.runtime.Assert;
 
 import java.util.HashMap;

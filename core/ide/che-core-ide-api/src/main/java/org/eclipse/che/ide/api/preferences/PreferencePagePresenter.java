@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.api.preferences;
 
 import org.eclipse.che.ide.api.mvp.Presenter;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Interface of preference page.
@@ -47,13 +46,6 @@ public interface PreferencePagePresenter extends Presenter {
      * @return
      */
     String getTitle();
-
-    /**
-     * Returns this preference page's icon. This icon will be shown into list of preferences.
-     *
-     * @return
-     */
-    SVGResource getIcon();
 
     /**
      * Returns whether this page is changed or not.

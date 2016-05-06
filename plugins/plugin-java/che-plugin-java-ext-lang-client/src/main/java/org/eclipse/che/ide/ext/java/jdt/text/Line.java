@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.Region;
+import org.eclipse.che.ide.api.editor.text.Region;
 
 /**
  * Describes a line as a particular number of characters beginning at a particular offset, consisting of a particular number of

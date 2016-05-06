@@ -10,28 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client;
 
-import org.eclipse.che.ide.jseditor.client.editortype.EditorType;
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
 import com.google.gwt.core.shared.GWT;
+
+import org.eclipse.che.ide.api.editor.keymap.Keymap;
 
 /**
  * Keymaps supported by Orion.
- * 
+ *
  * @author "Mickaël Leduque"
  */
 public class KeyMode {
-
 
     public static Keymap DEFAULT;
     public static Keymap EMACS;
     public static Keymap VI;
 
-
     public final static void init() {
         KeymodeDisplayConstants constants = GWT.create(KeymodeDisplayConstants.class);
-        EditorType orionEditor = EditorType.fromKey(OrionEditorExtension.ORION_EDITOR_KEY);
-        DEFAULT = Keymap.newKeymap("orion_default", constants.defaultKeymap(), orionEditor);
-        EMACS = Keymap.newKeymap("Orion_emacs", constants.emacs(), orionEditor);
-        VI = Keymap.newKeymap("Orion_vim", constants.vi(), orionEditor);
+        DEFAULT = Keymap.newKeymap("orion_default", constants.defaultKeymap());
+        EMACS = Keymap.newKeymap("Orion_emacs", constants.emacs());
+        VI = Keymap.newKeymap("Orion_vim", constants.vi());
     }
 }

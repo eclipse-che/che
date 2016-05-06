@@ -26,6 +26,8 @@
         <findbugs.failonerror>false</findbugs.failonerror>
         <license_years>2014-2015</license_years>
         <patches.location>${basedir}/src/main/patches</patches.location>
+        <requirejs.upstream.url>http://requirejs.org/docs/release/${requirejs.upstream.version}/comments/</requirejs.upstream.url>
+        <requirejs.upstream.version>2.1.15</requirejs.upstream.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -74,10 +76,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-jseditor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-ui</artifactId>
         </dependency>
         <dependency>
@@ -97,6 +95,9 @@
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>target/requirejs-${requirejs.upstream.version}</directory>
             </resource>
         </resources>
         <plugins>
@@ -123,6 +124,24 @@
                             <strictPatching>true</strictPatching>
                             <strip>1</strip>
                             <targetDirectory>${project.build.directory}/classes</targetDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>1.0-beta-4</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>download-single</goal>
+                        </goals>
+                        <configuration>
+                            <url>${requirejs.upstream.url}</url>
+                            <fromFile>require.js</fromFile>
+                            <toFile>${project.build.directory}/requirejs-${requirejs.upstream.version}/org/eclipse/che/ide/editor/orion/public/require.js</toFile>
                         </configuration>
                     </execution>
                 </executions>

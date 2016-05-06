@@ -37,8 +37,8 @@ import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.ClassFile;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
-import org.eclipse.che.ide.jseditor.client.text.LinearRange;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.resource.Path;
@@ -201,8 +201,8 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
     }
 
     private void fileOpened(EditorPartPresenter editor) {
-        if (editor instanceof EmbeddedTextEditorPresenter) {
-            ((EmbeddedTextEditorPresenter)editor).getDocument().setSelectedRange(
+        if (editor instanceof TextEditorPresenter) {
+            ((TextEditorPresenter)editor).getDocument().setSelectedRange(
                     LinearRange.createWithStart(match.getFileMatchRegion().getOffset()).andLength(match.getFileMatchRegion().getLength()),
                     true);
         }

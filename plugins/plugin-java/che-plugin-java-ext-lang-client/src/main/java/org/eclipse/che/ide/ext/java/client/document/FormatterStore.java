@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.document;
 
 import org.eclipse.che.ide.ext.java.jdt.text.TextStore;
-import org.eclipse.che.ide.jseditor.client.document.Document;
+import org.eclipse.che.ide.api.editor.document.Document;
 
 /**
  * Provides access to the stored text into document and allows to manipulate it.

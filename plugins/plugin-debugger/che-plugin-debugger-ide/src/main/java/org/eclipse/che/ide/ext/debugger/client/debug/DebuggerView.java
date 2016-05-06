@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.debug.Breakpoint;
+import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.ext.debugger.shared.Location;
 
 import javax.validation.constraints.NotNull;

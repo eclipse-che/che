@@ -91,7 +91,10 @@ public class MavenExtension {
     }
 
     @Inject
-    private void registerFileType(FileTypeRegistry fileTypeRegistry, MavenResources mavenResources, EditorRegistry editorRegistry, PomEditorProvider editorProvider) {
+    private void registerFileType(FileTypeRegistry fileTypeRegistry,
+                                  MavenResources mavenResources,
+                                  EditorRegistry editorRegistry,
+                                  PomEditorProvider editorProvider) {
         FileType pomFile = new FileType(mavenResources.maven(), "pom.xml");
         fileTypeRegistry.registerFileType(pomFile);
         editorRegistry.register(pomFile, editorProvider);

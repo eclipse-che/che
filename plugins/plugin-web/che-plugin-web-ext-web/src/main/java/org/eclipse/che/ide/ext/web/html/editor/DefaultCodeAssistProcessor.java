@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.html.editor;
 
-import org.eclipse.che.ide.jseditor.client.codeassist.DefaultChainedCodeAssistProcessor;
+import org.eclipse.che.ide.api.editor.codeassist.DefaultChainedCodeAssistProcessor;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 

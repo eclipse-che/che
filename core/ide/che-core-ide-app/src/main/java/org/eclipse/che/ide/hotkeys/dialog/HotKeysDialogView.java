@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.hotkeys.dialog;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.hotkeys.HotKeyItem;
+import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 
 import java.util.List;
 import java.util.Map;

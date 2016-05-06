@@ -10,42 +10,31 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import static org.eclipse.che.ide.jseditor.client.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
-
-import java.util.logging.Logger;
+import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
+import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 import javax.inject.Inject;
+import java.util.logging.Logger;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
-import org.eclipse.che.ide.jseditor.client.editorconfig.EditorUpdateAction;
-import org.eclipse.che.ide.jseditor.client.editorconfig.TextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.reconciler.Reconciler;
-import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import static org.eclipse.che.ide.api.editor.partition.DocumentPartitioner.DEFAULT_CONTENT_TYPE;
 
 /** EditorProvider that provides a text editor configured for java source files. */
-public class JsJavaEditorProvider implements EditorProvider {
+public class JsJavaEditorProvider extends AbstractTextEditorProvider {
 
     private static final Logger LOG = Logger.getLogger(JsJavaEditorProvider.class.getName());
 
-    private final DefaultEditorProvider editorProvider;
-    private final FileWatcher watcher;
-    private final JsJavaEditorConfigurationFactory jsJavaEditorConfigurationFactory;
-    private final NotificationManager notificationManager;
-
+    private final FileWatcher                      watcher;
+    private final JsJavaEditorConfigurationFactory configurationFactory;
 
     @Inject
-    public JsJavaEditorProvider(final DefaultEditorProvider editorProvider,
-                                final FileWatcher watcher,
-                                final JsJavaEditorConfigurationFactory jsJavaEditorConfigurationFactory,
-                                final NotificationManager notificationManager) {
-        this.editorProvider = editorProvider;
+    public JsJavaEditorProvider(FileWatcher watcher, JsJavaEditorConfigurationFactory jsJavaEditorConfigurationFactory) {
         this.watcher = watcher;
-        this.jsJavaEditorConfigurationFactory = jsJavaEditorConfigurationFactory;
-        this.notificationManager = notificationManager;
+        this.configurationFactory = jsJavaEditorConfigurationFactory;
     }
 
     @Override
@@ -59,16 +48,15 @@ public class JsJavaEditorProvider implements EditorProvider {
     }
 
     @Override
-    public EditorPartPresenter getEditor() {
+    public TextEditor getEditor() {
         LOG.fine("JsJavaEditor instance creation.");
 
-        final EditorPartPresenter textEditor = editorProvider.getEditor();
+        final TextEditor textEditor = super.getEditor();
 
-        if (textEditor instanceof EmbeddedTextEditorPresenter) {
-            final EmbeddedTextEditorPresenter< ? > editor = (EmbeddedTextEditorPresenter< ? >)textEditor;
-            final TextEditorConfiguration configuration =
-                                                          this.jsJavaEditorConfigurationFactory.create(editor);
-            editor.initialize(configuration, this.notificationManager);
+        if (textEditor instanceof TextEditorPresenter) {
+            final TextEditorPresenter<?> editor = (TextEditorPresenter<?>)textEditor;
+            final TextEditorConfiguration configuration = configurationFactory.create(editor);
+            editor.initialize(configuration);
             editor.addEditorUpdateAction(new EditorUpdateAction() {
                 @Override
                 public void doRefresh() {
@@ -82,8 +70,9 @@ public class JsJavaEditorProvider implements EditorProvider {
                 }
             });
         }
+
         watcher.editorOpened(textEditor);
+
         return textEditor;
     }
-
 }

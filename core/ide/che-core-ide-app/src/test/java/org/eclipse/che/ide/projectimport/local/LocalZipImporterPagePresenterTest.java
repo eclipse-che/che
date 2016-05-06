@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ui.dialogs.message.MessageDialog;
+import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

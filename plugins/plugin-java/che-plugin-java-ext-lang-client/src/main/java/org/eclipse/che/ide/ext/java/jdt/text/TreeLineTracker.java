@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
-import org.eclipse.che.ide.api.text.Region;
-import org.eclipse.che.ide.api.text.RegionImpl;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.RegionImpl;
 import org.eclipse.che.ide.ext.java.jdt.text.AbstractLineTracker.DelimiterInfo;
 import org.eclipse.che.ide.runtime.Assert;
 
@@ -1083,7 +1083,7 @@ abstract class TreeLineTracker implements LineTracker {
      *
      * @param offset
      *         the illegal character or line offset that caused the exception
-     * @throws org.eclipse.che.ide.api.text.BadLocationException
+     * @throws org.eclipse.che.ide.api.editor.text.BadLocationException
      *         always
      */
     private void fail(int offset) throws BadLocationException {

@@ -16,7 +16,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
@@ -40,7 +39,7 @@ public class PythonGinModule extends AbstractGinModule {
     @Singleton
     @Named("PythonFileType")
     protected FileType providePythonFile() {
-        return new FileType("Python", PythonResources.INSTANCE.pythonFile(), MimeType.TEXT_X_PYTHON, PYTHON_EXT);
+        return new FileType(PythonResources.INSTANCE.pythonFile(), PYTHON_EXT);
     }
 
 }

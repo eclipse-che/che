@@ -22,8 +22,8 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.debug.Breakpoint;
-import org.eclipse.che.ide.debug.BreakpointManager;
+import org.eclipse.che.ide.api.debug.Breakpoint;
+import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -42,7 +42,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -127,7 +126,7 @@ public class DebuggerPresenterTest extends BaseTest {
         presenter.onSelectedVariableElement(selectedVariable);
 
         FileType fileType = mock(FileType.class);
-        doReturn(Collections.singletonList("application/java")).when(fileType).getMimeTypes();
+        doReturn("java").when(fileType).getExtension();
         doReturn(fileType).when(fileTypeRegistry).getFileTypeByFile(eq(file));
     }
 

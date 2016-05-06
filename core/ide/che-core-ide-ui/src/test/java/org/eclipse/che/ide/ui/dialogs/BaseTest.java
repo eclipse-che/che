@@ -13,6 +13,9 @@ package org.eclipse.che.ide.ui.dialogs;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

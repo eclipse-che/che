@@ -15,12 +15,11 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
-import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,15 +53,13 @@ public class RecipeEditorPanelTest {
     private RecipeDescriptor       recipeDescriptor;
     @Mock
     private OrionTextEditorFactory orionTextEditorFactory;
-    @Mock
-    private NotificationManager    notificationManager;
 
     @Mock
-    private VirtualFile                                    recipeFile;
+    private VirtualFile                            recipeFile;
     @Mock
-    private RecipeEditorPanel.ActionDelegate               delegate;
+    private RecipeEditorPanel.ActionDelegate       delegate;
     @Mock
-    private EmbeddedTextEditorPresenter<OrionEditorWidget> editor;
+    private TextEditorPresenter<OrionEditorWidget> editor;
 
     private RecipeEditorPanel presenter;
 
@@ -75,7 +72,6 @@ public class RecipeEditorPanelTest {
         presenter = new RecipeEditorPanel(recipeFileFactory,
                                           fileTypeRegistry,
                                           orionTextEditorFactory,
-                                          notificationManager,
                                           view,
                                           recipeDescriptor);
 

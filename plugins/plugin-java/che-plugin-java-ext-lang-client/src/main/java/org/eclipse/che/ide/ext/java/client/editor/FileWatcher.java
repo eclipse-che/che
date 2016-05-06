@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
 import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
 
@@ -38,7 +38,7 @@ public class FileWatcher {
     @Inject
     private EditorAgent editorAgent;
 
-    private Set<EmbeddedTextEditorPresenter> editor2reconcile = new HashSet<>();
+    private Set<TextEditorPresenter> editor2reconcile = new HashSet<>();
 
     @Inject
     private void handleFileOperations(EventBus eventBus) {
@@ -56,16 +56,16 @@ public class FileWatcher {
         eventBus.addHandler(ActivePartChangedEvent.TYPE, new ActivePartChangedHandler() {
             @Override
             public void onActivePartChanged(ActivePartChangedEvent event) {
-                if (event.getActivePart() instanceof EmbeddedTextEditorPresenter) {
+                if (event.getActivePart() instanceof TextEditorPresenter) {
                     if (editor2reconcile.contains(event.getActivePart())) {
-                        reParseEditor((EmbeddedTextEditorPresenter<?>)event.getActivePart());
+                        reParseEditor((TextEditorPresenter<?>)event.getActivePart());
                     }
                 }
             }
         });
     }
 
-    private void reParseEditor(EmbeddedTextEditorPresenter<?> editor) {
+    private void reParseEditor(TextEditorPresenter<?> editor) {
         editor.refreshEditor();
         editor2reconcile.remove(editor);
     }
@@ -78,7 +78,7 @@ public class FileWatcher {
                     if (!editor.isDirty()) {
                         reparseAllOpenedFiles();
                         //remove just saved editor
-                        editor2reconcile.remove((EmbeddedTextEditorPresenter)editor);
+                        editor2reconcile.remove((TextEditorPresenter)editor);
                     }
                 }
             }
@@ -88,8 +88,8 @@ public class FileWatcher {
 
     private void reparseAllOpenedFiles() {
         for (EditorPartPresenter editorPartPresenter: editorAgent.getOpenedEditors()) {
-            if (editorPartPresenter instanceof EmbeddedTextEditorPresenter) {
-                final EmbeddedTextEditorPresenter< ? > editor = (EmbeddedTextEditorPresenter< ? >)editorPartPresenter;
+            if (editorPartPresenter instanceof TextEditorPresenter) {
+                final TextEditorPresenter< ? > editor = (TextEditorPresenter< ? >)editorPartPresenter;
                 editor.refreshEditor();
             }
         }

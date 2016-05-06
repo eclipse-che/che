@@ -35,7 +35,7 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFact
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
-import org.eclipse.che.ide.ui.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.junit.Before;
 import org.junit.Test;

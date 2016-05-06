@@ -17,16 +17,16 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.text.Region;
+import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.ext.java.client.editor.ProblemRequester;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
-import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.reconciler.DirtyRegion;
-import org.eclipse.che.ide.jseditor.client.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
+import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.List;
 public class PomReconsilingStrategy implements ReconcilingStrategy {
 
     private final AnnotationModel          annotationModel;
-    private final EmbeddedTextEditorPresenter<?>
+    private final TextEditorPresenter<?>
                                            editor;
     private final MavenServerServiceClient client;
     private       String                   pomPath;
@@ -47,7 +47,7 @@ public class PomReconsilingStrategy implements ReconcilingStrategy {
 
     @Inject
     public PomReconsilingStrategy(@Assisted AnnotationModel annotationModel,
-                                  @Assisted @NotNull final EmbeddedTextEditorPresenter<?> editor,
+                                  @Assisted @NotNull final TextEditorPresenter<?> editor,
                                   MavenServerServiceClient client) {
         this.annotationModel = annotationModel;
         this.editor = editor;

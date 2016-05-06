@@ -13,32 +13,23 @@ package org.eclipse.che.plugin.maven.client.editor;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.editor.EditorProvider;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.DefaultEditorProvider;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * Creates editor for pom.xml file
  *
  * @author Evgen Vidolob
+ * @author Artem Zatsarynnyi
  */
 @Singleton
-public class PomEditorProvider implements EditorProvider {
+public class PomEditorProvider extends AbstractTextEditorProvider {
 
-
-    private final DefaultEditorProvider         editorProvider;
-    private final NotificationManager           notificationManager;
     private final PomEditorConfigurationFactory configurationFactory;
 
     @Inject
-    public PomEditorProvider(DefaultEditorProvider editorProvider,
-                             NotificationManager notificationManager,
-                             PomEditorConfigurationFactory configurationFactory) {
-        this.editorProvider = editorProvider;
-        this.notificationManager = notificationManager;
+    public PomEditorProvider(PomEditorConfigurationFactory configurationFactory) {
         this.configurationFactory = configurationFactory;
     }
 
@@ -53,10 +44,13 @@ public class PomEditorProvider implements EditorProvider {
     }
 
     @Override
-    public EditorPartPresenter getEditor() {
-        ConfigurableTextEditor editor = editorProvider.getEditor();
-        PomEditorConfiguration configuration = configurationFactory.create((EmbeddedTextEditorPresenter<?>)editor);
-        editor.initialize(configuration, notificationManager);
+    public TextEditor getEditor() {
+        TextEditor editor = super.getEditor();
+        if (editor instanceof TextEditorPresenter) {
+            PomEditorConfiguration configuration = configurationFactory.create((TextEditorPresenter<?>)editor);
+            editor.initialize(configuration);
+        }
+
         return editor;
     }
 }

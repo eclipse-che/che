@@ -28,10 +28,10 @@ import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
 import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
 import org.eclipse.che.ide.ext.git.ssh.client.SshLocalizationConstant;
 import org.eclipse.che.ide.ext.git.ssh.client.upload.UploadSshKeyPresenter;
-import org.eclipse.che.ide.ui.dialogs.CancelCallback;
-import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.ui.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -68,7 +68,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                   NotificationManager notificationManager,
                                   DialogFactory dialogFactory,
                                   GitSshKeyUploaderRegistry registry) {
-        super(constant.sshManagerTitle(), constant.sshManagerCategory(), null);
+        super(constant.sshManagerTitle(), constant.sshManagerCategory());
 
         this.view = view;
         this.appContext = appContext;

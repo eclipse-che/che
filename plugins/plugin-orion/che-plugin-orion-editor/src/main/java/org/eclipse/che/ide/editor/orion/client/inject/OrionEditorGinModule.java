@@ -10,32 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client.inject;
 
-
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
-import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.editor.orion.client.ContentAssistWidgetFactory;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorBuilder;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorExtension;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorModule;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
-import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingModule;
-import org.eclipse.che.ide.jseditor.client.JsEditorExtension;
-import org.eclipse.che.ide.jseditor.client.defaulteditor.EditorBuilder;
-import org.eclipse.che.ide.jseditor.client.editorconfig.AutoSaveTextEditorConfiguration;
-import org.eclipse.che.ide.jseditor.client.texteditor.ConfigurableTextEditor;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorModule;
-import org.eclipse.che.ide.jseditor.client.texteditor.EditorWidgetFactory;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenterFactory;
-
-import javax.inject.Named;
+import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
+import org.eclipse.che.ide.api.editor.texteditor.EditorModule;
+import org.eclipse.che.ide.api.editor.texteditor.EditorWidgetFactory;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenterFactory;
+import org.eclipse.che.ide.requirejs.ModuleHolder;
 
 @ExtensionGinModule
 public class OrionEditorGinModule extends AbstractGinModule {
@@ -49,31 +42,13 @@ public class OrionEditorGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
 
         install(new GinFactoryModuleBuilder()
-                        .implement(new TypeLiteral<EmbeddedTextEditorPresenter<OrionEditorWidget>>() {
+                        .implement(new TypeLiteral<TextEditorPresenter<OrionEditorWidget>>() {
                         }, OrionEditorPresenter.class)
-                        .build(new TypeLiteral<EmbeddedTextEditorPresenterFactory<OrionEditorWidget>>() {
+                        .build(new TypeLiteral<TextEditorPresenterFactory<OrionEditorWidget>>() {
                         }));
-    }
 
-    @Provides
-    @Singleton
-    @Named(JsEditorExtension.EMBEDDED_EDITOR_BUILDER)
-    protected EditorBuilder embeddedEditor(final OrionTextEditorFactory orionTextEditorFactory,
-                                           final NotificationManager notificationManager) {
-        return new EditorBuilder() {
-            @Override
-            public ConfigurableTextEditor buildEditor() {
-                final EmbeddedTextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
-                editor.initialize(new AutoSaveTextEditorConfiguration(), notificationManager);
-                return editor;
-            }
-        };
-    }
+        bind(EditorBuilder.class).to(OrionEditorBuilder.class);
 
-    @Provides
-    @Singleton
-    @Named(JsEditorExtension.DEFAULT_EDITOR_TYPE_INJECT_NAME)
-    protected String defaultEditorTypeKey() {
-        return OrionEditorExtension.ORION_EDITOR_KEY;
+        bind(ModuleHolder.class).in(Singleton.class);
     }
 }

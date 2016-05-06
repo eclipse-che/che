@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.debug.Breakpoint;
+import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
@@ -186,7 +186,7 @@ public class DebuggerTest extends BaseTest {
         debugger.addObserver(observer);
 
         FileType fileType = mock(FileType.class);
-        doReturn(Collections.singletonList("application/java")).when(fileType).getMimeTypes();
+        doReturn("java").when(fileType).getExtension();
         doReturn(fileType).when(fileTypeRegistry).getFileTypeByFile(eq(file));
     }
 

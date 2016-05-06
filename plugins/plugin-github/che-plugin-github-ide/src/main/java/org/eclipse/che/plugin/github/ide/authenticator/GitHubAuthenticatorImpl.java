@@ -29,7 +29,7 @@ import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
 import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
 import org.eclipse.che.ide.ext.git.ssh.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.ide.rest.RestContext;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
 import org.eclipse.che.security.oauth.JsOAuthWindow;

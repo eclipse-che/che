@@ -32,7 +32,7 @@ public class ExtensionManagerPresenter extends AbstractPreferencePagePresenter i
 
     @Inject
     public ExtensionManagerPresenter(CoreLocalizationConstant constant, ExtensionManagerView view, ExtensionRegistry extensionRegistry) {
-        super(constant.extensionTitle(), constant.extensionCategory(), null);
+        super(constant.extensionTitle(), constant.extensionCategory());
         this.view = view;
         this.extensionRegistry = extensionRegistry;
         view.setDelegate(this);

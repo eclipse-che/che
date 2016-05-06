@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text.edits;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
 import org.eclipse.che.ide.ext.java.jdt.text.Document;
 
 /** Text edit to replace a range in a document with a different string. */

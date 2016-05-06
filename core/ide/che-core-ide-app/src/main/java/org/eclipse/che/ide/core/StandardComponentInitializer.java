@@ -62,6 +62,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
+import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.icon.Icon;
@@ -80,6 +81,7 @@ import org.eclipse.che.ide.part.editor.actions.PinEditorTabAction;
 import org.eclipse.che.ide.part.editor.actions.ReopenClosedFileAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoaderResources;
+import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
@@ -130,9 +132,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private FindActionAction findActionAction;
-
-//    @Inject
-//    private FindReplaceAction findReplaceAction;
 
     @Inject
     private NavigateToFileAction navigateToFileAction;
@@ -271,6 +270,12 @@ public class StandardComponentInitializer {
     private MessageLoaderResources messageLoaderResources;
 
     @Inject
+    private EditorResources editorResources;
+
+    @Inject
+    private PopupResources popupResources;
+
+    @Inject
     private ShowReferenceAction showReferenceAction;
 
     @Inject
@@ -333,7 +338,6 @@ public class StandardComponentInitializer {
     @Inject
     private WsConnectionListener wsConnectionListener;
 
-
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
     public StandardComponentInitializer(IconRegistry iconRegistry,
@@ -342,8 +346,9 @@ public class StandardComponentInitializer {
     }
 
     public void initialize() {
-        //initialize loader resources
         messageLoaderResources.Css().ensureInjected();
+        editorResources.editorCss().ensureInjected();
+        popupResources.popupStyle().ensureInjected();
 
         fileTypeRegistry.registerFileType(xmlFile);
 
@@ -411,7 +416,7 @@ public class StandardComponentInitializer {
         newGroup.addSeparator();
 
         actionManager.registerAction("newXmlFile", newXmlFileAction);
-        newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getSVGImage());
+        newXmlFileAction.getTemplatePresentation().setSVGResource(xmlFile.getImage());
         newGroup.addAction(newXmlFileAction);
 
         actionManager.registerAction("uploadFile", uploadFileAction);
@@ -548,7 +553,6 @@ public class StandardComponentInitializer {
 
         actionManager.registerAction("collapseAll", collapseAllAction);
 
-//        actionManager.registerAction("findReplace", findReplaceAction);
         actionManager.registerAction("openFile", openFileAction);
         actionManager.registerAction("expandNode", expandNodeAction);
         actionManager.registerAction("switchLeftTab", switchLeftTabAction);
@@ -618,7 +622,6 @@ public class StandardComponentInitializer {
         } else {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeCurrentFile");
         }
-
     }
 
     /** Action that does nothing. It's just for disabling (catching) browser's hot key. */

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.editor;
 
-import org.eclipse.che.ide.jseditor.client.annotation.AnnotationModel;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * Factory class for creating PomReconsiligStrategy
@@ -20,5 +20,5 @@ import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresente
  */
 public interface PomReconsilingStrategyFactory {
 
-    PomReconsilingStrategy create(AnnotationModel annotationModel, EmbeddedTextEditorPresenter<?> editor);
+    PomReconsilingStrategy create(AnnotationModel annotationModel, TextEditorPresenter<?> editor);
 }

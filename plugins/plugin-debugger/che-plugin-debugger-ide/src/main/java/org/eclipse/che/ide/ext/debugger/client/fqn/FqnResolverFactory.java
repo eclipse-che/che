@@ -34,8 +34,8 @@ public class FqnResolverFactory implements FqnResolverObservable {
         this.listeners = new LinkedList<>();
     }
 
-    public void addResolver(@NotNull String mimeType, @NotNull FqnResolver resolver) {
-        resolvers.put(mimeType, resolver);
+    public void addResolver(@NotNull String fileExtension, @NotNull FqnResolver resolver) {
+        resolvers.put(fileExtension, resolver);
         onFqnResolverAdded(resolver);
     }
 
@@ -46,8 +46,8 @@ public class FqnResolverFactory implements FqnResolverObservable {
     }
 
     @Nullable
-    public FqnResolver getResolver(@NotNull String mimeType) {
-        return resolvers.get(mimeType);
+    public FqnResolver getResolver(@NotNull String fileExtension) {
+        return resolvers.get(fileExtension);
     }
 
     @Override

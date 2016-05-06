@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
-import org.eclipse.che.ide.jseditor.client.keymap.Keymap;
+import org.eclipse.che.ide.api.editor.keymap.Keymap;
 
 /**
  * An instance repository for keymode instances.

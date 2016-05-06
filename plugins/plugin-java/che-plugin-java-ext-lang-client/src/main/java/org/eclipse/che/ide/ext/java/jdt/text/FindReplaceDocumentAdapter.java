@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.jdt.text;
 
-import org.eclipse.che.ide.api.text.BadLocationException;
-import org.eclipse.che.ide.api.text.Region;
-import org.eclipse.che.ide.api.text.RegionImpl;
+import org.eclipse.che.ide.api.editor.text.BadLocationException;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.editor.text.RegionImpl;
 import org.eclipse.che.ide.runtime.Assert;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
@@ -124,7 +124,7 @@ public class FindReplaceDocumentAdapter implements CharSequence {
      * @param operationCode
      *         specifies what kind of operation is executed
      * @return the find or replace region or <code>null</code> if there was no match
-     * @throws org.eclipse.che.ide.api.text.BadLocationException
+     * @throws org.eclipse.che.ide.api.editor.text.BadLocationException
      *         if startOffset is an invalid document offset
      * @throws IllegalStateException
      *         if a REPLACE or REPLACE_FIND operation is not preceded by a successful FIND operation

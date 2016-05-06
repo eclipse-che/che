@@ -14,5 +14,5 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://gwtproject.org/doctype/2.7.0/gwt-module.dtd">
 <module>
     <inherits name="com.google.gwt.user.User"/>
-    <inherits name="org.eclipse.che.ide.jseditor.JsEditor"/>
+    <inherits name="org.eclipse.che.ide.Api"/>
 </module>
