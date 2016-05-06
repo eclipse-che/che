@@ -24,22 +24,22 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.json.JsonHelper;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.json.JsonHelper;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.project.node.ResourceBasedNode;
+import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.upload.BasicUploadPresenter;
 import org.eclipse.che.ide.util.NameUtils;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
@@ -79,6 +79,8 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
     private NotificationManager      notificationManager;
     @Inject
     private CoreLocalizationConstant localizationConstant;
+    @Inject
+    private BasicUploadPresenter     basicUploadPresenter;
 
     /**
      * Creates new action.
@@ -244,30 +246,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
     /** Returns parent for creating new item or {@code null} if resource can not be created. */
     @Nullable
     protected ResourceBasedNode<?> getResourceBasedNode() {
-        Selection<?> selection = projectExplorer.getSelection();
-
-        //we should be sure that user selected single element to work with it
-        if (selection == null || selection.isEmpty()) {
-            return null;
-        }
-
-        Object o = selection.getHeadElement();
-
-        if (o instanceof ResourceBasedNode<?>) {
-            ResourceBasedNode<?> node = (ResourceBasedNode<?>)o;
-            //it may be file node, so we should take parent node
-            if (node.isLeaf() && isResourceAndStorableNode(node.getParent())) {
-                return (ResourceBasedNode<?>)node.getParent();
-            }
-
-            return isResourceAndStorableNode(node) ? node : null;
-        }
-
-        return null;
-    }
-
-    protected boolean isResourceAndStorableNode(@Nullable Node node) {
-        return node != null && node instanceof ResourceBasedNode<?> && node instanceof HasStorablePath;
+        return basicUploadPresenter.getResourceBasedNode();
     }
 
     @Inject

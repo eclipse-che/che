@@ -55,18 +55,7 @@ public class ExtensionManagerGenerator {
      */
     public static void main(String[] args) {
         try {
-            String rootDirPath = ".";
-            // try to read argument
-            if (args.length == 1) {
-                if (args[0].startsWith(GeneratorUtils.ROOT_DIR_PARAMETER)) {
-                    rootDirPath = args[0].substring(GeneratorUtils.ROOT_DIR_PARAMETER.length());
-                } else {
-                    System.err.print("Wrong usage. There is only one allowed argument : "
-                                     + GeneratorUtils.ROOT_DIR_PARAMETER);//NOSONAR
-                    System.exit(1);//NOSONAR
-                }
-            }
-            File rootFolder = new File(rootDirPath);
+            File rootFolder = GeneratorUtils.getRootFolder(args);
             System.out.println(" ------------------------------------------------------------------------ ");
             System.out.println(String.format("Searching for Extensions in %s", rootFolder.getAbsolutePath()));
             System.out.println(" ------------------------------------------------------------------------ ");
@@ -88,7 +77,7 @@ public class ExtensionManagerGenerator {
     public static void generateExtensionManager(File rootFolder) throws IOException {
         File extManager = new File(rootFolder, EXT_MANAGER_PATH);
         StringBuilder builder = new StringBuilder();
-        builder.append("package " + "org.eclipse.che.ide.client;\n\n");
+        builder.append("package org.eclipse.che.ide.client;\n\n");
         generateImports(builder);
         generateClass(builder);
         // flush content
@@ -112,16 +101,16 @@ public class ExtensionManagerGenerator {
         builder.append("\n");
 
         // field
-        builder.append(GeneratorUtils.TAB
-                       + "/** Contains the map will all the Extension Providers <FullClassFQN, Provider>. */\n");
-        builder.append(GeneratorUtils.TAB
-                       + "protected final Map<String, Provider> extensions = new HashMap<>();\n\n");
+        builder.append(GeneratorUtils.TAB)
+               .append("/** Contains the map will all the Extension Providers <FullClassFQN, Provider>. */\n");
+        builder.append(GeneratorUtils.TAB)
+               .append("protected final Map<String, Provider> extensions = new HashMap<>();\n\n");
 
         // generate constructor
-
-        builder.append(GeneratorUtils.TAB + "/** Constructor that accepts all the Extension found in IDE package */\n");
-        builder.append(GeneratorUtils.TAB + "@Inject\n");
-        builder.append(GeneratorUtils.TAB + "public ExtensionManager(\n");
+        builder.append(GeneratorUtils.TAB)
+               .append("/** Constructor that accepts all the Extension found in IDE package */\n");
+        builder.append(GeneratorUtils.TAB).append("@Inject\n");
+        builder.append(GeneratorUtils.TAB).append("public ExtensionManager(\n");
 
         // paste args here
         Iterator<Entry<String, String>> entryIterator = EXTENSIONS_FQN.entrySet().iterator();
@@ -133,11 +122,11 @@ public class ExtensionManagerGenerator {
             // fullFQN classNameToLowerCase,
             String classFQN = String.format("Provider<%s>", extensionEntry.getKey());
             String variableName = extensionEntry.getValue().toLowerCase();
-            builder.append(GeneratorUtils.TAB2 + classFQN + " " + variableName + hasComma + "\n");
+            builder.append(GeneratorUtils.TAB2).append(classFQN).append(" ").append(variableName).append(hasComma).append("\n");
         }
 
-        builder.append(GeneratorUtils.TAB + ")\n");
-        builder.append(GeneratorUtils.TAB + "{\n");
+        builder.append(GeneratorUtils.TAB).append(")\n");
+        builder.append(GeneratorUtils.TAB).append("{\n");
 
         // paste add here
         for (Entry<String, String> extension : EXTENSIONS_FQN.entrySet()) {
@@ -145,19 +134,19 @@ public class ExtensionManagerGenerator {
             String variableName = extension.getValue().toLowerCase();
 
             String putStatement = String.format("this.extensions.put(\"%s\",%s);%n", fullFqn, variableName);
-            builder.append(GeneratorUtils.TAB2 + putStatement);
+            builder.append(GeneratorUtils.TAB2).append(putStatement);
         }
 
         // close constructor
-        builder.append(GeneratorUtils.TAB + "}\n\n");
+        builder.append(GeneratorUtils.TAB).append("}\n\n");
 
         // generate getter
-        builder.append(GeneratorUtils.TAB
-                       + "/** Returns  the map will all the Extension Providers <FullClassFQN, Provider>. */\n");
-        builder.append(GeneratorUtils.TAB + "public Map<String, Provider> getExtensions()\n");
-        builder.append(GeneratorUtils.TAB + "{\n");
-        builder.append(GeneratorUtils.TAB2 + "return extensions;\n");
-        builder.append(GeneratorUtils.TAB + "}\n");
+        builder.append(GeneratorUtils.TAB)
+               .append("/** Returns  the map will all the Extension Providers <FullClassFQN, Provider>. */\n");
+        builder.append(GeneratorUtils.TAB).append("public Map<String, Provider> getExtensions()\n");
+        builder.append(GeneratorUtils.TAB).append("{\n");
+        builder.append(GeneratorUtils.TAB2).append("return extensions;\n");
+        builder.append(GeneratorUtils.TAB).append("}\n");
 
         // close class
         builder.append("}\n");

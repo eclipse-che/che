@@ -10,7 +10,7 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-toolbar che-title="All Workspaces ({{listWorkspacesCtrl.userWorkspaces.length}})"
+<che-toolbar che-title="All Workspaces {{listWorkspacesCtrl.userWorkspaces.length ? '('+listWorkspacesCtrl.userWorkspaces.length+')' : ''}}"
               che-add-button-name="New Workspace"
               che-add-button-href="#/create-workspace"
               che-dropdown-menu="listWorkspacesCtrl.menuOptions"

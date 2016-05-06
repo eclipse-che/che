@@ -181,6 +181,15 @@ public interface HttpJsonRequest {
     }
 
     /**
+     * Uses {@link HttpMethod#OPTIONS} as a request method.
+     *
+     * @return this request instance
+     */
+    default HttpJsonRequest useOptionsMethod() {
+        return setMethod(HttpMethod.OPTIONS);
+    }
+
+    /**
      * Uses {@link HttpMethod#POST} as a request method.
      *
      * @return this request instance

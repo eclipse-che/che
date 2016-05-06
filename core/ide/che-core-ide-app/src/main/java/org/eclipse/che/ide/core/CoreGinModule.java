@@ -205,6 +205,7 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarView;
 import org.eclipse.che.ide.ui.toolbar.ToolbarViewImpl;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilderImpl;
+import org.eclipse.che.ide.upload.BasicUploadPresenter;
 import org.eclipse.che.ide.upload.file.UploadFileView;
 import org.eclipse.che.ide.upload.file.UploadFileViewImpl;
 import org.eclipse.che.ide.upload.folder.UploadFolderFromZipView;
@@ -419,6 +420,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(HotKeysDialogView.class).to(HotKeysDialogViewImpl.class).in(Singleton.class);
 
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
+
+        bind(BasicUploadPresenter.class);
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
     }
 

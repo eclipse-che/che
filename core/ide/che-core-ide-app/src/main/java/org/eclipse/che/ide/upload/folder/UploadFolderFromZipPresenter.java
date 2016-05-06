@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
+import org.eclipse.che.ide.upload.BasicUploadPresenter;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  *
  * @author Roman Nikitenko.
  */
-public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.ActionDelegate {
+public class UploadFolderFromZipPresenter extends BasicUploadPresenter implements UploadFolderFromZipView.ActionDelegate {
 
     private final UploadFolderFromZipView  view;
     private final ProjectExplorerPresenter projectExplorer;
@@ -54,6 +55,7 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
                                         NotificationManager notificationManager,
                                         ProjectExplorerPresenter projectExplorer,
                                         CoreLocalizationConstant locale) {
+        super(projectExplorer);
         this.appContext = appContext;
         this.editorAgent = editorAgent;
         this.eventBus = eventBus;
@@ -110,48 +112,6 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
         String fileName = view.getFileName();
         boolean enabled = !fileName.isEmpty() && fileName.contains(".zip");
         view.setEnabledUploadButton(enabled);
-    }
-
-    protected ResourceBasedNode<?> getResourceBasedNode() {
-        List<?> selection = projectExplorer.getSelection().getAllElements();
-        //we should be sure that user selected single element to work with it
-        if (selection != null && selection.isEmpty() || selection.size() > 1) {
-            return null;
-        }
-
-        Object o = selection.get(0);
-
-        if (o instanceof ResourceBasedNode<?>) {
-            ResourceBasedNode<?> node = (ResourceBasedNode<?>)o;
-            //it may be file node, so we should take parent node
-            if (node.isLeaf() && isResourceAndStorableNode(node.getParent())) {
-                return (ResourceBasedNode<?>)node.getParent();
-            }
-
-            return isResourceAndStorableNode(node) ? node : null;
-        }
-
-        return null;
-    }
-
-    protected boolean isResourceAndStorableNode(@Nullable Node node) {
-        return node != null && node instanceof ResourceBasedNode<?> && node instanceof HasStorablePath;
-    }
-
-    private String parseMessage(String message) {
-        int startIndex = 0;
-        int endIndex = -1;
-
-        if (message.contains("<pre>message:")) {
-            startIndex = message.indexOf("<pre>message:") + "<pre>message:".length();
-        } else if (message.contains("<pre>")) {
-            startIndex = message.indexOf("<pre>") + "<pre>".length();
-        }
-
-        if (message.contains("</pre>")) {
-            endIndex = message.indexOf("</pre>");
-        }
-        return (endIndex != -1) ? message.substring(startIndex, endIndex) : message.substring(startIndex);
     }
 
     private void updateOpenedEditors() {
