@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.machine.console;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -84,12 +83,6 @@ public class MachineConsolePresenter extends BasePresenter implements MachineCon
     @Override
     public void setVisible(boolean visible) {
         view.setVisible(visible);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public ImageResource getTitleImage() {
-        return null;
     }
 
     /** {@inheritDoc} */

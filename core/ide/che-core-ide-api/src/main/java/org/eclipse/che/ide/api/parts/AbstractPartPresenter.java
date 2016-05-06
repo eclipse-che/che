@@ -10,15 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.parts;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.util.ListenerManager;
 import org.eclipse.che.ide.util.ListenerManager.Dispatcher;
-import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -131,17 +128,6 @@ public abstract class AbstractPartPresenter implements PartPresenter {
         return 285;
     }
 
-    @Override
-    public ImageResource getTitleImage() {
-        return null;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public IsWidget getTitleWidget() {
-        return null;
-    }
-
     /** {@inheritDoc} */
     @Override
     public int getUnreadNotificationsCount() {
@@ -150,13 +136,8 @@ public abstract class AbstractPartPresenter implements PartPresenter {
 
     @Nullable
     @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return null;
     }
 
-    @Nullable
-    @Override
-    public SVGImage decorateIcon(SVGImage svgImage) {
-        return svgImage;
-    }
 }

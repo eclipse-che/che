@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.parts;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.Presenter;
 import org.eclipse.che.ide.api.selection.Selection;
-import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -54,18 +52,7 @@ public interface PartPresenter extends Presenter {
     IsWidget getView();
 
     /**
-     * Returns the title image of this part.  If this value changes the part must fire a property listener event with
-     * <code>PROP_TITLE</code>.
-     * <p>
-     * The title image is usually used to populate the title bar of this part's visual container.
-     *
-     * @return the title image
-     */
-    @Nullable
-    ImageResource getTitleImage();
-
-    /**
-     * Returns the title SVG image resource of this part.  If this value changes the part must fire a property listener event with
+     * Returns the title SVG image resource of this part. If this value changes the part must fire a property listener event with
      * <code>PROP_TITLE</code>.
      * <p>
      * The title image is usually used to populate the title bar of this part's visual container.
@@ -73,30 +60,7 @@ public interface PartPresenter extends Presenter {
      * @return the title SVG image resource
      */
     @Nullable
-    SVGResource getTitleSVGImage();
-
-    /**
-     * Decorate the title SVG image of this part. A convenient method to be able to size, color or perform any CSS related styling
-     * operation.
-     *
-     * @param svgImage
-     *         the title SVG image
-     * @return the image decorated, could be or not the same reference, no matter.
-     */
-    @Nullable
-    SVGImage decorateIcon(SVGImage svgImage);
-
-    /**
-     * Returns the widget to be displayed in the title of this part. If this value changes the part must fire a property listener event
-     * with
-     * <code>PROP_TITLE</code>.
-     * <p>
-     * The title widget is usually used to populate the title bar of this part's visual container.
-     *
-     * @return the title widget
-     */
-    @Nullable
-    IsWidget getTitleWidget();
+    SVGResource getTitleImage();
 
     /**
      * Returns count of unread notifications.

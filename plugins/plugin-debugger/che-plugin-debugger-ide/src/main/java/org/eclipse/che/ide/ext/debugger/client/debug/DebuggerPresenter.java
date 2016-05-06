@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.debugger.client.debug;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -21,14 +20,14 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.debug.Breakpoint;
+import org.eclipse.che.ide.api.debug.BreakpointManager;
+import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.debug.Breakpoint;
-import org.eclipse.che.ide.api.debug.BreakpointManager;
-import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -132,12 +131,7 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
     }
 
     @Override
-    public ImageResource getTitleImage() {
-        return null;
-    }
-
-    @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return debuggerResources.debug();
     }
 

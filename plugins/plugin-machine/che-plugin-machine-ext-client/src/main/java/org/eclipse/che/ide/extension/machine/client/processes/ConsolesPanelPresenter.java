@@ -194,7 +194,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
     @Nullable
     @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return resources.terminal();
     }
 

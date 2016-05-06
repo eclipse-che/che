@@ -133,7 +133,7 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
             VirtualFile file = part instanceof AbstractEditorPresenter ? ((AbstractEditorPresenter)part).getEditorInput().getFile()
                                                                        : null;
 
-            final EditorTab editorTab = tabItemFactory.createEditorPartButton(file, part.getTitleSVGImage(), part.getTitle());
+            final EditorTab editorTab = tabItemFactory.createEditorPartButton(file, part.getTitleImage(), part.getTitle());
 
             part.addPropertyListener(new PropertyListener() {
                 @Override

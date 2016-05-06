@@ -116,10 +116,10 @@ public class EditorPartStackPresenterTest {
     @Before
     public void setUp() {
         when(partPresenter1.getTitle()).thenReturn(SOME_TEXT);
-        when(partPresenter1.getTitleSVGImage()).thenReturn(resource1);
+        when(partPresenter1.getTitleImage()).thenReturn(resource1);
 
         when(partPresenter2.getTitle()).thenReturn(SOME_TEXT);
-        when(partPresenter2.getTitleSVGImage()).thenReturn(resource2);
+        when(partPresenter2.getTitleImage()).thenReturn(resource2);
 
         when(partPresenter1.getEditorInput()).thenReturn(editorInput1);
         when(editorInput1.getFile()).thenReturn(file1);
@@ -160,7 +160,7 @@ public class EditorPartStackPresenterTest {
 
         verify(tabItemFactory).createEditorPartButton(file1, resource1, SOME_TEXT);
 
-        verify(partPresenter1).getTitleSVGImage();
+        verify(partPresenter1).getTitleImage();
         verify(partPresenter1).getTitle();
 
         verify(editorTab1).setDelegate(presenter);

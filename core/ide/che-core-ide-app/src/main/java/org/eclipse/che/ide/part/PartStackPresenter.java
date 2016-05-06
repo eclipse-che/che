@@ -150,7 +150,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
 
         PartButton partButton = tabItemFactory.createPartButton(part.getTitle())
                                               .setTooltip(part.getTitleToolTip())
-                                              .setIcon(part.getTitleSVGImage());
+                                              .setIcon(part.getTitleImage());
         partButton.setDelegate(this);
 
         parts.put(partButton, part);

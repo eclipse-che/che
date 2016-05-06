@@ -624,7 +624,7 @@ public class ConsolesPanelPresenterTest {
 
     @Test
     public void shouldReturnTitleSVGImage() {
-        presenter.getTitleSVGImage();
+        presenter.getTitleImage();
 
         verify(resources).terminal();
     }

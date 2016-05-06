@@ -96,7 +96,7 @@ public class FindUsagesPresenter extends BasePresenter implements FindUsagesView
     }
 
     @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return resources.find();
     }
 
