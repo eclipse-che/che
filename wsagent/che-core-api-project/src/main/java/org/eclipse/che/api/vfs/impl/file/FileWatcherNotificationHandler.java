@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file;
 
+import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
+
 import java.io.File;
 
 public interface FileWatcherNotificationHandler {

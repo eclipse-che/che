@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.core;
 
-import org.eclipse.che.api.project.server.Constants;
+import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;

@@ -12,6 +12,7 @@ package org.eclipse.che.api.vfs.impl.file;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +55,9 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.eclipse.che.api.vfs.impl.file.FileWatcherEventType.CREATED;
-import static org.eclipse.che.api.vfs.impl.file.FileWatcherEventType.DELETED;
-import static org.eclipse.che.api.vfs.impl.file.FileWatcherEventType.MODIFIED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
 
 @Singleton
 public class FileTreeWatcher {

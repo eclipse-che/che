@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projectimport.zip;
 
-import org.eclipse.che.api.project.server.ZipProjectImporter;
+import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
@@ -38,7 +38,7 @@ public class ZipImportWizardRegistrar implements ImportWizardRegistrar {
 
     @NotNull
     public String getImporterId() {
-        return ZipProjectImporter.ID;
+        return Constants.ZIP_IMPORTER_ID;
     }
 
     @NotNull

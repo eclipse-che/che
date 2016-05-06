@@ -23,16 +23,17 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
+import static org.eclipse.che.api.project.shared.Constants.ZIP_IMPORTER_ID;
+
 /**
  * @author Vitaly Parfonov
  */
 @Singleton
 public class ZipProjectImporter implements ProjectImporter {
-    public static final String ID = "zip";
 
     @Override
     public String getId() {
-        return ID;
+        return ZIP_IMPORTER_ID;
     }
 
     @Override

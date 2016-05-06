@@ -8,10 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.server;
+package org.eclipse.che.api.project.shared;
 
-/** @author andrew00x */
+/**
+ * @author Vitalii Parfonov
+ */
 public class Constants {
+
+    public static final String BLANK_ID                = "blank";
+    public static final String ZIP_IMPORTER_ID         = "zip";
+    public static final String VCS_PROVIDER_NAME       = "vcs.provider.name";
     // rels for known project links
     public static final String LINK_REL_GET_PROJECTS   = "get projects";
     public static final String LINK_REL_CREATE_PROJECT = "create project";
@@ -19,7 +25,6 @@ public class Constants {
     public static final String LINK_REL_EXPORT_ZIP     = "zipball sources";
     public static final String LINK_REL_CHILDREN       = "children";
     public static final String LINK_REL_TREE           = "tree";
-    //public static final String LINK_REL_MODULES        = "modules";
     public static final String LINK_REL_DELETE         = "delete";
     public static final String LINK_REL_GET_CONTENT    = "get content";
     public static final String LINK_REL_UPDATE_CONTENT = "update content";

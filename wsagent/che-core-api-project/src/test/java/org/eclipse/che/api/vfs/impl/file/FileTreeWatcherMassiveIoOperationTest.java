@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.eclipse.che.api.vfs.impl.file.FileWatcherEventType.CREATED;
-import static org.eclipse.che.api.vfs.impl.file.FileWatcherEventType.DELETED;
-import static org.eclipse.che.api.vfs.impl.file.FileWatcherEventType.MODIFIED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.CREATED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;

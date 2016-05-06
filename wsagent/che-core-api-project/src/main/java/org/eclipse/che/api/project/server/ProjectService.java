@@ -84,13 +84,15 @@ import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_CHILDREN;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_DELETE;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_GET_CONTENT;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_TREE;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_CONTENT;
-import static org.eclipse.che.api.project.server.Constants.LINK_REL_UPDATE_PROJECT;
 import static org.eclipse.che.api.project.server.DtoConverter.asDto;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CHILDREN;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_CREATE_PROJECT;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_DELETE;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_CONTENT;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_GET_PROJECTS;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_TREE;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_UPDATE_CONTENT;
+import static org.eclipse.che.api.project.shared.Constants.LINK_REL_UPDATE_PROJECT;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -125,7 +127,7 @@ public class ProjectService extends Service {
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 500, message = "Server error")})
-    @GenerateLink(rel = Constants.LINK_REL_GET_PROJECTS)
+    @GenerateLink(rel = LINK_REL_GET_PROJECTS)
     public List<ProjectConfigDto> getProjects(@ApiParam("ID of workspace to get projects")
                                               @PathParam("ws-id") String workspace) throws IOException,
                                                                                            ServerException,
@@ -165,7 +167,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "Operation is forbidden"),
                    @ApiResponse(code = 409, message = "Project with specified name already exist in workspace"),
                    @ApiResponse(code = 500, message = "Server error")})
-    @GenerateLink(rel = Constants.LINK_REL_CREATE_PROJECT)
+    @GenerateLink(rel = LINK_REL_CREATE_PROJECT)
     /**
      * NOTE: parentPath is added to make a module
      */
