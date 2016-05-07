@@ -32,7 +32,7 @@ Che is open sourced under the Eclipse Public License 1.0.
 ### Dependencies
 * Docker 1.8+
 * Maven 3.3.1+
-* Java 1.8
+* Oracle Java 1.8 -- compilation with openjdk is not yet supported
 
 ### Clone
 
