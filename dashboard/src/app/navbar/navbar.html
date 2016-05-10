@@ -16,15 +16,13 @@
     <div ng-show="navbarCtrl.email">
       <section class="navbar-top-dropdown" layout="column" layout-align="center left">
         <che-button-dropdown che-button-dropdown-href="#/create-project?resetProgress" che-button-dropdown-label="New Project"
-                             che-button-dropdown-controller="navbarCtrl"
-                             ng-if="navbarCtrl.isUser()"></che-button-dropdown>
+                             che-button-dropdown-controller="navbarCtrl"></che-button-dropdown>
       </section>
       <md-divider md-theme="factory-theme"></md-divider>
       <div class="admin-navbar-menu">
         <section class="left-sidebar-menu" layout="column" layout-align="center center">
           <md-list layout="column">
-            <ide-list-item-navbar></ide-list-item-navbar>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
+            <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -41,7 +39,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
+            <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="fa fa-folder-open icon">&nbsp;</i>
@@ -49,43 +47,12 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isFactoryServiceAvailable">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.factories}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">
-                  <i class="chefont cheico-rocket-chefont icon">&nbsp;</i>
-                  <span>Factories</span>
-                </div>
-              </md-button>
-            </md-list-item>
           </md-list>
         </section>
       </div>
-      <md-divider ng-show="navbarCtrl.isAdminServiceAvailable" md-theme="factory-theme"></md-divider>
-      <div ng-show="navbarCtrl.isAdminServiceAvailable" class="admin-navbar-menu"
-           ng-init="configMenuIsExpand=true">
-        <div class="navbar-identity"
-             flex layout="row" layout-align="start center" ng-click="configMenuIsExpand=!configMenuIsExpand">
-      <span flex layout="row" layout-align="start center" layout-padding>
-        <i class="material-design icon-ic_build_24px">&nbsp;</i>
-        <span flex class="navbar-title">Configuration</span>
-      </span>
-          <i class="material-design md-tab-themed" ng-class="configMenuIsExpand ? 'icon-ic_expand_less_24px' : 'icon-ic_expand_more_24px'">
-            &nbsp;</i>
-        </div>
-        <section class="animation navbar-subsection"
-                 flex layout="column" layout-align="center start" layout-fill
-                 class="animation"
-                 ng-if="configMenuIsExpand">
-          <md-list layout="column" flex>
-            <md-list-item ng-show="navbarCtrl.isAdminPluginServiceAvailable" flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.plugins}}" layout-align="left">
-                <div class="navbar-item" layout="row" layout-align="start center">Plug-Ins</div>
-              </md-button>
-            </md-list-item>
-          </md-list>
-        </section>
-      </div>
-      <md-divider md-theme="factory-theme" ng-show="navbarCtrl.isUser()"></md-divider>
+
+      <navbar-recent-workspaces></navbar-recent-workspaces>
+
     </div>
   </md-toolbar>
 </div>

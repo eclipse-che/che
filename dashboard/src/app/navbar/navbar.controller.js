@@ -68,7 +68,7 @@ export class CheNavBarCtrl {
     $scope.$on('$locationChangeStart', () => {
       let path = '#' + $location.path(),
         match = Object.keys(this.menuItemUrl).some(item => this.menuItemUrl[item] === path);
-      if (match) {
+      if (match || /\/ide\//.test(path)) {
         $scope.$broadcast('navbar-selected:restore', path);
       }
       else {
