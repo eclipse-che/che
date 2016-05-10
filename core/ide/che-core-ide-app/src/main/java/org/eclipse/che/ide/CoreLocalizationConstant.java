@@ -305,11 +305,11 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("oauth.failed.to.get.authenticator.text")
     String oauthFailedToGetAuthenticatorText();
 
-    @Key("importProject.ssh.key.failed.title")
-    String importProjectSshKeyFailedTitle();
+    @Key("importProject.ssh.key.upload.failed.title")
+    String importProjectSshKeyUploadFailedTitle();
 
-    @Key("importProject.ssh.key.failed.text")
-    String importProjectSshKeyFailedText();
+    @Key("importProject.ssh.key.upload.failed.text")
+    String importProjectSshKeyUploadFailedText();
 
     /* Actions */
     @Key("action.newFolder.title")

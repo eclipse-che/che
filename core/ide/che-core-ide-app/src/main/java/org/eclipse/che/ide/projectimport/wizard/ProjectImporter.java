@@ -139,8 +139,8 @@ public class ProjectImporter extends AbstractImporter {
                                                         sourceStorage,
                                                         subscriber);
                         } else {
-                          dialogFactory.createMessageDialog(localizationConstant.importProjectSshKeyFailedTitle(),
-                                                            localizationConstant.importProjectSshKeyFailedText(), null).show();
+                          dialogFactory.createMessageDialog(localizationConstant.importProjectSshKeyUploadFailedTitle(),
+                                                            localizationConstant.importProjectSshKeyUploadFailedText(), null).show();
                         }
                     } else {
                         dialogFactory.createMessageDialog(localizationConstant.oauthFailedToGetAuthenticatorTitle(),
