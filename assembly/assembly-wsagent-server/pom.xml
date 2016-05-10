@@ -18,9 +18,9 @@
         <groupId>org.eclipse.che</groupId>
         <version>4.3.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>assembly-machine-server</artifactId>
+    <artifactId>assembly-wsagent-server</artifactId>
     <packaging>pom</packaging>
-    <name>Che Assembly Machine Plugins :: Server</name>
+    <name>Che Assembly Workspace Agent Server</name>
     <dependencies>
         <dependency>
             <groupId>log4j</groupId>
@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-machine-war</artifactId>
+            <artifactId>assembly-wsagent-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>

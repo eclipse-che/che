@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project.type;
 
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Registry for {@link org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor}s.
+ * Registry for {@link org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor}s.
  *
  * @author Artem Zatsarynnyi
  */
@@ -29,7 +29,7 @@ public interface ProjectTemplateRegistry {
      */
     void register(@NotNull ProjectTemplateDescriptor descriptor);
 
-    /** Get all {@link org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor}s for the specified {@code projectTypeId}. */
+    /** Get all {@link org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor}s for the specified {@code projectTypeId}. */
     @NotNull
     List<ProjectTemplateDescriptor> getTemplateDescriptors(@NotNull String projectTypeId);
 }

@@ -43,7 +43,7 @@
             <outputDirectory>webapps</outputDirectory>
             <outputFileNameMapping>wsagent.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:assembly-machine-war</include>
+                <include>org.eclipse.che:assembly-wsagent-war</include>
             </includes>
         </dependencySet>
     </dependencySets>

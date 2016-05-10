@@ -25,6 +25,8 @@
     <packaging>pom</packaging>
     <name>Che Master Parent</name>
     <modules>
+        <module>che-core-api-project-templates-shared</module>
+        <module>che-core-api-project-templates</module>
         <module>che-core-api-machine-shared</module>
         <module>che-core-api-machine</module>
         <module>che-core-api-workspace-shared</module>

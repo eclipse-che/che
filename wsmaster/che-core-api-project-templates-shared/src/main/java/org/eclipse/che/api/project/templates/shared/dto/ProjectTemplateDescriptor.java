@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.shared.dto;
+package org.eclipse.che.api.project.templates.shared.dto;
 
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -63,12 +63,6 @@ public interface ProjectTemplateDescriptor {
     void setAttributes(Map<String, List<String>> attributes);
 
     ProjectTemplateDescriptor withAttributes(Map<String, List<String>> attributes);
-
-    List<ProjectConfigDto> getModules();
-
-    void setModules(List<ProjectConfigDto> modules);
-
-    ProjectTemplateDescriptor withModules(List<ProjectConfigDto> modules);
 
     List<ProjectProblemDto> getProblems();
 

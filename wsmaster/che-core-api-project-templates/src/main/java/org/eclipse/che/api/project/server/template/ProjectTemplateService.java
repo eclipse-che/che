@@ -11,7 +11,7 @@
 package org.eclipse.che.api.project.server.template;
 
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;

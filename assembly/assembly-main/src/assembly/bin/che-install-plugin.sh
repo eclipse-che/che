@@ -192,10 +192,10 @@ function set_environment_variables {
   PLUGIN_IDE_WAR_DIR="${SDK_DIR}/assembly-ide-war"
 
   # The machine web app project that will be built with the extension
-  PLUGIN_MACHINE_WAR_DIR="${SDK_DIR}/assembly-machine-war"
+  PLUGIN_WSAGENT_WAR_DIR="${SDK_DIR}/assembly-wsagent-war"
 
   # Creates the ws-agent.zip artifact for a Che assembly, which packages Tomcat + machine war into single package
-  PLUGIN_MACHINE_SERVER_DIR="${SDK_DIR}/assembly-machine-server"
+  PLUGIN_WSAGENT_SERVER_DIR="${SDK_DIR}/assembly-wsagent-server"
 
   # Generates a new Che assembly that contains new IDE, ws-master, and ws-agent.
   PLUGIN_ASSEMBLY_DIR="${SDK_DIR}/assembly-main"
@@ -208,8 +208,8 @@ function set_environment_variables {
     echo "PLUGIN_IDE_DIR            = " $PLUGIN_IDE_DIR
     echo "PLUGIN_WSAGENT_DIR        = " $PLUGIN_WSAGENT_DIR
     echo "PLUGIN_IDE_WAR_DIR        = " $PLUGIN_IDE_WAR_DIR
-    echo "PLUGIN_IDE_WAR_DIR        = " $PLUGIN_MACHINE_WAR_DIR
-    echo "PLUGIN_MACHINE_SERVER_DIR = " $PLUGIN_MACHINE_SERVER_DIR
+    echo "PLUGIN_WSAGENT_WAR_DIR    = " $PLUGIN_WSAGENT_WAR_DIR
+    echo "PLUGIN_WSAGENT_SERVER_DIR = " $PLUGIN_WSAGENT_SERVER_DIR
     echo "PLUGIN_ASSEMBLY_DIR       = " $PLUGIN_ASSEMBLY_DIR
   fi
 }
@@ -274,7 +274,7 @@ if [ "${USE_HELP}" == "false" ]; then
               `"${CHE_HOME}/sdk/che-plugin-sdk-logger.jar":`
               `"${CHE_HOME}/sdk/che-plugin-sdk-logger-core.jar" `
               `org.eclipse.che.ide.sdk.tools.InstallExtension --extDir="${PLUGIN_WSAGENT_DIR}" `
-              `--extResourcesDir="${PLUGIN_MACHINE_WAR_DIR}"
+              `--extResourcesDir="${PLUGIN_WSAGENT_WAR_DIR}"
 
     fi
   fi
@@ -300,19 +300,19 @@ if [ "${USE_HELP}" == "false" ]; then
     echo_stage "CHE SDK: Compiling ws-agent plug-ins into new workspace agent."
       
     # Re-build the che web application with extensions from ide/ and che/ directories included. This artifact is deployed into Che server.
-    cd "${PLUGIN_MACHINE_WAR_DIR}/temp"
+    cd "${PLUGIN_WSAGENT_WAR_DIR}/temp"
     mvn sortpom:sort
     mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
 
     echo_stage "CHE SDK: Packaging ws-agent web app and Tomcat into ws-agent.zip."
 
-    cd "${PLUGIN_MACHINE_SERVER_DIR}"
+    cd "${PLUGIN_WSAGENT_SERVER_DIR}"
     mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
     cd "${CHE_HOME}"
 
 
     if [ "${SKIP_UPDATE}" == "false" ]; then
-      cp -r "${PLUGIN_MACHINE_SERVER_DIR}"/target/*.zip lib/ws-agent.zip
+      cp -r "${PLUGIN_WSAGENT_SERVER_DIR}"/target/*.zip lib/ws-agent.zip
     fi
   fi  
 
@@ -347,7 +347,7 @@ if [ "${USE_HELP}" == "false" ]; then
 
   if [ "${SKIP_WSAGENT}" == "false" ] && [ "${SKIP_UPDATE}" == "true" ]; then
     echo "New Workspace Agent: 
-    ${PLUGIN_MACHINE_SERVER_DIR}/target/*.zip"
+    ${PLUGIN_WSAGENT_SERVER_DIR}/target/*.zip"
   fi
 
   if [ "${SKIP_WSAGENT}" == "false" ] && [ "${SKIP_UPDATE}" == "false" ]; then

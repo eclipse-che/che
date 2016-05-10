@@ -24,8 +24,8 @@ PRE-REQS: Java 1.8, Maven, Git, and a clone of Che's assembly repo @ http://gith
 STEPS:    1. git clone http://github.com/che-samples/che-server-extension
           2. cd che-server-extension
           3. mvn clean install
-          4. Add new extension as dependency to /che/assembly-machine-war/pom.xml
+          4. Add new extension as dependency to /che/assembly-wsagent-war/pom.xml
           5. Optional: Add new extension as dependency to /che/pom.xml
-          6. Create a new ws-agent with your extension: `mvn -Denforcer.skip=true clean install` in /che/assembly-machine-war directory
+          6. Create a new ws-agent with your extension: `mvn -Denforcer.skip=true clean install` in /che/assembly-wsagent-war directory
           7. Create a new Che assembly: `mvn clean install` in /che
           8. In /che/assembly-main/target/eclipse-che-{version}/bin, run `che run` to launch new Che assembly.
