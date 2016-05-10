@@ -129,9 +129,9 @@ public class ProjectImporter extends AbstractImporter {
                     final Map<String, String> attributes = ExceptionUtils.getAttributes(exception.getCause());
                     final String providerName = attributes.get(PROVIDER_NAME);
                     final String authenticateUrl = attributes.get(AUTHENTICATE_URL);
-                    final boolean authorized = Boolean.parseBoolean(attributes.get("authorized"));
+                    final boolean authenticated = Boolean.parseBoolean(attributes.get("authenticated"));
                     if (!Strings.isNullOrEmpty(providerName) && !Strings.isNullOrEmpty(authenticateUrl)) {
-                        if (!authorized) {
+                        if (!authenticated) {
                             tryAuthenticateRepeatImport(providerName,
                                                         authenticateUrl,
                                                         pathToProject,
