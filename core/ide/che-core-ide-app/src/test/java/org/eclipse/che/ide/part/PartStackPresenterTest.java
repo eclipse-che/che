@@ -98,11 +98,11 @@ public class PartStackPresenterTest {
     public void setUp() {
         when(basePresenter.getTitle()).thenReturn(SOME_TEXT);
         when(basePresenter.getTitleToolTip()).thenReturn(SOME_TEXT);
-        when(basePresenter.getTitleSVGImage()).thenReturn(resource);
+        when(basePresenter.getTitleImage()).thenReturn(resource);
 
         when(partPresenter.getTitle()).thenReturn(SOME_TEXT);
         when(partPresenter.getTitleToolTip()).thenReturn(SOME_TEXT);
-        when(partPresenter.getTitleSVGImage()).thenReturn(resource);
+        when(partPresenter.getTitleImage()).thenReturn(resource);
 
         when(tabItemFactory.createPartButton(SOME_TEXT)).thenReturn(partButton);
         when(partButton.setTooltip(SOME_TEXT)).thenReturn(partButton);

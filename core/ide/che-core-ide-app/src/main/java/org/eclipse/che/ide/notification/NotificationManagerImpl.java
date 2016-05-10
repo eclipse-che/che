@@ -349,7 +349,7 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     /** {@inheritDoc} */
     @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return resources.eventsPartIcon();
     }
 

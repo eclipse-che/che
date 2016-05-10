@@ -71,7 +71,7 @@ public class FindResultPresenterTest {
 
     @Test
     public void imageShouldBeReturned() {
-        findResultPresenter.getTitleSVGImage();
+        findResultPresenter.getTitleImage();
 
         verify(resources).find();
     }

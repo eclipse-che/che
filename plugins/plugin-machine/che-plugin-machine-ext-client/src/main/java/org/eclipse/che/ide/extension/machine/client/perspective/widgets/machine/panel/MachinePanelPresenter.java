@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel;
 
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -214,16 +213,9 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
         return view;
     }
 
-    /** {@inheritDoc} */
     @Nullable
     @Override
-    public ImageResource getTitleImage() {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return resources.machinesPartIcon();
     }
 

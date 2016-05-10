@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.selection;
 
 import com.google.gwt.junit.GWTMockUtilities;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.web.bindery.event.shared.EventBus;
@@ -109,12 +108,7 @@ public class TestSelectionAgent {
             }
 
             @Override
-            public ImageResource getTitleImage() {
-                return null;
-            }
-
-            @Override
-            public SVGResource getTitleSVGImage() {
+            public SVGResource getTitleImage() {
                 return null;
             }
 
@@ -162,12 +156,7 @@ public class TestSelectionAgent {
             }
 
             @Override
-            public ImageResource getTitleImage() {
-                return null;
-            }
-
-            @Override
-            public SVGResource getTitleSVGImage() {
+            public SVGResource getTitleImage() {
                 return null;
             }
 

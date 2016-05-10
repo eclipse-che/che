@@ -132,7 +132,7 @@ public class OutputsContainerPresenter extends BasePresenter implements OutputsC
 
     @Nullable
     @Override
-    public SVGResource getTitleSVGImage() {
+    public SVGResource getTitleImage() {
         return resources.outputPartIcon();
     }
 
