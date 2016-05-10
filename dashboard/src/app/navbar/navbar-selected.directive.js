@@ -44,8 +44,6 @@ export class NavBarSelected {
         this.$rootScope.selectedNavBarElement.removeClass('che-navbar-selected');
       }
 
-      controller.close();
-
       // select the new element
       this.$rootScope.selectedNavBarElement = elem;
       // add the class
