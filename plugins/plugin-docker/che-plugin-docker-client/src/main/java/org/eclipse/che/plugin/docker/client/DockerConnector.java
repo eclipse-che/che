@@ -34,6 +34,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
@@ -69,6 +70,7 @@ import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.WaitContainerParams;
+import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +83,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -106,6 +109,7 @@ import static javax.ws.rs.core.Response.Status.OK;
  * @author Alexander Garagatyi
  * @author Anton Korneta
  * @author Mykola Morhun
+ * @author Alexander Andrienko
  */
 @Singleton
 public class DockerConnector {
@@ -185,7 +189,48 @@ public class DockerConnector {
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
             }
-            return parseResponseStreamAsListAndClose(response.getInputStream());
+            return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<Image>>() {}.getType());
+        } catch (JsonParseException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
+     * Method returns list of docker containers, include non-running ones.
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public List<ContainerListEntry> listContainers() throws IOException {
+        return listContainers(ListContainersParams.create().withAll(true));
+    }
+
+    /**
+     * Method returns list of docker containers which was filtered by {@link ListContainersParams}
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public List<ContainerListEntry> listContainers(ListContainersParams params) throws IOException {
+        final Filters filters = params.getFilters();
+
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("GET")
+                                                            .path("/containers/json")) {
+            addQueryParamIfNotNull(connection, "all", params.isAll());
+            addQueryParamIfNotNull(connection, "size", params.isSize());
+            addQueryParamIfNotNull(connection, "limit", params.getLimit());
+            addQueryParamIfNotNull(connection, "since", params.getSince());
+            addQueryParamIfNotNull(connection, "before", params.getBefore());
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(filters)));
+            }
+            DockerResponse response = connection.request();
+            final int status = response.getStatus();
+            if (OK.getStatusCode() != status) {
+                throw getDockerException(response);
+            }
+            return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<ContainerListEntry>>() {}.getType());
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
@@ -1610,11 +1655,11 @@ public class DockerConnector {
 
     @VisibleForTesting
     @SuppressWarnings("unchecked")
-    <T> List<T> parseResponseStreamAsListAndClose(InputStream inputStream) throws IOException, JsonParseException {
+    <T> List<T> parseResponseStreamAsListAndClose(InputStream inputStream, Type type) throws IOException, JsonParseException {
         try (InputStream responseStream = inputStream) {
             return (List<T>)JsonHelper.fromJson(responseStream,
                                                 List.class,
-                                                new TypeToken<List<T>>() {}.getType(),
+                                                type,
                                                 FIRST_LETTER_LOWERCASE);
         }
     }

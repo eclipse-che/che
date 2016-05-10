@@ -10,31 +10,33 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json;
 
+import java.util.Arrays;
+import java.util.Map;
+
 /** @author andrew00x */
 public class Image {
-    private String repository;
-    private String tag;
-    private String id;
-    private long   created;
-    private long   size;
-    private long   virtualSize;
+    private String[]            repoTags;
+    private String              parentId;
+    private String              id;
+    private long                created;
+    private long                size;
+    private long                virtualSize;
+    private Map<String, String> labels;
 
-    public String getRepository() {
-        return repository;
+    /**
+     * Return a collection of tags grouped under a common prefix (the name component before ':').
+     */
+    public String[] getRepoTags() {
+        return repoTags;
     }
 
-    public void setRepository(String repository) {
-        this.repository = repository;
+    public void setRepoTags(String[] repoTags) {
+        this.repoTags = repoTags;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
+    /**
+     * Return uniquely identifies the image.
+     */
     public String getId() {
         return id;
     }
@@ -43,6 +45,9 @@ public class Image {
         this.id = id;
     }
 
+    /**
+     * Return ISO-8601 formatted combined date and time at which the image was created.
+     */
     public long getCreated() {
         return created;
     }
@@ -51,6 +56,9 @@ public class Image {
         this.created = created;
     }
 
+    /**
+     * Return the size in bytes of the filesystem changeset associated with the image layer.
+     */
     public long getSize() {
         return size;
     }
@@ -59,6 +67,9 @@ public class Image {
         this.size = size;
     }
 
+    /**
+     *  Return the virtual size of the image
+     */
     public long getVirtualSize() {
         return virtualSize;
     }
@@ -67,15 +78,38 @@ public class Image {
         this.virtualSize = virtualSize;
     }
 
+    /**
+     * Return parent IDs of image layers to find the root ancestor
+     */
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+
+    /**
+     * Returns metadata of the image
+     */
+    public Map<String, String> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Map<String, String> labels) {
+        this.labels = labels;
+    }
+
     @Override
     public String toString() {
         return "Image{" +
-               "repository='" + repository + '\'' +
-               ", tag='" + tag + '\'' +
+               "repoTags=" + Arrays.toString(repoTags) +
+               ", parentId='" + parentId + '\'' +
                ", id='" + id + '\'' +
                ", created=" + created +
                ", size=" + size +
                ", virtualSize=" + virtualSize +
+               ", labels=" + labels +
                '}';
     }
 }
