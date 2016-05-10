@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.gwt.client;
 
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
+
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.validation.constraints.NotNull;

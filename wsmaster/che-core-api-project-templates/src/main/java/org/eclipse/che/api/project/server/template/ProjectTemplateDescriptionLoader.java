@@ -12,7 +12,7 @@ package org.eclipse.che.api.project.server.template;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +93,7 @@ public class ProjectTemplateDescriptionLoader {
     }
 
     private void resolveTemplate(InputStream stream) throws IOException {
-        final List<ProjectTemplateDescriptor> templates = DtoFactory.getInstance().createListDtoFromJson(stream, 
+        final List<ProjectTemplateDescriptor> templates = DtoFactory.getInstance().createListDtoFromJson(stream,
                                                                                                          ProjectTemplateDescriptor.class);
         for (ProjectTemplateDescriptor template : templates) {
             templateRegistry.register(template.getTags(), template);

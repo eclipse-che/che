@@ -60,6 +60,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-project-templates-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace-shared</artifactId>
         </dependency>
         <dependency>
@@ -73,7 +77,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-client-gwt-workspace</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -113,7 +116,12 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
-                        <artifactId>che-core-api-project</artifactId>
+                        <artifactId>che-core-api-project-shared</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-project-templates-shared</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                     <dependency>
@@ -130,6 +138,7 @@
                 <configuration>
                     <dtoPackages>
                         <package>org.eclipse.che.api.project.shared.dto</package>
+                        <package>org.eclipse.che.api.project.templates.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.api.project.gwt.client.dto.DtoClientImpls</genClassName>

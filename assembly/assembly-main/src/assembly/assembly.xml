@@ -32,6 +32,15 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
+            <outputFileNameMapping>wsmaster.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:assembly-wsmaster-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.dashboard:che-dashboard-war</include>
@@ -52,7 +61,7 @@
             <outputDirectory>lib</outputDirectory>
             <outputFileNameMapping>ws-agent.zip</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:assembly-machine-server</include>
+                <include>org.eclipse.che:assembly-wsagent-server</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -168,15 +177,15 @@
            </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/assembly-machine-war</directory>
-            <outputDirectory>sdk/assembly-machine-war</outputDirectory>
+            <directory>${project.parent.basedir}/assembly-wsagent-war</directory>
+            <outputDirectory>sdk/assembly-wsagent-war</outputDirectory>
             <excludes>
             <exclude>**/target/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/assembly-machine-server</directory>
-            <outputDirectory>sdk/assembly-machine-server</outputDirectory>
+            <directory>${project.parent.basedir}/assembly-wsagent-server</directory>
+            <outputDirectory>sdk/assembly-wsagent-server</outputDirectory>
             <excludes>
             <exclude>**/target/**</exclude>
             </excludes>

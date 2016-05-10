@@ -12,8 +12,8 @@ package org.eclipse.che.ide.projecttype.wizard.categoriespage;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;

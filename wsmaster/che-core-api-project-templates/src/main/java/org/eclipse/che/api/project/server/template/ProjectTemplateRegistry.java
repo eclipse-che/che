@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.template;
 
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
+
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;

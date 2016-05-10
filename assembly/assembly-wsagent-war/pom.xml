@@ -18,9 +18,9 @@
         <groupId>org.eclipse.che</groupId>
         <version>4.3.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>assembly-machine-war</artifactId>
+    <artifactId>assembly-wsagent-war</artifactId>
     <packaging>war</packaging>
-    <name>Che Machine Plugins :: Packaging</name>
+    <name>Che Workspace Agent War Packaging</name>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -139,10 +139,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-plain-ide</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-plain-server</artifactId>
         </dependency>
         <dependency>
@@ -172,10 +168,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-python-lang-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-env-local</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
