@@ -96,8 +96,6 @@ class IdeSvc {
   }
 
   startIde(workspace, noIdeLoader) {
-    this.lastWorkspace = workspace;
-
     let defer = this.$q.defer();
     if (!noIdeLoader) {
       this.ideLoaderSvc.addLoader();
@@ -125,7 +123,7 @@ class IdeSvc {
     });
 
     return startWorkspaceDefer.promise.then(() => {
-      if (workspace.id === this.lastWorkspace.id) {
+      if (this.lastWorkspace && workspace.id === this.lastWorkspace.id) {
         // Now that the container is started, wait for the extension server. For this, needs to get runtime details
         let websocketUrl = this.cheWorkspace.getWebsocketUrl(workspace.id);
         // try to connect
@@ -134,7 +132,7 @@ class IdeSvc {
       }
       return this.$q.resolve();
     }, (error) => {
-      if (workspace.id === this.lastWorkspace.id) {
+      if (this.lastWorkspace && workspace.id === this.lastWorkspace.id) {
         this.cleanupChannels(workspace.id);
       }
       return this.$q.reject(error);
@@ -245,7 +243,6 @@ class IdeSvc {
 
     // on success, create project
     websocketStream.onOpen(() => {
-      this.openIde(workspaceId);
       this.cleanupChannels(workspaceId, websocketStream);
     });
 
@@ -286,6 +283,11 @@ class IdeSvc {
 
   openIde(workspaceId, skipLoader) {
     this.$rootScope.hideNavbar = false;
+
+    if (this.lastWorkspace && this.lastWorkspace.id === workspaceId) {
+      this.restoreIDE();
+      return;
+    }
 
     this.$timeout(() => {
       this.currentStep = 3;

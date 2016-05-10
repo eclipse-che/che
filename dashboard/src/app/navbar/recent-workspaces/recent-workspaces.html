@@ -1,0 +1,32 @@
+<md-divider md-theme="factory-theme"
+            ng-show="navbarRecentWorkspacesCtrl.getRecentWorkspaces().length"></md-divider>
+<div class="admin-navbar-menu recent-workspaces">
+  <section class="left-sidebar-menu" layout="column" layout-align="center center">
+    <md-list layout="column">
+
+      <md-list-item flex class="navbar-subsection-item">
+        <div flex layout-align="left">
+          <div layout="row" layout-align="start center">
+            <span class="recent-workspaces-section-caption">Recent workspaces</span>
+          </div>
+        </div>
+      </md-list-item>
+
+      <md-list-item flex class="navbar-subsection-item"
+                    ng-repeat="workspace in navbarRecentWorkspacesCtrl.getRecentWorkspaces() | orderBy:'attributes.updated':'reverse' | limitTo:'5' | orderBy:'config.name'"
+                    ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesCtrl.isOpen(workspace.id)}">
+        <md-button nav-bar-selected flex che-reload-href
+                   ng-href="#/ide/{{navbarRecentWorkspacesCtrl.getWorkspaceName(workspace.id)}}" layout-align="left"
+                   target="_self">
+          <div class="navbar-item" layout="row" layout-align="start center">
+            <i class="icon">
+              <workspace-status-indicator-circle che-status="navbarRecentWorkspacesCtrl.getWorkspaceStatus(workspace.id)"
+                                                 title="{{navbarRecentWorkspacesCtrl.getWorkspaceStatus(workspace.id)}}"></workspace-status-indicator-circle>
+            </i>
+            <span>{{navbarRecentWorkspacesCtrl.getWorkspaceName(workspace.id)}}</span>
+          </div>
+        </md-button>
+      </md-list-item>
+    </md-list>
+  </section>
+</div>
