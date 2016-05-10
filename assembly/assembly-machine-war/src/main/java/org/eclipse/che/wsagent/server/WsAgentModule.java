@@ -32,15 +32,13 @@ import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.vfs.VirtualFileSystemModule;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
-import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
-import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGeneratorModule;
 import org.eclipse.che.git.impl.nativegit.LocalGitUserResolver;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
-import org.eclipse.che.ide.ext.java.jdi.server.JavaDebuggerService;
-import org.eclipse.che.plugin.maven.server.inject.MavenModule;
-import org.eclipse.che.ide.gdb.server.GdbDebuggerService;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.github.server.inject.GitHubModule;
+import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
+import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGeneratorModule;
+import org.eclipse.che.plugin.maven.server.inject.MavenModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
@@ -73,10 +71,9 @@ public class WsAgentModule extends AbstractModule {
         install(new ArchetypeGeneratorModule());
         install(new GitHubModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
+        install(new org.eclipse.che.api.debugger.server.DebuggerModule());
 
         bind(ArchetypeGenerator.class);
-        bind(JavaDebuggerService.class);
-        bind(GdbDebuggerService.class);
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);

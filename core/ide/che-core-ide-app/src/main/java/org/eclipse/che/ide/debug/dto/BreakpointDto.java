@@ -22,6 +22,10 @@ import org.eclipse.che.ide.api.debug.Breakpoint;
 @DTO
 public interface BreakpointDto {
 
+    void setActive(boolean active);
+
+    boolean isActive();
+
     void setLineNumber(int lineNumber);
 
     int getLineNumber();
@@ -29,10 +33,6 @@ public interface BreakpointDto {
     void setType(Breakpoint.Type type);
 
     Breakpoint.Type getType();
-
-    void setMessage(String message);
-
-    String getMessage();
 
     void setPath(String path);
 

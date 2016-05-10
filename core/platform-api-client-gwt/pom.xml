@@ -33,5 +33,6 @@
         <module>che-core-client-gwt-factory</module>
         <module>che-core-client-gwt-git</module>
         <module>che-core-client-gwt-ssh</module>
+        <module>che-core-client-gwt-debugger</module>
     </modules>
 </project>

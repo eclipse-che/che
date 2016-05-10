@@ -28,8 +28,6 @@
         <module>che-plugin-java-ext-lang-server</module>
         <module>che-plugin-java-ext-lang-client</module>
         <module>che-plugin-java-plain</module>
-        <module>che-plugin-java-debugger-server</module>
-        <module>che-plugin-java-debugger-ide</module>
     </modules>
     <build>
         <pluginManagement>

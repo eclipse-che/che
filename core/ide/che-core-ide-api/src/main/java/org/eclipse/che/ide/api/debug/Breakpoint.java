@@ -25,7 +25,6 @@ public class Breakpoint {
     protected int         lineNumber;
     protected VirtualFile file;
     private   Type        type;
-    private   String      message;
     private   String      path;
 
     /**
@@ -34,14 +33,9 @@ public class Breakpoint {
     private boolean active;
 
     public Breakpoint(Type type, int lineNumber, String path, VirtualFile file, boolean active) {
-        this(type, lineNumber, path, file, null, active);
-    }
-
-    public Breakpoint(Type type, int lineNumber, String path, VirtualFile file, String message, boolean active) {
         this.type = type;
         this.lineNumber = lineNumber;
         this.path = path;
-        this.message = message;
         this.file = file;
         this.active = active;
     }
@@ -61,11 +55,6 @@ public class Breakpoint {
     /** @return the lineNumber */
     public int getLineNumber() {
         return lineNumber;
-    }
-
-    /** @return the message */
-    public String getMessage() {
-        return message;
     }
 
     /** @return file path */
@@ -88,7 +77,6 @@ public class Breakpoint {
         builder.append("Breakpoint [lineNumber=").append(lineNumber)
                .append(", type=").append(type)
                .append(", active=").append(active)
-               .append(", message=").append(message)
                .append(", path=").append(path)
                .append("]");
         return builder.toString();
@@ -112,6 +100,6 @@ public class Breakpoint {
     }
 
     public enum Type {
-        BREAKPOINT, DISABLED, CONDITIONAL, CURRENT
+        BREAKPOINT, CURRENT
     }
 }

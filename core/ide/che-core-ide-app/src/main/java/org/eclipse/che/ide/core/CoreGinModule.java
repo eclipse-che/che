@@ -25,6 +25,8 @@ import org.eclipse.che.api.account.gwt.client.AccountServiceClient;
 import org.eclipse.che.api.account.gwt.client.AccountServiceClientImpl;
 import org.eclipse.che.api.auth.client.OAuthServiceClient;
 import org.eclipse.che.api.auth.client.OAuthServiceClientImpl;
+import org.eclipse.che.api.debugger.gwt.client.DebuggerServiceClient;
+import org.eclipse.che.api.debugger.gwt.client.DebuggerServiceClientImpl;
 import org.eclipse.che.api.factory.gwt.client.FactoryServiceClient;
 import org.eclipse.che.api.factory.gwt.client.FactoryServiceClientImpl;
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
@@ -338,6 +340,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(MachineServiceClient.class).to(MachineServiceClientImpl.class).in(Singleton.class);
         bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
         bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
+        bind(DebuggerServiceClient.class).to(DebuggerServiceClientImpl.class).in(Singleton.class);
     }
 
     /** API Bindings, binds API interfaces to the implementations */

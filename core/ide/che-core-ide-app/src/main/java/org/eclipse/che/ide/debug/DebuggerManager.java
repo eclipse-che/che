@@ -55,12 +55,12 @@ public class DebuggerManager implements DebuggerManagerObservable {
 
     /**
      * Sets new active debugger.
-     * Resubscriber all {@link DebuggerObserver} to listen to events from new {@link Debugger}
+     * Resubscribe all {@link DebuggerObserver} to listen to events from new {@link Debugger}
      *
      * @param debugger
      *         debugger is being used
      */
-    public void setActiveDebugger(Debugger debugger) {
+    public void setActiveDebugger(@Nullable Debugger debugger) {
         if (activeDebugger != null) {
             for (DebuggerManagerObserver observer : observers) {
                 activeDebugger.removeObserver(observer);
@@ -69,11 +69,11 @@ public class DebuggerManager implements DebuggerManagerObservable {
 
         activeDebugger = debugger;
 
-        if (activeDebugger != null) {
-            for (DebuggerManagerObserver observer : observers) {
+        for (DebuggerManagerObserver observer : observers) {
+            if (activeDebugger != null) {
                 activeDebugger.addObserver(observer);
-                observer.onActiveDebuggerChanged(activeDebugger);
             }
+            observer.onActiveDebuggerChanged(activeDebugger);
         }
     }
 
