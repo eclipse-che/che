@@ -604,7 +604,9 @@ public class NativeGitConnection implements GitConnection {
                 throw new UnauthorizedException(gitEx.getMessage(),
                                                 ErrorCodes.UNAUTHORIZED_GIT_OPERATION,
                                                 ImmutableMap.of(PROVIDER_NAME, info.getProviderName(),
-                                                                AUTHENTICATE_URL, info.getAuthenticateUrl()));
+                                                                AUTHENTICATE_URL, info.getAuthenticateUrl(),
+                                                                "authorized", Boolean.toString(
+                                                        credentialsLoader.getUserCredential(command.getRemoteUri()) != null)));
             }
             throw new UnauthorizedException(gitEx.getMessage(), ErrorCodes.UNAUTHORIZED_GIT_OPERATION);
         }
