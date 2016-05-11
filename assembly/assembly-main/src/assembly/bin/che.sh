@@ -619,8 +619,8 @@ launch_docker_registry () {
 }
 
 launch_che_server () {
-  # Set host variable to the hostname that client should connect to.
-  if ${WIN} || ${MAC} ; then
+
+  if [[ -n "${DOCKER_HOST}" ]]; then
     strip_url ${DOCKER_HOST}
   else
     host=localhost
