@@ -43,7 +43,7 @@
     </div>
     <div
       ng-if="listProjectsCtrl.projects.length > 0"
-      ng-repeat="(workspaceId, projects) in listProjectsCtrl.projectsPerWorkspace | listProjectWorkspaceFilter:listProjectsCtrl.filtersWorkspaceSelected">
+      ng-repeat="(workspaceId, projects) in listProjectsCtrl.getProjectsPerWorkspace() | listProjectWorkspaceFilter:listProjectsCtrl.filtersWorkspaceSelected">
       <che-list-title che-icon="fa fa-folder">
         <span class="projects-list-workspace-name">{{listProjectsCtrl.getWorkspaceName(workspaceId)}}</span>
         <span ng-show="projects.length == 0" class="project-list-empty">- No projects inside</span>

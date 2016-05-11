@@ -22,17 +22,17 @@ export class ListProjectsCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, cheAPI, cheNotification) {
+  constructor($mdDialog, cheAPI, cheNotification, lodash, $q) {
     this.$mdDialog = $mdDialog;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
+    this.lodash = lodash;
+    this.$q = $q;
 
     this.filtersWorkspaceSelected = {};
     this.projectFilter = {name: ''};
     this.projectsSelectedStatus = {};
     this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
-
-
 
     this.isLoading = true;
     // fetch workspaces when initializing
@@ -77,12 +77,16 @@ export class ListProjectsCtrl {
 
   updateData() {
     this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
-    this.projectsPerWorkspace = this.cheAPI.getProject().getProjectsByWorkspace();
-    this.projects = this.cheAPI.getProject().getAllProjects();
+    this.projects = this.lodash.values(this.cheAPI.getWorkspace().getWorkspaceProjects());
+
     // init the filters of workspaces
     this.workspaces.forEach((workspace) => {
       this.filtersWorkspaceSelected[workspace.id] = true;
     });
+  }
+
+  getProjectsPerWorkspace() {
+    return this.cheAPI.getWorkspace().getWorkspaceProjects();
   }
 
   /**
@@ -126,11 +130,11 @@ export class ListProjectsCtrl {
           checkedProjectsKeys.push(key);
         }
       });
-      var queueLenth = checkedProjectsKeys.length;
-      if (queueLenth) {
+
+      if (checkedProjectsKeys.length) {
         let confirmTitle = 'Would you like to delete ';
-        if (queueLenth > 1) {
-          confirmTitle += 'these ' + queueLenth + ' projects?';
+        if (checkedProjectsKeys.length > 1) {
+          confirmTitle += 'these ' + checkedProjectsKeys.length + ' projects?';
         } else {
           confirmTitle += 'this selected project?';
         }
@@ -142,33 +146,24 @@ export class ListProjectsCtrl {
           .cancel('Cancel')
           .clickOutsideToClose(true);
         this.$mdDialog.show(confirm).then(() => {
-          var isError = false;
+          let promises = [];
           checkedProjectsKeys.forEach((key) => {
             // remove it !
             var partsArray = key.split('/');
             if (partsArray.length === 2) {
               this.projectsSelectedStatus[key] = false;
-              let promise = this.cheAPI.getProject().remove(partsArray[0], partsArray[1]);
-              promise.then(() => {
-                queueLenth--;
-                if (!queueLenth) {
-                  if (isError) {
-                    this.cheNotification.showError('Delete failed.');
-                  } else {
-                    this.cheNotification.showInfo('Has been successfully removed.');
-                  }
-                }
-              }, (error) => {
-                queueLenth--;
-                if (!queueLenth) {
-                  this.cheNotification.showError('Delete failed.');
-                }
-                console.log('error', error);
-              });
-            } else {
-              this.cheNotification.showError('No such project.');
+              promises.push(this.removeProject(partsArray[0], partsArray[1]));
             }
           });
+          let deletionPromise = this.$q.all(promises);
+          deletionPromise.then(() => {
+            this.cheNotification.showInfo('Successfully removed project(s).');
+            this.refreshWorkspaces();
+          }, (error) => {
+            this.cheNotification.showError('Project deletion failed.');
+            this.refreshWorkspaces();
+          });
+
         });
       } else {
         this.cheNotification.showError('No selected projects.');
@@ -177,4 +172,30 @@ export class ListProjectsCtrl {
       this.cheNotification.showError('No selected projects.');
     }
   }
+
+  refreshWorkspaces() {
+    let promise = this.cheAPI.getWorkspace().fetchWorkspaces();
+
+    promise.then(() => {
+        this.updateData();
+        this.isLoading = false;
+      },
+      (error) => {
+        this.isLoading = false;
+        if (error.status === 304) {
+          this.updateData();
+        }
+      });
+  }
+
+  removeProject(workspaceId, projectPath) {
+    let wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
+
+    if (wsagent) {
+      return wsagent.getProject().remove(workspaceId, projectPath);
+    } else {
+      return this.cheAPI.getWorkspace().deleteProject(workspaceId, projectPath);
+    }
+  }
+
 }

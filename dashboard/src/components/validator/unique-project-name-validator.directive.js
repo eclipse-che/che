@@ -51,10 +51,10 @@ export class UniqueProjectNameValidator {
         // found a selected workspace ?
         if (selectedWorkspace) {
           // check if project is there
-          var map = this.cheAPI.getProject().getProjectsByWorkspaceMap();
+          var map = this.cheAPI.getWorkspace().getWorkspaceProjects();
 
 
-          var projectsWorkspace = map.get(selectedWorkspace.id);
+          var projectsWorkspace = map[selectedWorkspace.id];
           for (let i = 0; i < projectsWorkspace.length; i++) {
             let project = projectsWorkspace[i];
             if (modelValue === project.name) {
