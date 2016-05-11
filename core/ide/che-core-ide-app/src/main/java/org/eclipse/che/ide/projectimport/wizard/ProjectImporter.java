@@ -129,13 +129,19 @@ public class ProjectImporter extends AbstractImporter {
                     final Map<String, String> attributes = ExceptionUtils.getAttributes(exception.getCause());
                     final String providerName = attributes.get(PROVIDER_NAME);
                     final String authenticateUrl = attributes.get(AUTHENTICATE_URL);
+                    final boolean authenticated = Boolean.parseBoolean(attributes.get("authenticated"));
                     if (!Strings.isNullOrEmpty(providerName) && !Strings.isNullOrEmpty(authenticateUrl)) {
-                        tryAuthenticateRepeatImport(providerName,
-                                                    authenticateUrl,
-                                                    pathToProject,
-                                                    projectName,
-                                                    sourceStorage,
-                                                    subscriber);
+                        if (!authenticated) {
+                            tryAuthenticateRepeatImport(providerName,
+                                                        authenticateUrl,
+                                                        pathToProject,
+                                                        projectName,
+                                                        sourceStorage,
+                                                        subscriber);
+                        } else {
+                          dialogFactory.createMessageDialog(localizationConstant.importProjectSshKeyUploadFailedTitle(),
+                                                            localizationConstant.importProjectSshKeyUploadFailedText(), null).show();
+                        }
                     } else {
                         dialogFactory.createMessageDialog(localizationConstant.oauthFailedToGetAuthenticatorTitle(),
                                                           localizationConstant.oauthFailedToGetAuthenticatorText(), null).show();

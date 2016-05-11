@@ -601,10 +601,12 @@ public class NativeGitConnection implements GitConnection {
             }
             ProviderInfo info = credentialsLoader.getProviderInfo(command.getRemoteUri());
             if (info != null) {
+                boolean isAuthenticated = credentialsLoader.getUserCredential(command.getRemoteUri()) != null;
                 throw new UnauthorizedException(gitEx.getMessage(),
                                                 ErrorCodes.UNAUTHORIZED_GIT_OPERATION,
                                                 ImmutableMap.of(PROVIDER_NAME, info.getProviderName(),
-                                                                AUTHENTICATE_URL, info.getAuthenticateUrl()));
+                                                                AUTHENTICATE_URL, info.getAuthenticateUrl(),
+                                                                "authenticated", Boolean.toString(isAuthenticated)));
             }
             throw new UnauthorizedException(gitEx.getMessage(), ErrorCodes.UNAUTHORIZED_GIT_OPERATION);
         }
