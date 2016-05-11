@@ -43,17 +43,6 @@ public interface Author {
     Author withEmail(String email);
 
     /**
-     * Identifier for the tracked factory features.
-     * Replaces orgid.
-     */
-    @FactoryParameter(obligation = OPTIONAL)
-    String getAccountId();
-
-    void setAccountId(String accountId);
-
-    Author withAccountId(String accountId);
-
-    /**
      * Id of user that create factory, set by the server
      */
     @FactoryParameter(obligation = OPTIONAL, setByServer = true)

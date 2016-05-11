@@ -211,7 +211,6 @@ public class FactoryBuilderTest {
                   .withV("4.0")
                   .withWorkspace(workspaceConfig)
                   .withCreator(dto.createDto(Author.class)
-                                  .withAccountId("accountId")
                                   .withEmail("email")
                                   .withName("name"))
                   .withPolicies(dto.createDto(Policies.class)
