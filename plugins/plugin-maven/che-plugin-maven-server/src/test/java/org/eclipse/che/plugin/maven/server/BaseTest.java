@@ -129,7 +129,7 @@ public abstract class BaseTest {
 
         projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());
 
-        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry);
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry, eventService);
         projectRegistry.initProjects();
 
         importerRegistry = new ProjectImporterRegistry(new HashSet<>());
@@ -227,13 +227,5 @@ public abstract class BaseTest {
             super("test", "test", true, true);
         }
     }
-
-//    protected static class MavenProjectType extends ProjectTypeDef {
-//
-//        protected MavenProjectType() {
-//            super("maven", "maven", true, true);
-//        }
-//    }
-
 
 }

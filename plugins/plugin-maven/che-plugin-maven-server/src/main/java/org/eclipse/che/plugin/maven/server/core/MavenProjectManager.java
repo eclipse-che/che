@@ -14,15 +14,15 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.maven.data.MavenArtifact;
+import org.eclipse.che.maven.data.MavenKey;
+import org.eclipse.che.maven.data.MavenWorkspaceCache;
+import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.MavenServerManager;
 import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProjectModifications;
-import org.eclipse.che.maven.data.MavenArtifact;
-import org.eclipse.che.maven.data.MavenKey;
-import org.eclipse.che.maven.data.MavenWorkspaceCache;
-import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 
@@ -95,7 +95,7 @@ public class MavenProjectManager {
 
     private MavenProjectListener createListenersDispatcher() {
         return (MavenProjectListener)Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                                                            new Class[]{MavenProjectListener.class},
+                                                            new Class[] {MavenProjectListener.class},
                                                             (proxy, method, args) -> {
                                                                 for (MavenProjectListener listener : listeners) {
                                                                     method.invoke(listener, args);
@@ -122,7 +122,7 @@ public class MavenProjectManager {
             dispatcher.projectResolved(mavenProject, modifications);
 
         } finally {
-           wrapperManager.release(mavenServer);
+            wrapperManager.release(mavenServer);
         }
 
     }
@@ -463,6 +463,35 @@ public class MavenProjectManager {
                                                 && Objects.equals(key.getGroupId(), groupId)
                                                 && Objects.equals(key.getVersion(), version))
                         .findFirst().isPresent();
+    }
+
+    public void delete(List<IProject> projects) {
+        if (projects.isEmpty()) {
+            return;
+        }
+        UpdateState state = new UpdateState();
+
+        Deque<MavenProject> stack = new LinkedList<>();
+
+        Set<MavenProject> childToUpdate = new HashSet<>();
+
+        for (IProject project : projects) {
+            MavenProject mavenProject = findMavenProject(project);
+            if (mavenProject == null) {
+                return;
+            }
+
+            childToUpdate.addAll(findChildProjects(mavenProject));
+            internalDelete(findParentProject(mavenProject), mavenProject, state);
+        }
+
+        childToUpdate.removeAll(state.removedProjects);
+
+        for (MavenProject mavenProject : childToUpdate) {
+            internalUpdate(mavenProject, null, false, false, state, stack);
+        }
+
+        state.fireUpdate();
     }
 
     private class UpdateState {

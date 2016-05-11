@@ -96,7 +96,7 @@ public class WorkspaceTest extends BaseTest {
 
                                                 }
                                             }, new ClasspathManager(root.getAbsolutePath(), wrapperManager, projectManager, terminal,
-                                                                    mavenNotifier), pm);
+                                                                    mavenNotifier), pm, eventService, new EclipseWorkspaceProvider());
     }
 
 
@@ -571,5 +571,108 @@ public class WorkspaceTest extends BaseTest {
         IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
         assertThat(rawClasspath).onProperty("path").contains(new Path("/test/target/generated-sources/dto/"));
     }
+
+    @Test
+    public void testImportMultimoduleProjectDeleteAndImportAgain() throws Exception {
+        String pom = "<groupId>com.codenvy.workspacebf11inh2ze5i06bk</groupId>\n" +
+                     "<artifactId>multimodule</artifactId>\n" +
+                     "   <packaging>pom</packaging>\n" +
+                     "   <version>1.0-SNAPSHOT</version>\n" +
+                     "   <properties>\n" +
+                     "      <maven.compiler.source>1.6</maven.compiler.source>\n" +
+                     "      <maven.compiler.target>1.6</maven.compiler.target>\n" +
+                     "   </properties>\n" +
+                     "   <modules>\n" +
+                     "      <module>my-lib</module>\n" +
+                     "      <module>my-webapp</module>\n" +
+                     "   </modules>";
+        createTestProject("parent", pom);
+
+        String myLibPom = " <parent>\n" +
+                          "<groupId>com.codenvy.workspacebf11inh2ze5i06bk</groupId>\n" +
+                          "<artifactId>multimodule</artifactId>\n" +
+                          "    <version>1.0-SNAPSHOT</version>\n" +
+                          "  </parent>\n" +
+                          "  <artifactId>my-lib</artifactId>\n" +
+                          "  <version>1.0-SNAPSHOT</version>\n" +
+                          "  <packaging>jar</packaging>\n" +
+                          "\n" +
+                          "  <name>sample-lib</name>\n" +
+                          "\n" +
+                          "  <properties>\n" +
+                          "    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n" +
+                          "  </properties>\n" +
+                          "\n" +
+                          "  <dependencies>\n" +
+                          "    <dependency>\n" +
+                          "      <groupId>junit</groupId>\n" +
+                          "      <artifactId>junit</artifactId>\n" +
+                          "      <version>3.8.1</version>\n" +
+                          "      <scope>test</scope>\n" +
+                          "    </dependency>\n" +
+                          "  </dependencies>";
+
+        createTestProject("parent/my-lib", myLibPom);
+        String myWebApp = " <parent>\n" +
+                          "<groupId>com.codenvy.workspacebf11inh2ze5i06bk</groupId>\n" +
+                          "<artifactId>multimodule</artifactId>\n" +
+                          "    <version>1.0-SNAPSHOT</version>\n" +
+                          "  </parent>\n" +
+                          "  <artifactId>my-webapp</artifactId>\n" +
+                          "  <packaging>war</packaging>\n" +
+                          "  <version>1.0</version>\n" +
+                          "  <name>SpringDemo</name>\n" +
+                          "  <properties>\n" +
+                          "    <maven.compiler.source>1.6</maven.compiler.source>\n" +
+                          "    <maven.compiler.target>1.6</maven.compiler.target>\n" +
+                          "  </properties>\n" +
+                          "  <dependencies>\n" +
+                          "      <dependency>\n" +
+                          "<groupId>com.codenvy.workspacebf11inh2ze5i06bk</groupId>\n" +
+                          "         <artifactId>my-lib</artifactId>\n" +
+                          "         <version>1.0-SNAPSHOT</version>\n" +
+                          "      </dependency>\n" +
+                          "      <dependency>\n" +
+                          "         <groupId>javax.servlet</groupId>\n" +
+                          "         <artifactId>servlet-api</artifactId>\n" +
+                          "         <version>2.5</version>\n" +
+                          "         <scope>provided</scope>\n" +
+                          "      </dependency>\n" +
+                          "      <dependency>\n" +
+                          "         <groupId>org.springframework</groupId>\n" +
+                          "         <artifactId>spring-webmvc</artifactId>\n" +
+                          "         <version>3.0.5.RELEASE</version>\n" +
+                          "      </dependency>\n" +
+                          "      <dependency>\n" +
+                          "         <groupId>junit</groupId>\n" +
+                          "         <artifactId>junit</artifactId>\n" +
+                          "         <version>3.8.1</version>\n" +
+                          "         <scope>test</scope>\n" +
+                          "      </dependency>\n" +
+                          "  </dependencies>\n" +
+                          "  <build>\n" +
+                          "    <finalName>greeting</finalName>\n" +
+                          "  </build>";
+        createTestProject("parent/my-webapp", myWebApp);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("parent");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject = projectManager.findMavenProject(test);
+        assertThat(mavenProject).isNotNull();
+
+        pm.delete("parent");
+
+        createTestProject("parent2", pom);
+        createTestProject("parent2/my-lib", myLibPom);
+        createTestProject("parent2/my-webapp", myWebApp);
+
+        IProject test2 = ResourcesPlugin.getWorkspace().getRoot().getProject("parent2");
+        mavenWorkspace.update(Collections.singletonList(test2));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject2 = projectManager.findMavenProject(test2);
+        assertThat(mavenProject2).isNotNull();
+    }
+
 
 }
