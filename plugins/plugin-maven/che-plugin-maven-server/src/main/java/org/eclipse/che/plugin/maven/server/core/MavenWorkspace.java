@@ -17,6 +17,9 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.project.server.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathHelper;
@@ -35,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,13 +74,22 @@ public class MavenWorkspace {
                           ProjectRegistry projectRegistry,
                           MavenCommunication communication,
                           ClasspathManager classpathManager,
-                          ProjectManager projectManager) {
+                          ProjectManager projectManager,
+                          EventService eventService,
+                          EclipseWorkspaceProvider workspaceProvider) {
         this.projectRegistry = projectRegistry;
         this.communication = communication;
         this.classpathManager = classpathManager;
         this.manager = manager;
         this.projectManager = projectManager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
+        eventService.subscribe(new EventSubscriber<ProjectDeletedEvent>() {
+            @Override
+            public void onEvent(ProjectDeletedEvent event) {
+                IProject project = workspaceProvider.get().getRoot().getProject(event.getProjectPath());
+                manager.delete(Collections.singletonList(project));
+            }
+        });
         manager.addListener(new MavenProjectListener() {
             @Override
             public void projectResolved(MavenProject project, MavenProjectModifications modifications) {

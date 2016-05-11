@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.WorkspaceHolder;
@@ -105,7 +106,7 @@ public class MavenProjectResolverTest {
 
 
         projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, new ProjectHandlerRegistry(
-                Collections.<ProjectHandler>emptySet()));
+                Collections.<ProjectHandler>emptySet()), new EventService());
 
     }
 

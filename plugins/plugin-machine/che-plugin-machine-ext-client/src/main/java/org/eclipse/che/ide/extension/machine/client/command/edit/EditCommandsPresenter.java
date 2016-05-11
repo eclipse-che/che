@@ -31,6 +31,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBo
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage.DirtyStateListener;
+import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage.FieldStateActionDelegate;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
@@ -55,9 +56,10 @@ import java.util.Set;
  *
  * @author Artem Zatsarynnyi
  * @author Oleksii Orel
+ * @author Valeriy Svydenko
  */
 @Singleton
-public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
+public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, FieldStateActionDelegate {
 
     public static final String PREVIEW_URL_ATTR = "previewUrl";
 
@@ -415,6 +417,8 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
 
             editedPage = p;
 
+            p.setFieldStateActionDelegate(this);
+
             p.setDirtyStateListener(new DirtyStateListener() {
                 @Override
                 public void onDirtyStateChanged() {
@@ -572,6 +576,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate {
 
     public void removeConfigurationsChangedListener(ConfigurationChangedListener listener) {
         configurationChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void updatePreviewURLState(boolean isVisible) {
+        view.setPreviewUrlState(isVisible);
     }
 
     /** Listener that will be called when command configuration changed. */

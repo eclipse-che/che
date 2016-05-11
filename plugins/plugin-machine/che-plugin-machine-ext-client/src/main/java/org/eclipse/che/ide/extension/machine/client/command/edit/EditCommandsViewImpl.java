@@ -429,6 +429,11 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
     }
 
     @Override
+    public void setPreviewUrlState(boolean enabled) {
+        previewUrlPanel.setVisible(enabled);
+    }
+
+    @Override
     public void setConfigurationName(String name) {
         configurationName.setText(name);
     }

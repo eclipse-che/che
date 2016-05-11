@@ -19,6 +19,8 @@ import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.OutputMessageUnmarshaller;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
@@ -33,11 +35,11 @@ import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter.PREVIEW_URL_ATTR;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter.PREVIEW_URL_ATTR;
 
 /**
  * Console for command output.
@@ -63,7 +65,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private List<ConsoleOutputListener>  outputListenes = new ArrayList<>();
 
     @Inject
-    public CommandOutputConsolePresenter(OutputConsoleView view,
+    public CommandOutputConsolePresenter(final OutputConsoleView view,
                                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                          final MessageBusProvider messageBusProvider,
                                          MachineServiceClient machineServiceClient,
@@ -85,7 +87,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
         final String previewUrl = commandConfiguration.getAttributes().get(PREVIEW_URL_ATTR);
         if (!isNullOrEmpty(previewUrl)) {
-            view.printPreviewUrl(commandManager.substituteProperties(previewUrl));
+            commandManager.substituteProperties(previewUrl).then(new Operation<String>() {
+                @Override
+                public void apply(String arg) throws OperationException {
+                    view.printPreviewUrl(arg);
+                }
+            });
         } else {
             view.hidePreview();
         }

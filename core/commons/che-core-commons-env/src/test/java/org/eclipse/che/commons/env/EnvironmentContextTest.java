@@ -14,9 +14,11 @@ import org.eclipse.che.commons.user.User;
 import org.eclipse.che.commons.user.UserImpl;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
-
 import java.util.Collections;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 public class EnvironmentContextTest {
 
@@ -24,13 +26,11 @@ public class EnvironmentContextTest {
     public void shouldBeAbleToSetEnvContextInSameThread() {
         //given
         EnvironmentContext expected = EnvironmentContext.getCurrent();
-        expected.setAccountId("acc1");
         expected.setWorkspaceId("ws1");
         expected.setWorkspaceTemporary(true);
         expected.setUser(new UserImpl("user", "id", "token", Collections.singleton("role"), false));
 
         EnvironmentContext actual = EnvironmentContext.getCurrent();
-        assertEquals(actual.getAccountId(), "acc1");
         assertEquals(actual.getWorkspaceId(), "ws1");
         assertTrue(actual.isWorkspaceTemporary());
         User actualUser = actual.getUser();
@@ -45,7 +45,6 @@ public class EnvironmentContextTest {
     public void shouldNotBeAbleToSeeContextInOtherThread() {
         //given
         final EnvironmentContext expected = EnvironmentContext.getCurrent();
-        expected.setAccountId("acc1");
         expected.setWorkspaceId("ws1");
         expected.setWorkspaceTemporary(true);
         expected.setUser(new UserImpl("user", "id", "token", Collections.singleton("role"), false));

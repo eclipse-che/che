@@ -934,9 +934,9 @@ public class FactoryServiceTest {
         // given
         Factory factory = prepareFactoryWithGivenStorage("git", "http://github.com/codenvy/platform-api.git")
                 .withId(CORRECT_FACTORY_ID)
-                .withCreator(dto.createDto(Author.class).withAccountId("testorg"));
+                .withCreator(dto.createDto(Author.class).withUserId("uid-123"));
 
-        List<Pair<String, String>> expected = Collections.singletonList(Pair.of("creator.accountid", "testorg"));
+        List<Pair<String, String>> expected = Collections.singletonList(Pair.of("creator.userid", "uid-123"));
         when(factoryStore.findByAttribute(anyInt(), anyInt(), eq(expected))).thenReturn(
                 Arrays.asList(factory, factory));
 
@@ -944,7 +944,7 @@ public class FactoryServiceTest {
         Response response = given().auth()
                                    .basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD)
                                    .when()
-                                   .get("/private" + SERVICE_PATH + "/find?creator.accountid=testorg");
+                                   .get("/private" + SERVICE_PATH + "/find?creator.userid=uid-123");
 
         // then
         assertEquals(response.getStatusCode(), 200);

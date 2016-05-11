@@ -77,11 +77,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-account</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -204,11 +199,6 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-workspace-shared</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-client-gwt-account</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

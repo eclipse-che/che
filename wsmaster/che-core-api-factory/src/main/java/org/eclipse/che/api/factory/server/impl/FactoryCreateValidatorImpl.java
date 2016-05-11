@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.impl;
 
-import org.eclipse.che.api.account.server.dao.AccountDao;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -30,10 +29,9 @@ public class FactoryCreateValidatorImpl extends FactoryBaseValidator implements 
     private WorkspaceValidator workspaceConfigValidator;
 
     @Inject
-    public FactoryCreateValidatorImpl(AccountDao accountDao,
-                                      PreferenceDao preferenceDao,
+    public FactoryCreateValidatorImpl(PreferenceDao preferenceDao,
                                       WorkspaceValidator workspaceConfigValidator) {
-        super(accountDao, preferenceDao);
+        super(preferenceDao);
         this.workspaceConfigValidator = workspaceConfigValidator;
     }
 

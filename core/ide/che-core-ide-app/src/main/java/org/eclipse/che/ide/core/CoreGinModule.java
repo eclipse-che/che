@@ -21,8 +21,6 @@ import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 
-import org.eclipse.che.api.account.gwt.client.AccountServiceClient;
-import org.eclipse.che.api.account.gwt.client.AccountServiceClientImpl;
 import org.eclipse.che.api.auth.client.OAuthServiceClient;
 import org.eclipse.che.api.auth.client.OAuthServiceClientImpl;
 import org.eclipse.che.api.factory.gwt.client.FactoryServiceClient;
@@ -327,7 +325,6 @@ public class CoreGinModule extends AbstractGinModule {
         bind(UserServiceClient.class).to(UserServiceClientImpl.class).in(Singleton.class);
         bind(UserProfileServiceClient.class).to(UserProfileServiceClientImpl.class).in(Singleton.class);
         bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
-        bind(AccountServiceClient.class).to(AccountServiceClientImpl.class).in(Singleton.class);
         bind(OAuthServiceClient.class).to(OAuthServiceClientImpl.class).in(Singleton.class);
         bind(FactoryServiceClient.class).to(FactoryServiceClientImpl.class).in(Singleton.class);
         bind(ProjectServiceClient.class).to(ProjectServiceClientImpl.class).in(Singleton.class);
