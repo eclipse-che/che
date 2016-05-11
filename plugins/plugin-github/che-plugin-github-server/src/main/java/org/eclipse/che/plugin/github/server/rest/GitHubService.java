@@ -203,22 +203,13 @@ public class GitHubService {
                                                               @QueryParam("head") String head)
             throws ApiException {
         try {
-            final GitHub github = gitHubFactory.connect();
-            // Workaround for adding head parameter to the request
-            // TODO remove after update to 1.73 library version
-            github.setConnector(new HttpConnector() {
-                @Override
-                public HttpURLConnection connect(URL url) throws IOException {
-                    final String sourceUrl = url.toString();
-                    if (sourceUrl.contains("pulls")) {
-                        return DEFAULT.connect(URI.create(url.toString() + "&head=" + head).toURL());
-                    }
-                    return DEFAULT.connect(url);
-                }
-            });
-            return gitHubDTOFactory.createPullRequestsList(github.getUser(user)
-                                                                 .getRepository(repository)
-                                                                 .listPullRequests(GHIssueState.OPEN));
+            return gitHubDTOFactory.createPullRequestsList(gitHubFactory.connect()
+                                                                        .getUser(user)
+                                                                        .getRepository(repository)
+                                                                        .queryPullRequests()
+                                                                        .head(head)
+                                                                        .state(GHIssueState.OPEN)
+                                                                        .list());
         } catch (IOException e) {
             LOG.error("Getting list of pull request by repositories", e);
             throw new ServerException(e.getMessage());
