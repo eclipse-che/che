@@ -25,7 +25,6 @@
     <modules>
         <module>che-core-client-gwt-core</module>
         <module>che-core-client-gwt-auth</module>
-        <module>che-core-client-gwt-account</module>
         <module>che-core-client-gwt-machine</module>
         <module>che-core-client-gwt-workspace</module>
         <module>che-core-client-gwt-project</module>

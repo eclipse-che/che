@@ -56,7 +56,6 @@ public class EnvironmentContext {
 
     private boolean workspaceTemporary;
 
-    private String accountId;
 
     public EnvironmentContext() {
     }
@@ -65,7 +64,6 @@ public class EnvironmentContext {
         setUser(other.getUser());
         setWorkspaceName(other.getWorkspaceName());
         setWorkspaceId(other.getWorkspaceId());
-        setAccountId(other.getAccountId());
         setWorkspaceTemporary(other.isWorkspaceTemporary());
     }
 
@@ -92,14 +90,6 @@ public class EnvironmentContext {
 
     public void setWorkspaceId(String workspaceId) {
         this.workspaceId = workspaceId;
-    }
-
-    public String getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
     }
 
     public boolean isWorkspaceTemporary() {
