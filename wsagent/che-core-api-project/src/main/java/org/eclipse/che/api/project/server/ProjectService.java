@@ -887,25 +887,17 @@ public class ProjectService extends Service {
         final QueryExpression expr = new QueryExpression()
                 .setPath(path.startsWith("/") ? path : ('/' + path))
                 .setName(name)
-                .setText(text);
+                .setText(text)
+                .setMaxItems(maxItems)
+                .setSkipCount(skipCount);
 
         final SearchResult result = searcher.search(expr);
-
-        if (skipCount > 0) {
-            if (skipCount > result.getTotalHits()) {
-                throw new ConflictException(
-                        String.format("'skipCount' parameter: %d is greater then total number of items in result: %d.",
-                                      skipCount, result.getTotalHits()));
-            }
-        }
-
-        final int length = maxItems > 0 ? Math.min(result.getTotalHits(), maxItems) : result.getTotalHits();
-        final List<ItemReference> items = new ArrayList<>(length);
+        final List<SearchResultEntry> searchResultEntries = result.getResults();
+        final List<ItemReference> items = new ArrayList<>(searchResultEntries.size());
         final FolderEntry root = projectManager.getProjectsRoot();
 
-        List<SearchResultEntry> entries = result.getResults();
-        for (int i = skipCount; i < length; i++) {
-            final VirtualFileEntry child = root.getChild(entries.get(i).getFilePath());
+        for (SearchResultEntry searchResultEntry : searchResultEntries) {
+            final VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
 
             if (child != null && child.isFile()) {
                 items.add(injectFileLinks(asDto((FileEntry)child), workspace));
