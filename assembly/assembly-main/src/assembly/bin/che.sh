@@ -35,7 +35,7 @@ Usage:
      -m:name,   --machine:name          For Win & Mac, sets the docker-machine VM name; default=che
      -a:driver, --machine-driver:driver For Win & Mac, specifies the docker-machine driver to use; default=vbox
      -p:port,   --port:port             Port that Che server will use for HTTP requests; default=8080
-     -ll:level, --logs_level:level      Logging level in Che; default= INFO
+     -ll:level, --logs_level:level      Logging level in Che; default=INFO
      -r:ip,     --remote:ip             If Che clients are not localhost, set to IP address of Che server
      -h,        --help                  Show this help
      -d,        --debug                 Use debug mode (prints command line options + app server debug)
