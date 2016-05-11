@@ -30,28 +30,27 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
 
 /**
- * The class listens changing of machine status and perform some actions when status is changed.
+ * The class listens changing of machine status and perform stop workspace if dev-machine is destroyed.
  *
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class MachineStateListener implements EventSubscriber<MachineStatusEvent> {
-    private static final Logger LOG = LoggerFactory.getLogger(MachineStateListener.class);
+public class StopWorkspaceOnDestroyDevMachine implements EventSubscriber<MachineStatusEvent> {
+    private static final Logger LOG = LoggerFactory.getLogger(StopWorkspaceOnDestroyDevMachine.class);
 
     private final WorkspaceManager workspaceManager;
     private final EventService     eventService;
 
     @Inject
-    public MachineStateListener(WorkspaceManager workspaceManager, EventService eventService) {
+    public StopWorkspaceOnDestroyDevMachine(WorkspaceManager workspaceManager, EventService eventService) {
         this.workspaceManager = workspaceManager;
         this.eventService = eventService;
     }
 
     @Override
     public void onEvent(MachineStatusEvent event) {
-        String workspaceId = event.getWorkspaceId();
-
-        if (event.isDev() && DESTROYED.equals(event.getEventType())) {
+        if (DESTROYED.equals(event.getEventType()) && event.isDev()) {
+            String workspaceId = event.getWorkspaceId();
             try {
                 WorkspaceImpl currentWorkspace = workspaceManager.getWorkspace(workspaceId);
 

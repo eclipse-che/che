@@ -54,6 +54,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yevhenii Voevodin
@@ -68,6 +69,8 @@ public class WorkspaceRuntimesTest {
 
     @Mock
     private EventService eventService;
+    @Mock
+    private MachineImpl  machine;
 
     private WorkspaceRuntimes runtimes;
 
@@ -404,6 +407,36 @@ public class WorkspaceRuntimesTest {
         } catch (MachineException ex) {
             verify(runtimes).publishEvent(EventType.ERROR, workspace.getId(), ex.getLocalizedMessage());
         }
+    }
+
+    @Test
+    public void shouldInjectNewMachine() throws NotFoundException, ServerException, ConflictException {
+        final WorkspaceImpl workspace = createWorkspace();
+        final MachineImpl machine = createMachine(new MachineConfigImpl());
+
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+
+        runtimes.addMachine(machine);
+
+        assertTrue(runtimes.get(WORKSPACE_ID)
+                           .getRuntime()
+                           .getMachines()
+                           .contains(machine));
+    }
+
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = "Could not perform operation because application server is stopping")
+    public void shouldThrowServerExceptionIfAddMachineAfterPreDestroy() throws NotFoundException, ServerException, ConflictException {
+        runtimes.cleanup();
+
+        runtimes.addMachine(machine);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionIfWorkspaceIsNotRunning() throws NotFoundException, ServerException, ConflictException {
+        when(machine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+
+        runtimes.addMachine(machine);
     }
 
     private static MachineImpl createMachine(MachineConfig cfg) {

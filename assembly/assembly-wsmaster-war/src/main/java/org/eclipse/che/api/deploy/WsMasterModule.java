@@ -15,6 +15,8 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.api.workspace.server.event.AddMachineIntoWorkspaceRuntime;
+import org.eclipse.che.api.workspace.server.event.StopWorkspaceOnDestroyDevMachine;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.ServiceBindingHelper;
 
@@ -71,7 +73,8 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
-        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
+        bind(StopWorkspaceOnDestroyDevMachine.class).asEagerSingleton();
+        bind(AddMachineIntoWorkspaceRuntime.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
                 .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);

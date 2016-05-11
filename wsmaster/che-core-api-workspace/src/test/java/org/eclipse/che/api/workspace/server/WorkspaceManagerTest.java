@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
@@ -98,6 +99,10 @@ public class WorkspaceManagerTest {
     private WorkspaceRuntimes             runtimes;
     @Mock
     private UserManager                   userManager;
+    @Mock
+    private MachineImpl                   machine;
+    @Mock
+    private MachineConfigImpl             machineConfig;
     @Captor
     private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -529,6 +534,29 @@ public class WorkspaceManagerTest {
         final List<SnapshotImpl> snapshots = workspaceManager.getSnapshot("workspace123");
 
         assertEquals(snapshots.size(), 1);
+    }
+
+    @Test
+    public void shouldAddMachineToWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
+        when(machine.getConfig()).thenReturn(machineConfig);
+        when(machineConfig.isDev()).thenReturn(false);
+
+        workspaceManager.addMachine(machine);
+
+        verify(runtimes).addMachine(machine);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionIfAddAnotherDevMachine() throws ConflictException, NotFoundException, ServerException {
+        when(machine.getConfig()).thenReturn(machineConfig);
+        when(machineConfig.isDev()).thenReturn(true);
+
+        workspaceManager.addMachine(machine);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Require non-null machine")
+    public void shouldThrowNullPointerExceptionIfMachineIsNull() throws ConflictException, NotFoundException, ServerException {
+        workspaceManager.addMachine(null);
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status) {

@@ -47,9 +47,11 @@ public class WorkspaceRuntimeImpl implements WorkspaceRuntime {
         if (devMachine != null) {
             this.devMachine = new MachineImpl(devMachine);
         }
-        this.machines = machines.stream()
-                                .map(MachineImpl::new)
-                                .collect(toList());
+        if (machines != null) {
+            this.machines = machines.stream()
+                                    .map(MachineImpl::new)
+                                    .collect(toList());
+        }
     }
 
     public WorkspaceRuntimeImpl(WorkspaceRuntime runtime) {

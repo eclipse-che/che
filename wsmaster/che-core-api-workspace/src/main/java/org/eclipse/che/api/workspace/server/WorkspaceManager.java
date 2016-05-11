@@ -487,6 +487,31 @@ public class WorkspaceManager {
         return machineManager.getSnapshots(sessionUser().getId(), workspaceId);
     }
 
+    /**
+     * Adds machine into workspace runtime.
+     *
+     * @param machine
+     *         machine to add to specified runtime
+     * @throws ConflictException
+     *         when given machine already exists in specified runtime
+     *         or when machine is dev-machine
+     * @throws NotFoundException
+     *         when workspace in which machine is adding doesn't have runtime
+     * @throws ServerException
+     *         when application server is stopping
+     * @throws NullPointerException
+     *         when machine is null
+     */
+    public void addMachine(MachineImpl machine) throws ConflictException, NotFoundException, ServerException {
+        requireNonNull(machine, "Require non-null machine");
+        if (machine.getConfig().isDev()) {
+            throw new ConflictException("Cannot add another dev-machine " + machine.getId() +
+                                        " to " + machine.getWorkspaceId() + " workspace");
+        }
+
+        runtimes.addMachine(machine);
+    }
+
     /** Asynchronously starts given workspace. */
     @VisibleForTesting
     WorkspaceImpl performAsyncStart(WorkspaceImpl workspace,

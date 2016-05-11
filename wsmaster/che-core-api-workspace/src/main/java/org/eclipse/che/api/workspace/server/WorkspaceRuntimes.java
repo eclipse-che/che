@@ -245,6 +245,42 @@ public class WorkspaceRuntimes {
     }
 
     /**
+     * Adds machine into running workspace.
+     * This method do not touch workspace configuration.
+     * Just add machine to workspace runtime and destroy it on workspace stop.
+     *
+     * @param machine
+     *         machine to add to specified runtime
+     * @throws NotFoundException
+     *         when workspace with specified id not exists
+     * @throws ServerException
+     *         when application server is stopping
+     * @throws ConflictException
+     *         when workspace is not running
+     */
+    public void addMachine(MachineImpl machine) throws NotFoundException, ServerException, ConflictException {
+        ensurePreDestroyIsNotExecuted();
+
+        String workspaceId = machine.getWorkspaceId();
+
+        rwLock.writeLock().lock();
+        try {
+            ensurePreDestroyIsNotExecuted();
+            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
+            if (descriptor == null) {
+                throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
+            }
+            if (descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
+                throw new ConflictException("Cannot add machine " + machine.getId() + " to not running workspace");
+            }
+
+            descriptor.getRuntime().getMachines().add(machine);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    /**
      * Returns true if workspace was started and its status is
      * {@link WorkspaceStatus#RUNNING running}, {@link WorkspaceStatus#STARTING starting}
      * or {@link WorkspaceStatus#STOPPING stopping} - otherwise returns false.
