@@ -20,12 +20,11 @@ class IdeCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(ideSvc, $routeParams, ideLoaderSvc, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
+  constructor(ideSvc, $routeParams, ideIFrameSvc, $rootScope, cheWorkspace, $timeout, $location, routeHistory) {
     this.ideSvc = ideSvc;
     this.ideIFrameSvc = ideIFrameSvc;
     this.$rootScope = $rootScope;
     this.cheWorkspace = cheWorkspace;
-    this.ideLoaderSvc = ideLoaderSvc;
     this.$timeout = $timeout;
     this.selectedWorkspace = null;
     this.$rootScope.loadingIDE = true;
@@ -128,7 +127,6 @@ class IdeCtrl {
     }
 
     this.$rootScope.hideLoader = true;
-    this.$rootScope.hideIdeLoader = true;
 
     if (this.selectedWorkspace) {
       this.ideSvc.setPreventRedirection(false);
