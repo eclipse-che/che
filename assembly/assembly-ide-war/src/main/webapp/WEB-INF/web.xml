@@ -17,11 +17,6 @@
          version="3.0"
          metadata-complete="true">
 
-    <context-param>
-        <param-name>org.everrest.websocket.context</param-name>
-        <param-value>/api</param-value>
-    </context-param>
-
     <servlet>
         <servlet-name>IDE</servlet-name>
         <jsp-file>/IDE.jsp</jsp-file>
@@ -36,25 +31,6 @@
         <url-pattern>/_app/*</url-pattern>
     </servlet-mapping>
 
-    <listener>
-        <listener-class>org.eclipse.che.inject.CheBootstrap</listener-class>
-    </listener>
-    <listener>
-        <listener-class>org.eclipse.che.everrest.ServerContainerInitializeListener</listener-class>
-    </listener>
-
-    <listener>
-        <listener-class>org.everrest.websockets.WSConnectionTracker</listener-class>
-    </listener>
-
-    <filter>
-        <filter-name>guiceFilter</filter-name>
-        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>guiceFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
     <security-role>
         <description>the user role</description>
         <role-name>developer</role-name>

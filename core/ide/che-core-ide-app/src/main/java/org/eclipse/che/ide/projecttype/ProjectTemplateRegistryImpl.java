@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projecttype;
 
-import org.eclipse.che.api.project.shared.dto.ProjectTemplateDescriptor;
+import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 
 import javax.validation.constraints.NotNull;

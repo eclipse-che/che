@@ -257,7 +257,7 @@ public class ConfigurationTest {
         final Properties props1 = new Properties();
         props1.put("test_a", "bar");
         props1.put("test_b", "foo");
-        Module module1 = new CodenvyBootstrap.AbstractConfigurationModule() {
+        Module module1 = new CheBootstrap.AbstractConfigurationModule() {
             @Override
             protected void configure() {
                 bindProperties(props1);
@@ -266,7 +266,7 @@ public class ConfigurationTest {
 
         final Properties props2 = new Properties();
         props2.put("test_a", "overridden bar");
-        Module module2 = new CodenvyBootstrap.AbstractConfigurationModule() {
+        Module module2 = new CheBootstrap.AbstractConfigurationModule() {
             @Override
             protected void configure() {
                 bindProperties(props2);

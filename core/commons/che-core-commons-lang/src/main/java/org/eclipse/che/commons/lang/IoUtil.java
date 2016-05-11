@@ -190,41 +190,6 @@ public class IoUtil {
     }
 
     /**
-     * Create temporary directory and use specified parent. If parent is <code>null</code> then use 'java.io.tmpdir'.
-     *
-     * @param parent
-     *         parent
-     * @param prefix
-     *         prefix
-     * @return newly create directory
-     * @throws java.io.IOException
-     *         if creation of new directory failed
-     * @deprecated - Use Files.createTempDirectory
-     */
-    @Deprecated
-    public static File createTempDirectory(File parent, String prefix) throws IOException {
-        if (parent == null) {
-            parent = new File(System.getProperty("java.io.tmpdir"));
-        }
-        return Files.createTempDirectory(parent.toPath(), prefix).toFile();
-    }
-
-    /**
-     * Create temporary directory and use 'java.io.tmpdir' as parent.
-     *
-     * @param prefix
-     *         prefix, may not be <code>null</code> and must be at least three characters long
-     * @return newly create directory
-     * @throws java.io.IOException
-     *         if creation of new directory failed
-     * @deprecated - Use Files.createTempDirectory
-     */
-    @Deprecated
-    public static File createTempDirectory(String prefix) throws IOException {
-        return createTempDirectory(null, prefix);
-    }
-
-    /**
      * Download file.
      *
      * @param parent

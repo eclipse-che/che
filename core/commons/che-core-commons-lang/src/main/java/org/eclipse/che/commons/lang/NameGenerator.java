@@ -21,9 +21,11 @@ public class NameGenerator {
 
     static {
         int i = 0;
+        // [0..9]
         for (int c = 48; c <= 57; c++) {
             CHARS[i++] = (char)c;
         }
+        // [a-z]
         for (int c = 97; c <= 122; c++) {
             CHARS[i++] = (char)c;
         }
