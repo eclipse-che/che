@@ -86,7 +86,7 @@ public class ClasspathManagerTest extends BaseTest {
                                                 public void send(JsonObject object, MessageType type) {
 
                                                 }
-                                            }, classpathManager, pm);
+                                            }, classpathManager, pm, eventService, new EclipseWorkspaceProvider());
     }
 
     @AfterMethod
