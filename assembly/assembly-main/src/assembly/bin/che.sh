@@ -46,7 +46,7 @@ Usage:
      -s:java,   --skip:java             Do not enforce Java version checks
      -s:uid,    --skip:uid              Do not enforce UID=1000 for Docker
 
-  Options when running Che in a Docker container:
+  Options to launch Che in a Docker container:
      -i,        --image                 Launches Che within a Docker container using latest image
      -i:tag,    --image:tag             Launches Che within a Docker container using specific image
      -c:name,   --container:name        Sets the container name if -i provided; default=che
@@ -72,6 +72,7 @@ https://eclipse-che.readme.io/docs/networking."
   CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
+  COPY_LIB=false
   VM=${CHE_DOCKER_MACHINE_NAME:-che}
   MACHINE_DRIVER=virtualbox
   CONTAINER=${CHE_CONTAINER_NAME:-che}
@@ -108,6 +109,9 @@ parse_command_line () {
   case ${command_line_option} in
     -b|--blocking-entropy)
       USE_BLOCKING_ENTROPY=true
+    ;;
+    -l|--copy-lib)
+      COPY_LIB=true
     ;;
     -i|--image)
       USE_DOCKER=true
@@ -201,6 +205,7 @@ parse_command_line () {
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
     echo "CHE_DOCKER_MACHINE: ${VM}"
+    echo "COPY_LIB: ${COPY_LIB}"
     echo "MACHINE_DRIVER: ${MACHINE_DRIVER}"
     echo "LAUNCH_REGISTRY: ${LAUNCH_REGISTRY}"
     echo "SKIP_PRINT_CLIENT: ${SKIP_PRINT_CLIENT}"
@@ -440,13 +445,25 @@ get_docker_ready () {
   "${DOCKER}" ps &> /dev/null || DOCKER_VM_REACHABLE=$? || true
 
   if [ "${DOCKER_VM_REACHABLE}" == "1" ]; then
-    error_exit "Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon."
+    error_exit "Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon. Consider running 'sudo chmod 777 /var/run/docker.sock'."
     return
   fi
 
   if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
     echo -e "${BLUE}Docker${NC} is configured to use docker-machine named ${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
   fi
+
+  # Hidden parameter
+  # Only used if running Che server inside a Docker container
+  # Copies Che libraries to a temporary directory which is mounted by the container to be reachable by external host.
+  # Files must be copied otherwise host will overwrite them to blank.
+  # These commands assume that CHE_HOME = /home/user/che
+  if [ "${COPY_LIB}" == "true" ]; then
+    echo "CHE_HOME=" ${CHE_HOME}
+    rm -rf ${CHE_HOME}/lib-copy/*
+    mkdir -p ${CHE_HOME}/lib-copy
+    cp -rf ${CHE_HOME}/lib/* ${CHE_HOME}/lib-copy
+  fi 
 }
 
 # Added || true to not fail due to set -e
@@ -605,7 +622,7 @@ kill_and_launch_docker_che () {
   "${DOCKER}" run -v //var/run/docker.sock:/var/run/docker.sock \
   -v //home/user/che/lib:/home/user/che/lib-copy \
   -v //home/user/che/workspaces:/home/user/che/workspaces \
-  -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
+  -v //home/user/che/storage:/home/user/che/storage \
   -e CHE_DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d --net=host codenvy/che:${CHE_DOCKER_TAG} \
   bash -c "tail -f /dev/null" || DOCKER_EXIT=$? || true
   set +x
