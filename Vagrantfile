@@ -138,7 +138,7 @@ Vagrant.configure(2) do |config|
         export JAVA_HOME=/usr &>/dev/null
         echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:${IP} --skip:client -g start &>/dev/null
       fi
-      # If we are not awake after 180 seconds, restart server
+      # If we are not awake after 180 seconds, exit with failure
       if [ $counter == "35" ]; then
         echo "---------------------------------------------"
         echo "."
