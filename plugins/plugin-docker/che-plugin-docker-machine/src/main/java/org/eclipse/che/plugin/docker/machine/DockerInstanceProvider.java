@@ -33,7 +33,6 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
@@ -80,6 +79,7 @@ public class DockerInstanceProvider implements InstanceProvider {
 
     private final DockerConnector                  docker;
     private final DockerInstanceStopDetector       dockerInstanceStopDetector;
+    private final DockerContainerNameGenerator     containerNameGenerator;
     private final WorkspaceFolderPathProvider      workspaceFolderPathProvider;
     private final boolean                          doForcePullOnBuild;
     private final boolean                          privilegeMode;
@@ -99,6 +99,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   DockerConnectorConfiguration dockerConnectorConfiguration,
                                   DockerMachineFactory dockerMachineFactory,
                                   DockerInstanceStopDetector dockerInstanceStopDetector,
+                                  DockerContainerNameGenerator containerNameGenerator,
                                   @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                   @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                   @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -115,6 +116,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.docker = docker;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
+        this.containerNameGenerator = containerNameGenerator;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegeMode = privilegeMode;
@@ -216,7 +218,11 @@ public class DockerInstanceProvider implements InstanceProvider {
                                    LineConsumer creationLogsOutput) throws MachineException, UnsupportedRecipeException {
         final Dockerfile dockerfile = parseRecipe(recipe);
 
-        final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
+        final String userName = EnvironmentContext.getCurrent().getUser().getName();
+        final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
+                                                                                         machine.getId(),
+                                                                                         userName,
+                                                                                         machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
         final long memoryLimit = (long)machine.getConfig().getLimits().getRam() * 1024 * 1024;
 
@@ -236,7 +242,11 @@ public class DockerInstanceProvider implements InstanceProvider {
 
         pullImage(dockerInstanceKey, creationLogsOutput);
 
-        final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
+        final String userName = EnvironmentContext.getCurrent().getUser().getName();
+        final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
+                                                                                         machine.getId(),
+                                                                                         userName,
+                                                                                         machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
         final String fullNameOfPulledImage = dockerInstanceKey.getFullName();
         try {
@@ -458,14 +468,6 @@ public class DockerInstanceProvider implements InstanceProvider {
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
         }
-    }
-
-    String generateContainerName(String workspaceId, String displayName) {
-        String userName = EnvironmentContext.getCurrent().getUser().getName();
-        final String containerName = userName + '_' + workspaceId + '_' + displayName + '_';
-
-        // removing all not allowed characters + generating random name suffix
-        return NameGenerator.generate(containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", ""), 5);
     }
 
     /**
