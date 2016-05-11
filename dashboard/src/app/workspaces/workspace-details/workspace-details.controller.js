@@ -137,7 +137,7 @@ export class WorkspaceDetailsCtrl {
 
     this.ideSvc.init();
     this.$rootScope.loadingIDE = false;
-    let promise = this.ideSvc.startIde(this.workspaceDetails, true);
+    let promise = this.ideSvc.startIde(this.workspaceDetails);
     promise.then(() => {
       this.showShowMore = false;
     }, (error) => {
