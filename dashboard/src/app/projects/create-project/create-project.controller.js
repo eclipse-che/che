@@ -413,7 +413,11 @@ export class CreateProjectCtrl {
     }
 
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
-    startWorkspacePromise.then(() => {}, (error) => {
+    startWorkspacePromise.then(() => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+    }, (error) => {
       let errorMessage;
 
       if (!error || !error.data) {

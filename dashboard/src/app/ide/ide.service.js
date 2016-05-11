@@ -20,7 +20,7 @@ class IdeSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q, $log, cheWorkspace) {
+  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, $location, routeHistory, $q, $log, cheWorkspace) {
     this.cheAPI = cheAPI;
     this.$rootScope = $rootScope;
     this.lodash = lodash;
@@ -30,7 +30,6 @@ class IdeSvc {
     this.userDashboardConfig = userDashboardConfig;
     this.$sce = $sce;
     this.proxySettings = proxySettings;
-    this.ideLoaderSvc = ideLoaderSvc;
     this.$location = $location;
     this.routeHistory = routeHistory;
     this.$q = $q;
@@ -65,15 +64,6 @@ class IdeSvc {
     }
   }
 
-  getStepText(stepNumber) {
-    let entry = this.steps[stepNumber];
-    if (this.currentStep >= stepNumber) {
-      return entry.inProgressText;
-    } else {
-      return entry.text;
-    }
-  }
-
   displayIDE() {
     this.$rootScope.showIDE = true;
   }
@@ -95,11 +85,8 @@ class IdeSvc {
     this.$log.error(error);
   }
 
-  startIde(workspace, noIdeLoader) {
+  startIde(workspace) {
     let defer = this.$q.defer();
-    if (!noIdeLoader) {
-      this.ideLoaderSvc.addLoader();
-    }
 
     this.currentStep = 1;
 
@@ -277,11 +264,7 @@ class IdeSvc {
     this.ideAction = ideAction;
   }
 
-  openLastStartedIde(skipLoader) {
-    this.openIde(this.lastWorkspace.id, skipLoader);
-  }
-
-  openIde(workspaceId, skipLoader) {
+  openIde(workspaceId) {
     this.$rootScope.hideNavbar = false;
 
     if (this.lastWorkspace && this.lastWorkspace.id === workspaceId) {
@@ -295,11 +278,6 @@ class IdeSvc {
 
     if (this.$rootScope.loadingIDE === false || this.preventRedirection) {
       return;
-    }
-
-    if (skipLoader) {
-      this.ideLoaderSvc.addLoader();
-      this.$rootScope.hideIdeLoader = true;
     }
 
     let inDevMode = this.userDashboardConfig.developmentMode;
@@ -330,11 +308,6 @@ class IdeSvc {
       this.$rootScope.ideIframeLink = this.$sce.trustAsResourceUrl(ideUrlLink + appendUrl);
     } else {
       this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
-    }
-    if (!skipLoader) {
-      this.$timeout(() => {
-        this.$rootScope.hideIdeLoader = true;
-      }, 4000);
     }
 
     this.$timeout(() => {
