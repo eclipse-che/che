@@ -115,44 +115,39 @@ Vagrant.configure(2) do |config|
 
   $script2 = <<-SHELL
     IP=$1
-
     counter=0
     while [ true ]; do
       curl -v http://${IP}:8080/dashboard &>/dev/null
       exitcode=$?
-
       if [ $exitcode == "0" ]; then
-        echo "--------------------------------------"
+        echo "----------------------------------------"
         echo "."
-        echo "ARTIK IDE: SERVER BOOTED AND REACHABLE"
+        echo "ECLIPSE CHE: SERVER BOOTED AND REACHABLE"
         echo "AVAILABLE: http://${IP}:8080  "
         echo "."
-        echo "--------------------------------------"
+        echo "----------------------------------------"
         exit 0
       fi 
-
       # If we are not awake after 60 seconds, restart server
       if [ $counter == "11" ]; then
-        echo "---------------------------------------------"
+        echo "-----------------------------------------------"
         echo "."
-        echo "ARTIK IDE: SERVER NOT RESPONSIVE -- REBOOTING"
+        echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- REBOOTING"
         echo "."
-        echo "---------------------------------------------"
+        echo "-----------------------------------------------"
         export JAVA_HOME=/usr &>/dev/null
         echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:${IP} --skip:client -g start &>/dev/null
       fi
-
       # If we are not awake after 180 seconds, restart server
       if [ $counter == "35" ]; then
-        echo "-------------------------------------------"
+        echo "---------------------------------------------"
         echo "."
-        echo "ARTIK IDE: SERVER NOT RESPONSIVE -- EXITING"
-        echo "           CONTACT SUPPORT FOR ASSISTANCE  "
+        echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- EXITING"
+        echo "           CONTACT SUPPORT FOR ASSISTANCE    "
         echo "."
-        echo "-------------------------------------------"
+        echo "---------------------------------------------"
         exit 0
       fi
-
       let counter=counter+1
       sleep 5
     done
