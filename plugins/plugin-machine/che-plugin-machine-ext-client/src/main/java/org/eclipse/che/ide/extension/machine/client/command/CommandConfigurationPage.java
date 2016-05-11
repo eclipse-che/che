@@ -22,6 +22,7 @@ import javax.validation.constraints.NotNull;
  * @param <T>
  *         type of the command configuration which this page should edit
  * @author Artem Zatsarynnyi
+ * @author Valeriy Svydenko
  */
 public interface CommandConfigurationPage<T extends CommandConfiguration> extends Presenter {
 
@@ -56,6 +57,16 @@ public interface CommandConfigurationPage<T extends CommandConfiguration> extend
      * every time when any modifications on the page has been performed.
      */
     void setDirtyStateListener(@NotNull DirtyStateListener listener);
+
+    /**
+     * Sets {@link FieldStateActionDelegate} that should be operated all panels.
+     */
+    void setFieldStateActionDelegate (FieldStateActionDelegate delegate);
+
+    interface FieldStateActionDelegate {
+        /** Sets a state of the visibility for the Preview URL panel.*/
+        void updatePreviewURLState(boolean isVisible);
+    }
 
     /** Listener that should be called when any modifications on page. */
     interface DirtyStateListener {

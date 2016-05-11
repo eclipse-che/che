@@ -35,6 +35,7 @@ public class CommandPagePresenter implements CommandPageView.ActionDelegate, Com
     private String                     originCodeServerAddress;
     private String                     originClassPath;
     private DirtyStateListener         listener;
+    private FieldStateActionDelegate   delegate;
 
     @Inject
     public CommandPagePresenter(CommandPageView view) {
@@ -69,6 +70,11 @@ public class CommandPagePresenter implements CommandPageView.ActionDelegate, Com
     @Override
     public void setDirtyStateListener(@NotNull DirtyStateListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override

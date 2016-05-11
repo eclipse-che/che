@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
@@ -111,7 +110,7 @@ public class ClasspathResolver {
             return null;
         }
 
-        List<ClasspathEntryDTO> entries = new ArrayList<>();
+        final List<ClasspathEntryDTO> entries = new ArrayList<>();
         for (String path : libs) {
             entries.add(dtoFactory.createDto(ClasspathEntryDTO.class).withPath(path).withEntryKind(LIBRARY));
         }
@@ -129,6 +128,7 @@ public class ClasspathResolver {
         promise.then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
+                eventBus.fireEvent(new ClasspathChangedEvent(currentProject.getProjectConfig().getPath(), entries));
                 projectService.getProject(appContext.getDevMachine(), currentProject.getProjectConfig().getPath()).then(
                         new Operation<ProjectConfigDto>() {
                             @Override

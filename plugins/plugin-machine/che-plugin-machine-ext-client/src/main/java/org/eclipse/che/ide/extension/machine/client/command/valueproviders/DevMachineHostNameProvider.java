@@ -16,6 +16,8 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import javax.validation.constraints.NotNull;
@@ -49,8 +51,8 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
 
     @NotNull
     @Override
-    public String getValue() {
-        return value;
+    public Promise<String> getValue() {
+        return Promises.resolve(value);
     }
 
     @Override

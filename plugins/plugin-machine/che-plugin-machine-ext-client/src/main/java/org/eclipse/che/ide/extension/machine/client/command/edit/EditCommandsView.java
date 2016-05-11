@@ -63,6 +63,9 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
     /** Returns preview Url. */
     String getConfigurationPreviewUrl();
 
+    /** Sets visible state of the 'Preview URL' panel. */
+    void setPreviewUrlState(boolean enabled);
+
     /** Sets enabled state of the 'Cancel' button. */
     void setCancelButtonState(boolean enabled);
 
