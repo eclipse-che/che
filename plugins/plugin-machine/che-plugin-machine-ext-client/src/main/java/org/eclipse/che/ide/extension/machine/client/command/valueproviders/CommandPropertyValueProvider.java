@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
 
+import org.eclipse.che.api.promises.client.Promise;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -27,5 +29,6 @@ public interface CommandPropertyValueProvider {
 
     /** Get value. */
     @NotNull
-    String getValue();
+    Promise<String> getValue();
+
 }

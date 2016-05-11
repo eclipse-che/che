@@ -98,7 +98,7 @@
         </g:west>
         <g:center>
             <g:FlowPanel addStyleNames="{style.rightPart}">
-                <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.contentPanel}"/>
+                <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.contentPanel}" debugId="pageViewContainer"/>
                 <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
             </g:FlowPanel>
         </g:center>

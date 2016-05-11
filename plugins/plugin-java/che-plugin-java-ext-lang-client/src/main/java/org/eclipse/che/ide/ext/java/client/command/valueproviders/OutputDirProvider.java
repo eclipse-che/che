@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
+package org.eclipse.che.ide.ext.java.client.command.valueproviders;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -17,24 +17,22 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.ext.java.shared.Constants;
+import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
 
 /**
- * Provides relative path to specific project. Path to project resolves from current workspace root.
- * e.g. /project_name.
+ * Provides a path to the project's output directory.
  *
- * Need for IDEX-3924 as intermediate solution.
- *
- * @author Vlad Zhukovskiy
+ * @author Valeriy Svydenko
  */
 @Singleton
-public class CurrentProjectRelativePathProvider implements CommandPropertyValueProvider {
+public class OutputDirProvider implements CommandPropertyValueProvider {
+    private static final String KEY = "${project.java.output.dir}";
 
-    private static final String KEY = "${current.project.relpath}";
-
-    private AppContext appContext;
+    private final AppContext         appContext;
 
     @Inject
-    public CurrentProjectRelativePathProvider(AppContext appContext) {
+    public OutputDirProvider(AppContext appContext) {
         this.appContext = appContext;
     }
 
@@ -49,6 +47,13 @@ public class CurrentProjectRelativePathProvider implements CommandPropertyValueP
         if (currentProject == null) {
             return Promises.resolve("");
         }
-        return Promises.resolve(appContext.getCurrentProject().getProjectConfig().getPath().substring(1));
+
+        String languageAttribute = currentProject.getAttributeValue(Constants.LANGUAGE);
+        if (!Constants.JAVA_ID.equals(languageAttribute)) {
+            return Promises.resolve(appContext.getProjectsRoot() + currentProject.getProjectConfig().getPath());
+        }
+
+        return Promises.resolve(appContext.getProjectsRoot() + currentProject.getAttributeValue(Constants.OUTPUT_FOLDER));
     }
+
 }

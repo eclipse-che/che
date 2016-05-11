@@ -31,6 +31,7 @@ public class CustomPagePresenter implements CustomPageView.ActionDelegate, Comma
     private CustomCommandConfiguration editedConfiguration;
     private String                     originCommandLine;
     private DirtyStateListener         listener;
+    private FieldStateActionDelegate   delegate;
 
     @Inject
     public CustomPagePresenter(CustomPageView view) {
@@ -59,6 +60,11 @@ public class CustomPagePresenter implements CustomPageView.ActionDelegate, Comma
     @Override
     public void setDirtyStateListener(@NotNull DirtyStateListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override

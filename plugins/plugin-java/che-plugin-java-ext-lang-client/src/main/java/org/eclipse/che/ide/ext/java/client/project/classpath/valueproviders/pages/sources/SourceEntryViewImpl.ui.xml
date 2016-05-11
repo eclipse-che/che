@@ -44,12 +44,12 @@
         </g:north>
         <g:west size="265">
             <g:ScrollPanel addStyleNames="{style.sourcePanel}">
-                <g:FlowPanel width="100%" height="100%" ui:field="sourcePanel"/>
+                <g:FlowPanel width="100%" height="100%" ui:field="sourcePanel" debugId="page-sources"/>
             </g:ScrollPanel>
         </g:west>
         <g:east size="115">
             <g:FlowPanel ui:field="buttonsPanel" addStyleNames="{style.buttonsPanel}" debugId="source-buttons-panel">
-                <g:Button ui:field="addSourceBtn" text="{locale.buttonAddFolder}" addStyleNames="{style.btn}"/>
+                <g:Button ui:field="addSourceBtn" text="{locale.buttonAddFolder}" addStyleNames="{style.btn}" debugId="add-source-btn"/>
             </g:FlowPanel>
         </g:east>
     </g:DockLayoutPanel>

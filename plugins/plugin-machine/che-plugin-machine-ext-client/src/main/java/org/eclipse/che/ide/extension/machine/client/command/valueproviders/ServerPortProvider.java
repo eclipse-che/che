@@ -22,10 +22,8 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedEvent;
-import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStoppedHandler;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
 
 import java.util.Map;
@@ -119,8 +117,8 @@ public class ServerPortProvider implements WsAgentStateHandler {
         }
 
         @Override
-        public String getValue() {
-            return address;
+        public Promise<String> getValue() {
+            return Promises.resolve(address);
         }
     }
 }

@@ -28,14 +28,15 @@ public class GwtCommandPagePresenter implements GwtCommandPageView.ActionDelegat
 
     private final GwtCommandPageView view;
 
-    private GwtCommandConfiguration editedConfiguration;
+    private GwtCommandConfiguration  editedConfiguration;
     /** Working directory value before any editing. */
-    private String                  originWorkingDirectory;
+    private String                   originWorkingDirectory;
     /** GWT module value before any editing. */
-    private String                  originGwtModule;
+    private String                   originGwtModule;
     /** Code server address value before any editing. */
-    private String                  originCodeServerAddress;
-    private DirtyStateListener      listener;
+    private String                   originCodeServerAddress;
+    private DirtyStateListener       listener;
+    private FieldStateActionDelegate delegate;
 
     @Inject
     public GwtCommandPagePresenter(GwtCommandPageView view) {
@@ -70,6 +71,11 @@ public class GwtCommandPagePresenter implements GwtCommandPageView.ActionDelegat
     @Override
     public void setDirtyStateListener(@NotNull DirtyStateListener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override

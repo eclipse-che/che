@@ -14,6 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
@@ -54,8 +56,8 @@ public class CurrentClassFQNProvider implements CommandPropertyValueProvider, Fi
     }
 
     @Override
-    public String getValue() {
-        return value;
+    public Promise<String> getValue() {
+        return Promises.resolve(value);
     }
 
     @Override

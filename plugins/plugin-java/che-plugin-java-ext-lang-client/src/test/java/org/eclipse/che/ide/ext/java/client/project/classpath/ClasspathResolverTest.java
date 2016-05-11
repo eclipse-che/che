@@ -46,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -161,7 +162,7 @@ public class ClasspathResolverTest {
         verify(getProjectPromise).then(getProjectOperation.capture());
         getProjectOperation.getValue().apply(projectConfig);
 
-        verify(eventBus).fireEvent(Matchers.<Event>anyObject());
+        verify(eventBus, times(2)).fireEvent(Matchers.<Event>anyObject());
     }
 
     @Test

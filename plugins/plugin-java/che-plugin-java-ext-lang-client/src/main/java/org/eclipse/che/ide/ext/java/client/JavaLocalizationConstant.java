@@ -425,4 +425,16 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("button.continue")
     String buttonContinue();
+
+    @Key("label.main.class")
+    String labelMainClass();
+
+    @Key("command.line")
+    String commandLine();
+
+    @Key("browse.button")
+    String browseBtn();
+
+    @Key("command.line.description")
+    String commandLineDescription();
 }
