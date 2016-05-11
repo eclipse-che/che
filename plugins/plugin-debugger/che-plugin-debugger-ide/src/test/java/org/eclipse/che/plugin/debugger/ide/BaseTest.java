@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.debugger.ide;
 
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.debugger.gwt.client.DebuggerServiceClient;
-import org.eclipse.che.api.debugger.shared.dto.DebugSessionDto;
-import org.eclipse.che.api.debugger.shared.dto.DebuggerInfoDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.DebugSessionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.DebuggerInfoDto;
+import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;

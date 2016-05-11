@@ -15,13 +15,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.eclipse.che.api.debugger.shared.dto.action.ActionDto;
-import org.eclipse.che.api.debugger.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.api.debugger.shared.dto.action.StartActionDto;
-import org.eclipse.che.api.debugger.shared.dto.action.StepIntoActionDto;
-import org.eclipse.che.api.debugger.shared.dto.action.StepOutActionDto;
-import org.eclipse.che.api.debugger.shared.dto.action.StepOverActionDto;
-import org.eclipse.che.api.debugger.shared.model.action.Action;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.ActionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.StartActionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.StepIntoActionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOutActionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.ide.api.debugger.shared.model.action.Action;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
 

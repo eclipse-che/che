@@ -118,7 +118,7 @@
                 </dependencies>
                 <configuration>
                     <dtoPackages>
-                        <package>org.eclipse.che.api.debugger.shared.dto</package>
+                        <package>org.eclipse.che.ide.api.debugger.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                     <genClassName>org.eclipse.che.api.debugger.server.dto.DtoServerImpls</genClassName>

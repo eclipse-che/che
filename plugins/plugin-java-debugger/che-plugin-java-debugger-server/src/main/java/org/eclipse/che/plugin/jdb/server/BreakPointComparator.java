@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.jdb.server;
 
 
-import org.eclipse.che.api.debugger.shared.model.Breakpoint;
+import org.eclipse.che.ide.api.debugger.shared.model.Breakpoint;
 
 import java.util.Comparator;
 

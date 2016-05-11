@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide;
 
-import org.eclipse.che.api.debugger.shared.dto.VariableDto;
-import org.eclipse.che.api.debugger.shared.dto.VariablePathDto;
-import org.eclipse.che.api.debugger.shared.model.MutableVariable;
+import org.eclipse.che.ide.api.debugger.shared.dto.VariableDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.VariablePathDto;
+import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.debug.DebuggerPresenter;

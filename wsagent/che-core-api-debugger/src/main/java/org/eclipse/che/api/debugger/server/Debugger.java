@@ -11,22 +11,22 @@
 package org.eclipse.che.api.debugger.server;
 
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.api.debugger.shared.model.Breakpoint;
-import org.eclipse.che.api.debugger.shared.model.DebuggerInfo;
-import org.eclipse.che.api.debugger.shared.model.Location;
-import org.eclipse.che.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.api.debugger.shared.model.Value;
-import org.eclipse.che.api.debugger.shared.model.Variable;
-import org.eclipse.che.api.debugger.shared.model.VariablePath;
-import org.eclipse.che.api.debugger.shared.model.action.ResumeAction;
-import org.eclipse.che.api.debugger.shared.model.action.StartAction;
-import org.eclipse.che.api.debugger.shared.model.action.StepIntoAction;
-import org.eclipse.che.api.debugger.shared.model.action.StepOutAction;
-import org.eclipse.che.api.debugger.shared.model.action.StepOverAction;
-import org.eclipse.che.api.debugger.shared.model.event.BreakpointActivatedEvent;
-import org.eclipse.che.api.debugger.shared.model.event.DebuggerEvent;
-import org.eclipse.che.api.debugger.shared.model.event.DisconnectEvent;
-import org.eclipse.che.api.debugger.shared.model.event.SuspendEvent;
+import org.eclipse.che.ide.api.debugger.shared.model.Breakpoint;
+import org.eclipse.che.ide.api.debugger.shared.model.DebuggerInfo;
+import org.eclipse.che.ide.api.debugger.shared.model.Location;
+import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
+import org.eclipse.che.ide.api.debugger.shared.model.Value;
+import org.eclipse.che.ide.api.debugger.shared.model.Variable;
+import org.eclipse.che.ide.api.debugger.shared.model.VariablePath;
+import org.eclipse.che.ide.api.debugger.shared.model.action.ResumeAction;
+import org.eclipse.che.ide.api.debugger.shared.model.action.StartAction;
+import org.eclipse.che.ide.api.debugger.shared.model.action.StepIntoAction;
+import org.eclipse.che.ide.api.debugger.shared.model.action.StepOutAction;
+import org.eclipse.che.ide.api.debugger.shared.model.action.StepOverAction;
+import org.eclipse.che.ide.api.debugger.shared.model.event.BreakpointActivatedEvent;
+import org.eclipse.che.ide.api.debugger.shared.model.event.DebuggerEvent;
+import org.eclipse.che.ide.api.debugger.shared.model.event.DisconnectEvent;
+import org.eclipse.che.ide.api.debugger.shared.model.event.SuspendEvent;
 
 import java.util.List;
 

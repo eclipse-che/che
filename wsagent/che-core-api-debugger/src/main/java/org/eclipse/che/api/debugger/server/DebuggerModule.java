@@ -14,7 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.debugger.shared.dto.action.ActionDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.action.ActionDto;
 
 /**
  * The module that contains configuration of the server side part of the Debugger.

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server.parser;
 
-import org.eclipse.che.api.debugger.shared.model.Location;
-import org.eclipse.che.api.debugger.shared.model.impl.LocationImpl;
+import org.eclipse.che.ide.api.debugger.shared.model.Location;
+import org.eclipse.che.ide.api.debugger.shared.model.impl.LocationImpl;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

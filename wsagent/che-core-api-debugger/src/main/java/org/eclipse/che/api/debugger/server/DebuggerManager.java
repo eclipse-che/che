@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerNotFoundException;
-import org.eclipse.che.api.debugger.shared.model.event.DebuggerEvent;
+import org.eclipse.che.ide.api.debugger.shared.model.event.DebuggerEvent;
 import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

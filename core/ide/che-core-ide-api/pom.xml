@@ -52,6 +52,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-debugger-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-dto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-factory-shared</artifactId>
         </dependency>
         <dependency>
@@ -192,6 +200,11 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-debugger-shared</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-ide-api</artifactId>
                         <version>${project.version}</version>
                     </dependency>
@@ -199,9 +212,10 @@
                 <configuration>
                     <dtoPackages>
                         <package>org.eclipse.che.ide.api.user</package>
+                        <package>org.eclipse.che.ide.api.debugger.shared.dto</package>
                     </dtoPackages>
                     <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                    <genClassName>org.eclipse.che.ide.api.user.dto.DtoClientImpls</genClassName>
+                    <genClassName>org.eclipse.che.ide.api.dto.DtoClientImpls</genClassName>
                     <impl>client</impl>
                 </configuration>
             </plugin>

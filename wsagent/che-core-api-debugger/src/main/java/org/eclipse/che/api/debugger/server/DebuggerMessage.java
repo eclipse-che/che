@@ -11,7 +11,7 @@
 package org.eclipse.che.api.debugger.server;
 
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.debugger.shared.model.event.DebuggerEvent;
+import org.eclipse.che.ide.api.debugger.shared.model.event.DebuggerEvent;
 
 /**
  * A wrapper over {@link DebuggerEvent} to send data over {@link EventService}.

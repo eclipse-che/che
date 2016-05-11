@@ -15,7 +15,7 @@ import elemental.html.SpanElement;
 
 import com.google.gwt.resources.client.CssResource;
 
-import org.eclipse.che.api.debugger.shared.model.MutableVariable;
+import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
 import org.eclipse.che.ide.ui.tree.NodeRenderer;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;

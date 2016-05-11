@@ -15,12 +15,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.debugger.shared.model.Location;
-import org.eclipse.che.api.debugger.shared.model.MutableVariable;
-import org.eclipse.che.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.api.debugger.shared.model.Value;
-import org.eclipse.che.api.debugger.shared.model.Variable;
-import org.eclipse.che.api.debugger.shared.model.impl.LocationImpl;
+import org.eclipse.che.ide.api.debugger.shared.model.Location;
+import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
+import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
+import org.eclipse.che.ide.api.debugger.shared.model.Value;
+import org.eclipse.che.ide.api.debugger.shared.model.Variable;
+import org.eclipse.che.ide.api.debugger.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;

@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.api.debugger.shared.dto.ValueDto;
-import org.eclipse.che.api.debugger.shared.model.Location;
-import org.eclipse.che.api.debugger.shared.model.MutableVariable;
+import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
+import org.eclipse.che.ide.api.debugger.shared.dto.ValueDto;
+import org.eclipse.che.ide.api.debugger.shared.model.Location;
+import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
