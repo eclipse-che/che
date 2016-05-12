@@ -14,7 +14,6 @@
 import {CheWorkspaceBuilder} from './che-workspace-builder';
 import {CheProjectReferenceBuilder} from './che-projectreference-builder';
 import {CheProjectDetailsBuilder} from './che-projectdetails-builder';
-import {CheProjectPermissionsBuilder} from './che-projectpermissions-builder';
 import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
 import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attribute-descriptor-builder';
@@ -66,17 +65,6 @@ export class CheAPIBuilder {
   getProjectDetailsBuilder() {
     return new CheProjectDetailsBuilder();
   }
-
-
-
-  /***
-   * The Che Project Permission builder
-   * @returns {CheProjectPermissionsBuilder}
-   */
-  getProjectPermissionsBuilder() {
-    return new CheProjectPermissionsBuilder();
-  }
-
 
   /***
    * The Che Project Template builder

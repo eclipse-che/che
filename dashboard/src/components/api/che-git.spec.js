@@ -45,8 +45,7 @@ describe('CheGit', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheGit, cheWorkspace, cheAPIBuilder, cheHttpBackend) {
-    factory = cheGit;
+  beforeEach(inject(function (cheWorkspace, cheAPIBuilder, cheHttpBackend) {
     workspace = cheWorkspace;
     cheBackend = cheHttpBackend;
     apiBuilder = cheAPIBuilder;
@@ -66,7 +65,7 @@ describe('CheGit', function () {
    */
   it('Fetch local git url', function () {
       // setup tests objects
-      var agentUrl = 'localhost:3232';
+      var agentUrl = 'localhost:3232/wsagent/ext';
       var workspaceId = 'workspace123test';
       var projectPath = '/testProject';
       var localUrl = 'http://eclipse.org/che/git/f1/' + workspaceId + projectPath;
@@ -85,8 +84,11 @@ describe('CheGit', function () {
       workspace.fetchWorkspaceDetails(workspaceId);
       httpBackend.expectGET('/api/workspace/' + workspaceId);
 
+
       // flush command
       httpBackend.flush();
+
+      var factory = workspace.getWorkspaceAgent(workspaceId).getGit();
 
       cheBackend.getLocalGitUrl(workspaceId, encodeURIComponent(projectPath));
 
@@ -94,7 +96,7 @@ describe('CheGit', function () {
       factory.fetchLocalUrl(workspaceId, projectPath);
 
       // expecting GETs
-      httpBackend.expectGET('//' + agentUrl + '/wsagent/ext/git/' + workspaceId + '/read-only-url?projectPath=' + encodeURIComponent(projectPath));
+      httpBackend.expectGET(agentUrl + '/git/' + workspaceId + '/read-only-url?projectPath=' + encodeURIComponent(projectPath));
 
       // flush command
       httpBackend.flush();
@@ -112,7 +114,7 @@ describe('CheGit', function () {
    */
   it('Fetch remote git urls', function () {
       // setup tests objects
-      var agentUrl = 'localhost:3232';
+      var agentUrl = 'localhost:3232/wsagent/ext';
       var workspaceId = 'workspace123test';
       var projectPath = '/testProject';
       var remoteArray = [{
@@ -141,13 +143,15 @@ describe('CheGit', function () {
       // flush command
       httpBackend.flush();
 
+      var factory = workspace.getWorkspaceAgent(workspaceId).getGit();
+
       cheBackend.getRemoteGitUrlArray(workspaceId, encodeURIComponent(projectPath));
 
       // fetch localUrl
       factory.fetchRemoteUrlArray(workspaceId, projectPath);
 
       // expecting POSTs
-      httpBackend.expectPOST('//' + agentUrl + '/wsagent/ext/git/' + workspaceId + '/remote-list?projectPath=' + encodeURIComponent(projectPath));
+      httpBackend.expectPOST(agentUrl + '/git/' + workspaceId + '/remote-list?projectPath=' + encodeURIComponent(projectPath));
 
       // flush command
       httpBackend.flush();
