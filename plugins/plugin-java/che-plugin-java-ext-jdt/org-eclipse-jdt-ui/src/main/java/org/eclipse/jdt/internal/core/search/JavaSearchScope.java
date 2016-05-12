@@ -190,7 +190,7 @@ public class JavaSearchScope extends AbstractJavaSearchScope {
                     if ((includeMask & REFERENCED_PROJECTS) != 0) {
                         IPath path = entry.getPath();
                         if (pathToAdd == null || pathToAdd.equals(path)) {
-                            JavaProject referencedProject = (JavaProject)model.getJavaProject(path.lastSegment());
+                            JavaProject referencedProject = (JavaProject)model.getJavaProject(path.toOSString());
                             if (!projectsToBeAdded
                                     .contains(referencedProject)) { // do not recurse if depending project was used to create the scope
                                 add(referencedProject, null, includeMask, projectsToBeAdded, visitedProjects, cpEntry);
