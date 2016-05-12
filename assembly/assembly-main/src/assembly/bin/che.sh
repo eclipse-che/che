@@ -189,6 +189,7 @@ parse_command_line () {
     ;;
     -d|--debug)
       USE_DEBUG=true
+      CHE_LOGS_LEVEL=DEBUG
     ;;
     start|stop|run)
       CHE_SERVER_ACTION=${command_line_option}
