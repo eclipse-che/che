@@ -14,7 +14,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.project.gwt.client.ProjectImportersServiceClient;
+import org.eclipse.che.ide.api.project.ProjectImportersServiceClient;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterData;
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;

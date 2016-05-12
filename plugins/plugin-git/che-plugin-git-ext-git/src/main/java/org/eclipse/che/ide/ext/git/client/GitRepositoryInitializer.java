@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.git.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import org.eclipse.che.api.git.gwt.client.GitServiceClient;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;

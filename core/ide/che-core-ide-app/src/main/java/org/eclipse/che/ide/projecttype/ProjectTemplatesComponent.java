@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projecttype;
 
-import org.eclipse.che.api.project.gwt.client.ProjectTemplateServiceClient;
+import org.eclipse.che.ide.api.project.ProjectTemplateServiceClient;
 
 import org.eclipse.che.api.project.templates.shared.dto.ProjectTemplateDescriptor;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;

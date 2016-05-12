@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
-import org.eclipse.che.api.user.gwt.client.UserProfileServiceClient;
+import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.component.Component;

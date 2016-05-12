@@ -19,11 +19,13 @@
     </generate-with>
     <stylesheet src="https://fonts.googleapis.com/css?family=Open+Sans"></stylesheet>
 
-    <inherits name="org.eclipse.che.api.Core"/>
-    <inherits name="org.eclipse.che.api.Machine"/>
-    <inherits name="org.eclipse.che.api.Workspace"/>
-    <inherits name="com.google.gwt.user.User"/>
+    <inherits name="org.eclipse.che.api.core.Core"/>
+    <inherits name="org.eclipse.che.api.machine.Machine"/>
+    <inherits name="org.eclipse.che.api.workspace.Workspace"/>
+    <inherits name="org.eclipse.che.api.git.Git"/>
+    <inherits name="org.eclipse.che.api.factory.Factory"/>
 
+    <inherits name="com.google.gwt.user.User"/>
     <inherits name="elemental.Elemental"/>
     <inherits name="org.eclipse.che.ide.Commons"/>
     <inherits name="org.eclipse.che.ide.Api"/>
@@ -33,6 +35,5 @@
     <inherits name="com.google.gwt.user.Debug"/>
     <inherits name="com.google.common.base.Base"/>
     <inherits name="com.google.common.collect.Collect"/>
-    <inherits name="org.eclipse.che.api.Git"/>
-    <inherits name="org.eclipse.che.api.Factory"/>
+
 </module>
