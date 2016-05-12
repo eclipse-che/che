@@ -14,8 +14,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.gwt.client.DevMachine;
-import org.eclipse.che.api.project.gwt.client.ProjectTypeServiceClient;
+import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
 import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;

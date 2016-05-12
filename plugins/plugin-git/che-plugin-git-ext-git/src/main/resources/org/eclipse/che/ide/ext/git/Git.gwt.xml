@@ -21,7 +21,7 @@
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.Core"/>
-    <inherits name="org.eclipse.che.api.Git"/>
+    <inherits name="org.eclipse.che.api.git.Git"/>
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
     <inherits name="org.eclipse.che.ide.extension.machine.Machine"/>
 

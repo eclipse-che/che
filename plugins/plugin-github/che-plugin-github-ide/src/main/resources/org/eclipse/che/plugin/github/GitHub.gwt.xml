@@ -19,12 +19,12 @@
     <inherits name="com.google.gwt.json.JSON"/>
     <inherits name='org.eclipse.che.ide.Api'/>
     <inherits name="com.google.gwt.inject.Inject"/>
-    <inherits name="org.eclipse.che.api.User"/>
+    <inherits name="org.eclipse.che.api.user.User"/>
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.ide.ui.CodenvyUI"/>
     <inherits name="org.eclipse.che.security.OAuth"/>
-    <inherits name="org.eclipse.che.api.Git"/>
-    <inherits name="org.eclipse.che.api.Ssh"/>
+    <inherits name="org.eclipse.che.api.git.Git"/>
+    <inherits name="org.eclipse.che.api.ssh.Ssh"/>
     <inherits name="org.eclipse.che.ide.ext.git.ssh.Ssh"/>
     <inherits name="com.google.common.base.Base"/>
 
