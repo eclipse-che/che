@@ -1,8 +1,17 @@
+# Copyright (c) 2012-2016 Codenvy, S.A.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Codenvy, S.A. - initial API and implementation
+
 # Set to "<proto>://<user>:<pass>@<host>:<port>"
 $http_proxy  = ""
 $https_proxy = ""
 $che_version = "latest"
-$ip          = "192.168.28.28"
+$ip          = "192.168.28.30"
 
 Vagrant.configure(2) do |config|
   config.vm.box = "centos71-docker-java-v1.0"
@@ -11,16 +20,11 @@ Vagrant.configure(2) do |config|
   config.ssh.insert_key = false
   config.vm.network :private_network, ip: $ip
   config.vm.synced_folder ".", "/home/vagrant/.che"
-  config.vm.define "artik" do |artik|
+  config.vm.define "che" do |che|
   end
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "4096"
-    vb.name = "artik-ide-vm"
-    vb.customize ["modifyvm", :id, "--usb", "on"]
-    vb.customize ["modifyvm", :id, "--usbehci", "on"]
-    vb.customize ["usbfilter", "add", "0",
-                  "--target", :id,
-                  "--name", "Artik"]
+    vb.name = "eclipse-che-vm"
   end
 
   $script = <<-SHELL
@@ -30,18 +34,17 @@ Vagrant.configure(2) do |config|
     IP=$4
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-	    echo "-----------------------------------"
+	    echo "-------------------------------------"
 	    echo "."
-	    echo "ARTIK IDE: CONFIGURING SYSTEM PROXY"
+	    echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
 	    echo "."
-	    echo "-----------------------------------"
+	    echo "-------------------------------------"
 	    echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
 	    echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
 	    source /home/vagrant/.bashrc
 	    echo "HTTP PROXY set to: $HTTP_PROXY"
 	    echo "HTTPS PROXY set to: $HTTPS_PROXY"
     fi
-
     # Add the user in the VM to the docker group
     usermod -aG docker vagrant &>/dev/null
 
@@ -61,44 +64,36 @@ Vagrant.configure(2) do |config|
         systemctl restart docker
     fi
 
-    echo "--------------------------------"
+    echo "------------------------------------"
     echo "."
-    echo "ARTIK IDE: DOWNLOADING ARTIK IDE"
+    echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE"
     echo "."
-    echo "--------------------------------"
-    curl -O "https://install.codenvycorp.com/artik/samsung-artik-ide-${CHE_VERSION}.tar.gz"
-    tar xvfz samsung-artik-ide-${CHE_VERSION}.tar.gz &>/dev/null
+    echo "------------------------------------"
+    curl -O "https://install.codenvycorp.com/che/eclipse-che-$CHE_VERSION.tar.gz"
+    tar xvfz eclipse-che-$CHE_VERSION.tar.gz &>/dev/null
     sudo chown -R vagrant:vagrant * &>/dev/null
     export JAVA_HOME=/usr &>/dev/null
 
     # exporting CHE_LOCAL_CONF_DIR, reconfiguring Che to store workspaces, projects and prefs outside the Tomcat
     export CHE_LOCAL_CONF_DIR=/home/vagrant/.che &>/dev/null
-    cp /home/vagrant/eclipse-che-*/conf/che.properties /home/vagrant/.che/
+    cp /home/vagrant/eclipse-che-*/conf/che.properties /home/vagrant/.che/che.properties
     sed -i 's|${catalina.base}/temp/local-storage|/home/vagrant/.che|' /home/vagrant/.che/che.properties
     sed -i 's|${che.home}/workspaces|/home/vagrant/.che|' /home/vagrant/.che/che.properties
     echo 'export CHE_LOCAL_CONF_DIR=/home/vagrant/.che' >> /home/vagrant/.bashrc
+    source /home/vagrant/.bashrc
 
-    echo "------------------------------------------"
+    echo "----------------------------------------"
     echo "."
-    echo "ARTIK IDE: DOWNLOADING ARTIK RUNTIME IMAGE"
-    echo "           950MB: SILENT OUTPUT           "
+    echo "ECLIPSE CHE: DOWNLOADING DOCKER REGISTRY"
+    echo "             50MB: SILENT OUTPUT        "
     echo "."
-    echo "------------------------------------------"
-    docker pull codenvy/artik &>/dev/null
-
-    echo "--------------------------------------"
-    echo "."
-    echo "ARTIK IDE: DOWNLOADING DOCKER REGISTRY"
-    echo "           50MB: SILENT OUTPUT        "
-    echo "."
-    echo "--------------------------------------"
+    echo "----------------------------------------"
     docker pull registry:2 &>/dev/null
-
-    echo "-------------------------------"
+    echo "---------------------------------"
     echo "."
-    echo "ARTIK IDE: PREPPING SERVER ~10s"
+    echo "ECLIPSE CHE: PREPPING SERVER ~10s"
     echo "."
-    echo "-------------------------------"
+    echo "---------------------------------"
     if [ -n "$HTTP_PROXY" ]; then
         sed -i "s|http.proxy=|http.proxy=${HTTP_PROXY}|" /home/vagrant/eclipse-che-*/conf/che.properties
     fi
@@ -112,7 +107,7 @@ Vagrant.configure(2) do |config|
   	s.inline = $script
   	s.args = [$http_proxy, $https_proxy, $che_version, $ip]
   end
-
+  
   $script2 = <<-SHELL
     IP=$1
     counter=0
