@@ -121,9 +121,9 @@ public class WorkspaceTest extends BaseTest {
 
         List<MavenArtifact> dependencies = mavenProject.getDependencies();
         assertThat(dependencies).isNotNull().hasSize(2);
-        assertThat(dependencies).onProperty("artifactId").containsExactly("junit", "hamcrest-core");
-        assertThat(dependencies).onProperty("groupId").containsExactly("junit", "org.hamcrest");
-        assertThat(dependencies).onProperty("version").containsExactly("4.12", "1.3");
+        assertThat(dependencies).onProperty("artifactId").contains("junit", "hamcrest-core");
+        assertThat(dependencies).onProperty("groupId").contains("junit", "org.hamcrest");
+        assertThat(dependencies).onProperty("version").contains("4.12", "1.3");
     }
 
     @Test
