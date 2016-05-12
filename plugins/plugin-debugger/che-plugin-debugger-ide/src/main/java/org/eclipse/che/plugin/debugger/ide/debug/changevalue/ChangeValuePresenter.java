@@ -13,8 +13,8 @@ package org.eclipse.che.plugin.debugger.ide.debug.changevalue;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.VariableImpl;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;

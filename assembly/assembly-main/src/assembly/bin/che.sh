@@ -46,11 +46,9 @@ Usage:
      -s:java,   --skip:java             Do not enforce Java version checks
      -s:uid,    --skip:uid              Do not enforce UID=1000 for Docker
 
-  Options when running Che in a Docker container:
-     -i,        --image                 Launches Che within a Docker container using latest image
-     -i:tag,    --image:tag             Launches Che within a Docker container using specific image
-     -c:name,   --container:name        Sets the container name if -i provided; default=che
-     -t,        --stop-container        If stopping Che, will also stop Che container if Che ran with -i
+  Options to launch Che in a Docker container:
+     -i,        --image                 (Deprecated) Launches Che within a Docker container using latest image
+     -i:tag,    --image:tag             (Deprecated) Launches Che within a Docker container using specific version
 
   Commands:
      run                                (Default) Starts Che server with logging in current console
@@ -59,8 +57,8 @@ Usage:
 
 Docs: http://eclipse.org/che/getting-started.
 
-If you are running Che as a server on a VM for multiple users to access, review the various networking
-configuration items that control how clients, Che and workspaces initiate connections. See:
+If you are running Che as a server on a VM for multiple users, review the additional networking
+configuration that control how clients, Che and workspaces initiate connections. See:
 https://eclipse-che.readme.io/docs/networking."
 
   # Command line parameters
@@ -72,9 +70,9 @@ https://eclipse-che.readme.io/docs/networking."
   CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
+  COPY_LIB=false
   VM=${CHE_DOCKER_MACHINE_NAME:-che}
   MACHINE_DRIVER=virtualbox
-  CONTAINER=${CHE_CONTAINER_NAME:-che}
   USE_DEBUG=false
   SKIP_PRINT_CLIENT=false
   SKIP_DOCKER_UID=false
@@ -96,8 +94,7 @@ error_exit () {
   echo "!!!"
   echo "!!! ${1}"
   echo "!!!"
-  echo "${USAGE}"
-#  echo "${WRONG} ${CHE_VARIABLES} ${USAGE}"
+  echo 
   JUMP_TO_END=true
 }
 
@@ -109,6 +106,9 @@ parse_command_line () {
     -b|--blocking-entropy)
       USE_BLOCKING_ENTROPY=true
     ;;
+    -l|--copy-lib)
+      COPY_LIB=true
+    ;;
     -i|--image)
       USE_DOCKER=true
     ;;
@@ -119,11 +119,6 @@ parse_command_line () {
       USE_DOCKER=true
       if [ "${command_line_option#*:}" != "" ]; then
         CHE_DOCKER_TAG="${command_line_option#*:}"
-      fi
-    ;;
-    -c:*|--container:*)
-      if [ "${command_line_option#*:}" != "" ]; then
-        CONTAINER="${command_line_option#*:}"
       fi
     ;;
     -p:*|--port:*)
@@ -172,9 +167,6 @@ parse_command_line () {
         esac
       fi
     ;;
-    -t|--stop-container)
-      STOP_CONTAINER=true
-    ;;
     -h|--help)
       USE_HELP=true
       usage
@@ -201,12 +193,12 @@ parse_command_line () {
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
     echo "CHE_DOCKER_MACHINE: ${VM}"
+    echo "COPY_LIB: ${COPY_LIB}"
     echo "MACHINE_DRIVER: ${MACHINE_DRIVER}"
     echo "LAUNCH_REGISTRY: ${LAUNCH_REGISTRY}"
     echo "SKIP_PRINT_CLIENT: ${SKIP_PRINT_CLIENT}"
     echo "SKIP_DOCKER_UID: ${SKIP_DOCKER_UID}"
     echo "SKIP_JAVA_VERSION: ${SKIP_JAVA_VERSION}"
-    echo "STOP_CONTAINER: ${STOP_CONTAINER}"
     echo "USE_HELP: ${USE_HELP}"
     echo "CHE_SERVER_ACTION: ${CHE_SERVER_ACTION}"
     echo "USE_DEBUG: ${USE_DEBUG}"
@@ -253,7 +245,8 @@ set_environment_variables () {
     fi
   fi
 
-  if [[ "${CHE_IP}" != "" ]]; then
+  # The environment variable is used by Che to set its IP address
+  if [[ -n "${CHE_IP}" ]]; then
     export CHE_DOCKER_MACHINE_HOST="${CHE_IP}"
   fi
 
@@ -312,93 +305,14 @@ set_environment_variables () {
 }
 
 get_docker_ready () {
-  # Create absolute file names for docker and docker-machine
-  # DOCKER_TOOLBOX_INSTALL_PATH set globally by Docker Toolbox installer
+
   if [ "${WIN}" == "true" ]; then
-    if [ ! -z "${DOCKER_TOOLBOX_INSTALL_PATH}" ]; then
-      export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
-      export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
-    else
-      error_exit "DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
-      return
-    fi
+    export DOCKER=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker.exe
   elif [ "${MAC}" == "true" ]; then
-    export DOCKER_MACHINE=/usr/local/bin/docker-machine
     export DOCKER=/usr/local/bin/docker
   elif [ "${LINUX}" == "true" ]; then
-    export DOCKER_MACHINE=
     export DOCKER=/usr/bin/docker
   fi
-
-  ### If Windows or Mac, launch docker-machine, if necessary
-  if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
-
-    # Path to run VMware on the command line - used for creating VMs
-    # TODO: add support for VMware Workstation
-    if [ "${MAC}" == "true" ] && [ "${MACHINE_DRIVER}" == "fusion" ]; then
-      VMRUN="/Applications/VMware Fusion.app/Contents/Library/vmrun"
-      echo "$VMRUN"
-      VM_CHECK_CMD="$("$VMRUN" list \| grep $VM)"
-      DOCKER_MACHINE_DRIVER=vmwarefusion
-      if [ ! -f "$VMRUN" ]; then
-        error_exit "Could not find vmrun. Expected vmrun in $VMRUN. Check VMware Fusion installation."
-        return
-      fi
-    else
-      if [ ! -z "${VBOX_MSI_INSTALL_PATH}" ]; then
-        # Convert this directory to its short form name on Windows
-        if [ "${WIN}" == "true" ]; then
-          export VBOX_MSI_INSTALL_PATH=`(cd "${VBOX_MSI_INSTALL_PATH}" && cmd //C 'FOR %i in (.) do @echo %~Si')`\\
-      fi
-        VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}"VBoxManage.exe
-      else
-        VBOXMANAGE=/usr/local/bin/VBoxManage
-      fi
-      VM_CHECK_CMD="${VBOXMANAGE} showvminfo ${VM}"
-      DOCKER_MACHINE_DRIVER=virtualbox
-      DOCKER_MACHINE_DRIVER_OPTIONS='--virtualbox-host-dns-resolver --virtualbox-memory 2048 --virtualbox-cpu-count 2'
-      if [ ! -f "${VBOXMANAGE}" ]; then
-        error_exit "Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected Virtual Box at /usr/local/bin/VBoxManage."
-      return
-      fi
-    fi
-
-    if [ ! -f "${DOCKER_MACHINE}" ]; then
-      error_exit "Could not find docker-machine executable. Win: DOCKER_TOOLBOX_INSTALL_PATH env variable not set. Add it or rerun Docker Toolbox installation. Mac: Expected docker-machine at /usr/local/bin/docker-machine."
-      return
-    fi
-
-    # Test to see if the VM we need is already running
-    # Added || true to not fail due to set -e
-    ${VM_CHECK_CMD} &> /dev/null || VM_EXISTS_CODE=$? || true
-    if [ "${VM_EXISTS_CODE}" == "1" ]; then
-      echo -e "Could not find an existing docker machine named ${GREEN}${VM}${NC}."
-      echo -e "Creating docker machine named ${GREEN}${VM}${NC}... Please be patient, this takes a couple minutes the first time."
-      "${DOCKER_MACHINE}" rm -f ${VM} &> /dev/null || true
-      rm -rf ~/.docker/machine/machines/${VM}
-      "${DOCKER_MACHINE}" create -d $DOCKER_MACHINE_DRIVER $DOCKER_MACHINE_DRIVER_OPTIONS ${VM} &> /dev/null || true
-
-      # Seems that sometimes you have to regenerate certs even when creating new machine on windows
-
-      echo -e "Successfully started docker machine named ${GREEN}${VM}${NC}..."
-
-    else
-      echo -e "Docker machine named ${GREEN}${VM}${NC} already exists..."
-    fi
-
-    VM_STATUS=$("${DOCKER_MACHINE}" status ${VM} 2>&1)
-
-    if [ "${VM_STATUS}" != "Running" ]; then
-      echo -e "Docker machine named ${GREEN}${VM}${NC} is not running."
-      echo -e "Starting docker machine named ${GREEN}${VM}${NC}..."
-      "${DOCKER_MACHINE}" start ${VM} || true
-      yes | "${DOCKER_MACHINE}" regenerate-certs ${VM} &> /dev/null  || true
-    fi
-
-    echo -e "Setting environment variables for machine ${GREEN}${VM}${NC}..."
-    eval "$("${DOCKER_MACHINE}" env --shell=bash ${VM})"
-  fi
-  ### End logic block to create / remove / start docker-machine VM
 
   # Test to ensure user is in Docker group with appropriate permissions
   if [ "${LINUX}" == "true" ]; then
@@ -411,11 +325,13 @@ get_docker_ready () {
       if echo "${LINUX_GROUPS}" | grep "docker" &>/dev/null; then
 
         if [[ "${LINUX_UID}" != "1000" ]] ; then
-          error_exit "This Linux user was launched with a UID != 1000. Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
+          error_exit "This Linux user was launched with a UID != 1000. `
+                     `Che must run under UID 1000. See https://eclipse-che.readme.io/docs/usage#section-cannot-create-projects"
         fi
 
       else
-        error_exit "This Linux user is not in docker group. See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
+        error_exit "This Linux user is not in 'docker' group. `
+                   `See https://docs.docker.com/engine/installation/ubuntulinux/#create-a-docker-group"
       fi
     fi
 
@@ -424,7 +340,10 @@ get_docker_ready () {
   # Docker should be available, either in a VM or natively.
   # Test to see if docker binary is installed
   if [ ! -f "${DOCKER}" ]; then
-    error_exit "Could not find Docker client. Expected at Windows: %DOCKER_TOOLBOX_INSTALL_PATH%\\docker.exe, Mac: /usr/local/bin/docker, Linux: /usr/bin/docker."
+    error_exit "Could not find Docker client. `
+               `Expected at Windows: %DOCKER_TOOLBOX_INSTALL_PATH%\\docker.exe, `
+               `Mac: /usr/local/bin/docker, `
+               `Linux: /usr/bin/docker."
     return
   fi
 
@@ -440,13 +359,114 @@ get_docker_ready () {
   "${DOCKER}" ps &> /dev/null || DOCKER_VM_REACHABLE=$? || true
 
   if [ "${DOCKER_VM_REACHABLE}" == "1" ]; then
-    error_exit "Running 'docker' succeeded, but 'docker ps' failed. This usually means that docker cannot reach its daemon."
+    
+    # If this is Mac or Windows and we get a failure, assume Docker is not installed.
+    # Use Docker Machine to launch a VM where we can use Docker
+    if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
+      launch_docker_vm
+    else
+      # If Linux and docker ps fails, then this likely a file permissions issue.
+      error_exit "Running 'docker' succeeded, but 'docker ps' failed. `
+                 `This usually means that docker cannot reach its daemon. `
+                 `On Mac and Linux, check the read / write permissions on '/var/run/docker.sock'. `
+                 `Consider running 'sudo chmod 777 /var/run/docker.sock'."
+      return
+    fi
+  fi
+
+  # Hidden parameter
+  # Only used if running Che server inside a Docker container.
+  # Copies Che libraries to a temporary directory which is mounted by the container to be reachable by external host.
+  # Files must be copied otherwise host will overwrite them to blank.
+  if [ "${COPY_LIB}" == "true" ]; then
+    echo "CHE_HOME=" ${CHE_HOME}
+    rm -rf ${CHE_HOME}/lib-copy/*
+    mkdir -p ${CHE_HOME}/lib-copy
+    cp -rf ${CHE_HOME}/lib/* ${CHE_HOME}/lib-copy
+  fi 
+}
+
+launch_docker_vm () {
+  # Create absolute file names for docker and docker-machine
+  # DOCKER_TOOLBOX_INSTALL_PATH set globally by Docker Toolbox installer
+  if [ "${WIN}" == "true" ]; then
+    if [ ! -z "${DOCKER_TOOLBOX_INSTALL_PATH}" ]; then
+      export DOCKER_MACHINE=${DOCKER_TOOLBOX_INSTALL_PATH}\\docker-machine.exe
+    else
+      error_exit "DOCKER_TOOLBOX_INSTALL_PATH environment variable not set. Add it or rerun Docker Toolbox installation."
+      return
+    fi
+  else 
+    export DOCKER_MACHINE=/usr/local/bin/docker-machine
+  fi
+
+  # Path to run VMware on the command line - used for creating VMs
+  # TODO: add support for VMware Workstation
+  if [ "${MAC}" == "true" ] && [ "${MACHINE_DRIVER}" == "fusion" ]; then
+    VMRUN="/Applications/VMware Fusion.app/Contents/Library/vmrun"
+    echo "$VMRUN"
+    VM_CHECK_CMD="$("$VMRUN" list \| grep $VM)"
+    DOCKER_MACHINE_DRIVER=vmwarefusion
+    if [ ! -f "$VMRUN" ]; then
+      error_exit "Could not find vmrun. Expected vmrun in $VMRUN. Check VMware Fusion installation."
+      return
+    fi
+  else
+    if [ ! -z "${VBOX_MSI_INSTALL_PATH}" ]; then
+      # Convert this directory to its short form name on Windows
+      if [ "${WIN}" == "true" ]; then
+        export VBOX_MSI_INSTALL_PATH=`(cd "${VBOX_MSI_INSTALL_PATH}" && cmd //C 'FOR %i in (.) do @echo %~Si')`\\
+    fi
+      VBOXMANAGE="${VBOX_MSI_INSTALL_PATH}"VBoxManage.exe
+    else
+      VBOXMANAGE=/usr/local/bin/VBoxManage
+    fi
+    VM_CHECK_CMD="${VBOXMANAGE} showvminfo ${VM}"
+    DOCKER_MACHINE_DRIVER=virtualbox
+    DOCKER_MACHINE_DRIVER_OPTIONS='--virtualbox-host-dns-resolver --virtualbox-memory 2048 --virtualbox-cpu-count 2'
+    if [ ! -f "${VBOXMANAGE}" ]; then
+      error_exit "Could not find VirtualBox. Win: VBOX_MSI_INSTALL_PATH env variable not set. `
+                 `Add it or rerun Docker Toolbox installation. Mac: Expected Virtual Box at /usr/local/bin/VBoxManage."
+    return
+    fi
+  fi
+
+  if [ ! -f "${DOCKER_MACHINE}" ]; then
+    error_exit "Could not find docker-machine executable. Win: DOCKER_TOOLBOX_INSTALL_PATH env variable not set. `
+               `Mac: Expected docker-machine at /usr/local/bin/docker-machine."
     return
   fi
 
-  if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
-    echo -e "${BLUE}Docker${NC} is configured to use docker-machine named ${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
+  # Test to see if the VM we need is already running
+  # Added || true to not fail due to set -e
+  ${VM_CHECK_CMD} &> /dev/null || VM_EXISTS_CODE=$? || true
+  if [ "${VM_EXISTS_CODE}" == "1" ]; then
+    echo -e "Could not find an existing docker machine named ${GREEN}${VM}${NC}."
+    echo -e "Creating docker machine named ${GREEN}${VM}${NC}... Be patient, this takes a couple minutes the first time."
+    "${DOCKER_MACHINE}" rm -f ${VM} &> /dev/null || true
+    rm -rf ~/.docker/machine/machines/${VM}
+    "${DOCKER_MACHINE}" create -d $DOCKER_MACHINE_DRIVER $DOCKER_MACHINE_DRIVER_OPTIONS ${VM} &> /dev/null || true
+
+    # Seems that sometimes you have to regenerate certs even when creating new machine on windows
+    echo -e "Successfully started docker machine named ${GREEN}${VM}${NC}..."
+  else
+    echo -e "Docker machine named ${GREEN}${VM}${NC} already exists..."
   fi
+
+  VM_STATUS=$("${DOCKER_MACHINE}" status ${VM} 2>&1)
+
+  if [ "${VM_STATUS}" != "Running" ]; then
+    echo -e "Docker machine named ${GREEN}${VM}${NC} is not running."
+    echo -e "Starting docker machine named ${GREEN}${VM}${NC}..."
+    "${DOCKER_MACHINE}" start ${VM} || true
+    yes | "${DOCKER_MACHINE}" regenerate-certs ${VM} &> /dev/null  || true
+  fi
+
+  echo -e "Setting environment variables for machine ${GREEN}${VM}${NC}..."
+  eval "$("${DOCKER_MACHINE}" env --shell=bash ${VM})"
+
+  echo -e "${BLUE}Docker${NC} is configured to use docker-machine named `
+          `${GREEN}${VM}${NC} with IP ${GREEN}$("${DOCKER_MACHINE}" ip ${VM})${NC}..."
 }
 
 # Added || true to not fail due to set -e
@@ -480,16 +500,11 @@ strip_url () {
 
   # extract the path (if any)
   path="`echo ${url} | grep / | cut -d/ -f2-`" || true
-
 }
 
 print_client_connect () {
-  if [ "${USE_DOCKER}" == "false" ]; then
-    HOST_PRINT_VALUE="localhost"
-  else
-    HOST_PRINT_VALUE=${host}
-  fi
-      echo "
+  HOST_PRINT_VALUE=${host}
+  echo "
 ############## HOW TO CONNECT YOUR CHE CLIENT ###############
 After Che server has booted, you can connect your clients by:
 1. Open browser to http://${HOST_PRINT_VALUE}:${CHE_PORT}, or:
@@ -514,7 +529,7 @@ call_catalina () {
   # Test to see that Java is installed and working
   "${JAVA_HOME}"/bin/java &>/dev/null || JAVA_EXIT=$? || true
   if [ "${JAVA_EXIT}" != "1" ]; then
-    error_exit "We could not find a working Java JVM. java command fails."
+    error_exit "We could not find a working Java JVM. 'java' command fails."
     return
   fi
 
@@ -554,61 +569,10 @@ call_catalina () {
 
 stop_che_server () {
 
-echo $CATALINA_PID
-
-  if [[ "${USE_DOCKER}" == true ]]; then
-    # Determined that we need to stop Che that is running in a container
-    # Docker exec the command
-    echo -e "Stopping Che server running in docker container named ${GREEN}${CONTAINER}${NC}..."
-    DOCKER_EXEC="//home/user/che/bin/che.sh stop"
-    "${DOCKER}" exec ${CONTAINER} ${DOCKER_EXEC} || DOCKER_EXIT=$? || true
-
-    if [[ "${STOP_CONTAINER}" == true ]]; then
-      echo -e "Stopping docker container named ${GREEN}${CONTAINER}${NC}...."
-      "${DOCKER}" stop --time=10 ${CONTAINER} &>/dev/null 2>&1 || DOCKER_EXIT=$? || true
-    fi
-  else
-    echo -e "Stopping Che server running on localhost:${CHE_PORT}"
-    call_catalina >/dev/null 2>&1
-  fi
+  echo -e "Stopping Che server running on localhost:${CHE_PORT}"
+  call_catalina >/dev/null 2>&1
   return
-}
 
-kill_and_launch_docker_che () {
-
-  echo -e "A Docker container named ${GREEN}${CONTAINER}${NC} does not exist or duplicate conflict was discovered."
-  echo -e "Cleaning up any zombie containers named ${GREEN}${CONTAINER}${NC}..."
-
-  # Force remove any lingering zombie containers with the name ${CONTAINER}
-  "${DOCKER}" rm -f ${CONTAINER} &> /dev/null || true
-
-  echo -e "Pulling the Docker image labeled ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC}..."
-  "${DOCKER}" pull codenvy/che:${CHE_DOCKER_TAG} || true
-
-  echo -e "Launching a new Docker container named ${GREEN}${CONTAINER}${NC} from image ${GREEN}codenvy/che:${CHE_DOCKER_TAG}${NC}..."
-
-  if ${WIN} || ${MAC} ; then
-    DOCKER_PRINT_VALUE=${host}
-  else
-    if [[ "${CHE_IP}" != "" ]]; then
-      DOCKER_PRINT_VALUE="${CHE_IP}"
-    else
-      DOCKER_PRINT_VALUE="${host}"
-    fi
-  fi
-
-  if ${USE_DEBUG}; then
-    set -x
-  fi
-
-  # IDEX-4266 - Change launching of docker to avoid using dind
-  "${DOCKER}" run -v //var/run/docker.sock:/var/run/docker.sock \
-  -v //home/user/che/lib:/home/user/che/lib-copy \
-  -v //home/user/che/workspaces:/home/user/che/workspaces \
-  -v //home/user/che/tomcat/temp/local-storage:/home/user/che/tomcat/temp/local-storage \
-  -e CHE_DOCKER_MACHINE_HOST=${DOCKER_PRINT_VALUE} --name ${CONTAINER} -d --net=host codenvy/che:${CHE_DOCKER_TAG} \
-  bash -c "tail -f /dev/null" || DOCKER_EXIT=$? || true
-  set +x
 }
 
 kill_and_launch_docker_registry () {
@@ -622,7 +586,6 @@ kill_and_launch_docker_registry () {
 launch_docker_registry () {
 
     echo "Launching a Docker registry for workspace snapshots."
-
     CREATE_NEW_CONTAINER=false
 
     # Check to see if the registry docker was not properly shut down
@@ -653,13 +616,11 @@ launch_docker_registry () {
       kill_and_launch_docker_registry
 
     fi
-
 }
 
 launch_che_server () {
 
-  # Set host variable to the hostname that client should connect to.
-  if ${WIN} || ${MAC} ; then
+  if [[ -n "${DOCKER_HOST}" ]]; then
     strip_url ${DOCKER_HOST}
   else
     host=localhost
@@ -679,94 +640,18 @@ launch_che_server () {
     export CHE_REGISTRY_HOST="localhost"
   fi
 
-  if ! ${USE_DOCKER}; then
-
-    #########################################
-    # Launch Che natively as a tomcat server
-    call_catalina
-
-  else
-
-    # Launch Che as a docker image
-    echo -e "Starting Che server in docker container named ${GREEN}${CONTAINER}${NC}."
-
-    CREATE_NEW_CONTAINER=false
-
-    # Check to see if the Che docker was not properly shut down
-    "${DOCKER}" inspect ${CONTAINER} &> /dev/null || DOCKER_INSPECT_EXIT=$? || true
-    if [ "${DOCKER_INSPECT_EXIT}" == "1" ]; then
-
-      # No existing Che container found, we need to create a new one.
-      CREATE_NEW_CONTAINER=true
-
-    else
-
-      # Existing container found.  Let's start it.
-      echo -e "Found a container named ${GREEN}${CONTAINER}${NC}. Attempting restart."
-      "${DOCKER}" start ${CONTAINER} &>/dev/null || DOCKER_EXIT=$? || true
-
-      if [ "${DOCKER_EXIT}" == "1" ]; then
-
-        # Existing container found, but could not start it properly.
-        echo "Initial start of docker container failed... Attempting docker restart and exec."
-        "${DOCKER}" exec ${CONTAINER} bash -c "true && sudo service docker start && "`
-                                              `"//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
-                                              `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
-
-        if [ "${DOCKER_EXIT}" == "1" ]; then
-          # If we get to this point and Docker is still failing, then we will destroy the container entirely
-          CREATE_NEW_CONTAINER=true
-        fi
-
-      else
-
-        # Existing container found, and it was started properly.
-        echo -e "Successful restart of container named ${GREEN}${CONTAINER}${NC}. Restarting Che server..."
-        "${DOCKER}" exec ${CONTAINER} bash -c "//home/user/che/bin/che.sh "-p:${CHE_PORT}" "`
-                                             `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
-        echo
-        # Do not attempt additional docker exec command if we are restarting existing container
-        return
-      fi
-    fi
-
-    if ${CREATE_NEW_CONTAINER} ; then
-
-      # Container in bad state or not found, kill and launch new container.
-      kill_and_launch_docker_che
-
-    fi
-
-    echo -e "Docker container named ${GREEN}${CONTAINER}${NC} successfully started."
-    echo -e "Launching Che in a container named ${GREEN}${CONTAINER}${NC}..."
-
-    # Launching tomcat with the start option in a docker container does not run successfully
-    # because main process of container exits after starting Che as child process
-
-    if [[ "${USE_DEBUG}" == true ]]; then
-      DEBUG_PRINT_VALUE=--debug
-    else
-      DEBUG_PRINT_VALUE=
-    fi
-
-    if ${USE_DEBUG}; then
-      set -x
-    fi
-
-    "${DOCKER}" exec -i ${CONTAINER} bash -c "sudo rm -rf /home/user/che/lib-copy/* && "`
-                                            `"mkdir -p /home/user/che/lib-copy/ && "`
-                                            `"sudo chown -R user:user /home/user && "`
-                                            `"cp -rf /home/user/che/lib/* /home/user/che/lib-copy && "`
-                                            `"cd /home/user/che/bin/ && ./che.sh "-p:${CHE_PORT}" "`
-                                            `"--skip:client "${DEBUG_PRINT_VALUE}" "${CHE_SERVER_ACTION}"" || DOCKER_EXIT=$? || true
-    set +x
-    return
-  fi
+  #########################################
+  # Launch Che natively as a tomcat server
+  call_catalina
 }
 
 init_global_variables
 parse_command_line "$@"
 determine_os
+
+if [ "${USE_DOCKER}" == "true" ]; then
+  error_exit "The '--image' option has been deprecated. Please use Che's 'docker run' syntax to run Che in a container."
+fi 
 
 if [ "${USE_HELP}" == "false" ] && [ "${JUMP_TO_END}" == "false" ]; then
 

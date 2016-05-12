@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.checkout;
 
 import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.machine.gwt.client.DevMachine;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;

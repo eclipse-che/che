@@ -13,8 +13,8 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.gwt.event.shared.EventBus;
 import com.google.web.bindery.event.shared.Event;
 
-import org.eclipse.che.api.machine.gwt.client.DevMachine;
-import org.eclipse.che.api.project.gwt.client.ProjectServiceClient;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;

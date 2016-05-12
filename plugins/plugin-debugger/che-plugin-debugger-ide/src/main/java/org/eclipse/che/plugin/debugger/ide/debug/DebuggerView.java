@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.api.debug.Breakpoint;

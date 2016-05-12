@@ -31,32 +31,32 @@ import com.sun.jdi.request.StepRequest;
 
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.ide.api.debugger.shared.dto.BreakpointDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.FieldDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariableDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariablePathDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.ide.api.debugger.shared.model.Breakpoint;
-import org.eclipse.che.ide.api.debugger.shared.model.DebuggerInfo;
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.Value;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
-import org.eclipse.che.ide.api.debugger.shared.model.VariablePath;
-import org.eclipse.che.ide.api.debugger.shared.model.action.ResumeAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StartAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StepIntoAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StepOutAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StepOverAction;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.FieldImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.LocationImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.ValueImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.VariableImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.event.BreakpointActivatedEventImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.event.DisconnectEventImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.event.SuspendEventImpl;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.FieldDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.VariableDto;
+import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
+import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
+import org.eclipse.che.api.debug.shared.model.action.StartAction;
+import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
+import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
+import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
+import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
+import org.eclipse.che.api.debug.shared.model.impl.FieldImpl;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.plugin.jdb.server.exceptions.DebuggerAbsentInformationException;
 import org.eclipse.che.plugin.jdb.server.expression.Evaluator;
 import org.eclipse.che.plugin.jdb.server.expression.ExpressionException;
@@ -418,7 +418,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
      *         when any other errors occur when try to access the variable
      */
     @Override
-    public Value getValue(VariablePath variablePath) throws DebuggerException {
+    public SimpleValue getValue(VariablePath variablePath) throws DebuggerException {
         List<String> path = variablePath.getPath();
         if (path.size() == 0) {
             throw new IllegalArgumentException("Path to value may not be empty. ");
@@ -476,7 +476,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
                                                true));
             }
         }
-        return new ValueImpl(variables, variable.getValue().getAsString());
+        return new SimpleValueImpl(variables, variable.getValue().getAsString());
     }
 
     @Override

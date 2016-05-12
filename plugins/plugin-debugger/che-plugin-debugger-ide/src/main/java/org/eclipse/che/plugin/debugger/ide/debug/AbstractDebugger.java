@@ -14,32 +14,32 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.debugger.shared.dto.BreakpointDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.DebugSessionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.ValueDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariableDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariablePathDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StartActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepIntoActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOutActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOverActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.event.BreakpointActivatedEventDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.event.DebuggerEventDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.event.SuspendEventDto;
-import org.eclipse.che.ide.api.debugger.shared.model.DebuggerInfo;
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.ide.api.debugger.shared.model.Value;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
-import org.eclipse.che.ide.api.debugger.shared.model.VariablePath;
-import org.eclipse.che.ide.api.debugger.shared.model.action.Action;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.StackFrameDumpImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.ValueImpl;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.VariableDto;
+import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
+import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
+import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.action.Action;
+import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -289,16 +289,16 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     @Override
-    public Promise<Value> getValue(Variable variable) {
+    public Promise<SimpleValue> getValue(Variable variable) {
         if (!isConnected()) {
             return Promises.reject(JsPromiseError.create("Debugger is not connected"));
         }
 
-        Promise<ValueDto> promise = service.getValue(debugSessionDto.getId(), asDto(variable));
-        return promise.then(new Function<ValueDto, Value>() {
+        Promise<SimpleValueDto> promise = service.getValue(debugSessionDto.getId(), asDto(variable));
+        return promise.then(new Function<SimpleValueDto, SimpleValue>() {
             @Override
-            public Value apply(ValueDto arg) throws FunctionException {
-                return new ValueImpl(arg);
+            public SimpleValue apply(SimpleValueDto arg) throws FunctionException {
+                return new SimpleValueImpl(arg);
             }
         });
     }

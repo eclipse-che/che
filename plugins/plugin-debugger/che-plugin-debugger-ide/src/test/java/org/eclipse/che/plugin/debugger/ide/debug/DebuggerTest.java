@@ -13,25 +13,25 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.debugger.shared.dto.BreakpointDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.DebugSessionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.ValueDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariableDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariablePathDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepIntoActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOutActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOverActionDto;
-import org.eclipse.che.ide.api.debugger.shared.model.DebuggerInfo;
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.ide.api.debugger.shared.model.Value;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
-import org.eclipse.che.ide.api.debugger.shared.model.VariablePath;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
-import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateHandler;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.dto.VariableDto;
+import org.eclipse.che.api.debug.shared.dto.VariablePathDto;
+import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -460,17 +460,17 @@ public class DebuggerTest extends BaseTest {
     public void testGetValue() throws Exception {
         final VariableDto variableDto = mock(VariableDto.class);
         final Variable variable = mock(Variable.class);
-        final Promise<ValueDto> promiseValue = mock(Promise.class);
+        final Promise<SimpleValueDto> promiseValue = mock(Promise.class);
 
         doReturn(variableDto).when(dtoFactory).createDto(VariableDto.class);
         doReturn(mock(VariablePathDto.class)).when(dtoFactory).createDto(VariablePathDto.class);
         doReturn(mock(VariablePathDto.class)).when(variable).getVariablePath();
         doReturn(Collections.emptyList()).when(variable).getVariables();
         doReturn(promiseValue).when(service).getValue(SESSION_ID, variableDto);
-        doReturn(promiseValue).when(promiseValue).then((Function<ValueDto, Object>)any());
+        doReturn(promiseValue).when(promiseValue).then((Function<SimpleValueDto, Object>)any());
         doReturn(promiseValue).when(promiseValue).catchError((Operation<PromiseError>)any());
 
-        Promise<Value> result = debugger.getValue(variable);
+        Promise<SimpleValue> result = debugger.getValue(variable);
         assertEquals(promiseValue, result);
     }
 

@@ -15,12 +15,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
-import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.ide.api.debugger.shared.model.Value;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.LocationImpl;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -154,11 +154,11 @@ public class DebuggerPresenter extends BasePresenter implements DebuggerView.Act
         if (rootVariables.isEmpty()) {
             Debugger debugger = debuggerManager.getActiveDebugger();
             if (debugger != null) {
-                Promise<Value> promise = debugger.getValue(selectedVariable);
+                Promise<SimpleValue> promise = debugger.getValue(selectedVariable);
 
-                promise.then(new Operation<Value>() {
+                promise.then(new Operation<SimpleValue>() {
                     @Override
-                    public void apply(Value arg) throws OperationException {
+                    public void apply(SimpleValue arg) throws OperationException {
                         selectedVariable.setValue(arg.getValue());
                         view.setVariablesIntoSelectedVariable(selectedVariable.getVariables());
                         view.updateSelectedVariable();

@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.ValueDto;
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -99,23 +99,23 @@ public class DebuggerPresenterTest extends BaseTest {
     private VirtualFile     file;
 
     @Mock
-    private Promise<String>   promiseString;
+    private Promise<String>         promiseString;
     @Mock
-    private Promise<ValueDto> promiseValue;
+    private Promise<SimpleValueDto> promiseValue;
     @Mock
-    private Promise<Void>     promiseVoid;
+    private Promise<Void>           promiseVoid;
     @Mock
-    private PromiseError      promiseError;
+    private PromiseError            promiseError;
 
 
     @Captor
-    private ArgumentCaptor<Operation<PromiseError>> operationPromiseErrorCaptor;
+    private ArgumentCaptor<Operation<PromiseError>>   operationPromiseErrorCaptor;
     @Captor
-    private ArgumentCaptor<Operation<Void>>         operationVoidCaptor;
+    private ArgumentCaptor<Operation<Void>>           operationVoidCaptor;
     @Captor
-    private ArgumentCaptor<Operation<String>>       operationStringCaptor;
+    private ArgumentCaptor<Operation<String>>         operationStringCaptor;
     @Captor
-    private ArgumentCaptor<Operation<ValueDto>>     operationValueCaptor;
+    private ArgumentCaptor<Operation<SimpleValueDto>> operationValueCaptor;
 
     private DebuggerPresenter presenter;
 
@@ -153,14 +153,14 @@ public class DebuggerPresenterTest extends BaseTest {
 
     @Test
     public void testOnExpandVariablesTree() throws OperationException {
-        ValueDto valueDto = mock(ValueDto.class);
+        SimpleValueDto valueDto = mock(SimpleValueDto.class);
 
         List<MutableVariable> rootVariables = mock(List.class);
         doReturn(true).when(rootVariables).isEmpty();
         doReturn(rootVariables).when(selectedVariable).getVariables();
 
         doReturn(promiseValue).when(debugger).getValue(selectedVariable);
-        doReturn(promiseValue).when(promiseValue).then((Operation<ValueDto>)any());
+        doReturn(promiseValue).when(promiseValue).then((Operation<SimpleValueDto>)any());
 
         presenter.onExpandVariablesTree();
 

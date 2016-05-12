@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide.debug;
 
-import org.eclipse.che.ide.api.debugger.shared.model.MutableVariable;
+import org.eclipse.che.api.debug.shared.model.MutableVariable;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ui.tree.NodeDataAdapter;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;

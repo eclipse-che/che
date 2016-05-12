@@ -14,21 +14,21 @@ import com.google.gwt.http.client.URL;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.debugger.shared.dto.BreakpointDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.DebugSessionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.ValueDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariableDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.ActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StartActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepIntoActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOutActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOverActionDto;
-import org.eclipse.che.api.machine.gwt.client.DevMachine;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.dto.VariableDto;
+import org.eclipse.che.api.debug.shared.dto.action.ActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -136,7 +136,7 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     }
 
     @Override
-    public Promise<ValueDto> getValue(String id, VariableDto variableDto) {
+    public Promise<SimpleValueDto> getValue(String id, VariableDto variableDto) {
         final String requestUrl = getBaseUrl() + "/" + id + "/value";
         List<String> path = variableDto.getVariablePath().getPath();
 
@@ -151,7 +151,7 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
 
         return asyncRequestFactory.createGetRequest(requestUrl + params)
                                   .loader(loaderFactory.newLoader())
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(ValueDto.class));
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(SimpleValueDto.class));
     }
 
     @Override

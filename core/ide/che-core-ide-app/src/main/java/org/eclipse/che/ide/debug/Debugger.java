@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
-import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.ide.api.debugger.shared.model.Value;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 
@@ -93,7 +93,7 @@ public interface Debugger extends DebuggerObservable {
     /**
      * Gets the value of the given variable.
      */
-    Promise<Value> getValue(Variable variable);
+    Promise<SimpleValue> getValue(Variable variable);
 
     /**
      * Gets dump the current frame.

@@ -10,28 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.ide.api.debugger.shared.model.Breakpoint;
-import org.eclipse.che.ide.api.debugger.shared.model.DebuggerInfo;
-import org.eclipse.che.ide.api.debugger.shared.model.Location;
-import org.eclipse.che.ide.api.debugger.shared.model.StackFrameDump;
-import org.eclipse.che.ide.api.debugger.shared.model.Value;
-import org.eclipse.che.ide.api.debugger.shared.model.Variable;
-import org.eclipse.che.ide.api.debugger.shared.model.VariablePath;
-import org.eclipse.che.ide.api.debugger.shared.model.action.ResumeAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StartAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StepIntoAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StepOutAction;
-import org.eclipse.che.ide.api.debugger.shared.model.action.StepOverAction;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.StackFrameDumpImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.ValueImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.VariableImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.VariablePathImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.event.BreakpointActivatedEventImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.event.DisconnectEventImpl;
-import org.eclipse.che.ide.api.debugger.shared.model.impl.event.SuspendEventImpl;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
+import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.Variable;
+import org.eclipse.che.api.debug.shared.model.VariablePath;
+import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
+import org.eclipse.che.api.debug.shared.model.action.StartAction;
+import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
+import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
+import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
+import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
+import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
+import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
+import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
@@ -306,7 +306,7 @@ public class GdbDebugger implements Debugger {
     }
 
     @Override
-    public Value getValue(VariablePath variablePath) throws DebuggerException {
+    public SimpleValue getValue(VariablePath variablePath) throws DebuggerException {
         try {
             List<String> path = variablePath.getPath();
             if (path.isEmpty()) {
@@ -314,7 +314,7 @@ public class GdbDebugger implements Debugger {
             }
 
             GdbPrint gdbPrint = gdb.print(path.get(0));
-            return new ValueImpl(Collections.emptyList(), gdbPrint.getValue());
+            return new SimpleValueImpl(Collections.emptyList(), gdbPrint.getValue());
         } catch (IOException | GdbParseException | InterruptedException e) {
             throw new DebuggerException("Can't get value for " + variablePath, e);
         }

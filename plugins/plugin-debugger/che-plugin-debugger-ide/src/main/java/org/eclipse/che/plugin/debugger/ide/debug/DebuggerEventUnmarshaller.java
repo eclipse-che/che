@@ -13,11 +13,11 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 
-import org.eclipse.che.ide.api.debugger.shared.dto.event.BreakpointActivatedEventDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.event.DebuggerEventDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.event.DisconnectEventDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.event.SuspendEventDto;
-import org.eclipse.che.ide.api.debugger.shared.model.event.DebuggerEvent.TYPE;
+import org.eclipse.che.api.debug.shared.dto.event.BreakpointActivatedEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.DebuggerEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.DisconnectEventDto;
+import org.eclipse.che.api.debug.shared.dto.event.SuspendEventDto;
+import org.eclipse.che.api.debug.shared.model.event.DebuggerEvent.TYPE;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.websocket.Message;

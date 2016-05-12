@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.debug;
 
-import org.eclipse.che.ide.api.debugger.shared.dto.BreakpointDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.DebugSessionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.LocationDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.StackFrameDumpDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.ValueDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.VariableDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.ResumeActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StartActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepIntoActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOutActionDto;
-import org.eclipse.che.ide.api.debugger.shared.dto.action.StepOverActionDto;
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
+import org.eclipse.che.api.debug.shared.dto.DebugSessionDto;
+import org.eclipse.che.api.debug.shared.dto.LocationDto;
+import org.eclipse.che.api.debug.shared.dto.StackFrameDumpDto;
+import org.eclipse.che.api.debug.shared.dto.SimpleValueDto;
+import org.eclipse.che.api.debug.shared.dto.VariableDto;
+import org.eclipse.che.api.debug.shared.dto.action.ResumeActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StartActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepIntoActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOutActionDto;
+import org.eclipse.che.api.debug.shared.dto.action.StepOverActionDto;
 import org.eclipse.che.api.promises.client.Promise;
 
 import java.util.List;
@@ -129,7 +129,7 @@ public interface DebuggerServiceClient {
      * @param id
      *      debug session id
      */
-    Promise<ValueDto> getValue(String id, VariableDto variableDto);
+    Promise<SimpleValueDto> getValue(String id, VariableDto variableDto);
 
     /**
      * Sets the new value of the variable.

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
-import org.eclipse.che.ide.api.debugger.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLine;
