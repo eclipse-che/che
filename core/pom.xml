@@ -32,7 +32,6 @@
         <module>che-core-api-model</module>
         <module>../wsmaster</module>
         <module>../wsagent</module>
-        <module>platform-api</module>
         <module>ide</module>
     </modules>
 </project>
