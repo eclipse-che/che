@@ -21,7 +21,7 @@ describe('unique-project-name-validator', function() {
   /**
    * Project API
    */
-  var factoryProject;
+  var workspace;
 
   /**
    * API builder.
@@ -42,10 +42,10 @@ describe('unique-project-name-validator', function() {
   beforeEach(angular.mock.module('userDashboard'));
 
 
-  beforeEach(inject(function($compile, $rootScope, cheProject, cheAPIBuilder, cheHttpBackend) {
+  beforeEach(inject(function($compile, $rootScope, cheWorkspace, cheAPIBuilder, cheHttpBackend) {
     $scope = $rootScope;
     $compiler = $compile;
-    factoryProject = cheProject;
+    workspace = cheWorkspace;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
     httpBackend = cheHttpBackend.getHttpBackend();
@@ -68,7 +68,7 @@ describe('unique-project-name-validator', function() {
 
 
       // update projects workspaces
-      factoryProject.onChangeWorkspaces([workspace1]);
+      workspace.fetchWorkspaceDetails(idWorkspace1);
 
       // flush HTTP backend
       httpBackend.flush();
@@ -104,7 +104,7 @@ describe('unique-project-name-validator', function() {
       cheBackend.addProjects(workspace1, [wksp1Project1]);
 
       // update projects workspaces
-      factoryProject.onChangeWorkspaces([workspace1]);
+      workspace.fetchWorkspaceDetails(idWorkspace1);
 
       // setup backend
       cheBackend.setup();

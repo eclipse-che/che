@@ -11,10 +11,8 @@
 'use strict';
 
 import {CheAPI} from './che-api.factory';
-import {CheProject} from './che-project.factory';
 import {CheWorkspace} from './che-workspace.factory';
 import {CheUser} from './che-user.factory';
-import {CheProjectType} from './che-project-type.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheRecipe} from './che-recipe.factory';
 import {CheRecipeTemplate} from './che-recipe-template.factory';
@@ -22,7 +20,6 @@ import {CheStack} from './che-stack.factory';
 import {CheWebsocket} from './che-websocket.factory';
 import {CheProfile} from './che-profile.factory';
 import {CheService} from './che-service.factory';
-import {CheGit} from './che-git.factory';
 import {CheSvn} from './che-svn.factory';
 import {CheHttpBackend} from './test/che-http-backend';
 import {CheHttpBackendProviderFactory} from './test/che-http-backend-provider.factory'
@@ -36,17 +33,14 @@ import {CheOAuthProvider} from './che-o-auth-provider.factory';
 export class ApiConfig {
 
   constructor(register) {
-    register.factory('cheProject', CheProject);
     register.factory('cheWorkspace', CheWorkspace);
     register.factory('cheUser', CheUser);
-    register.factory('cheProjectType', CheProjectType);
     register.factory('cheProjectTemplate', CheProjectTemplate);
     register.factory('cheProfile', CheProfile);
     register.factory('cheWebsocket', CheWebsocket);
     register.factory('cheRecipe', CheRecipe);
     register.factory('cheRecipeTemplate', CheRecipeTemplate);
     register.factory('cheStack', CheStack);
-    register.factory('cheGit', CheGit);
     register.factory('cheSvn', CheSvn);
     register.factory('cheHttpBackendProvider', CheHttpBackendProviderFactory);
     register.factory('cheHttpBackend', CheHttpBackendFactory);

@@ -23,7 +23,7 @@ export class DashboardLastProjectsController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheProject, cheWorkspace) {
+  constructor(cheWorkspace) {
     this.projects = [];
     this.state = 'loading';
 
@@ -31,13 +31,13 @@ export class DashboardLastProjectsController {
     let promise = cheWorkspace.fetchWorkspaces();
 
     promise.then(() => {
-        this.projects = cheProject.getAllProjects();
+        this.projects = cheWorkspace.getAllProjects();
         this.state = 'OK';
       },
       (error) => {
         if (error.status === 304) {
           // ok
-          this.projects = cheProject.getAllProjects();
+          this.projects = cheWorkspace.getAllProjects();
           this.state = 'OK';
           return;
         }

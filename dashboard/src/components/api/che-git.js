@@ -19,27 +19,19 @@ export class CheGit {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($resource, lodash, $location, cheWorkspace) {
-
+  constructor($resource, wsagentPath) {
     // keep resource
     this.$resource = $resource;
-    this.lodash = lodash;
-    this.cheWorkspace = cheWorkspace;
 
     this.remoteGitUrlArraysMap = new Map();
     this.localGitUrlsMap = new Map();
 
     // remote call
-    this.remoteGitAPI = this.$resource('//:agent/wsagent/ext/git', {agent : 'agent'}, {
-      getLocalUrl: {method: 'GET', url: '//:agent/wsagent/ext/git/:workspaceId/read-only-url?projectPath=:path', isArray: false},
-      getRemoteUrlArray: {method: 'POST', url: '//:agent/wsagent/ext/git/:workspaceId/remote-list?projectPath=:path', isArray: true}
+    this.remoteGitAPI = this.$resource(wsagentPath + '/git', {}, {
+      getLocalUrl: {method: 'GET', url: wsagentPath + '/git/:workspaceId/read-only-url?projectPath=:path', isArray: false},
+      getRemoteUrlArray: {method: 'POST', url: wsagentPath + '/git/:workspaceId/remote-list?projectPath=:path', isArray: true}
     });
-  }
-
-  getWorkspaceAgent(workspaceId) {
-    return this.cheWorkspace.getWorkspaceAgent(workspaceId);
   }
 
   /**
@@ -49,7 +41,6 @@ export class CheGit {
    */
   fetchLocalUrl(workspaceId, projectPath) {
     let promise = this.remoteGitAPI.getLocalUrl({
-      agent: this.getWorkspaceAgent(workspaceId),
       workspaceId: workspaceId,
       path: projectPath
     }, null).$promise;
@@ -82,14 +73,12 @@ export class CheGit {
     var data = {remote: null, verbose: true, attributes: {}};
 
     let promise = this.remoteGitAPI.getRemoteUrlArray({
-      agent: this.getWorkspaceAgent(workspaceId),
       workspaceId: workspaceId,
       path: projectPath
     }, data).$promise;
 
     // check if it was OK or not
     let parsedResultPromise = promise.then((remoteArray) => {
-      remoteArray = this.lodash.sortBy(remoteArray, 'name');
       this.remoteGitUrlArraysMap.set(workspaceId + projectPath, remoteArray);
     });
 

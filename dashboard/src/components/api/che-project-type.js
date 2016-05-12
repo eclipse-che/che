@@ -19,12 +19,10 @@ export class CheProjectType {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor ($q, $resource, $location, cheWorkspace) {
+  constructor ($resource, $q, wsagentPath) {
     this.$q = $q;
     this.$resource = $resource;
-    this.cheWorkspace = cheWorkspace;
 
     // types per category per workspace ID : workspace ID ==> map<projectTypeId, projectType>
     this.typesIdPerWorkspace = new Map();
@@ -32,8 +30,7 @@ export class CheProjectType {
     // project types per workspace ID
     this.typesWorkspaces = new Map();
     // remote call
-    this.remoteProjectTypeAPI = this.$resource('//:agent/wsagent/ext/project-type/:workspaceId');
-
+    this.remoteProjectTypeAPI = this.$resource(wsagentPath + '/project-type/:workspaceId');
   }
 
 
@@ -41,9 +38,8 @@ export class CheProjectType {
    * Fetch the project types
    */
   fetchTypes(workspaceId) {
-    let agent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
     var defer = this.$q.defer();
-    let promise = this.remoteProjectTypeAPI.query({agent: agent, workspaceId: workspaceId}).$promise;
+    let promise = this.remoteProjectTypeAPI.query({workspaceId: workspaceId}).$promise;
     let updatedPromise = promise.then((projectTypes) => {
 
       var idProjectTypesMap = this.typesIdPerWorkspace.get(workspaceId);

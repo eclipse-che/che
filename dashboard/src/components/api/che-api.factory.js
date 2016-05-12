@@ -22,16 +22,13 @@ export class CheAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheProject, cheWorkspace, cheUser, cheProfile, cheProjectType, cheProjectTemplate, cheWebsocket, cheGit, cheSvn,
+  constructor(cheWorkspace, cheUser, cheProfile, cheProjectTemplate, cheWebsocket, cheSvn,
               cheService, cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider) {
-    this.cheProject = cheProject;
     this.cheWorkspace = cheWorkspace;
     this.cheUser = cheUser;
     this.cheProfile = cheProfile;
-    this.cheProjectType = cheProjectType;
     this.cheProjectTemplate = cheProjectTemplate;
     this.cheWebsocket = cheWebsocket;
-    this.cheGit = cheGit;
     this.cheSvn = cheSvn;
     this.cheService = cheService;
     this.cheAdminPlugins = cheAdminPlugins;
@@ -40,20 +37,8 @@ export class CheAPI {
     this.cheRecipeTemplate = cheRecipeTemplate;
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
-
-    // register listener of projects onto workspaces
-    this.cheWorkspace.addListener(this.cheProject);
-
   }
 
-
-  /**
-   * The Che Project API
-   * @returns {CheAPI.cheProject|*}
-   */
-  getProject() {
-    return this.cheProject;
-  }
 
   /**
    * The Che Workspace API
@@ -88,14 +73,6 @@ export class CheAPI {
   }
 
   /**
-   * The Che Project Type API
-   * @returns {CheProjectType|*}
-   */
-  getProjectType() {
-    return this.cheProjectType;
-  }
-
-  /**
    * The Che Project Template API
    * @returns {CheProjectTemplate|*}
    */
@@ -109,14 +86,6 @@ export class CheAPI {
    */
   getWebsocket() {
     return this.cheWebsocket;
-  }
-
-  /**
-   * The Che Git API
-   * @returns {CheGit|*}
-   */
-  getGit() {
-    return this.cheGit;
   }
 
   /**
