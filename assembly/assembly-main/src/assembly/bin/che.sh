@@ -389,7 +389,7 @@ get_docker_ready () {
   # Copies Che libraries to a temporary directory which is mounted by the container to be reachable by external host.
   # Files must be copied otherwise host will overwrite them to blank.
   if [ "${COPY_LIB}" == "true" ]; then
-    echo "CHE_HOME=" ${CHE_HOME}
+    sudo chown -R user:user ${CHE_HOME}
     rm -rf ${CHE_HOME}/lib-copy/*
     mkdir -p ${CHE_HOME}/lib-copy
     cp -rf ${CHE_HOME}/lib/* ${CHE_HOME}/lib-copy
