@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.shared.stack;
 
 import com.sun.istack.internal.Nullable;
 
-import org.eclipse.che.api.machine.shared.Permissible;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
 import java.util.List;
@@ -26,7 +25,7 @@ import java.util.List;
  *
  * @author Alexander Andrienko
  */
-public interface Stack extends Permissible {
+public interface Stack {
 
     /**
      * Return the unique stack identifier. (e.g. "stack123").

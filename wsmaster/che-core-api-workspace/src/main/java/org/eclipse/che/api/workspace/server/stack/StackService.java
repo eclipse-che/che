@@ -27,13 +27,11 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
-import org.eclipse.che.api.machine.server.recipe.PermissionsChecker;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -49,28 +47,25 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.CREATED;
+import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_STACK;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACKS_BY_CREATOR;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_DELETE_ICON;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_ICON;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_STACK_BY_ID;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_STACK;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SEARCH_STACKS;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_UPDATE_STACK;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_UPLOAD_ICON;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_ICON;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_DELETE_ICON;
-import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
 /**
  * Defines Stack REST API
@@ -81,20 +76,18 @@ import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 @Path("/stack")
 public class StackService extends Service {
 
-    private final StackDao           stackDao;
-    private final PermissionsChecker permissionChecker;
+    private final StackDao stackDao;
 
     @Inject
-    public StackService(StackDao stackDao, PermissionsChecker permissionChecker) {
+    public StackService(StackDao stackDao) {
         this.stackDao = stackDao;
-        this.permissionChecker = permissionChecker;
     }
 
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_CREATE_STACK)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Create a new stack",
                   notes = "This operation can be performed only by authorized user",
                   response = StackDto.class)
@@ -112,11 +105,6 @@ public class StackService extends Service {
         }
 
         String userId = EnvironmentContext.getCurrent().getUser().getId();
-        if (stackDto.getPermissions() != null &&
-            !isSystemUser() &&
-            permissionChecker.hasPublicSearchPermission(stackDto.getPermissions())) {
-            throw new ForbiddenException(format("User '%s' doesn't has access to use 'public: search' permission", userId));
-        }
 
         StackImpl newStack = StackImpl.builder()
                                       .generateId()
@@ -128,7 +116,6 @@ public class StackService extends Service {
                                       .setWorkspaceConfig(stackDto.getWorkspaceConfig())
                                       .setSource(stackDto.getSource())
                                       .setComponents(stackDto.getComponents())
-                                      .setPermissions(stackDto.getPermissions())
                                       .build();
 
         stackDao.create(newStack);
@@ -142,7 +129,7 @@ public class StackService extends Service {
     @Path("/{id}")
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_GET_STACK_BY_ID)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Get the stack by id",
                   notes = "This operation can be performed for stack owner, or for predefined stacks")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested stack entity"),
@@ -150,16 +137,7 @@ public class StackService extends Service {
                    @ApiResponse(code = 403, message = "The user has not permission get requested stack"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public StackDto getStack(@ApiParam("The stack id") @PathParam("id") final String id) throws ApiException {
-        final StackImpl stack = stackDao.getById(id);
-
-        final String userId = EnvironmentContext.getCurrent().getUser().getId();
-        if (!userId.equals(stack.getCreator()) &&
-            !isSystemUser() &&
-            !permissionChecker.hasAccess(stack, userId, "read")) {
-            throw new ForbiddenException(format("User '%s' doesn't has access to stack '%s'", userId, id));
-        }
-
-        return asStackDto(stack);
+        return asStackDto(stackDao.getById(id));
     }
 
     @PUT
@@ -167,7 +145,7 @@ public class StackService extends Service {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_UPDATE_STACK)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Update the stack by replacing all the existing data (exclude field \"creator\") with update",
                   notes = "This operation can be performed only by stack owner. But user with roles \"system/admin\" or \"system/manager\" " +
                           "can update predefined stack.")
@@ -189,25 +167,6 @@ public class StackService extends Service {
 
         final StackImpl stack = stackDao.getById(id);
 
-        final User user = EnvironmentContext.getCurrent().getUser();
-        final String userId = user.getId();
-        if (!userId.equals(stack.getCreator()) &&
-            !user.isMemberOf("system/admin") &&
-            !permissionChecker.hasAccess(stack, userId, "write")) {
-            throw new ForbiddenException(format("User '%s' doesn't has access to update stack '%s'", userId, id));
-        }
-        if (updateDto.getPermissions() != null) {
-            //ensure that user has access to update stack permissions
-            if (!userId.equals(stack.getCreator()) &&
-                !user.isMemberOf("system/admin") &&
-                !permissionChecker.hasAccess(stack, userId, "update_acl")) {
-                throw new ForbiddenException(format("User '%s' doesn't has access to update stack '%s' permissions", userId, id));
-            }
-            if (!isSystemUser() && permissionChecker.hasPublicSearchPermission(updateDto.getPermissions())) {
-                throw new ForbiddenException(format("User '%s' doesn't has access to use 'public: search' permission", userId));
-            }
-        }
-
         StackImpl stackForUpdate = StackImpl.builder()
                                             .setId(id)
                                             .setName(updateDto.getName())
@@ -219,17 +178,15 @@ public class StackService extends Service {
                                             .setWorkspaceConfig(updateDto.getWorkspaceConfig())
                                             .setSource(updateDto.getSource())
                                             .setComponents(updateDto.getComponents())
-                                            .setPermissions(updateDto.getPermissions())
                                             .build();
 
-        stackDao.update(stackForUpdate);
-        return asStackDto(stackForUpdate);
+        return asStackDto(stackDao.update(stackForUpdate));
     }
 
     @DELETE
     @Path("/{id}")
     @GenerateLink(rel = LINK_REL_REMOVE_STACK)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Removes the stack",
                   notes = "But user with roles \"system/admin\" or \"system/manager\" " + "can delete predefined stack.")
     @ApiResponses({@ApiResponse(code = 204, message = "The stack successfully removed"),
@@ -237,51 +194,13 @@ public class StackService extends Service {
                    @ApiResponse(code = 404, message = "The stack doesn't exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public void removeStack(@ApiParam("The stack id") @PathParam("id") final String id) throws ApiException {
-        final StackImpl stack = stackDao.getById(id);
-
-        final User user = EnvironmentContext.getCurrent().getUser();
-
-        if (!user.getId().equals(stack.getCreator()) &&
-            !user.isMemberOf("system/admin")
-            && !permissionChecker.hasAccess(stack, user.getId(), "write")) {
-            throw new ForbiddenException(format("User '%s' doesn't has access to stack with id '%s'", user.getId(), id));
-        }
-
         stackDao.remove(id);
     }
 
     @GET
-    @GenerateLink(rel = LINK_REL_GET_STACKS_BY_CREATOR)
-    @Produces(APPLICATION_JSON)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
-    @ApiOperation(value = "Get the list stacks owned by current user",
-                  notes = "This operation can be performed only by authorized user",
-                  response = StackDto.class,
-                  responseContainer = "List")
-    @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested list stack entity"),
-                   @ApiResponse(code = 403, message = "The user does not have access to get stack entity list"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public List<StackDto> getCreatedStacks(@ApiParam("The number of the items to skip")
-                                           @DefaultValue("0")
-                                           @QueryParam("skipCount")
-                                           final Integer skipCount,
-                                           @ApiParam("The limit of the items in the response, default is 30")
-                                           @DefaultValue("30")
-                                           @QueryParam("maxItems")
-                                           final Integer maxItems) throws ServerException {
-        String creator = EnvironmentContext.getCurrent().getUser().getId();
-        List<StackImpl> stacks = stackDao.getByCreator(creator, skipCount, maxItems);
-
-        return stacks.stream()
-                     .map(this::asStackDto)
-                     .collect(Collectors.toList());
-    }
-
-    @GET
-    @Path("/list")
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_SEARCH_STACKS)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Get the list stacks with required tags",
                   notes = "This operation can be performed only by authorized user",
                   response = StackDto.class,
@@ -300,17 +219,18 @@ public class StackService extends Service {
                                        @DefaultValue("30")
                                        @QueryParam("maxItems")
                                        final Integer maxItems) throws ServerException {
-        List<StackImpl> stacks = stackDao.searchStacks(tags, skipCount, maxItems);
-        return stacks.stream()
-                     .map(this::asStackDto)
-                     .collect(Collectors.toList());
+        final String currentUser = EnvironmentContext.getCurrent().getUser().getId();
+        return stackDao.searchStacks(currentUser, tags, skipCount, maxItems)
+                       .stream()
+                       .map(this::asStackDto)
+                       .collect(Collectors.toList());
     }
 
     @GET
     @Path("/{id}/icon")
     @Produces("image/*")
     @GenerateLink(rel = LINK_REL_GET_ICON)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Get icon by stack id",
                   notes = "This operation can be performed only by authorized user",
                   response = byte[].class)
@@ -338,7 +258,7 @@ public class StackService extends Service {
     @Consumes(MULTIPART_FORM_DATA)
     @Produces(TEXT_PLAIN)
     @GenerateLink(rel = LINK_REL_UPLOAD_ICON)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Upload icon for required stack",
                   notes = "This operation can be performed only by authorized stack owner")
     @ApiResponses({@ApiResponse(code = 200, message = "Image was successfully uploaded"),
@@ -358,13 +278,6 @@ public class StackService extends Service {
 
             StackImpl stack = stackDao.getById(id);
 
-            User user = EnvironmentContext.getCurrent().getUser();
-            if (!user.getId().equals(stack.getCreator()) &&
-                !user.isMemberOf("system/admin") &&
-                !permissionChecker.hasAccess(stack, user.getId(), "write")) {
-                throw new ForbiddenException(format("User '%s' doesn't has access to stack with id '%s'", user.getId(), id));
-            }
-
             stack.setStackIcon(stackIcon);
             stackDao.update(stack);
         }
@@ -374,7 +287,7 @@ public class StackService extends Service {
     @DELETE
     @Path("/{id}/icon")
     @GenerateLink(rel = LINK_REL_DELETE_ICON)
-    @RolesAllowed({"user", "system/admin", "system/manager"})
+    @RolesAllowed("user")
     @ApiOperation(value = "Delete icon for required stack",
                   notes = "This operation can be performed only by authorized stack owner")
     @ApiResponses({@ApiResponse(code = 204, message = "Icon was successfully removed"),
@@ -387,14 +300,6 @@ public class StackService extends Service {
     public void removeIcon(@ApiParam("The stack Id") @PathParam("id") final String id)
             throws NotFoundException, ServerException, ConflictException, ForbiddenException, BadRequestException {
         StackImpl stack = stackDao.getById(id);
-
-        User user = EnvironmentContext.getCurrent().getUser();
-        if (!user.getId().equals(stack.getCreator()) &&
-            !user.isMemberOf("system/admin") &&
-            !permissionChecker.hasAccess(stack, user.getId(), "write")) {
-            throw new ForbiddenException(format("User '%s' doesn't has access to stack with id '%s'", user.getId(), id));
-        }
-
         stack.setStackIcon(null);
         stackDao.update(stack);
     }
@@ -451,13 +356,5 @@ public class StackService extends Service {
         if (isNullOrEmpty(parameter)) {
             throw new BadRequestException(message);
         }
-    }
-
-    /**
-     * Returns true if user has role "system/admin" or "system/manager", otherwise returns false
-     */
-    private boolean isSystemUser() {
-        final User user = EnvironmentContext.getCurrent().getUser();
-        return user.isMemberOf("system/admin") || user.isMemberOf("system/manager");
     }
 }

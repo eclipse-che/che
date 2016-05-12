@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.recipe;
 
+import org.eclipse.che.api.core.acl.AclEntryImpl;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
-import org.eclipse.che.api.machine.shared.Permissions;
-import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,33 +26,61 @@ import java.util.Objects;
  */
 public class RecipeImpl implements ManagedRecipe {
 
-    public static RecipeImpl fromDescriptor(RecipeDescriptor descriptor) {
-        final RecipeImpl recipe = new RecipeImpl().withId(descriptor.getId())
-                                                  .withName(descriptor.getName())
-                                                  .withType(descriptor.getType())
-                                                  .withScript(descriptor.getScript())
-                                                  .withTags(descriptor.getTags())
-                                                  .withCreator(descriptor.getCreator());
-        if (descriptor.getPermissions() != null) {
-            recipe.setPermissions(PermissionsImpl.fromDescriptor(descriptor.getPermissions()));
-        }
-        return recipe;
+    private String             id;
+    private String             name;
+    private String             creator;
+    private String             type;
+    private String             script;
+    private List<String>       tags;
+    private String             description;
+    private List<AclEntryImpl> acl;
+
+    public RecipeImpl() {
     }
 
-    private String       id;
-    private String       name;
-    private String       creator;
-    private String       type;
-    private String       script;
-    private List<String> tags;
-    private Permissions  permissions;
-    private String       description;
-
-    public RecipeImpl() {}
-
     public RecipeImpl(Recipe recipe) {
-        this.script = recipe.getScript();
         this.type = recipe.getType();
+        this.script = recipe.getScript();
+    }
+
+    public RecipeImpl(ManagedRecipe recipe) {
+        this(recipe.getId(),
+             recipe.getName(),
+             recipe.getCreator(),
+             recipe.getType(),
+             recipe.getScript(),
+             recipe.getTags(),
+             recipe.getDescription(),
+             null);
+    }
+
+    public RecipeImpl(RecipeImpl recipe) {
+        this(recipe.getId(),
+             recipe.getName(),
+             recipe.getCreator(),
+             recipe.getType(),
+             recipe.getScript(),
+             recipe.getTags(),
+             recipe.getDescription(),
+             recipe.getAcl());
+    }
+
+    public RecipeImpl(String id,
+                      String name,
+                      String creator,
+                      String type,
+                      String script,
+                      List<String> tags,
+                      String description,
+                      List<AclEntryImpl> acl) {
+        this.id = id;
+        this.name = name;
+        this.creator = creator;
+        this.type = type;
+        this.script = script;
+        this.tags = tags;
+        this.description = description;
+        this.acl = acl;
     }
 
     @Override
@@ -143,20 +171,6 @@ public class RecipeImpl implements ManagedRecipe {
     }
 
     @Override
-    public Permissions getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Permissions permissions) {
-        this.permissions = permissions;
-    }
-
-    public RecipeImpl withPermissions(Permissions permissions) {
-        this.permissions = permissions;
-        return this;
-    }
-
-    @Override
     public String getDescription() {
         return description;
     }
@@ -167,6 +181,20 @@ public class RecipeImpl implements ManagedRecipe {
 
     public RecipeImpl withDescription(String description) {
         this.description = description;
+        return this;
+    }
+
+    @Nullable
+    public List<AclEntryImpl> getAcl() {
+        return acl;
+    }
+
+    public void setAcl(List<AclEntryImpl> acl) {
+        this.acl = acl;
+    }
+
+    public RecipeImpl withAcl(List<AclEntryImpl> acl) {
+        this.acl = acl;
         return this;
     }
 
@@ -184,9 +212,9 @@ public class RecipeImpl implements ManagedRecipe {
                Objects.equals(creator, other.creator) &&
                Objects.equals(type, other.type) &&
                Objects.equals(script, other.script) &&
-               Objects.equals(permissions, other.permissions) &&
                Objects.equals(description, other.description) &&
-               getTags().equals(other.getTags());
+               getTags().equals(other.getTags()) &&
+               Objects.equals(acl, other.acl);
     }
 
     @Override
@@ -197,9 +225,9 @@ public class RecipeImpl implements ManagedRecipe {
         hash = 31 * hash + Objects.hashCode(creator);
         hash = 31 * hash + Objects.hashCode(type);
         hash = 31 * hash + Objects.hashCode(script);
-        hash = 31 * hash + Objects.hashCode(permissions);
         hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + getTags().hashCode();
+        hash = 31 * hash + Objects.hashCode(acl);
         return hash;
     }
 
@@ -212,8 +240,8 @@ public class RecipeImpl implements ManagedRecipe {
                ", type='" + type + '\'' +
                ", script='" + script + '\'' +
                ", tags=" + tags +
-               ", permissions=" + permissions +
                ", description='" + description + '\'' +
+               ", acl=" + acl +
                '}';
     }
 }

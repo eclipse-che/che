@@ -474,7 +474,6 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 .withType(selectedTarget.getRecipe().getType())
                 .withTags(selectedTarget.getRecipe().getTags())
                 .withDescription(selectedTarget.getRecipe().getDescription())
-                .withPermissions(selectedTarget.getRecipe().getPermissions())
                 .withScript("{" +
                         "\"host\": \"" + selectedTarget.getHost() + "\", " +
                         "\"port\": \"" + selectedTarget.getPort() + "\", " +

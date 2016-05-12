@@ -20,7 +20,7 @@ import java.util.List;
  *
  * @author Eugene Voevodin
  */
-public interface ManagedRecipe extends Recipe, Permissible {
+public interface ManagedRecipe extends Recipe {
 
     /**
      * Returns recipe identifier.

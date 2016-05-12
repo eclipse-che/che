@@ -48,12 +48,6 @@ public interface RecipeDescriptor extends Hyperlinks, ManagedRecipe {
 
     RecipeDescriptor withTags(List<String> tags);
 
-    PermissionsDescriptor getPermissions();
-
-    void setPermissions(PermissionsDescriptor permissions);
-
-    RecipeDescriptor withPermissions(PermissionsDescriptor permissions);
-
     void setDescription(String description);
 
     RecipeDescriptor withDescription(String description);

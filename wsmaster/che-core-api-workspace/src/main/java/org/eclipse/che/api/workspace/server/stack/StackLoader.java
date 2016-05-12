@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.stack;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -19,8 +20,8 @@ import com.google.inject.name.Named;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.slf4j.Logger;
@@ -46,20 +47,19 @@ import static java.lang.String.format;
 public class StackLoader {
     private static final Logger LOG = LoggerFactory.getLogger(StackLoader.class);
 
+    private static final Gson GSON = new GsonBuilder().create();
+
     private final Path     stackJsonPath;
     private final Path     stackIconFolderPath;
     private final StackDao stackDao;
-    private final Gson     gson;
 
     @Inject
-    public StackLoader(StackTypeAdaptersProvider stackTypeAdaptersProvider,
-                       @Named("che.stacks.default") String stacksPath,
+    public StackLoader(@Named("che.stacks.default") String stacksPath,
                        @Named("che.stacks.images.storage") String stackIconFolder,
                        StackDao stackDao) {
         this.stackJsonPath = Paths.get(stacksPath);
         this.stackIconFolderPath = Paths.get(stackIconFolder);
         this.stackDao = stackDao;
-        this.gson = stackTypeAdaptersProvider.getGson();
     }
 
     /**
@@ -69,7 +69,7 @@ public class StackLoader {
     public void start() {
         if (Files.exists(stackJsonPath) && Files.isRegularFile(stackJsonPath)) {
             try (BufferedReader reader = Files.newBufferedReader(stackJsonPath)) {
-                List<StackImpl> stacks = gson.fromJson(reader, new TypeToken<List<StackImpl>>() {}.getType());
+                List<StackImpl> stacks = GSON.fromJson(reader, new TypeToken<List<StackImpl>>() {}.getType());
                 stacks.forEach(this::loadStack);
             } catch (Exception e) {
                 LOG.error("Failed to store stacks ", e);

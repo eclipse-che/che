@@ -17,33 +17,14 @@ import com.google.gson.GsonBuilder;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-
-import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.core.model.machine.Limits;
-import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.stack.adapters.CommandAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.EnvironmentAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.LimitsAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.MachineSourceAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.ProjectConfigAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.StackComponentAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.StackSourceAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.WorkspaceConfigAdapter;
-import org.eclipse.che.api.workspace.server.stack.adapters.MachineConfigAdapter;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
@@ -52,8 +33,6 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
-import org.eclipse.che.api.workspace.shared.stack.StackComponent;
-import org.eclipse.che.api.workspace.shared.stack.StackSource;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -70,11 +49,11 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
- * Test for {@link StackLoader}
+ * Tests for {@link StackLoader}
  *
  * @author Alexander Andrienko
  */
@@ -91,7 +70,7 @@ public class StackLoaderTest {
         URL url = Resources.getResource("stacks.json");
         URL urlFolder = Thread.currentThread().getContextClassLoader().getResource("stack_img");
 
-        stackLoader = new StackLoader(new StackTypeAdaptersProvider(), url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
 
         stackLoader.start();
         verify(stackDao, times(2)).update(any());
@@ -105,7 +84,7 @@ public class StackLoaderTest {
 
         doThrow(new NotFoundException("Stack is already exist")).when(stackDao).update(any());
 
-        stackLoader = new StackLoader(new StackTypeAdaptersProvider(), url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
 
         stackLoader.start();
         verify(stackDao, times(2)).update(any());
@@ -119,7 +98,7 @@ public class StackLoaderTest {
 
         doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
-        stackLoader = new StackLoader(new StackTypeAdaptersProvider(), url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
 
         stackLoader.start();
         verify(stackDao, times(2)).update(any());
@@ -155,16 +134,6 @@ public class StackLoaderTest {
         SourceStorageDto sourceStorageDto = newDto(SourceStorageDto.class).withType("some type")
                                                                           .withParameters(attributes)
                                                                           .withLocation("location");
-
-        ProjectConfigDto moduleConfigDto = newDto(ProjectConfigDto.class).withName("module")
-                                                                         .withPath("somePath")
-                                                                         .withAttributes(projectMap)
-                                                                         .withType("maven type")
-                                                                         .withDescription("some project description")
-                                                                         .withLinks(Collections.singletonList(link))
-                                                                         .withMixins(Collections.singletonList("mixin time"))
-                                                                         .withProblems(Collections.singletonList(projectProblem))
-                                                                         .withSource(sourceStorageDto);
 
         ProjectConfigDto projectConfigDto = newDto(ProjectConfigDto.class).withName("project")
                                                                           .withPath("somePath")
@@ -215,17 +184,7 @@ public class StackLoaderTest {
                                                                                 .withCommands(Collections.singletonList(commandDto));
 
         stackDtoDescriptor.setWorkspaceConfig(workspaceConfigDto);
-        Gson GSON = new GsonBuilder().registerTypeAdapter(StackComponent.class, new StackComponentAdapter())
-                                     .registerTypeAdapter(WorkspaceConfig.class, new WorkspaceConfigAdapter())
-                                     .registerTypeAdapter(ProjectConfig.class, new ProjectConfigAdapter())
-                                     .registerTypeAdapter(Environment.class, new EnvironmentAdapter())
-                                     .registerTypeAdapter(Command.class, new CommandAdapter())
-                                     .registerTypeAdapter(Recipe.class, new RecipeTypeAdapter())
-                                     .registerTypeAdapter(Limits.class, new LimitsAdapter())
-                                     .registerTypeAdapter(MachineSource.class, new MachineSourceAdapter())
-                                     .registerTypeAdapter(MachineConfig.class, new MachineConfigAdapter())
-                                     .registerTypeAdapter(StackSource.class, new StackSourceAdapter())
-                                     .create();
+        Gson GSON = new GsonBuilder().create();
 
         GSON.fromJson(stackDtoDescriptor.toString(), StackImpl.class);
     }

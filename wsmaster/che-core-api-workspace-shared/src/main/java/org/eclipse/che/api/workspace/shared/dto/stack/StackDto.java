@@ -12,7 +12,6 @@ package org.eclipse.che.api.workspace.shared.dto.stack;
 
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.machine.shared.dto.recipe.PermissionsDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.dto.shared.DTO;
@@ -68,13 +67,6 @@ public interface StackDto extends Stack, Hyperlinks {
     void setComponents(List<StackComponentDto> components);
 
     StackDto withComponents(List<StackComponentDto> components);
-
-    @Override
-    PermissionsDescriptor getPermissions();
-
-    void setPermissions(PermissionsDescriptor permissions);
-
-    StackDto withPermissions(PermissionsDescriptor permissions);
 
     StackDto withLinks(List<Link> links);
 }

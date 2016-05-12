@@ -18,11 +18,8 @@ import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.machine.shared.Permissions;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
-import org.eclipse.che.api.machine.shared.dto.recipe.GroupDescriptor;
-import org.eclipse.che.api.machine.shared.dto.recipe.PermissionsDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -113,21 +110,6 @@ public final class DtoConverter {
                                  .collect(toList());
         }
 
-        PermissionsDescriptor permissionsDescriptor = null;
-        if (stack.getPermissions() != null) {
-            Permissions permissions = stack.getPermissions();
-
-            List<GroupDescriptor> groups = permissions.getGroups()
-                                                      .stream()
-                                                      .map(descriptor -> newDto(GroupDescriptor.class).withName(descriptor.getName())
-                                                                                                      .withAcl(descriptor.getAcl())
-                                                                                                      .withUnit(descriptor.getUnit()))
-                                                      .collect(toList());
-
-            permissionsDescriptor = newDto(PermissionsDescriptor.class).withGroups(groups)
-                                                                       .withUsers(permissions.getUsers());
-        }
-
         return newDto(StackDto.class).withId(stack.getId())
                                      .withName(stack.getName())
                                      .withDescription(stack.getDescription())
@@ -136,8 +118,7 @@ public final class DtoConverter {
                                      .withTags(stack.getTags())
                                      .withComponents(componentsDto)
                                      .withWorkspaceConfig(workspaceConfigDto)
-                                     .withSource(stackSourceDto)
-                                     .withPermissions(permissionsDescriptor);
+                                     .withSource(stackSourceDto);
     }
 
     /** Converts {@link ProjectConfig} to {@link ProjectConfigDto}. */

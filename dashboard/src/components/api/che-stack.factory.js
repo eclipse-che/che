@@ -34,7 +34,7 @@ export class CheStack {
 
     // remote call
     this.remoteStackAPI = this.$resource('/api/stack',{}, {
-      getStacks: {method: 'GET', url: '/api/stack/list', isArray: true}});
+      getStacks: {method: 'GET', url: '/api/stack', isArray: true}});
 
 
   }

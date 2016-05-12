@@ -21,11 +21,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
-import org.eclipse.che.api.machine.server.recipe.adapters.GroupAdapter;
-import org.eclipse.che.api.machine.server.recipe.adapters.PermissionsAdapter;
-import org.eclipse.che.api.machine.shared.Group;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
-import org.eclipse.che.api.machine.shared.Permissions;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.annotation.PostConstruct;
@@ -53,9 +48,7 @@ import static java.util.Collections.emptyList;
  */
 @Singleton
 public class RecipeLoader {
-    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(Permissions.class, new PermissionsAdapter())
-                                                      .registerTypeAdapter(Group.class, new GroupAdapter())
-                                                      .create();
+    private static final Gson GSON = new GsonBuilder().create();
 
     private final Set<String> recipesPaths;
     private final RecipeDao   recipeDao;
@@ -70,7 +63,7 @@ public class RecipeLoader {
     public void start() throws ServerException {
         for (String recipesPath : recipesPaths) {
             if (recipesPath != null && !recipesPath.isEmpty()) {
-                for (ManagedRecipe recipe : loadRecipes(recipesPath)) {
+                for (RecipeImpl recipe : loadRecipes(recipesPath)) {
                     try {
                         try {
                             recipeDao.update(recipe);
@@ -94,7 +87,7 @@ public class RecipeLoader {
      * @throws ServerException
      *         when problems occurs with getting or parsing recipe file
      */
-    private List<ManagedRecipe> loadRecipes(String recipesPath) throws ServerException {
+    private List<RecipeImpl> loadRecipes(String recipesPath) throws ServerException {
         try (InputStream is = getResource(recipesPath)) {
             return firstNonNull(GSON.fromJson(new InputStreamReader(is), new TypeToken<List<RecipeImpl>>() {}.getType()), emptyList());
         } catch (IOException | JsonIOException | JsonSyntaxException e) {

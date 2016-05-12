@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.stack.StackTypeAdaptersProvider;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +49,8 @@ public class StackLocalStorage {
     private final Path         iconFolderPath;
 
     @Inject
-    public StackLocalStorage(@Named("che.conf.storage") String pathToStorage,
-                             StackTypeAdaptersProvider adaptersProvider) throws IOException {
-        this.localStorage = new LocalStorage(pathToStorage, STACK_STORAGE_FILE, adaptersProvider.getTypeAdapters());
+    public StackLocalStorage(@Named("che.conf.storage") String pathToStorage) throws IOException {
+        this.localStorage = new LocalStorage(pathToStorage, STACK_STORAGE_FILE);
         this.iconFolderPath = Paths.get(pathToStorage, ICON_FOLDER_NAME);
     }
 

@@ -62,17 +62,6 @@ public interface RecipeServiceClient {
     Promise<List<RecipeDescriptor>> getAllRecipes();
 
     /**
-     * Get recipes with pagination.
-     *
-     * @param skipCount
-     *         count of items which should be skipped
-     * @param maxItems
-     *         max count of items to fetch
-     * @return a promise that will provide a list of {@link RecipeDescriptor}s, or rejects with an error
-     */
-    Promise<List<RecipeDescriptor>> getRecipes(int skipCount, int maxItems);
-
-    /**
      * Search for recipes which type is equal to the specified {@code type}
      * and tags contain all of the specified {@code tags}.
      *

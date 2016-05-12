@@ -88,35 +88,15 @@ public interface StackDao {
      * @throws ServerException
      *         when any error occurs
      */
-    void update(StackImpl update) throws NotFoundException, ServerException;
+    StackImpl update(StackImpl update) throws NotFoundException, ServerException;
 
     /**
-     * Returns limited by {@code skipCount} and {@code maxItems} stacks which creator is equal to specified {@code creator}
-     * or empty list when such stacks were not found.
-     *
-     * @param creator
-     *         stack creator to filter stacks
-     * @param skipCount
-     *         count of items which should be skipped,
-     *         if found items contain fewer than {@code skipCount} items
-     *         then return empty list items
-     * @param maxItems
-     *         max count of items to fetch
-     * @return stacks which creator matches to specified {@code creator}
-     * @throws ServerException
-     *         when any error occurs
-     * @throws NullPointerException
-     *         when {@code creator} is null
-     * @throws IllegalArgumentException
-     *         when {@code skipCount} or {@code maxItems} is negative
-     */
-    List<StackImpl> getByCreator(String creator, int skipCount, int maxItems) throws ServerException;
-
-    /**
-     * Searches for stacks which contains all of specified {@code tags}.
+     * Searches for stacks which which have read permissions for specified user and contains all of specified {@code tags}.
      * Not specified {@code tags} will not take part of search
      * <b>Note: only stack which contains permission <i>public: search<i/> take part of the search</b>
      *
+     * @param user
+     *         user id for permission checking
      * @param tags
      *         stack tags to search stacks, may be {@code null}
      * @param skipCount
@@ -131,5 +111,5 @@ public interface StackDao {
      * @throws IllegalArgumentException
      *         when {@code skipCount} or {@code maxItems} is negative
      */
-    List<StackImpl> searchStacks(@Nullable List<String> tags, int skipCount, int maxItems) throws ServerException;
+    List<StackImpl> searchStacks(String user, @Nullable List<String> tags, int skipCount, int maxItems) throws ServerException;
 }

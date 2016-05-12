@@ -29,17 +29,6 @@ export class CheRecipeTemplate {
     this.defaultRecipe = {
       type: 'docker',
       name: 'defaultName',
-      permissions: {
-        groups: [
-          {
-            name: 'public',
-            acl: [
-              'read'
-            ]
-          }
-        ],
-        users: {}
-      },
       script: '# This is a template for your machine recipe.\n' +
       '# Uncomment instructions that you want to use and replace them with yours.\n' +
       '# Inherit from a base image. This can be a Eclipse Che verified image or any base image you can find at Docker Hub.\n' +

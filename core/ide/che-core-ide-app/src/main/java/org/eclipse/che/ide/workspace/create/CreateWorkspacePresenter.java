@@ -106,7 +106,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             workspacesNames.add(workspace.getConfig().getName());
         }
 
-        Promise<List<RecipeDescriptor>> recipes = recipeService.getRecipes(SKIP_COUNT, MAX_COUNT);
+        Promise<List<RecipeDescriptor>> recipes = recipeService.getAllRecipes();
 
         recipes.then(new Operation<List<RecipeDescriptor>>() {
             @Override

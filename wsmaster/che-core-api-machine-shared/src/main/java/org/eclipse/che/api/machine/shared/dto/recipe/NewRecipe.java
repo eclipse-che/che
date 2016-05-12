@@ -39,12 +39,6 @@ public interface NewRecipe extends ManagedRecipe {
 
     NewRecipe withTags(List<String> tags);
 
-    PermissionsDescriptor getPermissions();
-
-    void setPermissions(PermissionsDescriptor permissions);
-
-    NewRecipe withPermissions(PermissionsDescriptor permissions);
-
     void setDescription(String description);
 
     NewRecipe withDescription(String description);
