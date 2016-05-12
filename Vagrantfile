@@ -130,11 +130,11 @@ Vagrant.configure(2) do |config|
       fi 
       # If we are not awake after 60 seconds, restart server
       if [ $counter == "11" ]; then
-        echo "-----------------------------------------------"
+        echo "------------------------------------------------"
         echo "."
-        echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- REBOOTING"
+        echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- RESTARTING"
         echo "."
-        echo "-----------------------------------------------"
+        echo "------------------------------------------------"
         export JAVA_HOME=/usr &>/dev/null
         echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:${IP} --skip:client -g start &>/dev/null
       fi
@@ -143,7 +143,7 @@ Vagrant.configure(2) do |config|
         echo "---------------------------------------------"
         echo "."
         echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- EXITING"
-        echo "           CONTACT SUPPORT FOR ASSISTANCE    "
+        echo "             CONTACT SUPPORT FOR ASSISTANCE  "
         echo "."
         echo "---------------------------------------------"
         exit 0
