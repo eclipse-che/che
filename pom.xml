@@ -87,6 +87,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-debug</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-debug-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -336,11 +346,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-debugger-ide</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-debugger-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -652,6 +657,11 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.ui.ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

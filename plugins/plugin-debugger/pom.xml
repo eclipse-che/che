@@ -23,7 +23,6 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Debugger :: Parent</name>
     <modules>
-        <module>che-plugin-debugger-shared</module>
         <module>che-plugin-debugger-ide</module>
     </modules>
 </project>

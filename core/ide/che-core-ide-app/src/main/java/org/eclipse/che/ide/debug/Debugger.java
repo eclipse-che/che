@@ -10,14 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
+import org.eclipse.che.api.debug.shared.model.StackFrameDump;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
+import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 
-import java.util.List;
 import java.util.Map;
 
 /**
- * The general class which provides to manage breakpoints on server.
+ * Client-side debugger.
  *
  * @author Andrey Plotnikov
  * @author Anatoliy Bazko
@@ -25,89 +27,94 @@ import java.util.Map;
 public interface Debugger extends DebuggerObservable {
 
     /**
-     * Adds new breakpoint on server.
+     * Adds new breakpoint.
      *
      * @param file
+     *      the file
      * @param lineNumber
+     *      the line number
      */
     void addBreakpoint(VirtualFile file, int lineNumber);
 
     /**
-     * Deletes breakpoint on server.
+     * Deletes the given breakpoint on server.
      *
      * @param file
+     *      the file
      * @param lineNumber
+     *      the line number
      */
     void deleteBreakpoint(VirtualFile file, int lineNumber);
 
     /**
-     * Deletes all breakpoints on server.
+     * Deletes all breakpoints.
      */
     void deleteAllBreakpoints();
 
     /**
-     * Attaches debugger.
+     * Connects to server.
+     *
+     * @param connectionProperties
+     *      the connection properties
      */
-    Promise<Void> attachDebugger(Map<String, String> connectionProperties);
+    Promise<Void> connect(Map<String, String> connectionProperties);
 
     /**
-     * Disconnects from process under debugger.
+     * Disconnects from process is being debugged.
      * When debugger is disconnected it should invoke {@link DebuggerManager#setActiveDebugger(Debugger)} with {@code null}.
      */
-    void disconnectDebugger();
+    void disconnect();
 
     /**
-     * Steps into a method
+     * Does step into.
      */
     void stepInto();
 
     /**
-     * Steps without entering into a method
+     * Does step over.
      */
     void stepOver();
 
     /**
-     * Returns from a method
+     * Does step out.
      */
     void stepOut();
 
     /**
-     * Resumes execution
+     * Resumes application.
      */
     void resume();
 
     /**
-     * Evaluates given expression
+     * Evaluates the given expression
      */
-    Promise<String> evaluateExpression(String expression);
+    Promise<String> evaluate(String expression);
 
     /**
-     * @return the value of the variable
+     * Gets the value of the given variable.
      */
-    Promise<String> getValue(String variable);
+    Promise<SimpleValue> getValue(Variable variable);
 
     /**
-     * @return stack frame dump
+     * Gets dump the current frame.
      */
-    Promise<String> getStackFrameDump();
+    Promise<StackFrameDump> dumpStackFrame();
 
     /**
-     * Changes value of given variable
+     * Updates the value of the given variable.
      *
-     * @param path
-     *         path to changing variable
-     * @param newValue
-     *         new value for given variable
+     * @param variable
+     *      the variable to update
      */
-    void changeVariableValue(List<String> path, String newValue);
+    void setValue(Variable variable);
 
     /**
-     * Indicates if debugger is connected.
+     * Indicates if connection is established with the server.
      */
     boolean isConnected();
 
     /**
-     * Indicates if debugger is suspended.
+     * Indicates if debugger is in suspended state.
      */
     boolean isSuspended();
 }

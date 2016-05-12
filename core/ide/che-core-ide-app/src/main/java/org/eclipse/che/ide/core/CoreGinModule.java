@@ -55,6 +55,13 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
+import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
+import org.eclipse.che.ide.api.debug.DebuggerServiceClientImpl;
+import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputDialog;
+import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -170,23 +177,18 @@ import org.eclipse.che.ide.theme.ThemeAgentImpl;
 import org.eclipse.che.ide.ui.button.ConsoleButton;
 import org.eclipse.che.ide.ui.button.ConsoleButtonFactory;
 import org.eclipse.che.ide.ui.button.ConsoleButtonImpl;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.ChoiceDialog;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogView;
 import org.eclipse.che.ide.ui.dialogs.choice.ChoiceDialogViewImpl;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogView;
 import org.eclipse.che.ide.ui.dialogs.confirm.ConfirmDialogViewImpl;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogView;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialogViewImpl;
-import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogFooter;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogPresenter;
 import org.eclipse.che.ide.ui.dialogs.message.MessageDialogView;
@@ -335,6 +337,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(MachineServiceClient.class).to(MachineServiceClientImpl.class).in(Singleton.class);
         bind(ProjectTypeRegistry.class).to(ProjectTypeRegistryImpl.class).in(Singleton.class);
         bind(ProjectTemplateRegistry.class).to(ProjectTemplateRegistryImpl.class).in(Singleton.class);
+        bind(DebuggerServiceClient.class).to(DebuggerServiceClientImpl.class).in(Singleton.class);
     }
 
     /** API Bindings, binds API interfaces to the implementations */

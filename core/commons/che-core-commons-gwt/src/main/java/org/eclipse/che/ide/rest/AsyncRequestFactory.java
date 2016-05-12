@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.rest;
 
-import org.eclipse.che.ide.MimeType;
-import org.eclipse.che.ide.dto.DtoFactory;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.dto.DtoFactory;
 
 import java.util.List;
 
@@ -72,6 +73,20 @@ public class AsyncRequestFactory {
     }
 
     /**
+     * Creates new PUT request to the specified {@code url} with the provided {@code data}.
+     *
+     * @param url
+     *         request URL
+     * @param dtoData
+     *         the DTO to send as body of the request. Must implement {@link org.eclipse.che.ide.dto.JsonSerializable} interface. May be {@code
+     *         null}.
+     * @return new {@link AsyncRequest} instance to send PUT request
+     */
+    public AsyncRequest createPutRequest(String url, Object dtoData) {
+        return createPutRequest(url, dtoData, false);
+    }
+
+    /**
      * Creates new POST request to the specified {@code url} with the provided {@code data}.
      *
      * @param url
@@ -100,6 +115,23 @@ public class AsyncRequestFactory {
     public AsyncRequest createPostRequest(String url, Object dtoData, boolean async) {
         return createRequest(RequestBuilder.POST, url, dtoData, async);
     }
+
+    /**
+     * Creates new PUT request to the specified {@code url} with the provided {@code data}.
+     *
+     * @param url
+     *         request URL
+     * @param dtoData
+     *         the DTO to send as body of the request. Must implement {@link org.eclipse.che.ide.dto.JsonSerializable} interface. May be {@code
+     *         null}.
+     * @param async
+     *         if <b>true</b> - request will be sent in asynchronous mode
+     * @return new {@link AsyncRequest} instance to send POST request
+     */
+    public AsyncRequest createPutRequest(String url, Object dtoData, boolean async) {
+        return createRequest(RequestBuilder.PUT, url, dtoData, async);
+    }
+
 
     /**
      * Creates new POST request to the specified {@code url} with the provided {@code data}.
