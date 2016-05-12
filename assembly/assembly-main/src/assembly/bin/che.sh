@@ -35,6 +35,7 @@ Usage:
      -m:name,   --machine:name          For Win & Mac, sets the docker-machine VM name; default=che
      -a:driver, --machine-driver:driver For Win & Mac, specifies the docker-machine driver to use; default=vbox
      -p:port,   --port:port             Port that Che server will use for HTTP requests; default=8080
+     -ll:level, --logs_level:level      Logging level in Che; default=INFO
      -r:ip,     --remote:ip             If Che clients are not localhost, set to IP address of Che server
      -h,        --help                  Show this help
      -d,        --debug                 Use debug mode (prints command line options + app server debug)
@@ -67,6 +68,7 @@ https://eclipse-che.readme.io/docs/networking."
   USE_VMWARE=false
   CHE_DOCKER_TAG=latest
   CHE_PORT=8080
+  CHE_LOGS_LEVEL=INFO
   CHE_IP=
   USE_HELP=false
   CHE_SERVER_ACTION=run
@@ -136,6 +138,11 @@ parse_command_line () {
         VM="${command_line_option#*:}"
       fi
     ;;
+    -ll:*|--log_level:*)
+      if [ "${command_line_option#*:}" != "" ]; then
+        CHE_LOGS_LEVEL="${command_line_option#*:}"
+      fi
+    ;;
     -a:*|--machine-driver:*)
       if [ "${command_line_option#*:}" != "" ]; then
         case "${command_line_option#*:}" in
@@ -174,6 +181,7 @@ parse_command_line () {
     ;;
     -d|--debug)
       USE_DEBUG=true
+      CHE_LOGS_LEVEL=DEBUG
     ;;
     start|stop|run)
       CHE_SERVER_ACTION=${command_line_option}
@@ -192,6 +200,7 @@ parse_command_line () {
     echo "CHE_DOCKER_TAG: ${CHE_DOCKER_TAG}"
     echo "CHE_PORT: ${CHE_PORT}"
     echo "CHE_IP: \"${CHE_IP}\""
+    echo "LOGGING_LEVEL: ${CHE_LOGS_LEVEL}"
     echo "CHE_DOCKER_MACHINE: ${VM}"
     echo "COPY_LIB: ${COPY_LIB}"
     echo "MACHINE_DRIVER: ${MACHINE_DRIVER}"
@@ -296,6 +305,7 @@ set_environment_variables () {
 
   export CATALINA_BASE="${CHE_HOME}"/tomcat
   export ASSEMBLY_BIN_DIR="${CATALINA_HOME}"/bin
+  export CHE_LOGS_LEVEL="${CHE_LOGS_LEVEL}"
 
   # Global logs directory
   if [ -z "${CHE_LOGS_DIR}" ]; then
