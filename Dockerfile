@@ -30,6 +30,6 @@ ENV CHE_HOME /home/user/che
 
 RUN sudo chown -R user:user /home/user
 
-ENTRYPOINT [ "/home/user/che/bin/che.sh", "-l" ]
+ENTRYPOINT [ "/home/user/che/bin/che.sh", "-c" ]
 
 CMD [ "run" ]
