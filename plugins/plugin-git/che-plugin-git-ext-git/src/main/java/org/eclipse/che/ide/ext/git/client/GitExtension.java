@@ -36,7 +36,6 @@ import org.eclipse.che.ide.ext.git.client.action.RemoveFromIndexAction;
 import org.eclipse.che.ide.ext.git.client.action.ResetFilesAction;
 import org.eclipse.che.ide.ext.git.client.action.ResetToCommitAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowBranchesAction;
-import org.eclipse.che.ide.ext.git.client.action.ShowGitUrlAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowMergeAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowRemoteAction;
 import org.eclipse.che.ide.ext.git.client.action.ShowStatusAction;
@@ -72,7 +71,6 @@ public class GitExtension {
                         ShowMergeAction showMergeAction,
                         ResetFilesAction resetFilesAction,
                         ShowStatusAction showStatusAction,
-                        ShowGitUrlAction showGitUrlAction,
                         ShowRemoteAction showRemoteAction,
                         PushAction pushAction,
                         FetchAction fetchAction,
@@ -140,11 +138,6 @@ public class GitExtension {
         historyGroup.add(historyAction);
         actionManager.registerAction("gitStatus", showStatusAction);
         historyGroup.add(showStatusAction);
-
-        if (!appContext.getWorkspace().isTemporary()) {
-            actionManager.registerAction("gitUrl", showGitUrlAction);
-            historyGroup.add(showGitUrlAction);
-        }
 
         actionManager.registerAction("gitPush", pushAction);
         remoteGroup.add(pushAction);
