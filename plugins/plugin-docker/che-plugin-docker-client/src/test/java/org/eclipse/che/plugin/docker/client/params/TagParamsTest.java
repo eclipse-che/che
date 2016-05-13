@@ -30,12 +30,12 @@ public class TagParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        tagParams = TagParams.from(IMAGE, REPOSITORY);
+        tagParams = TagParams.create(IMAGE, REPOSITORY);
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        tagParams = TagParams.from(IMAGE, REPOSITORY);
+        tagParams = TagParams.create(IMAGE, REPOSITORY);
 
         assertEquals(tagParams.getImage(), IMAGE);
         assertEquals(tagParams.getRepository(), REPOSITORY);
@@ -46,7 +46,7 @@ public class TagParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        tagParams = TagParams.from(IMAGE, REPOSITORY)
+        tagParams = TagParams.create(IMAGE, REPOSITORY)
                              .withTag(TAG)
                              .withForce(FORCE);
 
@@ -58,12 +58,12 @@ public class TagParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
-        tagParams = TagParams.from(null, REPOSITORY);
+        tagParams = TagParams.create(null, REPOSITORY);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterIsNull() {
-        tagParams = TagParams.from(IMAGE, null);
+        tagParams = TagParams.create(IMAGE, null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

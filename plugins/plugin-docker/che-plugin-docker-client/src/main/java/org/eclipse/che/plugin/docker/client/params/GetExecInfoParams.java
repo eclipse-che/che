@@ -32,7 +32,7 @@ public class GetExecInfoParams {
      *         exec id
      * @return arguments holder with required parameters
      */
-    public static GetExecInfoParams from(@NotNull String execId) {
+    public static GetExecInfoParams create(@NotNull String execId) {
         return new GetExecInfoParams().withExecId(execId);
     }
 

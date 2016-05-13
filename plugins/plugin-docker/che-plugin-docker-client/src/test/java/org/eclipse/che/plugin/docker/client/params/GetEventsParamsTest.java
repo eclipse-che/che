@@ -32,12 +32,12 @@ public class GetEventsParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        getEventsParams = GetEventsParams.from();
+        getEventsParams = GetEventsParams.create();
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        getEventsParams = GetEventsParams.from();
+        getEventsParams = GetEventsParams.create();
 
         assertNull(getEventsParams.getSinceSecond());
         assertNull(getEventsParams.getUntilSecond());
@@ -46,7 +46,7 @@ public class GetEventsParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        getEventsParams = GetEventsParams.from()
+        getEventsParams = GetEventsParams.create()
                                          .withSinceSecond(SINCE_SECOND)
                                          .withUntilSecond(UNTIL_SECOND)
                                          .withFilters(FILTERS);

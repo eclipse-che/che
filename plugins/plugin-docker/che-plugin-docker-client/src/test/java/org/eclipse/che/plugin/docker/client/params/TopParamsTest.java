@@ -27,7 +27,7 @@ public class TopParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        topParams = TopParams.from(CONTAINER);
+        topParams = TopParams.create(CONTAINER);
 
         assertEquals(topParams.getContainer(), CONTAINER);
 
@@ -36,7 +36,7 @@ public class TopParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        topParams = TopParams.from(CONTAINER)
+        topParams = TopParams.create(CONTAINER)
                              .withPsArgs(PS_ARGS);
 
         assertEquals(topParams.getContainer(), CONTAINER);
@@ -45,12 +45,12 @@ public class TopParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        topParams = TopParams.from(null);
+        topParams = TopParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        topParams = TopParams.from(CONTAINER)
+        topParams = TopParams.create(CONTAINER)
                              .withContainer(null);
     }
 

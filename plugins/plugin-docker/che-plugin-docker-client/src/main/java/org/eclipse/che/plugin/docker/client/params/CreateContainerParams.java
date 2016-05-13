@@ -37,7 +37,7 @@ public class CreateContainerParams {
      * @throws NullPointerException
      *         if {@code containerConfig} is null
      */
-    public static CreateContainerParams from(@NotNull ContainerConfig containerConfig) {
+    public static CreateContainerParams create(@NotNull ContainerConfig containerConfig) {
         return new CreateContainerParams().withContainerConfig(containerConfig);
     }
 

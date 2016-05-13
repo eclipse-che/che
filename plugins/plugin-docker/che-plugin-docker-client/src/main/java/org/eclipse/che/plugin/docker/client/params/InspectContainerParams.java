@@ -35,7 +35,7 @@ public class InspectContainerParams {
      * @throws NullPointerException
      *         if {@code container} is null
      */
-    public static InspectContainerParams from(@NotNull String container) {
+    public static InspectContainerParams create(@NotNull String container) {
         return new InspectContainerParams().withContainer(container);
     }
 

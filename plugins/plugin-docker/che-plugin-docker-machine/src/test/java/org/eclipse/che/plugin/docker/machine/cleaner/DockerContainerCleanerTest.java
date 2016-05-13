@@ -137,7 +137,7 @@ public class DockerContainerCleanerTest {
         verify(dockerConnector, times(2)).removeContainer(Matchers.<RemoveContainerParams>anyObject());
 
         verify(dockerConnector, never()).killContainer(containerId1);
-        verify(dockerConnector, never()).removeContainer(RemoveContainerParams.from(containerId1).withForce(true).withRemoveVolumes(true));
+        verify(dockerConnector, never()).removeContainer(RemoveContainerParams.create(containerId1).withForce(true).withRemoveVolumes(true));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class DockerContainerCleanerTest {
         cleaner.run();
 
         verify(dockerConnector, never()).killContainer(containerId2);
-        verify(dockerConnector).removeContainer(RemoveContainerParams.from(containerId2).withForce(true).withRemoveVolumes(true));
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(containerId2).withForce(true).withRemoveVolumes(true));
     }
 
     @Test

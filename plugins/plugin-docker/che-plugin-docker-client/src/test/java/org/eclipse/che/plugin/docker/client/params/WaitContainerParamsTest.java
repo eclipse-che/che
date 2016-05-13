@@ -25,19 +25,19 @@ public class WaitContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        waitContainerParams = WaitContainerParams.from(CONTAINER);
+        waitContainerParams = WaitContainerParams.create(CONTAINER);
 
         assertEquals(waitContainerParams.getContainer(), CONTAINER);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        waitContainerParams = WaitContainerParams.from(null);
+        waitContainerParams = WaitContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        waitContainerParams = WaitContainerParams.from(CONTAINER)
+        waitContainerParams = WaitContainerParams.create(CONTAINER)
                                                  .withContainer(null);
     }
 }

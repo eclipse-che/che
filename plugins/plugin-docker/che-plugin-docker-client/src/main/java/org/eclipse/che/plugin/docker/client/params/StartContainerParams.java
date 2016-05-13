@@ -34,7 +34,7 @@ public class StartContainerParams {
      * @throws NullPointerException
      *         if {@code container} is null
      */
-    public static StartContainerParams from(@NotNull String container) {
+    public static StartContainerParams create(@NotNull String container) {
         return new StartContainerParams().withContainer(container);
     }
 

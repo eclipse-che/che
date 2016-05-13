@@ -40,7 +40,7 @@ public class CreateExecParams {
      * @throws NullPointerException
      *         if {@code container} or {@code cmd} is null
      */
-    public static CreateExecParams from(@NotNull String container, @NotNull String[] cmd) {
+    public static CreateExecParams create(@NotNull String container, @NotNull String[] cmd) {
         return new CreateExecParams().withContainer(container)
                                      .withCmd(cmd);
     }

@@ -28,7 +28,7 @@ public class InspectContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        inspectContainerParams = InspectContainerParams.from(CONTAINER);
+        inspectContainerParams = InspectContainerParams.create(CONTAINER);
 
         assertEquals(inspectContainerParams.getContainer(), CONTAINER);
 
@@ -37,7 +37,7 @@ public class InspectContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        inspectContainerParams = InspectContainerParams.from(CONTAINER)
+        inspectContainerParams = InspectContainerParams.create(CONTAINER)
                                                        .withReturnContainerSize(RETURN_CONTAINER_SIZE);
 
         assertEquals(inspectContainerParams.getContainer(), CONTAINER);
@@ -46,7 +46,7 @@ public class InspectContainerParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        inspectContainerParams = InspectContainerParams.from(null);
+        inspectContainerParams = InspectContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

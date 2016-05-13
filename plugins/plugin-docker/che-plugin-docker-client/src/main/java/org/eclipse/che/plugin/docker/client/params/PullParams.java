@@ -38,7 +38,7 @@ public class PullParams {
      * @throws NullPointerException
      *         if {@code image} is null
      */
-    public static PullParams from(@NotNull String image) {
+    public static PullParams create(@NotNull String image) {
         return new PullParams().withImage(image);
     }
 

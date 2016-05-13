@@ -39,7 +39,7 @@ public class TagParams {
      * @throws NullPointerException
      *         if {@code image} or {@code repository} is null
      */
-    public static TagParams from(@NotNull String image, @NotNull String repository) {
+    public static TagParams create(@NotNull String image, @NotNull String repository) {
         return new TagParams().withImage(image)
                               .withRepository(repository);
     }

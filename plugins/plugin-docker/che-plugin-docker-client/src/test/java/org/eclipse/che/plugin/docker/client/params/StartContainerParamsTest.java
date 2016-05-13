@@ -25,19 +25,19 @@ public class StartContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        startContainerParams = StartContainerParams.from(CONTAINER);
+        startContainerParams = StartContainerParams.create(CONTAINER);
 
         assertEquals(startContainerParams.getContainer(), CONTAINER);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        startContainerParams = StartContainerParams.from(null);
+        startContainerParams = StartContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        startContainerParams = StartContainerParams.from(CONTAINER)
+        startContainerParams = StartContainerParams.create(CONTAINER)
                                                    .withContainer(null);
     }
 

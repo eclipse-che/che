@@ -28,7 +28,7 @@ public class PushParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        pullParams = PullParams.from(REPOSITORY);
+        pullParams = PullParams.create(REPOSITORY);
 
         assertEquals(pullParams.getImage(), REPOSITORY);
 
@@ -38,7 +38,7 @@ public class PushParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        pullParams = PullParams.from(REPOSITORY)
+        pullParams = PullParams.create(REPOSITORY)
                                .withTag(TAG)
                                .withRegistry(REGISTRY);
 
@@ -49,18 +49,18 @@ public class PushParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterIsNull() {
-        pullParams = PullParams.from(null);
+        pullParams = PullParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterResetWithNull() {
-        pullParams = PullParams.from(REPOSITORY)
+        pullParams = PullParams.create(REPOSITORY)
                                .withImage(null);
     }
 
     @Test
     public void tagParameterShouldEqualsNullIfItNotSet() {
-        pullParams = PullParams.from(REPOSITORY)
+        pullParams = PullParams.create(REPOSITORY)
                                .withRegistry(REGISTRY);
 
         assertNull(pullParams.getTag());
@@ -68,7 +68,7 @@ public class PushParamsTest {
 
     @Test
     public void registryParameterShouldEqualsNullIfItNotSet() {
-        pullParams = PullParams.from(REPOSITORY)
+        pullParams = PullParams.create(REPOSITORY)
                                .withTag(TAG);
 
         assertNull(pullParams.getRegistry());

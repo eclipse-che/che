@@ -28,7 +28,7 @@ public class RemoveContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        removeContainerParams = RemoveContainerParams.from(CONTAINER);
+        removeContainerParams = RemoveContainerParams.create(CONTAINER);
 
         assertEquals(removeContainerParams.getContainer(), CONTAINER);
 
@@ -38,7 +38,7 @@ public class RemoveContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        removeContainerParams = RemoveContainerParams.from(CONTAINER)
+        removeContainerParams = RemoveContainerParams.create(CONTAINER)
                                                      .withForce(FORCE)
                                                      .withRemoveVolumes(REMOVE_VOLUMES);
 
@@ -49,18 +49,18 @@ public class RemoveContainerParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        removeContainerParams = RemoveContainerParams.from(null);
+        removeContainerParams = RemoveContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        removeContainerParams = RemoveContainerParams.from(CONTAINER)
+        removeContainerParams = RemoveContainerParams.create(CONTAINER)
                                                      .withContainer(null);
     }
 
     @Test
     public void forceParameterShouldEqualsNullIfItNotSet() {
-        removeContainerParams = RemoveContainerParams.from(CONTAINER)
+        removeContainerParams = RemoveContainerParams.create(CONTAINER)
                                                      .withRemoveVolumes(REMOVE_VOLUMES);
 
         assertNull(removeContainerParams.isForce());
@@ -68,7 +68,7 @@ public class RemoveContainerParamsTest {
 
     @Test
     public void removeVolumesParameterShouldEqualsNullIfItNotSet() {
-        removeContainerParams = RemoveContainerParams.from(CONTAINER)
+        removeContainerParams = RemoveContainerParams.create(CONTAINER)
                                                      .withForce(FORCE);
 
         assertNull(removeContainerParams.isRemoveVolumes());

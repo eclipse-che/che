@@ -36,7 +36,7 @@ public class RemoveContainerParams {
      * @throws NullPointerException
      *         if {@code container} is null
      */
-    public static RemoveContainerParams from(@NotNull String container) {
+    public static RemoveContainerParams create(@NotNull String container) {
         return new RemoveContainerParams().withContainer(container);
     }
 

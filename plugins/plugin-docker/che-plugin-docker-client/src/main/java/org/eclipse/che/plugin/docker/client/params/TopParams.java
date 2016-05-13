@@ -36,7 +36,7 @@ public class TopParams {
      * @throws NullPointerException
      *         if {@code container} is null
      */
-    public static TopParams from(@NotNull String container) {
+    public static TopParams create(@NotNull String container) {
         return new TopParams().withContainer(container);
     }
 

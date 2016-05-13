@@ -34,12 +34,12 @@ public class PutResourceParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        putResourceParams = PutResourceParams.from(CONTAINER, TARGET_PATH);
+        putResourceParams = PutResourceParams.create(CONTAINER, TARGET_PATH);
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        putResourceParams = PutResourceParams.from(CONTAINER, TARGET_PATH);
+        putResourceParams = PutResourceParams.create(CONTAINER, TARGET_PATH);
 
         assertEquals(putResourceParams.getContainer(), CONTAINER);
         assertEquals(putResourceParams.getTargetPath(), TARGET_PATH);
@@ -50,7 +50,7 @@ public class PutResourceParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        putResourceParams = PutResourceParams.from(CONTAINER, TARGET_PATH)
+        putResourceParams = PutResourceParams.create(CONTAINER, TARGET_PATH)
                                              .withSourceStream(SOURCE_STREAM)
                                              .withNoOverwriteDirNonDir(NO_OVERWRITE_DIR_NON_DIR);
 
@@ -62,12 +62,12 @@ public class PutResourceParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        putResourceParams = PutResourceParams.from(null, TARGET_PATH);
+        putResourceParams = PutResourceParams.create(null, TARGET_PATH);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfTargetPathRequiredParameterIsNull() {
-        putResourceParams = PutResourceParams.from(CONTAINER, null);
+        putResourceParams = PutResourceParams.create(CONTAINER, null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

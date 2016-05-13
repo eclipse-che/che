@@ -39,7 +39,7 @@ public class PutResourceParams {
      * @throws NullPointerException
      *         if {@code container} or {@code targetPath} is null
      */
-    public static PutResourceParams from(@NotNull String container, @NotNull String targetPath) {
+    public static PutResourceParams create(@NotNull String container, @NotNull String targetPath) {
         return new PutResourceParams().withContainer(container)
                                       .withTargetPath(targetPath);
     }

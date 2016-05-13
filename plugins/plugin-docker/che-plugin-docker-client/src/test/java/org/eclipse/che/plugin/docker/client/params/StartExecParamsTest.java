@@ -27,7 +27,7 @@ public class StartExecParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        startExecParams = StartExecParams.from(EXEC_ID);
+        startExecParams = StartExecParams.create(EXEC_ID);
 
         assertEquals(startExecParams.getExecId(), EXEC_ID);
 
@@ -37,7 +37,7 @@ public class StartExecParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        startExecParams = StartExecParams.from(EXEC_ID)
+        startExecParams = StartExecParams.create(EXEC_ID)
                                          .withDetach(DETACH)
                                          .withTty(TTY);
 
@@ -48,18 +48,18 @@ public class StartExecParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfExecIdRequiredParameterIsNull() {
-        startExecParams = StartExecParams.from(null);
+        startExecParams = StartExecParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfExecIdRequiredParameterResetWithNull() {
-        startExecParams = StartExecParams.from(EXEC_ID)
+        startExecParams = StartExecParams.create(EXEC_ID)
                                          .withExecId(null);
     }
 
     @Test
     public void detachParameterShouldEqualsNullIfItNotSet() {
-        startExecParams = StartExecParams.from(EXEC_ID)
+        startExecParams = StartExecParams.create(EXEC_ID)
                                          .withTty(TTY);
 
         assertNull(startExecParams.isDetach());
@@ -67,7 +67,7 @@ public class StartExecParamsTest {
 
     @Test
     public void ttyParameterShouldEqualsNullIfItNotSet() {
-        startExecParams = StartExecParams.from(EXEC_ID)
+        startExecParams = StartExecParams.create(EXEC_ID)
                                          .withDetach(DETACH);
 
         assertNull(startExecParams.isTty());
