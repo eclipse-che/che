@@ -29,7 +29,7 @@ public class GetEventsParams {
     /**
      * Creates arguments holder.
      */
-    public static GetEventsParams from() {
+    public static GetEventsParams create() {
         return new GetEventsParams();
     }
 

@@ -27,12 +27,12 @@ public class GetResourceParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        getResourceParams = GetResourceParams.from(CONTAINER, SOURCE_PATH);
+        getResourceParams = GetResourceParams.create(CONTAINER, SOURCE_PATH);
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        getResourceParams = GetResourceParams.from(CONTAINER, SOURCE_PATH);
+        getResourceParams = GetResourceParams.create(CONTAINER, SOURCE_PATH);
 
         assertEquals(getResourceParams.getContainer(), CONTAINER);
         assertEquals(getResourceParams.getSourcePath(), SOURCE_PATH);
@@ -40,12 +40,12 @@ public class GetResourceParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        getResourceParams = GetResourceParams.from(null, SOURCE_PATH);
+        getResourceParams = GetResourceParams.create(null, SOURCE_PATH);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfSourcePathRequiredParameterIsNull() {
-        getResourceParams = GetResourceParams.from(CONTAINER, null);
+        getResourceParams = GetResourceParams.create(CONTAINER, null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

@@ -28,7 +28,7 @@ public class AttachContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        attachContainerParams = AttachContainerParams.from(CONTAINER);
+        attachContainerParams = AttachContainerParams.create(CONTAINER);
 
         assertEquals(attachContainerParams.getContainer(), CONTAINER);
 
@@ -37,7 +37,7 @@ public class AttachContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        attachContainerParams = AttachContainerParams.from(CONTAINER)
+        attachContainerParams = AttachContainerParams.create(CONTAINER)
                                                      .withStream(STREAM);
 
         assertEquals(attachContainerParams.getContainer(), CONTAINER);
@@ -46,18 +46,18 @@ public class AttachContainerParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        attachContainerParams = AttachContainerParams.from(null);
+        attachContainerParams = AttachContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterResetWithNull() {
-        attachContainerParams = AttachContainerParams.from(CONTAINER)
+        attachContainerParams = AttachContainerParams.create(CONTAINER)
                                                      .withContainer(null);
     }
 
     @Test
     public void streamParameterShouldEqualsNullIfItNotSet() {
-        attachContainerParams = AttachContainerParams.from(CONTAINER);
+        attachContainerParams = AttachContainerParams.create(CONTAINER);
 
         assertNull(attachContainerParams.isStream());
     }

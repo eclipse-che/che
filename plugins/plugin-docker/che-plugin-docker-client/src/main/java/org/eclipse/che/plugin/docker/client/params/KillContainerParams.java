@@ -33,7 +33,7 @@ public class KillContainerParams {
      *          container identifier, either id or name
      * @return arguments holder with required parameters
      */
-    public static KillContainerParams from(@NotNull String container) {
+    public static KillContainerParams create(@NotNull String container) {
         return new KillContainerParams().withContainer(container);
     }
 

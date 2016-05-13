@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
-import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.from;
+import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.create;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 
 /**
@@ -92,7 +92,7 @@ public class DockerContainerCleaner implements Runnable {
 
     private void removeContainer(String containerId, String containerName) {
         try {
-            dockerConnector.removeContainer(from(containerId).withForce(true).withRemoveVolumes(true));
+            dockerConnector.removeContainer(create(containerId).withForce(true).withRemoveVolumes(true));
             LOG.warn("Unused container with 'id': '{}' and 'name': '{}' was removed", containerId, containerName);
         } catch (IOException e) {
             LOG.error(format("Failed to delete unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);

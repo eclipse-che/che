@@ -45,12 +45,12 @@ public class BuildImageParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        buildImageParams = BuildImageParams.from(FILE);
+        buildImageParams = BuildImageParams.create(FILE);
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        buildImageParams = BuildImageParams.from(FILE);
+        buildImageParams = BuildImageParams.create(FILE);
 
         assertEquals(buildImageParams.getFiles(), FILES);
 
@@ -63,7 +63,7 @@ public class BuildImageParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        buildImageParams = BuildImageParams.from(FILE)
+        buildImageParams = BuildImageParams.create(FILE)
                                            .withRepository(REPOSITORY)
                                            .withAuthConfigs(AUTH_CONFIGS)
                                            .withDoForcePull(DO_FORCE_PULL)
@@ -81,7 +81,7 @@ public class BuildImageParamsTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfFilesRequiredParameterIsNull() {
         File file = null;
-        buildImageParams = BuildImageParams.from(file);
+        buildImageParams = BuildImageParams.create(file);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

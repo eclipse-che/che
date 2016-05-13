@@ -27,7 +27,7 @@ public class RemoveImageParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        removeImageParams = RemoveImageParams.from(IMAGE);
+        removeImageParams = RemoveImageParams.create(IMAGE);
 
         assertEquals(removeImageParams.getImage(), IMAGE);
 
@@ -36,7 +36,7 @@ public class RemoveImageParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        removeImageParams = RemoveImageParams.from(IMAGE)
+        removeImageParams = RemoveImageParams.create(IMAGE)
                                              .withForce(FORCE);
 
         assertEquals(removeImageParams.getImage(), IMAGE);
@@ -45,12 +45,12 @@ public class RemoveImageParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
-        removeImageParams = RemoveImageParams.from(null);
+        removeImageParams = RemoveImageParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
-        removeImageParams = RemoveImageParams.from(IMAGE)
+        removeImageParams = RemoveImageParams.create(IMAGE)
                                              .withImage(null);
     }
 

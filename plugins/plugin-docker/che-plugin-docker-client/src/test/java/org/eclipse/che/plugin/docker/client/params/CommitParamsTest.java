@@ -31,12 +31,12 @@ public class CommitParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        commitParams = CommitParams.from(CONTAINER, REPOSITORY);
+        commitParams = CommitParams.create(CONTAINER, REPOSITORY);
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        commitParams = CommitParams.from(CONTAINER, REPOSITORY);
+        commitParams = CommitParams.create(CONTAINER, REPOSITORY);
 
         assertEquals(commitParams.getContainer(), CONTAINER);
         assertEquals(commitParams.getRepository(), REPOSITORY);
@@ -48,7 +48,7 @@ public class CommitParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        commitParams = CommitParams.from(CONTAINER, REPOSITORY)
+        commitParams = CommitParams.create(CONTAINER, REPOSITORY)
                                                 .withTag(TAG)
                                                 .withComment(COMMENT)
                                                 .withAuthor(AUTHOR);
@@ -62,12 +62,12 @@ public class CommitParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        commitParams = CommitParams.from(null, REPOSITORY);
+        commitParams = CommitParams.create(null, REPOSITORY);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterIsNull() {
-        commitParams = CommitParams.from(CONTAINER, null);
+        commitParams = CommitParams.create(CONTAINER, null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

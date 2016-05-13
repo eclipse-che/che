@@ -40,7 +40,7 @@ public class CommitParams {
      * @throws NullPointerException
      *         if {@code container} or {@code repository} is null
      */
-    public static CommitParams from(@NotNull String container, @NotNull String repository) {
+    public static CommitParams create(@NotNull String container, @NotNull String repository) {
         return new CommitParams().withContainer(container)
                                  .withRepository(repository);
     }

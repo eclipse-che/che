@@ -48,7 +48,7 @@ public class BuildImageParams {
      *         if {@code files} is empty array
      *
      */
-    public static BuildImageParams from(@NotNull File... files) {
+    public static BuildImageParams create(@NotNull File... files) {
         return new BuildImageParams().withFiles(files);
     }
 

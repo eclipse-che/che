@@ -25,19 +25,19 @@ public class GetExecInfoParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        getExecInfoParams = GetExecInfoParams.from(EXEC_ID);
+        getExecInfoParams = GetExecInfoParams.create(EXEC_ID);
 
         assertEquals(getExecInfoParams.getExecId(), EXEC_ID);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfExecIdRequiredParameterIsNull() {
-        getExecInfoParams = GetExecInfoParams.from(null);
+        getExecInfoParams = GetExecInfoParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfExecIdRequiredParameterResetWithNull() {
-        getExecInfoParams = GetExecInfoParams.from(EXEC_ID)
+        getExecInfoParams = GetExecInfoParams.create(EXEC_ID)
                                              .withExecId(null);
     }
 

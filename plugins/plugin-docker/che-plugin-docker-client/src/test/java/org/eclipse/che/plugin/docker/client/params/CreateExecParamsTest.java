@@ -29,7 +29,7 @@ public class CreateExecParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        createExecParams = CreateExecParams.from(CONTAINER, CMD);
+        createExecParams = CreateExecParams.create(CONTAINER, CMD);
 
         assertEquals(createExecParams.getContainer(), CONTAINER);
         assertEquals(createExecParams.getCmd(), CMD);
@@ -39,7 +39,7 @@ public class CreateExecParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        createExecParams = CreateExecParams.from(CONTAINER, CMD)
+        createExecParams = CreateExecParams.create(CONTAINER, CMD)
                                            .withDetach(DETACH);
 
         assertEquals(createExecParams.getContainer(), CONTAINER);
@@ -49,17 +49,17 @@ public class CreateExecParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        createExecParams = CreateExecParams.from(null, CMD);
+        createExecParams = CreateExecParams.create(null, CMD);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowAnNullPointerExceptionIfCmdRequiredParameterIsNull() {
-        createExecParams = CreateExecParams.from(CONTAINER, null);
+        createExecParams = CreateExecParams.create(CONTAINER, null);
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void shouldThrowIllegalArgumentExceptionIfSetEmptyArray() {
-        createExecParams = CreateExecParams.from(CONTAINER, CMD);
+        createExecParams = CreateExecParams.create(CONTAINER, CMD);
 
         String[] cmd = new String[0];
         createExecParams.withCmd(cmd);
@@ -67,7 +67,7 @@ public class CreateExecParamsTest {
 
     @Test (expectedExceptions = IllegalArgumentException.class)
     public void shouldThrowIllegalArgumentExceptionIfSetEmptyCommand() {
-        createExecParams = CreateExecParams.from(CONTAINER, CMD);
+        createExecParams = CreateExecParams.create(CONTAINER, CMD);
 
         String[] cmd = {"", "arg"};
         createExecParams.withCmd(cmd);
@@ -75,7 +75,7 @@ public class CreateExecParamsTest {
 
     @Test
     public void detachParameterShouldEqualsNullIfItNotSet() {
-        createExecParams = CreateExecParams.from(CONTAINER, CMD);
+        createExecParams = CreateExecParams.create(CONTAINER, CMD);
 
         assertNull(createExecParams.isDetach());
     }

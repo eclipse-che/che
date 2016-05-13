@@ -30,7 +30,7 @@ public class CreateContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        createContainerParams = CreateContainerParams.from(CONTAINER_CONFIG);
+        createContainerParams = CreateContainerParams.create(CONTAINER_CONFIG);
 
         assertEquals(createContainerParams.getContainerConfig(), CONTAINER_CONFIG);
 
@@ -39,7 +39,7 @@ public class CreateContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        createContainerParams = CreateContainerParams.from(CONTAINER_CONFIG)
+        createContainerParams = CreateContainerParams.create(CONTAINER_CONFIG)
                                                      .withContainerName(CONTAINER_NAME);
 
         assertEquals(createContainerParams.getContainerConfig(), CONTAINER_CONFIG);
@@ -48,18 +48,18 @@ public class CreateContainerParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerConfigRequiredParameterIsNull() {
-        createContainerParams = CreateContainerParams.from(null);
+        createContainerParams = CreateContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
-        createContainerParams = CreateContainerParams.from(CONTAINER_CONFIG)
+        createContainerParams = CreateContainerParams.create(CONTAINER_CONFIG)
                                                      .withContainerConfig(null);
     }
 
     @Test
     public void containerNameParameterShouldEqualsNullIfItNotSet() {
-        createContainerParams = CreateContainerParams.from(CONTAINER_CONFIG);
+        createContainerParams = CreateContainerParams.create(CONTAINER_CONFIG);
 
         assertNull(createContainerParams.getContainerName());
     }

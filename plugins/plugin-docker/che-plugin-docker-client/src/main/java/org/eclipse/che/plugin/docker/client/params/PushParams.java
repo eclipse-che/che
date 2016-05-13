@@ -38,7 +38,7 @@ public class PushParams {
      * @throws NullPointerException
      *         if {@code registry} is null
      */
-    public static PushParams from(@NotNull String repository) {
+    public static PushParams create(@NotNull String repository) {
         return new PushParams().withRepository(repository);
     }
 

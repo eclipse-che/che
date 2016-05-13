@@ -37,7 +37,7 @@ public class GetResourceParams {
      * @throws NullPointerException
      *         if {@code container} or {@code sourcePath} is null
      */
-    public static GetResourceParams from(@NotNull String container, @NotNull String sourcePath) {
+    public static GetResourceParams create(@NotNull String container, @NotNull String sourcePath) {
         return new GetResourceParams().withContainer(container)
                                       .withSourcePath(sourcePath);
     }

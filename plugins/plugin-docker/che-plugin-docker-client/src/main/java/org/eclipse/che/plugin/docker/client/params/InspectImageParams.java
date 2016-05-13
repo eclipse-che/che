@@ -34,7 +34,7 @@ public class InspectImageParams {
      * @throws NullPointerException
      *         if {@code image} is null
      */
-    public static InspectImageParams from(@NotNull String image) {
+    public static InspectImageParams create(@NotNull String image) {
         return new InspectImageParams().withImage(image);
     }
 

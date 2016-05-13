@@ -34,7 +34,7 @@ public class WaitContainerParams {
      * @throws NullPointerException
      *         if {@code container} is null
      */
-    public static WaitContainerParams from(@NotNull String container) {
+    public static WaitContainerParams create(@NotNull String container) {
         return new WaitContainerParams().withContainer(container);
     }
 

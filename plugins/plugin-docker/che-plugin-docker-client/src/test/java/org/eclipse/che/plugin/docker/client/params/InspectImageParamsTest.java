@@ -25,19 +25,19 @@ public class InspectImageParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        inspectImageParams = InspectImageParams.from(IMAGE);
+        inspectImageParams = InspectImageParams.create(IMAGE);
 
         assertEquals(inspectImageParams.getImage(), IMAGE);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
-        inspectImageParams = InspectImageParams.from(null);
+        inspectImageParams = InspectImageParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
-        inspectImageParams = InspectImageParams.from(IMAGE)
+        inspectImageParams = InspectImageParams.create(IMAGE)
                                                .withImage(null);
     }
 

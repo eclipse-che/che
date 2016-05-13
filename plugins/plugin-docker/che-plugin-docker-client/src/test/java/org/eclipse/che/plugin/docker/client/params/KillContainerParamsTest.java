@@ -28,7 +28,7 @@ public class KillContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        killContainerParams = KillContainerParams.from(CONTAINER);
+        killContainerParams = KillContainerParams.create(CONTAINER);
 
         assertEquals(killContainerParams.getContainer(), CONTAINER);
 
@@ -37,7 +37,7 @@ public class KillContainerParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        killContainerParams = KillContainerParams.from(CONTAINER)
+        killContainerParams = KillContainerParams.create(CONTAINER)
                                                  .withSignal(SIGNAL);
 
         assertEquals(killContainerParams.getContainer(), CONTAINER);
@@ -46,7 +46,7 @@ public class KillContainerParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        killContainerParams = KillContainerParams.from(null);
+        killContainerParams = KillContainerParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

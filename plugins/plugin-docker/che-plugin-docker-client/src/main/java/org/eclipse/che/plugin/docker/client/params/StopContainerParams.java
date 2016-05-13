@@ -36,7 +36,7 @@ public class StopContainerParams {
      * @throws NullPointerException
      *         if {@code container} is null
      */
-    public static StopContainerParams from(@NotNull String container) {
+    public static StopContainerParams create(@NotNull String container) {
         return new StopContainerParams().withContainer(container);
     }
 

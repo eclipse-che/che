@@ -35,7 +35,7 @@ public class AttachContainerParams {
      *         id or name of container
      * @return arguments holder with required parameters
      */
-    public static AttachContainerParams from(@NotNull String container) {
+    public static AttachContainerParams create(@NotNull String container) {
         return new AttachContainerParams().withContainer(container);
     }
 

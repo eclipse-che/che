@@ -35,7 +35,7 @@ public class RemoveImageParams {
      * @throws NullPointerException
      *         if {@code image} is null
      */
-    public static RemoveImageParams from(@NotNull String image) {
+    public static RemoveImageParams create(@NotNull String image) {
         return new RemoveImageParams().withImage(image);
     }
 

@@ -38,7 +38,7 @@ public class StartExecParams {
      * @throws NullPointerException
      *         if {@code execId} is null
      */
-    public static StartExecParams from(@NotNull String execId) {
+    public static StartExecParams create(@NotNull String execId) {
         return new StartExecParams().withExecId(execId);
     }
 

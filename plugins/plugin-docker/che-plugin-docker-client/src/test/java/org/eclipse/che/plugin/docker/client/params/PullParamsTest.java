@@ -28,7 +28,7 @@ public class PullParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        pullParams = PullParams.from(IMAGE);
+        pullParams = PullParams.create(IMAGE);
 
         assertEquals(pullParams.getImage(), IMAGE);
 
@@ -38,7 +38,7 @@ public class PullParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        pullParams = PullParams.from(IMAGE)
+        pullParams = PullParams.create(IMAGE)
                                .withTag(TAG)
                                .withRegistry(REGISTRY);
 
@@ -49,18 +49,18 @@ public class PullParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterIsNull() {
-        pullParams = PullParams.from(null);
+        pullParams = PullParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfImageRequiredParameterResetWithNull() {
-        pullParams = PullParams.from(IMAGE)
+        pullParams = PullParams.create(IMAGE)
                                .withImage(null);
     }
 
     @Test
     public void tagParameterShouldEqualsNullIfItNotSet() {
-        pullParams = PullParams.from(IMAGE)
+        pullParams = PullParams.create(IMAGE)
                                .withRegistry(REGISTRY);
 
         assertNull(pullParams.getTag());
@@ -68,7 +68,7 @@ public class PullParamsTest {
 
     @Test
     public void registryParameterShouldEqualsNullIfItNotSet() {
-        pullParams = PullParams.from(IMAGE)
+        pullParams = PullParams.create(IMAGE)
                                .withTag(TAG);
 
         assertNull(pullParams.getRegistry());
