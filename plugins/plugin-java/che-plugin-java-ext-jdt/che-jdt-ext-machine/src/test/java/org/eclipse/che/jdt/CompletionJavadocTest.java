@@ -12,10 +12,9 @@
 package org.eclipse.che.jdt;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.jdt.javaeditor.TextViewer;
 import org.eclipse.che.jdt.quickfix.QuickFixTest;
-import org.eclipse.che.jdt.rest.UrlContextProvider;
 import org.eclipse.che.jdt.testplugin.Java18ProjectTestSetup;
 import org.eclipse.che.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.che.jdt.testplugin.ProjectTestSetup;
@@ -33,7 +32,6 @@ import org.eclipse.jdt.internal.ui.text.java.RelevanceSorter;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Point;
-import org.everrest.guice.GuiceUriBuilderImpl;
 import org.fest.assertions.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -89,7 +87,7 @@ public class CompletionJavadocTest extends QuickFixTest {
         super.setUp();
         EnvironmentContext customEnvironment = mock(EnvironmentContext.class);
         doReturn("1q2w3e").when(customEnvironment).getWorkspaceId();
-        doReturn(new UserImpl(vfsUser, "", "", vfsUserGroups, false)).when(customEnvironment).getUser();
+        doReturn(new SubjectImpl(vfsUser, "", "", vfsUserGroups, false)).when(customEnvironment).getSubject();
         EnvironmentContext.setCurrent(customEnvironment);
         fJProject1 = Java18ProjectTestSetup.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(fJProject1, "src");

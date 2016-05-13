@@ -24,7 +24,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
@@ -127,7 +127,7 @@ public class DockerInstanceProviderTest {
                                                                 Collections.emptySet()));
 
         EnvironmentContext envCont = new EnvironmentContext();
-        envCont.setUser(new UserImpl(USER_NAME, "userId", USER_TOKEN, null, false));
+        envCont.setSubject(new SubjectImpl(USER_NAME, "userId", USER_TOKEN, null, false));
         envCont.setWorkspaceId(WORKSPACE_ID);
         EnvironmentContext.setCurrent(envCont);
 

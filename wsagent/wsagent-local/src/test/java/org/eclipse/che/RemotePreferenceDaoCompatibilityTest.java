@@ -16,8 +16,8 @@ import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
@@ -49,8 +49,8 @@ import static org.mockito.Mockito.when;
 public class RemotePreferenceDaoCompatibilityTest {
 
     @SuppressWarnings("unused") // used by EverrestJetty
-    private static final EnvironmentFilter  ENVIRONMENT_FILTER = new EnvironmentFilter();
-    private static final User               TEST_USER          = new UserImpl("name", "id", "token", null, false);
+    private static final EnvironmentFilter ENVIRONMENT_FILTER = new EnvironmentFilter();
+    private static final Subject           TEST_SUBJECT       = new SubjectImpl("name", "id", "token", null, false);
 
     @Mock
     private PreferenceDao preferenceDaoMock;
@@ -67,7 +67,7 @@ public class RemotePreferenceDaoCompatibilityTest {
     @BeforeMethod
     private void setUp() {
         final EnvironmentContext context = new EnvironmentContext();
-        context.setUser(TEST_USER);
+        context.setSubject(TEST_SUBJECT);
         EnvironmentContext.setCurrent(context);
     }
 
@@ -75,18 +75,18 @@ public class RemotePreferenceDaoCompatibilityTest {
     public void testGetPreferences(ITestContext ctx) throws Exception {
         final RemotePreferenceDao remoteDao = new RemotePreferenceDao(getUrl(ctx), new DefaultHttpJsonRequestFactory());
 
-        remoteDao.getPreferences(TEST_USER.getId());
+        remoteDao.getPreferences(TEST_SUBJECT.getUserId());
 
-        verify(preferenceDaoMock).getPreferences(TEST_USER.getId());
+        verify(preferenceDaoMock).getPreferences(TEST_SUBJECT.getUserId());
     }
 
     @Test
     public void testGetPreferencesWithFilter(ITestContext ctx) throws Exception {
         final RemotePreferenceDao remoteDao = new RemotePreferenceDao(getUrl(ctx), new DefaultHttpJsonRequestFactory());
 
-        remoteDao.getPreferences(TEST_USER.getId(), "filter");
+        remoteDao.getPreferences(TEST_SUBJECT.getUserId(), "filter");
 
-        verify(preferenceDaoMock).getPreferences(TEST_USER.getId(), "filter");
+        verify(preferenceDaoMock).getPreferences(TEST_SUBJECT.getUserId(), "filter");
     }
 
     @Test
@@ -94,25 +94,25 @@ public class RemotePreferenceDaoCompatibilityTest {
         final RemotePreferenceDao remoteDao = new RemotePreferenceDao(getUrl(ctx), new DefaultHttpJsonRequestFactory());
         final Map<String, String> prefs = Collections.singletonMap("pref1", "value1");
 
-        remoteDao.setPreferences(TEST_USER.getId(), prefs);
+        remoteDao.setPreferences(TEST_SUBJECT.getUserId(), prefs);
 
-        verify(preferenceDaoMock).setPreferences(TEST_USER.getId(), prefs);
+        verify(preferenceDaoMock).setPreferences(TEST_SUBJECT.getUserId(), prefs);
     }
 
     @Test
     public void testRemovePreferences(ITestContext ctx) throws Exception {
         final RemotePreferenceDao remoteDao = new RemotePreferenceDao(getUrl(ctx), new DefaultHttpJsonRequestFactory());
 
-        remoteDao.remove(TEST_USER.getId());
+        remoteDao.remove(TEST_SUBJECT.getUserId());
 
-        verify(preferenceDaoMock).remove(TEST_USER.getId());
+        verify(preferenceDaoMock).remove(TEST_SUBJECT.getUserId());
     }
 
     @Filter
     public static class EnvironmentFilter implements RequestFilter {
 
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setUser(TEST_USER);
+            EnvironmentContext.getCurrent().setSubject(TEST_SUBJECT);
             // hacking security context
             try {
                 final SecurityContext securityContext = mock(SecurityContext.class, RETURNS_MOCKS);

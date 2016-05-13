@@ -47,7 +47,7 @@ public class GitHubOAuthCredentialProvider implements CredentialsProvider {
     @Override
     public UserCredential getUserCredential() throws GitException {
         try {
-            OAuthToken token = oAuthTokenProvider.getToken(OAUTH_PROVIDER_NAME, EnvironmentContext.getCurrent().getUser().getId());
+            OAuthToken token = oAuthTokenProvider.getToken(OAUTH_PROVIDER_NAME, EnvironmentContext.getCurrent().getSubject().getUserId());
             if (token != null) {
                 return new UserCredential(token.getToken(), token.getToken(), OAUTH_PROVIDER_NAME);
             }
@@ -71,7 +71,7 @@ public class GitHubOAuthCredentialProvider implements CredentialsProvider {
     public ProviderInfo getProviderInfo() {
         return new ProviderInfo(OAUTH_PROVIDER_NAME, UriBuilder.fromPath(authorizationServicePath)
                                                                .queryParam("oauth_provider", OAUTH_PROVIDER_NAME)
-                                                               .queryParam("userId", EnvironmentContext.getCurrent().getUser().getId())
+                                                               .queryParam("userId", EnvironmentContext.getCurrent().getSubject().getUserId())
                                                                .queryParam("scope", "repo")
                                                                .build()
                                                                .toString());

@@ -20,8 +20,8 @@ import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
@@ -50,8 +50,8 @@ import static org.testng.Assert.assertEquals;
 @Listeners(MockitoTestNGListener.class)
 public class RemotePreferenceDaoTest {
 
-    private static final String API_ENDPOINT = "http://localhost:8000/api";
-    private static final User   TEST_USER    = new UserImpl("name", "user123", "token", null, false);
+    private static final String  API_ENDPOINT = "http://localhost:8000/api";
+    private static final Subject TEST_SUBJECT = new SubjectImpl("name", "user123", "token", null, false);
 
     @Mock
     private HttpJsonRequestFactory requestFactory;
@@ -63,7 +63,7 @@ public class RemotePreferenceDaoTest {
     @BeforeMethod
     private void setUp() throws Exception {
         preferenceDao = new RemotePreferenceDao(API_ENDPOINT, requestFactory);
-        request = mock(HttpJsonRequest.class, (Answer) invocation -> {
+        request = mock(HttpJsonRequest.class, (Answer)invocation -> {
             if (invocation.getMethod().getReturnType().isInstance(invocation.getMock())) {
                 return invocation.getMock();
             }
@@ -72,7 +72,7 @@ public class RemotePreferenceDaoTest {
         when(request.request()).thenReturn(response);
         when(requestFactory.fromUrl(anyString())).thenReturn(request);
         final EnvironmentContext context = new EnvironmentContext();
-        context.setUser(TEST_USER);
+        context.setSubject(TEST_SUBJECT);
         EnvironmentContext.setCurrent(context);
     }
 
@@ -81,7 +81,7 @@ public class RemotePreferenceDaoTest {
         final Map<String, String> prefs = singletonMap("name", "value");
         when(response.asProperties()).thenReturn(prefs);
 
-        final Map<String, String> result = preferenceDao.getPreferences(TEST_USER.getId());
+        final Map<String, String> result = preferenceDao.getPreferences(TEST_SUBJECT.getUserId());
 
         assertEquals(result, prefs);
     }
@@ -91,14 +91,14 @@ public class RemotePreferenceDaoTest {
         final Map<String, String> prefs = singletonMap("name", "value");
         when(response.asProperties()).thenReturn(prefs);
 
-        final Map<String, String> result = preferenceDao.getPreferences(TEST_USER.getId(), "filter");
+        final Map<String, String> result = preferenceDao.getPreferences(TEST_SUBJECT.getUserId(), "filter");
 
         assertEquals(result, prefs);
     }
 
     @Test
     public void shouldRemovePreferences() throws Exception {
-        preferenceDao.remove(TEST_USER.getId());
+        preferenceDao.remove(TEST_SUBJECT.getUserId());
 
         verify(request).request();
     }
@@ -107,7 +107,7 @@ public class RemotePreferenceDaoTest {
     public void shouldSetPreferences() throws Exception {
         final Map<String, String> prefs = singletonMap("name", "value");
 
-        preferenceDao.setPreferences(TEST_USER.getId(), prefs);
+        preferenceDao.setPreferences(TEST_SUBJECT.getUserId(), prefs);
 
         verify(request).setBody(prefs);
         verify(request).request();
@@ -162,28 +162,28 @@ public class RemotePreferenceDaoTest {
     public void shouldRethrowExceptionAsServerExceptionWhenGettingPreferences(Exception ex) throws Exception {
         when(request.request()).thenThrow(ex);
 
-        preferenceDao.getPreferences(TEST_USER.getId());
+        preferenceDao.getPreferences(TEST_SUBJECT.getUserId());
     }
 
     @Test(expectedExceptions = ServerException.class, dataProvider = "exceptions")
     public void shouldRethrowExceptionAsServerExceptionWhenGettingPreferencesWithFilter(Exception ex) throws Exception {
         when(request.request()).thenThrow(ex);
 
-        preferenceDao.getPreferences(TEST_USER.getId(), "filter");
+        preferenceDao.getPreferences(TEST_SUBJECT.getUserId(), "filter");
     }
 
     @Test(expectedExceptions = ServerException.class, dataProvider = "exceptions")
     public void shouldRethrowExceptionAsServerExceptionWhenSettingPreferences(Exception ex) throws Exception {
         when(request.request()).thenThrow(ex);
 
-        preferenceDao.setPreferences(TEST_USER.getId(), emptyMap());
+        preferenceDao.setPreferences(TEST_SUBJECT.getUserId(), emptyMap());
     }
 
     @Test(expectedExceptions = ServerException.class, dataProvider = "exceptions")
     public void shouldRethrowExceptionAsServerExceptionWhenRemovingPreferences(Exception ex) throws Exception {
         when(request.request()).thenThrow(ex);
 
-        preferenceDao.remove(TEST_USER.getId());
+        preferenceDao.remove(TEST_SUBJECT.getUserId());
     }
 
     @DataProvider(name = "exceptions")

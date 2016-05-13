@@ -48,7 +48,7 @@ public class GitAskPassScript {
      */
     public File build(UserCredential credentials) throws GitException {
         File askScriptDirectory = new File(System.getProperty("java.io.tmpdir")
-                                           + "/" + EnvironmentContext.getCurrent().getUser().getName());
+                                           + "/" + EnvironmentContext.getCurrent().getSubject().getUserName());
         if (!askScriptDirectory.exists()) {
             askScriptDirectory.mkdirs();
         }
@@ -72,7 +72,7 @@ public class GitAskPassScript {
     public void remove() {
 
         File askScriptDirectory = new File(System.getProperty("java.io.tmpdir")
-                                           + "/" + EnvironmentContext.getCurrent().getUser().getName());
+                                           + "/" + EnvironmentContext.getCurrent().getSubject().getUserName());
         if (askScriptDirectory.exists()) {
             if (!IoUtil.deleteRecursive(askScriptDirectory))
                 LOG.warn("Ask-pass script deletion failed.");

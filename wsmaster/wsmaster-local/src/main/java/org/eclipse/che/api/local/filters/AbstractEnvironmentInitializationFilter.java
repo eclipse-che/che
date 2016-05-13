@@ -11,8 +11,8 @@
 package org.eclipse.che.api.local.filters;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -48,17 +48,17 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
 
         final List<String> roles = new LinkedList<>();
         Collections.addAll(roles, "workspace/admin", "workspace/developer", "system/admin", "system/manager", "user");
-        User user = new UserImpl("che", "che", "dummy_token", roles, false);
+        Subject subject = new SubjectImpl("che", "che", "dummy_token", roles, false);
         HttpSession session = httpRequest.getSession();
-        session.setAttribute("codenvy_user", user);
+        session.setAttribute("codenvy_user", subject);
 
         final EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
 
         try {
-            environmentContext.setUser(user);
+            environmentContext.setSubject(subject);
             environmentContext.setWorkspaceId(getWorkspaceId(request));
 
-            filterChain.doFilter(addUserInRequest(httpRequest, user), response);
+            filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
         } finally {
             EnvironmentContext.reset();
         }
@@ -73,16 +73,16 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
      */
     protected abstract String getWorkspaceId(ServletRequest request);
 
-    private HttpServletRequest addUserInRequest(final HttpServletRequest httpRequest, final User user) {
+    private HttpServletRequest addUserInRequest(final HttpServletRequest httpRequest, final Subject subject) {
         return new HttpServletRequestWrapper(httpRequest) {
             @Override
             public String getRemoteUser() {
-                return user.getName();
+                return subject.getUserName();
             }
 
             @Override
             public boolean isUserInRole(String role) {
-                return user.isMemberOf(role);
+                return subject.isMemberOf(role);
             }
 
             @Override
@@ -90,7 +90,7 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
                 return new Principal() {
                     @Override
                     public String getName() {
-                        return user.getName();
+                        return subject.getUserName();
                     }
                 };
             }

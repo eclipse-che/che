@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.java;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -35,7 +35,7 @@ public class DummyProjectManager /*implements ProjectManager*/ {
     public DummyProjectManager(String workspacePath, EventService eventService) {
 
         EnvironmentContext context = new EnvironmentContext();
-        context.setUser(new UserImpl(vfsUser, "", "", vfsUserGroups, false));
+        context.setSubject(new SubjectImpl(vfsUser, "", "", vfsUserGroups, false));
         EnvironmentContext.setCurrent(context);
 //        localFileSystemProvider = new LocalFileSystemProvider("", new LocalFSMountStrategy() {
 //            @Override

@@ -42,7 +42,7 @@ public class FactoryEditValidatorImpl implements FactoryEditValidator {
     @Override
     public void validate(Factory factory) throws ForbiddenException, ServerException {
         // ensure user has the correct permissions
-        final String userId = EnvironmentContext.getCurrent().getUser().getId();
+        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
         // Checks if there is an author from the factory (It may be missing for some old factories)
         Author author = factory.getCreator();
         if (author == null || author.getUserId() == null) {

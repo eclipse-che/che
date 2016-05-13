@@ -11,7 +11,7 @@
 package org.eclipse.che.commons.env;
 
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 /**
  * <p>Defines a component that holds variables of type {@link ThreadLocal}
@@ -19,7 +19,7 @@ import org.eclipse.che.commons.user.User;
  * This component is mainly used when we want to do a task asynchronously, in that case
  * to ensure that the task will be executed in the same conditions as if it would be
  * executed synchronously we need to transfer the thread context from the original
- * thread to the executor thread.</p>
+ * thread to the executor thread.
  */
 public class EnvironmentContext {
 
@@ -48,7 +48,7 @@ public class EnvironmentContext {
     }
 
 
-    private User user;
+    private Subject subject;
 
     private String workspaceName;
 
@@ -61,19 +61,18 @@ public class EnvironmentContext {
     }
 
     public EnvironmentContext(EnvironmentContext other) {
-        setUser(other.getUser());
+        setSubject(other.getSubject());
         setWorkspaceName(other.getWorkspaceName());
         setWorkspaceId(other.getWorkspaceId());
         setWorkspaceTemporary(other.isWorkspaceTemporary());
     }
 
-
-    public User getUser() {
-        return user;
+    public Subject getSubject() {
+        return subject;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setSubject(Subject subject) {
+        this.subject = subject;
     }
 
     public String getWorkspaceName() {

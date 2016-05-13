@@ -8,26 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.commons.user;
+package org.eclipse.che.commons.subject;
 
+import javax.ws.rs.ForbiddenException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Base implementation of User interface.
+ * Base implementation of {@link Subject}.
  *
  * @author andrew00x
  */
-public class UserImpl implements User {
+public class SubjectImpl implements Subject {
     private final String      name;
     private final Set<String> roles;
     private final String      token;
     private final String      id;
     private final boolean     isTemporary;
 
-    public UserImpl(String name, String id, String token, Collection<String> roles, boolean isTemporary) {
+    public SubjectImpl(String name, String id, String token, Collection<String> roles, boolean isTemporary) {
         this.name = name;
         this.id = id;
         this.token = token;
@@ -36,22 +37,22 @@ public class UserImpl implements User {
     }
 
     @Deprecated
-    public UserImpl(String name, String id, String token, Collection<String> roles) {
+    public SubjectImpl(String name, String id, String token, Collection<String> roles) {
         this(name, id, token, roles, false);
     }
 
     @Deprecated
-    public UserImpl(String name, String token, Collection<String> roles) {
+    public SubjectImpl(String name, String token, Collection<String> roles) {
         this(name, null, token, roles);
     }
 
     @Deprecated
-    public UserImpl(String name) {
+    public SubjectImpl(String name) {
         this(name, null, null);
     }
 
     @Override
-    public String getName() {
+    public String getUserName() {
         return name;
     }
 
@@ -66,12 +67,17 @@ public class UserImpl implements User {
     }
 
     @Override
+    public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
+        throw new ForbiddenException("User is not authorized to perform operation");
+    }
+
+    @Override
     public String getToken() {
         return token;
     }
 
     @Override
-    public String getId() {
+    public String getUserId() {
         return id;
     }
 
@@ -85,7 +91,7 @@ public class UserImpl implements User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UserImpl user = (UserImpl)o;
+        SubjectImpl user = (SubjectImpl)o;
 
         if (isTemporary != user.isTemporary) return false;
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
