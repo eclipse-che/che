@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 
@@ -34,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.function.Function.identity;
@@ -143,17 +142,15 @@ public class LocalRecipeDaoImpl implements RecipeDao {
     public List<RecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException {
         lock.readLock().lock();
         try {
-            return FluentIterable.from(recipes.values())
-                                 .skip(skipCount)
-                                 .filter(new Predicate<ManagedRecipe>() {
-                                     @Override
-                                     public boolean apply(ManagedRecipe recipe) {
-                                         return (tags == null || recipe.getTags().containsAll(tags))
-                                                && (type == null || type.equals(recipe.getType()));
-                                     }
-                                 })
-                                 .limit(maxItems)
-                                 .toList();
+            final Stream<RecipeImpl> recipesStream = recipes.values()
+                                                            .stream()
+                                                            .filter(recipe -> (tags == null || recipe.getTags().containsAll(tags))
+                                                                              && (type == null || type.equals(recipe.getType())))
+                                                            .skip(skipCount);
+            if (maxItems != 0) {
+                recipesStream.limit(maxItems);
+            }
+            return recipesStream.collect(Collectors.toList());
         } finally {
             lock.readLock().unlock();
         }
