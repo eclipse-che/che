@@ -57,12 +57,6 @@ public class SourceProjectParametersValidatorTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "The parameter .* has a value submitted .* with a value.*")
-    public void shouldThrowExceptionIfTypeIsNotGit() throws Exception {
-        validator.validate(sourceStorage.withType("zip"), FactoryParameter.Version.V4_0);
-    }
-
-    @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "You have provided an invalid parameter .* for this version of Factory parameters.*")
     public void shouldThrowExceptionIfUnknownParameterIsUsed() throws Exception {
         sourceStorage.getParameters().put("other", "value");
