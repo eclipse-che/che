@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -129,12 +130,17 @@ public class LocalStackDaoImpl implements StackDao {
     public List<StackImpl> searchStacks(String user, @Nullable List<String> tags, int skipCount, int maxItems) {
         lock.readLock().lock();
         try {
-            return stacks.values().stream()
-                         .skip(skipCount)
-                         .filter(decoratedStack -> tags == null || decoratedStack.getTags().containsAll(tags))
-                         .limit(maxItems)
-                         .map(StackImpl::new)
-                         .collect(toList());
+            final Stream<StackImpl> stacksStream = stacks.values()
+                                                         .stream()
+                                                         .skip(skipCount)
+                                                         .filter(decoratedStack -> tags == null ||
+                                                                                   decoratedStack.getTags().containsAll(tags));
+            if (maxItems != 0) {
+                stacksStream.limit(maxItems);
+            }
+
+            return stacksStream.map(StackImpl::new)
+                               .collect(toList());
         } finally {
             lock.readLock().unlock();
         }
