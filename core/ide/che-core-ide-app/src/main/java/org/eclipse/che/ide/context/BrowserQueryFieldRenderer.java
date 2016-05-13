@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.collections.Jso;
 
 /**
  * The class contains business logic which allows get or set workspace name to query field in browser.
@@ -73,6 +74,40 @@ public class BrowserQueryFieldRenderer {
         }
 
         return "";
+    }-*/;
+
+
+    /**
+     * Returns map containing key and value of parameters. If there are no parameters, empty map will be returned.
+     *
+     * @return string/string map of parameters
+     */
+    public native Jso getParameters() /*-{
+        var urlParameterString = window.location.search;
+
+        if (!urlParameterString) {
+            return {};
+        }
+
+        // remove leading question marks
+        while (urlParameterString.indexOf("?") == 0) {
+            urlParameterString = urlParameterString.substring(1);
+        }
+
+        var map = {};
+        var pairs = urlParameterString.split("&");
+
+        for (var i = 0; i < pairs.length; i++) {
+            var pair = pairs[i].split('=');
+
+            if (pair.length == 2) {
+                var key = decodeURIComponent(pair[0]);
+                var value = decodeURIComponent(pair[1]);
+                map[key] = value;
+            }
+        }
+
+        return map;
     }-*/;
 
     /**
