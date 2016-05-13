@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 
 /**
@@ -37,6 +38,10 @@ public class MarkDirectoryAsGroup extends DefaultActionGroup {
 
     @Override
     public void update(ActionEvent e) {
-        e.getPresentation().setVisible("plainJava".equals(appContext.getCurrentProject().getProjectConfig().getType()));
+        CurrentProject currentProject = appContext.getCurrentProject();
+        if (currentProject == null) {
+            e.getPresentation().setVisible(false);
+        }
+        e.getPresentation().setVisible("plainJava".equals(currentProject.getProjectConfig().getType()));
     }
 }

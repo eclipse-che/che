@@ -16,14 +16,12 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
-import org.eclipse.che.plugin.maven.client.actions.CreateMavenModuleAction;
 import org.eclipse.che.plugin.maven.client.actions.GetEffectivePomAction;
 import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
@@ -35,7 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_BUILD_CONTEXT_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL;
 
 /**
@@ -67,19 +64,14 @@ public class MavenExtension {
 
     @Inject
     private void prepareActions(ActionManager actionManager,
-                                CreateMavenModuleAction createMavenModuleAction,
                                 DependencyResolverAction dependencyResolverAction,
                                 GetEffectivePomAction getEffectivePomAction) {
         // register actions
-        actionManager.registerAction("createMavenModule", createMavenModuleAction);
         actionManager.registerAction("getEffectivePom", getEffectivePomAction);
 
         // add actions in main menu
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_ASSISTANT);
         assistantGroup.add(getEffectivePomAction, Constraints.LAST);
-
-        DefaultActionGroup newGroup = (DefaultActionGroup)actionManager.getAction(GROUP_FILE_NEW);
-        newGroup.add(createMavenModuleAction, new Constraints(Anchor.AFTER, "newJavaPackage"));
 
         // add actions in context menu
         DefaultActionGroup buildContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_BUILD_CONTEXT_MENU);

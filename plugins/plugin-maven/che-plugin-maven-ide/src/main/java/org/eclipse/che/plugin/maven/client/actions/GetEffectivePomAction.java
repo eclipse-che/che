@@ -19,6 +19,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
@@ -72,7 +73,12 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabledAndVisible(MAVEN_ID.equals(appContext.getCurrentProject().getProjectConfig().getType()));
+        CurrentProject currentProject = appContext.getCurrentProject();
+        if (currentProject == null) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+        event.getPresentation().setEnabledAndVisible(MAVEN_ID.equals(currentProject.getProjectConfig().getType()));
     }
 
     @Override
