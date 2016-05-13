@@ -28,28 +28,26 @@ import static java.lang.String.format;
 public class SourceStorageParametersValidator implements FactoryParameterValidator<SourceStorage> {
     @Override
     public void validate(SourceStorage source, FactoryParameter.Version version) throws ConflictException {
-        if ("git".equals(source.getType()) || "esbwso2".equals(source.getType())) {
-            for (Map.Entry<String, String> entry : source.getParameters().entrySet()) {
-                switch (entry.getKey()) {
-                    case "keepVcs":
-                        final String keepVcs = entry.getValue();
-                        if (!"true".equals(keepVcs) && !"false".equals(keepVcs)) {
-                            throw new ConflictException(
-                                    format(PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE, "source.project.parameters.keepVcs", entry.getValue()));
-                        }
-                        break;
-                    case "branch":
-                    case "commitId":
-                    case "keepDir":
-                    case "fetch":
-                    case "branchMerge":
-                        break;
-                    default:
-                        throw new ConflictException(format(PARAMETRIZED_INVALID_PARAMETER_MESSAGE, "source.project.parameters." + entry.getKey(), version));
-                }
+        for (Map.Entry<String, String> entry : source.getParameters().entrySet()) {
+            switch (entry.getKey()) {
+                case "keepVcs":
+                    final String keepVcs = entry.getValue();
+                    if (!"true".equals(keepVcs) && !"false".equals(keepVcs)) {
+                        throw new ConflictException(
+                                format(PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE, "source.project.parameters.keepVcs",
+                                       entry.getValue()));
+                    }
+                    break;
+                case "branch":
+                case "commitId":
+                case "keepDir":
+                case "fetch":
+                case "branchMerge":
+                    break;
+                default:
+                    throw new ConflictException(
+                            format(PARAMETRIZED_INVALID_PARAMETER_MESSAGE, "source.project.parameters." + entry.getKey(), version));
             }
-        } else {
-            throw new ConflictException(format(PARAMETRIZED_ILLEGAL_PARAMETER_VALUE_MESSAGE, "source.project.type", source.getType()));
         }
     }
 }
