@@ -390,9 +390,9 @@ get_docker_ready () {
   # Files must be copied otherwise host will overwrite them to blank.
   if [ "${COPY_LIB}" == "true" ]; then
     sudo chown -R user:user ${CHE_HOME}
-    rm -rf ${CHE_HOME}/lib-copy/*
-    mkdir -p ${CHE_HOME}/lib-copy
-    cp -rf ${CHE_HOME}/lib/* ${CHE_HOME}/lib-copy
+    sudo rm -rf ${CHE_HOME}/lib-copy/*
+    sudo mkdir -p ${CHE_HOME}/lib-copy
+    sudo cp -rf ${CHE_HOME}/lib/* ${CHE_HOME}/lib-copy
   fi 
 }
 
