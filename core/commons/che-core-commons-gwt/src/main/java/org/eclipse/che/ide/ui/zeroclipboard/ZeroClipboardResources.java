@@ -19,7 +19,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  * @author Oleksii Orel
  */
 public interface ZeroClipboardResources extends ClientBundle {
-    public interface Css extends CssResource {
+    interface Css extends CssResource {
         String clipboardButton();
     }
 

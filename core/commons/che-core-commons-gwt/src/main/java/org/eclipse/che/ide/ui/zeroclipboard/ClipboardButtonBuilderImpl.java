@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.zeroclipboard;
 
-import org.eclipse.che.ide.MimeType;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.MimeType;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;

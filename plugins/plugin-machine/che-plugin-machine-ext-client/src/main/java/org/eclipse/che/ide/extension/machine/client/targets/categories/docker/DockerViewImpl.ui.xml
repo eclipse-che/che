@@ -1,0 +1,68 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+        .label {
+            margin-top: 0;
+            margin-left: 0;
+        }
+
+        .delimiter {
+            margin-top: 10px;
+        }
+
+        input.withCopyButton {
+            width: literal("calc(100% - 28px)");
+            float: left;
+        }
+
+        input.withCopyButton + div {
+            margin-top: 0;
+        }
+
+        input.withCopyButton + div > span {
+            margin-top: 1px;
+            left: inherit;
+            top: 28px;
+            right: -15px;
+        }
+
+        input.withCopyButton + div > span:after {
+            top: -15px;
+            right: 14px;
+            left: inherit;
+        }
+
+    </ui:style>
+    <g:FlowPanel width="100%">
+
+        <g:Label width="100%" text="Name" addStyleNames="{style.label} {style.delimiter}"/>
+        <g:TextBox readOnly="true" height="14px" ui:field="targetName" tabIndex="0"/>
+
+        <g:Label width="100%" text="Owner" addStyleNames="{style.label} {style.delimiter}"/>
+        <g:TextBox readOnly="true" height="14px" ui:field="owner" tabIndex="0"/>
+
+        <g:Label width="100%" text="Type" addStyleNames="{style.label} {style.delimiter}"/>
+        <g:TextBox readOnly="true" height="14px" ui:field="type" tabIndex="0"/>
+
+        <g:Label width="100%" text="Source type" addStyleNames="{style.label} {style.delimiter}"/>
+        <g:TextBox readOnly="true" height="14px" ui:field="sourceType" tabIndex="0"/>
+
+        <g:Label width="100%" text="Source URL" addStyleNames="{style.label} {style.delimiter}"/>
+        <g:TextBox addStyleNames=" {style.withCopyButton}" readOnly="true" height="14px" ui:field="sourceUrl" tabIndex="0"/>
+
+    </g:FlowPanel>
+</ui:UiBinder>

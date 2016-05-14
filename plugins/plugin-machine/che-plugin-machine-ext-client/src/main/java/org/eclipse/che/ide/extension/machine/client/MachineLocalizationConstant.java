@@ -197,6 +197,15 @@ public interface MachineLocalizationConstant extends Messages {
     String editCommandsSaveChangesDiscard();
 
     /* Targets view */
+    @Key("view.targets.category.ssh")
+    String targetsViewCategorySsh();
+
+    @Key("view.targets.category.docker")
+    String targetsViewCategoryDocker();
+
+    @Key("view.targets.category.development")
+    String targetsViewCategoryDevelopment();
+
     @Key("view.targets.title")
     String targetsViewTitle();
 
@@ -230,8 +239,11 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("view.targets.delete.confirm")
     String targetsViewDeleteConfirm(String target);
 
-    @Key("view.targets.delete.success")
-    String targetsViewDeleteSuccess(String target);
+    @Key("view.targets.delete.confirm.title")
+    String targetsViewDeleteConfirmTitle();
+
+    @Key("view.targets.recipe.delete.success")
+    String targetsRecipeDeleteSuccess(String target);
 
     @Key("view.targets.delete.error")
     String targetsViewDeleteError(String target);
