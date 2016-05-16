@@ -81,7 +81,8 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
 
-    private static final String USER_ID = "user123";
+    private static final String USER_ID    = "user123";
+    private static final String MACHINE_ID = "Machine123";
 
     @Mock
     private EventService                  eventService;
@@ -539,9 +540,11 @@ public class WorkspaceManagerTest {
     @Test
     public void shouldAddMachineToWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
         when(machine.getConfig()).thenReturn(machineConfig);
+        when(machine.getId()).thenReturn(MACHINE_ID);
+        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
         when(machineConfig.isDev()).thenReturn(false);
 
-        workspaceManager.addMachine(machine);
+        workspaceManager.addMachineIntoRuntime(machine.getId());
 
         verify(runtimes).addMachine(machine);
     }
@@ -549,14 +552,45 @@ public class WorkspaceManagerTest {
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionIfAddAnotherDevMachine() throws ConflictException, NotFoundException, ServerException {
         when(machine.getConfig()).thenReturn(machineConfig);
+        when(machine.getId()).thenReturn(MACHINE_ID);
+        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
         when(machineConfig.isDev()).thenReturn(true);
 
-        workspaceManager.addMachine(machine);
+        workspaceManager.addMachineIntoRuntime(machine.getId());
     }
 
-    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Require non-null machine")
-    public void shouldThrowNullPointerExceptionIfMachineIsNull() throws ConflictException, NotFoundException, ServerException {
-        workspaceManager.addMachine(null);
+    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Require non-null machine id")
+    public void shouldThrowNullPointerExceptionIfMachineIdIsNullWhenAddMachineIntoRuntime()
+            throws ConflictException, NotFoundException, ServerException {
+        workspaceManager.addMachineIntoRuntime(null);
+    }
+
+    @Test
+    public void shouldRemoveMachineFromWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
+        when(machine.getConfig()).thenReturn(machineConfig);
+        when(machine.getId()).thenReturn(MACHINE_ID);
+        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
+        when(machineConfig.isDev()).thenReturn(false);
+
+        workspaceManager.removeMachineFromRuntime(machine.getId());
+
+        verify(runtimes).removeMachine(machine);
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionIfRemoveDevMachine() throws ConflictException, NotFoundException, ServerException {
+        when(machine.getConfig()).thenReturn(machineConfig);
+        when(machine.getId()).thenReturn(MACHINE_ID);
+        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
+        when(machineConfig.isDev()).thenReturn(true);
+
+        workspaceManager.removeMachineFromRuntime(machine.getId());
+    }
+
+    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Require non-null machine id")
+    public void shouldThrowNullPointerExceptionIfMachineIdIsNullWhenRemoveMachineFromRuntime()
+            throws ConflictException, NotFoundException, ServerException {
+        workspaceManager.removeMachineFromRuntime(null);
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status) {

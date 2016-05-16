@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.user.server.UserManager;
@@ -71,6 +72,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author gazarenkov
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
+ * @author Mykola Morhun
  */
 @Singleton
 public class WorkspaceManager {
@@ -488,28 +490,57 @@ public class WorkspaceManager {
     }
 
     /**
-     * Adds machine into workspace runtime.
+     * Adds additional machine into workspace runtime.
      *
-     * @param machine
-     *         machine to add to specified runtime
+     * @param machineId
+     *         id of machine to add to specified runtime
      * @throws ConflictException
      *         when given machine already exists in specified runtime
      *         or when machine is dev-machine
      * @throws NotFoundException
+     *         when machine with given id doesn't exist or
      *         when workspace in which machine is adding doesn't have runtime
      * @throws ServerException
      *         when application server is stopping
      * @throws NullPointerException
-     *         when machine is null
+     *         when machine id is null
      */
-    public void addMachine(MachineImpl machine) throws ConflictException, NotFoundException, ServerException {
-        requireNonNull(machine, "Require non-null machine");
+    public void addMachineIntoRuntime(String machineId) throws ConflictException, NotFoundException, ServerException {
+        requireNonNull(machineId, "Require non-null machine id");
+        MachineImpl machine = machineManager.getMachine(machineId);
         if (machine.getConfig().isDev()) {
             throw new ConflictException("Cannot add another dev-machine " + machine.getId() +
                                         " to " + machine.getWorkspaceId() + " workspace");
         }
 
         runtimes.addMachine(machine);
+    }
+
+    /**
+     * Removes additional machine from workspace runtime.
+     * Is opposite to {@link #addMachineIntoRuntime(String)}
+     *
+     * @param machineId
+     *         id of machine to remove
+     * @throws NotFoundException
+     *         when workspace from which machine is removing doesn't have runtime or
+     *         when workspace doesn't exist
+     * @throws ConflictException
+     *         when machine is dev-machine
+     * @throws MachineException
+     *         when another error occurs
+     * @throws NullPointerException
+     *         when machine id is null
+     */
+    public void removeMachineFromRuntime(String machineId) throws NotFoundException, ConflictException, MachineException {
+        requireNonNull(machineId, "Require non-null machine id");
+        MachineImpl machine = machineManager.getMachine(machineId);
+        if (machine.getConfig().isDev()) {
+            throw new ConflictException("Cannot remove dev-machine " + machine.getId() +
+                                        " from " + machine.getWorkspaceId() + " workspace");
+        }
+
+        runtimes.removeMachine(machine);
     }
 
     /** Asynchronously starts given workspace. */

@@ -32,6 +32,7 @@ import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.Ev
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.ERROR;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -42,7 +43,7 @@ import static org.mockito.Mockito.when;
  * @author Mykola Morhun
  */
 @Listeners(MockitoTestNGListener.class)
-public class AddMachineIntoWorkspaceRuntimeTest {
+public class AddJustRunMachineIntoWorkspaceRuntimeTest {
 
     private static final String MACHINE_ID   = "machineId";
 
@@ -59,13 +60,14 @@ public class AddMachineIntoWorkspaceRuntimeTest {
     private WorkspaceManager   workspaceManager;
 
     @InjectMocks
-    private AddMachineIntoWorkspaceRuntime listener;
+    private AddJustRunMachineIntoWorkspaceRuntime listener;
 
     @BeforeMethod
     public void setup() throws NotFoundException, MachineException {
         when(event.getEventType()).thenReturn(RUNNING);
         when(event.getMachineId()).thenReturn(MACHINE_ID);
         when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
+        when(machine.getId()).thenReturn(MACHINE_ID);
         when(event.isDev()).thenReturn(false);
     }
 
@@ -73,14 +75,14 @@ public class AddMachineIntoWorkspaceRuntimeTest {
     public void shouldAddNewMachineIntoWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
         listener.onEvent(event);
 
-        verify(workspaceManager).addMachine(eq(machine));
+        verify(workspaceManager).addMachineIntoRuntime(eq(machine.getId()));
     }
 
     @Test
     public void shouldNotAddDevMachineIntoWorkspaceRuntimeList() throws ConflictException, NotFoundException, ServerException {
         when(event.isDev()).thenReturn(true);
 
-        verify(workspaceManager, never()).addMachine(anyObject());
+        verify(workspaceManager, never()).addMachineIntoRuntime(anyObject());
     }
 
     @Test
@@ -89,7 +91,7 @@ public class AddMachineIntoWorkspaceRuntimeTest {
 
         listener.onEvent(event);
 
-        verify(workspaceManager, never()).addMachine(anyObject());
+        verify(workspaceManager, never()).addMachineIntoRuntime(anyObject());
     }
 
     @Test
@@ -98,7 +100,7 @@ public class AddMachineIntoWorkspaceRuntimeTest {
 
         listener.onEvent(event);
 
-        verify(workspaceManager, never()).addMachine(anyObject());
+        verify(workspaceManager, never()).addMachineIntoRuntime(anyObject());
     }
 
     @Test
@@ -107,7 +109,7 @@ public class AddMachineIntoWorkspaceRuntimeTest {
 
         listener.onEvent(event);
 
-        verify(workspaceManager, never()).addMachine(anyObject());
+        verify(workspaceManager, never()).addMachineIntoRuntime(anyObject());
     }
 
     @Test
@@ -116,12 +118,12 @@ public class AddMachineIntoWorkspaceRuntimeTest {
 
         listener.onEvent(event);
 
-        verify(workspaceManager, never()).addMachine(anyObject());
+        verify(workspaceManager, never()).addMachineIntoRuntime(anyObject());
     }
 
     @Test
     public void shouldDestroyMachineIfErrorOccurred() throws ConflictException, NotFoundException, ServerException {
-        doThrow(ServerException.class).when(workspaceManager).addMachine(machine);
+        doThrow(ServerException.class).when(workspaceManager).addMachineIntoRuntime(anyString());
 
         listener.onEvent(event);
 

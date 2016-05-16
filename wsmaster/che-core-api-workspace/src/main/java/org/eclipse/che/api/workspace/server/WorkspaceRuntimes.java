@@ -65,6 +65,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Yevhenii Voevodin
  * @author Alexander Garagatyi
+ * @author Mykola Morhun
  */
 @Singleton
 public class WorkspaceRuntimes {
@@ -252,7 +253,7 @@ public class WorkspaceRuntimes {
      * @param machine
      *         machine to add to specified runtime
      * @throws NotFoundException
-     *         when workspace with specified id not exists
+     *         when workspace with specified id not running or not exists
      * @throws ServerException
      *         when application server is stopping
      * @throws ConflictException
@@ -271,10 +272,35 @@ public class WorkspaceRuntimes {
                 throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
             }
             if (descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
-                throw new ConflictException("Cannot add machine " + machine.getId() + " to not running workspace");
+                throw new ConflictException("Cannot add machine " + machine.getId() + " to not running workspace.");
             }
 
             descriptor.getRuntime().getMachines().add(machine);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Removes machine from running workspace.
+     * This method do not touch workspace configuration and is opposite to {@link #addMachine(MachineImpl)}
+     *
+     * @param machine
+     *         machine to remove from specified runtime
+     * @throws NotFoundException
+     *         when workspace with specified id not running or not exists
+     */
+    public void removeMachine(MachineImpl machine) throws NotFoundException {
+        String workspaceId = machine.getWorkspaceId();
+
+        rwLock.writeLock().lock();
+        try {
+            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
+            if (descriptor == null) {
+                throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
+            }
+
+            descriptor.getRuntime().getMachines().remove(machine);
         } finally {
             rwLock.writeLock().unlock();
         }
