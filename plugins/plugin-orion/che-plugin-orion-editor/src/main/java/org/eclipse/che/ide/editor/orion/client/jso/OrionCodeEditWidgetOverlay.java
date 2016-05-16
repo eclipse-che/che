@@ -25,6 +25,11 @@ public class OrionCodeEditWidgetOverlay extends JavaScriptObject {
     protected OrionCodeEditWidgetOverlay() {
     }
 
+    /** Creates an Orion CodeEdit widget instance. */
+    public final native OrionCodeEditWidgetOverlay create() /*-{
+        return new this();
+    }-*/;
+
     /**
      * Creates an Orion EditorView instance.
      *
@@ -36,6 +41,6 @@ public class OrionCodeEditWidgetOverlay extends JavaScriptObject {
      */
     public final native Promise<OrionEditorViewOverlay> createEditorView(final Element element, final JavaScriptObject options) /*-{
         options.parent = element;
-        return new this().create(options);
+        return this.create(options);
     }-*/;
 }

@@ -1,26 +1,9 @@
 This patch fixes bug with linked mode and reduces amount of scrolling lines.
-This patch fixes bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=482536 in Orion 10.
-Bug482536 is already fixed in Orion 11.
 ===================================================================
-diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_edit/built-codeEdit-amd.js
---- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_edit/built-codeEdit-amd.js
-+++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_edit/built-codeEdit-amd.js
-@@ -5709,13 +5709,13 @@
- 			var actionTaken = false;
- 			if (!this.isVisible()) {
- 				this.dispatchEvent({type: "triggered", dropdown: this, event: mouseEvent}); //$NON-NLS-0$
--				lib.setFramesEnabled(false);
- 				if (this._populate) {
- 					this.empty();
- 					this._populate(this._dropdownNode);
- 				}
- 				var items = this.getItems();
- 				if (items.length > 0) {
-+                    lib.setFramesEnabled(false);
- 					if (this._boundAutoDismiss) {
- 						lib.removeAutoDismiss(this._boundAutoDismiss);
- 					} 
-@@ -17601,6 +17601,7 @@
+diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
+--- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
++++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
+@@ -21325,6 +21325,7 @@
  		},
  		_handleMouseWheel: function (e) {
  			if (this._noScroll) return;
@@ -28,7 +11,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_ed
  			var lineHeight = this._getLineHeight();
  			var pixelX = 0, pixelY = 0;
  			// Note: On the Mac the correct behaviour is to scroll by pixel.
-@@ -28645,8 +28646,9 @@
+@@ -31473,8 +31474,9 @@
  	'orion/editor/keyModes', //$NON-NLS-0$
  	'orion/editor/annotations', //$NON-NLS-0$
  	'orion/objects', //$NON-NLS-0$
@@ -39,7 +22,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_ed
 
  	var exports = {};
 
-@@ -28715,11 +28717,11 @@
+@@ -31543,11 +31545,11 @@
  		this.linkedModeModel = null;
 
  		textView.setAction("linkedModeEnter", function() { //$NON-NLS-0$
@@ -53,7 +36,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_ed
  			return true;
  		}.bind(this));
  		textView.setAction("linkedModeNextGroup", function() { //$NON-NLS-0$
-@@ -28757,7 +28759,7 @@
+@@ -31585,7 +31587,7 @@
  					changed = positionChanged.position;
  					if (changed === undefined || changed.model !== model) {
  						// The change has been done outside of the positions, exit the Linked Mode
@@ -62,7 +45,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_ed
  						model = this.linkedModeModel;
  					} else {
  						break;
-@@ -28803,7 +28805,7 @@
+@@ -31631,7 +31633,7 @@
  					changed = positionChanged.position;
  					if (changed === undefined || changed.model !== model) {
  						// The change has been done outside of the positions, exit the Linked Mode
@@ -71,7 +54,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_ed
  						model = this.linkedModeModel;
  					} else {
  						break;
-@@ -28930,10 +28932,11 @@
+@@ -31758,10 +31760,11 @@
  		 * Exits Linked Mode. Optionally places the caret at linkedMode escapePosition.
  		 * @param {Boolean} [escapePosition=false] if true, place the caret at the  escape position.
  		 */
@@ -84,7 +67,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/code_ed
  			if (this._compoundChange) {
  				this.endUndo();
  				this._compoundChange = null;
-@@ -29122,6 +29125,7 @@
+@@ -31950,6 +31953,7 @@
  			annotationModel.replaceAnnotations(remove, add);
  		}
  	});
