@@ -23,8 +23,8 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.shared.JsonArray;
 import org.eclipse.che.dto.shared.JsonStringMap;
@@ -74,7 +74,7 @@ public class DefaultHttpJsonRequestTest {
     private static final ApiExceptionMapper EXCEPTION_MAPPER = new ApiExceptionMapper();
     @SuppressWarnings("unused") // used by EverrestJetty
     private static final TestService        TEST_SERVICE     = new TestService();
-    private static final User               TEST_USER        = new UserImpl("name", "id", "token", null, false);
+    private static final Subject            TEST_SUBJECT     = new SubjectImpl("name", "id", "token", null, false);
     private static final String             DEFAULT_URL      = "http://localhost:8080";
 
     @Captor
@@ -96,7 +96,8 @@ public class DefaultHttpJsonRequestTest {
     public void shouldUseUrlAndMethodFromTheLinks() throws Exception {
         final Link link = createLink("POST", DEFAULT_URL, "rel");
         final DefaultHttpJsonRequest request = spy(new DefaultHttpJsonRequest(link));
-        doReturn(new DefaultHttpJsonResponse("", 200)).when(request).doRequest(anyInt(), anyString(), anyString(), anyObject(), any(), anyString());
+        doReturn(new DefaultHttpJsonResponse("", 200)).when(request)
+                                                      .doRequest(anyInt(), anyString(), anyString(), anyObject(), any(), anyString());
 
         request.request();
 
@@ -314,7 +315,7 @@ public class DefaultHttpJsonRequestTest {
     @Test
     public void shouldUseTokenFromCurrentContextForAuthorization(ITestContext ctx) throws Exception {
         final EnvironmentContext context = new EnvironmentContext();
-        context.setUser(TEST_USER);
+        context.setSubject(TEST_SUBJECT);
         EnvironmentContext.setCurrent(context);
 
         new DefaultHttpJsonRequest(getUrl(ctx) + "/token").usePostMethod().request();
@@ -324,7 +325,7 @@ public class DefaultHttpJsonRequestTest {
     public static class EnvironmentFilter implements RequestFilter {
 
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setUser(TEST_USER);
+            EnvironmentContext.getCurrent().setSubject(TEST_SUBJECT);
         }
 
     }

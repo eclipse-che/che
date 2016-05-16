@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class DockerContainerNameGenerator {
      * @param machineId
      *         unique machine id, see more {@link Machine#getId()}
      * @param userName
-     *         name of the user who is docker container owner, see more {@link User#getName}
+     *         name of the user who is docker container owner
      * @param machineName
      *         name of the workspace machine, see more {@link MachineConfig#getName()}
      */

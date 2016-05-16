@@ -16,7 +16,7 @@ import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.shared.dto.Author;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -68,8 +68,8 @@ public class FactoryEditValidatorImplTest {
     }
 
     private void setCurrentUser(String userId) {
-        User user = mock(User.class);
-        when(user.getId()).thenReturn(userId);
-        EnvironmentContext.getCurrent().setUser(user);
+        Subject subject = mock(Subject.class);
+        when(subject.getUserId()).thenReturn(userId);
+        EnvironmentContext.getCurrent().setSubject(subject);
     }
 }

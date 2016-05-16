@@ -43,7 +43,7 @@ public class CheAccessTokenCredentialProvider implements CredentialsProvider {
     @Override
     public UserCredential getUserCredential() throws GitException {
         String token = EnvironmentContext.getCurrent()
-                                         .getUser()
+                                         .getSubject()
                                          .getToken();
         if (token != null) {
             return new UserCredential(token, "x-che", OAUTH_PROVIDER_NAME);

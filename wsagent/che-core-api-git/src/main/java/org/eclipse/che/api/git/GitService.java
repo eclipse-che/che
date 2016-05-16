@@ -11,7 +11,6 @@
 package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchCreateRequest;
@@ -54,7 +53,6 @@ import org.eclipse.che.api.git.shared.TagListRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +70,6 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,9 +85,6 @@ public class GitService {
 
     @Inject
     private ProjectRegistry projectRegistry;
-
-    @Inject
-    private GitUrlResolver gitUrlResolver;
 
     @QueryParam("projectPath")
     private String projectPath;
@@ -412,36 +406,6 @@ public class GitService {
         try (GitConnection gitConnection = getGitConnection()) {
             return new GenericEntity<List<Tag>>(gitConnection.tagList(request)) {
             };
-        }
-    }
-
-    @Path("read-only-url")
-    @Produces(MediaType.TEXT_PLAIN)
-    @GET
-    public String readOnlyGitUrlTextPlain(@Context UriInfo uriInfo) throws ApiException {
-        final RegisteredProject project = projectRegistry.getProject(projectPath);
-        if (project.getBaseFolder().getChildFolder(".git") != null) {
-            return gitUrlResolver.resolve(uriInfo.getBaseUri(), getAbsoluteProjectPath(projectPath));
-        } else {
-            throw new ServerException("Not git repository");
-        }
-    }
-
-    @Path("import-source-descriptor")
-    @Produces(MediaType.APPLICATION_JSON)
-    @GET
-    public SourceStorageDto importDescriptor(@Context UriInfo uriInfo) throws ApiException {
-        final RegisteredProject project = projectRegistry.getProject(projectPath);
-        if (project.getBaseFolder().getChildFolder(".git") != null) {
-            try (GitConnection gitConnection = getGitConnection()) {
-                return DtoFactory.getInstance().createDto(SourceStorageDto.class)
-                                 .withType("git")
-                                 .withLocation(gitUrlResolver.resolve(uriInfo.getBaseUri(), getAbsoluteProjectPath(projectPath)))
-                                 .withParameters(Collections.singletonMap("commitId", gitConnection.log(null).getCommits().get(0).getId()));
-
-            }
-        } else {
-            throw new ServerException("Not git repository");
         }
     }
 

@@ -62,9 +62,9 @@ public class RecipeDownloader {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(machineConfig.getSource().getLocation());
             // add user token to be able to download user's private recipe
             if (machineConfig.getSource().getLocation().startsWith(apiEndpoint)) {
-                if (EnvironmentContext.getCurrent().getUser() != null
-                    && EnvironmentContext.getCurrent().getUser().getToken() != null) {
-                    targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getUser().getToken());
+                if (EnvironmentContext.getCurrent().getSubject() != null
+                    && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
+                    targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
                 }
             }
             recipeUrl = targetUriBuilder.build().toURL();

@@ -37,7 +37,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.assured.JettyHttpServer;
@@ -145,8 +145,8 @@ public class FactoryServiceTest {
 
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext context = EnvironmentContext.getCurrent();
-            context.setUser(new UserImpl(JettyHttpServer.ADMIN_USER_NAME, userId, "token-2323",
-                                         Collections.<String>emptyList(), false));
+            context.setSubject(new SubjectImpl(JettyHttpServer.ADMIN_USER_NAME, userId, "token-2323",
+                                               Collections.<String>emptyList(), false));
         }
 
     }

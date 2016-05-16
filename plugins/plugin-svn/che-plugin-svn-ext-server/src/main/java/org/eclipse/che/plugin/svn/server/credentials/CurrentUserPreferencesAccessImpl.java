@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.server.credentials;
 
-import java.text.MessageFormat;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
+import javax.inject.Inject;
+import java.text.MessageFormat;
+import java.util.Map;
 
 /**
  * Provides access to the current user's preferences.<br>
@@ -37,16 +35,16 @@ public class CurrentUserPreferencesAccessImpl implements CurrentUserPreferencesA
 
     @Override
     public void updatePreference(final String key, final String value) throws PreferencesAccessException {
-        final User currentUser = getCurrentUser();
+        final Subject currentSubject = getCurrentSubject();
         Map<String, String> content;
         try {
-            content = this.preferencesDao.getPreferences(currentUser.getId());
+            content = this.preferencesDao.getPreferences(currentSubject.getUserId());
         } catch (final ServerException e) {
             throw new PreferencesAccessException(e);
         }
         content.put(key, value);
         try {
-            this.preferencesDao.setPreferences(currentUser.getId(), content);
+            this.preferencesDao.setPreferences(currentSubject.getUserId(), content);
         } catch (final ServerException | NotFoundException e) {
             throw new PreferencesAccessException(e);
         }
@@ -54,18 +52,18 @@ public class CurrentUserPreferencesAccessImpl implements CurrentUserPreferencesA
 
     @Override
     public String getPreference(final String key) throws PreferencesAccessException {
-        final User currentUser = getCurrentUser();
+        final Subject currentSubject = getCurrentSubject();
         final String pattern = MessageFormat.format("^{0}$", key);
         Map<String, String> response;
         try {
-            response = this.preferencesDao.getPreferences(currentUser.getId(), pattern);
+            response = this.preferencesDao.getPreferences(currentSubject.getUserId(), pattern);
         } catch (final ServerException e) {
             throw new PreferencesAccessException(e);
         }
         return response.get(key);
     }
 
-    private User getCurrentUser() {
-        return EnvironmentContext.getCurrent().getUser();
+    private Subject getCurrentSubject() {
+        return EnvironmentContext.getCurrent().getSubject();
     }
 }

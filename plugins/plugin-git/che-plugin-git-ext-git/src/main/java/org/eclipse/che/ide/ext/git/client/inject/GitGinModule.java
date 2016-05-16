@@ -57,8 +57,6 @@ import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitView;
 import org.eclipse.che.ide.ext.git.client.reset.commit.ResetToCommitViewImpl;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesView;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesViewImpl;
-import org.eclipse.che.ide.ext.git.client.url.ShowProjectGitReadOnlyUrlView;
-import org.eclipse.che.ide.ext.git.client.url.ShowProjectGitReadOnlyUrlViewImpl;
 
 /** @author Andrey Plotnikov */
 @ExtensionGinModule
@@ -66,8 +64,6 @@ public class GitGinModule extends AbstractGinModule {
     /** {@inheritDoc} */
     @Override
     protected void configure() {
-//        bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
-
         GinMultibinder.newSetBinder(binder(), ImportWizardRegistrar.class).addBinding().to(GitImportWizardRegistrar.class);
         GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class).addBinding().to(CommitterPreferencePresenter.class);
 
@@ -81,7 +77,6 @@ public class GitGinModule extends AbstractGinModule {
         bind(BranchListView.class).to(BranchListViewImpl.class).in(Singleton.class);
         bind(MergeView.class).to(MergeViewImpl.class).in(Singleton.class);
         bind(ResetFilesView.class).to(ResetFilesViewImpl.class).in(Singleton.class);
-        bind(ShowProjectGitReadOnlyUrlView.class).to(ShowProjectGitReadOnlyUrlViewImpl.class).in(Singleton.class);
         bind(RemoteView.class).to(RemoteViewImpl.class).in(Singleton.class);
         bind(AddRemoteRepositoryView.class).to(AddRemoteRepositoryViewImpl.class).in(Singleton.class);
         bind(PushToRemoteView.class).to(PushToRemoteViewImpl.class).in(Singleton.class);

@@ -40,7 +40,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.Event
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -484,7 +484,7 @@ public class WorkspaceManager {
         requireNonNull(workspaceId, "Required non-null workspace id");
         // check if workspace exists
         workspaceDao.get(workspaceId);
-        return machineManager.getSnapshots(sessionUser().getId(), workspaceId);
+        return machineManager.getSnapshots(sessionUser().getUserId(), workspaceId);
     }
 
     /** Asynchronously starts given workspace. */
@@ -627,14 +627,14 @@ public class WorkspaceManager {
         }
     }
 
-    private User sessionUser() {
-        return EnvironmentContext.getCurrent().getUser();
+    private Subject sessionUser() {
+        return EnvironmentContext.getCurrent().getSubject();
     }
 
     private String sessionUserNameOr(String nameIfNoUser) {
-        final User user;
-        if (EnvironmentContext.getCurrent() != null && (user = EnvironmentContext.getCurrent().getUser()) != null) {
-            return user.getName();
+        final Subject subject;
+        if (EnvironmentContext.getCurrent() != null && (subject = EnvironmentContext.getCurrent().getSubject()) != null) {
+            return subject.getUserName();
         }
         return nameIfNoUser;
     }
@@ -695,7 +695,7 @@ public class WorkspaceManager {
         }
         final String userName = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userName.isEmpty() ? sessionUser().getId() : userManager.getByName(userName).getId();
+        final String ownerId = userName.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userName).getId();
         return workspaceDao.get(wsName, ownerId);
     }
 

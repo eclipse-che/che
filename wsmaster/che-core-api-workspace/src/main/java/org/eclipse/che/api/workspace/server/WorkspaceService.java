@@ -922,7 +922,7 @@ public class WorkspaceService extends Service {
     }
 
     private static String getCurrentUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 
     /**

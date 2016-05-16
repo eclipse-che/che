@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
@@ -39,7 +38,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -557,7 +556,7 @@ public class FactoryService extends Service {
                                    @QueryParam("path")
                                    String path)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
-        final String userId = EnvironmentContext.getCurrent().getUser().getId();
+        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
         final WorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
         if (!usersWorkspace.getNamespace().equals(userId)) {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
@@ -625,15 +624,15 @@ public class FactoryService extends Service {
      * Adds to the factory information about creator and time of creation
      */
     private void processDefaults(Factory factory) {
-        final User currentUser = EnvironmentContext.getCurrent().getUser();
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         final Author creator = factory.getCreator();
         if (creator == null) {
-            factory.setCreator(newDto(Author.class).withUserId(currentUser.getId())
+            factory.setCreator(newDto(Author.class).withUserId(currentSubject.getUserId())
                                                    .withCreated(System.currentTimeMillis()));
             return;
         }
         if (isNullOrEmpty(creator.getUserId())) {
-            creator.setUserId(currentUser.getId());
+            creator.setUserId(currentSubject.getUserId());
         }
         if (creator.getCreated() == null) {
             creator.setCreated(System.currentTimeMillis());

@@ -873,7 +873,7 @@ public class ProjectService extends Service {
                  projectName,
                  projectType,
                  EnvironmentContext.getCurrent().getWorkspaceId(),
-                 EnvironmentContext.getCurrent().getUser().getId());
+                 EnvironmentContext.getCurrent().getSubject().getUserId());
     }
 
     private VirtualFileEntry getVirtualFile(String path, boolean force) throws ServerException,

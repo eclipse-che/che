@@ -27,6 +27,7 @@ import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 
 import com.google.common.util.concurrent.Striped;
@@ -122,7 +123,7 @@ public class UserProfileService extends Service {
     @GenerateLink(rel = LINK_REL_GET_CURRENT_USER_PROFILE)
     @Produces(APPLICATION_JSON)
     public ProfileDescriptor getCurrent(@Context SecurityContext context) throws NotFoundException, ServerException {
-        final User user = userDao.getById(currentUser().getId());
+        final User user = userDao.getById(currentUser().getUserId());
         final Profile profile = profileDao.getById(user.getId());
         profile.getAttributes().put("email", user.getEmail());
         return toDescriptor(profile, context);
@@ -146,9 +147,9 @@ public class UserProfileService extends Service {
     public Map<String, String> getPreferences(@ApiParam(value = "Filer")
                                                   @QueryParam("filter") String filter) throws ServerException {
         if (filter != null) {
-            return preferenceDao.getPreferences(currentUser().getId(), filter);
+            return preferenceDao.getPreferences(currentUser().getUserId(), filter);
         }
-        return preferenceDao.getPreferences(currentUser().getId());
+        return preferenceDao.getPreferences(currentUser().getUserId());
     }
 
     /**
@@ -172,7 +173,7 @@ public class UserProfileService extends Service {
         if (updates == null || updates.isEmpty()) {
             throw new ConflictException("Attributes to update required");
         }
-        final User user = userDao.getById(currentUser().getId());
+        final User user = userDao.getById(currentUser().getUserId());
         final Profile profile = profileDao.getById(user.getId());
         profile.getAttributes().putAll(updates);
         profileDao.update(profile);
@@ -276,14 +277,14 @@ public class UserProfileService extends Service {
             throw new ConflictException("Preferences to update required");
         }
         
-        String userId = currentUser().getId();
+        String userId = currentUser().getUserId();
         // Keep the lock in a variable so it isn't garbage collected while in use
         Lock lock = preferencesUpdateLocksByUser.get(userId);
         lock.lock();
         try {
             final Map<String, String> preferences = preferenceDao.getPreferences(userId);
             preferences.putAll(update);
-            preferenceDao.setPreferences(currentUser().getId(), preferences);
+            preferenceDao.setPreferences(currentUser().getUserId(), preferences);
             return preferences;
         } finally {
             lock.unlock();
@@ -319,7 +320,7 @@ public class UserProfileService extends Service {
                                  @Description("Attributes names to remove")
                                  List<String> attrNames,
                                  @Context SecurityContext context) throws NotFoundException, ServerException, ConflictException {
-        final Profile currentProfile = profileDao.getById(currentUser().getId());
+        final Profile currentProfile = profileDao.getById(currentUser().getUserId());
         if (attrNames == null) {
             currentProfile.getAttributes().clear();
         } else {
@@ -356,7 +357,7 @@ public class UserProfileService extends Service {
     public void removePreferences(@ApiParam(value = "Preferences to remove", required = true)
                                   @Required
                                   List<String> names) throws ServerException, NotFoundException {
-        String userId = currentUser().getId();
+        String userId = currentUser().getUserId();
         if (names == null) {
             preferenceDao.remove(userId);
         } else {
@@ -442,8 +443,8 @@ public class UserProfileService extends Service {
                          .withLinks(links);
     }
 
-    private org.eclipse.che.commons.user.User currentUser() {
-        return EnvironmentContext.getCurrent().getUser();
+    private Subject currentUser() {
+        return EnvironmentContext.getCurrent().getSubject();
     }
 
     private void logEventUserUpdateProfile(User user, Map<String, String> attributes) {

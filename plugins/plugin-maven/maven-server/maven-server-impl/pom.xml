@@ -11,7 +11,8 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>che-maven-server</artifactId>
@@ -207,7 +208,6 @@
                         <param>org.eclipse.aether:aether-transport-wagon</param>
                         <param>org.apache.maven.wagon:wagon-http-lightweight</param>
                         <param>org.slf4j:slf4j-simple</param>
-                        <!--<param>org.apache.maven.wagon:wagon-provider-api</param>-->
                     </usedDependencies>
                 </configuration>
             </plugin>
@@ -223,6 +223,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/EffectivePomWriter.java</exclude>
+                        <exclude>**/CheArtifactResolver.java</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

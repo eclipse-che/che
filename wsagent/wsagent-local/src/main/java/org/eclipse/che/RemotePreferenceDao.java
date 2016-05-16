@@ -109,7 +109,7 @@ public class RemotePreferenceDao implements PreferenceDao {
      * Checks that {@code userId} is equal to current user id.
      */
     private void checkUserId(String userId) throws ServerException {
-        if (!EnvironmentContext.getCurrent().getUser().getId().equals(userId)) {
+        if (!EnvironmentContext.getCurrent().getSubject().getUserId().equals(userId)) {
             throw new ServerException("This method is not allowed for user '" + userId + "'");
         }
     }

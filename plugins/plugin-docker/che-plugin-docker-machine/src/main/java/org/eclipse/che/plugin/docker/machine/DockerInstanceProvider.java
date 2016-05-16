@@ -218,7 +218,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                    LineConsumer creationLogsOutput) throws MachineException, UnsupportedRecipeException {
         final Dockerfile dockerfile = parseRecipe(recipe);
 
-        final String userName = EnvironmentContext.getCurrent().getUser().getName();
+        final String userName = EnvironmentContext.getCurrent().getSubject().getUserName();
         final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
                                                                                          machine.getId(),
                                                                                          userName,
@@ -242,7 +242,7 @@ public class DockerInstanceProvider implements InstanceProvider {
 
         pullImage(dockerInstanceKey, creationLogsOutput);
 
-        final String userName = EnvironmentContext.getCurrent().getUser().getName();
+        final String userName = EnvironmentContext.getCurrent().getSubject().getUserName();
         final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
                                                                                          machine.getId(),
                                                                                          userName,
@@ -418,7 +418,7 @@ public class DockerInstanceProvider implements InstanceProvider {
 
                 env = new ArrayList<>(devMachineEnvVariables);
                 env.add(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + '=' + machine.getWorkspaceId());
-                env.add(DockerInstanceRuntimeInfo.USER_TOKEN + '=' + EnvironmentContext.getCurrent().getUser().getToken());
+                env.add(DockerInstanceRuntimeInfo.USER_TOKEN + '=' + EnvironmentContext.getCurrent().getSubject().getToken());
             } else {
                 portsToExpose = new HashMap<>(commonMachinePortsToExpose);
                 volumes = commonMachineSystemVolumes;

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.commons.env;
 
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.testng.annotations.Test;
 
 import java.util.Collections;
@@ -28,17 +28,17 @@ public class EnvironmentContextTest {
         EnvironmentContext expected = EnvironmentContext.getCurrent();
         expected.setWorkspaceId("ws1");
         expected.setWorkspaceTemporary(true);
-        expected.setUser(new UserImpl("user", "id", "token", Collections.singleton("role"), false));
+        expected.setSubject(new SubjectImpl("user", "id", "token", Collections.singleton("role"), false));
 
         EnvironmentContext actual = EnvironmentContext.getCurrent();
         assertEquals(actual.getWorkspaceId(), "ws1");
         assertTrue(actual.isWorkspaceTemporary());
-        User actualUser = actual.getUser();
-        assertEquals(actualUser.getName(), "user");
-        assertEquals(actualUser.getId(), "id");
-        assertEquals(actualUser.getToken(), "token");
-        assertTrue(actualUser.isMemberOf("role"));
-        assertFalse(actualUser.isTemporary());
+        Subject actualSubject = actual.getSubject();
+        assertEquals(actualSubject.getUserName(), "user");
+        assertEquals(actualSubject.getUserId(), "id");
+        assertEquals(actualSubject.getToken(), "token");
+        assertTrue(actualSubject.isMemberOf("role"));
+        assertFalse(actualSubject.isTemporary());
     }
 
     @Test(enabled = false)
@@ -47,7 +47,7 @@ public class EnvironmentContextTest {
         final EnvironmentContext expected = EnvironmentContext.getCurrent();
         expected.setWorkspaceId("ws1");
         expected.setWorkspaceTemporary(true);
-        expected.setUser(new UserImpl("user", "id", "token", Collections.singleton("role"), false));
+        expected.setSubject(new SubjectImpl("user", "id", "token", Collections.singleton("role"), false));
 
 
 

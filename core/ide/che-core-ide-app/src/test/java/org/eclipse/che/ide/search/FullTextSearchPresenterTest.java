@@ -13,15 +13,15 @@ package org.eclipse.che.ide.search;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.project.ProjectServiceClient;
+import org.eclipse.che.ide.api.project.QueryExpression;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
@@ -37,6 +37,8 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -49,6 +51,7 @@ import static org.mockito.Mockito.when;
  * Tests for {@link FullTextSearchPresenter}.
  *
  * @author Valeriy Svydenko
+ * @author Roman Nikitenko
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class FullTextSearchPresenterTest {
@@ -78,6 +81,8 @@ public class FullTextSearchPresenterTest {
     private ArgumentCaptor<Operation<PromiseError>>        operationErrorCapture;
     @Captor
     private ArgumentCaptor<Operation<List<ItemReference>>> operationSuccessCapture;
+    @Captor
+    private ArgumentCaptor<QueryExpression> queryExpressionArgumentCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -111,6 +116,38 @@ public class FullTextSearchPresenterTest {
         fullTextSearchPresenter.setPathDirectory(anyString());
 
         verify(view).setPathDirectory(anyString());
+    }
+
+    @Test
+    public void testPrepareOneWordToSearch() throws Exception {
+        String textToSearch = "someText";
+        fullTextSearchPresenter.search(textToSearch);
+
+        verify(projectServiceClient).search((DevMachine)any(), queryExpressionArgumentCaptor.capture());
+        String actual = queryExpressionArgumentCaptor.getValue().getText();
+        String expected = textToSearch + '*';
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPreparePhraseToSearch() throws Exception {
+        fullTextSearchPresenter.search(SEARCHED_TEXT);
+
+        verify(projectServiceClient).search((DevMachine)any(), queryExpressionArgumentCaptor.capture());
+        String actual = queryExpressionArgumentCaptor.getValue().getText();
+        String expected = "\"to be or not to \" AND be*";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testPrepareTextToSearchWhenSomeCharactersShouldBeEscaped() throws Exception {
+        String searchText = "http://localhost:8080/ide/dev6?action=createProject:projectName=test";
+        fullTextSearchPresenter.search(searchText);
+
+        verify(projectServiceClient).search((DevMachine)any(), queryExpressionArgumentCaptor.capture());
+        String actual = queryExpressionArgumentCaptor.getValue().getText();
+        String expected = "http%5C:%5C/%5C/localhost%5C:8080%5C/ide%5C/dev6%5C?action=createProject%5C:projectName=test" + '*';
+        assertEquals(expected, actual);
     }
 
     @Test
