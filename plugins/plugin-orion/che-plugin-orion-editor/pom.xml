@@ -152,10 +152,8 @@
                     <excludes>
                         <!-- Orion - EPL License -->
                         <exclude>**/org/eclipse/che/ide/editor/orion/public/orion/**</exclude>
-                        <exclude>**/org/eclipse/che/ide/editor/orion/public/built-codeEdit-10.0/**</exclude>
                         <exclude>**/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/**</exclude>
                         <exclude>**/patches/built-codeEdit-amd.js.diff</exclude>
-                        <exclude>**/patches/Bug482536.diff</exclude>
                         <exclude>**/patches/embeddedToolingPlugin.js.diff</exclude>
                     </excludes>
                 </configuration>
