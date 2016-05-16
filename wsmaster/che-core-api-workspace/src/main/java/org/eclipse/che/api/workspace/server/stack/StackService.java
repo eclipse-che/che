@@ -104,7 +104,7 @@ public class StackService extends Service {
             throw new BadRequestException("Stack source required. You must specify stack source: 'workspaceConfig' or 'stackSource'");
         }
 
-        String userId = EnvironmentContext.getCurrent().getUser().getId();
+        String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
 
         StackImpl newStack = StackImpl.builder()
                                       .generateId()
@@ -219,7 +219,7 @@ public class StackService extends Service {
                                        @DefaultValue("30")
                                        @QueryParam("maxItems")
                                        final Integer maxItems) throws ServerException {
-        final String currentUser = EnvironmentContext.getCurrent().getUser().getId();
+        final String currentUser = EnvironmentContext.getCurrent().getSubject().getUserId();
         return stackDao.searchStacks(currentUser, tags, skipCount, maxItems)
                        .stream()
                        .map(this::asStackDto)

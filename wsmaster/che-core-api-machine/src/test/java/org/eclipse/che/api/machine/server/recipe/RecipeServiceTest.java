@@ -20,7 +20,7 @@ import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeUpdate;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
@@ -48,7 +48,6 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -314,7 +313,7 @@ public class RecipeServiceTest {
     public static class EnvironmentFilter implements RequestFilter {
 
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setUser(new UserImpl("user", USER_ID, "token", ROLES, false));
+            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", ROLES, false));
         }
     }
 

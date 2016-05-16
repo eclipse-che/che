@@ -86,7 +86,7 @@ public class RecipeService extends Service {
         if (isNullOrEmpty(newRecipe.getName())) {
             throw new BadRequestException("Recipe name required");
         }
-        String userId = EnvironmentContext.getCurrent().getUser().getId();
+        String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
 
         final RecipeImpl recipe = new RecipeImpl().withId(NameGenerator.generate("recipe", 16))
                                                   .withName(newRecipe.getName())
@@ -126,7 +126,7 @@ public class RecipeService extends Service {
                                                 @QueryParam("type") String type,
                                                 @DefaultValue("0") @QueryParam("skipCount") Integer skipCount,
                                                 @DefaultValue("30") @QueryParam("maxItems") Integer maxItems) throws ApiException {
-        final String currentUser = EnvironmentContext.getCurrent().getUser().getId();
+        final String currentUser = EnvironmentContext.getCurrent().getSubject().getUserId();
         return recipeDao.search(currentUser, tags, type, skipCount, maxItems)
                         .stream()
                         .map(this::asRecipeDescriptor)

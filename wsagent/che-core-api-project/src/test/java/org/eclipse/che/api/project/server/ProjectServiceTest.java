@@ -57,7 +57,7 @@ import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.ResourceBinder;
 import org.everrest.core.impl.ApplicationContextImpl;
@@ -433,7 +433,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetProjectCheckUserPermissions() throws Exception {
         // Without roles Collections.<String>emptySet() should get default set of permissions
-        env.setUser(new UserImpl(vfsUser, vfsUser, "dummy_token", Collections.<String>emptySet(), false));
+        env.setSubject(new SubjectImpl(vfsUser, vfsUser, "dummy_token", Collections.<String>emptySet(), false));
         ContainerResponse response =
                 launcher.service(GET, String.format("http://localhost:8080/api/project/%s/my_project", workspace),
                                  "http://localhost:8080/api", null, null, null);

@@ -21,6 +21,7 @@ import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.commons.json.JsonHelper;
+import org.eclipse.che.commons.subject.Subject;
 import org.everrest.core.impl.ApplicationContextImpl;
 import org.everrest.core.impl.ApplicationProviderBinder;
 import org.everrest.core.impl.ContainerRequest;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -133,10 +135,9 @@ public class UserProfileServiceTest {
         when(securityContext.getUserPrincipal()).thenReturn(new PrincipalImpl(email));
         when(userDao.getByAlias(email)).thenReturn(testUser);
         when(userDao.getById(id)).thenReturn(testUser);
-        org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setUser(new org.eclipse.che.commons.user.User() {
-
+        org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setSubject(new Subject() {
             @Override
-            public String getName() {
+            public String getUserName() {
                 return testUser.getEmail();
             }
 
@@ -151,12 +152,16 @@ public class UserProfileServiceTest {
             }
 
             @Override
+            public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
+            }
+
+            @Override
             public String getToken() {
                 return null;
             }
 
             @Override
-            public String getId() {
+            public String getUserId() {
                 return testUser.getId();
             }
 

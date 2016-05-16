@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.core.util.LinksHelper;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,9 +103,9 @@ public class OAuthAuthenticationService {
             throws ForbiddenException, BadRequestException, OAuthAuthenticationException {
 
         OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
-        if (!isNullOrEmpty(userId) && !userId.equals(EnvironmentContext.getCurrent().getUser().getId())) {
+        if (!isNullOrEmpty(userId) && !userId.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
             throw new ForbiddenException(
-                    "Provided userId " + userId + " is not related to current user " + EnvironmentContext.getCurrent().getUser().getId());
+                    "Provided userId " + userId + " is not related to current user " + EnvironmentContext.getCurrent().getSubject().getUserId());
         }
 
         final String authUrl = oauth.getAuthenticateUrl(getRequestUrl(uriInfo), scopes == null ? Collections.<String>emptyList() : scopes);
@@ -173,16 +173,16 @@ public class OAuthAuthenticationService {
     public OAuthToken token(@Required @QueryParam("oauth_provider") String oauthProvider)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
         OAuthAuthenticator provider = getAuthenticator(oauthProvider);
-        final User user = EnvironmentContext.getCurrent().getUser();
+        final Subject subject = EnvironmentContext.getCurrent().getSubject();
         try {
-            OAuthToken token = provider.getToken(user.getId());
+            OAuthToken token = provider.getToken(subject.getUserId());
             if (token == null) {
-                token = provider.getToken(user.getName());
+                token = provider.getToken(subject.getUserName());
             }
             if (token != null) {
                 return token;
             }
-            throw new NotFoundException("OAuth token for user " + user.getId() + " was not found");
+            throw new NotFoundException("OAuth token for user " + subject.getUserId() + " was not found");
         } catch (IOException e) {
             throw new ServerException(e.getLocalizedMessage(), e);
         }
@@ -195,10 +195,10 @@ public class OAuthAuthenticationService {
             throws BadRequestException, NotFoundException, ServerException, ForbiddenException {
 
         OAuthAuthenticator oauth = getAuthenticator(oauthProvider);
-        final User user = EnvironmentContext.getCurrent().getUser();
+        final Subject subject = EnvironmentContext.getCurrent().getSubject();
         try {
-            if (!oauth.invalidateToken(user.getId())) {
-                throw new NotFoundException("OAuth token for user " + user.getId() + " was not found");
+            if (!oauth.invalidateToken(subject.getUserId())) {
+                throw new NotFoundException("OAuth token for user " + subject.getUserId() + " was not found");
             }
         } catch (IOException e) {
             throw new ServerException(e.getMessage());

@@ -47,7 +47,7 @@ public class LocalGitUserResolver implements GitUserResolver {
         String name = null;
         String email = null;
         try {
-            Map<String, String> preferences = preferenceDao.getPreferences(EnvironmentContext.getCurrent().getUser().getId(),
+            Map<String, String> preferences = preferenceDao.getPreferences(EnvironmentContext.getCurrent().getSubject().getUserId(),
                                                                            "git.committer.\\w+");
             name = preferences.get("git.committer.name");
             email = preferences.get("git.committer.email");

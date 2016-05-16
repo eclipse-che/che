@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
 import org.eclipse.che.api.user.shared.dto.UserDescriptor;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.UriBuilder;
@@ -40,11 +40,11 @@ import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_PASSWORD
 public final class LinksInjector {
 
     public static UserDescriptor injectLinks(UserDescriptor userDescriptor, ServiceContext serviceContext) {
-        final User currentUser = EnvironmentContext.getCurrent().getUser();
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         final UriBuilder uriBuilder = serviceContext.getBaseUriBuilder();
 
         final List<Link> links = new LinkedList<>();
-        if (currentUser.isMemberOf("user")) {
+        if (currentSubject.isMemberOf("user")) {
             links.add(LinksHelper.createLink(HttpMethod.GET,
                                              uriBuilder.clone().path(UserProfileService.class)
                                                        .path(UserProfileService.class, "getCurrent")
@@ -70,7 +70,7 @@ public final class LinksInjector {
                                              null,
                                              LINK_REL_UPDATE_PASSWORD));
         }
-        if (currentUser.isMemberOf("system/admin") || currentUser.isMemberOf("system/manager")) {
+        if (currentSubject.isMemberOf("system/admin") || currentSubject.isMemberOf("system/manager")) {
             links.add(LinksHelper.createLink(HttpMethod.GET,
                                              uriBuilder.clone().path(UserService.class)
                                                        .path(UserService.class, "getById")
@@ -99,7 +99,7 @@ public final class LinksInjector {
                                                  LINK_REL_GET_USER_BY_EMAIL));
             }
         }
-        if (currentUser.isMemberOf("system/admin")) {
+        if (currentSubject.isMemberOf("system/admin")) {
             links.add(LinksHelper.createLink(HttpMethod.DELETE,
                                              uriBuilder.clone().path(UserService.class)
                                                        .path(UserService.class, "remove")

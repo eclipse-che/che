@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
 
 import javax.ws.rs.HttpMethod;
@@ -36,7 +36,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -402,9 +401,9 @@ public class HttpJsonHelper {
         }
 
         private String getAuthenticationToken() {
-            User user = EnvironmentContext.getCurrent().getUser();
-            if (user != null) {
-                return user.getToken();
+            Subject subject = EnvironmentContext.getCurrent().getSubject();
+            if (subject != null) {
+                return subject.getToken();
             }
             return null;
         }
