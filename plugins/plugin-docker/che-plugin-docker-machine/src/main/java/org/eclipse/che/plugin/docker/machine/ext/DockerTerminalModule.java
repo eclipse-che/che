@@ -28,11 +28,6 @@ import org.eclipse.che.plugin.docker.machine.ext.provider.TerminalServerConfProv
 public class DockerTerminalModule extends AbstractModule {
     @Override
     protected void configure() {
-        bindConstant().annotatedWith(Names.named(DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
-                      .to("mkdir -p ~/che " +
-                          "&& cp /mnt/che/terminal -R ~/che" +
-                          "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
-
         Multibinder<ServerConf> machineServers = Multibinder.newSetBinder(binder(),
                                                                           ServerConf.class,
                                                                           Names.named("machine.docker.machine_servers"));
