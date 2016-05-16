@@ -142,13 +142,13 @@ public class LocalRecipeDaoImpl implements RecipeDao {
     public List<RecipeImpl> search(String user, List<String> tags, String type, int skipCount, int maxItems) throws ServerException {
         lock.readLock().lock();
         try {
-            final Stream<RecipeImpl> recipesStream = recipes.values()
-                                                            .stream()
-                                                            .filter(recipe -> (tags == null || recipe.getTags().containsAll(tags))
-                                                                              && (type == null || type.equals(recipe.getType())))
-                                                            .skip(skipCount);
+            Stream<RecipeImpl> recipesStream = recipes.values()
+                                                      .stream()
+                                                      .filter(recipe -> (tags == null || recipe.getTags().containsAll(tags))
+                                                                        && (type == null || type.equals(recipe.getType())))
+                                                      .skip(skipCount);
             if (maxItems != 0) {
-                recipesStream.limit(maxItems);
+                recipesStream = recipesStream.limit(maxItems);
             }
             return recipesStream.collect(Collectors.toList());
         } finally {
