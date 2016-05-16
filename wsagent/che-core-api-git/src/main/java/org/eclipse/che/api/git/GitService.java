@@ -78,7 +78,7 @@ import java.util.List;
 import java.util.Map;
 
 /** @author andrew00x */
-@Path("git/{ws-id}")
+@Path("git")
 public class GitService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GitService.class);
@@ -91,9 +91,6 @@ public class GitService {
 
     @Inject
     private GitUrlResolver gitUrlResolver;
-
-    @PathParam("ws-id")
-    private String workspace;
 
     @QueryParam("projectPath")
     private String projectPath;

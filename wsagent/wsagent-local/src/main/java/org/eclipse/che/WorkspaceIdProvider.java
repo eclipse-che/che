@@ -8,21 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.client.module;
+package org.eclipse.che;
 
-import com.google.gwt.resources.client.ClientBundle;
-
-import org.eclipse.che.ide.ui.Styles;
 
 /**
- * @author Evgen Vidolob
+ * //
+ *
+ * @author Vitalii Parfonov
  */
-public interface CreateMavenModuleResources extends ClientBundle {
 
-    @Source({"org/eclipse/che/ide/api/ui/style.css","org/eclipse/che/ide/ui/Styles.css"})
-    Css css();
+public class WorkspaceIdProvider   {
 
-    public interface Css extends Styles{
+    public static final String CHE_WORKSPACE_ID = "CHE_WORKSPACE_ID";
 
+    public static String getWorkspaceId() {
+        return System.getenv(CHE_WORKSPACE_ID) == null ? "" : System.getenv(CHE_WORKSPACE_ID);
     }
 }

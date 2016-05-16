@@ -104,7 +104,6 @@ public class ProjectUpdaterTest {
     @Before
     @SuppressWarnings("unchecked")
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(appContext.getWorkspace()).thenReturn(usersWorkspaceDtoMock);
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getWsAgentBaseUrl()).thenReturn("/ext");

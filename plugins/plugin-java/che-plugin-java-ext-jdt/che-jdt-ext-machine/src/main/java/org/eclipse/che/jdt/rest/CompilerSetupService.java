@@ -35,7 +35,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  *
  * @author Dmitry Shnurenko
  */
-@Path("/jdt/{wsId}/compiler-settings")
+@Path("/jdt/compiler-settings")
 public class CompilerSetupService {
 
     private static final JavaModel JAVA_MODEL = JavaModelManager.getJavaModelManager().getJavaModel();

@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.maven.server.core;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
+import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.util.CancellableProcessWrapper;
 import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.StreamPump;
@@ -55,12 +56,10 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
     private final ExecutorService executorService;
     private final ProjectManager  projectManager;
 
-    private String workspaceId;
-
     @Inject
-    public MavenClassPathBuilder(ProjectManager projectManager, MavenClasspathContainerInitializer containerInitializer) {
+    public MavenClassPathBuilder(ProjectManager projectManager,
+                                 MavenClasspathContainerInitializer containerInitializer) {
         this.projectManager = projectManager;
-
 
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(MavenClassPathBuilder.class.getSimpleName() + "-%d").build();
 
@@ -69,9 +68,7 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
 
     /** {@inheritDoc} */
     @Override
-    public ClassPathBuilderResult buildClassPath(String workspaceId, String projectPath) throws ExecutionException, InterruptedException {
-        this.workspaceId = workspaceId;
-
+    public ClassPathBuilderResult buildClassPath(String projectPath) throws ExecutionException, InterruptedException {
         //TODO Temporary solution for IDEX-4270
         try {
             RegisteredProject project = projectManager.getProject(projectPath);
@@ -140,7 +137,7 @@ public class MavenClassPathBuilder implements ClassPathBuilder {
                                                                                 + "due to timeout. Project: "
                                                                                 + projectPath)));
 
-            String channel = "dependencyUpdate:output:" + workspaceId + ':' + projectPath;
+            String channel = "dependencyUpdate:output:" + WorkspaceIdProvider.getWorkspaceId() + ':' + projectPath;
 
             classPathBuilderResult.setChannel(channel);
 

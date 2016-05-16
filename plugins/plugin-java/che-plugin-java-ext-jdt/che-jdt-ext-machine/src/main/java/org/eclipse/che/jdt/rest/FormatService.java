@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * @author Roman Nikitenko
  */
-@Path("code-formatting/{wsId}")
+@Path("code-formatting")
 public class FormatService {
     private Formatter formatter;
 

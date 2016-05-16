@@ -62,7 +62,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author Kevin Pollet
  * @author Igor vinokur
  */
-@Path("/github/{ws-id}")
+@Path("/github")
 public class GitHubService {
     @Inject
     private GitHubFactory gitHubFactory;

@@ -169,56 +169,9 @@ public class ProjectNode extends AbstractTreeNode<ProjectConfigDto> implements S
     /** {@inheritDoc} */
     @Override
     public void refreshChildren(final AsyncCallback<TreeNode<?>> callback) {
-        getModules(getData(), new AsyncCallback<List<ProjectConfigDto>>() {
-            @Override
-            public void onSuccess(final List<ProjectConfigDto> modules) {
-                getChildren(getData().getPath(), new AsyncCallback<List<ItemReference>>() {
-                    @Override
-                    public void onSuccess(List<ItemReference> childItems) {
-                        setChildren(getChildNodesForItems(childItems, modules));
-                        callback.onSuccess(ProjectNode.this);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
-                    }
-                });
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                //can be if pom.xml not found
-                getChildren(getData().getPath(), new AsyncCallback<List<ItemReference>>() {
-                    @Override
-                    public void onSuccess(List<ItemReference> childItems) {
-                        callback.onSuccess(ProjectNode.this);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
-                    }
-                });
-                callback.onFailure(caught);
-            }
-        });
     }
 
-    protected void getModules(ProjectConfigDto project, final AsyncCallback<List<ProjectConfigDto>> callback) {
-        final Unmarshallable<List<ProjectConfigDto>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(ProjectConfigDto.class);
-        projectServiceClient.getModules(appContext.getDevMachine(), project.getPath(), new AsyncRequestCallback<List<ProjectConfigDto>>(unmarshaller) {
-            @Override
-            protected void onSuccess(List<ProjectConfigDto> result) {
-                callback.onSuccess(result);
-            }
 
-            @Override
-            protected void onFailure(Throwable exception) {
-                callback.onFailure(exception);
-            }
-        });
-    }
 
     private List<TreeNode<?>> getChildNodesForItems(List<ItemReference> childItems, List<ProjectConfigDto> modules) {
         List<TreeNode<?>> oldChildren = getChildren();

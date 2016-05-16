@@ -25,8 +25,6 @@ public interface ClassPathBuilder {
     /**
      * Builds classpath for the current project.
      *
-     * @param workspaceId
-     *         id of current workspace
      * @param projectPath
      *         relative path to current project from the workspace
      * @return information about building project classpath
@@ -35,5 +33,5 @@ public interface ClassPathBuilder {
      * @throws InterruptedException
      *         if the current thread was interrupted
      */
-    ClassPathBuilderResult buildClassPath(String workspaceId, String projectPath) throws ExecutionException, InterruptedException;
+    ClassPathBuilderResult buildClassPath(String projectPath) throws ExecutionException, InterruptedException;
 }

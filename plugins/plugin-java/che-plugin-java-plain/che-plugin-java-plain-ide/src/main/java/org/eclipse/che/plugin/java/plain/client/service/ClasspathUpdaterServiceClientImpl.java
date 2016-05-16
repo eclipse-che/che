@@ -43,7 +43,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
 
-        this.pathToService = "/jdt/" + appContext.getWorkspaceId() + "/classpath/";
+        this.pathToService = "/jdt/classpath/";
     }
 
     @Override

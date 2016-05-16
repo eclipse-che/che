@@ -124,7 +124,6 @@ public class ProjectWizardTest {
 
     @Before
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(dataObject.getName()).thenReturn(PROJECT_NAME);
         when(dataObject.getSource()).thenReturn(storage);

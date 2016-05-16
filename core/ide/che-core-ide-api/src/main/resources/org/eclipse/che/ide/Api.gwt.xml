@@ -22,6 +22,7 @@
     <inherits name="com.google.gwt.user.Debug"/>
     <inherits name="org.vectomatic.libgwtsvg"/>
     <inherits name="org.eclipse.che.api.promises.Promises"/>
+    <inherits name="org.eclipse.che.api.project.Project"/>
 
     <source path="api"/>
 </module>

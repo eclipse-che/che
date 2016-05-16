@@ -33,7 +33,7 @@ import static java.util.Collections.emptyList;
  *
  * @author Valeriy Svydenko
  */
-@Path("jdt/{wsId}/classpath/")
+@Path("jdt/classpath/")
 public class ClasspathService {
 
     private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();

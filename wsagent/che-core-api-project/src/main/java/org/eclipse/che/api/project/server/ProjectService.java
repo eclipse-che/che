@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiResponses;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.tika.Tika;
+import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -105,19 +106,21 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author Dmitry Shnurenko
  */
 @Api(value = "/project", description = "Project REST API")
-@Path("/project/{ws-id}")
+@Path("/project")
 @Singleton
 public class ProjectService extends Service {
     private static final Logger LOG  = LoggerFactory.getLogger(ProjectService.class);
     private static final Tika   TIKA = new Tika();
 
-    private ProjectManager projectManager;
-    private EventService   eventService;
+    private final ProjectManager projectManager;
+    private final EventService   eventService;
+    private final String         workspace;
 
     @Inject
     public ProjectService(ProjectManager projectManager, EventService eventService) {
         this.projectManager = projectManager;
         this.eventService = eventService;
+        this.workspace = WorkspaceIdProvider.getWorkspaceId();
     }
 
     @GET
@@ -128,14 +131,13 @@ public class ProjectService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 500, message = "Server error")})
     @GenerateLink(rel = LINK_REL_GET_PROJECTS)
-    public List<ProjectConfigDto> getProjects(@ApiParam("ID of workspace to get projects")
-                                              @PathParam("ws-id") String workspace) throws IOException,
-                                                                                           ServerException,
-                                                                                           ConflictException,
-                                                                                           ForbiddenException {
+    public List<ProjectConfigDto> getProjects() throws IOException,
+                                                       ServerException,
+                                                       ConflictException,
+                                                       ForbiddenException {
         return projectManager.getProjects()
                              .stream()
-                             .map(p -> injectProjectLinks(asDto(p), workspace))
+                             .map(p -> injectProjectLinks(asDto(p)))
                              .collect(Collectors.toList());
     }
 
@@ -148,14 +150,12 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
                    @ApiResponse(code = 500, message = "Server error")})
-    public ProjectConfigDto getProject(@ApiParam(value = "ID of workspace to get projects", required = true)
-                                       @PathParam("ws-id") String workspace,
-                                       @ApiParam(value = "Path to requested project", required = true)
+    public ProjectConfigDto getProject(@ApiParam(value = "Path to requested project", required = true)
                                        @PathParam("path") String path) throws NotFoundException,
                                                                               ForbiddenException,
                                                                               ServerException,
                                                                               ConflictException {
-        return injectProjectLinks(asDto(projectManager.getProject(path)), workspace);
+        return injectProjectLinks(asDto(projectManager.getProject(path)));
     }
 
     @POST
@@ -171,9 +171,7 @@ public class ProjectService extends Service {
     /**
      * NOTE: parentPath is added to make a module
      */
-    public ProjectConfigDto createProject(@ApiParam(value = "ID of workspace to create project", required = true)
-                                          @PathParam("ws-id") String workspace,
-                                          @ApiParam(value = "Add to this project as module", required = false)
+    public ProjectConfigDto createProject(@ApiParam(value = "Add to this project as module", required = false)
                                           @Description("descriptor of project") ProjectConfigDto projectConfig) throws ConflictException,
                                                                                                                        ForbiddenException,
                                                                                                                        ServerException,
@@ -196,7 +194,7 @@ public class ProjectService extends Service {
         // TODO this throws NPE
         //logProjectCreatedEvent(configDto.getName(), configDto.getProjectType());
 
-        return injectProjectLinks(configDto, workspace);
+        return injectProjectLinks(configDto);
     }
 
     @PUT
@@ -210,9 +208,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "Operation is forbidden"),
                    @ApiResponse(code = 409, message = "Update operation causes conflicts"),
                    @ApiResponse(code = 500, message = "Server error")})
-    public ProjectConfigDto updateProject(@ApiParam(value = "ID of workspace", required = true)
-                                          @PathParam("ws-id") String workspace,
-                                          @ApiParam(value = "Path to updated project", required = true)
+    public ProjectConfigDto updateProject(@ApiParam(value = "Path to updated project", required = true)
                                           @PathParam("path") String path,
                                           ProjectConfigDto projectConfigDto) throws NotFoundException,
                                                                                     ConflictException,
@@ -235,9 +231,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public void delete(@ApiParam("Workspace ID")
-                       @PathParam("ws-id") String workspace,
-                       @ApiParam("Path to a resource to be deleted")
+    public void delete(@ApiParam("Path to a resource to be deleted")
                        @PathParam("path") String path) throws NotFoundException, ForbiddenException, ConflictException, ServerException {
         projectManager.delete(path);
     }
@@ -251,9 +245,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
                    @ApiResponse(code = 500, message = "Server error")})
-    public SourceEstimation estimateProject(@ApiParam(value = "ID of workspace to estimate projects", required = true)
-                                            @PathParam("ws-id") String workspace,
-                                            @ApiParam(value = "Path to requested project", required = true)
+    public SourceEstimation estimateProject(@ApiParam(value = "Path to requested project", required = true)
                                             @PathParam("path") String path,
                                             @ApiParam(value = "Project Type ID to estimate against", required = true)
                                             @QueryParam("type") String projectType) throws NotFoundException,
@@ -276,9 +268,7 @@ public class ProjectService extends Service {
     @GET
     @Path("/resolve/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<SourceEstimation> resolveSources(@ApiParam(value = "ID of workspace to estimate projects", required = true)
-                                                 @PathParam("ws-id") String workspace,
-                                                 @ApiParam(value = "Path to requested project", required = true)
+    public List<SourceEstimation> resolveSources(@ApiParam(value = "Path to requested project", required = true)
                                                  @PathParam("path") String path) throws NotFoundException,
                                                                                         ForbiddenException,
                                                                                         ServerException,
@@ -312,9 +302,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "Forbidden operation"),
                    @ApiResponse(code = 409, message = "Resource already exists"),
                    @ApiResponse(code = 500, message = "Unsupported source type")})
-    public void importProject(@ApiParam(value = "Workspace ID", required = true)
-                              @PathParam("ws-id") String workspace,
-                              @ApiParam(value = "Path in the project", required = true)
+    public void importProject(@ApiParam(value = "Path in the project", required = true)
                               @PathParam("path") String path,
                               @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
                               @QueryParam("force") boolean force,
@@ -339,9 +327,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "File already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response createFile(@ApiParam(value = "Workspace ID", required = true)
-                               @PathParam("ws-id") String workspace,
-                               @ApiParam(value = "Path to a target directory", required = true)
+    public Response createFile(@ApiParam(value = "Path to a target directory", required = true)
                                @PathParam("parent") String parentPath,
                                @ApiParam(value = "New file name", required = true)
                                @QueryParam("name") String fileName,
@@ -362,9 +348,9 @@ public class ProjectService extends Service {
 
         final URI location = getServiceContext().getServiceUriBuilder().clone()
                                                 .path(getClass(), "getFile")
-                                                .build(workspace, newFile.getPath().toString().substring(1));
+                                                .build(newFile.getPath().toString().substring(1));
         return Response.created(location)
-                       .entity(injectFileLinks(asDto(newFile), workspace))
+                       .entity(injectFileLinks(asDto(newFile)))
                        .build();
     }
 
@@ -378,9 +364,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "File already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response createFolder(@ApiParam(value = "Workspace ID", required = true)
-                                 @PathParam("ws-id") String workspace,
-                                 @ApiParam(value = "Path to a new folder destination", required = true)
+    public Response createFolder(@ApiParam(value = "Path to a new folder destination", required = true)
                                  @PathParam("path") String path) throws ConflictException,
                                                                         ForbiddenException,
                                                                         ServerException,
@@ -388,7 +372,7 @@ public class ProjectService extends Service {
         final FolderEntry newFolder = projectManager.getProjectsRoot().createFolder(path);
         final URI location = getServiceContext().getServiceUriBuilder().clone()
                                                 .path(getClass(), "getChildren")
-                                                .build(workspace, newFolder.getPath().toString().substring(1));
+                                                .build(newFolder.getPath().toString().substring(1));
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.CREATED,
                                                           workspace,
@@ -397,7 +381,7 @@ public class ProjectService extends Service {
                                                           true));
 
         return Response.created(location)
-                       .entity(injectFolderLinks(asDto(newFolder), workspace))
+                       .entity(injectFolderLinks(asDto(newFolder)))
                        .build();
     }
 
@@ -412,9 +396,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "File already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response uploadFile(@ApiParam(value = "Workspace ID", required = true)
-                               @PathParam("ws-id") String workspace,
-                               @ApiParam(value = "Destination path", required = true)
+    public Response uploadFile(@ApiParam(value = "Destination path", required = true)
                                @PathParam("parent") String parentPath,
                                Iterator<FileItem> formData) throws NotFoundException,
                                                                    ConflictException,
@@ -442,9 +424,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Resource already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response uploadFolderFromZip(@ApiParam(value = "Workspace ID", required = true)
-                                        @PathParam("ws-id") String workspace,
-                                        @ApiParam(value = "Path in the project", required = true)
+    public Response uploadFolderFromZip(@ApiParam(value = "Path in the project", required = true)
                                         @PathParam("path") String path,
                                         Iterator<FileItem> formData) throws ServerException,
                                                                             ConflictException,
@@ -467,11 +447,12 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 500, message = "Internal Server Error")})
     @GET
     @Path("/file/{path:.*}")
-    public Response getFile(@ApiParam(value = "Workspace ID", required = true)
-                            @PathParam("ws-id") String workspace,
-                            @ApiParam(value = "Path to a file", required = true)
+    public Response getFile(@ApiParam(value = "Path to a file", required = true)
                             @PathParam("path") String path) throws IOException, NotFoundException, ForbiddenException, ServerException {
         final FileEntry file = projectManager.asFile(path);
+        if (file == null) {
+            throw new NotFoundException("File not found for " + path);
+        }
         return Response.ok().entity(file.getInputStream()).type(TIKA.detect(file.getName())).build();
     }
 
@@ -484,9 +465,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response updateFile(@ApiParam(value = "Workspace ID", required = true)
-                               @PathParam("ws-id") String workspace,
-                               @ApiParam(value = "Full path to a file", required = true)
+    public Response updateFile(@ApiParam(value = "Full path to a file", required = true)
                                @PathParam("path") String path,
                                InputStream content) throws NotFoundException, ForbiddenException, ServerException {
         final FileEntry file = projectManager.asFile(path);
@@ -516,8 +495,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Resource already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response copy(@ApiParam("Workspace ID") @PathParam("ws-id") String workspace,
-                         @ApiParam("Path to a resource") @PathParam("path") String path,
+    public Response copy(@ApiParam("Path to a resource") @PathParam("path") String path,
                          @ApiParam(value = "Path to a new location", required = true) @QueryParam("to") String newParent,
                          CopyOptions copyOptions) throws NotFoundException,
                                                          ForbiddenException,
@@ -542,7 +520,7 @@ public class ProjectService extends Service {
 
         final URI location = getServiceContext().getServiceUriBuilder()
                                                 .path(getClass(), copy.isFile() ? "getFile" : "getChildren")
-                                                .build(workspace, copy.getPath().toString().substring(1));
+                                                .build(copy.getPath().toString().substring(1));
 
         if (copy.isFolder()) {
             try {
@@ -567,8 +545,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Resource already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response move(@ApiParam("Workspace ID") @PathParam("ws-id") String workspace,
-                         @ApiParam("Path to a resource to be moved") @PathParam("path") String path,
+    public Response move(@ApiParam("Path to a resource to be moved") @PathParam("path") String path,
                          @ApiParam("Path to a new location") @QueryParam("to") String newParent,
                          MoveOptions moveOptions) throws NotFoundException, ForbiddenException, ConflictException, ServerException {
         final VirtualFileEntry entry = projectManager.asVirtualFileEntry(path);
@@ -590,7 +567,7 @@ public class ProjectService extends Service {
 
         final URI location = getServiceContext().getServiceUriBuilder()
                                                 .path(getClass(), move.isFile() ? "getFile" : "getChildren")
-                                                .build(workspace, move.getPath().toString().substring(1));
+                                                .build(move.getPath().toString().substring(1));
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.MOVED,
                                                           workspace,
@@ -614,9 +591,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "Forbidden operation"),
                    @ApiResponse(code = 409, message = "Resource already exists"),
                    @ApiResponse(code = 500, message = "Unsupported source type")})
-    public List<SourceEstimation> uploadProjectFromZip(@ApiParam(value = "Workspace ID", required = true)
-                                                       @PathParam("ws-id") String workspace,
-                                                       @ApiParam(value = "Path in the project", required = true)
+    public List<SourceEstimation> uploadProjectFromZip(@ApiParam(value = "Path in the project", required = true)
                                                        @PathParam("path") String path,
                                                        @ApiParam(value = "Force rewrite existing project", allowableValues = "true,false")
                                                        @QueryParam("force") boolean force,
@@ -665,7 +640,7 @@ public class ProjectService extends Service {
             baseProjectFolder.getVirtualFile().unzip(zip, true, stripNumber);
         }
 
-        return resolveSources(workspace, path);
+        return resolveSources(path);
     }
 
     @POST
@@ -678,9 +653,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Resource already exists"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response importZip(@ApiParam(value = "Workspace ID", required = true)
-                              @PathParam("ws-id") String workspace,
-                              @ApiParam(value = "Path to a location (where import to?)")
+    public Response importZip(@ApiParam(value = "Path to a location (where import to?)")
                               @PathParam("path") String path,
                               InputStream zip,
                               @DefaultValue("false") @QueryParam("skipFirstLevel") Boolean skipFirstLevel) throws NotFoundException,
@@ -705,7 +678,7 @@ public class ProjectService extends Service {
 
         return Response.created(getServiceContext().getServiceUriBuilder()
                                                    .path(getClass(), "getChildren")
-                                                   .build(workspace, parent.getPath().toString().substring(1))).build();
+                                                   .build(parent.getPath().toString().substring(1))).build();
     }
 
     @GET
@@ -717,9 +690,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public InputStream exportZip(@ApiParam(value = "Workspace ID", required = true)
-                                 @PathParam("ws-id") String workspace,
-                                 @ApiParam(value = "Path to resource to be exported")
+    public InputStream exportZip(@ApiParam(value = "Path to resource to be exported")
                                  @PathParam("path") String path) throws NotFoundException, ForbiddenException, ServerException {
 
         final FolderEntry folder = projectManager.asFolder(path);
@@ -734,9 +705,7 @@ public class ProjectService extends Service {
     @GET
     @Path("/export/file/{path:.*}")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response exportFile(@ApiParam(value = "Workspace ID", required = true)
-                               @PathParam("ws-id") String workspace,
-                               @ApiParam(value = "Path to resource to be imported")
+    public Response exportFile(@ApiParam(value = "Path to resource to be imported")
                                @PathParam("path") String path) throws NotFoundException, ForbiddenException, ServerException {
 
         final FileEntry file = projectManager.asFile(path);
@@ -765,9 +734,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public List<ItemReference> getChildren(@ApiParam(value = "Workspace ID", required = true)
-                                           @PathParam("ws-id") String workspace,
-                                           @ApiParam(value = "Path to a project", required = true)
+    public List<ItemReference> getChildren(@ApiParam(value = "Path to a project", required = true)
                                            @PathParam("parent") String path) throws NotFoundException,
                                                                                     ForbiddenException,
                                                                                     ServerException {
@@ -781,9 +748,9 @@ public class ProjectService extends Service {
         final ArrayList<ItemReference> result = new ArrayList<>(children.size());
         for (VirtualFileEntry child : children) {
             if (child.isFile()) {
-                result.add(injectFileLinks(asDto((FileEntry)child), workspace));
+                result.add(injectFileLinks(asDto((FileEntry)child)));
             } else {
-                result.add(injectFolderLinks(asDto((FolderEntry)child), workspace));
+                result.add(injectFolderLinks(asDto((FolderEntry)child)));
             }
         }
 
@@ -800,9 +767,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public TreeElement getTree(@ApiParam(value = "Workspace ID", required = true)
-                               @PathParam("ws-id") String workspace,
-                               @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
+    public TreeElement getTree(@ApiParam(value = "Path to resource. Can be project or its folders", required = true)
                                @PathParam("parent") String path,
                                @ApiParam(value = "Tree depth. This parameter can be dropped. If not specified ?depth=1 is used by default")
                                @DefaultValue("1") @QueryParam("depth") int depth,
@@ -813,8 +778,8 @@ public class ProjectService extends Service {
                                                                                                                ServerException {
         final FolderEntry folder = projectManager.asFolder(path);
 
-        return newDto(TreeElement.class).withNode(injectFolderLinks(asDto(folder), workspace))
-                                        .withChildren(getTree(folder, workspace, depth, includeFiles));
+        return newDto(TreeElement.class).withNode(injectFolderLinks(asDto(folder)))
+                                        .withChildren(getTree(folder, depth, includeFiles));
     }
 
     @GET
@@ -826,9 +791,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 403, message = "User not authorized to call this operation"),
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public ItemReference getItem(@ApiParam(value = "Workspace ID", required = true)
-                                 @PathParam("ws-id") String workspace,
-                                 @ApiParam(value = "Path to resource. Can be project or its folders", required = true)
+    public ItemReference getItem(@ApiParam(value = "Path to resource. Can be project or its folders", required = true)
                                  @PathParam("path") String path) throws NotFoundException,
                                                                         ForbiddenException,
                                                                         ServerException {
@@ -839,9 +802,9 @@ public class ProjectService extends Service {
         }
 
         if (entry.isFile()) {
-            return injectFileLinks(asDto((FileEntry)entry), workspace);
+            return injectFileLinks(asDto((FileEntry)entry));
         } else {
-            return injectFolderLinks(asDto((FolderEntry)entry), workspace);
+            return injectFolderLinks(asDto((FolderEntry)entry));
         }
     }
 
@@ -857,9 +820,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Not found"),
                    @ApiResponse(code = 409, message = "Conflict error"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public List<ItemReference> search(@ApiParam(value = "Workspace ID", required = true)
-                                      @PathParam("ws-id") String workspace,
-                                      @ApiParam(value = "Path to resource, i.e. where to search?", required = true)
+    public List<ItemReference> search(@ApiParam(value = "Path to resource, i.e. where to search?", required = true)
                                       @PathParam("path") String path,
                                       @ApiParam(value = "Resource name")
                                       @QueryParam("name") String name,
@@ -900,7 +861,7 @@ public class ProjectService extends Service {
             final VirtualFileEntry child = root.getChild(searchResultEntry.getFilePath());
 
             if (child != null && child.isFile()) {
-                items.add(injectFileLinks(asDto((FileEntry)child), workspace));
+                items.add(injectFileLinks(asDto((FileEntry)child)));
             }
         }
 
@@ -936,7 +897,6 @@ public class ProjectService extends Service {
     }
 
     private List<TreeElement> getTree(FolderEntry folder,
-                                      String workspace,
                                       int depth,
                                       boolean includeFiles) throws ServerException, NotFoundException {
         if (depth == 0) {
@@ -955,10 +915,10 @@ public class ProjectService extends Service {
         for (VirtualFileEntry child : children) {
             if (child.isFolder()) {
                 nodes.add(newDto(TreeElement.class)
-                                  .withNode(injectFolderLinks(asDto((FolderEntry)child), workspace))
-                                  .withChildren(getTree((FolderEntry)child, workspace, depth - 1, includeFiles)));
+                                  .withNode(injectFolderLinks(asDto((FolderEntry)child)))
+                                  .withChildren(getTree((FolderEntry)child, depth - 1, includeFiles)));
             } else {
-                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry)child), workspace)));
+                nodes.add(newDto(TreeElement.class).withNode(injectFileLinks(asDto((FileEntry)child))));
             }
         }
 
@@ -1064,7 +1024,7 @@ public class ProjectService extends Service {
         parent.unzip(in, overwrite, stripNum);
     }
 
-    private ItemReference injectFileLinks(ItemReference itemReference, String workspace) {
+    private ItemReference injectFileLinks(ItemReference itemReference) {
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final List<Link> links = new ArrayList<>();
         final String relPath = itemReference.getPath().substring(1);
@@ -1072,14 +1032,14 @@ public class ProjectService extends Service {
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getFile")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_GET_CONTENT));
         links.add(createLink(PUT,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "updateFile")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              MediaType.WILDCARD,
                              null,
@@ -1087,14 +1047,14 @@ public class ProjectService extends Service {
         links.add(createLink(DELETE,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "delete")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              LINK_REL_DELETE));
 
         return itemReference.withLinks(links);
     }
 
-    private ItemReference injectFolderLinks(ItemReference itemReference, String workspace) {
+    private ItemReference injectFolderLinks(ItemReference itemReference) {
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final List<Link> links = new ArrayList<>();
         final String relPath = itemReference.getPath().substring(1);
@@ -1102,28 +1062,28 @@ public class ProjectService extends Service {
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getChildren")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_CHILDREN));
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getTree")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_TREE));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "delete")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              LINK_REL_DELETE));
 
         return itemReference.withLinks(links);
     }
 
-    private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig, String workspace) {
+    private ProjectConfigDto injectProjectLinks(ProjectConfigDto projectConfig) {
         final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
         final List<Link> links = new ArrayList<>();
         final String relPath = projectConfig.getPath().substring(1);
@@ -1131,7 +1091,7 @@ public class ProjectService extends Service {
         links.add(createLink(PUT,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "updateProject")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              APPLICATION_JSON,
                              APPLICATION_JSON,
@@ -1139,21 +1099,21 @@ public class ProjectService extends Service {
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getChildren")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_CHILDREN));
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getTree")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_TREE));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "delete")
-                                       .build(workspace, relPath)
+                                       .build(relPath)
                                        .toString(),
                              LINK_REL_DELETE));
 
