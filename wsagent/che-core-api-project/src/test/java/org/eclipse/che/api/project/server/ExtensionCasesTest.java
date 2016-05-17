@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -42,7 +43,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         new File(root, "/project1").mkdir();
 
 
-        List<ProjectConfigDto> projects = new ArrayList<>();
+        List<ProjectConfig> projects = new ArrayList<>();
         projects.add(DtoFactory.newDto(ProjectConfigDto.class)
                                .withPath("/project1")
                                .withName("project1Name")
@@ -61,7 +62,7 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                null, fileWatcherNotificationHandler, fileTreeWatcher);
+                                null, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
 
 

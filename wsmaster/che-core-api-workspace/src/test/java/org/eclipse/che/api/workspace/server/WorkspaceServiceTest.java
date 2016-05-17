@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -32,7 +33,6 @@ import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -595,7 +595,7 @@ public class WorkspaceServiceTest {
     public void shouldDeleteProject() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-        final ProjectConfigImpl firstProject = workspace.getConfig().getProjects().iterator().next();
+        final ProjectConfig firstProject = workspace.getConfig().getProjects().iterator().next();
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)

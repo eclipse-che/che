@@ -11,10 +11,11 @@
 package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.WorkspaceHolder;
+import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -22,10 +23,7 @@ import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
 import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectResolver;
@@ -96,7 +94,7 @@ public class MavenProjectResolverTest {
         rootDirectory = Files.createTempDirectory(null).toFile();
         List<ProjectConfigDto> projects = new ArrayList<>();
 
-        WorkspaceHolder workspaceHolder = new TestWorkspaceHolder(projects);
+        TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder(projects);
         ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaValueProviderFactory()));
         projectTypeRegistry.registerProjectType(new MavenProjectType(new MavenValueProviderFactory()));
@@ -165,18 +163,45 @@ public class MavenProjectResolverTest {
         Files.write(pom, pomJar.getBytes());
     }
 
-    protected static class TestWorkspaceHolder extends WorkspaceHolder {
+    /**
+     * Dummy implementation do nothing
+     */
+    protected static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
 
-        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(WorkspaceDto.class).
-                             withId("id").withConfig(DtoFactory.newDto(WorkspaceConfigDto.class).withName("name")
-                            .withProjects(projects)));
+        private List<ProjectConfigDto> projects;
+
+        public TestWorkspaceHolder(List<ProjectConfigDto> projects) {
+            this.projects = projects;
         }
 
-//        @Override
-//        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
-//            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
-//            workspace.setProjects(persistedProjects);
-//        }
+        @Override
+        public List<? extends ProjectConfig> getProjects() {
+            return projects;
+        }
+
+        @Override
+        public String getWorkspaceId() {
+            return "id";
+        }
+
+        @Override
+        protected void addProject(ProjectConfig project) throws ServerException {
+
+        }
+
+        @Override
+        protected void updateProject(ProjectConfig project) throws ServerException {
+
+        }
+
+        @Override
+        protected void removeProject(ProjectConfig project) throws ServerException {
+
+        }
+
+
     }
 }
+
+
+
