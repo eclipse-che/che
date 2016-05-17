@@ -12,7 +12,9 @@ package org.eclipse.che;
 
 
 /**
- * //
+ * Class provide workspace ID which linked to current developer machine it will take from environment variable "CHE_WORKSPACE_ID"
+ * if this variable not set return empty String but in real life should never be
+ *
  *
  * @author Vitalii Parfonov
  */
