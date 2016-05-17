@@ -44,6 +44,7 @@ import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,8 @@ public class WorkspaceManager {
     private final ExecutorService   executor;
     private final MachineManager    machineManager;
     private final UserManager       userManager;
+    private final boolean           defaultAutoSnapshot;
+    private final boolean           defaultAutoRestore;
 
     private WorkspaceHooks hooks = new NoopWorkspaceHooks();
 
@@ -96,12 +99,16 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             MachineManager machineManager,
-                            UserManager userManager) {
+                            UserManager userManager,
+                            @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
+                            @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.eventService = eventService;
         this.machineManager = machineManager;
         this.userManager = userManager;
+        this.defaultAutoSnapshot = defaultAutoSnapshot;
+        this.defaultAutoRestore = defaultAutoRestore;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
@@ -343,9 +350,10 @@ public class WorkspaceManager {
                                                                            ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-        final boolean autoRestore = parseBoolean(workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT))
-                                    && !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, autoRestore, accountId);
+        final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
+        final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
+        final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
+        return performAsyncStart(workspace, envName, snapshotExists && autoRestore, accountId);
     }
 
     /**
@@ -550,7 +558,8 @@ public class WorkspaceManager {
      */
     @VisibleForTesting
     void performAsyncStop(WorkspaceImpl workspace) throws ConflictException {
-        final boolean createSnapshot = parseBoolean(workspace.getAttributes().get(AUTO_CREATE_SNAPSHOT));
+        final String autoSnapshotAttr = workspace.getAttributes().get(AUTO_CREATE_SNAPSHOT);
+        final boolean createSnapshot = autoSnapshotAttr == null ? defaultAutoSnapshot : parseBoolean(autoSnapshotAttr);
         if (createSnapshot) {
             checkWorkspaceBeforeCreatingSnapshot(workspace);
         }
