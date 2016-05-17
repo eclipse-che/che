@@ -10,14 +10,30 @@
 # Set to "<proto>://<user>:<pass>@<host>:<port>"
 $http_proxy  = ""
 $https_proxy = ""
+$no_proxy    = "localhost,127.0.0.1"
 $che_version = "nightly"
 $ip          = "192.168.28.111"
+$port        = 8080
 
 Vagrant.configure(2) do |config|
+
+  if ($http_proxy.to_s != '' || $https_proxy.to_s != '') && !Vagrant.has_plugin?("vagrant-proxyconf")
+    puts ("You configured a proxy, but Vagrant's proxy plugin not detected.")
+    puts ("Install the plugin with: vagrant plugin install vagrant-proxyconf")
+    Process.kill 9, Process.pid
+  end
+
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http = $http_proxy
+    config.proxy.https = $https_proxy
+    config.proxy.no_proxy = $no_proxy
+  end
+
   config.vm.box = "boxcutter/centos72-docker"
   config.vm.box_download_insecure = true
   config.ssh.insert_key = false
   config.vm.network :private_network, ip: $ip
+  config.vm.network "forwarded_port", guest: 8080, host: $port
   config.vm.synced_folder ".", "/home/vagrant/.che"
   config.vm.define "che" do |che|
   end
@@ -30,7 +46,8 @@ Vagrant.configure(2) do |config|
   $script = <<-SHELL
     HTTP_PROXY=$1
     HTTPS_PROXY=$2
-    CHE_VERSION=$3
+    NO_PROXY=$3
+    CHE_VERSION=$4
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
 	    echo "-------------------------------------"
@@ -41,8 +58,13 @@ Vagrant.configure(2) do |config|
 	    echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
 	    echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
 	    source /home/vagrant/.bashrc
+
+      echo 'http.proxy="'$HTTP_PROXY'"' >> /home/user/che/che.properties
+      echo 'https.proxy="'$HTTPS_PROXY'"' >> /home/user/che/che.properties
+
 	    echo "HTTP PROXY set to: $HTTP_PROXY"
 	    echo "HTTPS PROXY set to: $HTTPS_PROXY"
+      more /home/vagrant/che.properties
     fi
 
     # Add the user in the VM to the docker group
@@ -69,12 +91,13 @@ Vagrant.configure(2) do |config|
     fi
     if [ -n "$HTTP_PROXY" ]; then
         printf "[Service]\nEnvironment=\"HTTP_PROXY=${HTTP_PROXY}\"" > /etc/systemd/system/docker.service.d/http-proxy.conf
+        printf ""
     fi
     if [ -n "$HTTPS_PROXY" ]; then
         printf "[Service]\nEnvironment=\"HTTPS_PROXY=${HTTPS_PROXY}\"" > /etc/systemd/system/docker.service.d/https-proxy.conf
     fi
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-        printf "[Service]\nEnvironment=\"NO_PROXY=localhost,127.0.0.1\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
+        printf "[Service]\nEnvironment=\"NO_PROXY=${NO_PROXY}\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
         systemctl daemon-reload
         systemctl restart docker
     fi
@@ -93,12 +116,13 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell" do |s| 
   	s.inline = $script
-  	s.args = [$http_proxy, $https_proxy, $che_version]
+  	s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
   end
 
   $script2 = <<-SHELL
     CHE_VERSION=$1
     IP=$2
+    PORT=$3
 
     echo "---------------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE SERVER"
@@ -109,6 +133,8 @@ Vagrant.configure(2) do |config|
               `-v /home/user/che/lib:/home/user/che/lib-copy `
               `-v /home/user/che/workspaces:/home/user/che/workspaces `
               `-v /home/user/che/storage:/home/user/che/tomcat/temp/local-storage `
+              `-v /home/user/che/che.properties:/container/che.properties `
+              `-e CHE_LOCAL_CONF_DIR=/container `
               `codenvy/che:${CHE_VERSION} --remote:${IP} run &>/dev/null
             
     while [ true ]; do
@@ -118,7 +144,7 @@ Vagrant.configure(2) do |config|
       if [ $exitcode == "0" ]; then
         echo "----------------------------------------"
         echo "ECLIPSE CHE: SERVER BOOTED AND REACHABLE"
-        echo "AVAILABLE: http://${IP}:8080  "
+        echo "ECLIPSE CHE: http://${IP}:${PORT}       "
         echo "----------------------------------------"
         exit 0
       fi 
@@ -130,7 +156,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", run: "always" do |s|
     s.inline = $script2
-    s.args = [$che_version, $ip]
+    s.args = [$che_version, $ip, $port]
   end
 
 end
