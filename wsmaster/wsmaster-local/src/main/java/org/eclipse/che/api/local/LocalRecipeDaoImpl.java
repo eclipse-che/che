@@ -20,7 +20,6 @@ import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.shared.ManagedRecipe;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -35,8 +34,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * @author Eugene Voevodin
@@ -53,22 +50,17 @@ public class LocalRecipeDaoImpl implements RecipeDao {
     public LocalRecipeDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         this.recipeStorage = storageFactory.create("recipes.json");
         this.recipes = new HashMap<>();
-        lock = new ReentrantReadWriteLock();
+        this.lock = new ReentrantReadWriteLock();
     }
 
     @PostConstruct
-    public void start() {
+    public void loadRecipes() {
         recipes.putAll(recipeStorage.loadMap(new TypeToken<Map<String, RecipeImpl>>() {}));
     }
 
     @PreDestroy
-    public void stop() throws IOException {
-        Map<String, ManagedRecipe> recipesToStore = recipes.values()
-                                                           .stream()
-                                                           .filter(recipe -> !"codenvy".equals(recipe.getCreator()))
-                                                           .collect(toMap(ManagedRecipe::getId, identity()));
-
-        recipeStorage.store(recipesToStore);
+    public void saveRecipes() throws IOException {
+        recipeStorage.store(recipes);
     }
 
     @Override
@@ -98,13 +90,16 @@ public class LocalRecipeDaoImpl implements RecipeDao {
             if (update.getScript() != null) {
                 target.setScript(update.getScript());
             }
+            if (update.getDescription() != null) {
+                target.setDescription(update.getDescription());
+            }
             if (update.getName() != null) {
                 target.setName(update.getName());
             }
             if (!update.getTags().isEmpty()) {
                 target.setTags(update.getTags());
             }
-            if (!update.getAcl().isEmpty()) {
+            if (update.getAcl() != null && !update.getAcl().isEmpty()) {
                 target.setAcl(update.getAcl());
             }
 

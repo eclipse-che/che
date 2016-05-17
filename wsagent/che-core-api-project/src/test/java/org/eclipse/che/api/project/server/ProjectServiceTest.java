@@ -87,7 +87,6 @@ import java.net.URI;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -169,7 +168,7 @@ public class ProjectServiceTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        WorkspaceHolder workspaceHolder = new TestWorkspaceHolder();
+        WorkspaceProjectsSyncer workspaceHolder = new WsAgentTestBase.TestWorkspaceHolder();
 
         File root = new File(FS_PATH);
 
@@ -220,7 +219,7 @@ public class ProjectServiceTest {
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, null, ptRegistry, projectRegistry, phRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -264,7 +263,6 @@ public class ProjectServiceTest {
         dependencies.addComponent(ProjectManager.class, pm);
         dependencies.addComponent(ProjectImporterRegistry.class, importerRegistry);
         dependencies.addComponent(ProjectHandlerRegistry.class, phRegistry);
-//        dependencies.addComponent(SearcherProvider.class, new TestSercherProvider());
         dependencies.addComponent(EventService.class, eventService);
 
         ResourceBinder resources = new ResourceBinderImpl();
@@ -280,68 +278,15 @@ public class ProjectServiceTest {
 
             @Override
             public Set<Object> getSingletons() {
-                return new HashSet<>(Arrays.asList(/*new CodenvyJsonProvider(singleton(ContentStream.class)),*/
-                                                   /*new ContentStreamWriter(),*/
-                                                   new ApiExceptionMapper()));
+                return new HashSet<>(Arrays.asList(new ApiExceptionMapper()));
             }
         });
 
         ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, ProviderBinder.getInstance()));
 
         env = org.eclipse.che.commons.env.EnvironmentContext.getCurrent();
-//        env.setUser(new UserImpl(vfsUser, vfsUser, "dummy_token", vfsUserGroups, false));
-//        env.setWorkspaceName(workspace);
-//        env.setWorkspaceId(workspace);
     }
 
-
-    private static class TestWorkspaceHolder extends WorkspaceHolder {
-        private TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")
-                                                  .withProjects(new ArrayList<>())));
-        }
-
-        @Override
-        void addProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.addProject(project);
-            }
-        }
-
-        @Override
-        public void updateProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.updateProject(project);
-            }
-        }
-
-        @Override
-        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
-            projects.stream()
-                    .filter(project -> !project.isDetected())
-                    .forEach(workspace::removeProject);
-        }
-    }
-
-    private static class TestSearcherProvider implements SearcherProvider {
-
-        @Override
-        public Searcher getSearcher(VirtualFileSystem virtualFileSystem, boolean create) throws ServerException {
-            return null;
-        }
-
-        @Override
-        public Searcher getSearcher(VirtualFileSystem virtualFileSystem) throws ServerException {
-            return null;
-        }
-
-        @Override
-        public void close() throws ServerException {
-
-        }
-    }
 
     @Test
     @SuppressWarnings("unchecked")

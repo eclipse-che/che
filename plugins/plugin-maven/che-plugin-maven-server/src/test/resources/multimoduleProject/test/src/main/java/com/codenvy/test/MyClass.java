@@ -11,10 +11,6 @@
 
 package org.eclipse.che.test;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-
 /**
  * Test javadoc for class.
  */

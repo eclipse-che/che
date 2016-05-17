@@ -478,7 +478,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         // SPECS:
         // Only persisted variables should be persisted (no constants, no provided variables)
 
-        for (ProjectConfig project : workspaceHolder.getWorkspace().getConfig().getProjects()) {
+        for (ProjectConfig project : workspaceHolder.getProjects()) {
 
             if (project.getPath().equals("/testProvidedAttributesNotSerialized")) {
 
@@ -490,25 +490,6 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         }
     }
 
-    @Test
-    public void testDetectedProjectsNotSerialized() throws Exception {
-        Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put("pt2-var2", new AttributeValue("test2").getList());
-        attributes.put("pt2-var1", new AttributeValue("test1").getList());
-        ProjectConfig pc1 = new NewProjectConfig("/testDetectedProjectsNotSerialized1", "pt3", null, "name", "descr", attributes, null);
-        ProjectConfig pc2 = new NewProjectConfig("/testDetectedProjectsNotSerialized2", "pt3", null, "name", "descr", attributes, null);
-
-        projectRegistry.putProject(pc1, null, true, true);
-        projectRegistry.putProject(pc2, null, true, false);
-
-        // SPECS:
-        // Only persisted projects should be persisted (no detected)
-
-        assertTrue(workspaceHolder.getWorkspace().getConfig().getProjects().size() == 1);
-
-        ProjectConfig persistedProjectConfig = workspaceHolder.getWorkspace().getConfig().getProjects().get(0);
-        assertEquals("/testDetectedProjectsNotSerialized2", persistedProjectConfig.getPath());
-    }
 
     @Test
     public void testSettableValueProvider() throws Exception {
