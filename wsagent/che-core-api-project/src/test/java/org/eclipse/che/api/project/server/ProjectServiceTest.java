@@ -1698,7 +1698,7 @@ public class ProjectServiceTest {
         myProject.getBaseFolder().createFolder("c").createFile("_test", "Pay attention! To be or to not be that is the question".getBytes());
 
         ContainerResponse response =
-                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/search/my_project", workspace) + queryToSearch,
+                launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         List<ItemReference> result = (List<ItemReference>)response.getEntity();
@@ -1724,7 +1724,7 @@ public class ProjectServiceTest {
                  .createFile("notContainsSearchText", "Pay attention! To be or to not be that is the questEon".getBytes());
 
         ContainerResponse response =
-                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/search/my_project", workspace) + queryToSearch,
+                launcher.service(GET,"http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         List<ItemReference> result = (List<ItemReference>)response.getEntity();
@@ -1749,7 +1749,7 @@ public class ProjectServiceTest {
                  .createFile("notContainsSearchText", "Pay attention! To be or to not be that is the questEon".getBytes());
 
         ContainerResponse response =
-                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/search/my_project", workspace) + queryToSearch,
+                launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         List<ItemReference> result = (List<ItemReference>)response.getEntity();
@@ -1774,7 +1774,7 @@ public class ProjectServiceTest {
         myProject.getBaseFolder().createFolder("c").createFile("alsoNotContainsSearchText", "To be or to not be that is the ...".getBytes());
 
         ContainerResponse response =
-                launcher.service(GET, String.format("http://localhost:8080/api/project/%s/search/my_project", workspace) + queryToSearch,
+                launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                  "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         List<ItemReference> result = (List<ItemReference>)response.getEntity();
@@ -1802,8 +1802,7 @@ public class ProjectServiceTest {
         myProject.getBaseFolder().createFolder("x/y")
                  .createFile("test.txt", "http://localhost:8080/ide/dev6?action=createProject:projectName=test".getBytes());
 
-        ContainerResponse response = launcher.service(GET, String.format("http://localhost:8080/api/project/%s/search/my_project",
-                                                                         workspace) + queryToSearch,
+        ContainerResponse response = launcher.service(GET, "http://localhost:8080/api/project/search/my_project" + queryToSearch,
                                                       "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         List<ItemReference> result = (List<ItemReference>)response.getEntity();
