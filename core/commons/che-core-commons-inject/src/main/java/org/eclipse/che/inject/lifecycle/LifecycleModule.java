@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.inject.lifecycle;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.AbstractModule;
-
-import org.everrest.core.impl.HelperCache;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -22,6 +23,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /** @author andrew00x */
 abstract class LifecycleModule extends AbstractModule {
@@ -60,28 +63,29 @@ abstract class LifecycleModule extends AbstractModule {
         }
     }
 
-    private static final int SIZE = 1 << 3;
-    private static final int MASK = SIZE - 1;
 
-    private final HelperCache<Key, Method[]>[] caches;
+    private final LoadingCache<Key, Method[]> cache;
 
     @SuppressWarnings("unchecked")
     LifecycleModule() {
-        caches = new HelperCache[SIZE];
-        for (int i = 0; i < SIZE; i++) {
-            caches[i] = new HelperCache<>(60 * 1000, 50);
-        }
+        cache = CacheBuilder.<Key, Method[]>newBuilder()
+                             .maximumSize(1_000)
+                             .expireAfterWrite(1, TimeUnit.HOURS)
+                             .build(new CacheLoader<Key, Method[]>() {
+                                 @Override
+                                 public Method[] load(Key key) throws Exception {
+                                     return doGet(key.type, key.annotationType);
+                                 }
+                             });
     }
 
     Method[] get(Class<?> type, Class<? extends Annotation> annotationType) {
         final Key key = Key.of(type, annotationType);
-        final HelperCache<Key, Method[]> cache = caches[key.hashCode() & MASK];
-        synchronized (cache) {
-            Method[] methods = cache.get(key);
-            if (methods == null) {
-                cache.put(key, methods = doGet(type, annotationType));
-            }
-            return methods;
+        try {
+            return cache.get(key);
+        } catch (ExecutionException e) {
+            //should never happen
+            throw new RuntimeException(e.getLocalizedMessage(), e);
         }
     }
 
