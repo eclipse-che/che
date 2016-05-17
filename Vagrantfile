@@ -132,7 +132,7 @@ Vagrant.configure(2) do |config|
               `-v /var/run/docker.sock:/var/run/docker.sock `
               `-v /home/user/che/lib:/home/user/che/lib-copy `
               `-v /home/user/che/workspaces:/home/user/che/workspaces `
-              `-v /home/user/che/storage:/home/user/che/tomcat/temp/local-storage `
+              `-v /home/user/che/storage:/home/user/che/storage `
               `-v /home/user/che/che.properties:/container/che.properties `
               `-e CHE_LOCAL_CONF_DIR=/container `
               `codenvy/che:${CHE_VERSION} --remote:${IP} run &>/dev/null
