@@ -93,16 +93,16 @@ describe('CheGit', function () {
       cheBackend.getLocalGitUrl(workspaceId, encodeURIComponent(projectPath));
 
       // fetch localUrl
-      factory.fetchLocalUrl(workspaceId, projectPath);
+      factory.fetchLocalUrl(projectPath);
 
       // expecting GETs
-      httpBackend.expectGET(agentUrl + '/git/' + workspaceId + '/read-only-url?projectPath=' + encodeURIComponent(projectPath));
+      httpBackend.expectGET(agentUrl + '/git/read-only-url?projectPath=' + encodeURIComponent(projectPath));
 
       // flush command
       httpBackend.flush();
 
       // now, check url
-      var url = factory.getLocalUrlByKey(workspaceId, projectPath);
+      var url = factory.getLocalUrlByKey(projectPath);
 
       // check local url
       expect(localUrl).toEqual(url);
@@ -148,16 +148,16 @@ describe('CheGit', function () {
       cheBackend.getRemoteGitUrlArray(workspaceId, encodeURIComponent(projectPath));
 
       // fetch localUrl
-      factory.fetchRemoteUrlArray(workspaceId, projectPath);
+      factory.fetchRemoteUrlArray(projectPath);
 
       // expecting POSTs
-      httpBackend.expectPOST(agentUrl + '/git/' + workspaceId + '/remote-list?projectPath=' + encodeURIComponent(projectPath));
+      httpBackend.expectPOST(agentUrl + '/git/remote-list?projectPath=' + encodeURIComponent(projectPath));
 
       // flush command
       httpBackend.flush();
 
       // now, check url
-      var urlArray = factory.getRemoteUrlArrayByKey(workspaceId, projectPath);
+      var urlArray = factory.getRemoteUrlArrayByKey(projectPath);
       remoteArray.sort(function (a, b) {
         if (a.name > b.name) {
           return 1;

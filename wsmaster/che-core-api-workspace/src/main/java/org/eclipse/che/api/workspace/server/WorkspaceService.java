@@ -855,6 +855,7 @@ public class WorkspaceService extends Service {
                                       .getLinks()
                                       .add(createLink("GET",
                                                       UriBuilder.fromUri(wsAgent.getUrl())
+                                                                .path("ws")
                                                                 .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                                 .build()
                                                                 .toString(),

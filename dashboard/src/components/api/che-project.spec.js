@@ -98,13 +98,13 @@ describe('CheProject', function () {
       factory.fetchProjectDetails(testProjectDetails.workspaceId, '/' + testProjectDetails.name);
 
       // expecting GET
-      httpBackend.expectGET(agentUrl + '/project/' + testProjectDetails.workspaceId + '/' + testProjectDetails.name);
+      httpBackend.expectGET(agentUrl + '/project/' + testProjectDetails.name);
 
       // flush command
       httpBackend.flush();
 
       // now, check
-      var projectDetails = factory.getProjectDetailsByKey(testProjectDetails.workspaceId, '/' + testProjectDetails.name);
+      var projectDetails = factory.getProjectDetailsByKey('/' + testProjectDetails.name);
 
       // check project details
       expect(projectDetails.name).toEqual(testProjectDetails.name);
