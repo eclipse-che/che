@@ -162,6 +162,15 @@
 .textviewTooltip .commandButton:not(.dropdownTrigger){ 
   text-transform: initial; 
 }
+.textviewTooltip .commandList > li {
+	margin: 0;
+}
+.textviewTooltip .quickfixAllParameter {
+	margin-bottom: 4px;
+	vertical-align: middle;
+	font-weight: normal;
+	font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+}
 .textViewTooltipOnFocus {
 	resize: both;
 	overflow: auto;
@@ -173,14 +182,13 @@
 .textViewFind {
 	background-color: #ddd;
 	position: absolute;
-	top: -50px;
-	right: -1000px;
 	border: 1px solid #aaa;
 	border-top: 0;
 	border-bottom-right-radius: 4px;
 	border-bottom-left-radius: 4px;
 	padding: 2px;
 	z-index: 100;
+	display: none;
 }
 .textViewFind.show {
 	top: 0;
@@ -190,6 +198,7 @@
 	-moz-transition: top 0.3s ease-out;
 	-webkit-transition: top 0.3s ease-out;
 	-o-transition: top 0.3s ease-out;
+	display: inline-block;
 }
 .textViewFindButton {
 	margin-right: 1px;
@@ -401,10 +410,6 @@
 .meta.tag {
 	color: #3f7f7f;
 }
-.meta .preprocessor {
-    color: #A4A4A4;
-}
-
 .punctuation-definition-comment {
 	color: #3f5fbf;
 }
@@ -802,6 +807,12 @@
 	-webkit-box-ordinal-group: 3;
     width: 20%; 
     padding-right:5px;
+}
+.banner-maximized {
+	display: none;
+}
+.footer-maximized {
+	display: none;
 }
 .content-fixedHeight {
 	clear: both;
@@ -1406,18 +1417,12 @@ and (max-device-width : 1024px)  {
     display: flex;
 	display: -webkit-flex;
     height:300px;
-    width:400px;
+    width:100%;
     flex-direction: column;
     -webkit-flex-direction: column;
     align-items: center;
     -webkit-align-items: center;
 	background-color: rgb(57,75,84);
-	padding: 20px;
-	padding-top: 60px;
-	padding-bottom: 0px;
-	border-radius: 4px;
-	Xbox-shadow: 5px 5px 5px 0 rgba(0,0,0,0.2);
-	Xborder-bottom: 1px solid rgb(59,222,255);
 }
 .splashAbout {
     text-align: center;
@@ -1442,11 +1447,11 @@ and (max-device-width : 1024px)  {
 }
 .splashMessage {
 	color: white;
-	font-size: 12px;
+	font-size: 14px;
 }
 .splashDetailedMessage {
 	color: white;
-	font-size: 12px;
+	font-size: 14px;
 }
 .splashVisual {
 	width: 24px;
@@ -2438,8 +2443,8 @@ a.breadcrumb.currentLocation {
 	color: white !important;
 }
 .contentassist .selected {
-	/*background-color: #1BB199 !important;*/
-	/*background: #1BB199 !important;*/
+	background-color: #1BB199 !important;
+	background: #1BB199 !important;
 	border-radius: 0; 
 	color: #FFF;
 }

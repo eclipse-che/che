@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,18 +18,16 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.LinkElement;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.EditorInitializer;
+import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.InitializerCallback;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingModule;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
 import org.eclipse.che.ide.requirejs.RequireJsLoader;
 import org.eclipse.che.ide.requirejs.RequirejsErrorHandler.RequireError;
-import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.EditorInitializer;
-import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.InitializerCallback;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
@@ -40,7 +38,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 
 @Extension(title = "Orion Editor", version = "1.1.0")
 @Singleton
-public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
+public class OrionEditorExtension {
 
     /** The logger. */
     private static final Logger LOG = Logger.getLogger(OrionEditorExtension.class.getSimpleName());
@@ -50,8 +48,6 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
     private final OrionResource          orionResource;
 
     private boolean initFailedWarnedOnce = false;
-
-    private OrionKeyBindingModule keyBindingModule;
 
     @Inject
     public OrionEditorExtension(final NotificationManager notificationManager,
@@ -85,9 +81,8 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
 
     private void injectOrion(final InitializerCallback callback) {
         final String[] scripts = new String[]{
-                "built-codeEdit-10.0/code_edit/built-codeEdit-amd",
-                "orion/CheContentAssistMode",
-                "orion/uiUtils"
+                "built-codeEdit-11.0/code_edit/built-codeEdit-amd",
+                "orion/CheContentAssistMode"
         };
 
         requireJsLoader.require(new Callback<JavaScriptObject[], Throwable>() {
@@ -116,7 +111,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
             }
         }, scripts, new String[0]);
 
-        injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit-10.0/code_edit/built-codeEdit.css");
+        injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit-11.0/code_edit/built-codeEdit.css");
     }
 
     private static void injectCssLink(final String url) {
@@ -137,8 +132,6 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
 
             @Override
             public void onSuccess(final JavaScriptObject[] result) {
-                //use 4th element as keybinding module
-                keyBindingModule = result[3].cast();
                 endConfiguration(callback);
             }
         },
@@ -148,7 +141,7 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
                       "orion/keyBinding",
                       "che/editor/contentAssist",
                       "orion/editor/eventTarget",
-                      "uiUtils"},
+                      "orion/uiUtils"},
          new String[]{"CodeEditWidget",
                       "OrionEmacs",
                       "OrionVi",
@@ -177,10 +170,5 @@ public class OrionEditorExtension implements Provider<OrionKeyBindingModule>{
         notificationManager.notify(errorMessage, StatusNotification.Status.FAIL, FLOAT_MODE);
         LOG.log(Level.SEVERE, errorMessage + " - ", e);
         callback.onFailure(e);
-    }
-
-    @Override
-    public OrionKeyBindingModule get() {
-        return keyBindingModule;
     }
 }
