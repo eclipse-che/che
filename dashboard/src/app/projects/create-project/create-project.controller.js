@@ -472,7 +472,7 @@ export class CreateProjectCtrl {
       let deferredResolve = this.$q.defer();
       let deferredResolvePromise = deferredResolve.promise;
 
-      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(workspaceId, projectName, projectData.source);
+      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(projectName, projectData.source);
 
       importPromise.then(() => {
         // add commands if there are some that have been defined
@@ -528,20 +528,20 @@ export class CreateProjectCtrl {
     let projectTypeService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProjectType();
 
     if (projectDetails.type) {
-      let updateProjectPromise = projectService.updateProject(workspaceId, projectName, projectDetails);
+      let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
       updateProjectPromise.then(() => {
         deferredResolve.resolve();
       });
       return;
     }
 
-    let resolvePromise = projectService.fetchResolve(workspaceId, projectName);
+    let resolvePromise = projectService.fetchResolve(projectName);
     resolvePromise.then(() => {
-      let resultResolve = projectService.getResolve(workspaceId, projectName);
+      let resultResolve = projectService.getResolve(projectName);
       // get project-types
-      let fetchTypePromise = projectTypeService.fetchTypes(workspaceId);
+      let fetchTypePromise = projectTypeService.fetchTypes();
       fetchTypePromise.then(() => {
-        let projectTypesByCategory = projectTypeService.getProjectTypesIDs(workspaceId);
+        let projectTypesByCategory = projectTypeService.getProjectTypesIDs();
         // now try the estimate for each source
         let deferredEstimate = this.$q.defer();
         let deferredEstimatePromise = deferredResolve.promise;
@@ -559,7 +559,7 @@ export class CreateProjectCtrl {
           let projectType = projectTypesByCategory.get(sourceResolve.type);
           if (projectType.primaryable) {
             // call estimate
-            let estimatePromise = projectService.fetchEstimate(workspaceId, projectName, sourceResolve.type);
+            let estimatePromise = projectService.fetchEstimate(projectName, sourceResolve.type);
             estimatePromises.push(estimatePromise);
             estimateTypes.push(sourceResolve.type);
           }
@@ -573,7 +573,7 @@ export class CreateProjectCtrl {
             var firstMatchingType;
             var firstMatchingResult;
             estimateTypes.forEach((type) => {
-              let resultEstimate = projectService.getEstimate(workspaceId, projectName, type);
+              let resultEstimate = projectService.getEstimate(projectName, type);
               // add attributes
               // there is a matching estimate
               if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
@@ -585,7 +585,7 @@ export class CreateProjectCtrl {
           if (firstMatchingType) {
             projectDetails.attributes = firstMatchingResult;
             projectDetails.type = firstMatchingType;
-            let updateProjectPromise = projectService.updateProject(workspaceId, projectName, projectDetails);
+            let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
             updateProjectPromise.then(() => {
               deferredResolve.resolve();
             });
