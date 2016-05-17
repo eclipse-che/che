@@ -21,6 +21,14 @@
         <param-name>org.everrest.websocket.context</param-name>
         <param-value>/api</param-value>
     </context-param>
+    <context-param>
+        <param-name>org.eclipse.che.websocket.endpoint</param-name>
+        <param-value>/ws/{ws-id}</param-value>
+    </context-param>
+    <context-param>
+        <param-name>org.eclipse.che.eventbus.endpoint</param-name>
+        <param-value>/eventbus/</param-value>
+    </context-param>
 
     <servlet>
         <servlet-name>IDE</servlet-name>
