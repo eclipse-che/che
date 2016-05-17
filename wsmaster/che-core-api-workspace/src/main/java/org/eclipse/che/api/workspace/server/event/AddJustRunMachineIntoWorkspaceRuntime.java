@@ -56,9 +56,9 @@ public class AddJustRunMachineIntoWorkspaceRuntime implements EventSubscriber<Ma
         if (RUNNING.equals(event.getEventType()) && !event.isDev()) {
             try {
                 workspaceManager.addMachineIntoRuntime(event.getMachineId());
-            } catch (NotFoundException exception) {
+            } catch (NotFoundException | ConflictException exception) {
                 LOG.error(exception.getLocalizedMessage(), exception);
-            } catch (ServerException | ConflictException exception) {
+            } catch (ServerException exception) {
                 LOG.error(exception.getLocalizedMessage(), exception);
                 try {
                     machineManager.destroy(event.getMachineId(), true);

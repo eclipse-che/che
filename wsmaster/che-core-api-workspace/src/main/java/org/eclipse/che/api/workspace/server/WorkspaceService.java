@@ -747,6 +747,7 @@ public class WorkspaceService extends Service {
         final MachineImpl machine = machineManager.createMachineAsync(machineConfig,
                                                                       workspaceId,
                                                                       workspace.getRuntime().getActiveEnv());
+        workspaceManager.addMachineIntoRuntime(machine.getId()); // creating state instead running
 
         return Response.status(201)
                        .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),

@@ -12,6 +12,8 @@ package org.eclipse.che.api.workspace.server.event;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -47,9 +49,15 @@ public class CleanUpNonDevMachineOnStop implements EventSubscriber<MachineStatus
     public void onEvent(MachineStatusEvent event) {
         if (DESTROYING.equals(event.getEventType()) && !event.isDev()) {
             try {
-                workspaceManager.removeMachineFromRuntime(event.getMachineId());
-            } catch (NotFoundException | MachineException | ConflictException exception) {
-                LOG.error(exception.getLocalizedMessage(), exception);
+                if (WorkspaceStatus.RUNNING.equals(workspaceManager.getWorkspace(event.getWorkspaceId()).getStatus())) {
+                    try {
+                        workspaceManager.removeMachineFromRuntime(event.getMachineId());
+                    } catch (NotFoundException | MachineException | ConflictException exception) {
+                        LOG.error(exception.getLocalizedMessage(), exception);
+                    }
+                }
+            } catch (NotFoundException | ServerException ignore) {
+                // it is already cleaned or will be cleaned by workspace runtime
             }
         }
     }

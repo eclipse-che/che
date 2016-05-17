@@ -248,7 +248,7 @@ public class WorkspaceRuntimes {
     /**
      * Adds machine into running workspace.
      * This method do not touch workspace configuration.
-     * Just add machine to workspace runtime and destroy it on workspace stop.
+     * Just adds machine to workspace runtime and destroy it on workspace stop.
      *
      * @param machine
      *         machine to add to specified runtime

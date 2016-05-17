@@ -503,7 +503,7 @@ public class WorkspaceManager {
      * @throws ServerException
      *         when application server is stopping
      * @throws NullPointerException
-     *         when machine id is null
+     *         when {@code machineId} is null
      */
     public void addMachineIntoRuntime(String machineId) throws ConflictException, NotFoundException, ServerException {
         requireNonNull(machineId, "Require non-null machine id");
@@ -530,7 +530,7 @@ public class WorkspaceManager {
      * @throws MachineException
      *         when another error occurs
      * @throws NullPointerException
-     *         when machine id is null
+     *         when {@code machineId} is null
      */
     public void removeMachineFromRuntime(String machineId) throws NotFoundException, ConflictException, MachineException {
         requireNonNull(machineId, "Require non-null machine id");
