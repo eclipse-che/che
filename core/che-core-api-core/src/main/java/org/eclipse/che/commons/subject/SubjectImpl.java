@@ -12,10 +12,7 @@ package org.eclipse.che.commons.subject;
 
 import org.eclipse.che.api.core.ForbiddenException;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Objects;
 
 /**
  * Base implementation of {@link Subject}.
@@ -23,43 +20,21 @@ import java.util.Set;
  * @author andrew00x
  */
 public class SubjectImpl implements Subject {
-    private final String      name;
-    private final Set<String> roles;
-    private final String      token;
-    private final String      id;
-    private final boolean     isTemporary;
+    private final String  id;
+    private final String  name;
+    private final String  token;
+    private final boolean isTemporary;
 
-    public SubjectImpl(String name, String id, String token, Collection<String> roles, boolean isTemporary) {
+    public SubjectImpl(String name, String id, String token, boolean isTemporary) {
         this.name = name;
         this.id = id;
         this.token = token;
         this.isTemporary = isTemporary;
-        this.roles = roles == null ? Collections.<String>emptySet() : Collections.unmodifiableSet(new LinkedHashSet<>(roles));
-    }
-
-    @Deprecated
-    public SubjectImpl(String name, String id, String token, Collection<String> roles) {
-        this(name, id, token, roles, false);
-    }
-
-    @Deprecated
-    public SubjectImpl(String name, String token, Collection<String> roles) {
-        this(name, null, token, roles);
-    }
-
-    @Deprecated
-    public SubjectImpl(String name) {
-        this(name, null, null);
     }
 
     @Override
     public String getUserName() {
         return name;
-    }
-
-    @Override
-    public boolean isMemberOf(String role) {
-        return roles.contains(role);
     }
 
     @Override
@@ -88,40 +63,35 @@ public class SubjectImpl implements Subject {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof SubjectImpl)) return false;
 
-        SubjectImpl user = (SubjectImpl)o;
+        SubjectImpl other = (SubjectImpl)obj;
 
-        if (isTemporary != user.isTemporary) return false;
-        if (id != null ? !id.equals(user.id) : user.id != null) return false;
-        if (name != null ? !name.equals(user.name) : user.name != null) return false;
-        if (roles != null ? !roles.equals(user.roles) : user.roles != null) return false;
-        if (token != null ? !token.equals(user.token) : user.token != null) return false;
-
-        return true;
+        return Objects.equals(id, other.id)
+               && Objects.equals(name, other.name)
+               && Objects.equals(token, other.token)
+               && isTemporary == other.isTemporary;
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (roles != null ? roles.hashCode() : 0);
-        result = 31 * result + (token != null ? token.hashCode() : 0);
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        result = 31 * result + (isTemporary ? 1 : 0);
-        return result;
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(token);
+        hash = 31 * hash + Boolean.hashCode(isTemporary);
+        return hash;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("UserImpl{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", roles=").append(roles);
-        sb.append(", token='").append(token).append('\'');
-        sb.append(", id='").append(id).append('\'');
-        sb.append(", isTemporary=").append(isTemporary);
-        sb.append('}');
-        return sb.toString();
+        return "UserImpl{" +
+               "id='" + id + '\'' +
+               ", name='" + name + '\'' +
+               ", token='" + token + '\'' +
+               ", isTemporary=" + isTemporary +
+               '}';
     }
 }

@@ -33,7 +33,6 @@ import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -87,7 +86,6 @@ public class StackService extends Service {
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_CREATE_STACK)
-    @RolesAllowed("user")
     @ApiOperation(value = "Create a new stack",
                   notes = "This operation can be performed only by authorized user",
                   response = StackDto.class)
@@ -129,7 +127,6 @@ public class StackService extends Service {
     @Path("/{id}")
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_GET_STACK_BY_ID)
-    @RolesAllowed("user")
     @ApiOperation(value = "Get the stack by id",
                   notes = "This operation can be performed for stack owner, or for predefined stacks")
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested stack entity"),
@@ -145,10 +142,7 @@ public class StackService extends Service {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_UPDATE_STACK)
-    @RolesAllowed("user")
-    @ApiOperation(value = "Update the stack by replacing all the existing data (exclude field \"creator\") with update",
-                  notes = "This operation can be performed only by stack owner. But user with roles \"system/admin\" or \"system/manager\" " +
-                          "can update predefined stack.")
+    @ApiOperation(value = "Update the stack by replacing all the existing data (exclude field \"creator\") with update")
     @ApiResponses({@ApiResponse(code = 200, message = "The stack successfully updated"),
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 403, message = "The user does not have access to update the stack"),
@@ -186,9 +180,7 @@ public class StackService extends Service {
     @DELETE
     @Path("/{id}")
     @GenerateLink(rel = LINK_REL_REMOVE_STACK)
-    @RolesAllowed("user")
-    @ApiOperation(value = "Removes the stack",
-                  notes = "But user with roles \"system/admin\" or \"system/manager\" " + "can delete predefined stack.")
+    @ApiOperation(value = "Removes the stack")
     @ApiResponses({@ApiResponse(code = 204, message = "The stack successfully removed"),
                    @ApiResponse(code = 403, message = "The user does not have access to remove the stack"),
                    @ApiResponse(code = 404, message = "The stack doesn't exist"),
@@ -200,7 +192,6 @@ public class StackService extends Service {
     @GET
     @Produces(APPLICATION_JSON)
     @GenerateLink(rel = LINK_REL_SEARCH_STACKS)
-    @RolesAllowed("user")
     @ApiOperation(value = "Get the list stacks with required tags",
                   notes = "This operation can be performed only by authorized user",
                   response = StackDto.class,
@@ -230,7 +221,6 @@ public class StackService extends Service {
     @Path("/{id}/icon")
     @Produces("image/*")
     @GenerateLink(rel = LINK_REL_GET_ICON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Get icon by stack id",
                   notes = "This operation can be performed only by authorized user",
                   response = byte[].class)
@@ -258,7 +248,6 @@ public class StackService extends Service {
     @Consumes(MULTIPART_FORM_DATA)
     @Produces(TEXT_PLAIN)
     @GenerateLink(rel = LINK_REL_UPLOAD_ICON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Upload icon for required stack",
                   notes = "This operation can be performed only by authorized stack owner")
     @ApiResponses({@ApiResponse(code = 200, message = "Image was successfully uploaded"),
@@ -287,7 +276,6 @@ public class StackService extends Service {
     @DELETE
     @Path("/{id}/icon")
     @GenerateLink(rel = LINK_REL_DELETE_ICON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Delete icon for required stack",
                   notes = "This operation can be performed only by authorized stack owner")
     @ApiResponses({@ApiResponse(code = 204, message = "Icon was successfully removed"),

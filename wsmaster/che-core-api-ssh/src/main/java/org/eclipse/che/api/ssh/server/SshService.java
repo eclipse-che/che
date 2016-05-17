@@ -32,7 +32,6 @@ import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.api.ssh.shared.model.SshPair;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -73,7 +72,6 @@ public class SshService extends Service {
     @Path("generate")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
     @GenerateLink(rel = Constants.LINK_REL_GENERATE_PAIR)
     @ApiOperation(value = "Generate and stores ssh pair based on the request",
                   notes = "This operation can be performed only by authorized user," +
@@ -99,7 +97,6 @@ public class SshService extends Service {
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
-    @RolesAllowed("user")
     @GenerateLink(rel = Constants.LINK_REL_CREATE_PAIR)
     public Response createPair(Iterator<FileItem> formData) throws BadRequestException, ServerException, ConflictException {
         String service = null;
@@ -143,7 +140,6 @@ public class SshService extends Service {
 
     @POST
     @Consumes(APPLICATION_JSON)
-    @RolesAllowed("user")
     @GenerateLink(rel = Constants.LINK_REL_CREATE_PAIR)
     @ApiOperation(value = "Create a new ssh pair",
                   notes = "This operation can be performed only by authorized user," +
@@ -168,7 +164,6 @@ public class SshService extends Service {
     @GET
     @Path("{service}/{name}")
     @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Get the ssh pair by the name of pair and name of service owned by the current user",
                   notes = "This operation can be performed only by authorized user.")
     @ApiResponses({@ApiResponse(code = 200, message = "The ssh pair successfully fetched"),
@@ -185,7 +180,6 @@ public class SshService extends Service {
 
     @DELETE
     @Path("{service}/{name}")
-    @RolesAllowed("user")
     @ApiOperation(value = "Remove the ssh pair by the name of pair and name of service owned by the current user")
     @ApiResponses({@ApiResponse(code = 204, message = "The ssh pair successfully removed"),
                    @ApiResponse(code = 404, message = "The ssh pair doesn't exist"),
@@ -202,7 +196,6 @@ public class SshService extends Service {
     @GET
     @Path("{service}")
     @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Get the ssh pairs by name of service owned by the current user",
                   notes = "This operation can be performed only by authorized user.",
                   response = SshPairDto.class,

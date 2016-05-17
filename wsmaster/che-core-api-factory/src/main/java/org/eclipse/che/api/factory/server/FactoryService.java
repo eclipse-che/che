@@ -43,7 +43,6 @@ import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -164,7 +163,6 @@ public class FactoryService extends Service {
     @POST
     @Consumes(MULTIPART_FORM_DATA)
     @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Create a Factory and return data",
                   notes = "Save factory to storage and return stored data. Field 'factory' should contains factory information.")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
@@ -236,7 +234,6 @@ public class FactoryService extends Service {
     @POST
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
-    @RolesAllowed("user")
     @ApiOperation(value = "Stores the factory from the configuration",
                   notes = "Stores the factory without pictures and returns instance of the stored factory with links")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
@@ -319,7 +316,6 @@ public class FactoryService extends Service {
      */
     @PUT
     @Path("/{id}")
-    @RolesAllowed("user")
     @Consumes(APPLICATION_JSON)
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Updates factory information by its id",
@@ -374,7 +370,6 @@ public class FactoryService extends Service {
      */
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("user")
     @ApiOperation(value = "Removes factory by its id",
                   notes = "Removes factory based on the factory id which is passed in a path parameter. " +
                           "For perform this operation user needs respective rights")
@@ -412,7 +407,6 @@ public class FactoryService extends Service {
     @GET
     @Path("/find")
     @Produces(APPLICATION_JSON)
-    @RolesAllowed({"user", "system/manager"})
     @ApiOperation(value = "Get Factory by attribute",
                   notes = "If specify more than one value for a single query parameter then will be taken first one")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),

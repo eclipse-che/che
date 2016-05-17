@@ -76,7 +76,7 @@ public class DashboardRedirectionFilterTest {
         EnvironmentContext context = new EnvironmentContext();
         context.setWorkspaceId("ws-id");
         context.setWorkspaceTemporary(false);
-        context.setSubject(new SubjectImpl("id123", "name", "token123", Arrays.asList("user"), false));
+        context.setSubject(new SubjectImpl("id123", "name", "token123", false));
         EnvironmentContext.setCurrent(context);
 
         //when

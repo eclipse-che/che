@@ -64,7 +64,7 @@ public class GitTestUtil {
     }
 
     public static GitConnection getTestUserConnection(GitConnectionFactory connectionFactory, File repository) throws GitException {
-        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null, Arrays.asList("workspace/developer"), false));
+        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null, false));
         return connectionFactory.getConnection(repository, NULL);
     }
 

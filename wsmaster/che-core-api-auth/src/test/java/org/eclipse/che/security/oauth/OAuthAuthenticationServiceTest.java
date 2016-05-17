@@ -68,8 +68,7 @@ public class OAuthAuthenticationServiceTest {
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext context = EnvironmentContext.getCurrent();
-            context.setSubject(new SubjectImpl(JettyHttpServer.ADMIN_USER_NAME, "id-2314", "token-2323",
-                                               Collections.<String>emptyList(), false));
+            context.setSubject(new SubjectImpl(JettyHttpServer.ADMIN_USER_NAME, "id-2314", "token-2323", false));
         }
 
     }
