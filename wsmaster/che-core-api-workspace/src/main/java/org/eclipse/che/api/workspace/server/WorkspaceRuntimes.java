@@ -284,6 +284,7 @@ public class WorkspaceRuntimes {
     /**
      * Removes machine from running workspace.
      * This method do not touch workspace configuration and is opposite to {@link #addMachine(MachineImpl)}
+     * Does nothing if remove nonexistent machine
      *
      * @param machine
      *         machine to remove from specified runtime
@@ -300,7 +301,13 @@ public class WorkspaceRuntimes {
                 throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
             }
 
-            descriptor.getRuntime().getMachines().remove(machine);
+            List<MachineImpl> machines = descriptor.getRuntime().getMachines();
+            for (int i = 0; i < machines.size(); i++) {
+                if (machine.getId().equals(machines.get(i).getId())) {
+                    machines.remove(i);
+                    break;
+                }
+            }
         } finally {
             rwLock.writeLock().unlock();
         }

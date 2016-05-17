@@ -410,7 +410,7 @@ public class WorkspaceRuntimesTest {
     }
 
     @Test
-    public void shouldInjectNewMachine() throws NotFoundException, ServerException, ConflictException {
+    public void shouldAddNewMachineIntoRuntime() throws NotFoundException, ServerException, ConflictException {
         final WorkspaceImpl workspace = createWorkspace();
         final MachineImpl machine = createMachine(new MachineConfigImpl());
 
@@ -433,7 +433,7 @@ public class WorkspaceRuntimesTest {
     }
 
     @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionIfWorkspaceIsNotRunning() throws NotFoundException, ServerException, ConflictException {
+    public void shouldThrowNotFoundExceptionIfWorkspaceIsNotRunningWhenAddMachine() throws NotFoundException, ServerException, ConflictException {
         when(machine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
         runtimes.addMachine(machine);
