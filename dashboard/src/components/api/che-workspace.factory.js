@@ -341,7 +341,8 @@ export class CheWorkspace {
     for (let i = 0; i < workspace.runtime.links.length; i++) {
       let link = workspace.runtime.links[i];
       if (link.rel === 'wsagent.websocket') {
-        return link.href + '/ws/' + workspaceId;
+        let href = link.href.endsWith('/') ? link.href : link.href + '/';
+        return href + 'ws/' + workspaceId;
       }
     }
     return '';
