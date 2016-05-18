@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.everrest;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.everrest.core.DependencySupplier;
@@ -18,6 +21,8 @@ import org.everrest.core.impl.ApplicationProviderBinder;
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.EverrestProcessor;
 import org.everrest.core.impl.ProviderBinder;
+import org.everrest.core.impl.RequestDispatcher;
+import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.provider.json.JsonException;
 import org.everrest.core.tools.SimplePrincipal;
 import org.everrest.core.tools.SimpleSecurityContext;
@@ -47,13 +52,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static javax.websocket.server.ServerEndpointConfig.Builder.create;
 import static javax.websocket.server.ServerEndpointConfig.Configurator;
-
-import com.google.common.base.MoreObjects;
 
 /**
  * @author andrew00x
@@ -65,8 +66,6 @@ public class ServerContainerInitializeListener implements ServletContextListener
     public static final String EVERREST_CONFIG_ATTRIBUTE    = EverrestConfiguration.class.getName();
     public static final String EXECUTOR_ATTRIBUTE           = "everrest.Executor";
     public static final String SECURITY_CONTEXT             = SecurityContext.class.getName();
-
-    private static final AtomicLong sequence = new AtomicLong(1);
 
     private WebApplicationDeclaredRoles webApplicationDeclaredRoles;
     private EverrestConfiguration       everrestConfiguration;
@@ -161,9 +160,10 @@ public class ServerContainerInitializeListener implements ServletContextListener
         final DependencySupplier dependencies = (DependencySupplier)servletContext.getAttribute(DependencySupplier.class.getName());
         final ResourceBinder resources = (ResourceBinder)servletContext.getAttribute(ResourceBinder.class.getName());
         final ProviderBinder providers = (ProviderBinder)servletContext.getAttribute(ApplicationProviderBinder.class.getName());
-        final EverrestConfiguration copy = getEverrestConfiguration(servletContext);
-        copy.setProperty(EverrestConfiguration.METHOD_INVOKER_DECORATOR_FACTORY, WebSocketMethodInvokerDecoratorFactory.class.getName());
-        return new EverrestProcessor(resources, providers, dependencies, copy, null);
+        final EverrestConfiguration copyOfEverrestConfiguration = new EverrestConfiguration(getEverrestConfiguration(servletContext));
+        copyOfEverrestConfiguration.setProperty(EverrestConfiguration.METHOD_INVOKER_DECORATOR_FACTORY, WebSocketMethodInvokerDecoratorFactory.class.getName());
+        final RequestHandlerImpl requestHandler = new RequestHandlerImpl(new RequestDispatcher(resources), providers);
+        return new EverrestProcessor(copyOfEverrestConfiguration, dependencies, requestHandler, null);
     }
 
     protected EverrestConfiguration getEverrestConfiguration(ServletContext servletContext) {
@@ -172,15 +172,9 @@ public class ServerContainerInitializeListener implements ServletContextListener
 
     protected ExecutorService createExecutor(final ServletContext servletContext) {
         final EverrestConfiguration everrestConfiguration = getEverrestConfiguration(servletContext);
-        return Executors.newFixedThreadPool(everrestConfiguration.getAsynchronousPoolSize(), new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                final Thread t =
-                        new Thread(r, "everrest.WSConnection." + servletContext.getServletContextName() + sequence.getAndIncrement());
-                t.setDaemon(true);
-                return t;
-            }
-        });
+        final String threadNameFormat = "everrest.WSConnection." + servletContext.getServletContextName() + "-%d";
+        return Executors.newFixedThreadPool(everrestConfiguration.getAsynchronousPoolSize(),
+                                            new ThreadFactoryBuilder().setNameFormat(threadNameFormat).setDaemon(true).build());
     }
 
     protected SecurityContext createSecurityContext(final HandshakeRequest req) {
