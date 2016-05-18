@@ -73,7 +73,7 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.workspace.server.event.StopWorkspaceOnDestroyDevMachine.class).asEagerSingleton();
         bind(org.eclipse.che.api.workspace.server.event.CleanUpNonDevMachineOnStop.class).asEagerSingleton();
-        //bind(org.eclipse.che.api.workspace.server.event.AddJustRunMachineIntoWorkspaceRuntime.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.AddJustRunMachineIntoWorkspaceRuntime.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
                 .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);
