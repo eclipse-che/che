@@ -16,7 +16,7 @@ import org.eclipse.che.api.auth.shared.dto.OAuthToken;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.assured.JettyHttpServer;
@@ -68,8 +68,8 @@ public class OAuthAuthenticationServiceTest {
     public static class EnvironmentFilter implements RequestFilter {
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext context = EnvironmentContext.getCurrent();
-            context.setUser(new UserImpl(JettyHttpServer.ADMIN_USER_NAME, "id-2314", "token-2323",
-                                         Collections.<String>emptyList(), false));
+            context.setSubject(new SubjectImpl(JettyHttpServer.ADMIN_USER_NAME, "id-2314", "token-2323",
+                                               Collections.<String>emptyList(), false));
         }
 
     }

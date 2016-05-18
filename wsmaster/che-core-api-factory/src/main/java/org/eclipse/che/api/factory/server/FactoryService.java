@@ -39,7 +39,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.URLEncodedUtils;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -557,7 +557,7 @@ public class FactoryService extends Service {
                                    @QueryParam("path")
                                    String path)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
-        final String userId = EnvironmentContext.getCurrent().getUser().getId();
+        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
         final WorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
         if (!usersWorkspace.getNamespace().equals(userId)) {
             throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
@@ -597,7 +597,7 @@ public class FactoryService extends Service {
     private void excludeProjectsWithoutLocation(WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
         final boolean notEmptyPath = projectPath != null;
         //Condition for sifting valid project in user's workspace
-        Predicate<ProjectConfigImpl> predicate = projectConfig -> {
+        Predicate<ProjectConfig> predicate = projectConfig -> {
             // if project is a subproject (it's path contains another project) , then location can be null
             final boolean isSubProject = projectConfig.getPath().indexOf('/', 1) != -1;
             final boolean hasNotEmptySource = projectConfig.getSource() != null
@@ -625,15 +625,15 @@ public class FactoryService extends Service {
      * Adds to the factory information about creator and time of creation
      */
     private void processDefaults(Factory factory) {
-        final User currentUser = EnvironmentContext.getCurrent().getUser();
+        final Subject currentSubject = EnvironmentContext.getCurrent().getSubject();
         final Author creator = factory.getCreator();
         if (creator == null) {
-            factory.setCreator(newDto(Author.class).withUserId(currentUser.getId())
+            factory.setCreator(newDto(Author.class).withUserId(currentSubject.getUserId())
                                                    .withCreated(System.currentTimeMillis()));
             return;
         }
         if (isNullOrEmpty(creator.getUserId())) {
-            creator.setUserId(currentUser.getId());
+            creator.setUserId(currentSubject.getUserId());
         }
         if (creator.getCreated() == null) {
             creator.setCreated(System.currentTimeMillis());

@@ -102,7 +102,7 @@ public class TestService extends Service {
     @POST
     @Path("/token")
     public void checkAuthorization(@HeaderParam(HttpHeaders.AUTHORIZATION) String token) throws UnauthorizedException {
-        if (!EnvironmentContext.getCurrent().getUser().getToken().equals(token)) {
+        if (!EnvironmentContext.getCurrent().getSubject().getToken().equals(token)) {
             throw new UnauthorizedException("Token '" + token + "' it is different from token in EnvironmentContext");
         }
     }

@@ -19,7 +19,7 @@ import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.InitRequest;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class GitTestUtil {
     }
 
     public static GitConnection getTestUserConnection(GitConnectionFactory connectionFactory, File repository) throws GitException {
-        EnvironmentContext.getCurrent().setUser(new UserImpl("codenvy", "codenvy", null, Arrays.asList("workspace/developer"), false));
+        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null, Arrays.asList("workspace/developer"), false));
         return connectionFactory.getConnection(repository, NULL);
     }
 

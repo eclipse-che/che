@@ -47,7 +47,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         new File(root, "/normal/module").mkdir();
 
 
-        List<ProjectConfigDto> projects = new ArrayList<>();
+        List<ProjectConfig> projects = new ArrayList<>();
         projects.add(DtoFactory.newDto(ProjectConfigDto.class)
                                .withPath("/normal")
                                .withName("project1Name")
@@ -76,7 +76,7 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
         projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                null, fileWatcherNotificationHandler, fileTreeWatcher);
+                                null, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
     }
 

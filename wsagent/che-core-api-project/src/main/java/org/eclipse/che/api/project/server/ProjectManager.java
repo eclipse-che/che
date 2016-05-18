@@ -20,7 +20,6 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.ProjectType;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
@@ -81,6 +80,7 @@ public final class ProjectManager {
     private final FileTreeWatcher                fileWatcher;
     private final FileWatcherNotificationHandler fileWatchNotifier;
     private final ExecutorService                executor;
+    private final WorkspaceProjectsSyncer        workspaceProjectsHolder;
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
@@ -90,7 +90,8 @@ public final class ProjectManager {
                           ProjectHandlerRegistry handlers,
                           ProjectImporterRegistry importers,
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
-                          FileTreeWatcher fileTreeWatcher) throws ServerException {
+                          FileTreeWatcher fileTreeWatcher,
+                          WorkspaceProjectsSyncer workspaceProjectsHolder) throws ServerException {
         this.vfs = vfsProvider.getVirtualFileSystem();
         this.eventService = eventService;
         this.projectTypeRegistry = projectTypeRegistry;
@@ -99,6 +100,8 @@ public final class ProjectManager {
         this.importers = importers;
         this.fileWatchNotifier = fileWatcherNotificationHandler;
         this.fileWatcher = fileTreeWatcher;
+        this.workspaceProjectsHolder = workspaceProjectsHolder;
+
         executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
                                                 new ThreadFactoryBuilder().setNameFormat("ProjectService-IndexingThread-")
                                                                           .setDaemon(true).build());
@@ -246,6 +249,8 @@ public final class ProjectManager {
             throw e;
         }
 
+        workspaceProjectsHolder.sync(projectRegistry);
+
         projectRegistry.fireInitHandlers(project);
 
         return project;
@@ -287,6 +292,8 @@ public final class ProjectManager {
 
         final RegisteredProject project = projectRegistry.putProject(newConfig, baseFolder, true, false);
 
+        workspaceProjectsHolder.sync(projectRegistry);
+
         projectRegistry.fireInitHandlers(project);
 
         // TODO move to register?
@@ -310,7 +317,7 @@ public final class ProjectManager {
         // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
         String normalizePath = (path.startsWith("/")) ? path : "/".concat(path);
         final LineConsumerFactory outputOutputConsumerFactory =
-                () -> new ProjectImportOutputWSLineConsumer(normalizePath, projectRegistry.getWorkspaceId(), 300);
+                () -> new ProjectImportOutputWSLineConsumer(normalizePath, workspaceProjectsHolder.getWorkspaceId(), 300);
 
         FolderEntry folder = asFolder(normalizePath);
         if (folder != null && !rewrite) {
@@ -329,9 +336,7 @@ public final class ProjectManager {
         }
 
         final String name = folder.getPath().getName();
-        WorkspaceConfig workspaceConfig = projectRegistry.getWorkspaceConfig();
-        List<? extends ProjectConfig> projects = workspaceConfig.getProjects();
-        for (ProjectConfig project : projects) {
+        for (ProjectConfig project : workspaceProjectsHolder.getProjects()) {
             if (normalizePath.equals(project.getPath())) {
                 // TODO Needed for factory project importing with keepDir. It needs to find more appropriate solution
                 List<String> innerProjects = projectRegistry.getProjects(normalizePath);
@@ -339,10 +344,15 @@ public final class ProjectManager {
                     RegisteredProject registeredProject = projectRegistry.getProject(innerProject);
                     projectRegistry.putProject(registeredProject, asFolder(registeredProject.getPath()), true, false);
                 }
-                return projectRegistry.putProject(project, folder, true, false);
+                RegisteredProject rp = projectRegistry.putProject(project, folder, true, false);
+                workspaceProjectsHolder.sync(projectRegistry);
+                return rp;
             }
         }
-        return projectRegistry.putProject(new NewProjectConfig(normalizePath, name, BaseProjectType.ID, sourceStorage), folder, true, false);
+
+        RegisteredProject rp = projectRegistry.putProject(new NewProjectConfig(normalizePath, name, BaseProjectType.ID, sourceStorage), folder, true, false);
+        workspaceProjectsHolder.sync(projectRegistry);
+        return rp;
     }
 
     public ProjectTypeResolution estimateProject(String path, String projectTypeId) throws ServerException,
@@ -404,6 +414,8 @@ public final class ProjectManager {
 
         // delete child projects
         projectRegistry.removeProjects(apath);
+
+        workspaceProjectsHolder.sync(projectRegistry);
     }
 
     public VirtualFileEntry copyTo(String itemPath, String newParentPath, String newName, boolean overwrite) throws ServerException,

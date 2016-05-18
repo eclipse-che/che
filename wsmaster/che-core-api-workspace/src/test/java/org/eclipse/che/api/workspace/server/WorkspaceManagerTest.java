@@ -34,8 +34,8 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.user.User;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -123,8 +123,8 @@ public class WorkspaceManagerTest {
 
         EnvironmentContext.setCurrent(new EnvironmentContext() {
             @Override
-            public User getUser() {
-                return new UserImpl("Test User", USER_ID, "token", new ArrayList<>(), false);
+            public Subject getSubject() {
+                return new SubjectImpl("Test User", USER_ID, "token", new ArrayList<>(), false);
             }
         });
     }

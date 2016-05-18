@@ -52,7 +52,7 @@ public class GitHubFactory {
     private String getToken() throws ServerException, UnauthorizedException {
         OAuthToken token;
         try {
-            token = oauthTokenProvider.getToken("github", EnvironmentContext.getCurrent().getUser().getId());
+            token = oauthTokenProvider.getToken("github", EnvironmentContext.getCurrent().getSubject().getUserId());
         } catch (IOException e) {
             throw new ServerException(e.getMessage());
         }

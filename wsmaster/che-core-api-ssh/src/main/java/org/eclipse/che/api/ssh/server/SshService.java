@@ -219,7 +219,7 @@ public class SshService extends Service {
     }
 
     private static String getCurrentUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 
     private static SshPairDto asDto(SshPair pair) {

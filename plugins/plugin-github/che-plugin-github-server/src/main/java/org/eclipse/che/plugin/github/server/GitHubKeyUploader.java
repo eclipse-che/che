@@ -63,7 +63,7 @@ public class GitHubKeyUploader implements SshKeyUploader {
 
     @Override
     public void uploadKey(String publicKey) throws IOException, UnauthorizedException {
-        final OAuthToken token = tokenProvider.getToken("github", EnvironmentContext.getCurrent().getUser().getId());
+        final OAuthToken token = tokenProvider.getToken("github", EnvironmentContext.getCurrent().getSubject().getUserId());
 
         if (token == null || token.getToken() == null) {
             LOG.debug("Token not found, user need to authorize to upload key.");

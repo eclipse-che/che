@@ -57,7 +57,7 @@ import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.ResourceBinder;
 import org.everrest.core.impl.ApplicationContextImpl;
@@ -86,7 +86,6 @@ import java.net.URI;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -169,7 +168,7 @@ public class ProjectServiceTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        WorkspaceHolder workspaceHolder = new TestWorkspaceHolder();
+        WorkspaceProjectsSyncer workspaceHolder = new WsAgentTestBase.TestWorkspaceHolder();
 
         File root = new File(FS_PATH);
 
@@ -220,7 +219,7 @@ public class ProjectServiceTest {
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, null, ptRegistry, projectRegistry, phRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -264,7 +263,6 @@ public class ProjectServiceTest {
         dependencies.addComponent(ProjectManager.class, pm);
         dependencies.addComponent(ProjectImporterRegistry.class, importerRegistry);
         dependencies.addComponent(ProjectHandlerRegistry.class, phRegistry);
-//        dependencies.addComponent(SearcherProvider.class, new TestSercherProvider());
         dependencies.addComponent(EventService.class, eventService);
 
         ResourceBinder resources = new ResourceBinderImpl();
@@ -280,68 +278,15 @@ public class ProjectServiceTest {
 
             @Override
             public Set<Object> getSingletons() {
-                return new HashSet<>(Arrays.asList(/*new CodenvyJsonProvider(singleton(ContentStream.class)),*/
-                                                   /*new ContentStreamWriter(),*/
-                                                   new ApiExceptionMapper()));
+                return new HashSet<>(Arrays.asList(new ApiExceptionMapper()));
             }
         });
 
         ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, ProviderBinder.getInstance()));
 
         env = org.eclipse.che.commons.env.EnvironmentContext.getCurrent();
-//        env.setUser(new UserImpl(vfsUser, vfsUser, "dummy_token", vfsUserGroups, false));
-//        env.setWorkspaceName(workspace);
-//        env.setWorkspaceId(workspace);
     }
 
-
-    private static class TestWorkspaceHolder extends WorkspaceHolder {
-        private TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")
-                                                  .withProjects(new ArrayList<>())));
-        }
-
-        @Override
-        void addProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.addProject(project);
-            }
-        }
-
-        @Override
-        public void updateProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.updateProject(project);
-            }
-        }
-
-        @Override
-        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
-            projects.stream()
-                    .filter(project -> !project.isDetected())
-                    .forEach(workspace::removeProject);
-        }
-    }
-
-    private static class TestSearcherProvider implements SearcherProvider {
-
-        @Override
-        public Searcher getSearcher(VirtualFileSystem virtualFileSystem, boolean create) throws ServerException {
-            return null;
-        }
-
-        @Override
-        public Searcher getSearcher(VirtualFileSystem virtualFileSystem) throws ServerException {
-            return null;
-        }
-
-        @Override
-        public void close() throws ServerException {
-
-        }
-    }
 
     @Test
     @SuppressWarnings("unchecked")
@@ -433,7 +378,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetProjectCheckUserPermissions() throws Exception {
         // Without roles Collections.<String>emptySet() should get default set of permissions
-        env.setUser(new UserImpl(vfsUser, vfsUser, "dummy_token", Collections.<String>emptySet(), false));
+        env.setSubject(new SubjectImpl(vfsUser, vfsUser, "dummy_token", Collections.<String>emptySet(), false));
         ContainerResponse response =
                 launcher.service(GET, String.format("http://localhost:8080/api/project/%s/my_project", workspace),
                                  "http://localhost:8080/api", null, null, null);
@@ -1672,51 +1617,6 @@ public class ProjectServiceTest {
                 "http://localhost:8080/api", null, null, null);
         assertEquals(response.getStatus(), 404, "Error: " + response.getEntity());
     }
-
-//    @Test
-//    @SuppressWarnings("unchecked")
-//    public void testGetItemWithHandler() throws Exception {
-//        final ProjectImpl myProject = pm.getProject("my_project");
-//        GetItemHandler myHandler = new GetItemHandler() {
-//            @Override
-//            public void onGetItem(VirtualFileEntry virtualFile) {
-//
-//                virtualFile.getAttributeEntries().putProject("my", "myValue");
-//                if (virtualFile.isFile())
-//                    virtualFile.getAttributeEntries().putProject("file", "a");
-//            }
-//
-//            @Override
-//            public String getProjectType() {
-//                return "my_project_type";
-//            }
-//        };
-//        pm.getHandlers().register(myHandler);
-//
-//        FolderEntry a = myProject.getBaseFolder().createFolder("a");
-//        a.createFolder("b");
-//        a.createFile("test.txt", "test".getBytes());
-//        ContainerResponse response = launcher.service(GET,
-//                                                      String.format("http://localhost:8080/api/project/%s/item/my_project/a/b", workspace),
-//                                                      "http://localhost:8080/api", null, null, null);
-//        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-//
-//        ItemReference result = (ItemReference)response.getEntity();
-//        assertEquals(result.getName(), "b");
-//        assertNotNull(result.getCreated());
-//        assertNotNull(result.getModified());
-//        assertEquals(result.getAttributeEntries().size(), 1);
-//
-//        response = launcher.service(GET,
-//                                    String.format("http://localhost:8080/api/project/%s/item/my_project/a/test.txt", workspace),
-//                                    "http://localhost:8080/api", null, null, null);
-//        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
-//        result = (ItemReference)response.getEntity();
-//        assertEquals(result.getProjectType(), "file");
-//        //assertEquals(result.getMediaType(), TEXT_PLAIN);
-//        assertNotNull(result.getContentLength());
-//        assertEquals(result.getAttributeEntries().size(), 2);
-//    }
 
     @Test
     public void testGetTree() throws Exception {

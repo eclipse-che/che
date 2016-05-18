@@ -11,7 +11,7 @@
 package org.eclipse.che.everrest;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.subject.Subject;
 import org.everrest.core.DependencySupplier;
 import org.everrest.core.ResourceBinder;
 import org.everrest.core.impl.ApplicationProviderBinder;
@@ -22,7 +22,6 @@ import org.everrest.core.impl.provider.json.JsonException;
 import org.everrest.core.tools.SimplePrincipal;
 import org.everrest.core.tools.SimpleSecurityContext;
 import org.everrest.core.tools.WebApplicationDeclaredRoles;
-import org.everrest.websockets.WSConnectionImpl;
 import org.everrest.websockets.message.BaseTextDecoder;
 import org.everrest.websockets.message.BaseTextEncoder;
 import org.everrest.websockets.message.JsonMessageConverter;
@@ -44,11 +43,8 @@ import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpointConfig;
 import javax.ws.rs.core.SecurityContext;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -186,13 +182,13 @@ public class ServerContainerInitializeListener implements ServletContextListener
     protected SecurityContext createSecurityContext(final HandshakeRequest req) {
         final boolean isSecure = false; //todo: get somehow from request
         final String authType = "BASIC";
-        final User user = EnvironmentContext.getCurrent().getUser();
+        final Subject subject = EnvironmentContext.getCurrent().getSubject();
 
-        if (user == null) {
+        if (subject == null) {
             return new SimpleSecurityContext(isSecure);
         }
 
-        final Principal principal = new SimplePrincipal(user.getName());
+        final Principal principal = new SimplePrincipal(subject.getUserName());
         return new SecurityContext() {
 
             @Override
@@ -202,7 +198,7 @@ public class ServerContainerInitializeListener implements ServletContextListener
 
             @Override
             public boolean isUserInRole(String role) {
-                return user.isMemberOf(role);
+                return subject.isMemberOf(role);
             }
 
             @Override

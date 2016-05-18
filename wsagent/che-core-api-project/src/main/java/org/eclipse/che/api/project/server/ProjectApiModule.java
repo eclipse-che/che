@@ -31,6 +31,7 @@ public class ProjectApiModule extends AbstractModule {
 
     @Override
     protected void configure() {
+
         Multibinder<ProjectImporter> projectImportersMultibinder = Multibinder.newSetBinder(binder(), ProjectImporter.class);
         projectImportersMultibinder.addBinding().to(ZipProjectImporter.class);
 
@@ -44,5 +45,7 @@ public class ProjectApiModule extends AbstractModule {
         bind(ProjectService.class);
         bind(ProjectTypeService.class);
         bind(ProjectImportersService.class);
+
+        bind(WorkspaceProjectsSyncer.class).to(WorkspaceHolder.class);
     }
 }

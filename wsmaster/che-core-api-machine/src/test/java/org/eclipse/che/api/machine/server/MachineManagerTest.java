@@ -31,7 +31,7 @@ import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
@@ -106,7 +106,7 @@ public class MachineManagerTest {
                                          recipeDownloader));
 
         EnvironmentContext envCont = new EnvironmentContext();
-        envCont.setUser(new UserImpl(null, USER_ID, null, null, false));
+        envCont.setSubject(new SubjectImpl(null, USER_ID, null, null, false));
         EnvironmentContext.setCurrent(envCont);
 
         RecipeImpl recipe = new RecipeImpl().withScript("script").withType("Dockerfile");

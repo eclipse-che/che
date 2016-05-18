@@ -21,7 +21,7 @@ import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.user.UserImpl;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
 import org.eclipse.che.plugin.svn.server.SubversionException;
@@ -166,8 +166,8 @@ public class TestUtils {
      */
     public static void createTestUser(final UserProfileDao userProfileDao) throws Exception {
         // set current user
-        EnvironmentContext.getCurrent().setUser(new UserImpl("codenvy", "codenvy", null,
-                                                             Arrays.asList("workspace/developer"), false));
+        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null,
+                                                                   Arrays.asList("workspace/developer"), false));
 
         // rules for mock
         final Map<String, String> profileAttributes = new HashMap<>();

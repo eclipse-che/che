@@ -14,12 +14,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.TestWorkspaceHolder;
+import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
@@ -29,6 +30,7 @@ import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
 import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
@@ -47,8 +49,10 @@ import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
 import java.nio.file.PathMatcher;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -138,7 +142,7 @@ public abstract class BaseTest {
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, new TestWorkspaceHolder(new ArrayList<>()));
 
         plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> pm);
 
@@ -226,6 +230,46 @@ public abstract class BaseTest {
         protected TestProjectType() {
             super("test", "test", true, true);
         }
+    }
+
+    protected static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
+
+        private List<ProjectConfigDto> projects;
+
+        public TestWorkspaceHolder() {
+            this.projects = new ArrayList<>();
+        }
+
+        public TestWorkspaceHolder(List<ProjectConfigDto> projects) {
+            this.projects = projects;
+        }
+
+        @Override
+        public List<? extends ProjectConfig> getProjects() {
+            return projects;
+        }
+
+        @Override
+        public String getWorkspaceId() {
+            return "id";
+        }
+
+        @Override
+        protected void addProject(ProjectConfig project) throws ServerException {
+
+        }
+
+        @Override
+        protected void updateProject(ProjectConfig project) throws ServerException {
+
+        }
+
+        @Override
+        protected void removeProject(ProjectConfig project) throws ServerException {
+
+        }
+
+
     }
 
 }

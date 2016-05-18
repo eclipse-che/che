@@ -491,6 +491,6 @@ public class UserService extends Service {
     }
 
     private String currentUserId() {
-        return EnvironmentContext.getCurrent().getUser().getId();
+        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 }

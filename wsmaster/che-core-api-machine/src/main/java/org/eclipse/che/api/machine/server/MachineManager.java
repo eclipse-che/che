@@ -316,7 +316,7 @@ public class MachineManager {
         }
 
         final String machineId = generateMachineId();
-        final String creator = EnvironmentContext.getCurrent().getUser().getId();
+        final String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
 
         if (machineConfig.getLimits().getRam() == 0) {
             machineConfig.setLimits(new LimitsImpl(defaultMachineMemorySizeMB));

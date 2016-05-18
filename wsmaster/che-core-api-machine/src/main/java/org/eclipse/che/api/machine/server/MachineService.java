@@ -123,7 +123,7 @@ public class MachineService extends Service {
 
         requiredNotNull(workspaceId, "Parameter workspace");
 
-        final String userId = EnvironmentContext.getCurrent().getUser().getId();
+        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
 
         return machineManager.getMachines(userId, workspaceId)
                              .stream()
@@ -168,7 +168,7 @@ public class MachineService extends Service {
 
         requiredNotNull(workspaceId, "Parameter workspace");
 
-        final List<SnapshotImpl> snapshots = machineManager.getSnapshots(EnvironmentContext.getCurrent().getUser().getId(), workspaceId);
+        final List<SnapshotImpl> snapshots = machineManager.getSnapshots(EnvironmentContext.getCurrent().getSubject().getUserId(), workspaceId);
 
         return snapshots.stream()
                         .map(DtoConverter::asDto)
@@ -198,7 +198,7 @@ public class MachineService extends Service {
 
         requiredNotNull(newSnapshotDescriptor, "Snapshot description");
         return injectLinks(DtoConverter.asDto(machineManager.save(machineId,
-                                                                  EnvironmentContext.getCurrent().getUser().getId(),
+                                                                  EnvironmentContext.getCurrent().getSubject().getUserId(),
                                                                   newSnapshotDescriptor.getDescription())));
     }
 

@@ -96,7 +96,7 @@ public class PomChangeListener {
                     projects.stream().map(project -> workspace.getRoot().getProject(project)).collect(Collectors.toList());
             mavenWorkspace.update(projectsList);
         } catch (Throwable t) {
-            t.printStackTrace();
+            JavaPlugin.log(t);
         }
     }
 }
