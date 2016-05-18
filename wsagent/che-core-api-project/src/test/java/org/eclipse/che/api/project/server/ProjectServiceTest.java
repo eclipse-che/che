@@ -113,6 +113,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -1771,8 +1772,14 @@ public class ProjectServiceTest {
         assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
         List<ItemReference> result = (List<ItemReference>)response.getEntity();
         assertEquals(result.size(), 2);
-        Assert.assertTrue(result.get(0).getPath().equals("/my_project/a/b/test.txt"));
-        Assert.assertTrue(result.get(1).getPath().equals("/my_project/x/y/test.txt"));
+        assertEqualsNoOrder(new Object[] {
+                                    result.get(0).getPath(),
+                                    result.get(1).getPath()
+                            },
+                            new Object[] {
+                                    "/my_project/a/b/test.txt",
+                                    "/my_project/x/y/test.txt"
+                            });
     }
 
     @SuppressWarnings("unchecked")
