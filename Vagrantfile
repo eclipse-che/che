@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
   config.ssh.insert_key = false
   config.vm.network :private_network, ip: $ip
   config.vm.network "forwarded_port", guest: 8080, host: $port
-  config.vm.synced_folder ".", "/home/vagrant/.che"
+  config.vm.synced_folder ".", "/home/user/che"
   config.vm.define "che" do |che|
   end
 
@@ -48,25 +48,21 @@ Vagrant.configure(2) do |config|
     HTTPS_PROXY=$2
     NO_PROXY=$3
     CHE_VERSION=$4
-
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-	    echo "-------------------------------------"
-	    echo "."
-	    echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
-	    echo "."
-	    echo "-------------------------------------"
-	    echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
-	    echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
-	    source /home/vagrant/.bashrc
-
+      echo "-------------------------------------"
+      echo "."
+      echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
+      echo "."
+      echo "-------------------------------------"
+      echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
+      echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
+      source /home/vagrant/.bashrc
       echo 'http.proxy="'$HTTP_PROXY'"' >> /home/user/che/che.properties
       echo 'https.proxy="'$HTTPS_PROXY'"' >> /home/user/che/che.properties
-
-	    echo "HTTP PROXY set to: $HTTP_PROXY"
-	    echo "HTTPS PROXY set to: $HTTPS_PROXY"
+      echo "HTTP PROXY set to: $HTTP_PROXY"
+      echo "HTTPS PROXY set to: $HTTPS_PROXY"
       more /home/vagrant/che.properties
     fi
-
     # Add the user in the VM to the docker group
     echo "------------------------------------"
     echo "ECLIPSE CHE: UPGRADING DOCKER ENGINE"
@@ -77,14 +73,11 @@ Vagrant.configure(2) do |config|
       printf "#"
       sleep 5
     done
-
  
     # Add the 'vagrant' user to the 'docker' group
     usermod -aG docker vagrant &>/dev/null
-
     # We need write access to this file to enable Che container to create other containers
     sudo chmod 777 /var/run/docker.sock &>/dev/null
-
     # Configure Docker daemon with the proxy
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
         mkdir /etc/systemd/system/docker.service.d
@@ -101,7 +94,6 @@ Vagrant.configure(2) do |config|
         systemctl daemon-reload
         systemctl restart docker
     fi
-
     echo "-------------------------------------------------"
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGE"
     echo "-------------------------------------------------"
@@ -115,19 +107,17 @@ Vagrant.configure(2) do |config|
   SHELL
 
   config.vm.provision "shell" do |s| 
-  	s.inline = $script
-  	s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
+    s.inline = $script
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
   end
 
   $script2 = <<-SHELL
     CHE_VERSION=$1
     IP=$2
     PORT=$3
-
     echo "---------------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE SERVER"
     echo "---------------------------------------"
-
     docker run --net=host --name=che --restart=always --detach `
               `-v /var/run/docker.sock:/var/run/docker.sock `
               `-v /home/user/che/lib:/home/user/che/lib-copy `
@@ -149,9 +139,7 @@ Vagrant.configure(2) do |config|
         exit 0
       fi 
       sleep 5
-
     done
-
   SHELL
 
   config.vm.provision "shell", run: "always" do |s|
