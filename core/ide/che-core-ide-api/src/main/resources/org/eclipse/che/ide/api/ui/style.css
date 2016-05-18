@@ -180,6 +180,9 @@
 @def largeDropdownLabel 12px;
 @def buttonFontSize 11px;
 
+@def consoleFontSize 11px;
+@def consoleLineHeight 13px;
+
 /* Fonts */
 @def alternativeFontFamily "Helvetica Neue", "Myriad Pro","open sans", arial, sans-serif;
 @def fileTreeFontFamily "Helvetica Neue", "Myriad Pro","Lucida Grande", Verdana, Arial;

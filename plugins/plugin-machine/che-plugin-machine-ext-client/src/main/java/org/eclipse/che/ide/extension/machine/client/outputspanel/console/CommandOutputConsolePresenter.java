@@ -24,7 +24,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
-import org.eclipse.che.ide.extension.machine.client.processes.event.ProcessFinishedEvent;
+import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -62,6 +62,11 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private MessageHandler               outputHandler;
     private boolean                      finished;
 
+    /** Wrap text or not */
+    private boolean                      wrapText = false;
+    /** Follow output when printing text */
+    private boolean                      followOutput = true;
+
     private List<ConsoleOutputListener>  outputListenes = new ArrayList<>();
 
     @Inject
@@ -90,7 +95,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
             commandManager.substituteProperties(previewUrl).then(new Operation<String>() {
                 @Override
                 public void apply(String arg) throws OperationException {
-                    view.printPreviewUrl(arg);
+                    view.showPreviewUrl(arg);
                 }
             });
         } else {
@@ -144,7 +149,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     public void attachToProcess(final MachineProcessDto process) {
         this.pid = process.getPid();
 
-        view.printCommandLine(process.getCommandLine());
+        view.showCommandLine(process.getCommandLine());
 
         final Unmarshallable<MachineProcessEvent> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(MachineProcessEvent.class);
         final String processStateChannel = "machine:process:" + machineId;
@@ -225,6 +230,33 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void addOutputListener(ConsoleOutputListener listener) {
         outputListenes.add(listener);
+    }
+
+    @Override
+    public void wrapTextButtonClicked() {
+        wrapText = !wrapText;
+        view.wrapText(wrapText);
+        view.toggleWrapTextButton(wrapText);
+    }
+
+    @Override
+    public void scrollToEndButtonClicked() {
+        followOutput = true;
+
+        view.scrollToEnd();
+        view.enableScrollToEndButton(false);
+    }
+
+    @Override
+    public void clearConsoleButtonClicked() {
+        view.clearConsole();
+        view.scrollToEnd();
+    }
+
+    @Override
+    public void onOutputScrolled(boolean bottomReached) {
+        followOutput = bottomReached;
+        view.enableScrollToEndButton(!bottomReached);
     }
 
 }

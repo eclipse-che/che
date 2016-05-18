@@ -15,6 +15,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,6 +26,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -41,6 +44,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     private static final OutputConsoleViewUiBinder UI_BINDER   = GWT.create(OutputConsoleViewUiBinder.class);
+
+    private ActionDelegate delegate;
 
     @UiField
     DockLayoutPanel consolePanel;
@@ -66,6 +71,15 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     @UiField
     Anchor          previewUrlLabel;
 
+    @UiField
+    HTML            wrapTextButton;
+
+    @UiField
+    HTML            scrollToEndButton;
+
+    @UiField
+    HTML            clearConsoleButton;
+
     /** If true - next printed line should replace the previous one. */
     private boolean carriageReturn;
 
@@ -79,10 +93,38 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     public OutputConsoleViewImpl() {
         initWidget(UI_BINDER.createAndBindUi(this));
         scrollPanel.addDomHandler(this, ScrollEvent.getType());
+
+        wrapTextButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if (!wrapTextButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.wrapTextButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        scrollToEndButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if (!scrollToEndButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.scrollToEndButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        clearConsoleButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if (!clearConsoleButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.clearConsoleButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -96,12 +138,50 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
-    public void printCommandLine(String commandLine) {
+    public void wrapText(boolean wrap) {
+        if (wrap) {
+            consoleLines.getElement().setAttribute("wrap", "");
+        } else {
+            consoleLines.getElement().removeAttribute("wrap");
+        }
+    }
+
+    @Override
+    public void scrollToEnd() {
+        followOutput = true;
+        followOutput();
+    }
+
+    @Override
+    public void clearConsole() {
+        consoleLines.getElement().setInnerHTML("");
+    }
+
+    @Override
+    public void toggleWrapTextButton(boolean toggle) {
+        if (toggle) {
+            wrapTextButton.getElement().setAttribute("toggled", "");
+        } else {
+            wrapTextButton.getElement().removeAttribute("toggled");
+        }
+    }
+
+    @Override
+    public void enableScrollToEndButton(boolean enable) {
+        if (enable) {
+            scrollToEndButton.getElement().removeAttribute("disabled");
+        } else {
+            scrollToEndButton.getElement().setAttribute("disabled", "");
+        }
+    }
+
+    @Override
+    public void showCommandLine(String commandLine) {
         commandLabel.setText(commandLine);
     }
 
     @Override
-    public void printPreviewUrl(String previewUrl) {
+    public void showPreviewUrl(String previewUrl) {
         if (Strings.isNullOrEmpty(previewUrl)) {
             hidePreview();
         } else {
@@ -112,7 +192,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
-    public void print(String message, boolean cr) {
+    public void print(String text, boolean cr) {
         if (carriageReturn) {
             Node lastChild = consoleLines.getElement().getLastChild();
             if (lastChild != null) {
@@ -123,7 +203,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         carriageReturn = cr;
 
         PreElement pre = DOM.createElement("pre").cast();
-        pre.setInnerText(message.isEmpty() ? " " : message);
+        pre.setInnerText(text.isEmpty() ? " " : text);
         consoleLines.getElement().appendChild(pre);
 
         followOutput();
@@ -133,6 +213,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     public void onScroll(ScrollEvent event) {
         // Do nothing if content height less scroll area height
         if (scrollPanel.getElement().getScrollHeight() < scrollPanel.getElement().getOffsetHeight()) {
+            if (delegate != null) {
+                delegate.onOutputScrolled(true);
+            }
             return;
         }
 
@@ -141,6 +224,10 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
             followOutput = true;
         } else {
             followOutput = false;
+        }
+
+        if (delegate != null) {
+            delegate.onOutputScrolled(followOutput);
         }
     }
 

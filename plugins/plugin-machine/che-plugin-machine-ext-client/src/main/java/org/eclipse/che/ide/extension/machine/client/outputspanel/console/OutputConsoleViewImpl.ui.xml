@@ -16,7 +16,63 @@
     <ui:with field="locale" type="org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant"/>
 
     <ui:style  src="org/eclipse/che/ide/api/ui/style.css">
-        .background {
+
+        @eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
+
+        /**
+         * Toolbar on the left with buttons.
+         */
+        .toolbar {
+            overflow: hidden;
+            background-color: #373737;
+        }
+
+        .toolbarButton {
+            width: 18px;
+            height: 18px;
+            margin-left: 2px;
+            margin-top: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            line-height: 19px;
+            font-family: "Droid Sans Mono", monospace;
+            text-align: center;
+            font-weight: normal;
+            overflow: hidden;
+            border-radius: 3px;
+            color: #aaaaaa;
+            opacity: 0.8;
+        }
+
+        .toolbarButton:HOVER {
+            color: #e0e0e0;
+            opacity: 1;
+        }
+
+        .toolbarButton:ACTIVE {
+            color: white;
+        }
+
+        .toolbarButton[toggled] {
+            opacity: 1;
+            background: #4eabff;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+            color: #FFFFFF !important;
+        }
+
+        .toolbarButton[disabled],
+        .toolbarButton[disabled]:HOVER,
+        .toolbarButton[disabled]:ACTIVE {
+            opacity: 0.4;
+            color: #777777;
+            background-color: transparent;
+            cursor: default;
+        }
+
+        /**
+         * Header with command line and preview URL.
+         */
+        .header {
             background-color: editorPanelBackgroundColor;
             -webkit-user-select: none;
             user-select: none;
@@ -59,41 +115,58 @@
             margin: 0;
         }
 
-        .commandConsole {
+        /**
+         * Console output area.
+         */
+        .console {
             background-color: outputBackgroundColor;
+            color: outputFontColor;
+            border-top: 1px solid separatorColor;
+
             -moz-user-select: text;
             -webkit-user-select: text;
             user-select: text;
-            color: outputFontColor;
             outline: none;
-            border-top: 1px solid separatorColor;
-            -webkit-box-shadow: outputBoxShadow;
-            -moz-box-shadow: outputBoxShadow;
-            box-shadow: outputBoxShadow;
+
             padding: 1px 3px 3px 3px;
-            margin-bottom: 3px;
+            margin-bottom: 0px;
         }
 
-        .commandConsole pre {
+        .console pre {
             font-family: outputFontFamily;
-            font-size: fontSize;
+            font-size: consoleFontSize;
+            line-height: consoleLineHeight;
         }
 
-        .commandConsoleLines {
+        .consoleLines {
             width: 100%;
         }
 
-        .commandConsoleLines > pre {
-            word-wrap: break-word;
+        .consoleLines > pre {
             width: inherit;
             padding: 0;
             margin: 0;
         }
+
+        .consoleLines[wrap] > pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+
+            word-wrap: break-word;
+        }
+
     </ui:style>
 
     <g:DockLayoutPanel ui:field="consolePanel" unit="PX" width="100%" height="100%">
+        <g:west size="22">
+            <g:FlowPanel styleName="{style.toolbar}">
+                <g:HTML ui:field="wrapTextButton" styleName="{style.toolbarButton}"><i class="fa fa-indent" /></g:HTML>
+                <g:HTML ui:field="scrollToEndButton" styleName="{style.toolbarButton}"><i class="fa fa-download" /></g:HTML>
+                <g:HTML ui:field="clearConsoleButton" styleName="{style.toolbarButton}"><i class="fa fa-remove" /></g:HTML>
+            </g:FlowPanel>
+        </g:west>
         <g:north size="14">
-            <g:FlowPanel ui:field="commandPanel" styleName="{style.background}">
+            <g:FlowPanel ui:field="commandPanel" styleName="{style.header}">
                 <g:Label ui:field="commandTitle" text="{locale.viewProcessesCommandTitle}"
                          addStyleNames="{style.label} {style.commandTitle}"/>
                 <g:Label ui:field="commandLabel"
@@ -101,17 +174,15 @@
             </g:FlowPanel>
         </g:north>
         <g:north size="14">
-            <g:FlowPanel ui:field="previewPanel" styleName="{style.background}">
-                <g:Label text="preview:"
-                         addStyleNames="{style.label} {style.commandTitle}"/>
+            <g:FlowPanel ui:field="previewPanel" styleName="{style.header}">
+                <g:Label text="preview:" addStyleNames="{style.label} {style.commandTitle}"/>
                 <g:Anchor ui:field="previewUrlLabel" target="_blank" title="Open in new window"
                           addStyleNames="{style.link} {style.value} {style.commandTitle}"/>
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:ScrollPanel ui:field="scrollPanel" debugId="commandConsoleScrollPanel" addStyleNames="{style.commandConsole}">
-                <g:FlowPanel width="100%" ui:field="consoleLines" debugId="commandConsoleLines"
-                             styleName="{style.commandConsoleLines}"/>
+            <g:ScrollPanel ui:field="scrollPanel" debugId="commandConsoleScrollPanel" styleName="{style.console}">
+                <g:FlowPanel width="100%" ui:field="consoleLines" debugId="commandConsoleLines" styleName="{style.consoleLines}"/>
             </g:ScrollPanel>
         </g:center>
     </g:DockLayoutPanel>
