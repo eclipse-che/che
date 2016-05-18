@@ -28,7 +28,7 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
 import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 
@@ -102,9 +102,9 @@ public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
     }
 
     private void updateClasspath(final CurrentProject currentProject, final FolderReferenceNode folder) {
-        classpathService.getClasspath(currentProject.getProjectConfig().getPath()).then(new Operation<List<ClasspathEntryDTO>>() {
+        classpathService.getClasspath(currentProject.getProjectConfig().getPath()).then(new Operation<List<ClasspathEntryDto>>() {
             @Override
-            public void apply(List<ClasspathEntryDTO> arg) throws OperationException {
+            public void apply(List<ClasspathEntryDto> arg) throws OperationException {
                 classpathResolver.resolveClasspathEntries(arg);
                 classpathResolver.getSources().add(folder.getStorablePath());
                 classpathResolver.updateClasspath();

@@ -11,9 +11,10 @@
 package org.eclipse.che.plugin.java.server.rest;
 
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
@@ -49,7 +50,7 @@ public class ClasspathService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ClasspathEntryDTO> getClasspath(@QueryParam("projectpath") String projectPath) throws JavaModelException {
+    public List<ClasspathEntryDto> getClasspath(@QueryParam("projectpath") String projectPath) throws JavaModelException {
         IJavaProject javaProject = model.getJavaProject(projectPath);
         IClasspathEntry[] entries = javaProject.getRawClasspath();
 
@@ -57,10 +58,21 @@ public class ClasspathService {
             return emptyList();
         }
 
-        List<ClasspathEntryDTO> entriesDTO = new ArrayList<>(entries.length);
+        return convertClasspathEntriesToDTO(javaProject, entries);
+    }
+
+    private List<ClasspathEntryDto> convertClasspathEntriesToDTO(IJavaProject javaProject,
+                                                                 IClasspathEntry[] entries) throws JavaModelException {
+        List<ClasspathEntryDto> entriesDTO = new ArrayList<>(entries.length);
         for (IClasspathEntry entry : entries) {
-            ClasspathEntryDTO entryDTO = DtoFactory.getInstance().createDto(ClasspathEntryDTO.class);
+            ClasspathEntryDto entryDTO = DtoFactory.getInstance().createDto(ClasspathEntryDto.class);
             entryDTO.withEntryKind(entry.getEntryKind()).withPath(entry.getPath().toOSString());
+            if (IClasspathEntry.CPE_CONTAINER == entry.getEntryKind()) {
+
+                IClasspathEntry[] subEntries = JavaCore.getClasspathContainer(entry.getPath(), javaProject).getClasspathEntries();
+
+                entryDTO.withExpandedEntries(convertClasspathEntriesToDTO(javaProject, subEntries));
+            }
             entriesDTO.add(entryDTO);
         }
 

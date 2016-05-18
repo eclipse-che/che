@@ -14,23 +14,27 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
-import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathResources;
-import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node.NodeWidget;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.AbstractClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.SelectNodePresenter;
-import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClassFolderNodeInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.JarNodeInterceptor;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.validation.constraints.NotNull;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
+import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.CONTAINER;
+import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 
 /**
  * The page for the information about libraries which are including into classpath.
@@ -38,42 +42,37 @@ import java.util.Map;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class LibEntryPresenter extends AbstractClasspathPagePresenter implements LibEntryView.ActionDelegate,
-                                                                                 NodeWidget.ActionDelegate {
-    private final ClasspathResolver         classpathResolver;
-    private final ProjectClasspathResources resources;
-    private final JavaResources             javaResources;
-    private final AppContext                appContext;
-    private final NodesResources            nodesResources;
-    private final SelectNodePresenter       selectNodePresenter;
-    private final LibEntryView              view;
+public class LibEntryPresenter extends AbstractClasspathPagePresenter implements LibEntryView.ActionDelegate {
+    private final ClasspathContainer  classpathContainer;
+    private final ClasspathResolver   classpathResolver;
+    private final DtoFactory          dtoFactory;
+    private final AppContext          appContext;
+    private final SelectNodePresenter selectNodePresenter;
+    private final LibEntryView        view;
 
-    private boolean                 dirty;
-    private boolean                 isMaven;
-    private Map<String, NodeWidget> pageNodes;
-    private String                  selectedNode;
+    private boolean                        dirty;
+    private boolean                        isPlainJava;
+    private Map<String, ClasspathEntryDto> categories;
 
     @Inject
     public LibEntryPresenter(LibEntryView view,
+                             ClasspathContainer classpathContainer,
                              ClasspathResolver classpathResolver,
                              JavaLocalizationConstant localization,
-                             ProjectClasspathResources resources,
-                             JavaResources javaResources,
+                             DtoFactory dtoFactory,
                              AppContext appContext,
-                             NodesResources nodesResources,
                              SelectNodePresenter selectNodePresenter) {
         super(localization.librariesPropertyName(), localization.javaBuildPathCategory(), null);
         this.view = view;
+        this.classpathContainer = classpathContainer;
         this.classpathResolver = classpathResolver;
-        this.resources = resources;
-        this.javaResources = javaResources;
+        this.dtoFactory = dtoFactory;
         this.appContext = appContext;
-        this.nodesResources = nodesResources;
         this.selectNodePresenter = selectNodePresenter;
 
-        pageNodes = new HashMap<>();
         dirty = false;
 
+        categories = new TreeMap<>();
         view.setDelegate(this);
     }
 
@@ -83,33 +82,32 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter implements
     }
 
     @Override
-    public void go(AcceptsOneWidget container) {
-        view.clear();
-
-        isMaven = "maven".equals(appContext.getCurrentProject().getProjectConfig().getType());
+    public void go(final AcceptsOneWidget container) {
+        ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
+        isPlainJava = "plainJava".equals(projectConfig.getType());
 
         setReadOnlyMod();
 
-        boolean dirtyState = dirty;
-        if (pageNodes.isEmpty()) {
-            for (String con : classpathResolver.getContainers()) {
-                addNode(con, ClasspathEntryKind.CONTAINER, javaResources.externalLibraries());
-            }
-            for (String lib : classpathResolver.getLibs()) {
-                addNode(lib, ClasspathEntryKind.LIBRARY, lib.endsWith(".jar") ? javaResources.jarFileIcon() : nodesResources.simpleFolder());
-            }
-        } else {
-            for (NodeWidget node : pageNodes.values()) {
-                view.addNode(node);
-            }
-        }
-
-        if (dirtyState != dirty) {
-            dirty = dirtyState;
-            delegate.onDirtyChanged();
-        }
-
         container.setWidget(view);
+
+        if (!categories.isEmpty()) {
+            view.renderLibraries();
+            return;
+        }
+
+        classpathContainer.getClasspathEntries(projectConfig.getPath()).then(new Operation<List<ClasspathEntryDto>>() {
+            @Override
+            public void apply(List<ClasspathEntryDto> arg) throws OperationException {
+                categories.clear();
+                for (ClasspathEntryDto entry : arg) {
+                    if (CONTAINER == entry.getEntryKind() || LIBRARY == entry.getEntryKind()) {
+                        categories.put(entry.getPath(), entry);
+                    }
+                }
+                view.setData(categories);
+                view.renderLibraries();
+            }
+        });
     }
 
     @Override
@@ -118,42 +116,30 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter implements
     }
 
     @Override
-    public void onAddClassFolderClicked() {
-        selectNodePresenter.show(this, new ClassFolderNodeInterceptor(), false);
-    }
-
-    @Override
-    public void onRemoveClicked() {
-        removeSelectedNode();
+    public void onRemoveClicked(String path) {
+        removeNode(path);
     }
 
     @Override
     public void storeChanges() {
         classpathResolver.getLibs().clear();
         classpathResolver.getContainers().clear();
-        for (NodeWidget node : pageNodes.values()) {
-            if (ClasspathEntryKind.LIBRARY == node.getKind()) {
-                classpathResolver.getLibs().add(node.getName());
-            } else if (ClasspathEntryKind.CONTAINER == node.getKind()) {
-                classpathResolver.getContainers().add(node.getName());
+
+        for (Map.Entry<String, ClasspathEntryDto> entry : categories.entrySet()) {
+            if (ClasspathEntryKind.LIBRARY == entry.getValue().getEntryKind()) {
+                classpathResolver.getLibs().add(entry.getKey());
+            } else if (CONTAINER == entry.getValue().getEntryKind()) {
+                classpathResolver.getContainers().add(entry.getValue());
             }
         }
+
         dirty = false;
         delegate.onDirtyChanged();
     }
 
     @Override
     public void revertChanges() {
-        view.clear();
-        pageNodes.clear();
-        selectedNode = null;
-
-        for (String con : classpathResolver.getContainers()) {
-            addNode(con, ClasspathEntryKind.CONTAINER, javaResources.externalLibraries());
-        }
-        for (String lib : classpathResolver.getLibs()) {
-            addNode(lib, ClasspathEntryKind.LIBRARY, javaResources.jarFileIcon());
-        }
+        clearData();
 
         dirty = false;
         delegate.onDirtyChanged();
@@ -161,63 +147,39 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter implements
 
     @Override
     public void clearData() {
-        selectedNode = null;
-        pageNodes.clear();
+        categories.clear();
+    }
+
+    @Override
+    public boolean isPlainJava() {
+        return isPlainJava;
     }
 
     @Override
     public void addNode(String path, int kind, SVGResource icon) {
-        if (pageNodes.keySet().contains(path)) {
+        if (categories.containsKey(path)) {
             return;
         }
-        if (selectedNode != null) {
-            pageNodes.get(selectedNode).deselect();
-        }
-        selectedNode = path;
-        NodeWidget addedNode = new NodeWidget(path, resources, kind, icon);
 
-        if (isMaven) {
-            addedNode.hideRemoveButton();
-        }
-
-        addedNode.setDelegate(this);
-        addedNode.select();
-        pageNodes.put(path, addedNode);
-        dirty = true;
-        view.addNode(addedNode);
-
-        delegate.onDirtyChanged();
-    }
-
-    @Override
-    public void removeSelectedNode() {
         dirty = true;
         delegate.onDirtyChanged();
-        view.removeNode(pageNodes.remove(selectedNode));
-        if (!pageNodes.isEmpty()) {
-            selectedNode = pageNodes.keySet().iterator().next();
-            pageNodes.get(selectedNode).select();
-        } else {
-            selectedNode = null;
-        }
+
+        categories.put(path, dtoFactory.createDto(ClasspathEntryDto.class).withEntryKind(kind));
+        view.setData(categories);
+        view.renderLibraries();
     }
 
     @Override
-    public void onNodeClicked(@NotNull NodeWidget nodeWidget) {
-        pageNodes.get(selectedNode).deselect();
-        nodeWidget.select();
-        selectedNode = nodeWidget.getName();
-    }
-
-    @Override
-    public void onRemoveButtonClicked( NodeWidget nodeWidget) {
-        onNodeClicked(nodeWidget);
-        removeSelectedNode();
+    public void removeNode(String path) {
+        dirty = true;
+        delegate.onDirtyChanged();
+        categories.remove(path);
+        view.setData(categories);
+        view.renderLibraries();
     }
 
     private void setReadOnlyMod() {
-        view.setAddClassFolderJarButtonState(!isMaven);
-        view.setAddJarButtonState(!isMaven);
+        view.setAddJarButtonState(isPlainJava);
     }
 
 }

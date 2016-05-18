@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.service;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
 import java.util.List;
 
@@ -31,6 +31,6 @@ public interface ClasspathServiceClient {
      *         path to the current project
      * @return list of classpath entries
      */
-    Promise<List<ClasspathEntryDTO>> getClasspath(String projectPath);
+    Promise<List<ClasspathEntryDto>> getClasspath(String projectPath);
 
 }

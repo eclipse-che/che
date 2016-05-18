@@ -12,25 +12,34 @@ package org.eclipse.che.ide.ext.java.shared.dto.classpath;
 
 import org.eclipse.che.dto.shared.DTO;
 
+import java.util.List;
+
 /**
  * DTO represents the information about classpath of the project.
  *
  * @author Valeriy Svydenko
  */
 @DTO
-public interface ClasspathEntryDTO {
+public interface ClasspathEntryDto {
     /** Returns type of the entry. */
     int getEntryKind();
 
     void setEntryKind(int kind);
 
-    ClasspathEntryDTO withEntryKind(int kind);
+    ClasspathEntryDto withEntryKind(int kind);
 
     /** Returns path to the entry. */
     String getPath();
 
     void setPath(String path);
 
-    ClasspathEntryDTO withPath(String path);
+    ClasspathEntryDto withPath(String path);
+
+    /** Returns sub entries. */
+    List<ClasspathEntryDto> getExpandedEntries();
+
+    void setExpandedEntries(List<ClasspathEntryDto> expandedEntries);
+
+    ClasspathEntryDto withExpandedEntries(List<ClasspathEntryDto> expandedEntries);
 
 }
