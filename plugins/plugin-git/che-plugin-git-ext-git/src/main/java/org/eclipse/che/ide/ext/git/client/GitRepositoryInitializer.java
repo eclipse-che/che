@@ -96,19 +96,5 @@ public class GitRepositoryInitializer {
 
             return;
         }
-
-        gitService.getGitReadOnlyUrl(appContext.getDevMachine(),
-                                     project,
-                                     new AsyncRequestCallback<String>(new StringUnmarshaller()) {
-                                         @Override
-                                         protected void onSuccess(String result) {
-                                             callback.onSuccess(result);
-                                         }
-
-                                         @Override
-                                         protected void onFailure(Throwable exception) {
-                                             callback.onFailure(exception);
-                                         }
-                                     });
     }
 }
