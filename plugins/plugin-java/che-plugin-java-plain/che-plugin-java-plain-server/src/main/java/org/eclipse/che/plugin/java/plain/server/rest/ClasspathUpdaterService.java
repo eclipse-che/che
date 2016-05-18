@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.server.NewProjectConfig;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -84,7 +84,7 @@ public class ClasspathUpdaterService {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateClasspath(@QueryParam("projectpath") String projectPath, List<ClasspathEntryDTO> entries) throws JavaModelException,
+    public void updateClasspath(@QueryParam("projectpath") String projectPath, List<ClasspathEntryDto> entries) throws JavaModelException,
                                                                                                                        ServerException,
                                                                                                                        ForbiddenException,
                                                                                                                        ConflictException,
@@ -114,9 +114,9 @@ public class ClasspathUpdaterService {
         projectManager.updateProject(projectConfig);
     }
 
-    private IClasspathEntry[] createModifiedEntry(List<ClasspathEntryDTO> entries) {
+    private IClasspathEntry[] createModifiedEntry(List<ClasspathEntryDto> entries) {
         List<IClasspathEntry> coreClasspathEntries = new ArrayList<>(entries.size());
-        for (ClasspathEntryDTO entry : entries) {
+        for (ClasspathEntryDto entry : entries) {
             IPath path = fromOSString(entry.getPath());
             int entryKind = entry.getEntryKind();
             if (IClasspathEntry.CPE_LIBRARY == entryKind) {

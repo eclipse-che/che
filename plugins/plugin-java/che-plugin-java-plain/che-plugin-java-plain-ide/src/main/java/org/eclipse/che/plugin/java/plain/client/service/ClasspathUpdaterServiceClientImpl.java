@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
@@ -47,7 +47,7 @@ public class ClasspathUpdaterServiceClientImpl implements ClasspathUpdaterServic
     }
 
     @Override
-    public Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDTO> entries) {
+    public Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDto> entries) {
         final String url = appContext.getDevMachine().getWsAgentBaseUrl() + pathToService + "update?projectpath=" + projectPath;
         return asyncRequestFactory.createPostRequest(url, entries)
                                   .loader(loader)

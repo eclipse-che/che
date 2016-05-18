@@ -14,6 +14,9 @@ import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node.NodeWidget;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+
+import java.util.Map;
 
 /**
  * View interface for the information about source folders on the build path.
@@ -22,16 +25,19 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node
  */
 @ImplementedBy(SourceEntryViewImpl.class)
 public interface SourceEntryView extends View<SourceEntryView.ActionDelegate> {
-    /**
-     * Adds new node to the library.
-     *
-     * @param addedNode
-     *         widget of the new lib node
-     */
-    void addNode(NodeWidget addedNode);
+    /** Clear and Render sources. */
+    void renderNodes();
 
     /**
-     * Removes node from the library.
+     * Set sources map for displaying.
+     *
+     * @param data
+     *         map which binds categories of the sources
+     */
+    void setData(Map<String, ClasspathEntryDto> data);
+
+    /**
+     * Removes node from the sources.
      *
      * @param nodeWidget
      *         widget which should be removed
@@ -41,14 +47,17 @@ public interface SourceEntryView extends View<SourceEntryView.ActionDelegate> {
     /** Sets enabled state of the 'Add Source' button. */
     void setAddSourceButtonState(boolean enabled);
 
-    /** Clears libraries panel. */
+    /** Clears sources panel. */
     void clear();
 
     interface ActionDelegate {
+        /** Returns true if project is plain. */
+        boolean isPlainJava();
+
         /** Performs some actions when user click on Add Jar button. */
         void onAddSourceClicked();
 
         /** Performs some actions when user click on Remove button. */
-        void onRemoveClicked();
+        void onRemoveClicked(String path);
     }
 }

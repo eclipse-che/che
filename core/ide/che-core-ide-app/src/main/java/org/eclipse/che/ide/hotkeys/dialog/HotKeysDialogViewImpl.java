@@ -146,7 +146,7 @@ public class HotKeysDialogViewImpl extends Window implements HotKeysDialogView {
     @Override
     public void renderKeybindings() {
         list.clear();
-        list.render(categoriesList);
+        list.render(categoriesList, true);
     }
 
     @Override
