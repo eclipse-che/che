@@ -33,7 +33,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Vitaly Parfonov
  */
-@Path("project-importers/{wsId}")
+@Path("project-importers")
 public class ProjectImportersService extends Service {
 
     private final Map<String, String>     configuration;

@@ -52,7 +52,7 @@ public class JavaSearchServiceRest implements JavaSearchService {
         this.unmarshallerFactory = unmarshallerFactory;
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
-        this.pathToService = "/jdt/" + appContext.getWorkspaceId() + "/search/";
+        this.pathToService = "/jdt/search/find/usages";
     }
 
     @Override
@@ -61,7 +61,7 @@ public class JavaSearchServiceRest implements JavaSearchService {
             @Override
             public void makeCall(AsyncCallback<FindUsagesResponse> callback) {
 
-                asyncRequestFactory.createPostRequest(appContext.getDevMachine().getWsAgentBaseUrl() + pathToService + "find/usages", request)
+                asyncRequestFactory.createPostRequest(appContext.getDevMachine().getWsAgentBaseUrl() + pathToService, request)
                                    .header(CONTENT_TYPE, APPLICATION_JSON)
                                    .loader(loader)
                                    .send(newCallback(callback, unmarshallerFactory.newUnmarshaller(FindUsagesResponse.class)));

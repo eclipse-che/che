@@ -23,6 +23,7 @@ import org.eclipse.che.jdt.rest.CompilerSetupService;
 import org.eclipse.che.jdt.rest.FormatService;
 import org.eclipse.che.jdt.rest.JavaNavigationService;
 import org.eclipse.che.jdt.rest.JavaReconcileService;
+import org.eclipse.che.jdt.rest.JavadocService;
 import org.eclipse.che.jdt.rest.JdtExceptionMapper;
 import org.eclipse.che.jdt.rest.RefactoringService;
 import org.eclipse.che.jdt.rest.SearchService;

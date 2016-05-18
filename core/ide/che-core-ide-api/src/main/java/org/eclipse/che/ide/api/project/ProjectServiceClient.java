@@ -33,8 +33,8 @@ public interface ProjectServiceClient {
     /**
      * Get all projects in current workspace.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param callback
      *         the callback to use for the response
      */
@@ -43,8 +43,8 @@ public interface ProjectServiceClient {
     /**
      * Get all projects in current workspace.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @return a promise that will provide a list of {@link ProjectConfigDto}s, or rejects with an error
      */
     Promise<List<ProjectConfigDto>> getProjects(DevMachine devMachine);
@@ -52,8 +52,8 @@ public interface ProjectServiceClient {
     /**
      * Get project.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the project to get
      * @param callback
@@ -64,6 +64,8 @@ public interface ProjectServiceClient {
     /**
      * Get project.
      *
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the project
      * @return a promise that resolves to the {@link ProjectConfigDto}, or rejects with an error
@@ -73,8 +75,8 @@ public interface ProjectServiceClient {
     /**
      * Get item.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the item to get
      * @param callback
@@ -85,8 +87,8 @@ public interface ProjectServiceClient {
     /**
      * Create project.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param projectConfig
      *         descriptor of the project to create
      * @param callback
@@ -98,8 +100,8 @@ public interface ProjectServiceClient {
     /**
      * Estimates if the folder supposed to be project of certain type.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path of the project to estimate
      * @param projectType
@@ -113,8 +115,8 @@ public interface ProjectServiceClient {
     /**
      * Gets list of {@link SourceEstimation} for all supposed project types.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path of the project to resolve
      * @param callback
@@ -127,8 +129,8 @@ public interface ProjectServiceClient {
      /**
       * Gets list of {@link SourceEstimation} for all supposed project types.
       *
-      * @param workspaceId
-      *         id of current workspace
+      * @param devMachine
+      *         of current devMachine
       * @param path
       *         path of the project to resolve
       * @return a promise that will provide a list of {@code SourceEstimation} for the given {@code workspaceId} and {@code path},
@@ -137,39 +139,10 @@ public interface ProjectServiceClient {
     Promise<List<SourceEstimation>> resolveSources(DevMachine devMachine, String path);
 
     /**
-     * Get sub-project.
-     *
-     * @param workspaceId
-     *         id of current workspace
-     * @param path
-     *         path to the parent project
-     * @param callback
-     *         the callback to use for the response
-     */
-    void getModules(DevMachine devMachine, String path, AsyncRequestCallback<List<ProjectConfigDto>> callback);
-
-    /**
-     * Create sub-project.
-     *
-     * @param workspaceId
-     *         id of current workspace
-     * @param parentProjectPath
-     *         path to the parent project
-     * @param projectConfig
-     *         descriptor of the project to create
-     * @param callback
-     *         the callback to use for the response
-     */
-    void createModule(DevMachine devMachine,
-                      String parentProjectPath,
-                      ProjectConfigDto projectConfig,
-                      AsyncRequestCallback<ProjectConfigDto> callback);
-
-    /**
      * Update project.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the project to get
      * @param descriptor
@@ -184,8 +157,8 @@ public interface ProjectServiceClient {
     /**
      * Update project.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the project to get
      * @param descriptor
@@ -198,8 +171,8 @@ public interface ProjectServiceClient {
     /**
      * Create new file in the specified folder.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param parentPath
      *         path to parent for new file
      * @param name
@@ -214,8 +187,8 @@ public interface ProjectServiceClient {
     /**
      * Get file content.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to file
      * @param callback
@@ -226,8 +199,8 @@ public interface ProjectServiceClient {
     /**
      * Update file content.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to file
      * @param content
@@ -240,8 +213,8 @@ public interface ProjectServiceClient {
     /**
      * Create new folder in the specified folder.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to parent for new folder
      * @param callback
@@ -252,8 +225,8 @@ public interface ProjectServiceClient {
     /**
      * Delete item.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to item to delete
      * @param callback
@@ -261,25 +234,11 @@ public interface ProjectServiceClient {
      */
     void delete(DevMachine devMachine, String path, AsyncRequestCallback<Void> callback);
 
-    /**
-     * Delete module.
-     *
-     * @param workspaceId
-     *         id of current workspace
-     * @param pathToParent
-     *         path to module's parent
-     * @param modulePath
-     *         path to module to delete
-     * @param callback
-     *         the callback to use for the response
-     */
-    void deleteModule(DevMachine devMachine, String pathToParent, String modulePath, AsyncRequestCallback<Void> callback);
-
-    /**
+     /**
      * Copy an item with new name to the specified target path. Original item name is used if new name isn't set.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the item to copy
      * @param newParentPath
@@ -294,8 +253,8 @@ public interface ProjectServiceClient {
     /**
      * Move an item to the specified target path. Set new name to rename the resource when moving.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the item to move
      * @param newParentPath
@@ -310,8 +269,8 @@ public interface ProjectServiceClient {
     /**
      * Rename and/or set new media type for item.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the item to rename
      * @param newName
@@ -326,8 +285,8 @@ public interface ProjectServiceClient {
     /**
      * Import sources into project.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the project to import sources
      * @param force
@@ -342,8 +301,8 @@ public interface ProjectServiceClient {
     /**
      * Import sources into project.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to the project to import sources
      * @param force
@@ -357,8 +316,8 @@ public interface ProjectServiceClient {
     /**
      * Get children for the specified path.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to get its children
      * @param callback
@@ -369,8 +328,8 @@ public interface ProjectServiceClient {
     /**
      * Get folders tree starts from the specified path.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param path
      *         path to get its folder tree
      * @param depth
@@ -383,8 +342,8 @@ public interface ProjectServiceClient {
     /**
      * Search an item(s) by the specified criteria.
      *
-     * @param workspaceId
-     *         id of current workspace
+     * @param devMachine
+     *         of current devMachine
      * @param expression
      *         search query expression
      * @return a promise that will provide a list of {@link ItemReference}s, or rejects with an error

@@ -192,7 +192,7 @@ export class ListProjectsCtrl {
     let wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
 
     if (wsagent) {
-      return wsagent.getProject().remove(workspaceId, projectPath);
+      return wsagent.getProject().remove(projectPath);
     } else {
       return this.cheAPI.getWorkspace().deleteProject(workspaceId, projectPath);
     }

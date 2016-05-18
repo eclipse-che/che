@@ -62,7 +62,7 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/project/" + appContext.getWorkspaceId() + "/export/" + getPath();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/" + getPath();
         downloadContainer.setUrl(url);
     }
 

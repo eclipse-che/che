@@ -58,7 +58,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  *
  * @author Anatoliy Bazko
  */
-@Path("debugger/{ws-id}")
+@Path("debugger")
 public class DebuggerService {
     private final DebuggerManager debuggerManager;
 

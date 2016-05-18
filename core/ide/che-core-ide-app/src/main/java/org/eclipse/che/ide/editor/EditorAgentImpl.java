@@ -56,7 +56,6 @@ import org.eclipse.che.ide.project.event.ResourceNodeRenamedEvent;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.node.ItemReferenceBasedNode;
-import org.eclipse.che.ide.project.node.ModuleNode;
 import org.eclipse.che.ide.project.node.NodeManager;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.resource.Path;
@@ -180,23 +179,6 @@ public class EditorAgentImpl implements EditorAgent {
                             eventBus.fireEvent(new FileEvent(editor.getEditorInput().getFile(), CLOSE));
                         }
                     }
-                } else if (node instanceof ModuleNode) {
-                    for (EditorPartPresenter editor : openedEditors) {
-                        VirtualFile virtualFile = editor.getEditorInput().getFile();
-                        if (moduleHasFile(node.getProjectConfig(), virtualFile)) {
-                            eventBus.fireEvent(new FileEvent(virtualFile, CLOSE));
-                        }
-                        if (node.getParent() == null || !(node.getParent() instanceof HasStorablePath)) {
-                            return;
-                        }
-
-                        String parentPath = ((HasStorablePath)node.getParent()).getStorablePath();
-                        String openFileName = virtualFile.getName();
-                        String openFilePath = virtualFile.getPath();
-                        if (openFilePath.contains(parentPath) && openFileName.equals("modules")) {
-                            eventBus.fireEvent(new FileContentUpdateEvent(openFilePath));
-                        }
-                    }
                 }
             }
         });
@@ -217,15 +199,10 @@ public class EditorAgentImpl implements EditorAgent {
             public void onResourceRenamedEvent(ResourceNodeRenamedEvent event) {
                 ResourceBasedNode<?> resourceBaseNode = event.getNode();
 
-                if (resourceBaseNode instanceof FolderReferenceNode || resourceBaseNode instanceof ModuleNode) {
+                if (resourceBaseNode instanceof FolderReferenceNode) {
                     HasStorablePath renamedTargetStoragePath = ((HasStorablePath)resourceBaseNode);
                     final String oldTargetPath = renamedTargetStoragePath.getStorablePath();
-                    final String newTargetPath;
-                    if (resourceBaseNode instanceof FolderReferenceNode) {
-                        newTargetPath = ((ItemReference)event.getNewDataObject()).getPath();
-                    } else {
-                        newTargetPath = ((ProjectConfigDto)event.getNewDataObject()).getPath();
-                    }
+                    final String newTargetPath = ((ItemReference)event.getNewDataObject()).getPath();
                     final Unmarshallable<ItemReference> unmarshaller = unmarshallerFactory.newUnmarshaller(ItemReference.class);
                     updateEditorPartsAfterRename(new LinkedList<>(openedEditors),
                                                  oldTargetPath,

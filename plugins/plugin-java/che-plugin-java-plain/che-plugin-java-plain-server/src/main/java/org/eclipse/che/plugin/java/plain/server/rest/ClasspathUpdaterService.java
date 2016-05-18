@@ -50,7 +50,7 @@ import static org.eclipse.jdt.core.JavaCore.newVariableEntry;
  *
  * @author Valeriy Svydenko
  */
-@Path("jdt/{wsId}/classpath/update")
+@Path("jdt/classpath/update")
 public class ClasspathUpdaterService {
     private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
 

@@ -28,12 +28,10 @@ import java.util.concurrent.ExecutionException;
  *
  * @author Evgen Vidolob
  */
-@Path("jdt/{wsId}/classpath")
+@Path("jdt/classpath")
 public class JavaClasspathService {
     @Inject
     private ClassPathBuilder classPathBuilder;
-    @PathParam("wsId")
-    private String           workspaceId;
 
     /**
      * Update dependencies.
@@ -47,6 +45,6 @@ public class JavaClasspathService {
     @GET
     public ClassPathBuilderResult update(@QueryParam("projectpath") final String projectPath) throws ExecutionException,
                                                                                                      InterruptedException {
-        return classPathBuilder.buildClassPath(workspaceId, projectPath);
+        return classPathBuilder.buildClassPath(projectPath);
     }
 }

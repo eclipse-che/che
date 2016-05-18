@@ -68,7 +68,7 @@ final class RefactoringServiceClientImpl implements RefactoringServiceClient {
         this.unmarshallerFactory = unmarshallerFactory;
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
-        this.pathToService = "/jdt/" + appContext.getWorkspaceId() + "/refactoring/";
+        this.pathToService = "/jdt/refactoring/";
     }
 
     /** {@inheritDoc} */

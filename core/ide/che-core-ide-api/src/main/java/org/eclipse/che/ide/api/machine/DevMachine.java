@@ -71,10 +71,7 @@ public class DevMachine {
             String url = server.getUrl();
             String extUrl = url.substring(url.indexOf(':'), url.length());
             final String protocol = Window.Location.getProtocol().equals("https:") ? "wss" : "ws";
-            return protocol
-                   + extUrl
-                   + (extUrl.endsWith("/") ? "ws/" : "/ws/")
-                   + getWorkspace();
+            return protocol + extUrl + (extUrl.endsWith("/") ? "ws" : "/ws");
         } else {
             //should not be
             String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";

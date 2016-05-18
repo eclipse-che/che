@@ -325,7 +325,7 @@ public class NodeManager {
 
     @Deprecated
     public static boolean isProjectOrModuleNode(Node node) {
-        return node instanceof ProjectNode || node instanceof ModuleNode;
+        return node instanceof ProjectNode;
     }
 
     protected <T> Function<T, Promise<T>> self() {

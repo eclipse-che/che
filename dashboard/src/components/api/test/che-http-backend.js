@@ -62,7 +62,7 @@ export class CheHttpBackend {
 
     var projectTypeKeys = this.projectTypesWorkspaces.keys();
     for (let key of projectTypeKeys) {
-      this.httpBackend.when('GET', this.workspaceAgentMap.get(key) + '/project-type/' + key).respond(this.projectTypesWorkspaces.get(key));
+      this.httpBackend.when('GET', this.workspaceAgentMap.get(key) + '/project-type').respond(this.projectTypesWorkspaces.get(key));
     }
 
     //memberships:
@@ -95,7 +95,8 @@ export class CheHttpBackend {
     var projectDetailsKeys = this.projectDetailsMap.keys();
     for (let projectKey of projectDetailsKeys) {
       let workspaceKey = projectKey.split('/')[0];
-      this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceKey) + '/project/' + projectKey).respond(this.projectDetailsMap.get(projectKey));
+      let projectId = projectKey.split('/')[1];
+      this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceKey) + '/project/' + projectId).respond(this.projectDetailsMap.get(projectKey));
     }
 
     // branding
@@ -164,7 +165,7 @@ export class CheHttpBackend {
     );
 
     // add call to the backend
-    this.httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/' + workspace.id).respond(this.projectsPerWorkspace.get(workspace.id));
+    this.httpBackend.when('GET', this.workspaceAgentMap.get(workspace.id) + '/project/').respond(this.projectsPerWorkspace.get(workspace.id));
 
   }
 
@@ -308,7 +309,7 @@ export class CheHttpBackend {
    * @param projectName the project name
    */
   addFetchProjectDetails(workspaceId, projectName) {
-    this.httpBackend.when('GET', '/project/' + workspaceId + '/' + projectName)
+    this.httpBackend.when('GET', '/project/' + projectName)
       .respond(this.projectDetailsMap.get(workspaceId + '/' + projectName));
   }
 
@@ -319,7 +320,7 @@ export class CheHttpBackend {
    * @param newProjectName the new project name
    */
   addUpdatedProjectName(workspaceId, projectName, newProjectName) {
-    this.httpBackend.when('POST', '/project/' + workspaceId + '/rename/' + projectName + '?name=' + newProjectName).respond(newProjectName);
+    this.httpBackend.when('POST', '/project/rename/' + projectName + '?name=' + newProjectName).respond(newProjectName);
   }
 
   /**
@@ -358,7 +359,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getLocalGitUrl(workspaceId, projectPath) {
-    this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceId) + '/git/' + workspaceId + '/read-only-url?projectPath=' + projectPath)
+    this.httpBackend.when('GET', this.workspaceAgentMap.get(workspaceId) + '/git/read-only-url?projectPath=' + projectPath)
       .respond(this.localGitUrlsMap.get(workspaceId + projectPath));
   }
 
@@ -368,7 +369,7 @@ export class CheHttpBackend {
    * @param projectPath
    */
   getRemoteGitUrlArray(workspaceId, projectPath) {
-    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/git/' + workspaceId + '/remote-list?projectPath=' + projectPath)
+    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/git/remote-list?projectPath=' + projectPath)
       .respond(this.remoteGitUrlArraysMap.get(workspaceId + projectPath));
   }
 

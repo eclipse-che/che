@@ -71,7 +71,7 @@ public class ProjectTypeServiceClientImpl implements ProjectTypeServiceClient {
     }
 
     private void getProjectTypes(DevMachine devMachine, @NotNull AsyncCallback<List<ProjectTypeDto>> callback) {
-        final String url = devMachine.getWsAgentBaseUrl() + "/project-type/" + devMachine.getWorkspace();
+        final String url = devMachine.getWsAgentBaseUrl() + "/project-type";
         asyncRequestFactory.createGetRequest(url)
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Getting info about registered project types..."))
@@ -89,7 +89,7 @@ public class ProjectTypeServiceClientImpl implements ProjectTypeServiceClient {
     }
 
     private void getProjectType(@NotNull DevMachine devMachine, @NotNull String id, @NotNull AsyncCallback<ProjectTypeDto> callback) {
-        final String url = devMachine.getWsAgentBaseUrl() + "/project-type/" + devMachine.getWorkspace() + '/' + id;
+        final String url = devMachine.getWsAgentBaseUrl() + "/project-type/" + id;
         asyncRequestFactory.createGetRequest(url)
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Getting info about project type..."))

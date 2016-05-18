@@ -47,7 +47,7 @@ public class ClasspathServiceClientImpl implements ClasspathServiceClient {
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
 
-        this.pathToService = "/jdt/" + appContext.getWorkspaceId() + "/classpath";
+        this.pathToService = "/jdt/classpath";
     }
 
     @Override
