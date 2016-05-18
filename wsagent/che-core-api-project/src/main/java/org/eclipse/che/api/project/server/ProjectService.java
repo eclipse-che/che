@@ -16,6 +16,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.tika.Tika;
 import org.eclipse.che.WorkspaceIdProvider;
@@ -51,6 +53,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
@@ -78,6 +81,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.HttpMethod.DELETE;
@@ -115,13 +123,23 @@ public class ProjectService extends Service {
     private final ProjectManager projectManager;
     private final EventService   eventService;
     private final String         workspace;
+    private final ExecutorService executor;
 
     @Inject
     public ProjectService(ProjectManager projectManager, EventService eventService) {
         this.projectManager = projectManager;
         this.eventService = eventService;
         this.workspace = WorkspaceIdProvider.getWorkspaceId();
+        executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
+                                                    new ThreadFactoryBuilder().setNameFormat("ProjectService-FileUpdatingThread-")
+                                                                              .setDaemon(true).build());
     }
+
+    @PreDestroy
+    void stop() {
+        executor.shutdownNow();
+    }
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -474,13 +492,21 @@ public class ProjectService extends Service {
             throw new NotFoundException("File not found for " + path);
         }
 
-        file.updateContent(content);
+        executor.execute(() -> {
+            try {
+                file.updateContent(content);
+            } catch (ForbiddenException e) {
+                LOG.warn(e.getLocalizedMessage());
+            } catch (ServerException e) {
+                LOG.warn(e.getLocalizedMessage());
+            }
+            eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.UPDATED,
+                                                              workspace,
+                                                              file.getProject(),
+                                                              file.getPath().toString(),
+                                                              false));
 
-        eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.UPDATED,
-                                                          workspace,
-                                                          file.getProject(),
-                                                          file.getPath().toString(),
-                                                          false));
+        });
 
         return Response.ok().build();
     }
