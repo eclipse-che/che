@@ -223,19 +223,19 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
     @Override
     public void setValue(String newValue, final ContentInitializedHandler initializationHandler) {
-        editorOverlay
-                .addEventListener(OrionInputChangedEventOverlay.TYPE, new OrionEditorOverlay.EventHandler<OrionInputChangedEventOverlay>() {
-                    @Override
-                    public void onEvent(OrionInputChangedEventOverlay event) {
-                        if (initializationHandler != null) {
-                            initializationHandler.onContentInitialized();
-                        }
-                    }
-                }, true);
+        editorOverlay.addEventListener(OrionInputChangedEventOverlay.TYPE,
+                                       new OrionEditorOverlay.EventHandler<OrionInputChangedEventOverlay>() {
+                                           @Override
+                                           public void onEvent(OrionInputChangedEventOverlay event) {
+                                               if (initializationHandler != null) {
+                                                   initializationHandler.onContentInitialized();
+                                               }
+                                           }
+                                       }, true);
+
         this.editorViewOverlay.setContents(newValue, modeName);
         this.editorOverlay.getUndoStack().reset();
     }
-
 
     @Override
     public String getMode() {
@@ -259,8 +259,10 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
     @Override
     public void setReadOnly(final boolean isReadOnly) {
-        this.editorOverlay.getTextView().getOptions().setReadOnly(isReadOnly);
-        this.editorOverlay.getTextView().update();
+        editorViewOverlay.setReadonly(isReadOnly);
+
+        final JSONObject properties = editorPropertiesManager.getJsonEditorProperties();
+        editorViewOverlay.updateSettings(properties.getJavaScriptObject());
     }
 
     @Override
