@@ -41,7 +41,10 @@ public class MavenModule extends AbstractModule {
     protected void configure() {
         newSetBinder(binder(), ValueProviderFactory.class).addBinding().to(MavenValueProviderFactory.class);
 
-        newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(MavenProjectType.class);
+        //bind maven project type only if maven installed on dev machine
+        if(System.getenv("M2_HOME") != null) {
+            newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(MavenProjectType.class);
+        }
 
         Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlerMultibinder.addBinding().to(MavenProjectGenerator.class);

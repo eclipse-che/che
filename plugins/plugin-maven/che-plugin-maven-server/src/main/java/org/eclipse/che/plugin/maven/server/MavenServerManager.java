@@ -14,12 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
-import org.eclipse.che.plugin.maven.server.execution.CommandLine;
-import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
-import org.eclipse.che.plugin.maven.server.execution.ProcessExecutor;
-import org.eclipse.che.plugin.maven.server.execution.ProcessHandler;
-import org.eclipse.che.plugin.maven.server.rmi.RmiClient;
-import org.eclipse.che.plugin.maven.server.rmi.RmiObjectWrapper;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.server.MavenRemoteServer;
 import org.eclipse.che.maven.server.MavenServer;
@@ -27,6 +21,12 @@ import org.eclipse.che.maven.server.MavenServerDownloadListener;
 import org.eclipse.che.maven.server.MavenServerLogger;
 import org.eclipse.che.maven.server.MavenSettings;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.plugin.maven.server.execution.CommandLine;
+import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
+import org.eclipse.che.plugin.maven.server.execution.ProcessExecutor;
+import org.eclipse.che.plugin.maven.server.execution.ProcessHandler;
+import org.eclipse.che.plugin.maven.server.rmi.RmiClient;
+import org.eclipse.che.plugin.maven.server.rmi.RmiObjectWrapper;
 import org.eclipse.che.rmi.RmiObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,10 +49,8 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
     private static final String MAVEN_SERVER_MAIN = "org.eclipse.che.maven.server.MavenServerMain";
 
     private RmiClient<MavenRemoteServer> client;
-
     private RmiLogger                      rmiLogger           = new RmiLogger();
     private RmiMavenServerDownloadListener rmiDownloadListener = new RmiMavenServerDownloadListener();
-
     private boolean loggerExported;
     private boolean listenerExported;
     private String  mavenServerPath;
@@ -136,13 +134,13 @@ public class MavenServerManager extends RmiObjectWrapper<MavenRemoteServer> {
         } catch (Exception e) {
             throw new RemoteException("Can't start maven server", e);
         }
-        if(!loggerExported) {
+        if (!loggerExported) {
             Remote loggerRemote = UnicastRemoteObject.exportObject(rmiLogger, 0);
             if (!(loggerExported = loggerRemote != null)) {
                 throw new RemoteException("Can't export logger");
             }
         }
-        if(!listenerExported) {
+        if (!listenerExported) {
             Remote listenerRemote = UnicastRemoteObject.exportObject(rmiDownloadListener, 0);
             if (!(listenerExported = listenerRemote != null)) {
                 throw new RemoteException("Can't export download listener");

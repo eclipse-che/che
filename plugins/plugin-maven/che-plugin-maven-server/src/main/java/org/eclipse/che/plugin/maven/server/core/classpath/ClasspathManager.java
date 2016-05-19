@@ -135,7 +135,6 @@ public class ClasspathManager {
             }
 
         }
-        //todo add downloaded sources
         return helper.getEntries();
     }
 
