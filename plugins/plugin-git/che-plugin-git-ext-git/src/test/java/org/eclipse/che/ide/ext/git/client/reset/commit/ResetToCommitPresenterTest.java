@@ -71,8 +71,6 @@ public class ResetToCommitPresenterTest extends BaseTest {
     @Override
     public void disarm() {
         super.disarm();
-        when(appContext.getWorkspaceId()).thenReturn("id");
-
         presenter = new ResetToCommitPresenter(view,
                                                service,
                                                constant,

@@ -68,6 +68,10 @@ public class WsMasterModule extends AbstractModule {
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "sudo chown -R $(id -u -n) /projects && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
+        bindConstant().annotatedWith(Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
+                      .to("mkdir -p ~/che " +
+                          "&& cp /mnt/che/terminal -R ~/che" +
+                          "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
@@ -79,6 +83,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
 
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
+        install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
         install(new org.eclipse.che.api.machine.server.MachineModule());
         install(new org.eclipse.che.api.local.LocalInfrastructureModule());

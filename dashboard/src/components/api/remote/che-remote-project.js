@@ -24,33 +24,31 @@ export class CheRemoteProject {
     this.authData = authData;
 
     // remote call
-    this.remoteProjectsAPI = this.$resource('', {workspaceId: '@id'}, {
-      import: {method: 'POST', url: authData.url + '/project/:workspaceId/import/:path?token=' + authData.token},
-      update: {method: 'PUT', url: authData.url + '/project/:workspaceId/:path?token=' + authData.token}
+    this.remoteProjectsAPI = this.$resource('', {}, {
+      import: {method: 'POST', url: authData.url + '/project/import/:path?token=' + authData.token},
+      update: {method: 'PUT', url: authData.url + '/project/:path?token=' + authData.token}
     });
 
   }
 
 
   /**
-   * Import a project based located on the given workspace id and path
-   * @param workspaceId the workspace ID to use
+   * Import a project based located on the given path
    * @param path the path of the project
    * @param data the project body description
    * @returns {$promise|*|T.$promise}
    */
-  importProject(workspaceId, path, data) {
+  importProject(path, data) {
     // remove unused description because we cannot set project description without project type
     if ((!data.type || data.type.length === 0) && data.description) {
       delete(data.description);
     }
-    return this.remoteProjectsAPI.import({workspaceId: workspaceId, path: path}, data).$promise;
+    return this.remoteProjectsAPI.import({path: path}, data).$promise;
   }
 
 
-  updateProject(workspaceId, path, projectDetails) {
+  updateProject(path, projectDetails) {
     return this.remoteProjectsAPI.update({
-      workspaceId: workspaceId,
       path: path
     }, projectDetails).$promise;
   }

@@ -42,14 +42,10 @@ import static org.eclipse.che.api.project.shared.Constants.LINK_REL_PROJECT_TYPE
  * @author gazarenkov
  */
 @Api(value = "/project-type", description = "Project type REST API")
-@Path("project-type/{ws-id}")
+@Path("project-type")
 public class ProjectTypeService extends Service {
 
     private final ProjectTypeRegistry registry;
-
-    @PathParam("ws-id")
-    @ApiParam("The id of the workspace")
-    private String wsId;
 
     @Inject
     public ProjectTypeService(ProjectTypeRegistry registry) {

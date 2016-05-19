@@ -25,44 +25,28 @@ export class CheProjectType {
     this.$resource = $resource;
 
     // types per category per workspace ID : workspace ID ==> map<projectTypeId, projectType>
-    this.typesIdPerWorkspace = new Map();
+    this.typesIds = new Map();
 
     // project types per workspace ID
-    this.typesWorkspaces = new Map();
+    this.workspaceTypes = [];
     // remote call
-    this.remoteProjectTypeAPI = this.$resource(wsagentPath + '/project-type/:workspaceId');
+    this.remoteProjectTypeAPI = this.$resource(wsagentPath + '/project-type');
   }
 
 
   /**
    * Fetch the project types
    */
-  fetchTypes(workspaceId) {
+  fetchTypes() {
     var defer = this.$q.defer();
-    let promise = this.remoteProjectTypeAPI.query({workspaceId: workspaceId}).$promise;
+    let promise = this.remoteProjectTypeAPI.query().$promise;
     let updatedPromise = promise.then((projectTypes) => {
 
-      var idProjectTypesMap = this.typesIdPerWorkspace.get(workspaceId);
-      if (!idProjectTypesMap) {
-        idProjectTypesMap = new Map();
-        this.typesIdPerWorkspace.set(workspaceId, idProjectTypesMap);
-      }
-
-      var typesWorkspace = this.typesWorkspaces.get(workspaceId);
-      if (!typesWorkspace) {
-        typesWorkspace = [];
-        this.typesWorkspaces.set(workspaceId, typesWorkspace);
-      }
-
       // reset global list
-      typesWorkspace.length = 0;
+      this.workspaceTypes = projectTypes;
 
       projectTypes.forEach((projectType) => {
-        var id = projectType.id;
-        // add in map
-        idProjectTypesMap.set(id, projectType);
-        // add in global list
-        typesWorkspace.push(projectType);
+        this.typesIds.set(projectType.id, projectType);
       });
       defer.resolve();
     }, (error) => {
@@ -76,25 +60,20 @@ export class CheProjectType {
     return defer.promise;
   }
 
-
-
   /**
    * Gets all project types
    * @returns {Array}
    */
-  getAllProjectTypes(workspaceId) {
-    let val = this.typesWorkspaces.get(workspaceId);
-    return !val ? [] : val;
+  getAllProjectTypes() {
+    return this.workspaceTypes;
   }
 
   /**
    * The types per category
    * @returns {CheProjectType.typesPerCategory|*}
    */
-  getProjectTypesIDs(workspaceId) {
-    let val = this.typesIdPerWorkspace.get(workspaceId);
-    return !val ? {} : val;
+  getProjectTypesIDs() {
+    return this.typesIds;
   }
-
 
 }

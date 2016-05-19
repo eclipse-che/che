@@ -32,9 +32,9 @@ public class CategoriesList extends Composite {
     private final SelectionManager          selectionManager;
     private       List<CategoryNodeElement> categoryNodeElements;
 
-    private       FlowPanel                 rootPanel;
-    private       FlowPanel                 scrollPanel;
-    private       FlowPanel                 lockPanel;
+    private FlowPanel rootPanel;
+    private FlowPanel scrollPanel;
+    private FlowPanel lockPanel;
 
     private boolean enabled = true;
 
@@ -65,11 +65,13 @@ public class CategoriesList extends Composite {
      *
      * @param categories
      *         the categories
+     * @param renderChildren
+     *         if is true - child node will be expanded, otherwise only root node.
      */
-    public void render(List<Category<?>> categories) {
+    public void render(List<Category<?>> categories, boolean renderChildren) {
         this.categoryNodeElements = new ArrayList<>();
         for (Category category : categories) {
-            CategoryNodeElement categoryNodeElement = new CategoryNodeElement(category, selectionManager, resources);
+            CategoryNodeElement categoryNodeElement = new CategoryNodeElement(category, renderChildren, selectionManager, resources);
             categoryNodeElements.add(categoryNodeElement);
             scrollPanel.add(categoryNodeElement);
         }

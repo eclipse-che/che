@@ -62,8 +62,8 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
     private ActionDelegate           delegate;
     private ClasspathNodeInterceptor interceptor;
 
-    Button acceptButton;
-    Button cancelButton;
+    private Button acceptButton;
+    private Button cancelButton;
 
     @UiField
     DockLayoutPanel treeContainer;

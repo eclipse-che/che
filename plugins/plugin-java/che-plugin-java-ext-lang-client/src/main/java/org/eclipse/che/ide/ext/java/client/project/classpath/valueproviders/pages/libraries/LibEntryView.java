@@ -13,7 +13,9 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pag
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node.NodeWidget;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+
+import java.util.Map;
 
 /**
  * View interface for the information about JARs and class folders on the build path.
@@ -22,39 +24,28 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node
  */
 @ImplementedBy(LibEntryViewImpl.class)
 public interface LibEntryView extends View<LibEntryView.ActionDelegate> {
-    /**
-     * Adds new node to the library.
-     *
-     * @param addedNode
-     *         widget of the new lib node
-     */
-    void addNode(NodeWidget addedNode);
+    /** Clear and Render libraries. */
+    void renderLibraries();
 
     /**
-     * Removes node from the library.
+     * Set libraries map for displaying.
      *
-     * @param nodeWidget
-     *         widget which should be removed
+     * @param data
+     *         map which binds categories of the library
      */
-    void removeNode(NodeWidget nodeWidget);
+    void setData(Map<String, ClasspathEntryDto> data);
 
     /** Sets enabled state of the 'Add Jar' button. */
     void setAddJarButtonState(boolean enabled);
 
-    /** Sets enabled state of the 'Add Class Folder' button. */
-    void setAddClassFolderJarButtonState(boolean enabled);
-
-    /** Clears libraries panel. */
-    void clear();
-
     interface ActionDelegate {
+        /** Returns true if project is plain java. */
+        boolean isPlainJava();
+
         /** Performs some actions when user click on Add Jar button. */
         void onAddJarClicked();
 
-        /** Performs some actions when user click on Add Class Folder button. */
-        void onAddClassFolderClicked();
-
         /** Performs some actions when user click on Remove button. */
-        void onRemoveClicked();
+        void onRemoveClicked(String path);
     }
 }

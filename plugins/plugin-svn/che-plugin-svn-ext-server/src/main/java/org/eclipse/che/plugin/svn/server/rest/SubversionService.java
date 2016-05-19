@@ -71,7 +71,7 @@ import java.io.IOException;
 /**
  * REST API endpoints for this extension.
  */
-@Path("svn/{ws-id}")
+@Path("svn")
 public class SubversionService extends Service {
 
     private static final Logger LOG = LoggerFactory.getLogger(SubversionService.class);
@@ -85,8 +85,6 @@ public class SubversionService extends Service {
     @Inject
     private CredentialsProvider credentialsProvider;
 
-    @PathParam("ws-id")
-    private String vfsId;
 
     /**
      * Add the selected paths to version control.

@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -854,6 +855,7 @@ public class WorkspaceService extends Service {
                                       .getLinks()
                                       .add(createLink("GET",
                                                       UriBuilder.fromUri(wsAgent.getUrl())
+                                                                .path("ws")
                                                                 .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
                                                                 .build()
                                                                 .toString(),

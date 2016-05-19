@@ -51,9 +51,6 @@ public class ResetFilesPresenterTest extends BaseTest {
     @Override
     public void disarm() {
         super.disarm();
-
-        when(appContext.getWorkspaceId()).thenReturn("id");
-
         presenter = new ResetFilesPresenter(view,
                                             service,
                                             appContext,

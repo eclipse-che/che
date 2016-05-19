@@ -23,22 +23,18 @@ import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.core.notification.WSocketEventBusClient;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.CoreRestModule;
+import org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.vfs.VirtualFileSystemModule;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.git.impl.nativegit.LocalGitUserResolver;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.github.server.inject.GitHubModule;
-import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGenerator;
-import org.eclipse.che.plugin.maven.generator.archetype.ArchetypeGeneratorModule;
-import org.eclipse.che.plugin.maven.server.inject.MavenModule;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
@@ -65,15 +61,10 @@ public class WsAgentModule extends AbstractModule {
                 .to(org.eclipse.che.git.impl.nativegit.ssh.SshKeyProviderImpl.class);
 
         install(new CoreRestModule());
-        install(new VirtualFileSystemModule());
+        install(new FileCleanerModule());
         install(new ProjectApiModule());
-        install(new MavenModule());
-        install(new ArchetypeGeneratorModule());
-        install(new GitHubModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
-
-        bind(ArchetypeGenerator.class);
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);

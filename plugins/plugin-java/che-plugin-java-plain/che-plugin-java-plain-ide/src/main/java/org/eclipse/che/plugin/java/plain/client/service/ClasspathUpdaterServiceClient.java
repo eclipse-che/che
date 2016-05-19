@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.java.plain.client.service;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
 import java.util.List;
 
@@ -33,5 +33,5 @@ public interface ClasspathUpdaterServiceClient {
      * @param entries
      *         list of the classpath entries
      */
-    Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDTO> entries);
+    Promise<Void> setRawClasspath(String projectPath, List<ClasspathEntryDto> entries);
 }

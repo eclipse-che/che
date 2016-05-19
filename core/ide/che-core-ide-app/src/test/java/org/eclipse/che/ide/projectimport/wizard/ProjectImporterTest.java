@@ -87,7 +87,6 @@ public class ProjectImporterTest {
 
     @Before
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(ID);
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getWsAgentBaseUrl()).thenReturn("/ext");
         when(projectConfig.getName()).thenReturn(PROJECT_NAME);

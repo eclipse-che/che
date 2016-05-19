@@ -19,15 +19,15 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
-import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,11 +60,11 @@ public class ProjectClasspathPresenterTest {
     @Mock
     private ProjectClasspathView     view;
     @Mock
-    private ClasspathServiceClient   service;
-    @Mock
     private AppContext               appContext;
     @Mock
     private JavaLocalizationConstant locale;
+    @Mock
+    private ClasspathContainer       classpathContainer;
     @Mock
     private DialogFactory            dialogFactory;
     @Mock
@@ -81,14 +81,14 @@ public class ProjectClasspathPresenterTest {
     private ProjectConfigDto         projectConfigDto;
 
     @Mock
-    private Promise<List<ClasspathEntryDTO>> promise;
+    private Promise<List<ClasspathEntryDto>> promise;
     @Mock
     private Promise<Void>                    updatePromise;
 
     @Captor
     private ArgumentCaptor<Operation<Void>>                    updateCapture;
     @Captor
-    private ArgumentCaptor<Operation<List<ClasspathEntryDTO>>> acceptCaptor;
+    private ArgumentCaptor<Operation<List<ClasspathEntryDto>>> acceptCaptor;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>            errorCaptor;
     @Captor
@@ -111,8 +111,8 @@ public class ProjectClasspathPresenterTest {
 
         presenter = new ProjectClasspathPresenter(view,
                                                   classpathPages,
-                                                  service,
                                                   appContext,
+                                                  classpathContainer,
                                                   locale,
                                                   dialogFactory,
                                                   notificationManager,
@@ -190,16 +190,16 @@ public class ProjectClasspathPresenterTest {
 
     @Test
     public void windowShouldBeShowedWithoutErrors() throws Exception {
-        List<ClasspathEntryDTO> arg = new ArrayList<>();
+        List<ClasspathEntryDto> arg = new ArrayList<>();
         when(projectConfigDto.getPath()).thenReturn("path");
-        when(service.getClasspath(anyString())).thenReturn(promise);
-        when(promise.then(Matchers.<Operation<List<ClasspathEntryDTO>>>anyObject())).thenReturn(promise);
+        when(classpathContainer.getClasspathEntries(anyString())).thenReturn(promise);
+        when(promise.then(Matchers.<Operation<List<ClasspathEntryDto>>>anyObject())).thenReturn(promise);
         when(page1.getCategory()).thenReturn(TEXT);
         when(page2.getCategory()).thenReturn(TEXT);
 
         presenter.show();
 
-        verify(service).getClasspath("path");
+        verify(classpathContainer).getClasspathEntries("path");
         verify(promise).then(acceptCaptor.capture());
         acceptCaptor.getValue().apply(arg);
 
@@ -213,14 +213,14 @@ public class ProjectClasspathPresenterTest {
         PromiseError promiseError = mock(PromiseError.class);
         when(promiseError.getMessage()).thenReturn(TEXT);
         when(projectConfigDto.getPath()).thenReturn("path");
-        when(service.getClasspath(anyString())).thenReturn(promise);
-        when(promise.then(Matchers.<Operation<List<ClasspathEntryDTO>>>anyObject())).thenReturn(promise);
+        when(classpathContainer.getClasspathEntries(anyString())).thenReturn(promise);
+        when(promise.then(Matchers.<Operation<List<ClasspathEntryDto>>>anyObject())).thenReturn(promise);
         when(page1.getCategory()).thenReturn(TEXT);
         when(page2.getCategory()).thenReturn(TEXT);
 
         presenter.show();
 
-        verify(service).getClasspath("path");
+        verify(classpathContainer).getClasspathEntries("path");
         verify(promise).catchError(errorCaptor.capture());
         errorCaptor.getValue().apply(promiseError);
         verify(notificationManager).notify("Problems with getting classpath", TEXT, FAIL, EMERGE_MODE);

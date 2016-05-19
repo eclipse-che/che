@@ -69,7 +69,6 @@ public class MergePresenterTest extends BaseTest {
     @Override
     public void disarm() {
         super.disarm();
-        when(appContext.getWorkspaceId()).thenReturn("id");
         presenter = new MergePresenter(view,
                                        eventBus,
                                        editorAgent,

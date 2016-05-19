@@ -49,7 +49,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.servicePath = "/maven/" + appContext.getWorkspace().getId() + "/server/";
+        this.servicePath = "/maven/server/";
     }
 
     @Override

@@ -75,7 +75,6 @@ public class AddToIndexPresenterTest extends BaseTest {
     @Override
     public void disarm() {
         super.disarm();
-        when(appContext.getWorkspaceId()).thenReturn("id");
         presenter = new AddToIndexPresenter(view,
                                             appContext,
                                             dtoUnmarshallerFactory,

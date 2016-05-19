@@ -59,8 +59,10 @@ public class CategoryNodeElement extends FlowPanel {
     private       Element                         selectedElement;
 
     @SuppressWarnings("unchecked")
-    CategoryNodeElement(Category category,
-                        CategoriesList.SelectionManager selectionManager, CategoriesList.Resources resources) {
+    CategoryNodeElement(final Category category,
+                        boolean renderChildren,
+                        CategoriesList.SelectionManager selectionManager,
+                        CategoriesList.Resources resources) {
         this.category = category;
         this.selectionManager = selectionManager;
         CategoryRenderer renderer = category.getRenderer();
@@ -71,6 +73,9 @@ public class CategoryNodeElement extends FlowPanel {
         header.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                if (category.getData().isEmpty()) {
+                    return;
+                }
                 expandOrCollapse();
             }
         }, ClickEvent.getType());
@@ -131,10 +136,14 @@ public class CategoryNodeElement extends FlowPanel {
         }, KeyDownEvent.getType());
         add(header);
         add(container);
-        animator = new AnimationController.Builder().setCollapse(true).setFade(true).build();
+        animator = new AnimationController.Builder().setCollapse(false).setFade(false).build();
         expanded = true;
         renderChildren();
-        expandControl.addClassName(resources.defaultCategoriesListCss().expandedImage());
+        if (renderChildren) {
+            expandControl.addClassName(resources.defaultCategoriesListCss().expandedImage());
+        } else {
+            expandOrCollapse();
+        }
     }
 
     @SuppressWarnings("unchecked")

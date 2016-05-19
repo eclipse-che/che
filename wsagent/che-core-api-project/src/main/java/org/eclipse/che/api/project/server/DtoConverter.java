@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -117,6 +118,18 @@ public class DtoConverter {
                                                                   .map(DtoConverter::asDto)
                                                                   .collect(Collectors.toList()));
     }
+
+    public static ProjectConfigDto asDto(ProjectConfig project) {
+        return newDto(ProjectConfigDto.class).withName(project.getName())
+                                             .withPath(project.getPath())
+                                             .withDescription(project.getDescription())
+                                             .withSource(asDto(project.getSource()))
+                                             .withAttributes(project.getAttributes())
+                                             .withType(project.getType())
+                                             .withMixins(project.getMixins())
+                                             ;
+    }
+
 
     public static SourceStorageDto asDto(SourceStorage sourceStorage) {
         SourceStorageDto storageDto = newDto(SourceStorageDto.class);

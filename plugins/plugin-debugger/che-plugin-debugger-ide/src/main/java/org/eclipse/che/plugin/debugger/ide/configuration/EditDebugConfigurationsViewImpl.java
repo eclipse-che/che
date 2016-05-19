@@ -292,7 +292,7 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
         }
 
         list.clear();
-        list.render(categoriesList);
+        list.render(categoriesList, true);
         if (selectedConfiguration != null) {
             list.selectElement(selectedConfiguration);
             if (filterTextValue.isEmpty()) {

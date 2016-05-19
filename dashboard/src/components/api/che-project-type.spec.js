@@ -99,25 +99,25 @@ describe('CheProjectType', function(){
       var factory = workspace.getWorkspaceAgent(workspaceId).getProjectType();
 
       // no types now on factory
-      expect(factory.getAllProjectTypes(workspaceId).length).toEqual(0);
+      expect(factory.getAllProjectTypes().length).toEqual(0);
 
       // fetch types
-      factory.fetchTypes(workspaceId);
+      factory.fetchTypes();
 
       // expecting a GET
-      httpBackend.expectGET(agentUrl + '/project-type/' + workspaceId);
+      httpBackend.expectGET(agentUrl + '/project-type');
 
       // flush command
       httpBackend.flush();
 
-      expect(factory.getAllProjectTypes(workspaceId).length).toEqual(2);
+      expect(factory.getAllProjectTypes().length).toEqual(2);
 
       // now, check types
-      var projectTypes = factory.getAllProjectTypes(workspaceId);
+      var projectTypes = factory.getAllProjectTypes();
       // check we have 2 PT
       expect(projectTypes.length).toEqual(2);
 
-      var typesIds = factory.getProjectTypesIDs(workspaceId);
+      var typesIds = factory.getProjectTypesIDs();
       expect(typesIds.size).toEqual(2);
 
       var firstType = typesIds.get('maven');

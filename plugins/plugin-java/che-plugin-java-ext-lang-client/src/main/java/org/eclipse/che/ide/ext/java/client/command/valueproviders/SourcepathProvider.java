@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.shared.Constants;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
 
 import java.util.List;
@@ -70,23 +70,23 @@ public class SourcepathProvider implements CommandPropertyValueProvider {
         final String projectPath = currentProject.getProjectConfig().getPath();
 
         return classpathContainer.getClasspathEntries(projectPath).then(
-                new Function<List<ClasspathEntryDTO>, String>() {
+                new Function<List<ClasspathEntryDto>, String>() {
                     @Override
-                    public String apply(List<ClasspathEntryDTO> arg) throws FunctionException {
+                    public String apply(List<ClasspathEntryDto> arg) throws FunctionException {
                         classpathResolver.resolveClasspathEntries(arg);
                         Set<String> sources = classpathResolver.getSources();
-                        StringBuilder classpath = new StringBuilder("");
+                        StringBuilder sourcepath = new StringBuilder("");
                         for (String source : sources) {
-                            classpath.append(source);
+                            sourcepath.append(source.substring(projectPath.length() + 1));
                         }
 
-                        if (classpath.toString().isEmpty()) {
-                            classpath.append(appContext.getProjectsRoot()).append(projectPath);
+                        if (sourcepath.toString().isEmpty()) {
+                            sourcepath.append(appContext.getProjectsRoot()).append(projectPath);
                         }
 
-                        classpath.append(':');
+                        sourcepath.append(':');
 
-                        return classpath.toString();
+                        return sourcepath.toString();
                     }
                 });
     }

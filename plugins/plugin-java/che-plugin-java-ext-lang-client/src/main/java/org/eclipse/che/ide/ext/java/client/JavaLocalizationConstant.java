@@ -372,9 +372,6 @@ public interface JavaLocalizationConstant extends Messages {
     @Key("library.title")
     String libraryTitle();
 
-    @Key("button.remove")
-    String removeElementButton();
-
     @Key("button.addJar")
     String addJarButton();
 
@@ -383,9 +380,6 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("unsavedChanges.title")
     String unsavedChangesTitle();
-
-    @Key("button.addClassFolder")
-    String buttonAddClassFolder();
 
     @Key("button.done")
     String buttonDone();

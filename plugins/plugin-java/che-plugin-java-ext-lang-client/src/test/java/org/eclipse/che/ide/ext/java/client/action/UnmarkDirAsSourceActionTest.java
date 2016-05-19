@@ -27,7 +27,7 @@ import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
 import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.junit.Before;
@@ -91,12 +91,12 @@ public class UnmarkDirAsSourceActionTest {
     @Mock
     private SourceFolderNode                 sourceFolder;
     @Mock
-    private Promise<List<ClasspathEntryDTO>> classpathPromise;
+    private Promise<List<ClasspathEntryDto>> classpathPromise;
     @Mock
     private PromiseError                     promiseError;
 
     @Captor
-    private ArgumentCaptor<Operation<List<ClasspathEntryDTO>>> classpathCapture;
+    private ArgumentCaptor<Operation<List<ClasspathEntryDto>>> classpathCapture;
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>            classpathErrorCapture;
 
@@ -117,7 +117,7 @@ public class UnmarkDirAsSourceActionTest {
         when(folder.getStorablePath()).thenReturn(TEXT);
 
         when(classpathService.getClasspath(anyString())).thenReturn(classpathPromise);
-        when(classpathPromise.then(Matchers.<Operation<List<ClasspathEntryDTO>>>anyObject())).thenReturn(classpathPromise);
+        when(classpathPromise.then(Matchers.<Operation<List<ClasspathEntryDto>>>anyObject())).thenReturn(classpathPromise);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class UnmarkDirAsSourceActionTest {
 
     @Test
     public void actionShouldBePerformed() throws Exception {
-        List<ClasspathEntryDTO> classpathEntries = new ArrayList<>();
+        List<ClasspathEntryDto> classpathEntries = new ArrayList<>();
         Set<String> sources = new HashSet<>();
         sources.add(TEXT);
         when(sourceFolder.getStorablePath()).thenReturn(TEXT);

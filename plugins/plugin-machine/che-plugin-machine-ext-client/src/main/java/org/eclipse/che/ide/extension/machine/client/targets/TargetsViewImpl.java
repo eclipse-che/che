@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.targets;
 
+import elemental.events.KeyboardEvent;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -35,7 +35,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import elemental.events.KeyboardEvent;
+
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
@@ -46,7 +46,6 @@ import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
-import org.eclipse.che.ide.ui.listbox.CustomListBox;
 import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.ArrayList;
@@ -56,11 +55,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer.MACHINE_LABELS_BY_CATEGORY_MAP;
 import static org.eclipse.che.ide.extension.machine.client.targets.TargetsPresenter.SSH_CATEGORY;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
-import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * @author Vitaliy Guliy
@@ -289,7 +288,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
         ensureSSHCategoryExists(categoriesList);
 
         list.clear();
-        list.render(categoriesList);
+        list.render(categoriesList, true);
     }
 
     @Override

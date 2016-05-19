@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2015 Codenvy, S.A.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -72,6 +72,9 @@ import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
+import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
+import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionAnnotationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
@@ -81,7 +84,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEventTargetOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionExtRulerOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionInputChangedEventOverlay;
-import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingModule;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyBindingsRelationOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyModeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionKeyStrokeOverlay;
@@ -93,9 +95,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.UiUtilsOverlay;
 import org.eclipse.che.ide.editor.preferences.editorproperties.EditorPropertiesManager;
 import org.eclipse.che.ide.editor.preferences.keymaps.KeyMapsPreferencePresenter;
-import org.eclipse.che.ide.editor.orion.client.events.HasScrollHandlers;
-import org.eclipse.che.ide.editor.orion.client.events.ScrollEvent;
-import org.eclipse.che.ide.editor.orion.client.events.ScrollHandler;
 import org.eclipse.che.ide.requirejs.ModuleHolder;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.loging.Log;
@@ -124,7 +123,6 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     /** The logger. */
     private static final Logger LOG = Logger.getLogger(OrionEditorWidget.class.getSimpleName());
 
-    private final OrionCodeEditWidgetOverlay codeEditWidgetModule;
     private final ModuleHolder               moduleHolder;
     private final EventBus                   eventBus;
     private final KeyModeInstances           keyModeInstances;
@@ -151,7 +149,6 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
     private EditorPropertiesManager editorPropertiesManager;
 
     private Keymap                          keymap;
-    private Provider<OrionKeyBindingModule> keyBindingModuleProvider;
     private ContentAssistWidget             assistWidget;
     private Gutter                          gutter;
 
@@ -170,13 +167,12 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                              final KeyModeInstances keyModeInstances,
                              final EventBus eventBus,
                              final EditorPropertiesManager editorPropertiesManager,
-                             final Provider<OrionKeyBindingModule> keyBindingModuleProvider,
+                             final Provider<OrionCodeEditWidgetOverlay> orionCodeEditWidgetProvider,
                              final ContentAssistWidgetFactory contentAssistWidgetFactory,
                              final DialogFactory dialogFactory,
                              final PreferencesManager preferencesManager,
                              @Assisted final List<String> editorModes,
                              @Assisted final WidgetInitializedCallback widgetInitializedCallback) {
-        this.keyBindingModuleProvider = keyBindingModuleProvider;
         this.contentAssistWidgetFactory = contentAssistWidgetFactory;
         this.moduleHolder = moduleHolder;
         this.keyModeInstances = keyModeInstances;
@@ -187,7 +183,6 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
         this.editorPropertiesManager = editorPropertiesManager;
 
-        this.codeEditWidgetModule = moduleHolder.getModule("CodeEditWidget").cast();
         this.uiUtilsOverlay = moduleHolder.getModule("UiUtils");
 
         // just first choice for the moment
@@ -198,8 +193,8 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         panel.getElement().setId("orion-parent-" + Document.get().createUniqueId());
         panel.getElement().addClassName(this.editorElementStyle.editorParent());
 
-        codeEditWidgetModule.createEditorView(panel.getElement(), JavaScriptObject.createObject())
-                            .then(new EditorViewCreatedOperation(widgetInitializedCallback));
+        orionCodeEditWidgetProvider.get().createEditorView(panel.getElement(), JavaScriptObject.createObject())
+                                   .then(new EditorViewCreatedOperation(widgetInitializedCallback));
 
         registerPromptFunction();
         eventBus.addHandler(EditorSettingsChangedEvent.TYPE, new EditorSettingsChangedHandler() {
@@ -228,19 +223,19 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
     @Override
     public void setValue(String newValue, final ContentInitializedHandler initializationHandler) {
-        editorOverlay
-                .addEventListener(OrionInputChangedEventOverlay.TYPE, new OrionEditorOverlay.EventHandler<OrionInputChangedEventOverlay>() {
-                    @Override
-                    public void onEvent(OrionInputChangedEventOverlay event) {
-                        if (initializationHandler != null) {
-                            initializationHandler.onContentInitialized();
-                        }
-                    }
-                }, true);
+        editorOverlay.addEventListener(OrionInputChangedEventOverlay.TYPE,
+                                       new OrionEditorOverlay.EventHandler<OrionInputChangedEventOverlay>() {
+                                           @Override
+                                           public void onEvent(OrionInputChangedEventOverlay event) {
+                                               if (initializationHandler != null) {
+                                                   initializationHandler.onContentInitialized();
+                                               }
+                                           }
+                                       }, true);
+
         this.editorViewOverlay.setContents(newValue, modeName);
         this.editorOverlay.getUndoStack().reset();
     }
-
 
     @Override
     public String getMode() {
@@ -264,8 +259,10 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
 
     @Override
     public void setReadOnly(final boolean isReadOnly) {
-        this.editorOverlay.getTextView().getOptions().setReadOnly(isReadOnly);
-        this.editorOverlay.getTextView().update();
+        editorViewOverlay.setReadonly(isReadOnly);
+
+        final JSONObject properties = editorPropertiesManager.getJsonEditorProperties();
+        editorViewOverlay.updateSettings(properties.getJavaScriptObject());
     }
 
     @Override
@@ -522,7 +519,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                                                          keyBinding.isAlt(),
                                                          keyBinding.isControl(),
                                                          "keydown",
-                                                         keyBindingModuleProvider.get());
+                                                         moduleHolder.getModule("OrionKeyBinding").cast());
         } else {
             strokeOverlay = OrionKeyStrokeOverlay.create(keyBinding.getKeyCode(),
                                                          keyBinding.isControl(),
@@ -530,7 +527,7 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
                                                          keyBinding.isAlt(),
                                                          false,
                                                          "keydown",
-                                                         keyBindingModuleProvider.get());
+                                                         moduleHolder.getModule("OrionKeyBinding").cast());
         }
         String actionId = "che-action-" + keyBinding.getAction().toString();
         editorOverlay.getTextView().setKeyBinding(strokeOverlay, actionId);

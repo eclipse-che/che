@@ -60,7 +60,6 @@ public class FetchPresenterTest extends BaseTest {
     @Override
     public void disarm() {
         super.disarm();
-        when(appContext.getWorkspaceId()).thenReturn("id");
         presenter = new FetchPresenter(dtoFactory,
                                        view,
                                        service,

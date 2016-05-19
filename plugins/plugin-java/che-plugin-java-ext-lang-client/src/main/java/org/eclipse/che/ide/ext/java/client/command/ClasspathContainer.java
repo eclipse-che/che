@@ -18,7 +18,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.Map;
 public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChangedHandler {
     private final ClasspathServiceClient classpathServiceClient;
 
-    private Map<String, Promise<List<ClasspathEntryDTO>>> classpathes;
+    private Map<String, Promise<List<ClasspathEntryDto>>> classpathes;
 
     @Inject
     public ClasspathContainer(ClasspathServiceClient classpathServiceClient, EventBus eventBus) {
@@ -52,11 +52,11 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
      *         path to the project
      * @return list of the classpath entries
      */
-    public Promise<List<ClasspathEntryDTO>> getClasspathEntries(String projectPath) {
+    public Promise<List<ClasspathEntryDto>> getClasspathEntries(String projectPath) {
         if (classpathes.containsKey(projectPath)) {
             return classpathes.get(projectPath);
         } else {
-            Promise<List<ClasspathEntryDTO>> result = classpathServiceClient.getClasspath(projectPath);
+            Promise<List<ClasspathEntryDto>> result = classpathServiceClient.getClasspath(projectPath);
             classpathes.put(projectPath, result);
             return result;
         }

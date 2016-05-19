@@ -33,15 +33,15 @@ export class ProjectRepositoryCtrl {
 
     this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
 
-    if (!this.wsagent.getProject().getProjectDetailsByKey(workspaceId, projectPath)) {
+    if (!this.wsagent.getProject().getProjectDetailsByKey(projectPath)) {
       let promise = this.wsagent.getProject().fetchProjectDetails(workspaceId, projectPath);
 
       promise.then(() => {
-        var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(workspaceId, projectPath);
+        var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
         this.updateRepositories(projectDetails);
       });
     } else {
-      var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(workspaceId, projectPath);
+      var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
       this.updateRepositories(projectDetails);
     }
 
@@ -68,25 +68,25 @@ export class ProjectRepositoryCtrl {
 
     if (projectDetails.mixins.indexOf(gitMixinId) !== -1) {
       //update git local url
-      if (!this.wsagent.getGit().getLocalUrlByKey(projectDetails.workspaceId, projectDetails.path)) {
-        let promise = this.wsagent.getGit().fetchLocalUrl(projectDetails.workspaceId, projectDetails.path);
+      if (!this.wsagent.getGit().getLocalUrlByKey(projectDetails.path)) {
+        let promise = this.wsagent.getGit().fetchLocalUrl(projectDetails.path);
 
         promise.then(() => {
-          this.localGitRepository = this.wsagent.getGit().getLocalUrlByKey(projectDetails.workspaceId, projectDetails.path);
+          this.localGitRepository = this.wsagent.getGit().getLocalUrlByKey(projectDetails.path);
         });
       } else {
-        this.localGitRepository = this.wsagent.getGit().getLocalUrlByKey(projectDetails.workspaceId, projectDetails.path);
+        this.localGitRepository = this.wsagent.getGit().getLocalUrlByKey(projectDetails.path);
       }
 
       //update git remote urls
-      if (!this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.workspaceId, projectDetails.path)) {
-        let promise = this.wsagent.getGit().fetchRemoteUrlArray(projectDetails.workspaceId, projectDetails.path);
+      if (!this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.path)) {
+        let promise = this.wsagent.getGit().fetchRemoteUrlArray(projectDetails.path);
 
         promise.then(() => {
-          this.remoteGitRepositories = this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.workspaceId, projectDetails.path);
+          this.remoteGitRepositories = this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.path);
         });
       } else {
-        this.remoteGitRepositories = this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.workspaceId, projectDetails.path);
+        this.remoteGitRepositories = this.wsagent.getGit().getRemoteUrlArrayByKey(projectDetails.path);
       }
     }
 

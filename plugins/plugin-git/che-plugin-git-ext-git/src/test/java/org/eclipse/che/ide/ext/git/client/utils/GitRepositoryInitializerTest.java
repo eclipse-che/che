@@ -95,17 +95,6 @@ public class GitRepositoryInitializerTest extends BaseTest {
             }
         }).when(service).init(devMachine, anyObject(), anyBoolean(), (RequestCallback<Void>)anyObject());
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[1];
-                @SuppressWarnings("NonJREEmulationClassesInClientCode")
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, REMOTE_URI);
-                return callback;
-            }
-        }).when(service).getGitReadOnlyUrl(devMachine, anyObject(), (AsyncRequestCallback<String>)anyObject());
 
         gitRepositoryInitializer.getGitUrlWithAutoInit(rootProjectConfig, stringCallback);
 
@@ -118,18 +107,6 @@ public class GitRepositoryInitializerTest extends BaseTest {
         final HashMap<String, List<String>> attributes = new HashMap<>();
         attributes.put("vcs.provider.name", new ArrayList<>(Arrays.asList("git")));
         doReturn(attributes).when(rootProjectConfig).getAttributes();
-
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[1];
-                @SuppressWarnings("NonJREEmulationClassesInClientCode")
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, REMOTE_URI);
-                return callback;
-            }
-        }).when(service).getGitReadOnlyUrl(devMachine, anyObject(), (AsyncRequestCallback<String>)anyObject());
 
         gitRepositoryInitializer.getGitUrlWithAutoInit(rootProjectConfig, stringCallback);
 
