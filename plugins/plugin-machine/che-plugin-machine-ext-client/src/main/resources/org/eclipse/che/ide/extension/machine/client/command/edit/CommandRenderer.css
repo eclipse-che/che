@@ -39,7 +39,7 @@
     text-align: center;
     margin-left: 2px;
     height: 100%;
-    padding: 0px 2px;
+    padding: 0 2px;
 }
 
 .categoryHeader span:first-child svg {
@@ -115,7 +115,7 @@ div.categorySubElementHeader[selected] .buttonArea span:hover > svg {
     border-radius: 5px;
     box-sizing: border-box;
     position: absolute;
-    left: 32px;
+    left: 30px;
     top: 4px;
 }
 
