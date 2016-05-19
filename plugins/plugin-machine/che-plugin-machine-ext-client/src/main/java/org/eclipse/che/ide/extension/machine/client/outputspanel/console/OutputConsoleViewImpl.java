@@ -242,6 +242,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         /** Scroll bottom immediately if view is visible */
         if (scrollPanel.getElement().getOffsetParent() != null) {
             scrollPanel.scrollToBottom();
+            scrollPanel.scrollToLeft();
             return;
         }
 
@@ -259,6 +260,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
                     if (scrollPanel.getElement().getOffsetParent() != null) {
                         scrollPanel.scrollToBottom();
+                        scrollPanel.scrollToLeft();
                         followScheduled = false;
                         return false;
                     }
