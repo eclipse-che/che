@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 
 /**
  * @author Anatoliy Bazko
@@ -34,7 +35,7 @@ public class JavaSourceFolderUtilTest {
         projectConfig.setPath("/test");
         projectConfig.setType("maven");
         projectConfig.setAttributes(new HashMap<String, List<String>>() {{
-            put("maven.source.folder", Collections.singletonList("src/main/java"));
+            put(SOURCE_FOLDER, Collections.singletonList(SOURCE_FOLDER));
         }});
 
         project = new CurrentProject();
