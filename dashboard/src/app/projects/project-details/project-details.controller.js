@@ -21,12 +21,13 @@ export class ProjectDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($log, $route, $location, cheAPI, $mdDialog, cheNotification) {
+  constructor($log, $route, $location, cheAPI, $mdDialog, cheNotification, lodash) {
     this.$log = $log;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
+    this.lodash = lodash;
 
     this.workspaceId = $route.current.params.workspaceId;
     this.projectName = $route.current.params.projectName;
@@ -188,6 +189,16 @@ export class ProjectDetailsCtrl {
         this.$log.log('error', error);
       });
     });
+  }
+
+  /**
+   * Returns list of projects of current workspace excluding current project
+   * @returns {*|Array}
+   */
+  getWorkspaceProjects() {
+    let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceId];
+    let _projects = this.lodash.filter(projects, (project) => { return project.name !== this.projectName});
+    return _projects;
   }
 
 }

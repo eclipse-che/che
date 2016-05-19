@@ -62,10 +62,13 @@ describe('unique-workspace-name-validator', function() {
       var nameWorkspace1 = 'testWorkspace1';
       var workspace1 = apiBuilder.getWorkspaceBuilder().withName(nameWorkspace1).withId(idWorkspace1).build();
 
+      var idWorkspace2 = 'idOfMyWorkspace2';
+      var workspace2 = apiBuilder.getWorkspaceBuilder().withId(idWorkspace2).build();
+
       factoryWorkspace.fetchWorkspaces();
 
       // add into backend
-      cheBackend.addWorkspaces([workspace1]);
+      cheBackend.addWorkspaces([workspace1, workspace2]);
       cheBackend.setup();
 
       // flush HTTP backend
@@ -75,7 +78,7 @@ describe('unique-workspace-name-validator', function() {
 
       var element = angular.element(
         '<form name="form">' +
-        '<input ng-model="model.workspaceName" name="name" unique-workspace-name="model.workspaceName" />' +
+        '<input ng-model="model.workspaceName" name="name" unique-workspace-name="workspace2.config.name" />' +
         '</form>'
       );
       $compiler(element)($scope);
@@ -95,10 +98,14 @@ describe('unique-workspace-name-validator', function() {
       var nameWorkspace1 = 'testWorkspace1';
       var workspace1 = apiBuilder.getWorkspaceBuilder().withName(nameWorkspace1).withId(idWorkspace1).build();
 
+      var idWorkspace2 = 'idOfMyWorkspace2';
+      var nameWorkspace2 = 'testWorkspace2';
+      var workspace2 = apiBuilder.getWorkspaceBuilder().withName().withId(idWorkspace2).build();
+
       factoryWorkspace.fetchWorkspaces();
 
       // add into backend
-      cheBackend.addWorkspaces([workspace1]);
+      cheBackend.addWorkspaces([workspace1, workspace2]);
 
       // setup backend
       cheBackend.setup();
@@ -110,13 +117,13 @@ describe('unique-workspace-name-validator', function() {
 
       var element = angular.element(
         '<form name="form">' +
-        '<input ng-model="model.workspaceName" name="name" unique-workspace-name="model.workspaceName" />' +
+        '<input ng-model="model.workspaceName" name="name" unique-workspace-name="workspace2.config.name" />' +
         '</form>'
       );
       $compiler(element)($scope);
       form = $scope.form;
 
-      form.name.$setViewValue('dummyWorkspace');
+      form.name.$setViewValue(nameWorkspace2);
 
       // check form valid
       expect(form.name.$invalid).toBe(false);

@@ -1176,4 +1176,16 @@ export class CreateProjectCtrl {
       return "Load Workspace and Create Project";
     }
   }
+
+  /**
+   * Returns list of projects of current workspace
+   * @returns {*|Array}
+   */
+  getWorkspaceProjects() {
+    if (this.workspaceSelected && this.workspaceResource === 'existing-workspace') {
+      let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceSelected.id];
+      return projects;
+    }
+    return [];
+  }
 }
