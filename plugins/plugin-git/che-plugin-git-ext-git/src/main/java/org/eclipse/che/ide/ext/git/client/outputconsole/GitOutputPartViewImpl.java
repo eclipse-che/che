@@ -86,14 +86,6 @@ public class GitOutputPartViewImpl extends Composite implements GitOutputPartVie
     /** {@inheritDoc} */
     @Override
     public void print(String text) {
-//        String preStyle = " style='margin:0px; font-size: 12px;' ";
-//
-//        HTML html = new HTML();
-//        html.setHTML("<pre" + preStyle + ">" + SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</pre>");
-//        html.getElement().setAttribute("style", "padding-left: 2px;");
-//
-//        consoleLines.add(html);
-
         PreElement pre = DOM.createElement("pre").cast();
         pre.setInnerText(text.isEmpty() ? "&nbsp;" : text);
         consoleLines.getElement().appendChild(pre);
@@ -101,16 +93,6 @@ public class GitOutputPartViewImpl extends Composite implements GitOutputPartVie
 
     @Override
     public void print(String text, String color) {
-//        String preStyle = " style='margin:0px; font-size: 12px;' ";
-//
-//        HTML html = new HTML();
-//        html.setHTML("<pre" + preStyle + "><span style='color:" + SimpleHtmlSanitizer.sanitizeHtml(color).asString() +
-//                ";'>" + SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</span></pre>");
-//
-//        html.getElement().setAttribute("style", "padding-left: 2px;");
-//        consoleLines.add(html);
-
-
         PreElement pre = DOM.createElement("pre").cast();
         pre.setInnerText(text.isEmpty() ? "&nbsp;" : text);
 

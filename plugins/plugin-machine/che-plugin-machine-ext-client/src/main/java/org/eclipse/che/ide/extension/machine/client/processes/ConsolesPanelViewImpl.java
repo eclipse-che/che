@@ -250,14 +250,8 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
         getElement().focus();
     }
 
-    private native void log(String msg) /*-{
-        console.log(msg);
-    }-*/;
-
     @Override
     public void addProcessWidget(String processId, IsWidget widget) {
-        log(">>> addProcessWidget " + widget.getClass().getName());
-
         processWidgets.put(processId, widget);
         outputPanel.add(widget);
 

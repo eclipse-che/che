@@ -18,10 +18,16 @@
 
         @eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
 
+        /**
+         * Toolbar on the left with buttons.
+         */
         .toolbar {
             background-color: #373737;
         }
 
+        /**
+         * Console output area.
+         */
         .console {
             background-color: outputBackgroundColor;
             color: outputFontColor;
@@ -34,16 +40,10 @@
 
             padding: 1px 3px 3px 3px;
             margin-bottom: 0px;
-
-            /*background-color: yellow;*/
-            /*border: 1px solid #242424;*/
-            /*padding: 3px;*/
-
         }
 
         .console pre {
             font-family: outputFontFamily;
-            /*font-size: fontSize;*/
             font-size: consoleFontSize;
             line-height: consoleLineHeight;
         }
@@ -63,7 +63,6 @@
             word-break: break-all;
             word-wrap: break-word;
         }
-
 
     </ui:style>
 
