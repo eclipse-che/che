@@ -64,6 +64,7 @@
     <inherits name='org.eclipse.che.plugin.java.plain.PlainJava'/>
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
+    <inherits name='org.eclipse.che.plugin.languageserver.LanguageServer'/>
 
     <inherits name='org.eclipse.che.api.core.Core'/>
     <inherits name='org.eclipse.che.api.machine.Machine'/>

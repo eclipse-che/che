@@ -42,6 +42,17 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.typefox.lsapi</groupId>
+                <artifactId>io.typefox.lsapi</artifactId>
+                <version>0.1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>io.typefox.lsapi</groupId>
+                <artifactId>io.typefox.lsapi</artifactId>
+                <version>0.1.0-SNAPSHOT</version>
+                <classifier>source</classifier>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
                 <version>${project.version}</version>
@@ -476,6 +487,21 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-plain-shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-languageserver-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-languageserver-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-languageserver-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
