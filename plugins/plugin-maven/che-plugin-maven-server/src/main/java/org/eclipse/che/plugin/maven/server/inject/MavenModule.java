@@ -39,7 +39,10 @@ public class MavenModule extends AbstractModule {
     protected void configure() {
         newSetBinder(binder(), ValueProviderFactory.class).addBinding().to(MavenValueProviderFactory.class);
 
-        newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(MavenProjectType.class);
+        //bind maven project type only if maven installed on dev machine
+        if(System.getenv("M2_HOME") != null) {
+            newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(MavenProjectType.class);
+        }
 
         Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlerMultibinder.addBinding().to(MavenProjectGenerator.class);
@@ -50,7 +53,6 @@ public class MavenModule extends AbstractModule {
 //        projectHandlerMultibinder.addBinding().to(MavenProjectCreatedHandler.class);
 
         newSetBinder(binder(), GeneratorStrategy.class).addBinding().to(ArchetypeGenerationStrategy.class);
-//        bind(ClassPathBuilder.class).to(MavenClassPathBuilder.class).in(Singleton.class);
 
 //        Multibinder<VirtualFileFilter> multibinder = newSetBinder(binder(), VirtualFileFilter.class, Names.named("vfs.index_filter"));
 //        multibinder.addBinding().to(MavenTargetFilter.class);
@@ -61,8 +63,6 @@ public class MavenModule extends AbstractModule {
         bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
 
         bind(MavenServerService.class);
-
-//        bind(IWorkspace.class).toProvider(EclipseWorkspaceProvider.class).in(Singleton.class);
 
         bind(PomChangeListener.class).asEagerSingleton();
     }
