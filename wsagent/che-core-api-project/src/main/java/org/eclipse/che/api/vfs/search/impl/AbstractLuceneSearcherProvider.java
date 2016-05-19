@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.search.impl;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.vfs.VirtualFileFilter;
 import org.eclipse.che.api.vfs.VirtualFileFilters;
@@ -18,8 +20,11 @@ import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 
+import javax.annotation.PreDestroy;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -27,6 +32,7 @@ import static com.google.common.collect.Lists.newArrayList;
 public abstract class AbstractLuceneSearcherProvider implements SearcherProvider {
     protected final VirtualFileFilter fileIndexFilter;
     protected final AtomicReference<Searcher> searcherReference = new AtomicReference<>();
+    private final ExecutorService executor;
 
     /**
      * @param fileIndexFilters
@@ -34,6 +40,10 @@ public abstract class AbstractLuceneSearcherProvider implements SearcherProvider
      */
     protected AbstractLuceneSearcherProvider(Set<VirtualFileFilter> fileIndexFilters) {
         this.fileIndexFilter = mergeFileIndexFilters(fileIndexFilters);
+        executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+                                                             .setDaemon(true)
+                                                             .setNameFormat("LuceneSearcherInitThread")
+                                                             .build());
     }
 
     private VirtualFileFilter mergeFileIndexFilters(Set<VirtualFileFilter> fileIndexFilters) {
@@ -54,11 +64,16 @@ public abstract class AbstractLuceneSearcherProvider implements SearcherProvider
         if (cachedSearcher == null && create) {
             LuceneSearcher searcher = createLuceneSearcher(() -> searcherReference.set(null));
             if (searcherReference.compareAndSet(null, searcher)) {
-                searcher.init(virtualFileSystem);
+                searcher.initAsynchronously(executor, virtualFileSystem);
             }
             cachedSearcher = searcherReference.get();
         }
         return cachedSearcher;
+    }
+
+    @PreDestroy
+    void stop() {
+        executor.shutdownNow();
     }
 
     @Override
