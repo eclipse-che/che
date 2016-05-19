@@ -204,6 +204,8 @@ public class AsyncRequestFactory {
         if (dtoBody != null) {
             if (dtoBody instanceof List) {
                 asyncRequest.data(dtoFactory.toJson((List)dtoBody));
+            } else if (dtoBody instanceof String) {
+                asyncRequest.data((String) dtoBody);
             } else {
                 asyncRequest.data(dtoFactory.toJson(dtoBody));
             }

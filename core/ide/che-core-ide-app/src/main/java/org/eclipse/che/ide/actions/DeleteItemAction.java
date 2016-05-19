@@ -79,7 +79,6 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
     private final GitServiceClient         gitService;
     private final CoreLocalizationConstant locale;
     private final NotificationManager      notificationManager;
-    private final String                   workspaceId;
 
     private Callback<Void, Throwable> actionCompletedCallBack;
 
@@ -109,8 +108,6 @@ public class DeleteItemAction extends AbstractPerspectiveAction implements Promi
         this.gitService = gitServiceClient;
         this.locale = coreLocalizationConstant;
         this.notificationManager = notificationManager;
-        
-        this.workspaceId = appContext.getWorkspaceId();
     }
 
     /** {@inheritDoc} */

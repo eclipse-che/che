@@ -101,7 +101,7 @@ public class UploadFolderFromZipPresenter extends BasicUploadPresenter implement
     public void onUploadClicked() {
         view.setLoaderVisibility(true);
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/" + appContext.getDevMachine().getWorkspace() + "/upload/zipfolder/" +
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/upload/zipfolder/" +
                        ((HasStorablePath)getResourceBasedNode()).getStorablePath());
         view.submit();
     }

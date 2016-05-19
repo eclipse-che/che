@@ -298,7 +298,7 @@ public class EditCommandsViewImpl extends Window implements EditCommandsView {
             categoriesList.add(category);
         }
         list.clear();
-        list.render(categoriesList);
+        list.render(categoriesList, true);
         if (selectConfiguration != null) {
             list.selectElement(selectConfiguration);
             if (filterTextValue.isEmpty()) {

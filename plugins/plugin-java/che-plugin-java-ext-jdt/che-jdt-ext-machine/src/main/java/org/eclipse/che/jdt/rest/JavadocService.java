@@ -8,15 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.jdt;
+package org.eclipse.che.jdt.rest;
 
+import org.eclipse.che.jdt.JavadocFinder;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -26,12 +26,8 @@ import javax.ws.rs.core.UriInfo;
 /**
  * @author Evgen Vidolob
  */
-@Path("jdt/{wsId}/javadoc")
+@Path("jdt/javadoc")
 public class JavadocService {
-
-    @PathParam("wsId")
-    private String wsId;
-
 
     @Path("find")
     @GET
@@ -53,7 +49,7 @@ public class JavadocService {
     }
 
     private String getUrlPart(String projectPath, UriBuilder uriBuilder) {
-        return uriBuilder.clone().path(JavadocService.class).path(JavadocService.class, "get").build(wsId).toString() + "?projectpath=" + projectPath + "&handle=";
+        return uriBuilder.clone().path(JavadocService.class).path(JavadocService.class, "get").build().toString() + "?projectpath=" + projectPath + "&handle=";
     }
 
 }

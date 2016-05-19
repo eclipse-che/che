@@ -186,7 +186,7 @@ public class PreferencesViewImpl extends Window implements PreferencesView {
                                               preferencesPageDelegate));
         }
 
-        list.render(categoriesList);
+        list.render(categoriesList, true);
     }
 
     /** {@inheritDoc} */

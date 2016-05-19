@@ -107,9 +107,6 @@ public class OrganizeImportsPresenterTest {
         when(projectConfigDto.getPath()).thenReturn(PATH);
         when(file.getName()).thenReturn("A.java");
         when(file.getPath()).thenReturn(PATH);
-
-        when(appContext.getWorkspaceId()).thenReturn(WS_ID);
-
         when(javaCodeAssistClient.organizeImports(anyString(), anyString())).thenReturn(importsPromise);
         when(importsPromise.then(Matchers.<Operation<List<ConflictImportDTO>>>anyObject())).thenReturn(importsPromise);
 

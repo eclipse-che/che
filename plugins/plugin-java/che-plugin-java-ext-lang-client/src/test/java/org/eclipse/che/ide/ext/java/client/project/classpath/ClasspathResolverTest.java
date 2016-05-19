@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.plugin.java.plain.client.service.ClasspathUpdaterServiceClient;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,15 +90,15 @@ public class ClasspathResolverTest {
     private DevMachine                devMachine;
 
     @Mock
-    private ClasspathEntryDTO entry;
+    private ClasspathEntryDto entry;
     @Mock
-    private ClasspathEntryDTO lib1;
+    private ClasspathEntryDto lib1;
     @Mock
-    private ClasspathEntryDTO lib2;
+    private ClasspathEntryDto lib2;
     @Mock
-    private ClasspathEntryDTO source;
+    private ClasspathEntryDto source;
     @Mock
-    private ClasspathEntryDTO container;
+    private ClasspathEntryDto container;
 
     @Captor
     private ArgumentCaptor<Operation<Void>>             updateOperation;
@@ -107,7 +107,7 @@ public class ClasspathResolverTest {
     @Captor
     private ArgumentCaptor<Operation<ProjectConfigDto>> getProjectOperation;
 
-    private List<ClasspathEntryDTO> entries = new ArrayList<>();
+    private List<ClasspathEntryDto> entries = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -134,13 +134,12 @@ public class ClasspathResolverTest {
         verify(source).getEntryKind();
         verify(source).getPath();
         verify(container).getEntryKind();
-        verify(container).getPath();
     }
 
     @Test
     public void classpathShouldBeUpdated() throws Exception {
         when(appContext.getCurrentProject()).thenReturn(currentProject);
-        when(dtoFactory.createDto(ClasspathEntryDTO.class)).thenReturn(entry);
+        when(dtoFactory.createDto(ClasspathEntryDto.class)).thenReturn(entry);
         when(entry.withPath(PATH_TO_LIB1)).thenReturn(lib1);
         when(entry.withPath(PATH_TO_LIB2)).thenReturn(lib2);
         when(entry.withPath(PATH_TO_CONTAINER)).thenReturn(container);
@@ -168,7 +167,7 @@ public class ClasspathResolverTest {
     @Test
     public void showErrorIfClasspathDoesNotUpdate() throws Exception {
         when(appContext.getCurrentProject()).thenReturn(currentProject);
-        when(dtoFactory.createDto(ClasspathEntryDTO.class)).thenReturn(entry);
+        when(dtoFactory.createDto(ClasspathEntryDto.class)).thenReturn(entry);
         when(entry.withPath(PATH_TO_LIB1)).thenReturn(lib1);
         when(entry.withPath(PATH_TO_LIB2)).thenReturn(lib2);
         when(entry.withPath(PATH_TO_CONTAINER)).thenReturn(container);
@@ -202,10 +201,10 @@ public class ClasspathResolverTest {
     @Test
     public void setOfContainersShouldBeReturned() throws Exception {
         classpathResolver.resolveClasspathEntries(entries);
-        Set<String> containers = classpathResolver.getContainers();
+        Set<ClasspathEntryDto> containers = classpathResolver.getContainers();
         assertFalse(containers.isEmpty());
         assertEquals(1, containers.size());
-        assertEquals(PATH_TO_CONTAINER, containers.iterator().next());
+        assertEquals(container, containers.iterator().next());
     }
 
     @Test

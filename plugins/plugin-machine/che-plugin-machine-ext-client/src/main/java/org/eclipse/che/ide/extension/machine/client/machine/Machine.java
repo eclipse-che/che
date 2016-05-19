@@ -113,11 +113,12 @@ public class Machine {
             if (Constants.TERMINAL_REFERENCE.equals(descriptor.getRef())) {
                 String terminalUrl = descriptor.getUrl();
 
-                terminalUrl = terminalUrl.substring(terminalUrl.indexOf(':'), terminalUrl.length());
+                String uriWithoutProtocol = terminalUrl.substring(terminalUrl.indexOf(':'), terminalUrl.length());
+                String protocol = Window.Location.getProtocol().equals("https:") ? "wss" : "ws";
 
-                boolean isSecureConnection = Window.Location.getProtocol().equals("https:");
-
-                return (isSecureConnection ? "wss" : "ws") + terminalUrl + "/pty";
+                return protocol +
+                       uriWithoutProtocol +
+                       (terminalUrl.endsWith("/") ? "pty" : "/pty");
             }
         }
 

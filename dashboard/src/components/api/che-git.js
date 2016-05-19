@@ -29,19 +29,17 @@ export class CheGit {
 
     // remote call
     this.remoteGitAPI = this.$resource(wsagentPath + '/git', {}, {
-      getLocalUrl: {method: 'GET', url: wsagentPath + '/git/:workspaceId/read-only-url?projectPath=:path', isArray: false},
-      getRemoteUrlArray: {method: 'POST', url: wsagentPath + '/git/:workspaceId/remote-list?projectPath=:path', isArray: true}
+      getLocalUrl: {method: 'GET', url: wsagentPath + '/git/read-only-url?projectPath=:path', isArray: false},
+      getRemoteUrlArray: {method: 'POST', url: wsagentPath + '/git/remote-list?projectPath=:path', isArray: true}
     });
   }
 
   /**
    * Ask for loading local repository url for the given project
-   * @param workspaceId
    * @param projectPath
    */
-  fetchLocalUrl(workspaceId, projectPath) {
+  fetchLocalUrl(projectPath) {
     let promise = this.remoteGitAPI.getLocalUrl({
-      workspaceId: workspaceId,
       path: projectPath
     }, null).$promise;
 
@@ -58,7 +56,7 @@ export class CheGit {
           }
         });
       }
-      this.localGitUrlsMap.set(workspaceId + projectPath, localUrl);
+      this.localGitUrlsMap.set(projectPath, localUrl);
     });
 
     return parsedResultPromise;
@@ -66,31 +64,29 @@ export class CheGit {
 
   /**
    * Ask for loading remote repository urls for the given project
-   * @param workspaceId
    * @param projectPath
    */
-  fetchRemoteUrlArray(workspaceId, projectPath) {
+  fetchRemoteUrlArray(projectPath) {
     var data = {remote: null, verbose: true, attributes: {}};
 
     let promise = this.remoteGitAPI.getRemoteUrlArray({
-      workspaceId: workspaceId,
       path: projectPath
     }, data).$promise;
 
     // check if it was OK or not
     let parsedResultPromise = promise.then((remoteArray) => {
-      this.remoteGitUrlArraysMap.set(workspaceId + projectPath, remoteArray);
+      this.remoteGitUrlArraysMap.set(projectPath, remoteArray);
     });
 
     return parsedResultPromise;
   }
 
-  getRemoteUrlArrayByKey(workspaceId, projectPath) {
-    return this.remoteGitUrlArraysMap.get(workspaceId + projectPath);
+  getRemoteUrlArrayByKey(projectPath) {
+    return this.remoteGitUrlArraysMap.get(projectPath);
   }
 
-  getLocalUrlByKey(workspaceId, projectPath) {
-    return this.localGitUrlsMap.get(workspaceId + projectPath);
+  getLocalUrlByKey(projectPath) {
+    return this.localGitUrlsMap.get(projectPath);
   }
 
 }

@@ -88,7 +88,7 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     private String getBaseUrl() {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + "/svn/" + appContext.getWorkspaceId();
+        return appContext.getDevMachine().getWsAgentBaseUrl() + "/svn";
     }
 
     @Override

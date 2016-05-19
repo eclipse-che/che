@@ -184,11 +184,11 @@ export class ExportWorkspaceDialogController {
         let deferred = this.$q.defer();
         let deferredPromise = deferred.promise;
         projectPromises.push(deferredPromise);
-        let importProjectPromise = remoteProjectAPI.importProject(workspace.id, project.name, project.source);
+        let importProjectPromise = remoteProjectAPI.importProject(project.name, project.source);
 
         importProjectPromise.then(() => {
           this.exportInCloudSteps += 'Importing project ' + project.name + '...<br>';
-          let updateProjectPromise = remoteProjectAPI.updateProject(workspace.id, project.name, project);
+          let updateProjectPromise = remoteProjectAPI.updateProject(project.name, project);
           updateProjectPromise.then(() => {
             deferred.resolve(workspace);
           }, (error) => {

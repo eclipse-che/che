@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -47,16 +47,16 @@ public class ClasspathServiceClientImpl implements ClasspathServiceClient {
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
 
-        this.pathToService = "/jdt/" + appContext.getWorkspaceId() + "/classpath";
+        this.pathToService = "/jdt/classpath";
     }
 
     @Override
-    public Promise<List<ClasspathEntryDTO>> getClasspath(String projectPath) {
+    public Promise<List<ClasspathEntryDto>> getClasspath(String projectPath) {
         final String url = appContext.getDevMachine().getWsAgentBaseUrl() + pathToService + "?projectpath=" + projectPath;
 
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
-                                  .send(unmarshallerFactory.newListUnmarshaller(ClasspathEntryDTO.class));
+                                  .send(unmarshallerFactory.newListUnmarshaller(ClasspathEntryDto.class));
     }
 
 }

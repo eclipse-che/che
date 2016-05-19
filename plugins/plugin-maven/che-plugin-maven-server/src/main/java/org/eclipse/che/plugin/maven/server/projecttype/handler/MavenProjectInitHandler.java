@@ -26,21 +26,19 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
  * @author Vitaly Parfonov
  */
 @Singleton
-public class ProjectBecomeMavenHandler extends AbstractJavaInitHandler {
+public class MavenProjectInitHandler extends AbstractJavaInitHandler {
 
     private final Provider<MavenWorkspace> mavenWorkspace;
 
     @Inject
-    public ProjectBecomeMavenHandler(Provider<MavenWorkspace> mavenWorkspace) {
+    public MavenProjectInitHandler(Provider<MavenWorkspace> mavenWorkspace) {
         this.mavenWorkspace = mavenWorkspace;
     }
-
 
     @Override
     public String getProjectType() {
         return MAVEN_ID;
     }
-
 
     @Override
     protected void initializeClasspath(IJavaProject javaProject) {

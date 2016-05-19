@@ -46,7 +46,7 @@ public abstract class AbstractExternalLibrariesNodeInterceptor implements NodeIn
     @Override
     public Promise<List<Node>> intercept(Node parent, List<Node> children) {
 
-        if (!(isProjectOrModuleNode(parent)/* || isJavaProject(parent)*/)) {
+        if (!isProjectOrModuleNode(parent)) {
             return Promises.resolve(children);
         }
 

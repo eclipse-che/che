@@ -89,9 +89,6 @@ public class PushToRemotePresenterTest extends BaseTest {
 
     public void disarm() {
         super.disarm();
-
-        when(appContext.getWorkspaceId()).thenReturn("id");
-
         when(view.getRepository()).thenReturn(REPOSITORY_NAME);
         when(view.getLocalBranch()).thenReturn(LOCAL_BRANCH);
         when(view.getRemoteBranch()).thenReturn(REMOTE_BRANCH);

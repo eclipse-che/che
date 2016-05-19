@@ -26,7 +26,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -67,8 +66,6 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
     SimplePanel categoriesPanel;
     @UiField
     SimplePanel contentPanel;
-    @UiField
-    FlowPanel   overFooter;
 
     @Inject
     protected ProjectClasspathViewImpl(org.eclipse.che.ide.Resources resources,
@@ -156,7 +153,7 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
                                               projectPropertiesDelegate));
         }
 
-        list.render(categoriesList);
+        list.render(categoriesList, true);
     }
 
     @Override

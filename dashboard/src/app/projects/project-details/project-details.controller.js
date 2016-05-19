@@ -21,12 +21,13 @@ export class ProjectDetailsCtrl {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($log, $route, $location, cheAPI, $mdDialog, cheNotification) {
+  constructor($log, $route, $location, cheAPI, $mdDialog, cheNotification, lodash) {
     this.$log = $log;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
+    this.lodash = lodash;
 
     this.workspaceId = $route.current.params.workspaceId;
     this.projectName = $route.current.params.projectName;
@@ -60,7 +61,7 @@ export class ProjectDetailsCtrl {
   fetchProjectDetails() {
     this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspaceId).getProject();
 
-    if (!this.projectService.getProjectDetailsByKey(this.workspaceId, this.projectPath)) {
+    if (!this.projectService.getProjectDetailsByKey(this.projectPath)) {
       let promise = this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath);
       promise.then(() => {
         this.updateProjectDetails();
@@ -91,7 +92,7 @@ export class ProjectDetailsCtrl {
   }
 
   updateProjectDetails() {
-    this.projectDetails = this.projectService.getProjectDetailsByKey(this.workspaceId, this.projectPath);
+    this.projectDetails = this.projectService.getProjectDetailsByKey(this.projectPath);
     this.projectName = angular.copy(this.projectDetails.name);
     this.projectDescription = angular.copy(this.projectDetails.description);
     this.loading = false;
@@ -111,7 +112,7 @@ export class ProjectDetailsCtrl {
       this.cheNotification.showInfo('Project information successfully updated.');
       this.updateLocation();
       if (this.isNameChanged()) {
-        this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath).then(() => {
+        this.projectService.fetchProjectDetails(this.projectPath).then(() => {
           this.updateProjectDetails();
         });
       } else {
@@ -147,10 +148,10 @@ export class ProjectDetailsCtrl {
     }
 
     if (this.isNameChanged()) {
-      let promise = this.projectService.rename(this.projectDetails.workspaceId, this.projectName, this.projectDetails.name);
+      let promise = this.projectService.rename(this.projectName, this.projectDetails.name);
 
       promise.then(() => {
-        this.projectService.removeProjectDetailsByKey(this.workspaceId, this.projectPath);
+        this.projectService.removeProjectDetailsByKey(this.projectPath);
         if (!this.isDescriptionChanged()) {
           this.cheNotification.showInfo('Project information successfully updated.');
           this.updateLocation();
@@ -181,13 +182,23 @@ export class ProjectDetailsCtrl {
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
       // remove it !
-      let promise = this.projectService.remove(this.projectDetails.workspaceId, this.projectDetails.name);
+      let promise = this.projectService.remove(this.projectDetails.name);
       promise.then(() => {
         this.$location.path('/projects');
       }, (error) => {
         this.$log.log('error', error);
       });
     });
+  }
+
+  /**
+   * Returns list of projects of current workspace excluding current project
+   * @returns {*|Array}
+   */
+  getWorkspaceProjects() {
+    let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceId];
+    let _projects = this.lodash.filter(projects, (project) => { return project.name !== this.projectName});
+    return _projects;
   }
 
 }

@@ -80,9 +80,6 @@ public class PullPresenterTest extends BaseTest {
     @Override
     public void disarm() {
         super.disarm();
-
-        when(appContext.getWorkspaceId()).thenReturn("id");
-
         List<EditorPartPresenter> partPresenterList = new ArrayList<>();
         partPresenterList.add(partPresenter);
 

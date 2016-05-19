@@ -82,7 +82,7 @@ public class JavaCommandConfiguration extends CommandConfiguration {
     public String toCommandLine() {
         final StringBuilder cmd = new StringBuilder("");
         if (!commandLine.trim().isEmpty()) {
-            cmd.append(' ').append(commandLine.trim());
+            cmd.append(commandLine.trim());
         }
         return cmd.toString();
     }

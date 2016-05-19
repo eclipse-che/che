@@ -113,7 +113,6 @@ public class BranchPresenterTest extends BaseTest {
     public void disarm() {
         super.disarm();
 
-        when(appContext.getWorkspaceId()).thenReturn("id");
         presenter = new BranchPresenter(view,
                                         dtoFactory,
                                         editorAgent,

@@ -138,7 +138,6 @@ public class GitExtension {
         historyGroup.add(historyAction);
         actionManager.registerAction("gitStatus", showStatusAction);
         historyGroup.add(showStatusAction);
-
         actionManager.registerAction("gitPush", pushAction);
         remoteGroup.add(pushAction);
         actionManager.registerAction("gitFetch", fetchAction);

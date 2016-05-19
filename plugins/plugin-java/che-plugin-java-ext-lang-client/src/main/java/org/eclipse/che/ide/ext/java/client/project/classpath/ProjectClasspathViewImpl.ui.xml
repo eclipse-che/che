@@ -76,20 +76,13 @@
             width: 9px;
         }
 
-        .overFooter {
-            float: right;
-            position: absolute;
-            bottom: 0;
-            right: 0;
-        }
-
         .overFooter button {
             margin-right: 6px;
         }
     </ui:style>
 
-    <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.mainPanel}">
-        <g:west size="380">
+    <g:DockLayoutPanel unit="PX" width="600px" height="440px" addStyleNames="{style.mainPanel}">
+        <g:west size="200">
             <g:DockLayoutPanel unit="PX" addStyleNames="{style.leftPart}">
                 <g:center>
                     <g:SimplePanel ui:field="categoriesPanel" addStyleNames="{style.categories}" debugId="propertiesWizard"/>
@@ -99,7 +92,6 @@
         <g:center>
             <g:FlowPanel addStyleNames="{style.rightPart}">
                 <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.contentPanel}" debugId="pageViewContainer"/>
-                <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
             </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>

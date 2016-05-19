@@ -63,7 +63,6 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
     private final SelectionAgent           selectionAgent;
     private final ProjectImporter          importer;
     private final ProjectUpdater           updater;
-    private final String                   workspaceId;
     private final CoreLocalizationConstant locale;
 
     @Inject
@@ -92,7 +91,6 @@ public class ProjectWizard extends AbstractWizard<ProjectConfigDto> {
         this.importer = importer;
         this.updater = updater;
         this.locale = locale;
-        this.workspaceId = appContext.getWorkspaceId();
 
         context.put(WIZARD_MODE_KEY, mode.toString());
         context.put(PROJECT_NAME_KEY, dataObject.getName());

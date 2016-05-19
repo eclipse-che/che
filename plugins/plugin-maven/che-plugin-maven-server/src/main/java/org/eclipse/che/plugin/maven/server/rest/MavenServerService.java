@@ -56,7 +56,7 @@ import static javax.ws.rs.core.MediaType.TEXT_XML;
  *
  * @author Valeriy Svydenko
  */
-@Path("/maven/{wsId}/server")
+@Path("/maven/server")
 public class MavenServerService {
     private static final Logger LOG = LoggerFactory.getLogger(MavenServerService.class);
 
@@ -64,9 +64,6 @@ public class MavenServerService {
     private final ProjectRegistry     projectRegistry;
     private final MavenProjectManager mavenProjectManager;
     private final ProjectManager      cheProjectManager;
-
-    @PathParam("wsId")
-    private String workspaceId;
 
     @Inject
     private MavenProgressNotifier notifier;

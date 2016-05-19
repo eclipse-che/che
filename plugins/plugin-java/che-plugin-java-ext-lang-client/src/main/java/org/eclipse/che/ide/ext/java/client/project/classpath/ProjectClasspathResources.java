@@ -23,17 +23,28 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface ProjectClasspathResources extends ClientBundle {
 
-    interface EditCommandStyles extends CssResource {
+    interface ClasspathStyles extends CssResource {
 
         String categoryHeader();
+
+        String elementHeader();
+
+        String elementLabel();
 
         String disableButton();
 
         String selectNode();
+
+        String classpathCategoryLabel();
+
+        String removeButton();
+
+        @ClassName("classpath-entry-category")
+        String classpathEntryCategory();
     }
 
     @Source({"PropertiesRenderer.css", "org/eclipse/che/ide/api/ui/style.css"})
-    EditCommandStyles getCss();
+    ClasspathStyles getCss();
 
     @Source("remove-node-button.svg")
     SVGResource removeNode();

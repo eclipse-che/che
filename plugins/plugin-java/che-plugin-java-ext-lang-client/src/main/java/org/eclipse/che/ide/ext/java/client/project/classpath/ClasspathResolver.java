@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -24,9 +23,10 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.plugin.java.plain.client.service.ClasspathUpdaterServiceClient;
 
 import java.util.ArrayList;
@@ -36,7 +36,6 @@ import java.util.Set;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.CONTAINER;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.PROJECT;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.SOURCE;
@@ -57,10 +56,10 @@ public class ClasspathResolver {
     private final AppContext                    appContext;
     private final DtoFactory                    dtoFactory;
 
-    private Set<String> libs;
-    private Set<String> containers;
-    private Set<String> sources;
-    private Set<String> projects;
+    private Set<String>            libs;
+    private Set<String>            sources;
+    private Set<String>            projects;
+    private Set<ClasspathEntryDto> containers;
 
     @Inject
     public ClasspathResolver(ClasspathUpdaterServiceClient classpathUpdater,
@@ -78,18 +77,18 @@ public class ClasspathResolver {
     }
 
     /** Reads and parses classpath entries. */
-    public void resolveClasspathEntries(List<ClasspathEntryDTO> entries) {
+    public void resolveClasspathEntries(List<ClasspathEntryDto> entries) {
         libs = new HashSet<>();
         containers = new HashSet<>();
         sources = new HashSet<>();
         projects = new HashSet<>();
-        for (ClasspathEntryDTO entry : entries) {
+        for (ClasspathEntryDto entry : entries) {
             switch (entry.getEntryKind()) {
                 case ClasspathEntryKind.LIBRARY:
                     libs.add(entry.getPath());
                     break;
                 case ClasspathEntryKind.CONTAINER:
-                    containers.add(entry.getPath());
+                    containers.add(entry);
                     break;
                 case ClasspathEntryKind.SOURCE:
                     sources.add(entry.getPath());
@@ -110,18 +109,18 @@ public class ClasspathResolver {
             return null;
         }
 
-        final List<ClasspathEntryDTO> entries = new ArrayList<>();
+        final List<ClasspathEntryDto> entries = new ArrayList<>();
         for (String path : libs) {
-            entries.add(dtoFactory.createDto(ClasspathEntryDTO.class).withPath(path).withEntryKind(LIBRARY));
+            entries.add(dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(LIBRARY));
         }
-        for (String path : containers) {
-            entries.add(dtoFactory.createDto(ClasspathEntryDTO.class).withPath(path).withEntryKind(CONTAINER));
+        for (ClasspathEntryDto container : containers) {
+            entries.add(container);
         }
         for (String path : sources) {
-            entries.add(dtoFactory.createDto(ClasspathEntryDTO.class).withPath(path).withEntryKind(SOURCE));
+            entries.add(dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(SOURCE));
         }
         for (String path : projects) {
-            entries.add(dtoFactory.createDto(ClasspathEntryDTO.class).withPath(path).withEntryKind(PROJECT));
+            entries.add(dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(PROJECT));
         }
         Promise<Void> promise = classpathUpdater.setRawClasspath(currentProject.getProjectConfig().getPath(), entries);
 
@@ -153,7 +152,7 @@ public class ClasspathResolver {
     }
 
     /** Returns list of containers from classpath. */
-    public Set<String> getContainers() {
+    public Set<ClasspathEntryDto> getContainers() {
         return containers;
     }
 

@@ -14,33 +14,42 @@ import com.google.gwt.dev.util.collect.HashSet;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathResources;
-import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node.NodeWidget;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.SelectNodePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.SourceFolderNodeInterceptor;
+import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.times;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,24 +76,35 @@ public class SourceEntryPresenterTest {
     @Mock
     private NodesResources                            nodesResources;
     @Mock
+    private ClasspathEntryDto                         classpathEntryDto;
+    @Mock
     private AcceptsOneWidget                          container;
     @Mock
     private SelectNodePresenter                       selectNodePresenter;
     @Mock
+    private ClasspathContainer                        classpathContainer;
+    @Mock
     private ClasspathPagePresenter.DirtyStateListener delegate;
 
     @Mock
-    private CurrentProject                              currentProject;
+    private CurrentProject                            currentProject;
     @Mock
-    private ProjectConfigDto                            projectConfig;
+    private ProjectConfigDto                          projectConfig;
     @Mock
-    private SVGResource                                 icon;
+    private SVGResource                               icon;
     @Mock
-    private OMSVGSVGElement                             svgElement;
+    private OMSVGSVGElement                           svgElement;
     @Mock
-    private ProjectClasspathResources.EditCommandStyles style;
+    private ProjectClasspathResources.ClasspathStyles style;
 
-    private Set<String> sources = new HashSet<>();
+    @Mock
+    private Promise<List<ClasspathEntryDto>> entriesPromise;
+
+    @Captor
+    private ArgumentCaptor<Operation<List<ClasspathEntryDto>>> acceptCaptor;
+
+    private Set<String>             sources = new HashSet<>();
+    private List<ClasspathEntryDto> entries = new LinkedList<>();
 
     @InjectMocks
     private SourceEntryPresenter presenter;
@@ -94,16 +114,21 @@ public class SourceEntryPresenterTest {
         when(appContext.getCurrentProject()).thenReturn(currentProject);
         when(currentProject.getProjectConfig()).thenReturn(projectConfig);
         when(projectConfig.getType()).thenReturn(PLAIN_TYPE);
+        when(projectConfig.getPath()).thenReturn("path");
         when(resources.removeNode()).thenReturn(icon);
         when(icon.getSvg()).thenReturn(svgElement);
         when(javaResources.sourceFolder()).thenReturn(icon);
         when(icon.getSvg()).thenReturn(svgElement);
         when(resources.getCss()).thenReturn(style);
         when(style.selectNode()).thenReturn("");
+        when(classpathContainer.getClasspathEntries(anyString())).thenReturn(entriesPromise);
+        when(classpathEntryDto.getEntryKind()).thenReturn(ClasspathEntryKind.CONTAINER);
+        when(classpathEntryDto.getPath()).thenReturn("path");
 
         presenter.setUpdateDelegate(delegate);
 
         sources.add(SOURCE);
+        entries.add(classpathEntryDto);
         when(classpathResolver.getSources()).thenReturn(sources);
     }
 
@@ -121,13 +146,12 @@ public class SourceEntryPresenterTest {
     public void widgetShouldBEStart() throws Exception {
         presenter.go(container);
 
-        verify(view).setAddSourceButtonState(true);
-        verify(view).clear();
-        verify(view).addNode(Matchers.<NodeWidget>anyObject());
-        verify(delegate, times(2)).onDirtyChanged();
-        assertFalse(presenter.isDirty());
+        verify(classpathContainer).getClasspathEntries("path");
+        verify(entriesPromise).then(acceptCaptor.capture());
+        acceptCaptor.getValue().apply(entries);
 
-        verify(container).setWidget(view);
+        verify(view).setData(anyMap());
+        verify(view).renderNodes();
     }
 
     @Test
@@ -137,16 +161,6 @@ public class SourceEntryPresenterTest {
         verify(selectNodePresenter).show(Matchers.<SourceEntryPresenter>anyObject(),
                                          Matchers.<SourceFolderNodeInterceptor>anyObject(),
                                          anyBoolean());
-    }
-
-    @Test
-    public void selectedNodeShouldBeRemove() throws Exception {
-        presenter.go(container);
-        presenter.onRemoveClicked();
-
-        assertTrue(presenter.isDirty());
-        verify(delegate, times(3)).onDirtyChanged();
-        verify(view).removeNode(Matchers.<NodeWidget>anyObject());
     }
 
     @Test
@@ -163,10 +177,7 @@ public class SourceEntryPresenterTest {
     public void changesShouldRevert() throws Exception {
         presenter.revertChanges();
 
-        verify(view).clear();
-        verify(view).addNode(Matchers.<NodeWidget>anyObject());
-        verify(delegate, times(2)).onDirtyChanged();
+        verify(delegate).onDirtyChanged();
         assertFalse(presenter.isDirty());
-        verify(delegate, times(2)).onDirtyChanged();
     }
 }

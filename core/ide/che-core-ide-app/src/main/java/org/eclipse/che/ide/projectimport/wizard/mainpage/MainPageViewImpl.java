@@ -117,7 +117,7 @@ public class MainPageViewImpl implements MainPageView {
                                               projectImporterDelegate));
         }
 
-        list.render(categoriesList);
+        list.render(categoriesList, true);
     }
 
     @Override

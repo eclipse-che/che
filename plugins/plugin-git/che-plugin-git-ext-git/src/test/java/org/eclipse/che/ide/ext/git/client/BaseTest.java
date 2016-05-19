@@ -99,7 +99,6 @@ public abstract class BaseTest {
 
     @Before
     public void disarm() {
-        when(appContext.getWorkspaceId()).thenReturn("id");
         when(appContext.getCurrentProject()).thenReturn(currentProject);
 
         when(currentProject.getProjectConfig()).thenReturn(projectConfig);

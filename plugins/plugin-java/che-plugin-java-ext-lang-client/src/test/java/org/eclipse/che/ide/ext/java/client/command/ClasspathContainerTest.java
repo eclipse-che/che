@@ -15,7 +15,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +45,7 @@ public class ClasspathContainerTest {
     private EventBus               eventBus;
 
     @Mock
-    private Promise<List<ClasspathEntryDTO>> classpathEntries;
+    private Promise<List<ClasspathEntryDto>> classpathEntries;
 
     @InjectMocks
     private ClasspathContainer classpathContainer;
@@ -62,7 +62,7 @@ public class ClasspathContainerTest {
 
     @Test
     public void classpathShouldBeAdded() throws Exception {
-        Promise<List<ClasspathEntryDTO>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
+        Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
         verify(classpathServiceClient).getClasspath(PROJECT_PATH);
         assertEquals(classpathEntries, entries);
@@ -74,7 +74,7 @@ public class ClasspathContainerTest {
 
         reset(classpathServiceClient);
 
-        Promise<List<ClasspathEntryDTO>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
+        Promise<List<ClasspathEntryDto>> entries = classpathContainer.getClasspathEntries(PROJECT_PATH);
 
         verify(classpathServiceClient, never()).getClasspath(PROJECT_PATH);
         assertEquals(classpathEntries, entries);

@@ -11,6 +11,13 @@
 @eval categoryHeaderButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.categoryHeaderButtonHoverColor();
 @eval categoryHeaderButtonColor org.eclipse.che.ide.api.theme.Style.theme.categoryHeaderButtonColor();
 @eval nodeSelectedColor org.eclipse.che.ide.api.theme.Style.theme.projectExplorerSelectedRowBackground();
+@eval categorySelectElementBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementBackgroundColor();
+@eval categorySelectElementColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementColor();
+@eval popupBorderColor org.eclipse.che.ide.api.theme.Style.theme.getPopupBorderColor();
+
+.categoryHeader {
+    padding-left: 0;
+}
 
 .categoryHeader svg {
     width: 15px;
@@ -19,7 +26,6 @@
 
 .categoryHeader span {
     display: inline;
-    font-weight: bold;
     text-transform: uppercase;
 }
 
@@ -31,26 +37,34 @@
 .categoryHeader span:first-child svg {
     vertical-align: middle;
     margin: 0 2px 3px 0;
-    fill: blueIconColor;
-    stroke: blueIconColor;
 }
 
 .categoryHeader span:last-child {
     display: inline-block;
     height: 100%;
-    width: 25px;
+    width: 20px;
     float: right;
     cursor: pointer;
     text-align: center;
 }
 
+.categoryHeader span:first-child svg {
+    vertical-align: middle;
+    margin: 0 -4px 3px 0;
+}
+
+.categoryHeader span:first-child {
+    text-align: center;
+    margin-left: 2px;
+    height: 100%;
+    padding: 0px 2px;
+    float: left;
+}
+
 .categoryHeader span:last-child svg {
     width: 14px;
     height: 14px;
-    margin-top: -2px;
     vertical-align: middle;
-    fill: categoryHeaderButtonColor;
-    stroke: categoryHeaderButtonColor;
 }
 
 .disableButton {
@@ -66,3 +80,75 @@
 .selectNode {
     background-color: nodeSelectedColor;
 }
+
+.classpathCategoryLabel {
+    width: 211px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 2px;
+    text-transform: initial;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.elementHeader {
+    padding-left: 0;
+    margin-left: -25px;
+}
+
+.elementLabel {
+    width: 215px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.removeButton {
+    cursor: pointer;
+    float: right;
+    width: 20px;
+    height: 100%;
+    margin-top: 2px;
+    padding-right: 3px;
+}
+
+.removeButton > svg {
+    width: 15px;
+    height: 15px;
+    padding: 3px 0;
+    fill: primaryButtonBackground;
+}
+
+.classpath-entry-category {
+    border: 1px solid popupBorderColor;
+}
+
+.classpath-entry-category svg {
+    padding-top: 2px;
+}
+
+.classpath-entry-category > div > div > div > div {
+    padding: 0;
+}
+
+.classpath-entry-category > div > div > div > div:last-child {
+    padding: 0 10px;
+}
+
+.classpath-entry-category div > span {
+    float: none;
+}
+
+.classpath-entry-category div > span + div {
+    float: left;
+    margin-top: 3px;
+    width: 13px;
+    height: 13px;
+}
+
+.classpath-entry-category div > span + div svg {
+    height: 9px;
+    width: 9px;
+}
+

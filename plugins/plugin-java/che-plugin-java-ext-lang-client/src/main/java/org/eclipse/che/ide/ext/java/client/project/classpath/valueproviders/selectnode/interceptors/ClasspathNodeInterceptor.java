@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.sel
 
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDTO;
+import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
 /**
  * Perform children interception to check if current children are available for conversion
@@ -25,6 +25,6 @@ public interface ClasspathNodeInterceptor extends NodeInterceptor {
     /** Returns {@code true} if node is valid for this interceptor else returns {@code false}. */
     boolean isNodeValid(Node node);
 
-    /** Returns type of classpath entry. For more details see {@link ClasspathEntryDTO} **/
+    /** Returns type of classpath entry. For more details see {@link ClasspathEntryDto} **/
     int getKind();
 }

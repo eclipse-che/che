@@ -56,7 +56,7 @@ import java.util.function.Function;
  *
  * @author Evgen Vidolob
  */
-@Path("/jdt/{ws-id}/refactoring")
+@Path("/jdt/refactoring")
 public class RefactoringService {
     private static final JavaModel model = JavaModelManager.getJavaModelManager().getJavaModel();
     private RefactoringManager manager;

@@ -33,7 +33,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
  *
  * @author Evgen Vidolob
  */
-@Path("jdt/{ws-id}/search")
+@Path("jdt/search")
 public class SearchService {
 
     @Inject
