@@ -40,10 +40,20 @@ export class UniqueWorkspaceNameValidator {
         // create promise
         var deferred = this.$q.defer();
 
-        let workspaces = this.cheAPI.getWorkspace().getWorkspaces();
+        // parent scope ?
+        var scopingTest = $scope.$parent;
+        if (!scopingTest) {
+          scopingTest = $scope;
+        }
+
+        let currentWorkspaceName = scopingTest.$eval(attributes.uniqueWorkspaceName),
+          workspaces = this.cheAPI.getWorkspace().getWorkspaces();
         if (workspaces.length) {
 
           for (let i=0; i<workspaces.length; i++) {
+            if (workspaces[i].config.name === currentWorkspaceName) {
+              continue;
+            }
             if (workspaces[i].config.name === modelValue) {
               deferred.reject(false);
             }
