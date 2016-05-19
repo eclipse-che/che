@@ -13,18 +13,24 @@ package org.eclipse.che.api.workspace.server.event;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
 
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.CREATING;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.RUNNING;
@@ -45,27 +51,37 @@ import static org.mockito.Mockito.when;
 @Listeners(MockitoTestNGListener.class)
 public class AddJustRunMachineIntoWorkspaceRuntimeTest {
 
-    private static final String MACHINE_ID   = "machineId";
+    private static final String WORKSPACE_ID   = "workspaceId";
+    private static final String MACHINE_ID     = "machineId";
 
     @Mock
-    private MachineImpl machine;
+    private MachineImpl        machine;
+    @Mock
+    private MachineConfig      machineConfig;
+    @Mock
+    private MachineRuntimeInfo machineRuntimeInfo;
 
     @Mock
-    private MachineStatusEvent event;
+    private MachineStatusEvent   event;
     @Mock
-    private WorkspaceImpl      workspace;
+    private WorkspaceImpl        workspace;
     @Mock
-    private MachineManager     machineManager;
+    private WorkspaceRuntimeImpl runtime;
     @Mock
-    private WorkspaceManager   workspaceManager;
+    private MachineManager       machineManager;
+    @Mock
+    private WorkspaceManager     workspaceManager;
 
     @InjectMocks
     private AddJustRunMachineIntoWorkspaceRuntime listener;
 
     @BeforeMethod
-    public void setup() throws NotFoundException, MachineException {
+    public void setup() throws NotFoundException, ServerException {
         when(event.getEventType()).thenReturn(RUNNING);
         when(event.getMachineId()).thenReturn(MACHINE_ID);
+        when(event.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(workspace.getRuntime()).thenReturn(runtime);
+        when(workspaceManager.getWorkspace(WORKSPACE_ID)).thenReturn(workspace);
         when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
         when(machine.getId()).thenReturn(MACHINE_ID);
         when(event.isDev()).thenReturn(false);
@@ -73,9 +89,25 @@ public class AddJustRunMachineIntoWorkspaceRuntimeTest {
 
     @Test
     public void shouldAddNewMachineIntoWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
+        ArrayList<MachineImpl> machines = new ArrayList<>();
+
+        when(runtime.getMachines()).thenReturn(machines);
+
         listener.onEvent(event);
 
         verify(workspaceManager).addMachineIntoRuntime(eq(machine.getId()));
+    }
+
+    @Test
+    public void shouldNotAddMachineIfItAlreadyExistInRuntime() throws ConflictException, NotFoundException, ServerException {
+        ArrayList<MachineImpl> machines = new ArrayList<>();
+        machines.add(new MachineImpl(machineConfig, MACHINE_ID, "workspace", "env", "owner", MachineStatus.RUNNING, machineRuntimeInfo));
+
+        when(runtime.getMachines()).thenReturn(machines);
+
+        listener.onEvent(event);
+
+        verify(workspaceManager, never()).addMachineIntoRuntime(eq(machine.getId()));
     }
 
     @Test
