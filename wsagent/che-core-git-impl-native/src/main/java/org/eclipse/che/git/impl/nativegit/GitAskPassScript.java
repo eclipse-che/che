@@ -10,10 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit;
 
+import com.google.common.io.Files;
+
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public class GitAskPassScript {
      * @return stored script
      */
     public File build(UserCredential credentials) throws GitException {
-        askScriptDirectory = new File(System.getProperty("java.io.tmpdir") + File.separator + NameGenerator.generate("", 8));
+        askScriptDirectory = Files.createTempDir();
 
         if (!askScriptDirectory.exists()) {
             askScriptDirectory.mkdirs();
