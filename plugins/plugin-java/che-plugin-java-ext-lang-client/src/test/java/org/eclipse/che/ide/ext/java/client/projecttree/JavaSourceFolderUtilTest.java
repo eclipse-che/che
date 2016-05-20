@@ -35,7 +35,7 @@ public class JavaSourceFolderUtilTest {
         projectConfig.setPath("/test");
         projectConfig.setType("maven");
         projectConfig.setAttributes(new HashMap<String, List<String>>() {{
-            put(SOURCE_FOLDER, Collections.singletonList(SOURCE_FOLDER));
+            put(SOURCE_FOLDER, Collections.singletonList("src/main/java"));
         }});
 
         project = new CurrentProject();
