@@ -15,11 +15,11 @@ import org.eclipse.che.api.git.Config;
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.git.impl.nativegit.commands.AddCommand;
-import org.eclipse.che.git.impl.nativegit.commands.CheckoutCommand;
 import org.eclipse.che.git.impl.nativegit.commands.BranchCreateCommand;
 import org.eclipse.che.git.impl.nativegit.commands.BranchDeleteCommand;
 import org.eclipse.che.git.impl.nativegit.commands.BranchListCommand;
 import org.eclipse.che.git.impl.nativegit.commands.BranchRenameCommand;
+import org.eclipse.che.git.impl.nativegit.commands.CheckoutCommand;
 import org.eclipse.che.git.impl.nativegit.commands.CloneCommand;
 import org.eclipse.che.git.impl.nativegit.commands.CommitCommand;
 import org.eclipse.che.git.impl.nativegit.commands.DiffCommand;
@@ -44,7 +44,7 @@ import org.eclipse.che.git.impl.nativegit.commands.StatusCommand;
 import org.eclipse.che.git.impl.nativegit.commands.TagCreateCommand;
 import org.eclipse.che.git.impl.nativegit.commands.TagDeleteCommand;
 import org.eclipse.che.git.impl.nativegit.commands.TagListCommand;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 
@@ -55,10 +55,10 @@ import java.io.File;
  */
 public class NativeGit {
 
-    private final File                 repository;
-    private final GitSshScriptProvider gitSshScriptProvider;
-    private final CredentialsLoader    credentialsLoader;
-    private final GitAskPassScript     gitAskPassScript;
+    private final File              repository;
+    private final SshScriptProvider sshScriptProvider;
+    private final CredentialsLoader credentialsLoader;
+    private final GitAskPassScript  gitAskPassScript;
 
     protected LineConsumerFactory gitOutputPublisherFactory;
 
@@ -67,10 +67,10 @@ public class NativeGit {
      *         directory where will be executed all commands created with
      *         this NativeGit object
      */
-    public NativeGit(File repository, GitSshScriptProvider gitSshScriptProvider,
+    public NativeGit(File repository, SshScriptProvider sshScriptProvider,
                      CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
         this.repository = repository;
-        this.gitSshScriptProvider = gitSshScriptProvider;
+        this.sshScriptProvider = sshScriptProvider;
         this.credentialsLoader = credentialsLoader;
         this.gitAskPassScript = gitAskPassScript;
     }
@@ -88,7 +88,7 @@ public class NativeGit {
      * @return clone command
      */
     public CloneCommand createCloneCommand() {
-        CloneCommand cloneCommand = new CloneCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        CloneCommand cloneCommand = new CloneCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         cloneCommand.setLineConsumerFactory(gitOutputPublisherFactory);
         return cloneCommand;
     }
@@ -106,7 +106,7 @@ public class NativeGit {
      * @return branch create command
      */
     public BranchRenameCommand createBranchRenameCommand() {
-        BranchRenameCommand command = new BranchRenameCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        BranchRenameCommand command = new BranchRenameCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         command.setLineConsumerFactory(gitOutputPublisherFactory);
         return command;
     }
@@ -151,7 +151,7 @@ public class NativeGit {
      * @return ls command
      */
     public LsRemoteCommand createLsRemoteCommand() {
-        LsRemoteCommand command = new LsRemoteCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        LsRemoteCommand command = new LsRemoteCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         command.setLineConsumerFactory(gitOutputPublisherFactory);
         return command;
     }
@@ -275,7 +275,7 @@ public class NativeGit {
      * @return branch delete command
      */
     public BranchDeleteCommand createBranchDeleteCommand() {
-        BranchDeleteCommand command = new BranchDeleteCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        BranchDeleteCommand command = new BranchDeleteCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         command.setLineConsumerFactory(gitOutputPublisherFactory);
         return command;
     }
@@ -322,7 +322,7 @@ public class NativeGit {
      * @return fetch command
      */
     public FetchCommand createFetchCommand() {
-        FetchCommand command = new FetchCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        FetchCommand command = new FetchCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         command.setLineConsumerFactory(gitOutputPublisherFactory);
         return command;
     }
@@ -333,7 +333,7 @@ public class NativeGit {
      * @return pull command
      */
     public PullCommand createPullCommand() {
-        PullCommand command = new PullCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        PullCommand command = new PullCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         command.setLineConsumerFactory(gitOutputPublisherFactory);
         return command;
     }
@@ -353,7 +353,7 @@ public class NativeGit {
      * @return push command
      */
     public PushCommand createPushCommand() {
-        PushCommand command = new PushCommand(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+        PushCommand command = new PushCommand(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
         command.setLineConsumerFactory(gitOutputPublisherFactory);
         return command;
     }

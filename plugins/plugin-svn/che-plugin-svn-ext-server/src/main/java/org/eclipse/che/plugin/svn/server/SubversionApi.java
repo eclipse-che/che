@@ -22,6 +22,7 @@ import org.eclipse.che.api.vfs.util.DeleteOnCloseFileInputStream;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider.Credentials;
@@ -29,7 +30,9 @@ import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.upstream.CommandLineResult;
 import org.eclipse.che.plugin.svn.server.upstream.UpstreamUtils;
 import org.eclipse.che.plugin.svn.server.utils.InfoUtils;
+import org.eclipse.che.plugin.svn.server.utils.SshEnvironment;
 import org.eclipse.che.plugin.svn.server.utils.SubversionUtils;
+import org.eclipse.che.plugin.svn.server.utils.SvnUrl;
 import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -89,13 +92,16 @@ public class SubversionApi {
 
     private final CredentialsProvider   credentialsProvider;
     private final RepositoryUrlProvider repositoryUrlProvider;
+    private final SshScriptProvider     sshScriptProvider;
     protected     LineConsumerFactory   svnOutputPublisherFactory;
 
     @Inject
-    public SubversionApi(final CredentialsProvider credentialsProvider,
-                         final RepositoryUrlProvider repositoryUrlProvider) {
+    public SubversionApi(CredentialsProvider credentialsProvider,
+                         RepositoryUrlProvider repositoryUrlProvider,
+                         SshScriptProvider sshScriptProvider) {
         this.credentialsProvider = credentialsProvider;
         this.repositoryUrlProvider = repositoryUrlProvider;
+        this.sshScriptProvider = sshScriptProvider;
     }
 
     /**
@@ -241,7 +247,6 @@ public class SubversionApi {
     public CLIOutputWithRevisionResponse checkout(final CheckoutRequest request, final String[] credentials)
             throws IOException, SubversionException {
         final File projectPath = new File(request.getProjectPath());
-
         final List<String> cliArgs = defaultArgs();
 
         // Flags
@@ -258,12 +263,7 @@ public class SubversionApi {
         cliArgs.add(request.getUrl());
         cliArgs.add(projectPath.getAbsolutePath());
 
-        CommandLineResult result;
-        if (credentials == null) {
-            result = runCommand(null, cliArgs, projectPath, request.getPaths());
-        } else {
-            result = runCommand(null, cliArgs, projectPath, request.getPaths(), credentials);
-        }
+        CommandLineResult result = runCommand(null, cliArgs, projectPath, request.getPaths(), credentials, request.getUrl());
 
         return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -852,13 +852,21 @@ public class SubversionApi {
         return paths;
     }
 
-    private CommandLineResult runCommand(final Map<String, String> env, final List<String> args, final File projectPath,
-                                         final List<String> paths) throws IOException, SubversionException {
-        return runCommand(env, args, projectPath, paths, getCredentialArgs(projectPath.getAbsolutePath()));
+    private CommandLineResult runCommand(Map<String, String> env,
+                                         List<String> args,
+                                         File projectPath,
+                                         List<String> paths) throws IOException, SubversionException {
+        String[] credentials = getCredentialArgs(projectPath.getAbsolutePath());
+        String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
+        return runCommand(env, args, projectPath, paths, credentials, repoUrl);
     }
 
-    private CommandLineResult runCommand(final Map<String, String> env, final List<String> args, final File projectPath,
-                                         final List<String> paths, final String[] credentials) throws IOException, SubversionException {
+    private CommandLineResult runCommand(Map<String, String> env,
+                                         List<String> args,
+                                         File projectPath,
+                                         List<String> paths,
+                                         String[] credentials,
+                                         String repoUrl) throws IOException, SubversionException {
         final List<String> lines = new ArrayList<>();
         final CommandLineResult result;
         final StringBuffer buffer;
@@ -876,8 +884,29 @@ public class SubversionApi {
             credentialsArgs = null;
         }
 
-        result = UpstreamUtils.executeCommandLine(env, "svn", args.toArray(new String[args.size()]),
-                                                  credentialsArgs, -1, projectPath, svnOutputPublisherFactory);
+        SshEnvironment sshEnvironment = null;
+        if (SvnUrl.isSSH(repoUrl)) {
+            sshEnvironment = new SshEnvironment(sshScriptProvider, repoUrl);
+            if (env == null) {
+                env = sshEnvironment.get();
+            } else {
+                env.putAll(sshEnvironment.get());
+            }
+        }
+
+        try {
+            result = UpstreamUtils.executeCommandLine(env,
+                                                      "svn",
+                                                      args.toArray(new String[args.size()]),
+                                                      credentialsArgs,
+                                                      -1,
+                                                      projectPath,
+                                                      svnOutputPublisherFactory);
+        } finally {
+            if (sshEnvironment != null) {
+                sshEnvironment.cleanUp();
+            }
+        }
 
         if (result.getExitCode() != 0) {
             buffer = new StringBuffer();
@@ -937,7 +966,7 @@ public class SubversionApi {
             addOption(args, "--revision", request.getRevision());
         }
 
-        if (true == request.getChildren()) {
+        if (request.getChildren()) {
             addOption(args, "--depth", "immediates");
         }
 

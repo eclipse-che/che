@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
-import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.CredentialsLoader;
+import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
-import org.eclipse.che.git.impl.GitTestUtil;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 import org.testng.annotations.DataProvider;
 
 import static org.mockito.Mockito.mock;
@@ -34,7 +33,7 @@ public class GitConnectionFactoryProvider {
                 new Object[]{
                         new NativeGitConnectionFactory(
                                 mock(CredentialsLoader.class),
-                                new GitSshScriptProvider(host -> new byte[0]),
+                                new SshScriptProvider(host -> new byte[0]),
                                 resolver)
                 }
         };
