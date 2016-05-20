@@ -99,18 +99,6 @@ public class AddJustRunMachineIntoWorkspaceRuntimeTest {
     }
 
     @Test
-    public void shouldNotAddMachineIfItAlreadyExistInRuntime() throws ConflictException, NotFoundException, ServerException {
-        ArrayList<MachineImpl> machines = new ArrayList<>();
-        machines.add(new MachineImpl(machineConfig, MACHINE_ID, "workspace", "env", "owner", MachineStatus.RUNNING, machineRuntimeInfo));
-
-        when(runtime.getMachines()).thenReturn(machines);
-
-        listener.onEvent(event);
-
-        verify(workspaceManager, never()).addMachineIntoRuntime(eq(machine.getId()));
-    }
-
-    @Test
     public void shouldNotAddDevMachineIntoWorkspaceRuntimeList() throws ConflictException, NotFoundException, ServerException {
         when(event.isDev()).thenReturn(true);
 

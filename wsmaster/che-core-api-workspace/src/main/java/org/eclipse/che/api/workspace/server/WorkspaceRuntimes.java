@@ -249,6 +249,7 @@ public class WorkspaceRuntimes {
      * Adds machine into running workspace.
      * This method do not touch workspace configuration.
      * Just adds machine to workspace runtime and destroy it on workspace stop.
+     * Does nothing if add already existing machine.
      *
      * @param machine
      *         machine to add to specified runtime
@@ -275,7 +276,10 @@ public class WorkspaceRuntimes {
                 throw new ConflictException("Cannot add machine " + machine.getId() + " to not running workspace.");
             }
 
-            descriptor.getRuntime().getMachines().add(machine);
+            List<MachineImpl> machines = descriptor.getRuntime().getMachines();
+            if (!machines.stream().anyMatch(m -> machine.getId().equals(m.getId()))) {
+                machines.add(machine);
+            }
         } finally {
             rwLock.writeLock().unlock();
         }
@@ -301,13 +305,14 @@ public class WorkspaceRuntimes {
                 throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
             }
 
-            List<MachineImpl> machines = descriptor.getRuntime().getMachines();
+            rmFirst(descriptor.getRuntime().getMachines(), m -> machine.getId().equals(m.getId()));
+            /*List<MachineImpl> machines = descriptor.getRuntime().getMachines();
             for (int i = 0; i < machines.size(); i++) {
                 if (machine.getId().equals(machines.get(i).getId())) {
                     machines.remove(i);
                     break;
                 }
-            }
+            }*/
         } finally {
             rwLock.writeLock().unlock();
         }

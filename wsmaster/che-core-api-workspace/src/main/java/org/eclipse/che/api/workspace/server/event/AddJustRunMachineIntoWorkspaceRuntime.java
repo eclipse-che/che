@@ -55,14 +55,7 @@ public class AddJustRunMachineIntoWorkspaceRuntime implements EventSubscriber<Ma
     public void onEvent(MachineStatusEvent event) {
         if (RUNNING.equals(event.getEventType()) && !event.isDev()) {
             try {
-                boolean isMachineExistInRuntime = workspaceManager.getWorkspace(event.getWorkspaceId())
-                                                                  .getRuntime()
-                                                                  .getMachines()
-                                                                  .stream()
-                                                                  .anyMatch(machine -> machine.getId().equals(event.getMachineId()));
-                if (!isMachineExistInRuntime) {
-                    workspaceManager.addMachineIntoRuntime(event.getMachineId());
-                }
+                workspaceManager.addMachineIntoRuntime(event.getMachineId());
             } catch (NotFoundException | ConflictException exception) {
                 LOG.error(exception.getLocalizedMessage(), exception);
             } catch (ServerException exception) {
