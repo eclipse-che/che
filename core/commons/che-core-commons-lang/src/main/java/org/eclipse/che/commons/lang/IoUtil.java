@@ -278,7 +278,9 @@ public class IoUtil {
                 if (redirect) {
                     String newUrl = conn.getHeaderField("Location");
                     // open the new connection again
-                    http = (HttpURLConnection)new URL(newUrl).openConnection();
+                    http.disconnect();
+                    conn = new URL(newUrl).openConnection();
+                    http = (HttpURLConnection)conn;
                     http.setRequestMethod(HttpMethod.GET);
                 }
             }
