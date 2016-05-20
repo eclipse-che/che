@@ -15,7 +15,7 @@ package org.eclipse.che.plugin.java.plain.shared;
  */
 public final class PlainJavaProjectConstants {
     public static String PLAIN_JAVA_PROJECT_ID       = "plainJava";
-    public static String PLAIN_JAVA_PROJECT_NAME     = "Plain Java Project";
+    public static String PLAIN_JAVA_PROJECT_NAME     = "Java";
     public static String DEFAULT_SOURCE_FOLDER_VALUE = "src";
     public static String DEFAULT_OUTPUT_FOLDER_VALUE = "bin";
 
