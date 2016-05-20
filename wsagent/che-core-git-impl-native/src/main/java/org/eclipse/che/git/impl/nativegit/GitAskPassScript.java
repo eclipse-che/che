@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit;
 
-import org.eclipse.che.api.git.UserCredential;
-import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.api.git.GitException;
-
+import org.eclipse.che.api.git.UserCredential;
+import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +31,7 @@ public class GitAskPassScript {
     private static final String GIT_ASK_PASS_SCRIPT_TEMPLATE = "META-INF/NativeGitAskPassTemplate";
     private static final String GIT_ASK_PASS_SCRIPT          = "ask_pass";
     private String gitAskPassTemplate;
+    private File askScriptDirectory;
 
     private static final Logger LOG = LoggerFactory.getLogger(GitAskPassScript.class);
 
@@ -47,8 +47,8 @@ public class GitAskPassScript {
      * @return stored script
      */
     public File build(UserCredential credentials) throws GitException {
-        File askScriptDirectory = new File(System.getProperty("java.io.tmpdir")
-                                           + "/" + EnvironmentContext.getCurrent().getSubject().getUserName());
+        askScriptDirectory = new File(System.getProperty("java.io.tmpdir") + NameGenerator.generate("", 8));
+
         if (!askScriptDirectory.exists()) {
             askScriptDirectory.mkdirs();
         }
@@ -71,9 +71,7 @@ public class GitAskPassScript {
 
     public void remove() {
 
-        File askScriptDirectory = new File(System.getProperty("java.io.tmpdir")
-                                           + "/" + EnvironmentContext.getCurrent().getSubject().getUserName());
-        if (askScriptDirectory.exists()) {
+        if (askScriptDirectory != null && askScriptDirectory.exists()) {
             if (!IoUtil.deleteRecursive(askScriptDirectory))
                 LOG.warn("Ask-pass script deletion failed.");
         }
