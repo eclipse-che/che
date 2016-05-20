@@ -142,6 +142,12 @@ public interface HttpJsonRequest {
     HttpJsonRequest setTimeout(int timeoutMs);
 
     /**
+     * Returns HTTP URL built from source URL
+     * and query parameters added to this request.
+     */
+    String getUrl();
+
+    /**
      * Makes http request with content type "application/json" and authorization headers
      * based on current {@link EnvironmentContext#getCurrent() context}.
      *

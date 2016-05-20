@@ -199,7 +199,7 @@ public class AsyncRequestFactory {
      *         if <b>true</b> - request will be sent in asynchronous mode
      * @return new {@link AsyncRequest} instance to send POST request
      */
-    private AsyncRequest doCreateRequest(RequestBuilder.Method method, String url, Object dtoBody, boolean async) {
+    protected AsyncRequest doCreateRequest(RequestBuilder.Method method, String url, Object dtoBody, boolean async) {
         AsyncRequest asyncRequest = new AsyncRequest(method, url, async);
         if (dtoBody != null) {
             if (dtoBody instanceof List) {

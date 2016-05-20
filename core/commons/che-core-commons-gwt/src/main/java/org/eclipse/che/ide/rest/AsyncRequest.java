@@ -71,27 +71,27 @@ public class AsyncRequest {
         this.asyncRequestCallback = new EverRestAsyncRequestCallback();
     }
 
-    public final AsyncRequest header(String header, String value) {
+    public AsyncRequest header(String header, String value) {
         requestBuilder.setHeader(header, value);
         return this;
     }
 
-    public final AsyncRequest user(String user) {
+    public AsyncRequest user(String user) {
         requestBuilder.setUser(user);
         return this;
     }
 
-    public final AsyncRequest password(String password) {
+    public AsyncRequest password(String password) {
         requestBuilder.setPassword(password);
         return this;
     }
 
-    public final AsyncRequest data(String requestData) {
+    public AsyncRequest data(String requestData) {
         requestBuilder.setRequestData(requestData);
         return this;
     }
 
-    public final AsyncRequest loader(AsyncRequestLoader loader) {
+    public AsyncRequest loader(AsyncRequestLoader loader) {
         this.loader = loader;
         return this;
     }
@@ -104,7 +104,7 @@ public class AsyncRequest {
      *         period of checking asynchronous task status (in milliseconds)
      * @return this {@link AsyncRequest}
      */
-    public final AsyncRequest period(int period) {
+    public AsyncRequest period(int period) {
         this.asyncTaskCheckingPeriodMillis = period;
         return this;
     }
@@ -116,7 +116,7 @@ public class AsyncRequest {
      *         handler to set
      * @return this {@link AsyncRequest}
      */
-    public final AsyncRequest requestStatusHandler(RequestStatusHandler handler) {
+    public AsyncRequest requestStatusHandler(RequestStatusHandler handler) {
         this.asyncTaskStatusHandler = handler;
         return this;
     }
@@ -126,7 +126,7 @@ public class AsyncRequest {
      *
      * @return promise that may be resolved with the {@link Void} or rejected in case request error
      */
-    public final Promise<Void> send() {
+    public Promise<Void> send() {
         return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<Void, Throwable>() {
             @Override
             public void makeCall(final Callback<Void, Throwable> callback) {
@@ -152,7 +152,7 @@ public class AsyncRequest {
      *         unmarshaller that should be used to deserialize a response
      * @return promise that may be resolved with the deserialized response value or rejected in case request error
      */
-    public final <R> Promise<R> send(final Unmarshallable<R> unmarshaller) {
+    public <R> Promise<R> send(final Unmarshallable<R> unmarshaller) {
         return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<R, Throwable>() {
             @Override
             public void makeCall(final Callback<R, Throwable> callback) {
@@ -177,7 +177,7 @@ public class AsyncRequest {
      * @param callback
      *         the response handler to be notified when the request fails or completes
      */
-    public final void send(AsyncRequestCallback<?> callback) {
+    public void send(AsyncRequestCallback<?> callback) {
         this.callback = callback;
         try {
             if (async) {
