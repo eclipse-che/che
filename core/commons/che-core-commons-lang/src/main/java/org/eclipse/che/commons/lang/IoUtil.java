@@ -13,12 +13,25 @@ package org.eclipse.che.commons.lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import javax.ws.rs.HttpMethod;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
@@ -27,8 +40,6 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-
-import javax.ws.rs.HttpMethod;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
@@ -214,6 +225,62 @@ public class IoUtil {
                 HttpURLConnection http = (HttpURLConnection)conn;
                 http.setInstanceFollowRedirects(false);
                 http.setRequestMethod(HttpMethod.GET);
+            }
+            try (InputStream input = conn.getInputStream();
+                 FileOutputStream fOutput = new FileOutputStream(file)) {
+                byte[] b = new byte[8192];
+                int r;
+                while ((r = input.read(b)) != -1) {
+                    fOutput.write(b, 0, r);
+                }
+            }
+        } finally {
+            if (conn != null && ("http".equals(protocol) || "https".equals(protocol))) {
+                ((HttpURLConnection)conn).disconnect();
+            }
+        }
+        return file;
+    }
+
+
+
+    /**
+     * Download file with redirection if got status 301, 302, 303.
+     * Will useful in case redirection http -> https
+     *
+     * @param parent
+     *         parent directory, may be <code>null</code> then use 'java.io.tmpdir'
+     * @param prefix
+     *         prefix of temporary file name, may not be <code>null</code> and must be at least three characters long
+     * @param suffix
+     *         suffix of temporary file name, may be <code>null</code>
+     * @param url
+     *         URL for download
+     * @return downloaded file
+     * @throws java.io.IOException
+     *         if any i/o error occurs
+     */
+    public static File downloadFileWithRedirect(File parent, String prefix, String suffix, URL url) throws IOException {
+        File file = File.createTempFile(prefix, suffix, parent);
+        URLConnection conn = null;
+        final String protocol = url.getProtocol().toLowerCase(Locale.ENGLISH);
+        try {
+            conn = url.openConnection();
+            boolean redirect = false;
+            if ("http".equals(protocol) || "https".equals(protocol)) {
+                HttpURLConnection http = (HttpURLConnection)conn;
+                http.setRequestMethod(HttpMethod.GET);
+                int status = http.getResponseCode();
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM ||
+                    status == HttpURLConnection.HTTP_SEE_OTHER) {
+                    redirect = true;
+                }
+                if (redirect) {
+                    String newUrl = conn.getHeaderField("Location");
+                    // open the new connection again
+                    http = (HttpURLConnection)new URL(newUrl).openConnection();
+                    http.setRequestMethod(HttpMethod.GET);
+                }
             }
             try (InputStream input = conn.getInputStream();
                  FileOutputStream fOutput = new FileOutputStream(file)) {

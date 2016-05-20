@@ -24,6 +24,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 
 import static java.lang.String.format;
@@ -39,10 +40,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class RecipeDownloader {
     private static final Logger LOG = getLogger(RecipeDownloader.class);
 
-    private final String apiEndpoint;
+    private final URI apiEndpoint;
 
     @Inject
-    public RecipeDownloader(@Named("api.endpoint") String apiEndpoint) {
+    public RecipeDownloader(@Named("api.endpoint") URI apiEndpoint) {
         this.apiEndpoint = apiEndpoint;
     }
 
@@ -58,24 +59,27 @@ public class RecipeDownloader {
     public RecipeImpl getRecipe(MachineConfig machineConfig) throws MachineException {
         URL recipeUrl;
         File file = null;
+        final String location = machineConfig.getSource().getLocation();
         try {
-            UriBuilder targetUriBuilder = UriBuilder.fromUri(machineConfig.getSource().getLocation());
+            UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
-            if (machineConfig.getSource().getLocation().startsWith(apiEndpoint)) {
+            final String apiEndPointHost = apiEndpoint.getHost();
+            final String host = targetUriBuilder.build().getHost();
+            if (apiEndPointHost.equals(host)) {
                 if (EnvironmentContext.getCurrent().getSubject() != null
                     && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
                 }
             }
             recipeUrl = targetUriBuilder.build().toURL();
-            file = IoUtil.downloadFile(null, "recipe", null, recipeUrl);
+            file = IoUtil.downloadFileWithRedirect(null, "recipe", null, recipeUrl);
 
             return new RecipeImpl().withType(machineConfig.getSource().getType())
                                    .withScript(IoUtil.readAndCloseQuietly(new FileInputStream(file)));
         } catch (IOException | IllegalArgumentException e) {
             throw new MachineException(format("Can't start machine %s because machine recipe downloading failed. Recipe url %s. Error: %s",
                                               machineConfig.getName(),
-                                              machineConfig.getSource().getLocation(),
+                                              location,
                                               e.getLocalizedMessage()));
         } finally {
             if (file != null && !file.delete()) {
