@@ -52,7 +52,7 @@ public class JavaSearchServiceRest implements JavaSearchService {
         this.unmarshallerFactory = unmarshallerFactory;
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
-        this.pathToService = "/jdt/search/find/usages";
+        this.pathToService = "/java/search/find/usages";
     }
 
     @Override
