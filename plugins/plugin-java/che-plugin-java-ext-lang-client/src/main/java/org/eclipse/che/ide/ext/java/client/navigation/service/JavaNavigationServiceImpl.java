@@ -62,34 +62,34 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
 
     @Override
     public void findDeclaration(String projectPath, String fqn, int offset, AsyncRequestCallback<OpenDeclarationDescriptor> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/find-declaration" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/find-declaration" +
                      "?projectpath=" + projectPath + "&fqn=" + fqn + "&offset=" + offset;
         requestFactory.createGetRequest(url).send(callback);
     }
 
     public void getExternalLibraries(String projectPath, AsyncRequestCallback<List<Jar>> callback) {
         String url =
-                appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/libraries?projectpath=" + projectPath;
+                appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/libraries?projectpath=" + projectPath;
         requestFactory.createGetRequest(url).send(callback);
     }
 
     @Override
     public void getLibraryChildren(String projectPath, int libId, AsyncRequestCallback<List<JarEntry>> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/lib/children" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/lib/children" +
                      "?projectpath=" + projectPath + "&root=" + libId;
         requestFactory.createGetRequest(url).send(callback);
     }
 
     @Override
     public void getChildren(String projectPath, int libId, String path, AsyncRequestCallback<List<JarEntry>> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/children" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/children" +
                      "?projectpath=" + projectPath + "&root=" + libId + "&path=" + path;
         requestFactory.createGetRequest(url).send(callback);
     }
 
     @Override
     public void getEntry(String projectPath, int libId, String path, AsyncRequestCallback<JarEntry> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/entry" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/entry" +
                      "?projectpath=" + projectPath + "&root=" + libId + "&path=" + path;
         requestFactory.createGetRequest(url).send(callback);
     }
@@ -103,14 +103,14 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
 
     @Override
     public void getContent(String projectPath, String fqn, AsyncRequestCallback<ClassContent> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/contentbyfqn?projectpath=" + projectPath + "&fqn=" + fqn;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/contentbyfqn?projectpath=" + projectPath + "&fqn=" + fqn;
         requestFactory.createGetRequest(url).send(callback);
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<CompilationUnit> getCompilationUnit(String projectPath, String fqn, boolean showInherited) {
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/compilation-unit" +
+        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/compilation-unit" +
                            "?projectpath=" + projectPath + "&fqn=" + fqn + "&showinherited=" + showInherited;
 
         return newPromise(new AsyncPromiseHelper.RequestCall<CompilationUnit>() {
@@ -125,7 +125,7 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
 
     @Override
     public Promise<ImplementationsDescriptorDTO> getImplementations(String projectPath, String fqn, int offset) {
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/implementations" +
+        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/implementations" +
                            "?projectpath=" + projectPath + "&fqn=" + fqn + "&offset=" + offset;
 
         return requestFactory.createGetRequest(url)
@@ -136,7 +136,7 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
 
     @Override
     public Promise<List<JavaProject>> getProjectsAndPackages(boolean includePackage) {
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/get/projects/and/packages"
+        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/get/projects/and/packages"
                            + "?includepackages=" + includePackage;
 
         return newPromise(new AsyncPromiseHelper.RequestCall<List<JavaProject>>() {
@@ -153,13 +153,13 @@ public class JavaNavigationServiceImpl implements JavaNavigationService {
 
     @Override
     public String getContentUrl(String projectPath, int libId, String path) {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/content" +
+        return appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/content" +
                "?projectpath=" + projectPath + "&root=" + libId + "&path=" + path;
     }
 
     @Override
     public Promise<List<MethodParameters>> getMethodParametersHints(String projectPath, String fqn, int offset, int lineStartOffset) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/navigation/parameters" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/navigation/parameters" +
                      "?projectpath=" + projectPath + "&fqn=" + fqn + "&offset=" + offset + "&lineStart=" + lineStartOffset;
 
         return requestFactory.createGetRequest(url)
