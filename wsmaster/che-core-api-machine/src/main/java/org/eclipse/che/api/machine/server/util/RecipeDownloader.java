@@ -64,8 +64,8 @@ public class RecipeDownloader {
             UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
             // add user token to be able to download user's private recipe
             final String apiEndPointHost = apiEndpoint.getHost();
-            final String host = UriBuilder.fromUri(location).build().getHost();
-            if (host.equals(apiEndPointHost)) {
+            final String host = targetUriBuilder.build().getHost();
+            if (apiEndPointHost.equals(host)) {
                 if (EnvironmentContext.getCurrent().getSubject() != null
                     && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
                     targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
