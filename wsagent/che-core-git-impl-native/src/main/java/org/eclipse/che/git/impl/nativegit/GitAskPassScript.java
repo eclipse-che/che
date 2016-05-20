@@ -47,7 +47,7 @@ public class GitAskPassScript {
      * @return stored script
      */
     public File build(UserCredential credentials) throws GitException {
-        askScriptDirectory = new File(System.getProperty("java.io.tmpdir") + NameGenerator.generate("", 8));
+        askScriptDirectory = new File(System.getProperty("java.io.tmpdir") + "/" + NameGenerator.generate("", 8));
 
         if (!askScriptDirectory.exists()) {
             askScriptDirectory.mkdirs();
