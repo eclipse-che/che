@@ -19,6 +19,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Docker implementation of {@link MachineRuntimeInfo}
@@ -39,6 +41,8 @@ import static java.util.stream.Collectors.toMap;
  * @author Alexander Garagatyi
  */
 public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
+    private static final Logger LOG = getLogger(DockerInstanceRuntimeInfo.class);
+
     /**
      * Env variable that points to root folder of projects in dev machine
      */
@@ -204,10 +208,16 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
     @Override
     public Map<String, ServerImpl> getServers() {
-        return addDefaultReferenceForServersWithoutReference(
-                addRefAndUrlToServers(getServersWithFilledPorts(containerHost,
-                                                                info.getNetworkSettings().getPorts()),
-                                      info.getConfig().getLabels()));
+        try {
+            return addDefaultReferenceForServersWithoutReference(
+                    addRefAndUrlToServers(getServersWithFilledPorts(containerHost,
+                                                                    info.getNetworkSettings().getPorts()),
+                                          info.getConfig().getLabels()));
+        } catch (Exception e) {
+            // Hack needed to investigate why swarm returns invalid response
+            LOG.error(info.toString());
+            throw e;
+        }
     }
 
     private Map<String, ServerImpl> addDefaultReferenceForServersWithoutReference(Map<String, ServerImpl> servers) {
