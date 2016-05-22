@@ -410,6 +410,11 @@ get_docker_ready () {
                    `Consider updating docker engine to have the versions match."
         return
       fi
+      
+      error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
+                 `/var/run/docker.sock is ok and your docker client and server have matching versions. \n`
+                 `Run 'docker ps' and inspect the output for additional clues."
+      return
     fi
   fi
 
