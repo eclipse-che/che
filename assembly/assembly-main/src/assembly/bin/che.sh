@@ -375,12 +375,41 @@ get_docker_ready () {
     if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
       launch_docker_vm
     else
-      # If Linux and docker ps fails, then this likely a file permissions issue.
-      error_exit "Running 'docker' succeeded, but 'docker ps' failed. `
-                 `This usually means that docker cannot reach its daemon. `
-                 `On Mac and Linux, check the read / write permissions on '/var/run/docker.sock'. `
-                 `Consider running 'sudo chmod 777 /var/run/docker.sock'."
-      return
+
+      # CHE-1202: Improve error messages in case of docker ps failure
+      # Verify that /var/run/docker.sock has owner and group read / write permissions
+      PERMS=$(stat -c %A /var/run/docker.sock)
+      OWNERREAD=$(cut -c2 <(echo $PERMS))
+      OWNERWRITE=$(cut -c3 <(echo $PERMS))
+      GROUPREAD=$(cut -c5 <(echo $PERMS))
+      GROUPWRITE=$(cut -c6 <(echo $PERMS))
+
+      if [[ "$OWNERREAD" != "r" || "$OWNERWRITE" != "w" || "$GROUPREAD" != "r" || "$GROUPWRITE" != "w" ]]; then
+        error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
+                   `The file /var/run/docker.sock does not have appropriate permissions. \n`
+                   `OWNER READ:  ${OWNERREAD} \n`
+                   `OWNER WRITE: ${OWNERWRITE} \n`
+                   `GROUP READ:  ${GROUPREAD} \n`
+                   `GROUP WRITE: ${GROUPWRITE} \n`
+                   `Run 'sudo chmod 660 /var/run/docker.sock' to give the right permissions."
+        return
+      fi
+
+      # CHE-1202: Improve error messages in case of docker ps failure
+      # Verify that docker client and server versions match
+      DOCKERSERVERVERSION=$(docker version --format '{{.Server.Version}}')
+      DOCKERCLIENTVERSION=$(docker version --format '{{.Client.Version}}')
+
+      if [[ "$DOCKERSERVERVERSION" != "$DOCKERCLIENTVERSION" ]]; then
+        error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
+                   `The docker client version does not match the docker server version. \n`
+                   `DOCKER SERVER: ${DOCKERSERVERVERSION} \n`
+                   `DOCKER CLIENT: ${DOCKERCLIENTVERSION} \n`
+                   `This can occur if you are running Che as a container itself. \n`
+                   `The Che container has an internal docker client that uses your host's docker server. \n` 
+                   `Consider updating docker engine to have the versions match."
+        return
+      fi
     fi
   fi
 
