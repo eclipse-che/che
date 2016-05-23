@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
+import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -24,6 +29,7 @@ import org.eclipse.jdt.internal.core.JavaModelManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
@@ -37,16 +43,20 @@ import static org.eclipse.jdt.core.IClasspathEntry.CPE_SOURCE;
  *
  * @author Valeriy Svydenko
  */
+@Singleton
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
+    @Inject
+    private Provider<ProjectRegistry> projectRegistryProvider;
+
     @Override
     public ValueProvider newInstance(FolderEntry projectFolder) {
         return new PlainJavaValueProvider(projectFolder);
     }
 
-    private class PlainJavaValueProvider extends ReadonlyValueProvider {
+    private class PlainJavaValueProvider extends SettableValueProvider {
         private FolderEntry projectFolder;
 
-        public PlainJavaValueProvider(FolderEntry projectFolder) {
+        PlainJavaValueProvider(FolderEntry projectFolder) {
             this.projectFolder = projectFolder;
         }
 
@@ -58,6 +68,16 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
                 return getOutputFolder();
             }
             return null;
+        }
+
+        @Override
+        public void setValues(String attributeName, List<String> values) throws ValueStorageException {
+            Map<String, List<String>> attributes = projectRegistryProvider.get().getProject(projectFolder.getProject()).getAttributes();
+            if (attributes.containsKey(attributeName)) {
+                attributes.get(attributeName).addAll(values);
+            } else {
+                attributes.put(attributeName, values);
+            }
         }
 
         private List<String> getOutputFolder() throws ValueStorageException {
