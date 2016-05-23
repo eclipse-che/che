@@ -32,7 +32,6 @@ import org.eclipse.che.plugin.svn.server.upstream.UpstreamUtils;
 import org.eclipse.che.plugin.svn.server.utils.InfoUtils;
 import org.eclipse.che.plugin.svn.server.utils.SshEnvironment;
 import org.eclipse.che.plugin.svn.server.utils.SubversionUtils;
-import org.eclipse.che.plugin.svn.server.utils.SvnUrl;
 import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -75,6 +74,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -885,13 +885,12 @@ public class SubversionApi {
         }
 
         SshEnvironment sshEnvironment = null;
-        if (SvnUrl.isSSH(repoUrl)) {
+        if (SshEnvironment.isSSH(repoUrl)) {
             sshEnvironment = new SshEnvironment(sshScriptProvider, repoUrl);
             if (env == null) {
-                env = sshEnvironment.get();
-            } else {
-                env.putAll(sshEnvironment.get());
+                env = new HashMap<>();
             }
+            env.putAll(sshEnvironment.get());
         }
 
         try {

@@ -38,6 +38,16 @@ public class SshEnvironment {
     }
 
     /**
+     * Indicates if uri represents ssh connection.
+     *
+     * @param uri
+     *      the url to svn repository
+     */
+    public static boolean isSSH(String uri) {
+        return uri != null && uri.startsWith("svn+ssh://");
+    }
+
+    /**
      * Prepares ssh environment.
      */
     public Map<String, String> get() {
