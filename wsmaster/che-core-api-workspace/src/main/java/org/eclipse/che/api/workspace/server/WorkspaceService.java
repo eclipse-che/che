@@ -745,9 +745,9 @@ public class WorkspaceService extends Service {
             throw new NotFoundException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
         }
 
-        final MachineImpl machine = machineManager.createMachineAsync(machineConfig,
-                                                                      workspaceId,
-                                                                      workspace.getRuntime().getActiveEnv());
+        MachineImpl machine = workspaceManager.createMachineAsyncInRuntime(machineConfig,
+                                                                           workspaceId,
+                                                                           workspace.getRuntime().getActiveEnv());
 
         return Response.status(201)
                        .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),

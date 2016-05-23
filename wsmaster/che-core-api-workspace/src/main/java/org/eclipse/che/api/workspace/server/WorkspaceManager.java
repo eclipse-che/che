@@ -15,18 +15,23 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
@@ -498,35 +503,30 @@ public class WorkspaceManager {
     }
 
     /**
-     * Adds additional machine into workspace runtime.
+     * Creates and adds new machine into specified workspace runtime.
+     * If machine creation fails, then that machine will be destroyed.
      *
-     * @param machineId
-     *         id of machine to add to specified runtime
-     * @throws ConflictException
-     *         when given machine already exists in specified runtime
-     *         or when machine is dev-machine
-     * @throws NotFoundException
-     *         when machine with given id doesn't exist or
-     *         when workspace in which machine is adding doesn't have runtime
-     * @throws ServerException
-     *         when application server is stopping
-     * @throws NullPointerException
-     *         when {@code machineId} is null
+     * @param machineConfig
+     *         configuration of new machine
+     * @param workspaceId
+     *         id of workspace this machine belongs to
+     * @param activeEnv
+     *         current machine environment
+     * @return starting machine instance
+     * Throws the same exceptions as @{@link MachineManager#createMachineAsync(MachineConfig, String, String)}
      */
-    public void addMachineIntoRuntime(String machineId) throws ConflictException, NotFoundException, ServerException {
-        requireNonNull(machineId, "Require non-null machine id");
-        MachineImpl machine = machineManager.getMachine(machineId);
-        if (machine.getConfig().isDev()) {
-            throw new ConflictException("Cannot add another dev-machine " + machine.getId() +
-                                        " to " + machine.getWorkspaceId() + " workspace");
-        }
-
-        runtimes.addMachine(machine);
+    public MachineImpl createMachineAsyncInRuntime(MachineConfig machineConfig, String workspaceId, String activeEnv)
+            throws MachineException,
+                   BadRequestException,
+                   SnapshotException,
+                   NotFoundException,
+                   ConflictException {
+        new AddNewMachineInRuntimeEventSubscriber();
+        return machineManager.createMachineAsync(machineConfig, workspaceId, activeEnv);
     }
 
     /**
      * Removes additional machine from workspace runtime.
-     * Is opposite to {@link #addMachineIntoRuntime(String)}
      *
      * @param machineId
      *         id of machine to remove
@@ -762,6 +762,59 @@ public class WorkspaceManager {
         final String wsName = parts[1];
         final String ownerId = userName.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userName).getId();
         return workspaceDao.get(wsName, ownerId);
+    }
+
+    /** Adds machine to runtime or cleanup on fail to start */
+    private class AddNewMachineInRuntimeEventSubscriber implements EventSubscriber<MachineStatusEvent> {
+
+        AddNewMachineInRuntimeEventSubscriber() {
+            eventService.subscribe(this);
+        }
+
+        @Override
+        public void onEvent(MachineStatusEvent event) {
+            if (MachineStatusEvent.EventType.CREATING.equals(event.getEventType())) {
+                return;
+            }
+
+            eventService.unsubscribe(this);
+            switch(event.getEventType()) {
+                case RUNNING:
+                    onSuccessRun(event);
+                    break;
+                case ERROR:
+                    onError(event);
+                    break;
+            }
+        }
+
+        private void onSuccessRun(MachineStatusEvent event) {
+            MachineImpl machine;
+            try {
+                machine = machineManager.getMachine(event.getMachineId());
+            } catch (NotFoundException | MachineException exception) {
+                LOG.error(exception.getLocalizedMessage(), exception);
+                return;
+            }
+            try {
+                runtimes.addMachine(machine);
+            } catch (ServerException | ConflictException | NotFoundException exception) {
+                try {
+                    machineManager.destroy(event.getMachineId(), true);
+                } catch (NotFoundException | MachineException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private void onError(MachineStatusEvent event) {
+            try {
+                machineManager.destroy(event.getMachineId(), true);
+            } catch (NotFoundException ignore) {
+            } catch (MachineException exception) {
+                LOG.error(exception.getLocalizedMessage(), exception);
+            }
+        }
     }
 
     /** No-operations workspace hooks. Each method does nothing */

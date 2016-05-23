@@ -306,13 +306,6 @@ public class WorkspaceRuntimes {
             }
 
             rmFirst(descriptor.getRuntime().getMachines(), m -> machine.getId().equals(m.getId()));
-            /*List<MachineImpl> machines = descriptor.getRuntime().getMachines();
-            for (int i = 0; i < machines.size(); i++) {
-                if (machine.getId().equals(machines.get(i).getId())) {
-                    machines.remove(i);
-                    break;
-                }
-            }*/
         } finally {
             rwLock.writeLock().unlock();
         }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -18,6 +19,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -81,8 +83,10 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
 
-    private static final String USER_ID    = "user123";
-    private static final String MACHINE_ID = "machine123";
+    private static final String USER_ID      = "user123";
+    private static final String MACHINE_ID   = "machine123";
+    private static final String WORKSPACE_ID = "workspace123";
+    private static final String ENV          = "current_environment";
 
     @Mock
     private EventService                  eventService;
@@ -579,31 +583,11 @@ public class WorkspaceManagerTest {
     }
 
     @Test
-    public void shouldAddMachineToWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
-        when(machine.getConfig()).thenReturn(machineConfig);
-        when(machine.getId()).thenReturn(MACHINE_ID);
-        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
-        when(machineConfig.isDev()).thenReturn(false);
+    public void shouldInvokeAsyncMachineCreationWithMachineManager()
+            throws MachineException, BadRequestException, SnapshotException, NotFoundException, ConflictException {
+        workspaceManager.createMachineAsyncInRuntime(machineConfig, WORKSPACE_ID, ENV);
 
-        workspaceManager.addMachineIntoRuntime(machine.getId());
-
-        verify(runtimes).addMachine(machine);
-    }
-
-    @Test(expectedExceptions = ConflictException.class)
-    public void shouldThrowConflictExceptionIfAddAnotherDevMachine() throws ConflictException, NotFoundException, ServerException {
-        when(machine.getConfig()).thenReturn(machineConfig);
-        when(machine.getId()).thenReturn(MACHINE_ID);
-        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
-        when(machineConfig.isDev()).thenReturn(true);
-
-        workspaceManager.addMachineIntoRuntime(machine.getId());
-    }
-
-    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Require non-null machine id")
-    public void shouldThrowNullPointerExceptionIfMachineIdIsNullWhenAddMachineIntoRuntime()
-            throws ConflictException, NotFoundException, ServerException {
-        workspaceManager.addMachineIntoRuntime(null);
+        verify(machineManager).createMachineAsync(machineConfig, WORKSPACE_ID, ENV);
     }
 
     @Test
