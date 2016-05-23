@@ -28,9 +28,19 @@ export class WorkspaceStatusIndicatorCircle {
     this.scope = {
       status: '=cheStatus'
     };
+  }
 
-    this.template = '<span ng-switch="status" class="workspace-status-indicator-circle">' +
-      '<span ng-switch-when="STOPPED" class="fa fa-circle workspace-status-stopped"></span>' +
+  /**
+   * Template for the current toolbar
+   * @param element
+   * @param attrs
+   * @returns {string} the template
+   */
+  template (element, attr) {
+    let emptyCircleOnStopped = attr.cheEmptyCircle;
+
+    return '<span ng-switch="status" class="workspace-status-indicator-circle">' +
+      '<span ng-switch-when="STOPPED" class="fa ' + (emptyCircleOnStopped ? 'fa-circle-o' : 'fa-circle') + ' workspace-status-stopped"></span>' +
       '<span ng-switch-when="PAUSED" class="fa fa-pause workspace-status-paused"></span>' +
       '<span ng-switch-when="RUNNING" class="fa fa-circle workspace-status-running"></span>' +
       '<span ng-switch-when="STARTING" class="workspace-status-spinner">' +
@@ -40,8 +50,7 @@ export class WorkspaceStatusIndicatorCircle {
       '<div class="spinner"><div class="rect1"></div><div class="rect2"></div><div class="rect3"></div></div>' +
       '</span>' +
       '<span ng-switch-when="ERROR" class="fa fa-circle workspace-status-error"></span>' +
-      '<span ng-switch-default class="fa fa-circle workspace-status-default"></span>' +
-      '</span>';
+      '<span ng-switch-default class="fa ' + (emptyCircleOnStopped ? 'fa-circle-o' : 'fa-circle') + ' workspace-status-default"></span>' +
+    '</span>';
   }
-
 }

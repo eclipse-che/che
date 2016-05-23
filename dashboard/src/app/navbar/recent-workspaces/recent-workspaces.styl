@@ -1,14 +1,44 @@
 .recent-workspaces
-  .icon
-    font-size inherit !important
+  $recent-workspaces-stopped-color = #9B9CA0
+  $recent-workspaces-notstopped-color = #C1C2C6
+  $recent-workspaces-section-caption-color = #62687C
 
-  .md-button
-    line-height 34px
+  .navbar-subsection-item
+    height 19px
+    min-height 19px
+    line-height 19px
 
-  .recent-workspaces-last-opened .navbar-item
-    margin 1px
-    outline 1px solid $link-color
+    .md-button
+      height 17px !important
+      min-height 17px !important
 
-.recent-workspaces-section-caption
-  white-space nowrap
-  padding-left: 50px
+      .navbar-item
+        line-height 19px !important
+
+        .navbar-icon
+          font-size inherit !important
+          height 17px !important
+          margin-right 0 !important
+          line-height 17px !important
+
+          .spinner
+            height 17px
+
+  .workspace-status-indicator-circle .workspace-status-stopped
+    color $recent-workspaces-stopped-color !important
+    text-shadow none
+
+  .recent-workspaces-notstopped-workspace
+    color $recent-workspaces-notstopped-color !important
+
+  .recent-workspaces-stopped-workspace
+    font-style italic
+    color $recent-workspaces-stopped-color !important
+
+  .recent-workspaces-section-caption
+    padding-left: 10px
+    text-transform uppercase
+    font-size 0.9em
+    color $recent-workspaces-section-caption-color !important
+    white-space nowrap
+

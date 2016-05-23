@@ -27,7 +27,7 @@ class IdeCtrl {
     this.cheWorkspace = cheWorkspace;
     this.$timeout = $timeout;
     this.selectedWorkspace = null;
-    this.$rootScope.loadingIDE = true;
+    this.$rootScope.showIDE = false;
 
     $rootScope.wantTokeepLoader = true;
 

@@ -33,7 +33,6 @@ export class NavBarSelected {
 
   }
 
-
   /**
    * Monitor click
    */
@@ -69,11 +68,6 @@ export class NavBarSelected {
       }
     });
     $scope.$on('navbar-selected:restore', (event, path) => {
-      // check if item is selected already
-      if (this.$rootScope.selectedNavBarElement) {
-        return;
-      }
-
       // select item
       if (attrs['ngHref'] === path) {
         select(element);
