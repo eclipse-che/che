@@ -79,11 +79,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-git-ssh-client</artifactId>
+            <artifactId>che-plugin-github-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-shared</artifactId>
+            <artifactId>che-plugin-ssh-key-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>

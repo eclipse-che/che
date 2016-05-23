@@ -24,7 +24,6 @@ import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
-import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
@@ -44,6 +43,7 @@ import org.eclipse.che.api.git.shared.LsRemoteRequest;
 import org.eclipse.che.api.git.shared.MergeRequest;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.MoveRequest;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.shared.PullRequest;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushRequest;
@@ -84,7 +84,7 @@ import org.eclipse.che.git.impl.nativegit.commands.PushCommand;
 import org.eclipse.che.git.impl.nativegit.commands.RemoteListCommand;
 import org.eclipse.che.git.impl.nativegit.commands.RemoteOperationCommand;
 import org.eclipse.che.git.impl.nativegit.commands.ShowFileContentCommand;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -122,16 +122,16 @@ public class NativeGitConnection implements GitConnection {
     /**
      * @param repository
      *         directory where commands will be invoked
-     * @param gitSshScriptProvider
+     * @param sshScriptProvider
      *         manager for ssh keys. If it is null default ssh will be used;
      * @param credentialsLoader
      *         loader for credentials
      * @throws GitException
      *         when some error occurs
      */
-    public NativeGitConnection(File repository, GitSshScriptProvider gitSshScriptProvider,
+    public NativeGitConnection(File repository, SshScriptProvider sshScriptProvider,
                                CredentialsLoader credentialsLoader, GitUserResolver userResolver) throws GitException {
-        this(new NativeGit(repository, gitSshScriptProvider, credentialsLoader, new GitAskPassScript()), credentialsLoader, userResolver);
+        this(new NativeGit(repository, sshScriptProvider, credentialsLoader, new GitAskPassScript()), credentialsLoader, userResolver);
     }
 
     /**

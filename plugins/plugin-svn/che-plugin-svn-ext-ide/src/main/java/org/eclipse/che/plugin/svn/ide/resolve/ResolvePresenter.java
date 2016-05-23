@@ -83,6 +83,10 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
             return;
         }
 
+        if (project.getPath() == null) {
+            return;
+        }
+
         subversionClientService.showConflicts(project.getPath(),
                                               forCurrentSelection ? getSelectedPaths() : null,
                                               new AsyncCallback<List<String>>() {
