@@ -38,7 +38,13 @@ export class NavbarRecentWorkspacesCtrl {
    */
   getRecentWorkspaces() {
     return this.lodash.filter(this.cheWorkspace.getWorkspaces(), (workspace) => {
-      return workspace.attributes && workspace.attributes.updated;
+      if (!workspace.attributes) {
+        return false;
+      }
+      if (!workspace.attributes.updated) {
+        workspace.attributes.updated = workspace.attributes.created;
+      }
+      return workspace.attributes.updated;
     });
   }
 
