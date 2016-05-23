@@ -117,18 +117,33 @@
         /**
          * Console output area.
          */
-        .console {
+        .consolePanel {
             background-color: outputBackgroundColor;
-            color: outputFontColor;
             border-top: 1px solid separatorColor;
+            position: absolute;
+            overflow: hidden;
+        }
+
+        .console {
+            color: outputFontColor;
 
             -moz-user-select: text;
             -webkit-user-select: text;
             user-select: text;
             outline: none;
 
-            padding: 1px 3px 3px 3px;
-            margin-bottom: 0px;
+            padding: 1px 3px 3px 0px;
+
+            border-left: 6px solid transparent;
+            box-sizing: border-box;
+            border-top: 2px solid transparent;
+
+            overflow: auto;
+            position: absolute!important;
+            left: 0px;
+            top: 0px;
+            right: 0px;
+            bottom: 0px;
         }
 
         .console pre {
@@ -179,9 +194,11 @@
             </g:FlowPanel>
         </g:north>
         <g:center>
-            <g:ScrollPanel ui:field="scrollPanel" debugId="commandConsoleScrollPanel" styleName="{style.console}">
-                <g:FlowPanel width="100%" ui:field="consoleLines" debugId="commandConsoleLines" styleName="{style.consoleLines}"/>
-            </g:ScrollPanel>
+            <g:FlowPanel styleName="{style.consolePanel}">
+                <g:ScrollPanel ui:field="scrollPanel" debugId="commandConsoleScrollPanel" styleName="{style.console}">
+                    <g:FlowPanel width="100%" ui:field="consoleLines" debugId="commandConsoleLines" styleName="{style.consoleLines}"/>
+                </g:ScrollPanel>
+            </g:FlowPanel>
         </g:center>
     </g:DockLayoutPanel>
 </ui:UiBinder>
