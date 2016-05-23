@@ -10,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import com.google.inject.Inject;
@@ -44,4 +45,19 @@ public class TextDocumentServiceImpl {
                 .completion(textDocumentPositionParams);
         return completion;
     }
+    
+    @POST
+    @Path("didChange")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void didChange(DidChangeTextDocumentParamsDTO change) {
+        LanguageServer server = languageServerRegistry
+                .findServer(change.getTextDocument().getUri());
+        if (server == null) {
+            // TODO error handling
+            return;
+        }
+        server.getTextDocumentService()
+                .didChange(change);
+    }
+
 }

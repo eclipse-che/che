@@ -13,20 +13,28 @@ import io.typefox.lsapi.WindowService;
 import io.typefox.lsapi.WorkspaceService;
 
 /**
- * A dummy language server. This is of course a HACK! Language servers should be
- * registered dynamically instead. I.e. by some sort of preferences where e.g.
- * maven coordinates and an implementation class are provided.
+ * A dummy language server.
  */
 @Singleton
 public class FooLanguageServer implements LanguageServer {
 
+    private String rootPath;
+    private FooTextDocumentService documentService;
+
     @Inject
     public FooLanguageServer(LanguageServerRegistry registry) {
+        // This is of course a HACK! Language servers should be
+        // registered dynamically instead. I.e. by some sort of preferences
+        // where e.g.
+        // maven coordinates and an implementation class are provided.
+
         registry.registerForExtension("foo", this);
     }
 
     @Override
     public InitializeResult initialize(InitializeParams params) {
+        rootPath = params.getRootPath();
+        this.documentService = new FooTextDocumentService(rootPath);
         return null;
     }
 
@@ -40,7 +48,9 @@ public class FooLanguageServer implements LanguageServer {
 
     @Override
     public TextDocumentService getTextDocumentService() {
-        return new FooTextDocumentService();
+        if (documentService == null)
+            throw new IllegalStateException("Langauge server has not been initialized.");
+        return documentService;
     }
 
     @Override
