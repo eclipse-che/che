@@ -18,6 +18,7 @@ import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Client for Factory service.
@@ -33,10 +34,9 @@ public interface FactoryServiceClient {
      *         factory ID to retrieve
      * @param validate
      *         indicates whether or not factory should be validated by accept validator
-     * @param callback
-     *         callback which return valid JSON object of factory or exception if occurred
+     * @return Factory through a Promise
      */
-    void getFactory(@NotNull String factoryId, boolean validate, @NotNull AsyncRequestCallback<Factory> callback);
+    Promise<Factory> getFactory(@NotNull String factoryId, boolean validate);
 
     /**
      * @param factoryId
@@ -101,4 +101,17 @@ public interface FactoryServiceClient {
      * @return updated factory
      */
     Promise<Factory> updateFactory(String id, Factory factory);
+
+
+    /**
+     * Resolve factory object based on user parameters
+     *
+     * @param factoryParameters
+     *         map containing factory data parameters provided through URL
+     * @param validate
+     *         indicates whether or not factory should be validated by accept validator
+     * @return Factory through a Promise
+     */
+    Promise<Factory> resolveFactory(@NotNull Map<String, String> factoryParameters, boolean validate);
+
 }

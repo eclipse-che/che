@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit.commands;
 
-import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.shared.RemoteReference;
-import org.eclipse.che.api.git.CredentialsLoader;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -27,8 +27,8 @@ import java.util.List;
 public class LsRemoteCommand extends RemoteOperationCommand<Void> {
     private String url;
 
-    public LsRemoteCommand(File repository, GitSshScriptProvider gitSshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
-        super(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+    public LsRemoteCommand(File repository, SshScriptProvider sshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
+        super(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
     }
 
     /** {@inheritDoc} */

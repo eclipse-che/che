@@ -325,11 +325,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-jdt-ext-machine</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-cpp-lang-ide</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -386,11 +381,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-git-provider-che</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-git-ssh-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -578,6 +568,16 @@
                 <artifactId>che-plugin-sdk-tools</artifactId>
                 <version>${project.version}</version>
                 <classifier>jar-with-dependencies</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-ssh-key-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-ssh-key-server</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>

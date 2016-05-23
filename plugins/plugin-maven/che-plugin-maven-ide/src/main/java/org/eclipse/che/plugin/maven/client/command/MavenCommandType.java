@@ -103,7 +103,8 @@ public class MavenCommandType implements CommandType {
 
     @Override
     public String getPreviewUrlTemplate() {
-        return Window.Location.getProtocol() + "//" + ServerPortProvider.KEY_TEMPLATE.replace("%", DEF_PORT) + "/" +
+        //TODO: hardcode http after switching WS Master to https
+        return "http://" + ServerPortProvider.KEY_TEMPLATE.replace("%", DEF_PORT) + "/" +
                currentProjectRelativePathProvider.getKey();
     }
 }

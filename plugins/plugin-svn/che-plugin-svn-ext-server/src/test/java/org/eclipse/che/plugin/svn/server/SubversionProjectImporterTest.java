@@ -24,6 +24,7 @@ import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.utils.TestUtils;
@@ -46,16 +47,15 @@ import static org.mockito.Mockito.when;
 public class SubversionProjectImporterTest {
 
     @Mock
-    private UserProfileDao userProfileDao;
-
+    private UserProfileDao        userProfileDao;
     @Mock
-    private CredentialsProvider credentialsProvider;
-
+    private CredentialsProvider   credentialsProvider;
     @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
-
     @Mock
-    private SourceStorage sourceStorage;
+    private SourceStorage         sourceStorage;
+    @Mock
+    private SshKeyProvider        sshKeyProvider;
 
     private File                      repoRoot;
     private SubversionProjectImporter projectImporter;
@@ -72,6 +72,7 @@ public class SubversionProjectImporterTest {
                 Multibinder.newSetBinder(binder(), ValueProviderFactory.class).addBinding()
                            .to(SubversionValueProviderFactory.class);
 
+                bind(SshKeyProvider.class).toInstance(sshKeyProvider);
                 bind(UserProfileDao.class).toInstance(userProfileDao);
                 bind(CredentialsProvider.class).toInstance(credentialsProvider);
                 bind(RepositoryUrlProvider.class).toInstance(repositoryUrlProvider);

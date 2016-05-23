@@ -98,6 +98,10 @@
             <artifactId>che-plugin-github-shared</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-ssh-key-server</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
         </dependency>

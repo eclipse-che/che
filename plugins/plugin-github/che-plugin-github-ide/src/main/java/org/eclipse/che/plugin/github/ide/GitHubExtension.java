@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.github.ide;
 
-import org.eclipse.che.ide.api.extension.Extension;
-import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.extension.Extension;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 
 /**
  * Extension adds GitHub support to the IDE Application.
@@ -28,7 +28,7 @@ public class GitHubExtension {
     public static final String GITHUB_HOST = "github.com";
 
     @Inject
-    public GitHubExtension(GitSshKeyUploaderRegistry registry, GitHubSshKeyUploader gitHubSshKeyProvider) {
+    public GitHubExtension(SshKeyUploaderRegistry registry, GitHubSshKeyUploader gitHubSshKeyProvider) {
         registry.registerUploader(GITHUB_HOST, gitHubSshKeyProvider);
     }
 }
