@@ -375,11 +375,51 @@ get_docker_ready () {
     if [ "${WIN}" == "true" ] || [ "${MAC}" == "true" ]; then
       launch_docker_vm
     else
-      # If Linux and docker ps fails, then this likely a file permissions issue.
-      error_exit "Running 'docker' succeeded, but 'docker ps' failed. `
-                 `This usually means that docker cannot reach its daemon. `
-                 `On Mac and Linux, check the read / write permissions on '/var/run/docker.sock'. `
-                 `Consider running 'sudo chmod 777 /var/run/docker.sock'."
+
+      # CHE-1202: Improve error messages in case of docker ps failure
+      # Verify that /var/run/docker.sock has read / write permissions
+      PERMS=$(stat -c %A /var/run/docker.sock)
+      OWNER_READ=$(cut -c2 <(echo $PERMS))
+      OWNER_WRITE=$(cut -c3 <(echo $PERMS))
+      GROUP_READ=$(cut -c5 <(echo $PERMS))
+      GROUP_WRITE=$(cut -c6 <(echo $PERMS))
+      OTHER_READ=$(cut -c8 <(echo $PERMS))
+      OTHER_WRITE=$(cut -c9 <(echo $PERMS))
+
+      if [[ "$OWNE_RREAD" != "r" || "$OWNER_WRITE" != "w" || `
+           `"$GROUP_READ" != "r" || "$GROUP_WRITE" != "w" || `
+           `"$OTHER_READ" != "r" || "$OTHER_WRITE" != "w" ]]; then
+        error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
+                   `The file /var/run/docker.sock does not have appropriate permissions. \n`
+                   `OWNER READ:  ${OWNER_READ} \n`
+                   `OWNER WRITE: ${OWNER_WRITE} \n`
+                   `GROUP READ:  ${GROUP_READ} \n`
+                   `GROUP WRITE: ${GROUP_WRITE} \n`
+                   `OTHER READ:  ${OTHER_READ} \n`
+                   `OTHER WRITE: ${OTHER_WRITE} \n`
+                   `Run 'sudo chmod 666 /var/run/docker.sock' to give the right permissions."
+        return
+      fi
+
+      # CHE-1202: Improve error messages in case of docker ps failure
+      # Verify that docker client and server versions match
+      DOCKER_SERVER_VERSION=$(docker version --format '{{.Server.Version}}')
+      DOCKER_CLIENT_VERSION=$(docker version --format '{{.Client.Version}}')
+
+      if [[ "$DOCKER_SERVER_VERSION" != "$DOCKER_CLIENT_VERSION" ]]; then
+        error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
+                   `The docker client version does not match the docker server version. \n`
+                   `DOCKER SERVER: ${DOCKER_SERVER_VERSION} \n`
+                   `DOCKER CLIENT: ${DOCKER_CLIENT_VERSION} \n`
+                   `This can occur if you are running Che as a container itself. \n`
+                   `The Che container has an internal docker client that uses your host's docker server. \n` 
+                   `Consider updating docker engine to have the versions match."
+        return
+      fi
+      
+      error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
+                 `/var/run/docker.sock is ok and your docker client and server have matching versions. \n`
+                 `Run 'docker ps' and inspect the output for additional clues."
       return
     fi
   fi
