@@ -94,6 +94,10 @@ class IdeSvc {
 
     let startWorkspaceDefer = this.$q.defer();
     this.startWorkspace(bus, workspace).then(() => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+
       this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING').then(() => {
         return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
       }).then(() => {
@@ -276,7 +280,7 @@ class IdeSvc {
       this.currentStep = 3;
     }, 0);
 
-    if (this.$rootScope.loadingIDE === false || this.preventRedirection) {
+    if (this.preventRedirection) {
       return;
     }
 
@@ -311,9 +315,12 @@ class IdeSvc {
     }
 
     this.$timeout(() => {
-      this.$rootScope.showIDE = true;
-      this.$rootScope.hideLoader = true;
-      this.$rootScope.loadingIDE = false;
+      let re = new RegExp(this.$location.path());
+      // check if we are still waiting for current workspace to be loaded
+      if (re.test(ideUrlLink)) {
+        this.$rootScope.showIDE = true;
+        this.$rootScope.hideLoader = true;
+      }
     }, 2000);
   }
 

@@ -145,7 +145,6 @@ export class WorkspaceDetailsCtrl {
     delete this.errorMessage;
 
     this.ideSvc.init();
-    this.$rootScope.loadingIDE = false;
     let promise = this.ideSvc.startIde(this.workspaceDetails);
     promise.then(() => {
       this.showShowMore = false;
