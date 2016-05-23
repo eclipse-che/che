@@ -92,11 +92,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -219,7 +225,7 @@ public class ProjectServiceTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        pm = new ProjectManager(vfsProvider, null, ptRegistry, projectRegistry, phRegistry,
+        pm = new ProjectManager(vfsProvider, new EventService(), ptRegistry, projectRegistry, phRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
 
@@ -227,30 +233,14 @@ public class ProjectServiceTest {
 
         //List<ProjectConfigDto> modules = new ArrayList<>();
 
-        final ProjectConfigDto testProjectConfigMock = mock(ProjectConfigDto.class);
-        when(testProjectConfigMock.getPath()).thenReturn("/my_project");
-        when(testProjectConfigMock.getName()).thenReturn("my_project");
-        when(testProjectConfigMock.getDescription()).thenReturn("my test project");
-        when(testProjectConfigMock.getType()).thenReturn("my_project_type");
-//        when(testProjectConfigMock.getModules()).thenReturn(modules);
-        when(testProjectConfigMock.getSource()).thenReturn(DtoFactory.getInstance().createDto(SourceStorageDto.class));
-//        when(testProjectConfigMock.findModule(anyString())).thenReturn(testProjectConfigMock);
-
-        Map<String, List<String>> attr = new HashMap<>();
-        for (Attribute attribute : myProjectType.getAttributes()) {
-            attr.put(attribute.getName(), attribute.getValue().getList());
-        }
-        when(testProjectConfigMock.getAttributes()).thenReturn(attr);
-
         projects = new ArrayList<>();
-        projects.add(testProjectConfigMock);
+        addMockedProjectConfigDto(myProjectType, "my_project");
+
         when(httpJsonRequestFactory.fromLink(any())).thenReturn(httpJsonRequest);
         when(httpJsonRequest.request()).thenReturn(httpJsonResponse);
         when(httpJsonResponse.asDto(WorkspaceDto.class)).thenReturn(usersWorkspaceMock);
         when(usersWorkspaceMock.getConfig()).thenReturn(workspaceConfigMock);
         when(workspaceConfigMock.getProjects()).thenReturn(projects);
-
-        pm.createProject(testProjectConfigMock, null);
 
 //        verify(httpJsonRequestFactory).fromLink(eq(DtoFactory.newDto(Link.class)
 //                                                             .withHref(apiEndpoint + "/workspace/" + workspace + "/project")
@@ -288,6 +278,27 @@ public class ProjectServiceTest {
         env = org.eclipse.che.commons.env.EnvironmentContext.getCurrent();
     }
 
+    private void addMockedProjectConfigDto(org.eclipse.che.api.project.server.type.ProjectTypeDef myProjectType, String projectName)
+            throws ForbiddenException, ServerException, NotFoundException, ConflictException {
+        final ProjectConfigDto testProjectConfigMock = mock(ProjectConfigDto.class);
+        when(testProjectConfigMock.getPath()).thenReturn("/" + projectName);
+        when(testProjectConfigMock.getName()).thenReturn(projectName);
+        when(testProjectConfigMock.getDescription()).thenReturn("my test project");
+        when(testProjectConfigMock.getType()).thenReturn("my_project_type");
+        when(testProjectConfigMock.getSource()).thenReturn(DtoFactory.getInstance().createDto(SourceStorageDto.class));
+        //        when(testProjectConfigMock.getModules()).thenReturn(modules);
+        //        when(testProjectConfigMock.findModule(anyString())).thenReturn(testProjectConfigMock);
+
+        Map<String, List<String>> attr = new HashMap<>();
+        for (Attribute attribute : myProjectType.getAttributes()) {
+            attr.put(attribute.getName(), attribute.getValue().getList());
+        }
+        when(testProjectConfigMock.getAttributes()).thenReturn(attr);
+
+        projects.add(testProjectConfigMock);
+
+        pm.createProject(testProjectConfigMock, null);
+    }
 
     @Test
     @SuppressWarnings("unchecked")
@@ -925,6 +936,50 @@ public class ProjectServiceTest {
         assertEquals(response.getStatus(), 204, "Error: " + response.getEntity());
 
         pm.getProject("my_project");
+    }
+
+    @Test
+    public void testDeleteProjectsConcurrently() throws Exception {
+        int threadNumber = 100;
+        ExecutorService executor = Executors.newFixedThreadPool(threadNumber);
+        CountDownLatch countDownLatch = new CountDownLatch(threadNumber);
+        List<Future<ContainerResponse>> futures = new LinkedList<>();
+
+
+        for (int i = 0; i < threadNumber; i++) {
+            addMockedProjectConfigDto(ptRegistry.getProjectType("my_project_type"), "my_project_name" + i);
+        }
+
+        IntStream.range(0, threadNumber).forEach(
+                i -> {
+                    futures.add(executor.submit(() -> {
+                        countDownLatch.countDown();
+                        countDownLatch.await();
+
+                        try {
+                            return launcher.service(DELETE,
+                                                    "http://localhost:8080/api/project/my_project_name" + i,
+                                                    "http://localhost:8080/api", null, null, null);
+                        } catch (Exception e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }));
+                }
+                                                );
+
+        boolean isNotDone;
+        do {
+            isNotDone = false;
+            for (Future<ContainerResponse> future : futures) {
+                if (!future.isDone()) {
+                    isNotDone = true;
+                }
+            }
+        } while (isNotDone);
+
+        for (Future<ContainerResponse> future : futures) {
+            assertEquals(future.get().getStatus(), 204, "Error: " + future.get().getEntity());
+        }
     }
 
     @Test
