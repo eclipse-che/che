@@ -106,7 +106,7 @@ public class JavaCommandType implements CommandType {
                " && javac -classpath " + classpathProvider.getKey() +
                " -sourcepath " + sourcepathProvider.getKey() +
                " -d " + outputDirProvider.getKey() +
-               " src/com/company/Main.java" +
+               " src/Main.java" +
                " && java -classpath " + classpathProvider.getKey() + outputDirProvider.getKey() +
                " com.company.Main";
     }
