@@ -83,10 +83,10 @@
                           workspace-details="workspaceDetailsCtrl.workspaceDetails"></export-workspace>
         <che-panel che-title="Delete Workspace" class="workspace-details-content">
           <div layout="row" flex layout-align="space-around start">
-            <label flex="15" class="workspace-details-description">
+            <label flex flex-gt-xs="15" class="workspace-details-description">
               This is irreversible. Deleting your workspace will also delete its projects.
             </label>
-            <div layout="column" flex="85">
+            <div layout="column" flex-xs="none" flex-gt-xs="85">
               <che-button-danger che-button-title="Delete"
                                  ng-disabled="!(workspaceDetailsCtrl.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'STOPPED' || workspaceDetailsCtrl.getWorkspaceStatus() === 'ERROR')"
                                  ng-click="workspaceDetailsCtrl.deleteWorkspace($event)"></che-button-danger>
