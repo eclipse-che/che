@@ -14,6 +14,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.junit.Before;
@@ -27,7 +28,6 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +51,8 @@ public class MachineTest {
     private MachineLocalizationConstant locale;
     @Mock
     private EntityFactory               entityFactory;
+    @Mock
+    private AppContext                  appContext;
 
     private Machine machine;
 
@@ -117,17 +119,6 @@ public class MachineTest {
         machine.getType();
 
         verify(machineConfig).getType();
-    }
-
-    @Test
-    public void nullShouldBeReturnedWhenTerminalRefIsNull() {
-        when(serverDescriptor.getRef()).thenReturn(null);
-
-        String url = machine.getTerminalUrl();
-
-        verify(serverDescriptor, never()).getUrl();
-
-        assertThat(url, equalTo(""));
     }
 
     @Test

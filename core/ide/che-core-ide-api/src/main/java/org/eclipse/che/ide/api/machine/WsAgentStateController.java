@@ -20,7 +20,10 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -174,41 +177,44 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkHttpConnection() {
         String url = devMachine.getWsAgentBaseUrl() + '/'; //here we add trailing slash because
                                                           // {@link org.eclipse.che.api.core.rest.ApiInfoService} mapped in this way
-        asyncRequestFactory.createGetRequest(url).send(new AsyncRequestCallback<String>(new StringUnmarshaller()) {
-            @Override
-            protected void onSuccess(String result) {
-                JSONObject object = null;
-                try {
-                    object = JSONParser.parseStrict(result).isObject();
-                } catch (Exception exception) {
-                    Log.warn(getClass(), "Parse root resources failed.");
-                }
+        asyncRequestFactory.createGetRequest(url)
+                           .send(new StringUnmarshaller())
+                           .then(new Operation<String>() {
+                               @Override
+                               public void apply(String result) throws OperationException {
+                                   JSONObject object = null;
+                                   try {
+                                       object = JSONParser.parseStrict(result).isObject();
+                                   } catch (Exception exception) {
+                                       Log.warn(getClass(), "Parse root resources failed.");
+                                   }
 
-                if (object != null && object.containsKey("rootResources")) {
-                    JSONArray rootResources = object.get("rootResources").isArray();
-                    for (int i = 0; i < rootResources.size(); i++) {
-                        JSONObject rootResource = rootResources.get(i).isObject();
-                        String regex = rootResource.get("regex").isString().stringValue();
-                        String fqn = rootResource.get("fqn").isString().stringValue();
-                        String path = rootResource.get("path").isString().stringValue();
-                        availableServices.add(new RestServiceInfo(fqn, regex, path));
-                    }
-                }
+                                   if (object != null && object.containsKey("rootResources")) {
+                                       JSONArray rootResources = object.get("rootResources").isArray();
+                                       for (int i = 0; i < rootResources.size(); i++) {
+                                           JSONObject rootResource = rootResources.get(i).isObject();
+                                           String regex = rootResource.get("regex").isString().stringValue();
+                                           String fqn = rootResource.get("fqn").isString().stringValue();
+                                           String path = rootResource.get("path").isString().stringValue();
+                                           availableServices.add(new RestServiceInfo(fqn, regex, path));
+                                       }
+                                   }
 
-                checkWsConnection();
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                Log.error(getClass(), exception.getMessage());
-                new Timer() {
-                    @Override
-                    public void run() {
-                        checkHttpConnection();
-                    }
-                }.schedule(1000);
-            }
-        });
+                                   checkWsConnection();
+                               }
+                           })
+                           .catchError(new Operation<PromiseError>() {
+                               @Override
+                               public void apply(PromiseError arg) throws OperationException {
+                                   Log.error(getClass(), arg.getMessage());
+                                   new Timer() {
+                                       @Override
+                                       public void run() {
+                                           checkHttpConnection();
+                                       }
+                                   }.schedule(1000);
+                               }
+                           });
     }
 
     /**

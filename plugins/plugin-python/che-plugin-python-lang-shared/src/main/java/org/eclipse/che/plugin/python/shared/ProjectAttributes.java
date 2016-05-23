@@ -18,7 +18,7 @@ package org.eclipse.che.plugin.python.shared;
 public final class ProjectAttributes {
     public static String LANGUAGE             = "language";
     public static String PYTHON_ID            = "python";
-    public static String PYTHON_NAME          = "Python Project";
+    public static String PYTHON_NAME          = "Python";
     public static String PYTHON_CATEGORY      = "Python";
     public static String PYTHON_EXT           = "py";
 

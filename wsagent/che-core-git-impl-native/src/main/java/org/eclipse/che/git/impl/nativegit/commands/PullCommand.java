@@ -12,12 +12,12 @@ package org.eclipse.che.git.impl.nativegit.commands;
 
 import com.google.common.base.Joiner;
 
+import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.PullResponse;
-import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 
@@ -35,8 +35,8 @@ public class PullCommand extends RemoteOperationCommand<Void> {
     private GitUser      author;
     private PullResponse pullResponse;
 
-    public PullCommand(File repository, GitSshScriptProvider gitSshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
-        super(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+    public PullCommand(File repository, SshScriptProvider sshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
+        super(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
     }
 
     /** @see GitCommand#execute() */

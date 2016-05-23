@@ -418,7 +418,7 @@ public class DockerInstanceProvider implements InstanceProvider {
 
                 env = new ArrayList<>(devMachineEnvVariables);
                 env.add(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + '=' + machine.getWorkspaceId());
-                env.add(DockerInstanceRuntimeInfo.USER_TOKEN + '=' + EnvironmentContext.getCurrent().getSubject().getToken());
+                env.add(DockerInstanceRuntimeInfo.USER_TOKEN + '=' + getUserToken(machine.getWorkspaceId()));
             } else {
                 portsToExpose = new HashMap<>(commonMachinePortsToExpose);
                 volumes = commonMachineSystemVolumes;
@@ -468,6 +468,12 @@ public class DockerInstanceProvider implements InstanceProvider {
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
         }
+    }
+
+    // workspaceId parameter is required, because in case of separate storage for tokens
+    // you need to know exactly which workspace and which user to apply the token.
+    protected String getUserToken(String wsId) {
+        return EnvironmentContext.getCurrent().getSubject().getToken();
     }
 
     /**

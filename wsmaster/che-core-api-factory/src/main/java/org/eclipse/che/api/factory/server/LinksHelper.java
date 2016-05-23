@@ -95,41 +95,55 @@ public class LinksHelper {
         // add path to factory service
         final UriBuilder factoryUriBuilder = baseUriBuilder.clone().path(FactoryService.class);
         final String factoryId = factory.getId();
+        if (factoryId != null) {
+            // uri to retrieve factory
+            links.add(createLink(HttpMethod.GET,
+                                 RETRIEVE_FACTORY_REL_ATT,
+                                 null,
+                                 MediaType.APPLICATION_JSON,
+                                 factoryUriBuilder.clone()
+                                                  .path(FactoryService.class, "getFactory")
+                                                  .build(factoryId)
+                                                  .toString()));
 
-        // uri to retrieve factory
-        links.add(createLink(HttpMethod.GET,
-                             RETRIEVE_FACTORY_REL_ATT,
-                             null,
-                             MediaType.APPLICATION_JSON,
-                             factoryUriBuilder.clone()
-                                              .path(FactoryService.class, "getFactory")
-                                              .build(factoryId)
-                                              .toString()));
+            // uri's of snippets
+            links.addAll(snippetTypes.stream()
+                                     .map(snippet -> createLink(HttpMethod.GET,
+                                                                SNIPPET_REL_ATT + snippet,
+                                                                null,
+                                                                MediaType.TEXT_PLAIN,
+                                                                factoryUriBuilder.clone()
+                                                                                 .path(FactoryService.class, "getFactorySnippet")
+                                                                                 .queryParam("type", snippet)
+                                                                                 .build(factoryId)
+                                                                                 .toString()))
+                                     .collect(toList()));
 
-        // uri's of snippets
-        links.addAll(snippetTypes.stream()
-                                 .map(snippet -> createLink(HttpMethod.GET,
-                                                            SNIPPET_REL_ATT + snippet,
-                                                            null,
-                                                            MediaType.TEXT_PLAIN,
-                                                            factoryUriBuilder.clone()
-                                                                             .path(FactoryService.class, "getFactorySnippet")
-                                                                             .queryParam("type", snippet)
-                                                                             .build(factoryId)
-                                                                             .toString()))
-                                 .collect(toList()));
+            // uri to accept factory
+            final Link createWorkspace = createLink(HttpMethod.GET,
+                                                    FACTORY_ACCEPTANCE_REL_ATT,
+                                                    null,
+                                                    MediaType.TEXT_HTML,
+                                                    baseUriBuilder.clone()
+                                                                  .replacePath("f")
+                                                                  .queryParam("id", factoryId)
+                                                                  .build()
+                                                                  .toString());
+            links.add(createWorkspace);
 
-        // uri to accept factory
-        final Link createWorkspace = createLink(HttpMethod.GET,
-                                                FACTORY_ACCEPTANCE_REL_ATT,
-                                                null,
-                                                MediaType.TEXT_HTML,
-                                                baseUriBuilder.clone()
-                                                              .replacePath("f")
-                                                              .queryParam("id", factoryId)
-                                                              .build()
-                                                              .toString());
-        links.add(createWorkspace);
+
+            // links of analytics
+            links.add(createLink(HttpMethod.GET,
+                                 ACCEPTED_REL_ATT,
+                                 null,
+                                 MediaType.TEXT_PLAIN,
+                                 baseUriBuilder.clone()
+                                               .path("analytics")
+                                               .path("public-metric/factory_used")
+                                               .queryParam("factory", URLEncoder.encode(createWorkspace.getHref(), "UTF-8"))
+                                               .build()
+                                               .toString()));
+        }
 
         if (!Strings.isNullOrEmpty(factory.getName()) && !Strings.isNullOrEmpty(userName)) {
             // uri to accept factory by name and creator
@@ -146,17 +160,6 @@ public class LinksHelper {
             links.add(createWorkspaceFromNamedFactory);
         }
 
-        // links of analytics
-        links.add(createLink(HttpMethod.GET,
-                             ACCEPTED_REL_ATT,
-                             null,
-                             MediaType.TEXT_PLAIN,
-                             baseUriBuilder.clone()
-                                           .path("analytics")
-                                           .path("public-metric/factory_used")
-                                           .queryParam("factory", URLEncoder.encode(createWorkspace.getHref(), "UTF-8"))
-                                           .build()
-                                           .toString()));
         return links;
     }
 

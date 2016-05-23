@@ -91,7 +91,10 @@ public class SubversionConfigurationChecker {
      */
     protected void ensureExistingSvnConfigFile() throws IOException {
         if (Files.notExists(GLOBAL_SUBVERSION_CONFIG_FILE_PATH)) {
-            Files.createDirectories(GLOBAL_SUBVERSION_CONFIG_FILE_PATH.getParent());
+            Path parent = GLOBAL_SUBVERSION_CONFIG_FILE_PATH.getParent();
+            if (Files.notExists(parent)) {
+                Files.createDirectories(parent);
+            }
             Files.createFile(GLOBAL_SUBVERSION_CONFIG_FILE_PATH);
         }
     }

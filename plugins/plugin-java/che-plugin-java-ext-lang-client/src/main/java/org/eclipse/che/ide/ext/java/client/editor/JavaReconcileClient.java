@@ -40,7 +40,7 @@ public class JavaReconcileClient {
     }
 
     public void reconcile(String projectPath, String fqn, final ReconcileCallback callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/reconcile/?projectpath=" + projectPath + "&fqn=" + fqn;
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/reconcile/?projectpath=" + projectPath + "&fqn=" + fqn;
         asyncRequestFactory.createGetRequest(url)
                            .send(new AsyncRequestCallback<ReconcileResult>(dtoUnmarshallerFactory.newUnmarshaller(ReconcileResult.class)) {
                                @Override

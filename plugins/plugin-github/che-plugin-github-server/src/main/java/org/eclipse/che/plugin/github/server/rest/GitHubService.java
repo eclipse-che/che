@@ -33,7 +33,6 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.HttpConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +46,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.util.List;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -320,18 +316,18 @@ public class GitHubService {
         final String host = "github.com";
         SshPair sshPair = null;
         try {
-            sshPair = sshServiceClient.getPair("git", host);
+            sshPair = sshServiceClient.getPair("vcs", host);
         } catch (NotFoundException ignored) {
         }
 
         if (sshPair != null) {
             if (sshPair.getPublicKey() == null) {
-                sshServiceClient.removePair("git", host);
-                sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("git")
+                sshServiceClient.removePair("vcs", host);
+                sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("vcs")
                                                                                             .withName(host));
             }
         } else {
-            sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("git")
+            sshPair = sshServiceClient.generatePair(newDto(GenerateSshPairRequest.class).withService("vcs")
                                                                                         .withName(host));
         }
 

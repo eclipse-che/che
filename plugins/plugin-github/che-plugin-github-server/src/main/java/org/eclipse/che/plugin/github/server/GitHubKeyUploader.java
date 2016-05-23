@@ -20,8 +20,8 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.git.impl.nativegit.GitUrl;
-import org.eclipse.che.git.impl.nativegit.ssh.SshKeyUploader;
 import org.eclipse.che.plugin.github.shared.GitHubKey;
+import org.eclipse.che.plugin.ssh.key.script.SshKeyUploader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

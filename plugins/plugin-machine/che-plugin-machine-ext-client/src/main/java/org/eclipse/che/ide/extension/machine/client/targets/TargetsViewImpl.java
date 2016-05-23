@@ -21,17 +21,14 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -57,12 +54,14 @@ import java.util.Map;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer.MACHINE_LABELS_BY_CATEGORY_MAP;
-import static org.eclipse.che.ide.extension.machine.client.targets.TargetsPresenter.SSH_CATEGORY;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
+ * The implementation of {@link TargetsView}.
+ *
  * @author Vitaliy Guliy
+ * @author Oleksii Orel
  */
 @Singleton
 public class TargetsViewImpl extends Window implements TargetsView {
@@ -70,55 +69,27 @@ public class TargetsViewImpl extends Window implements TargetsView {
     interface TargetsViewImplUiBinder extends UiBinder<Widget, TargetsViewImpl> {
     }
 
-    private EditCommandResources    commandResources;
-    private MachineResources     	machineResources;
-    private IconRegistry            iconRegistry;
+    private EditCommandResources commandResources;
+    private MachineResources     machineResources;
+    private IconRegistry         iconRegistry;
 
-    private ActionDelegate          delegate;
+    private ActionDelegate delegate;
 
     @UiField(provided = true)
-    MachineLocalizationConstant     machineLocale;
+    MachineLocalizationConstant machineLocale;
 
     @UiField
-    TextBox                         filterTargets;
+    SimplePanel targetsPanel;
+
+    private CategoriesList list;
 
     @UiField
-    SimplePanel                     targetsPanel;
-
-    private CategoriesList          list;
+    FlowPanel hintPanel;
 
     @UiField
-    FlowPanel                       hintPanel;
+    FlowPanel propertiesPanel;
 
-    @UiField
-    FlowPanel                       infoPanel;
-
-    @UiField
-    FlowPanel                       propertiesPanel;
-
-    @UiField
-    org.eclipse.che.ide.ui.TextBox  targetName;
-
-    @UiField
-    org.eclipse.che.ide.ui.TextBox  host;
-
-    @UiField
-    org.eclipse.che.ide.ui.TextBox  port;
-
-    @UiField
-    TextBox                         userName;
-
-    @UiField
-    PasswordTextBox                 password;
-
-    @UiField
-    FlowPanel                       footer;
-
-    private Button                  closeButton;
-
-    private Button                  saveButton;
-    private Button                  cancelButton;
-    private Button                  connectButton;
+    private Button closeButton;
 
     @Inject
     public TargetsViewImpl(org.eclipse.che.ide.Resources resources,
@@ -137,9 +108,6 @@ public class TargetsViewImpl extends Window implements TargetsView {
         getWidget().getElement().getStyle().setPadding(0, Style.Unit.PX);
         setTitle(machineLocale.targetsViewTitle());
 
-        filterTargets.getElement().setAttribute("placeholder", machineLocale.editCommandsViewPlaceholder());
-        filterTargets.getElement().addClassName(commandResources.getCss().filterPlaceholder());
-
         list = new CategoriesList(resources);
         list.addDomHandler(new KeyDownHandler() {
             @Override
@@ -155,75 +123,13 @@ public class TargetsViewImpl extends Window implements TargetsView {
         targetsPanel.add(list);
 
         closeButton = createButton(coreLocale.close(), "targets.button.close",
-                new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        delegate.onCloseClicked();
-                    }
-                });
+                                   new ClickHandler() {
+                                       @Override
+                                       public void onClick(ClickEvent event) {
+                                           delegate.onCloseClicked();
+                                       }
+                                   });
         addButtonToFooter(closeButton);
-
-        saveButton = createButton(coreLocale.save(), "targets.button.save", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onSaveClicked();
-            }
-        });
-        saveButton.addStyleName(Window.resources.windowCss().primaryButton());
-        footer.add(saveButton);
-
-        cancelButton = createButton(coreLocale.cancel(), "targets.button.cancel", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-            }
-        });
-        footer.add(cancelButton);
-
-        connectButton = createButton("Connect", "targets.button.connect", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onConnectClicked();
-            }
-        });
-        connectButton.addStyleName(Window.resources.windowCss().primaryButton());
-        connectButton.addStyleName(resources.Css().buttonLoader());
-        footer.add(connectButton);
-
-        targetName.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent keyUpEvent) {
-                delegate.onTargetNameChanged(targetName.getValue());
-            }
-        });
-
-        host.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent keyUpEvent) {
-                delegate.onHostChanged(host.getValue());
-            }
-        });
-
-        port.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent keyUpEvent) {
-                delegate.onPortChanged(port.getValue());
-            }
-        });
-
-        userName.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent keyUpEvent) {
-                delegate.onUserNameChanged(userName.getValue());
-            }
-        });
-
-        password.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent keyUpEvent) {
-                delegate.onPasswordChanged(password.getValue());
-            }
-        });
     }
 
     @Override
@@ -236,29 +142,22 @@ public class TargetsViewImpl extends Window implements TargetsView {
         list.clear();
 
         hintPanel.setVisible(true);
-        infoPanel.setVisible(false);
         propertiesPanel.setVisible(false);
     }
 
     @Override
     public void showHintPanel() {
         hintPanel.setVisible(true);
-        infoPanel.setVisible(false);
         propertiesPanel.setVisible(false);
     }
 
     @Override
-    public void showInfoPanel() {
+    public void setPropertiesPanel(IsWidget widget) {
         hintPanel.setVisible(false);
-        infoPanel.setVisible(true);
-        propertiesPanel.setVisible(false);
-    }
-
-    @Override
-    public void showPropertiesPanel() {
-        hintPanel.setVisible(false);
-        infoPanel.setVisible(false);
         propertiesPanel.setVisible(true);
+
+        propertiesPanel.clear();
+        propertiesPanel.add(widget);
     }
 
     @Override
@@ -272,10 +171,10 @@ public class TargetsViewImpl extends Window implements TargetsView {
 
         HashMap<String, List<Target>> categories = new HashMap<>();
         for (Target target : targets) {
-            List<Target> categoryTargets = categories.get(target.getType());
+            List<Target> categoryTargets = categories.get(target.getCategory());
             if (categoryTargets == null) {
                 categoryTargets = new ArrayList<>();
-                categories.put(target.getType(), categoryTargets);
+                categories.put(target.getCategory(), categoryTargets);
             }
             categoryTargets.add(target);
         }
@@ -292,18 +191,19 @@ public class TargetsViewImpl extends Window implements TargetsView {
     }
 
     @Override
-    public void selectTarget(Target target) {
-        list.selectElement(target);
+    public boolean selectTarget(Target target) {
+        return list.selectElement(target);
     }
 
     private void ensureSSHCategoryExists(List<Category<?>> categoriesList) {
         for (Category<?> category : categoriesList) {
-            if (SSH_CATEGORY.equalsIgnoreCase(category.getTitle())) {
+            if (machineLocale.targetsViewCategorySsh().equalsIgnoreCase(category.getTitle())) {
                 return;
             }
         }
 
-        categoriesList.add(new Category<>(SSH_CATEGORY, categoriesRenderer, new ArrayList<Target>(), categoriesEventDelegate));
+        categoriesList.add(new Category<>(machineLocale.targetsViewCategorySsh(), categoriesRenderer, new ArrayList<Target>(),
+                                          categoriesEventDelegate));
     }
 
     private SpanElement createMachineLabel(String machineCategory) {
@@ -336,7 +236,7 @@ public class TargetsViewImpl extends Window implements TargetsView {
         categoryHeaderElement.appendChild(textElement);
         textElement.setInnerText(category.getTitle());
 
-        if (SSH_CATEGORY.equalsIgnoreCase(category.getTitle())) {
+        if (machineLocale.targetsViewCategorySsh().equalsIgnoreCase(category.getTitle())) {
             // Add button to create a target
             SpanElement buttonElement = Document.get().createSpanElement();
             buttonElement.appendChild(commandResources.addCommandButton().getSvg().getElement());
@@ -367,21 +267,21 @@ public class TargetsViewImpl extends Window implements TargetsView {
                     element.getStyle().setPaddingLeft(54, PX);
                     element.addClassName(commandResources.getCss().categorySubElementHeader());
                     element.setId("target-" + target.getName());
+                    if (target.isConnected()) {
+                        DivElement running = Document.get().createDivElement();
+                        running.setClassName(commandResources.getCss().running());
+                        element.appendChild(running);
+
+                        Tooltip.create((elemental.dom.Element)running,
+                                       BOTTOM,
+                                       MIDDLE,
+                                       "Connected");
+                    }
 
                     if (target.getRecipe() == null) {
                         element.getStyle().setProperty("color", "gray");
-                    } else {
-                        if (target.isConnected()) {
-                            DivElement running = Document.get().createDivElement();
-                            running.setClassName(commandResources.getCss().running());
-                            element.appendChild(running);
-
-                            Tooltip.create((elemental.dom.Element) running,
-                                    BOTTOM,
-                                    MIDDLE,
-                                    "Connected");
-                        }
-
+                    }
+                    if (!machineLocale.targetsViewCategoryDevelopment().equalsIgnoreCase(target.getCategory())) {
                         SpanElement categorySubElement = Document.get().createSpanElement();
                         categorySubElement.setClassName(commandResources.getCss().buttonArea());
                         element.appendChild(categorySubElement);
@@ -416,116 +316,4 @@ public class TargetsViewImpl extends Window implements TargetsView {
                     delegate.onTargetSelected(target);
                 }
             };
-
-    @Override
-    public void setTargetName(String targetName) {
-        this.targetName.setValue(targetName);
-    }
-
-    @Override
-    public String getTargetName() {
-        return targetName.getValue();
-    }
-
-    @Override
-    public void markTargetNameInvalid() {
-        targetName.markInvalid();
-    }
-
-    @Override
-    public void unmarkTargetName() {
-        targetName.unmark();
-    }
-
-    @Override
-    public void markHostInvalid() {
-        host.markInvalid();
-    }
-
-    @Override
-    public void unmarkHost() {
-        host.unmark();
-    }
-
-    @Override
-    public void markPortInvalid() {
-        port.markInvalid();
-    }
-
-    @Override
-    public void unmarkPort() {
-        port.unmark();
-    }
-
-    @Override
-    public void setHost(String host) {
-        this.host.setValue(host);
-    }
-
-    @Override
-    public String getHost() {
-        return host.getValue();
-    }
-
-    @Override
-    public void setPort(String port) {
-        this.port.setValue(port);
-    }
-
-    @Override
-    public String getPort() {
-        return port.getValue();
-    }
-
-    @Override
-    public void setUserName(String userName) {
-        this.userName.setValue(userName);
-    }
-
-    @Override
-    public String getUserName() {
-        return userName.getValue();
-    }
-
-    @Override
-    public void setPassword(String password) {
-        this.password.setValue(password);
-    }
-
-    @Override
-    public String getPassword() {
-        return password.getValue();
-    }
-
-    @Override
-    public void enableSaveButton(boolean enable) {
-        saveButton.setEnabled(enable);
-    }
-
-    @Override
-    public void enableCancelButton(boolean enable) {
-        cancelButton.setEnabled(enable);
-    }
-
-    @Override
-    public void enableConnectButton(boolean enable) {
-        connectButton.setEnabled(enable);
-    }
-
-    @Override
-    public void setConnectButtonText(String title) {
-        if (title == null || title.isEmpty()) {
-            connectButton.setText("");
-            connectButton.setHTML("<i></i>");
-        } else {
-            connectButton.setText(title);
-        }
-    }
-
-    @Override
-    public void selectTargetName() {
-        targetName.setFocus(true);
-        targetName.selectAll();
-    }
-
 }

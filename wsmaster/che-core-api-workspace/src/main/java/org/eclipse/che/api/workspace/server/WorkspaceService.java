@@ -25,11 +25,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.MachineService;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
@@ -48,7 +45,6 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -63,38 +59,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_HTML;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.core.util.LinksHelper.createLink;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
-import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
-import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LIN_REL_GET_WORKSPACE;
-import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Defines Workspace REST API.
@@ -108,9 +83,8 @@ public class WorkspaceService extends Service {
     private final WorkspaceManager   workspaceManager;
     private final WorkspaceValidator validator;
     private final MachineManager     machineManager;
-    //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
-    //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
-    private final String             ideContext;
+
+    private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
     private SecurityContext securityContext;
@@ -119,11 +93,11 @@ public class WorkspaceService extends Service {
     public WorkspaceService(WorkspaceManager workspaceManager,
                             MachineManager machineManager,
                             WorkspaceValidator validator,
-                            @Named("che.ide.context") String ideContext) {
+                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
         this.workspaceManager = workspaceManager;
         this.machineManager = machineManager;
         this.validator = validator;
-        this.ideContext = ideContext;
+        this.linksInjector = workspaceServiceLinksInjector;
     }
 
     @POST
@@ -173,7 +147,7 @@ public class WorkspaceService extends Service {
             workspaceManager.startWorkspace(workspace.getId(), null, accountId);
         }
         return Response.status(201)
-                       .entity(injectLinks(asDto(workspace)))
+                       .entity(linksInjector.injectLinks(asDto(workspace), getServiceContext()))
                        .build();
     }
 
@@ -198,7 +172,7 @@ public class WorkspaceService extends Service {
                                                                       BadRequestException {
         validateKey(key);
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-        return injectLinks(asDto(workspace));
+        return linksInjector.injectLinks(asDto(workspace), getServiceContext());
     }
 
     @GET
@@ -226,7 +200,7 @@ public class WorkspaceService extends Service {
         return workspaceManager.getWorkspaces(getCurrentUserId())
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
-                               .map(workspace -> injectLinks(asDto(workspace)))
+                               .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
                                .collect(toList());
     }
 
@@ -254,7 +228,7 @@ public class WorkspaceService extends Service {
                                                            ConflictException {
         requiredNotNull(update, "Workspace configuration");
         validator.validateWorkspace(update);
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, update)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, update)), getServiceContext());
     }
 
     @DELETE
@@ -308,7 +282,7 @@ public class WorkspaceService extends Service {
         params.put("accountId", accountId);
         params.put("workspaceId", workspaceId);
 
-        return injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId)));
+        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId)), getServiceContext());
     }
 
     @POST
@@ -341,10 +315,10 @@ public class WorkspaceService extends Service {
                                                                  ConflictException {
         requiredNotNull(cfg, "Workspace configuration");
         validator.validateConfig(cfg);
-        return injectLinks(asDto(workspaceManager.startWorkspace(cfg,
-                                                                 getCurrentUserId(),
-                                                                 firstNonNull(isTemporary, false),
-                                                                 accountId)));
+        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(cfg,
+                                                                               getCurrentUserId(),
+                                                                               firstNonNull(isTemporary, false),
+                                                                               accountId)), getServiceContext());
     }
 
     @POST
@@ -378,7 +352,7 @@ public class WorkspaceService extends Service {
         params.put("accountId", accountId);
         params.put("workspaceId", workspaceId);
 
-        return injectLinks(asDto(workspaceManager.recoverWorkspace(workspaceId, envName, accountId)));
+        return linksInjector.injectLinks(asDto(workspaceManager.recoverWorkspace(workspaceId, envName, accountId)), getServiceContext());
     }
 
     @DELETE
@@ -437,7 +411,7 @@ public class WorkspaceService extends Service {
         return workspaceManager.getSnapshot(workspaceId)
                                .stream()
                                .map(DtoConverter::asDto)
-                               .map(this::injectLinks)
+                               .map(snapshotDto -> linksInjector.injectLinks(snapshotDto, getServiceContext()))
                                .collect(toList());
     }
 
@@ -467,7 +441,7 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
         validator.validateConfig(workspace.getConfig());
-        return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)), getServiceContext());
     }
 
     @PUT
@@ -502,7 +476,7 @@ public class WorkspaceService extends Service {
         }
         commands.add(new CommandImpl(update));
         validator.validateConfig(workspace.getConfig());
-        return injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(workspace.getId(), workspace)), getServiceContext());
     }
 
     @DELETE
@@ -556,7 +530,7 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(newEnvironment));
         validator.validateConfig(workspace.getConfig());
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
     @PUT
@@ -591,7 +565,7 @@ public class WorkspaceService extends Service {
         }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(update));
         validator.validateConfig(workspace.getConfig());
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
     @DELETE
@@ -645,7 +619,7 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
         validator.validateConfig(workspace.getConfig());
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
     @PUT
@@ -683,7 +657,7 @@ public class WorkspaceService extends Service {
         }
         projects.add(new ProjectConfigImpl(update));
         validator.validateConfig(workspace.getConfig());
-        return injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)));
+        return linksInjector.injectLinks(asDto(workspaceManager.updateWorkspace(id, workspace)), getServiceContext());
     }
 
     @DELETE
@@ -753,157 +727,6 @@ public class WorkspaceService extends Service {
                        .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
                                                           getServiceContext()))
                        .build();
-    }
-
-    private WorkspaceDto injectLinks(WorkspaceDto workspace) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final List<Link> links = new ArrayList<>();
-        // add common workspace links
-        links.add(createLink("GET",
-                             uriBuilder.clone()
-                                       .path(getClass(), "getByKey")
-                                       .build(workspace.getId())
-                                       .toString(),
-                             LINK_REL_SELF));
-        links.add(createLink("POST",
-                             uriBuilder.clone()
-                                       .path(getClass(), "startById")
-                                       .build(workspace.getId())
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_START_WORKSPACE));
-        links.add(createLink("DELETE",
-                             uriBuilder.clone()
-                                       .path(getClass(), "delete")
-                                       .build(workspace.getId())
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_REMOVE_WORKSPACE));
-        links.add(createLink("GET",
-                             uriBuilder.clone()
-                                       .path(getClass(), "getWorkspaces")
-                                       .build()
-                                       .toString(),
-                             APPLICATION_JSON,
-                             GET_ALL_USER_WORKSPACES));
-        links.add(createLink("GET",
-                             uriBuilder.clone()
-                                       .path(getClass(), "getSnapshot")
-                                       .build(workspace.getId())
-                                       .toString(),
-                             APPLICATION_JSON,
-                             LINK_REL_GET_SNAPSHOT));
-
-        //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
-        final URI ideUri = uriBuilder.clone()
-                                     .replacePath(ideContext)
-                                     .path(workspace.getConfig().getName())
-                                     .build();
-        links.add(createLink("GET", ideUri.toString(), TEXT_HTML, LINK_REL_IDE_URL));
-
-        // add workspace channel link
-        final Link workspaceChannelLink = createLink("GET",
-                                                     getServiceContext().getBaseUriBuilder()
-                                                                        .path("ws")
-                                                                        .path(workspace.getId())
-                                                                        .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                                        .build()
-                                                                        .toString(),
-                                                     null);
-        final LinkParameter channelParameter = newDto(LinkParameter.class).withName("channel")
-                                                                          .withRequired(true);
-
-        links.add(cloneDto(workspaceChannelLink).withRel(LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL)
-                                                .withParameters(singletonList(
-                                                        cloneDto(channelParameter).withDefaultValue("workspace:" + workspace.getId()))));
-
-        // add machine channels links to machines configs
-        workspace.getConfig()
-                 .getEnvironments()
-                 .stream()
-                 .forEach(environmentDto -> injectMachineChannelsLinks(environmentDto,
-                                                                       workspace.getId(),
-                                                                       workspaceChannelLink,
-                                                                       channelParameter));
-        // add links for running workspace
-        if (workspace.getStatus() == RUNNING) {
-            workspace.getRuntime()
-                     .getLinks()
-                     .add(createLink("DELETE",
-                                     uriBuilder.clone()
-                                               .path(getClass(), "stop")
-                                               .build(workspace.getId())
-                                               .toString(),
-                                     LINK_REL_STOP_WORKSPACE));
-
-            if (workspace.getRuntime() != null && workspace.getRuntime().getDevMachine() != null) {
-                workspace.getRuntime()
-                         .getDevMachine()
-                         .getRuntime()
-                         .getServers()
-                         .values()
-                         .stream()
-                         .filter(server -> WSAGENT_REFERENCE.equals(server.getRef()))
-                         .findAny()
-                         .ifPresent(wsAgent -> {
-                             workspace.getRuntime()
-                                      .getLinks()
-                                      .add(createLink("GET",
-                                                      wsAgent.getUrl(),
-                                                      WSAGENT_REFERENCE));
-                             workspace.getRuntime()
-                                      .getLinks()
-                                      .add(createLink("GET",
-                                                      UriBuilder.fromUri(wsAgent.getUrl())
-                                                                .path("ws")
-                                                                .scheme("https".equals(ideUri.getScheme()) ? "wss" : "ws")
-                                                                .build()
-                                                                .toString(),
-                                                      WSAGENT_WEBSOCKET_REFERENCE));
-                         });
-            }
-        }
-        return workspace.withLinks(links);
-    }
-
-    private void injectMachineChannelsLinks(EnvironmentDto environmentDto,
-                                            String workspaceId,
-                                            Link machineChannelLink,
-                                            LinkParameter channelParameter) {
-
-        for (MachineConfigDto machineConfigDto : environmentDto.getMachineConfigs()) {
-            MachineService.injectMachineChannelsLinks(machineConfigDto,
-                                                      workspaceId,
-                                                      environmentDto.getName(),
-                                                      machineChannelLink,
-                                                      channelParameter);
-        }
-    }
-
-    private SnapshotDto injectLinks(SnapshotDto snapshotDto) {
-        final UriBuilder uriBuilder = getServiceContext().getServiceUriBuilder();
-        final Link machineLink = createLink("GET",
-                                            getServiceContext().getBaseUriBuilder()
-                                                               .path("/machine/{id}")
-                                                               .build(snapshotDto.getId())
-                                                               .toString(),
-                                            APPLICATION_JSON,
-                                            "get machine");
-        final Link workspaceLink = createLink("GET",
-                                              uriBuilder.clone()
-                                                        .path(getClass(), "getByKey")
-                                                        .build(snapshotDto.getWorkspaceId())
-                                                        .toString(),
-                                              APPLICATION_JSON,
-                                              LIN_REL_GET_WORKSPACE);
-        final Link workspaceSnapshotLink = createLink("GET",
-                                                      uriBuilder.clone()
-                                                                .path(getClass(), "getSnapshot")
-                                                                .build(snapshotDto.getWorkspaceId())
-                                                                .toString(),
-                                                      APPLICATION_JSON,
-                                                      LINK_REL_SELF);
-        return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
     }
 
     private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {
