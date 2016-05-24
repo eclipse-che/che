@@ -17,7 +17,8 @@ import {ComponentsConfig} from '../components/components-config';
 import {AdminsConfig} from './admin/admin-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
-import {CheCountriesConfig} from './countries/che-countries.constant';
+import {CheCountriesConfig} from './constants/che-countries.constant';
+import {CheJobsConfig} from './constants/che-jobs.constant';
 import {DashboardConfig} from './dashboard/dashboard-config';
 // switch to a config
 import {DemoComponentsCtrl} from './demo-components/demo-components.controller';
@@ -349,6 +350,7 @@ new ProxySettingsConfig(instanceRegister);
 new CheColorsConfig(instanceRegister);
 new CheOutputColorsConfig(instanceRegister);
 new CheCountriesConfig(instanceRegister);
+new CheJobsConfig(instanceRegister);
 new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
 new IdeConfig(instanceRegister);
