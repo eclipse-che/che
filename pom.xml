@@ -26,6 +26,7 @@
     <modules>
         <module>core</module>
         <module>plugins</module>
+        <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
     </modules>
@@ -33,7 +34,7 @@
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/che.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/codenvy/che-core</url>
+        <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
         <che.lib.version>4.3.0-RC1-SNAPSHOT</che.lib.version>
@@ -667,6 +668,21 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>shared</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-json-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-json-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-json-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
