@@ -23,7 +23,6 @@ import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -205,13 +206,10 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
     @Override
     public Map<String, ServerImpl> getServers() {
-        Map<String, List<PortBinding>> ports = info.getNetworkSettings().getPorts();
-        Map<String, String> labels = info.getConfig().getLabels();
-
         return addDefaultReferenceForServersWithoutReference(
                 addRefAndUrlToServers(getServersWithFilledPorts(containerHost,
-                                                                ports != null ? ports : Collections.emptyMap()),
-                                      labels != null ? labels : Collections.emptyMap()));
+                                                                firstNonNull(info.getNetworkSettings().getPorts(), emptyMap())),
+                                      firstNonNull(info.getConfig().getLabels(), emptyMap())));
     }
 
     private Map<String, ServerImpl> addDefaultReferenceForServersWithoutReference(Map<String, ServerImpl> servers) {
