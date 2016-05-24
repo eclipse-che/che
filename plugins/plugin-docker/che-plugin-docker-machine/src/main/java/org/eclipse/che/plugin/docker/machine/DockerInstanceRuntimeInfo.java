@@ -223,13 +223,17 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
 
     @Override
     public Map<String, ServerImpl> getServers() {
-        Map<String, List<PortBinding>> ports = Collections.emptyMap();
+        Map<String, List<PortBinding>> ports;
         if (info.getNetworkSettings() != null && info.getNetworkSettings().getPorts() != null) {
             ports = info.getNetworkSettings().getPorts();
+        } else {
+            ports = Collections.emptyMap();
         }
-        Map<String, String> labels = Collections.emptyMap();
+        Map<String, String> labels;
         if (info.getConfig() != null && info.getConfig().getLabels() != null) {
             labels = info.getConfig().getLabels();
+        } else {
+            labels = Collections.emptyMap();
         }
         return addDefaultReferenceForServersWithoutReference(
                 addRefAndUrlToServers(
