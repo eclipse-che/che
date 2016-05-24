@@ -61,6 +61,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
+import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.editor.texteditor.EditorResources;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -538,7 +539,7 @@ public class StandardComponentInitializer {
         resourceOperation.add(convertFolderToProjectAction);
 
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_CONTEXT_MENU);
-        mainContextMenuGroup.add(newGroup);
+        mainContextMenuGroup.add(newGroup, Constraints.FIRST);
         mainContextMenuGroup.addSeparator();
         mainContextMenuGroup.add(resourceOperation);
 

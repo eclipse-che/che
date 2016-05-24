@@ -105,9 +105,6 @@ public class ActionManagerImpl implements ActionManager {
         DefaultActionGroup mainContextMenuGroup = new DefaultActionGroup(IdeActions.GROUP_MAIN_CONTEXT_MENU, false, this);
         registerAction(IdeActions.GROUP_MAIN_CONTEXT_MENU, mainContextMenuGroup);
 
-        DefaultActionGroup buildContextMenuGroup = new DefaultActionGroup(IdeActions.GROUP_BUILD_CONTEXT_MENU, false, this);
-        registerAction(IdeActions.GROUP_BUILD_CONTEXT_MENU, buildContextMenuGroup);
-
         DefaultActionGroup runContextMenuGroup = new DefaultActionGroup(IdeActions.GROUP_RUN_CONTEXT_MENU, false, this);
         registerAction(IdeActions.GROUP_RUN_CONTEXT_MENU, runContextMenuGroup);
         mainContextMenuGroup.add(runContextMenuGroup);
