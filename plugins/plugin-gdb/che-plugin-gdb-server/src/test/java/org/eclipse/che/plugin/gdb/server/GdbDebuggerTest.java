@@ -181,7 +181,7 @@ public class GdbDebuggerTest {
     }
 
     private void startDebugger() throws DebuggerException, InterruptedException {
-        gdbDebugger.start(new StartActionImpl());
+        gdbDebugger.start(new StartActionImpl(Collections.emptyList()));
 
         assertEquals(events.size(), 1);
 

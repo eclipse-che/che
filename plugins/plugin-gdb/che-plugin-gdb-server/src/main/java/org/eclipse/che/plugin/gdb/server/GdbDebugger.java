@@ -201,8 +201,15 @@ public class GdbDebugger implements Debugger {
     @Override
     public void start(StartAction action) throws DebuggerException {
         try {
-            Breakpoint breakpoint;
+            for (Breakpoint b : action.getBreakpoints()) {
+                try {
+                    addBreakpoint(b);
+                } catch (DebuggerException e) {
+                    // can't add breakpoint, skip it
+                }
+            }
 
+            Breakpoint breakpoint;
             if (isRemoteConnection()) {
                 GdbContinue gdbContinue = gdb.cont();
                 breakpoint = gdbContinue.getBreakpoint();
