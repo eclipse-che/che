@@ -25,6 +25,7 @@ public class DockerMachineTarget  extends BaseTarget {
     private String owner;
     private String sourceType;
     private String sourceUrl;
+    private String sourceContent;
 
 
     public void setType(String type) {
@@ -59,6 +60,15 @@ public class DockerMachineTarget  extends BaseTarget {
         return sourceUrl;
     }
 
+    public void setSourceContent(String sourceContent) {
+        this.sourceContent = sourceContent;
+    }
+
+    public String getSourceContent() {
+        return sourceContent;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -77,11 +87,12 @@ public class DockerMachineTarget  extends BaseTarget {
                && Objects.equals(getType(), other.getType())
                && Objects.equals(getOwner(), other.getOwner())
                && Objects.equals(getSourceType(), other.getSourceType())
+               && Objects.equals(getSourceContent(), other.getSourceContent())
                && Objects.equals(getSourceUrl(), other.getSourceUrl());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getCategory(), getRecipe(), getType(), getOwner(), getSourceType(), getSourceUrl());
+        return Objects.hash(getName(), getCategory(), getRecipe(), getType(), getOwner(), getSourceType(), getSourceUrl(), getSourceContent());
     }
 }

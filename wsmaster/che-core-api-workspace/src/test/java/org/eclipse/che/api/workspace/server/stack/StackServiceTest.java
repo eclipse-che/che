@@ -158,7 +158,7 @@ public class StackServiceTest {
         componentsImpl = Collections.singletonList(new StackComponentImpl(COMPONENT_NAME, COMPONENT_VERSION));
         stackSourceImpl = new StackSourceImpl(SOURCE_TYPE, SOURCE_ORIGIN);
         CommandImpl command = new CommandImpl(COMMAND_NAME, COMMAND_LINE, COMMAND_TYPE);
-        MachineSourceImpl machineSource = new MachineSourceImpl(MACHINE_SOURCE_TYPE, MACHINE_SOURCE_LOCATION);
+        MachineSourceImpl machineSource = new MachineSourceImpl(MACHINE_SOURCE_TYPE).setLocation(MACHINE_SOURCE_LOCATION);
         int limitMemory = 1000;
         LimitsImpl limits = new LimitsImpl(limitMemory);
         MachineConfigImpl machineConfig = new MachineConfigImpl(IS_DEV,

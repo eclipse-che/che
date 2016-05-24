@@ -61,7 +61,7 @@ public final class DtoConverter {
      * Converts {@link MachineSource} to {@link MachineSourceDto}.
      */
     public static MachineSourceDto asDto(MachineSource source) {
-        return newDto(MachineSourceDto.class).withType(source.getType()).withLocation(source.getLocation());
+        return newDto(MachineSourceDto.class).withType(source.getType()).withLocation(source.getLocation()).withContent(source.getContent());
     }
 
     /**

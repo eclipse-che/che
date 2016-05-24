@@ -13,17 +13,17 @@ package org.eclipse.che.api.local;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.adapters.InstanceKeyAdapter;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
+import org.eclipse.che.api.machine.server.model.impl.adapter.MachineSourceAdapter;
+import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.write;
@@ -39,11 +39,14 @@ import static org.testng.Assert.assertNotNull;
 public class LocalSnapshotDaoTest {
 
     private static Gson GSON = new GsonBuilder().setPrettyPrinting()
-                                                .registerTypeAdapter(InstanceKey.class, new InstanceKeyAdapter())
+                                                .registerTypeAdapter(MachineSource.class, new MachineSourceAdapter())
                                                 .create();
 
     private LocalSnapshotDaoImpl snapshotDao;
     private Path                 snapshotsPath;
+
+    @Mock
+    private MachineSource machineSource;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -80,7 +83,7 @@ public class LocalSnapshotDaoTest {
         return SnapshotImpl.builder()
                            .generateId()
                            .setType("docker")
-                           .setInstanceKey(new DummyInstanceKey())
+                           .setMachineSource(machineSource)
                            .setNamespace("user123")
                            .setWorkspaceId("workspace123")
                            .setMachineName("machine123")
@@ -91,18 +94,4 @@ public class LocalSnapshotDaoTest {
                            .build();
     }
 
-    private static class DummyInstanceKey implements InstanceKey {
-
-        Map<String, String> fields = singletonMap("field1", "value1");
-
-        @Override
-        public Map<String, String> getFields() {
-            return fields;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof InstanceKey && ((InstanceKey)obj).getFields().equals(getFields());
-        }
-    }
 }

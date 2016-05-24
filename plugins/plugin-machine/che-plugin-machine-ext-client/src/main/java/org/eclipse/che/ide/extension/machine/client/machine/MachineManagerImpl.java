@@ -14,12 +14,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.MachineManager;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -28,11 +24,16 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineManager;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
+import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier.RunningListener;
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsolePresenter;
@@ -45,11 +46,11 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL;
 import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.DESTROY;
 import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.RESTART;
 import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.START;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL;
 import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
 import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.ERROR;
@@ -189,11 +190,11 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
             @Override
             public void onMachineDestroyed(MachineStateEvent event) {
                 if (isMachineRestarting) {
-                    final String recipeUrl = machineState.getConfig().getSource().getLocation();
+                    final MachineSource machineSource = machineState.getConfig().getSource();
                     final String displayName = machineState.getConfig().getName();
                     final boolean isDev = machineState.getConfig().isDev();
 
-                    startMachine(recipeUrl, displayName, isDev, RESTART, "dockerfile", "docker");
+                    startMachine(asDto(machineSource), displayName, isDev, RESTART, "docker");
 
                     isMachineRestarting = false;
                 }
@@ -208,6 +209,17 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
         });
     }
 
+    /**
+     * Converts {@link MachineSource} to {@link MachineSourceDto}.
+     */
+    public MachineSourceDto asDto(MachineSource source) {
+        return this.dtoFactory.createDto(MachineSourceDto.class)
+                              .withType(source.getType())
+                              .withLocation(source.getLocation())
+                              .withContent(source.getContent());
+    }
+
+
     /** Start new machine. */
     @Override
     public void startMachine(String recipeURL, String displayName) {
@@ -219,6 +231,8 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     public void startDevMachine(String recipeURL, String displayName) {
         startMachine(recipeURL, displayName, true, START, "dockerfile", "docker");
     }
+
+
 
     /**
      * @param recipeURL
@@ -236,17 +250,32 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                               final MachineOperationType operationType,
                               final String sourceType,
                               final String machineType) {
+        MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType(sourceType).withLocation(recipeURL);
+        startMachine(sourceDto, displayName, isDev, operationType, machineType);
+    }
+    /**
+     * @param machineSourceDto
+     * @param displayName
+     * @param isDev
+     * @param operationType
+     * @param machineType
+     *         "docker" or "ssh"
+     */
+    private void startMachine(final MachineSourceDto machineSourceDto,
+                              final String displayName,
+                              final boolean isDev,
+                              final MachineOperationType operationType,
+                              final String machineType) {
 
         LimitsDto limitsDto = dtoFactory.createDto(LimitsDto.class).withRam(1024);
         if (isDev) {
             limitsDto.withRam(3072);
         }
-        MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType(sourceType).withLocation(recipeURL);
 
         MachineConfigDto configDto = dtoFactory.createDto(MachineConfigDto.class)
                                                .withDev(isDev)
                                                .withName(displayName)
-                                               .withSource(sourceDto)
+                                               .withSource(machineSourceDto)
                                                .withLimits(limitsDto)
                                                .withType(machineType);
 

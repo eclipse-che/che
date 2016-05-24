@@ -22,7 +22,6 @@ import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.CompositeLineConsumer;
@@ -39,10 +38,8 @@ import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
-import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
@@ -100,7 +97,6 @@ public class MachineManager {
     private final int                      defaultMachineMemorySizeMB;
     private final MachineCleaner           machineCleaner;
     private final WsAgentLauncher          wsAgentLauncher;
-    private final RecipeDownloader         recipeDownloader;
 
     @Inject
     public MachineManager(SnapshotDao snapshotDao,
@@ -109,13 +105,11 @@ public class MachineManager {
                           @Named("machine.logs.location") String machineLogsDir,
                           EventService eventService,
                           @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB,
-                          WsAgentLauncher wsAgentLauncher,
-                          RecipeDownloader recipeDownloader) {
+                          WsAgentLauncher wsAgentLauncher) {
         this.snapshotDao = snapshotDao;
         this.machineInstanceProviders = machineInstanceProviders;
         this.eventService = eventService;
         this.wsAgentLauncher = wsAgentLauncher;
-        this.recipeDownloader = recipeDownloader;
         this.machineLogsDir = new File(machineLogsDir);
         this.machineRegistry = machineRegistry;
         this.defaultMachineMemorySizeMB = defaultMachineMemorySizeMB;
@@ -256,12 +250,10 @@ public class MachineManager {
         return createMachine(normalizeMachineConfig(machineConfig),
                              workspaceId,
                              environmentName,
-                             (instanceProvider, recipe, instanceKey, machine, machineLogger) ->
+                             (instanceProvider, machine, machineLogger) ->
                                      executor.execute(ThreadLocalPropagateContext.wrap(() -> {
                                          try {
                                              createInstance(instanceProvider,
-                                                            recipe,
-                                                            instanceKey,
                                                             machine,
                                                             machineLogger);
                                          } catch (MachineException | NotFoundException e) {
@@ -297,14 +289,6 @@ public class MachineManager {
                                                         machineConfig.getName()));
         }
 
-        Recipe recipe = null;
-        InstanceKey instanceKey = null;
-        if (snapshot != null) {
-            instanceKey = snapshot.getInstanceKey();
-        } else {
-            recipe = recipeDownloader.getRecipe(machineConfig);
-        }
-
         if (!MACHINE_DISPLAY_NAME_PATTERN.matcher(machineConfig.getName()).matches()) {
             throw new BadRequestException("Invalid machine name " + machineConfig.getName());
         }
@@ -313,6 +297,11 @@ public class MachineManager {
             if (machine.getWorkspaceId().equals(workspaceId) && machine.getConfig().getName().equals(machineConfig.getName())) {
                 throw new ConflictException("Machine with name " + machineConfig.getName() + " already exists");
             }
+        }
+
+        // recover key from snapshot if there is one
+        if (snapshot != null) {
+            machineConfig.setSource(snapshot.getMachineSource());
         }
 
         final String machineId = generateMachineId();
@@ -339,7 +328,7 @@ public class MachineManager {
         try {
             machineRegistry.addMachine(machine);
 
-            instanceCreator.createInstance(instanceProvider, recipe, instanceKey, machine, machineLogger);
+            instanceCreator.createInstance(instanceProvider, machine, machineLogger);
 
             return machine;
         } catch (ConflictException e) {
@@ -348,8 +337,6 @@ public class MachineManager {
     }
 
     private void createInstance(InstanceProvider instanceProvider,
-                                Recipe recipe,
-                                InstanceKey instanceKey,
                                 Machine machine,
                                 LineConsumer machineLogger) throws MachineException, NotFoundException {
         Instance instance = null;
@@ -361,11 +348,7 @@ public class MachineManager {
                                            .withWorkspaceId(machine.getWorkspaceId())
                                            .withMachineName(machine.getConfig().getName()));
 
-            if (instanceKey == null) {
-                instance = instanceProvider.createInstance(recipe, machine, machineLogger);
-            } else {
-                instance = instanceProvider.createInstance(instanceKey, machine, machineLogger);
-            }
+            instance = instanceProvider.createInstance(machine, machineLogger);
 
             instance.setStatus(MachineStatus.RUNNING);
 
@@ -408,7 +391,6 @@ public class MachineManager {
 
     private interface MachineInstanceCreator {
         void createInstance(InstanceProvider instanceProvider,
-                            Recipe recipe, InstanceKey instanceKey,
                             Machine machineState,
                             LineConsumer machineLogger) throws MachineException, NotFoundException;
     }
@@ -590,7 +572,7 @@ public class MachineManager {
         final SnapshotImpl snapshot = getSnapshot(snapshotId);
         final String instanceType = snapshot.getType();
         final InstanceProvider instanceProvider = machineInstanceProviders.getProvider(instanceType);
-        instanceProvider.removeInstanceSnapshot(snapshot.getInstanceKey());
+        instanceProvider.removeInstanceSnapshot(snapshot.getMachineSource());
 
         snapshotDao.removeSnapshot(snapshotId);
     }
@@ -814,14 +796,14 @@ public class MachineManager {
                      machine.getId());
 
             snapshotWithKey = new SnapshotImpl(snapshot);
-            snapshotWithKey.setInstanceKey(machine.saveToSnapshot(machine.getOwner()));
+            snapshotWithKey.setMachineSourceImpl(machine.saveToSnapshot(machine.getOwner()));
 
             try {
                 SnapshotImpl oldSnapshot = snapshotDao.getSnapshot(snapshot.getWorkspaceId(),
                                                                    snapshot.getEnvName(),
                                                                    snapshot.getMachineName());
                 snapshotDao.removeSnapshot(oldSnapshot.getId());
-                machineInstanceProviders.getProvider(oldSnapshot.getType()).removeInstanceSnapshot(oldSnapshot.getInstanceKey());
+                machineInstanceProviders.getProvider(oldSnapshot.getType()).removeInstanceSnapshot(oldSnapshot.getMachineSource());
             } catch (NotFoundException ignored) {
                //DO nothing if we has no snapshots or when provider not found
             } catch (SnapshotException se) {

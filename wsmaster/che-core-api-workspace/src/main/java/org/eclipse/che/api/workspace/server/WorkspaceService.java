@@ -712,7 +712,9 @@ public class WorkspaceService extends Service {
         requiredNotNull(machineConfig.getType(), "Machine type");
         requiredNotNull(machineConfig.getSource(), "Machine source");
         requiredNotNull(machineConfig.getSource().getType(), "Machine source type");
-        requiredNotNull(machineConfig.getSource().getLocation(), "Machine source location");
+        // definition of source should come either with a content or with location
+        requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
+                        "Machine source should provide either location or content");
 
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
         if (workspace.getRuntime() == null) {
@@ -762,6 +764,27 @@ public class WorkspaceService extends Service {
      */
     private void requiredNotNull(Object object, String subject) throws BadRequestException {
         if (object == null) {
+            throw new BadRequestException(subject + " required");
+        }
+    }
+
+    /**
+     * Checks only one of the given object reference is {@code null}
+     *
+     * @param object1
+     *         object reference to check
+     * @param object2
+     *         object reference to check
+     * @param subject
+     *         used as subject of exception message "{subject} required"
+     * @throws BadRequestException
+     *         when objects are both null or have both a value reference is {@code null}
+     */
+    private void requiredOnlyOneNotNull(Object object1, Object object2, String subject) throws BadRequestException {
+        if (object1 == null && object2 == null) {
+            throw new BadRequestException(subject + " required");
+        }
+        if (object1 != null && object2 != null) {
             throw new BadRequestException(subject + " required");
         }
     }

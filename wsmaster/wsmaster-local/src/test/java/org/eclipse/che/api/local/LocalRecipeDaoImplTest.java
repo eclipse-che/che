@@ -17,8 +17,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.acl.AclEntryImpl;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.server.recipe.adapters.InstanceKeyAdapter;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;

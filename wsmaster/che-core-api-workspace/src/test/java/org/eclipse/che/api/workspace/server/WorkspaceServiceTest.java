@@ -721,7 +721,7 @@ public class WorkspaceServiceTest {
                                                               .setDev(true)
                                                               .setName("dev-machine")
                                                               .setType("docker")
-                                                              .setSource(new MachineSourceImpl("location", "recipe"))
+                                                              .setSource(new MachineSourceImpl("location").setLocation("recipe"))
                                                               .setServers(asList(new ServerConfImpl("wsagent",
                                                                                                     "8080",
                                                                                                     "https",

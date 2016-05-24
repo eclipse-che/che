@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -19,7 +20,6 @@ import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -150,10 +150,13 @@ public class DockerInstanceTest {
 
     @Test
     public void shouldSaveDockerInstanceStateIntoLocalImage() throws Exception {
-        final InstanceKey result = dockerInstance.saveToSnapshot(OWNER);
+        final MachineSource result = dockerInstance.saveToSnapshot(OWNER);
 
-        assertEquals(result.getFields().get("tag"), TAG);
-        assertFalse(result.getFields().containsKey("registry"));
+        assertTrue(result instanceof DockerMachineSource);
+        DockerMachineSource dockerMachineSource = (DockerMachineSource) result;
+        assertEquals(dockerMachineSource.getTag(), TAG);
+        assertNotNull(dockerMachineSource.getRepository());
+        assertEquals(dockerMachineSource.getRegistry(), null);
     }
 
     @Test
@@ -162,11 +165,13 @@ public class DockerInstanceTest {
         dockerInstance = getDockerInstance(getMachine(), REGISTRY, CONTAINER, IMAGE, true);
         when(dockerConnectorMock.push(any(PushParams.class), any(ProgressMonitor.class))).thenReturn(digest);
 
-        final InstanceKey result = dockerInstance.saveToSnapshot(OWNER);
+        final MachineSource result = dockerInstance.saveToSnapshot(OWNER);
 
-        assertEquals(result.getFields().get("tag"), TAG);
-        assertEquals(result.getFields().get("digest"), digest);
-        assertTrue(result.getFields().containsKey("registry"));
+        assertTrue(result instanceof DockerMachineSource);
+        DockerMachineSource dockerMachineSource = (DockerMachineSource) result;
+        assertEquals(dockerMachineSource.getTag(), TAG);
+        assertEquals(dockerMachineSource.getDigest(), digest);
+        assertEquals(dockerMachineSource.getRegistry(), REGISTRY);
     }
 
     @Test(expectedExceptions = MachineException.class)
@@ -235,7 +240,7 @@ public class DockerInstanceTest {
                                 .setDev(isDev)
                                 .setName(name)
                                 .setType(type)
-                                .setSource(new MachineSourceImpl("docker", "location"))
+                                .setSource(new MachineSourceImpl("docker").setLocation("location"))
                                 .setLimits(new LimitsImpl(64))
                                 .build();
     }

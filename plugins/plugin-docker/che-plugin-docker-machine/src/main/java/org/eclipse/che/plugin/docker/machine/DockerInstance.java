@@ -16,12 +16,12 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -59,6 +59,11 @@ import static java.lang.String.format;
  */
 public class DockerInstance extends AbstractInstance {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstance.class);
+
+    /**
+     * Name of the latest tag used in Docker image.
+     */
+    public static final String LATEST_TAG = "latest";
 
     private static final AtomicInteger pidSequence           = new AtomicInteger(1);
     private static final String        PID_FILE_TEMPLATE     = "/tmp/docker-exec-%s.pid";
@@ -191,21 +196,20 @@ public class DockerInstance extends AbstractInstance {
     }
 
     @Override
-    public InstanceKey saveToSnapshot(String owner) throws MachineException {
+    public MachineSource saveToSnapshot(String owner) throws MachineException {
         try {
             final String repository = generateRepository();
-            final String tag = "latest";
             if(!snapshotUseRegistry) {
-                commitContainer(owner, repository, tag);
-                return new DockerInstanceKey(repository, tag);
+                commitContainer(owner, repository, LATEST_TAG);
+                return new DockerMachineSource(repository).withTag(LATEST_TAG);
             }
             final String repositoryName = registry + '/' + repository;
-            commitContainer(owner, repositoryName, tag);
+            commitContainer(owner, repositoryName, LATEST_TAG);
             //TODO fix this workaround. Docker image is not visible after commit when using swarm
             Thread.sleep(2000);
             final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
             final String digest = docker.push(PushParams.create(repository)
-                                                        .withTag(tag)
+                                                        .withTag(LATEST_TAG)
                                                         .withRegistry(registry),
                                               progressMonitor -> {
                                                   try {
@@ -214,7 +218,7 @@ public class DockerInstance extends AbstractInstance {
                                                   }
                                               });
             docker.removeImage(RemoveImageParams.create(repositoryName).withForce(false));
-            return new DockerInstanceKey(repository, tag, registry, digest);
+            return new DockerMachineSource(repository).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
         } catch (IOException ioEx) {
             throw new MachineException(ioEx);
         } catch (InterruptedException e) {

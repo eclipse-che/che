@@ -12,9 +12,9 @@ package org.eclipse.che.api.machine.server.spi;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.exception.InvalidInstanceSnapshotException;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
@@ -45,12 +45,11 @@ public interface InstanceProvider {
     Set<String> getRecipeTypes();
 
     /**
-     * Creates instance from scratch.
+     * Creates instance from scratch or by reusing a previously one by using specified {@link org.eclipse.che.api.core.model.machine.MachineSource}
+     * data in {@link org.eclipse.che.api.core.model.machine.MachineConfig}.
      *
      * @param machine
      *         machine description
-     * @param recipe
-     *         instance creation {@link Recipe}
      * @param creationLogsOutput
      *         output for instance creation logs
      * @return newly created {@link Instance}
@@ -58,41 +57,24 @@ public interface InstanceProvider {
      *         if specified {@code recipe} is not supported
      * @throws InvalidRecipeException
      *         if {@code recipe} is invalid
+     * @throws NotFoundException
+     *         if instance described by {@link org.eclipse.che.api.core.model.machine.MachineSource} doesn't exists
      * @throws MachineException
      *         if other error occurs
      */
-    Instance createInstance(Recipe recipe,
-                            Machine machine,
+    Instance createInstance(Machine machine,
                             LineConsumer creationLogsOutput) throws UnsupportedRecipeException,
                                                                     InvalidRecipeException,
+                                                                    NotFoundException,
                                                                     MachineException;
-
-    /**
-     * Creates instance using implementation specific {@link InstanceKey}.
-     *
-     * @param instanceKey
-     *         implementation specific {@link InstanceKey}
-     * @param creationLogsOutput
-     *         output for instance creation logs
-     * @return newly created {@link Instance}
-     * @throws NotFoundException
-     *         if instance described by {@code InstanceKey} doesn't exists
-     * @throws InvalidInstanceSnapshotException
-     *         if other errors occurs while restoring instance
-     * @throws MachineException
-     *         if other error occurs
-     */
-    Instance createInstance(InstanceKey instanceKey,
-                            Machine machine,
-                            LineConsumer creationLogsOutput) throws NotFoundException, InvalidInstanceSnapshotException, MachineException;
 
     /**
      * Removes snapshot of the instance in implementation specific way.
      *
-     * @param instanceKey
-     *         key of the snapshot of the instance that should be removed
+     * @param machineSource
+     *         contains implementation specific key of the snapshot of the instance that should be removed
      * @throws SnapshotException
      *         if exception occurs on instance snapshot removal
      */
-    void removeInstanceSnapshot(InstanceKey instanceKey) throws SnapshotException;
+    void removeInstanceSnapshot(MachineSource machineSource) throws SnapshotException;
 }
