@@ -24,11 +24,16 @@ import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.languageserver.ide.editor.PublishDiagnosticsProcessor;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class TextDocumentServiceClient {
 
     private final DtoUnmarshallerFactory unmarshallerFactory;
@@ -82,6 +87,42 @@ public class TextDocumentServiceClient {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didChange";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                 .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) change).toJson()).send();
+    }
+    
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didOpen(io.typefox.lsapi.DidOpenTextDocumentParams)}
+     * 
+     * @param openEvent
+     * @return
+     */
+    public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didOpen";
+        asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
+        .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) openEvent).toJson()).send();
+    }
+    
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didClose(io.typefox.lsapi.DidCloseTextDocumentParams)}
+     * 
+     * @param closeEvent
+     * @return
+     */
+    public void didClose(DidCloseTextDocumentParamsDTO closeEvent) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didClose";
+        asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
+        .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) closeEvent).toJson()).send();
+    }
+    
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didSave(io.typefox.lsapi.DidSaveTextDocumentParams)}
+     * 
+     * @param saveEvent
+     * @return
+     */
+    public void didSave(DidSaveTextDocumentParamsDTO saveEvent) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didSave";
+        asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
+        .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) saveEvent).toJson()).send();
     }
     
     /**

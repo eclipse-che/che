@@ -1,32 +1,20 @@
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import static com.google.common.collect.Lists.newArrayList;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
-import org.eclipse.che.ide.api.editor.changeintercept.ChangeInterceptorProvider;
-import org.eclipse.che.ide.api.editor.changeintercept.TextChange;
-import org.eclipse.che.ide.api.editor.changeintercept.TextChangeInterceptor;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.document.DocumentHandle;
-import org.eclipse.che.ide.api.editor.document.ReadOnlyDocument;
-import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.partition.ConstantPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
-import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
-import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.plugin.languageserver.ide.editor.codeassist.LanguageServerCodeAssistProcessor;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -42,10 +30,12 @@ import com.google.inject.Provider;
 
 public class LanguageServerEditorConfiguration extends DefaultTextEditorConfiguration {
 
+    public static final int INITIAL_DOCUMENT_VERSION = 0;
+    
     private final LanguageServerCodeAssistProcessor codeAssistProcessor;
     private final AnnotationModel annotationModel;
     private final DocumentPositionMap documentPositionMap;
-    private final AtomicInteger version = new AtomicInteger(1);
+    private final AtomicInteger version = new AtomicInteger(INITIAL_DOCUMENT_VERSION);
     private final ConstantPartitioner constantPartitioner;
     private final ReconcilerWithAutoSave reconciler;
 
@@ -64,7 +54,7 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
                 
                 Document document = event.getDocument().getDocument();
                 TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
-                TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getRemoveCharCount());
+                TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getLength());
                 
                 DidChangeTextDocumentParamsDTOImpl changeDTO = DtoClientImpls.DidChangeTextDocumentParamsDTOImpl.make();
                 String uri = ((Document) document).getFile().getPath();
@@ -79,8 +69,8 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
                 start.setLine(startPosition.getLine());
                 start.setCharacter(startPosition.getCharacter());
                 PositionDTOImpl end = DtoClientImpls.PositionDTOImpl.make();
-                start.setLine(endPosition.getLine());
-                start.setCharacter(endPosition.getCharacter());
+                end.setLine(endPosition.getLine());
+                end.setCharacter(endPosition.getCharacter());
                 range.setStart(start);
                 range.setEnd(end);
                 actualChange.setRange(range);
