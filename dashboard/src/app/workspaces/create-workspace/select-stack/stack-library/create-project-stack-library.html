@@ -13,7 +13,7 @@
 
           <div layout="row" layout-wrap>
             <che-stack-library-selecter
-              ng-repeat="stack in filteredStacks = (createProjectStackLibraryCtrl.stacks | stackSelectedStackFilter:createProjectStackLibraryCtrl.filteredStackIds)"
+              ng-repeat="stack in filteredStacks = (createProjectStackLibraryCtrl.stacks | stackSelectedStackFilter:createProjectStackLibraryCtrl.filteredStackIds) | orderBy:'name'"
               ng-init="$first && createProjectStackLibraryCtrl.setStackSelectionById(stack.id)"
               che-is-select="stack.id === createProjectStackLibraryCtrl.selectedStackId"
               che-is-active="true"
