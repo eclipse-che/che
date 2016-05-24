@@ -1,59 +1,48 @@
 .che-select .che-select-container
+  border-bottom 1px solid $default-border-color
   outline none
-  border none
-  border-bottom 1px solid $default-border-color
 
-.che-select md-input-container .che-select-container
-  border-bottom 1px solid $default-border-color
-  margin-left -4px
-  width calc(100% + 4px)
+.che-select .che-select-mobile,
+.che-select .che-select-desktop
+  width 100%
+
+.che-select .che-select-desktop
+  height 21px
 
 .che-select .che-select-desktop .che-select-container
   position relative
-  min-height 20px
+  min-height 21px
 
-.che-select md-input-container
-  margin-top 30px
-
-.che-select md-input-container label
-  margin-top -47px
-
-.che-select select
-  background inherit
-  outline none
-
-.che-select .che-select-desktop select
-  position absolute
-  z-index 1000
-
-.che-select .che-select-desktop select:not(.che-select-border)
-  margin-left -4px
-  width calc(100% + 4px)
-  border none
-
-.che-select .che-select-desktop .che-select-border
-  background $white-color
-  border-style solid
-  border-width 1.5px
-  border-color $primary-color
-
-.che-select .che-select-desktop select.che-select-border
-  width 100%
-
-.che-select select.disabled
-  color $disabled-color
-
-.che-select select option:first-child
-  display none
-
-.che-select select.disabled option:not(:first-child)
-  color $label-primary-color
-
-.che-select-desktop select:focus
-  border-color $primary-color
-
-.che-select-desktop
+.che-select .che-select-desktop md-select
   margin 0
 
-.che-select-overflow-hidden
-  overflow hidden
+.che-select .che-select-desktop md-select > *
+  border none !important
+
+.che-select .che-select-desktop md-select-value
+  margin 0
+  padding 0
+  min-height 18px
+
+.che-select .che-select-desktop md-select-value .md-select-icon
+  text-align center
+  margin -12px 0 0 0
+  height 15px
+  width 15px
+
+.che-select .che-select-desktop label
+  line-height 21px
+
+.che-custom-dropdown
+  margin-left 2px
+  border 1px solid $frame-subscription-color
+
+.che-custom-dropdown md-select-menu
+  max-height 180px
+
+.che-custom-dropdown md-option
+  height 18px
+  padding 0 0 0 3px
+
+.che-custom-dropdown .md-text
+  font-size inherit !important
