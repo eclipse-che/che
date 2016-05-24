@@ -126,6 +126,9 @@ public class DockerContainerNameGeneratorTest {
                               {"workspace1_machinea_USER_ws-machine-name",
                                new Pair<>("machinea", "workspace1")},
 
+                              {"/nodes1.night-build.che-build.com/workspacep80at4r4hpvoztve_machinerup047b5xlv5zv20_iedexmain_ws-machine",
+                               new Pair<>("machinerup047b5xlv5zv20", "workspacep80at4r4hpvoztve")},
+
                               {"workspace1_machinea_user%100%_ws-machine-name",
                                new Pair<>("machinea", "workspace1")},
 
