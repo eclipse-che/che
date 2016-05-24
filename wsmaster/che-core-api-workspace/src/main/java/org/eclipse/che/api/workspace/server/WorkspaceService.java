@@ -719,7 +719,7 @@ public class WorkspaceService extends Service {
             throw new NotFoundException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
         }
 
-        MachineImpl machine = workspaceManager.createMachineAsyncInRuntime(machineConfig,
+        MachineImpl machine = workspaceManager.createMachineAsync(machineConfig,
                                                                            workspaceId,
                                                                            workspace.getRuntime().getActiveEnv());
 

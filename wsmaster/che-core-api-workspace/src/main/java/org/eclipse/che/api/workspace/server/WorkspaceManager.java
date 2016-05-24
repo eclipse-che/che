@@ -515,14 +515,19 @@ public class WorkspaceManager {
      * @return starting machine instance
      * Throws the same exceptions as @{@link MachineManager#createMachineAsync(MachineConfig, String, String)}
      */
-    public MachineImpl createMachineAsyncInRuntime(MachineConfig machineConfig, String workspaceId, String activeEnv)
+    public MachineImpl createMachineAsync(MachineConfig machineConfig, String workspaceId, String activeEnv)
             throws MachineException,
                    BadRequestException,
                    SnapshotException,
                    NotFoundException,
                    ConflictException {
-        new AddNewMachineInRuntimeEventSubscriber();
-        return machineManager.createMachineAsync(machineConfig, workspaceId, activeEnv);
+        requireNonNull(machineConfig, "Require non-null machine config");
+        requireNonNull(workspaceId, "Require non-null workspace id");
+        requireNonNull(activeEnv, "Require non-null environment");
+
+        MachineImpl machine = machineManager.createMachineAsync(machineConfig, workspaceId, activeEnv);
+        new MachineStartSubscriber(machine.getId());
+        return machine;
     }
 
     /**
@@ -545,7 +550,8 @@ public class WorkspaceManager {
         MachineImpl machine = machineManager.getMachine(machineId);
         if (machine.getConfig().isDev()) {
             throw new ConflictException("Cannot remove dev-machine " + machine.getId() +
-                                        " from " + machine.getWorkspaceId() + " workspace");
+                                        " from " + machine.getWorkspaceId() + " workspace." +
+                                        " Stop workspace to stop dev-machine");
         }
 
         runtimes.removeMachine(machine);
@@ -765,26 +771,32 @@ public class WorkspaceManager {
     }
 
     /** Adds machine to runtime or cleanup on fail to start */
-    private class AddNewMachineInRuntimeEventSubscriber implements EventSubscriber<MachineStatusEvent> {
+    private class MachineStartSubscriber implements EventSubscriber<MachineStatusEvent> {
+        String machineId;
 
-        AddNewMachineInRuntimeEventSubscriber() {
+        MachineStartSubscriber(String machineId) {
+            this.machineId = machineId;
+
             eventService.subscribe(this);
         }
 
         @Override
         public void onEvent(MachineStatusEvent event) {
-            if (MachineStatusEvent.EventType.CREATING.equals(event.getEventType())) {
-                return;
-            }
+            if (event.getMachineId().equals(machineId)) {
+                if (MachineStatusEvent.EventType.CREATING.equals(event.getEventType())) {
+                    return;
+                }
 
-            eventService.unsubscribe(this);
-            switch(event.getEventType()) {
-                case RUNNING:
-                    onSuccessRun(event);
-                    break;
-                case ERROR:
-                    onError(event);
-                    break;
+                eventService.unsubscribe(this);
+
+                switch (event.getEventType()) {
+                    case RUNNING:
+                        onSuccessRun(event);
+                        break;
+                    case ERROR:
+                        onError(event);
+                        break;
+                }
             }
         }
 
@@ -802,7 +814,7 @@ public class WorkspaceManager {
                 try {
                     machineManager.destroy(event.getMachineId(), true);
                 } catch (NotFoundException | MachineException e) {
-                    e.printStackTrace();
+                    LOG.error(exception.getLocalizedMessage(), exception);
                 }
             }
         }

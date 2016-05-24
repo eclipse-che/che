@@ -585,7 +585,7 @@ public class WorkspaceManagerTest {
     @Test
     public void shouldInvokeAsyncMachineCreationWithMachineManager()
             throws MachineException, BadRequestException, SnapshotException, NotFoundException, ConflictException {
-        workspaceManager.createMachineAsyncInRuntime(machineConfig, WORKSPACE_ID, ENV);
+        workspaceManager.createMachineAsync(machineConfig, WORKSPACE_ID, ENV);
 
         verify(machineManager).createMachineAsync(machineConfig, WORKSPACE_ID, ENV);
     }
