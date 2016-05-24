@@ -116,7 +116,8 @@
                             <patchDirectory>${patches.location}</patchDirectory>
                             <patches>
                                 <patch>built-codeEdit-amd.js.diff</patch>
-                                <patch>built-codeEdit-amd1.js.diff</patch>
+                                <patch>fix_goto_line.diff</patch>
+                                <patch>fix_focus.diff</patch>
                                 <patch>embeddedToolingPlugin.js.diff</patch>
                             </patches>
                             <optimizations>false</optimizations>
@@ -153,7 +154,8 @@
                         <!-- Orion - EPL License -->
                         <exclude>**/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/**</exclude>
                         <exclude>**/patches/built-codeEdit-amd.js.diff</exclude>
-                        <exclude>**/patches/built-codeEdit-amd1.js.diff</exclude>
+                        <exclude>**/patches/fix_goto_line.diff</exclude>
+                        <exclude>**/patches/fix_focus.diff</exclude>
                         <exclude>**/patches/embeddedToolingPlugin.js.diff</exclude>
                     </excludes>
                 </configuration>

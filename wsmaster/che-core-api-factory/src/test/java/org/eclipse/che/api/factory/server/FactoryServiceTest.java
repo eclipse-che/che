@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -28,8 +29,8 @@ import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -67,23 +68,36 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.jayway.restassured.RestAssured.given;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static java.net.URLEncoder.encode;
 import static javax.ws.rs.core.Response.Status;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.eclipse.che.api.factory.server.FactoryService.ERROR_NO_RESOLVER_AVAILABLE;
+import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_PARAMETER;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,11 +107,17 @@ import static org.testng.Assert.assertTrue;
 
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class FactoryServiceTest {
+
     private final String             CORRECT_FACTORY_ID = "correctFactoryId";
     private final String             ILLEGAL_FACTORY_ID = "illegalFactoryId";
     private final String             SERVICE_PATH       = "/factory";
     private static final String      userId             = "id-2314";
     private final ApiExceptionMapper exceptionMapper    = new ApiExceptionMapper();
+
+    /**
+     * Path of the resolver REST service.
+     */
+    private final String SERVICE_PATH_RESOLVER = SERVICE_PATH + "/resolver";
 
     private EnvironmentFilter filter = new EnvironmentFilter();
 
@@ -119,16 +139,28 @@ public class FactoryServiceTest {
     @Mock
     private UserDao userDao;
 
+    @Mock
+    private FactoryService.FactoryParametersResolverHolder factoryParametersResolverHolder;
+
     private FactoryBuilder factoryBuilder;
 
     private FactoryService factoryService;
     private DtoFactory     dto;
 
+    /**
+     * Set of all resolvers available for the factory service.
+     */
+    @Mock
+    private Set<FactoryParametersResolver> factoryParametersResolvers;
+
+
     @BeforeMethod
     public void setUp() throws Exception {
+        //doNothing().when(acceptValidator).validateOnAccept(any(Factory.class));
         dto = DtoFactory.getInstance();
         factoryBuilder = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
         doNothing().when(factoryBuilder).checkValid(any(Factory.class));
+        when(factoryParametersResolverHolder.getFactoryParametersResolvers()).thenReturn(factoryParametersResolvers);
         when(userDao.getById(anyString())).thenReturn(new User().withName(JettyHttpServer.ADMIN_USER_NAME));
         factoryService = new FactoryService(factoryStore,
                                             createValidator,
@@ -137,6 +169,7 @@ public class FactoryServiceTest {
                                             new LinksHelper(),
                                             factoryBuilder,
                                             workspaceManager,
+                                            factoryParametersResolverHolder,
                                             userDao);
     }
 
@@ -214,7 +247,7 @@ public class FactoryServiceTest {
                                    .basic(JettyHttpServer.ADMIN_USER_NAME, JettyHttpServer.ADMIN_USER_PASSWORD)
                                    .multiPart("someOtherData", "Some content", MediaType.TEXT_PLAIN)
                                    .expect()
-                                   .statusCode(Status.BAD_REQUEST.getStatusCode())
+                                   .statusCode(BAD_REQUEST.getStatusCode())
                                    .when()
                                    .post("/private" + SERVICE_PATH);
 
@@ -884,7 +917,7 @@ public class FactoryServiceTest {
                                    .when()
                                    .put("/private" + SERVICE_PATH + "/" + ILLEGAL_FACTORY_ID);
 
-        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
         assertEquals(dto.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
                      "The updating factory shouldn't be null");
 
@@ -897,7 +930,7 @@ public class FactoryServiceTest {
 
         // when, then
         Response response = given().expect()
-                                   .statusCode(Status.BAD_REQUEST.getStatusCode())
+                                   .statusCode(BAD_REQUEST.getStatusCode())
                                    .when()
                                    .get(SERVICE_PATH + "/" + CORRECT_FACTORY_ID + "/snippet?type=" + type);
 
@@ -926,7 +959,7 @@ public class FactoryServiceTest {
                                    .when()
                                    .get("/private" + SERVICE_PATH + "/find");
         // then
-        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -1076,7 +1109,7 @@ public class FactoryServiceTest {
                                    .multiPart("image", path.toFile(), "image/jpeg")
                                    .when()
                                    .post("/private" + SERVICE_PATH);
-        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -1110,7 +1143,7 @@ public class FactoryServiceTest {
                                    .contentType(ContentType.JSON)
                                    .body("")
                                    .post("/private" + SERVICE_PATH);
-        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
     }
 
     @Test
@@ -1217,7 +1250,172 @@ public class FactoryServiceTest {
                                    .get("/private" + SERVICE_PATH + "/workspace/" + wsId);
 
         // then
-        assertEquals(response.getStatusCode(), Status.BAD_REQUEST.getStatusCode());
+        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
+    }
+
+
+
+    /**
+     * Check that if no resolver is plugged, we have correct error
+     */
+    @Test
+    public void noResolver() throws Exception {
+        Set<FactoryParametersResolver> resolvers = new HashSet<>();
+        when(factoryParametersResolvers.stream()).thenReturn(resolvers.stream());
+
+        Map<String, String> map = new HashMap<>();
+        // when
+        Response response = given().contentType(ContentType.JSON).when().body(map).post(SERVICE_PATH_RESOLVER);
+
+        // then check we have a not found
+        assertEquals(response.getStatusCode(), NOT_FOUND.getStatusCode());
+        assertTrue(response.getBody().prettyPrint().contains(ERROR_NO_RESOLVER_AVAILABLE));
+    }
+
+
+    /**
+     * Check that if there is a matching resolver, factory is created
+     */
+    @Test
+    public void matchingResolver() throws Exception {
+        Set<FactoryParametersResolver> resolvers = new HashSet<>();
+        when(factoryParametersResolvers.stream()).thenReturn(resolvers.stream());
+        FactoryParametersResolver dummyResolver = mock(FactoryParametersResolver.class);
+        resolvers.add(dummyResolver);
+
+        // create factory
+        Factory expectFactory = dto.createDto(Factory.class).withV("4.0").withName("matchingResolverFactory");
+
+        // accept resolver
+        when(dummyResolver.accept(anyMap())).thenReturn(TRUE);
+        when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
+
+        // when
+        Map<String, String> map = new HashMap<>();
+        Response response = given().contentType(ContentType.JSON).when().body(map).post(SERVICE_PATH_RESOLVER);
+
+        // then check we have a not found
+        assertEquals(response.getStatusCode(), OK.getStatusCode());
+        Factory responseFactory = dto.createDtoFromJson(response.getBody().asInputStream(), Factory.class);
+        assertNotNull(responseFactory);
+        assertEquals(responseFactory.getName(), expectFactory.getName());
+        assertEquals(responseFactory.getV(), expectFactory.getV());
+
+        // check we call resolvers
+        verify(dummyResolver).accept(anyMap());
+        verify(dummyResolver).createFactory(anyMap());
+    }
+
+
+    /**
+     * Check that if there is no matching resolver, there is error
+     */
+    @Test
+    public void notMatchingResolver() throws Exception {
+        Set<FactoryParametersResolver> resolvers = new HashSet<>();
+        when(factoryParametersResolvers.stream()).thenReturn(resolvers.stream());
+
+        FactoryParametersResolver dummyResolver = mock(FactoryParametersResolver.class);
+        resolvers.add(dummyResolver);
+        FactoryParametersResolver fooResolver = mock(FactoryParametersResolver.class);
+        resolvers.add(fooResolver);
+
+
+        // accept resolver
+        when(dummyResolver.accept(anyMap())).thenReturn(FALSE);
+        when(fooResolver.accept(anyMap())).thenReturn(FALSE);
+
+        // when
+        Map<String, String> map = new HashMap<>();
+        Response response = given().contentType(ContentType.JSON).when().body(map).post(SERVICE_PATH_RESOLVER);
+
+        // then check we have a not found
+        assertEquals(response.getStatusCode(), NOT_FOUND.getStatusCode());
+
+        // check we never call create factories on resolver
+        verify(dummyResolver, never()).createFactory(anyMap());
+        verify(fooResolver, never()).createFactory(anyMap());
+    }
+
+    /**
+     * Check that if there is a matching resolver and other not matching, factory is created
+     */
+    @Test
+    public void onlyOneMatchingResolver() throws Exception {
+        Set<FactoryParametersResolver> resolvers = new HashSet<>();
+        when(factoryParametersResolvers.stream()).thenReturn(resolvers.stream());
+
+        FactoryParametersResolver dummyResolver = mock(FactoryParametersResolver.class);
+        resolvers.add(dummyResolver);
+        FactoryParametersResolver fooResolver = mock(FactoryParametersResolver.class);
+        resolvers.add(fooResolver);
+
+        // create factory
+        Factory expectFactory = dto.createDto(Factory.class).withV("4.0").withName("matchingResolverFactory");
+
+        // accept resolver
+        when(dummyResolver.accept(anyMap())).thenReturn(TRUE);
+        when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
+        when(fooResolver.accept(anyMap())).thenReturn(FALSE);
+
+        // when
+        Map<String, String> map = new HashMap<>();
+        Response response = given().contentType(ContentType.JSON).when().body(map).post(SERVICE_PATH_RESOLVER);
+
+        // then check we have a not found
+        assertEquals(response.getStatusCode(), OK.getStatusCode());
+        Factory responseFactory = dto.createDtoFromJson(response.getBody().asInputStream(), Factory.class);
+        assertNotNull(responseFactory);
+        assertEquals(responseFactory.getName(), expectFactory.getName());
+        assertEquals(responseFactory.getV(), expectFactory.getV());
+
+        // check we call resolvers
+        verify(dummyResolver).accept(anyMap());
+        verify(dummyResolver).createFactory(anyMap());
+        // never called this resolver
+        verify(fooResolver, never()).createFactory(anyMap());
+    }
+
+
+
+    /**
+     * Check that if there is a matching resolver, that factory is valid
+     */
+    @Test
+    public void checkValidateResolver() throws Exception {
+        Set<FactoryParametersResolver> resolvers = new HashSet<>();
+        when(factoryParametersResolvers.stream()).thenReturn(resolvers.stream());
+
+        FactoryParametersResolver dummyResolver = mock(FactoryParametersResolver.class);
+        resolvers.add(dummyResolver);
+
+        // invalid factory
+        String invalidFactoryMessage = "invalid factory";
+        doThrow(new BadRequestException(invalidFactoryMessage)).when(acceptValidator).validateOnAccept(any());
+
+        // create factory
+        Factory expectFactory = dto.createDto(Factory.class).withV("4.0").withName("matchingResolverFactory");
+
+        // accept resolver
+        when(dummyResolver.accept(anyMap())).thenReturn(TRUE);
+        when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
+
+        // when
+        Map<String, String> map = new HashMap<>();
+        Response response = given().contentType(ContentType.JSON).when().body(map).queryParam(VALIDATE_QUERY_PARAMETER, valueOf(true)).post(
+                SERVICE_PATH_RESOLVER);
+
+        // then check we have a not found
+        assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
+        assertTrue(response.getBody().prettyPrint().contains(invalidFactoryMessage));
+
+        // check we call resolvers
+        verify(dummyResolver).accept(anyMap());
+        verify(dummyResolver).createFactory(anyMap());
+
+        // check we call validator
+        verify(acceptValidator).validateOnAccept(any());
+
     }
 
     private Factory prepareFactoryWithGivenStorage(String type, String location) {

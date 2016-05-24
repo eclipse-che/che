@@ -26,7 +26,7 @@
                         che-place-holder="Name of the project"
                         ng-model="projectDetailsCtrl.projectDetails.name"
                         required
-                        unique-project-name="projectDetailsCtrl.workspace"
+                        unique-project-name="projectDetailsCtrl.getWorkspaceProjects()"
                         ng-maxlength="128"
                         ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
               <div ng-message="required">A name is required.</div>

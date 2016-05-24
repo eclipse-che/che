@@ -25,7 +25,7 @@
                          che-place-holder="Name of the workspace"
                          ng-model="workspaceDetailsCtrl.newName"
                          required
-                         unique-workspace-name="workspaceDetailsCtrl.newName"
+                         unique-workspace-name="workspaceDetailsCtrl.workspaceDetails.config.name"
                          ng-maxlength="128"
                          ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
                 <div ng-message="required">A name is required.</div>

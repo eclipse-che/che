@@ -15,22 +15,22 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.app.CurrentUser;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.ext.git.ssh.client.GitSshKeyUploaderRegistry;
-import org.eclipse.che.ide.ext.git.ssh.client.SshKeyUploader;
-import org.eclipse.che.ide.ext.git.ssh.client.manage.SshKeyManagerPresenter;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
+import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.security.oauth.OAuthStatus;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,7 +95,7 @@ public class GitHubAuthenticatorImplTest {
     @Mock
     private AppContext                 appContext;
     @Mock
-    private GitSshKeyUploaderRegistry  registry;
+    private SshKeyUploaderRegistry     registry;
     @InjectMocks
     private GitHubAuthenticatorImpl    gitHubAuthenticator;
 
@@ -242,7 +242,7 @@ public class GitHubAuthenticatorImplTest {
         verify(appContext).getCurrentUser();
         verify(dialogFactory).createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject());
         verify(messageDialog).show();
-        verify(sshServiceClient).getPairs(eq(SshKeyManagerPresenter.GIT_SSH_SERVICE));
+        verify(sshServiceClient).getPairs(eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
     }
 
     @Test
@@ -265,7 +265,7 @@ public class GitHubAuthenticatorImplTest {
         when(profile.getId()).thenReturn(userId);
         when(dialogFactory.createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject())).thenReturn(messageDialog);
         when(pair.getName()).thenReturn(GITHUB_HOST);
-        when(pair.getService()).thenReturn(SshKeyManagerPresenter.GIT_SSH_SERVICE);
+        when(pair.getService()).thenReturn(SshKeyManagerPresenter.VCS_SSH_SERVICE);
 
         gitHubAuthenticator.authenticate(null, getCallBack());
         gitHubAuthenticator.onAuthenticated(authStatus);
@@ -282,8 +282,8 @@ public class GitHubAuthenticatorImplTest {
         verify(appContext).getCurrentUser();
         verify(dialogFactory).createMessageDialog(anyString(), anyString(), Matchers.<ConfirmCallback>anyObject());
         verify(messageDialog).show();
-        verify(sshServiceClient).getPairs(eq(SshKeyManagerPresenter.GIT_SSH_SERVICE));
-        verify(sshServiceClient).deletePair(eq(SshKeyManagerPresenter.GIT_SSH_SERVICE), eq(GITHUB_HOST));
+        verify(sshServiceClient).getPairs(eq(SshKeyManagerPresenter.VCS_SSH_SERVICE));
+        verify(sshServiceClient).deletePair(eq(SshKeyManagerPresenter.VCS_SSH_SERVICE), eq(GITHUB_HOST));
     }
 
     private AsyncCallback<OAuthStatus> getCallBack() {

@@ -12,11 +12,11 @@ package org.eclipse.che.git.impl.nativegit.commands;
 
 import com.google.common.base.Joiner;
 
+import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.shared.PushResponse;
-import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 import java.util.List;
@@ -35,8 +35,8 @@ public class PushCommand extends RemoteOperationCommand<Void> {
     private boolean      force;
     private PushResponse pushResponse;
 
-    public PushCommand(File repository, GitSshScriptProvider gitSshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
-        super(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+    public PushCommand(File repository, SshScriptProvider sshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
+        super(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
     }
 
     /** @see GitCommand#execute() */

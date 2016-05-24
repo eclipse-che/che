@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
-import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.inject.DynaModule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.AbstractModule;
 
+import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +96,6 @@ public class FileCleaner {
     }
 
     /** Guice module that stops FileCleaner when Guice container destroyed. */
-    @DynaModule
     public static class FileCleanerModule extends AbstractModule {
         @Override
         protected void configure() {

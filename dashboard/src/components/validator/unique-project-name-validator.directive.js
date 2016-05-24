@@ -46,17 +46,13 @@ export class UniqueProjectNameValidator {
           scopingTest = $scope;
         }
 
-        var selectedWorkspace = scopingTest.$eval(attributes.uniqueProjectName);
+        var workspaceProjects = scopingTest.$eval(attributes.uniqueProjectName);
 
         // found a selected workspace ?
-        if (selectedWorkspace) {
+        if (workspaceProjects) {
           // check if project is there
-          var map = this.cheAPI.getWorkspace().getWorkspaceProjects();
-
-
-          var projectsWorkspace = map[selectedWorkspace.id];
-          for (let i = 0; i < projectsWorkspace.length; i++) {
-            let project = projectsWorkspace[i];
+          for (let i = 0; i < workspaceProjects.length; i++) {
+            let project = workspaceProjects[i];
             if (modelValue === project.name) {
               // project there so already exists, return false
               deferred.reject(false);

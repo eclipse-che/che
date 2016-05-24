@@ -32,6 +32,5 @@
         <module>che-plugin-java-jdt-core-repack</module>
         <module>org-eclipse-jdt-ui</module>
         <module>org-eclipse-ltk-core-refactoring</module>
-        <module>che-jdt-ext-machine</module>
     </modules>
 </project>

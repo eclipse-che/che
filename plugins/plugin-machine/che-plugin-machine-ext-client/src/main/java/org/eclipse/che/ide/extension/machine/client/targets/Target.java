@@ -12,117 +12,43 @@ package org.eclipse.che.ide.extension.machine.client.targets;
 
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 
+import javax.validation.constraints.NotNull;
+
 /**
- * Wrapper fot the Recipe.
+ * Wrapper for the machine.
  *
  * @author Vitaliy Guliy
+ * @author Oleksii Orel
  */
-public class Target {
+public interface Target {
 
-    private String name;
+    /** Sets the display name of the target. */
+    void setName(@NotNull String name);
 
-    private String host;
+    /** Returns the display name of the target. */
+    String getName();
 
-    private String port;
+    /** Sets the category of the target. */
+    void setCategory(@NotNull String category);
 
-    private String userName;
+    /** Returns the category of the target. */
+    String getCategory();
 
-    private String password;
+    /** Sets the recipe of the target. */
+    void setRecipe(RecipeDescriptor recipe);
 
-    private String type;
+    /** Returns the recipe of the target. */
+    RecipeDescriptor getRecipe();
 
-    private RecipeDescriptor recipe;
+    /** Returns the connecting status. */
+    boolean isConnected();
 
-    /**
-     * Indicates this target has unsaved changes.
-     */
-    private boolean dirty;
+    /** Sets the connecting status. */
+    void setConnected(boolean connected);
 
-    private boolean connected;
+    /** Returns status of unsaved changes. */
+    boolean isDirty();
 
-    public Target(String name, String type, RecipeDescriptor recipe) {
-        this.name = name;
-        this.type = type;
-        this.recipe = recipe;
-
-        dirty = false;
-    }
-
-    public Target(String name, String type) {
-        this.name = name;
-        this.type = type;
-    }
-
-    public RecipeDescriptor getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(RecipeDescriptor recipe) {
-        this.recipe = recipe;
-    }
-
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    public void setDirty(boolean dirty) {
-        this.dirty = dirty;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public boolean isConnected() {
-        return connected;
-    }
-
-    public void setConnected(boolean connected) {
-        this.connected = connected;
-    }
-
+    /** Sets status of unsaved changes. */
+    void setDirty(boolean dirty);
 }

@@ -15,7 +15,7 @@ package org.eclipse.che.plugin.maven.shared;
  */
 public interface MavenAttributes {
     String MAVEN_ID   = "maven";
-    String MAVEN_NAME = "Maven Project";
+    String MAVEN_NAME = "Maven";
 
     String GENERATION_STRATEGY_OPTION = "type";
 

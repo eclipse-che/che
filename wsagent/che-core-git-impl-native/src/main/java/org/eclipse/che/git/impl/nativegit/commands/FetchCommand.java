@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit.commands;
 
-import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.CredentialsLoader;
+import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 import java.util.List;
@@ -29,8 +29,8 @@ public class FetchCommand extends RemoteOperationCommand<Void> {
     private String   remote;
     private boolean  prune;
 
-    public FetchCommand(File repository, GitSshScriptProvider gitSshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
-        super(repository, gitSshScriptProvider, credentialsLoader, gitAskPassScript);
+    public FetchCommand(File repository, SshScriptProvider sshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
+        super(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
     }
 
     /** @see GitCommand#execute() */

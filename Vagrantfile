@@ -10,18 +10,37 @@
 # Set to "<proto>://<user>:<pass>@<host>:<port>"
 $http_proxy  = ""
 $https_proxy = ""
-$che_version = "latest"
-$ip          = "192.168.28.30"
+$no_proxy    = "localhost,127.0.0.1"
+$che_version = "nightly"
+$ip          = "192.168.28.100"
+$port        = 8080
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "centos71-docker-java-v1.0"
-  config.vm.box_url = "https://install.codenvycorp.com/centos71-docker-java-v1.0.box"
+  puts ("ECLIPSE CHE: VAGRANT INSTALLER")
+  puts ("ECLIPSE CHE: REQUIRED: VIRTUALBOX 5.x")
+  puts ("ECLIPSE CHE: REQUIRED: VAGRANT 1.8.x")
+  puts ("")
+  if ($http_proxy.to_s != '' || $https_proxy.to_s != '') && !Vagrant.has_plugin?("vagrant-proxyconf")
+    puts ("You configured a proxy, but Vagrant's proxy plugin not detected.")
+    puts ("Install the plugin with: vagrant plugin install vagrant-proxyconf")
+    Process.kill 9, Process.pid
+  end
+
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http = $http_proxy
+    config.proxy.https = $https_proxy
+    config.proxy.no_proxy = $no_proxy
+  end
+
+  config.vm.box = "boxcutter/centos72-docker"
   config.vm.box_download_insecure = true
   config.ssh.insert_key = false
   config.vm.network :private_network, ip: $ip
-  config.vm.synced_folder ".", "/home/vagrant/.che"
+  config.vm.network "forwarded_port", guest: $port, host: $port
+  config.vm.synced_folder ".", "/home/user/che"
   config.vm.define "che" do |che|
   end
+
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "4096"
     vb.name = "eclipse-che-vm"
@@ -30,23 +49,45 @@ Vagrant.configure(2) do |config|
   $script = <<-SHELL
     HTTP_PROXY=$1
     HTTPS_PROXY=$2
-    CHE_VERSION=$3
-    IP=$4
+    NO_PROXY=$3
+    CHE_VERSION=$4
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-	    echo "-------------------------------------"
-	    echo "."
-	    echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
-	    echo "."
-	    echo "-------------------------------------"
-	    echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
-	    echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
-	    source /home/vagrant/.bashrc
-	    echo "HTTP PROXY set to: $HTTP_PROXY"
-	    echo "HTTPS PROXY set to: $HTTPS_PROXY"
+      echo "-------------------------------------"
+      echo "."
+      echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
+      echo "."
+      echo "-------------------------------------"
+      echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
+      echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
+      source /home/vagrant/.bashrc
+
+      # Configuring the Che properties file - mounted into Che container when it starts
+      echo 'http.proxy="'$HTTP_PROXY'"' >> /home/user/che/che.properties
+      echo 'https.proxy="'$HTTPS_PROXY'"' >> /home/user/che/che.properties
+
+      echo "HTTP PROXY set to: $HTTP_PROXY"
+      echo "HTTPS PROXY set to: $HTTPS_PROXY"
     fi
+
     # Add the user in the VM to the docker group
+    echo "------------------------------------"
+    echo "ECLIPSE CHE: UPGRADING DOCKER ENGINE"
+    echo "------------------------------------"
+    echo 'y' | sudo yum update docker-engine &>/dev/null &
+    PROC_ID=$!
+    while kill -0 "$PROC_ID" >/dev/null 2>&1; do
+      printf "#"
+      sleep 10
+    done
+
+    echo $(docker --version)
+ 
+    # Add the 'vagrant' user to the 'docker' group
     usermod -aG docker vagrant &>/dev/null
+
+    # We need write access to this file to enable Che container to create other containers
+    sudo chmod 777 /var/run/docker.sock &>/dev/null
 
     # Configure Docker daemon with the proxy
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
@@ -54,103 +95,71 @@ Vagrant.configure(2) do |config|
     fi
     if [ -n "$HTTP_PROXY" ]; then
         printf "[Service]\nEnvironment=\"HTTP_PROXY=${HTTP_PROXY}\"" > /etc/systemd/system/docker.service.d/http-proxy.conf
+        printf ""
     fi
     if [ -n "$HTTPS_PROXY" ]; then
         printf "[Service]\nEnvironment=\"HTTPS_PROXY=${HTTPS_PROXY}\"" > /etc/systemd/system/docker.service.d/https-proxy.conf
     fi
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-        printf "[Service]\nEnvironment=\"NO_PROXY=localhost,127.0.0.1\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
+        printf "[Service]\nEnvironment=\"NO_PROXY=${NO_PROXY}\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
         systemctl daemon-reload
         systemctl restart docker
     fi
 
-    echo "------------------------------------"
-    echo "."
-    echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE"
-    echo "."
-    echo "------------------------------------"
-    curl -O "https://install.codenvycorp.com/che/eclipse-che-$CHE_VERSION.tar.gz"
-    tar xvfz eclipse-che-$CHE_VERSION.tar.gz &>/dev/null
-    sudo chown -R vagrant:vagrant * &>/dev/null
-    export JAVA_HOME=/usr &>/dev/null
-
-    # exporting CHE_LOCAL_CONF_DIR, reconfiguring Che to store workspaces, projects and prefs outside the Tomcat
-    export CHE_LOCAL_CONF_DIR=/home/vagrant/.che &>/dev/null
-    cp /home/vagrant/eclipse-che-*/conf/che.properties /home/vagrant/.che/che.properties
-    sed -i 's|${catalina.base}/temp/local-storage|/home/vagrant/.che|' /home/vagrant/.che/che.properties
-    sed -i 's|${che.home}/workspaces|/home/vagrant/.che|' /home/vagrant/.che/che.properties
-    echo 'export CHE_LOCAL_CONF_DIR=/home/vagrant/.che' >> /home/vagrant/.bashrc
-    source /home/vagrant/.bashrc
-
-    echo "----------------------------------------"
-    echo "."
-    echo "ECLIPSE CHE: DOWNLOADING DOCKER REGISTRY"
-    echo "             50MB: SILENT OUTPUT        "
-    echo "."
-    echo "----------------------------------------"
-    docker pull registry:2 &>/dev/null
-    echo "---------------------------------"
-    echo "."
-    echo "ECLIPSE CHE: PREPPING SERVER ~10s"
-    echo "."
-    echo "---------------------------------"
-    if [ -n "$HTTP_PROXY" ]; then
-        sed -i "s|http.proxy=|http.proxy=${HTTP_PROXY}|" /home/vagrant/eclipse-che-*/conf/che.properties
-    fi
-    if [ -n "$HTTPS_PROXY" ]; then
-        sed -i "s|https.proxy=|https.proxy=${HTTPS_PROXY}|"  /home/vagrant/eclipse-che-*/conf/che.properties
-    fi
-    echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:${IP} --skip:client -g start &>/dev/null
+    echo "-------------------------------------------------"
+    echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGE"
+    echo "-------------------------------------------------"
+    docker pull codenvy/che:${CHE_VERSION} &>/dev/null &
+    PROC_ID=$!
+ 
+    while kill -0 "$PROC_ID" >/dev/null 2>&1; do
+      printf "#"
+      sleep 10
+    done
   SHELL
 
-  config.vm.provision "shell" do |s|
-  	s.inline = $script
-  	s.args = [$http_proxy, $https_proxy, $che_version, $ip]
+  config.vm.provision "shell" do |s| 
+    s.inline = $script
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
   end
-  
+
   $script2 = <<-SHELL
-    IP=$1
-    counter=0
+    CHE_VERSION=$1
+    IP=$2
+    PORT=$3
+
+    echo "--------------------------------"
+    echo "ECLIPSE CHE: BOOTING ECLIPSE CHE"
+    echo "--------------------------------"
+    docker run --net=host --name=che --restart=always --detach `
+              `-v /var/run/docker.sock:/var/run/docker.sock `
+              `-v /home/user/che/lib:/home/user/che/lib-copy `
+              `-v /home/user/che/workspaces:/home/user/che/workspaces `
+              `-v /home/user/che/storage:/home/user/che/storage `
+              `-v /home/user/che/che.properties:/container/che.properties `
+              `-e CHE_LOCAL_CONF_DIR=/container `
+              `codenvy/che:${CHE_VERSION} --remote:${IP} --port:${PORT} run &>/dev/null
+    
+    # Test the default dashboard page to see when it returns a non-error value.
+    # Che is active once it returns success        
     while [ true ]; do
-      curl -v http://${IP}:8080/dashboard &>/dev/null
+      printf "#"
+      curl -v http://${IP}:${PORT}/dashboard &>/dev/null
       exitcode=$?
       if [ $exitcode == "0" ]; then
-        echo "----------------------------------------"
-        echo "."
-        echo "ECLIPSE CHE: SERVER BOOTED AND REACHABLE"
-        echo "AVAILABLE: http://${IP}:8080  "
-        echo "."
-        echo "----------------------------------------"
-        exit 0
+        echo "---------------------------------------"
+        echo "ECLIPSE CHE: BOOTED AND REACHABLE"
+        echo "ECLIPSE CHE: http://${IP}:${PORT}      "
+        echo "---------------------------------------"
+        exit 0             
       fi 
-      # If we are not awake after 60 seconds, restart server
-      if [ $counter == "11" ]; then
-        echo "------------------------------------------------"
-        echo "."
-        echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- RESTARTING"
-        echo "."
-        echo "------------------------------------------------"
-        export JAVA_HOME=/usr &>/dev/null
-        echo vagrant | sudo -S -E -u vagrant /home/vagrant/eclipse-che-*/bin/che.sh --remote:${IP} --skip:client -g start &>/dev/null
-      fi
-      # If we are not awake after 180 seconds, exit with failure
-      if [ $counter == "35" ]; then
-        echo "---------------------------------------------"
-        echo "."
-        echo "ECLIPSE CHE: SERVER NOT RESPONSIVE -- EXITING"
-        echo "             CONTACT SUPPORT FOR ASSISTANCE  "
-        echo "."
-        echo "---------------------------------------------"
-        exit 0
-      fi
-      let counter=counter+1
-      sleep 5
+      sleep 10
     done
   SHELL
 
   config.vm.provision "shell", run: "always" do |s|
     s.inline = $script2
-    s.args = [$ip]
+    s.args = [$che_version, $ip, $port]
   end
 
 end

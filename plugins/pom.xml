@@ -31,9 +31,9 @@
         <module>plugin-web</module>
         <module>plugin-machine</module>
         <module>plugin-debugger</module>
-        <module>plugin-maven</module>
         <module>plugin-java</module>
         <module>plugin-java-debugger</module>
+        <module>plugin-maven</module>
         <module>plugin-gdb</module>
         <module>plugin-sdk</module>
         <module>plugin-orion</module>
@@ -46,6 +46,7 @@
         <module>plugin-cpp</module>
         <module>plugin-nodejs</module>
         <module>plugin-ssh-machine</module>
-	    <module>plugin-languageserver</module>
+        <module>plugin-ssh-key</module>
+        <module>plugin-languageserver</module>
     </modules>
 </project>

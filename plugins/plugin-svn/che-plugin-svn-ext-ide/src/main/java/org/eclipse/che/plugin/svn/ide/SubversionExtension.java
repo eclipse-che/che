@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
@@ -35,9 +38,6 @@ import org.eclipse.che.plugin.svn.ide.action.StatusAction;
 import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
 import org.eclipse.che.plugin.svn.ide.action.UpdateAction;
 import org.eclipse.che.plugin.svn.ide.action.UpdateToRevisionAction;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 
 /**
@@ -82,7 +82,7 @@ public class SubversionExtension {
                                final SubversionExtensionResources resources) {
         SVN_GROUP_MAIN_MENU = constants.subversionLabel();
 
-        final Constraints beforeWindow = new Constraints(Anchor.BEFORE, IdeActions.GROUP_WINDOW);
+        final Constraints beforeWindow = new Constraints(Anchor.BEFORE, IdeActions.GROUP_HELP);
         final DefaultActionGroup addCommandGroup = new DefaultActionGroup(ADD_COMMAND_GROUP, false, actionManager);
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_MENU);
         final DefaultActionGroup fileCommandGroup = new DefaultActionGroup(FILE_COMMAND_GROUP, false, actionManager);

@@ -59,7 +59,7 @@ public class JavaSearchServiceWS implements JavaSearchService {
         this.dtoFactory = dtoFactory;
         this.loader = loaderFactory.newLoader();
         this.unmarshallerFactory = unmarshallerFactory;
-        this.pathToService = "/jdt/search/";
+        this.pathToService = "/java/search/";
     }
 
     @Override

@@ -16,7 +16,7 @@ import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.GitUserResolver;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,12 +31,13 @@ import java.io.File;
 @Singleton
 public class NativeGitConnectionFactory extends GitConnectionFactory {
 
-    private final CredentialsLoader    credentialsLoader;
-    private final GitSshScriptProvider gitSshScriptProvider;
-    private final GitUserResolver      userResolver;
+    private final CredentialsLoader credentialsLoader;
+    private final SshScriptProvider gitSshScriptProvider;
+    private final GitUserResolver   userResolver;
 
     @Inject
-    public NativeGitConnectionFactory(CredentialsLoader credentialsLoader, GitSshScriptProvider gitSshScriptProvider, GitUserResolver userResolver) {
+    public NativeGitConnectionFactory(CredentialsLoader credentialsLoader, SshScriptProvider gitSshScriptProvider,
+                                      GitUserResolver userResolver) {
         this.credentialsLoader = credentialsLoader;
         this.gitSshScriptProvider = gitSshScriptProvider;
         this.userResolver = userResolver;
