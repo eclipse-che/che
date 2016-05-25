@@ -72,7 +72,6 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author gazarenkov
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
- * @author Mykola Morhun
  */
 @Singleton
 public class WorkspaceManager {

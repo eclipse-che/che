@@ -295,13 +295,16 @@ public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
 
     @Override
     public void onEvent(MachineStatusEvent event) {
-        if (startQueues.get(event.getWorkspaceId()) == null) { // receive events only if workspace already started
+        if (!event.isDev()) {
             switch (event.getEventType()) {
                 case RUNNING:
                     try {
-                        if (hasRuntime(event.getWorkspaceId())) {
-                            addMachine(event.getMachineId());
+                        Queue<MachineConfigImpl> queue = startQueues.get(event.getWorkspaceId());
+                        if (queue != null && queue.stream()
+                                .anyMatch(machine -> machine.getName().equals(event.getMachineName()))) {
+                            return;
                         }
+                        addMachine(event.getMachineId());
                     } catch (ServerException | ConflictException | NotFoundException exception) {
                         try {
                             machineManager.destroy(event.getMachineId(), true);

@@ -30,7 +30,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
 
 /**
- * The class listens changing of machine status and perform stop workspace if dev-machine is destroyed.
+ * The class listens changing of machine status and perform stop workspace if ws-machine is destroyed.
  *
  * @author Dmitry Shnurenko
  */

@@ -63,7 +63,7 @@ import static org.testng.Assert.assertTrue;
 public class WorkspaceRuntimesTest {
 
     private static final String WORKSPACE_ID = "workspace123";
-    private static final String MACHINE_ID = "machine123";
+    private static final String MACHINE_ID   = "machine123";
 
     @Mock
     private MachineManager machineManagerMock;
