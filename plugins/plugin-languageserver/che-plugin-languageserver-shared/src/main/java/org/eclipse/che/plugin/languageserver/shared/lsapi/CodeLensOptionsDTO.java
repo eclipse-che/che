@@ -12,6 +12,10 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.CodeLensOptions;
 
 @DTO
-@SuppressWarnings("all")
 public interface CodeLensOptionsDTO extends CodeLensOptions {
+    /**
+     * Code lens has a resolve provider as well.
+     * 
+     */
+    public abstract void setResolveProvider(final boolean resolveProvider);
 }

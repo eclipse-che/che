@@ -12,11 +12,74 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.CompletionItem;
 
 @DTO
-@SuppressWarnings("all")
 public interface CompletionItemDTO extends CompletionItem {
     /**
-     * Overridden to return the DTO type.
+     * The label of this completion item. By default also the text that is
+     * inserted when selecting this completion.
+     * 
+     */
+    public abstract void setLabel(final String label);
+
+    /**
+     * The kind of this completion item. Based of the kind an icon is chosen by
+     * the editor.
+     * 
+     */
+    public abstract void setKind(final Integer kind);
+
+    /**
+     * A human-readable string with additional information about this item, like
+     * type or symbol information.
+     * 
+     */
+    public abstract void setDetail(final String detail);
+
+    /**
+     * A human-readable string that represents a doc-comment.
+     * 
+     */
+    public abstract void setDocumentation(final String documentation);
+
+    /**
+     * A string that shoud be used when comparing this item with other items.
+     * When `falsy` the label is used.
+     * 
+     */
+    public abstract void setSortText(final String sortText);
+
+    /**
+     * A string that should be used when filtering a set of completion items.
+     * When `falsy` the label is used.
+     * 
+     */
+    public abstract void setFilterText(final String filterText);
+
+    /**
+     * A string that should be inserted a document when selecting this
+     * completion. When `falsy` the label is used.
+     * 
+     */
+    public abstract void setInsertText(final String insertText);
+
+    /**
+     * An edit which is applied to a document when selecting this completion.
+     * When an edit is provided the value of insertText is ignored. Overridden
+     * to return the DTO type.
      * 
      */
     public abstract TextEditDTO getTextEdit();
+
+    /**
+     * An edit which is applied to a document when selecting this completion.
+     * When an edit is provided the value of insertText is ignored.
+     * 
+     */
+    public abstract void setTextEdit(final TextEditDTO textEdit);
+
+    /**
+     * An data entry field that is preserved on a completion item between a
+     * completion and a completion resolve request.
+     * 
+     */
+    public abstract void setData(final Object data);
 }

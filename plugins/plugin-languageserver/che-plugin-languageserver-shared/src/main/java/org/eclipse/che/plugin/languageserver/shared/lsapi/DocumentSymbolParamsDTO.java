@@ -12,11 +12,16 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.DocumentSymbolParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface DocumentSymbolParamsDTO extends DocumentSymbolParams {
     /**
-     * Overridden to return the DTO type.
+     * The text document. Overridden to return the DTO type.
      * 
      */
     public abstract TextDocumentIdentifierDTO getTextDocument();
+
+    /**
+     * The text document.
+     * 
+     */
+    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 }

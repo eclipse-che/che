@@ -12,6 +12,6 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.DidChangeConfigurationParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface DidChangeConfigurationParamsDTO extends DidChangeConfigurationParams {
+    public abstract void setSettings(final Object settings);
 }

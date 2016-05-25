@@ -12,6 +12,10 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.WorkspaceSymbolParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface WorkspaceSymbolParamsDTO extends WorkspaceSymbolParams {
+    /**
+     * A non-empty query string
+     * 
+     */
+    public abstract void setQuery(final String query);
 }

@@ -14,17 +14,28 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.Hover;
 
 @DTO
-@SuppressWarnings("all")
 public interface HoverDTO extends Hover {
     /**
-     * Overridden to return the DTO type.
+     * The hover's content Overridden to return the DTO type.
      * 
      */
     public abstract List<MarkedStringDTO> getContents();
 
     /**
-     * Overridden to return the DTO type.
+     * The hover's content
+     * 
+     */
+    public abstract void setContents(final List<MarkedStringDTO> contents);
+
+    /**
+     * An optional range Overridden to return the DTO type.
      * 
      */
     public abstract RangeDTO getRange();
+
+    /**
+     * An optional range
+     * 
+     */
+    public abstract void setRange(final RangeDTO range);
 }

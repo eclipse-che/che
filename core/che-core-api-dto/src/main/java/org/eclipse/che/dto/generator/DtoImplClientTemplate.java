@@ -946,7 +946,7 @@ public class DtoImplClientTemplate extends DtoImpl {
             sb.append('>');
             return sb.toString();
         } else {
-            throw new IllegalArgumentException("We do not handle this type");
+            throw new IllegalArgumentException("We do not handle the type '"+type==null?null:type.getTypeName()+"'.");
         }
     }
 

@@ -12,6 +12,10 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.TextDocumentIdentifier;
 
 @DTO
-@SuppressWarnings("all")
 public interface TextDocumentIdentifierDTO extends TextDocumentIdentifier {
+    /**
+     * The text document's uri.
+     * 
+     */
+    public abstract void setUri(final String uri);
 }

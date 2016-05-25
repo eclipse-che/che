@@ -12,6 +12,23 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.ResponseError;
 
 @DTO
-@SuppressWarnings("all")
 public interface ResponseErrorDTO extends ResponseError {
+    /**
+     * A number indicating the error type that occured.
+     * 
+     */
+    public abstract void setCode(final int code);
+
+    /**
+     * A string providing a short decription of the error.
+     * 
+     */
+    public abstract void setMessage(final String message);
+
+    /**
+     * A Primitive or Structured value that contains additional information
+     * about the error. Can be omitted.
+     * 
+     */
+    public abstract void setData(final Object data);
 }

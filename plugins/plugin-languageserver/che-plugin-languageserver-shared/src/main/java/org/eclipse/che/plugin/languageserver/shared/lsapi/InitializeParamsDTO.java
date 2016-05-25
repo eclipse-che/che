@@ -12,6 +12,22 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.InitializeParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface InitializeParamsDTO extends InitializeParams {
+    /**
+     * The process Id of the parent process that started the server.
+     * 
+     */
+    public abstract void setProcessId(final int processId);
+
+    /**
+     * The rootPath of the workspace. Is null if no folder is open.
+     * 
+     */
+    public abstract void setRootPath(final String rootPath);
+
+    /**
+     * The capabilities provided by the client (editor)
+     * 
+     */
+    public abstract void setCapabilities(final Object capabilities);
 }

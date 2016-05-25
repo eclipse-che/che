@@ -7,11 +7,17 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
+import java.util.List;
+
 import org.eclipse.che.dto.shared.DTO;
 
 import io.typefox.lsapi.SignatureHelpOptions;
 
 @DTO
-@SuppressWarnings("all")
 public interface SignatureHelpOptionsDTO extends SignatureHelpOptions {
+    /**
+     * The characters that trigger signature help automatically.
+     * 
+     */
+    public abstract void setTriggerCharacters(final List<String> triggerCharacters);
 }

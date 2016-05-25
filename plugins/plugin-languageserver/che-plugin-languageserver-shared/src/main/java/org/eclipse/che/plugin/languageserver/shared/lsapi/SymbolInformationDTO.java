@@ -12,11 +12,34 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.SymbolInformation;
 
 @DTO
-@SuppressWarnings("all")
 public interface SymbolInformationDTO extends SymbolInformation {
     /**
-     * Overridden to return the DTO type.
+     * The name of this symbol.
+     * 
+     */
+    public abstract void setName(final String name);
+
+    /**
+     * The kind of this symbol.
+     * 
+     */
+    public abstract void setKind(final int kind);
+
+    /**
+     * The location of this symbol. Overridden to return the DTO type.
      * 
      */
     public abstract LocationDTO getLocation();
+
+    /**
+     * The location of this symbol.
+     * 
+     */
+    public abstract void setLocation(final LocationDTO location);
+
+    /**
+     * The name of the symbol containing this symbol.
+     * 
+     */
+    public abstract void setContainer(final String container);
 }

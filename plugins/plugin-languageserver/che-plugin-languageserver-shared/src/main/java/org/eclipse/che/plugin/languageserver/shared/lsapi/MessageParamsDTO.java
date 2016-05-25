@@ -12,6 +12,16 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.MessageParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface MessageParamsDTO extends MessageParams {
+    /**
+     * The message type.
+     * 
+     */
+    public abstract void setType(final int type);
+
+    /**
+     * The actual message.
+     * 
+     */
+    public abstract void setMessage(final String message);
 }

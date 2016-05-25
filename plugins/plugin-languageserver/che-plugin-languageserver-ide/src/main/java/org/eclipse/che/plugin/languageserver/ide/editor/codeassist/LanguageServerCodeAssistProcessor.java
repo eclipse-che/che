@@ -40,7 +40,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         position.setLine(textPos.getLine());
         documentPosition.setPosition(position);
         TextDocumentIdentifierDTOImpl documentId = DtoClientImpls.TextDocumentIdentifierDTOImpl.make();
-        documentId.setUri(editor.getEditorInput().getFile().getContentUrl());
+        documentId.setUri(editor.getEditorInput().getFile().getPath());
         documentPosition.setTextDocument(documentId);
         this.lastErrorMessage = null;
         documentServiceClient.completion(documentPosition).then(new Operation<List<CompletionItemDTO>>() {
