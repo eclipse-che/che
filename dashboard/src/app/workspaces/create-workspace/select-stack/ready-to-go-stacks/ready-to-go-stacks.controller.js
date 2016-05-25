@@ -87,4 +87,18 @@ export class ReadyToGoStacksCtrl {
     return tags.join(', ');
   }
 
+  /**
+   * Gets privileged stack position
+   */
+  getPrivilegedSortPosition(item) {
+    let privilegedNames = ['Java', 'Blank'];
+
+    let sortPos = privilegedNames.indexOf(item.name);
+    if (sortPos > -1) {
+      return sortPos;
+    }
+
+    return privilegedNames.length;
+  }
+
 }
