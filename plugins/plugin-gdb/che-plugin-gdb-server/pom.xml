@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-gdb-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.2.3-SNAPSHOT</version>
+        <version>4.2.3</version>
     </parent>
     <artifactId>che-plugin-gdb-server</artifactId>
     <packaging>jar</packaging>
