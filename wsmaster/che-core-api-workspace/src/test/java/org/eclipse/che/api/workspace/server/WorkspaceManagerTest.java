@@ -17,12 +17,12 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -208,14 +208,14 @@ public class WorkspaceManagerTest {
     }
 
     @Test
-    public void shouldBeAbleToGetWorkspacesByOwner() throws Exception {
+    public void shouldBeAbleToGetWorkspacesAvailableForUser() throws Exception {
         // given
         final WorkspaceConfig config = createConfig();
 
         final WorkspaceImpl workspace1 = workspaceManager.createWorkspace(config, "user123", null);
-        final WorkspaceImpl workspace2 = workspaceManager.createWorkspace(config, "user123", null);
+        final WorkspaceImpl workspace2 = workspaceManager.createWorkspace(config, "user321", null);
 
-        when(workspaceDao.getByNamespace("user123")).thenReturn(asList(workspace1, workspace2));
+        when(workspaceDao.getWorkspaces("user123")).thenReturn(asList(workspace1, workspace2));
         final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
         when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
 

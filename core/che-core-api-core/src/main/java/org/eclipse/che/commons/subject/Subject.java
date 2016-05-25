@@ -43,7 +43,7 @@ public interface Subject {
 
         @Override
         public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
-
+            throw new ForbiddenException("User is not authorized to perform " + action + " of " + domain + " with id '" + instance + "'");
         }
 
         @Override
