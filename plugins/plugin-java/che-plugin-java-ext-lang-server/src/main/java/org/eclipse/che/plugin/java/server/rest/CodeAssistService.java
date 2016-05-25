@@ -11,7 +11,13 @@
 
 package org.eclipse.che.plugin.java.server.rest;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalApplyResult;
@@ -22,6 +28,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
+import org.eclipse.jdt.internal.corext.format.Formatter;
 import org.eclipse.jface.text.BadLocationException;
 
 import javax.inject.Inject;
@@ -47,6 +54,9 @@ public class CodeAssistService {
 
     @Inject
     private CodeAssist codeAssist;
+
+    @Inject
+    private Formatter formatter;
 
     @POST
     @Path("compute/completion")
@@ -130,6 +140,20 @@ public class CodeAssistService {
                                                                     BadLocationException {
         IJavaProject project = model.getJavaProject(projectPath);
         codeAssist.applyChosenImports(project, fqn, chosen.getTypeMatches());
+    }
+
+    @POST
+    @Path("/format")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Creates edits that describe how to format the given string")
+    public List<Change> getFormatChanges(@ApiParam(value = "The given offset to start recording the edits (inclusive)")
+                                         @QueryParam("offset") int offset,
+                                         @ApiParam(value = "The given length to stop recording the edits (exclusive)")
+                                         @QueryParam("length") int length,
+                                         @ApiParam(value = "The content to format. Java code formatting is supported only")
+                                         final String content) throws BadLocationException, IllegalArgumentException {
+        return formatter.getFormatChanges(content, offset, length);
     }
 
 }
