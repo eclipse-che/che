@@ -295,24 +295,17 @@ public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
 
     @Override
     public void onEvent(MachineStatusEvent event) {
-        if (hasRuntime(event.getWorkspaceId())) {
+        if (startQueues.get(event.getWorkspaceId()) == null) { // receive events only if workspace already started
             switch (event.getEventType()) {
                 case RUNNING:
-                    if (startQueues.get(event.getWorkspaceId()) == null) {
-                        try {
+                    try {
+                        if (hasRuntime(event.getWorkspaceId())) {
                             addMachine(event.getMachineId());
-                        } catch (ServerException | ConflictException | NotFoundException exception) {
-                            try {
-                                machineManager.destroy(event.getMachineId(), true);
-                            } catch (NotFoundException | MachineException e) {
-                                LOG.error(exception.getLocalizedMessage(), exception);
-                            }
                         }
-                    } else {
-                        LOG.warn("Cannot add machine into starting workspace");
+                    } catch (ServerException | ConflictException | NotFoundException exception) {
                         try {
-                            removeMachine(event.getMachineId());
-                        } catch (NotFoundException | MachineException exception) {
+                            machineManager.destroy(event.getMachineId(), true);
+                        } catch (NotFoundException | MachineException e) {
                             LOG.error(exception.getLocalizedMessage(), exception);
                         }
                     }
@@ -321,14 +314,6 @@ public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
                     try {
                         removeMachine(event.getMachineId());
                     } catch (NotFoundException | MachineException exception) {
-                        LOG.error(exception.getLocalizedMessage(), exception);
-                    }
-                    break;
-                case ERROR:
-                    try {
-                        machineManager.destroy(event.getMachineId(), true);
-                    } catch (NotFoundException ignore) {
-                    } catch (MachineException exception) {
                         LOG.error(exception.getLocalizedMessage(), exception);
                     }
                     break;
@@ -398,6 +383,7 @@ public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
      * @throws ConflictException
      *         when workspace is not running
      */
+    @VisibleForTesting
     void addMachine(String machineId) throws NotFoundException, ServerException, ConflictException {
         ensurePreDestroyIsNotExecuted();
 
@@ -434,6 +420,7 @@ public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
      *         when workspace with specified id not running or not exists
      * @throws MachineException
      */
+    @VisibleForTesting
     void removeMachine(String machineId) throws NotFoundException, MachineException {
         MachineImpl machine = machineManager.getMachine(machineId);
         String workspaceId = machine.getWorkspaceId();

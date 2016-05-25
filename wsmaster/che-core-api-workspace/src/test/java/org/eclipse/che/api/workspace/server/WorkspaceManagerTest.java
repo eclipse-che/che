@@ -80,7 +80,7 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
 
-    private static final String USER_ID      = "user123";
+    private static final String USER_ID = "user123";
 
     @Mock
     private EventService                  eventService;
