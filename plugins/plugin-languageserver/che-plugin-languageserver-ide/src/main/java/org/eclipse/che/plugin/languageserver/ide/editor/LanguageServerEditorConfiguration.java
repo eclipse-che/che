@@ -34,55 +34,18 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     
     private final LanguageServerCodeAssistProcessor codeAssistProcessor;
     private final AnnotationModel annotationModel;
-    private final DocumentPositionMap documentPositionMap;
-    private final AtomicInteger version = new AtomicInteger(INITIAL_DOCUMENT_VERSION);
-    private final ConstantPartitioner constantPartitioner;
     private final ReconcilerWithAutoSave reconciler;
 
     @Inject
     public LanguageServerEditorConfiguration(final LanguageServerCodeAssistProcessor codeAssistProcessor,
                                              final Provider<DocumentPositionMap> docPositionMapProvider,
-                                             final TextDocumentServiceClient textDocumentService,
-                                             final LanguageServerAnnotationModelFactory annotationModelFactory) {
+                                             final LanguageServerAnnotationModelFactory annotationModelFactory,
+                                             final Provider<LanguageServerReconcileStrategy> reconcileStrategyProvider) {
         this.codeAssistProcessor = codeAssistProcessor;
-        this.documentPositionMap = docPositionMapProvider.get();
-        this.annotationModel = annotationModelFactory.get(documentPositionMap);
-        
-        //HACK hijacked the partitioner to get document change events
-        this.constantPartitioner = new ConstantPartitioner() {
-            
-            @Override
-            public void onDocumentChange(DocumentChangeEvent event) {
-                super.onDocumentChange(event);
-                
-                Document document = event.getDocument().getDocument();
-                TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
-                TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getLength());
-                
-                DidChangeTextDocumentParamsDTOImpl changeDTO = DtoClientImpls.DidChangeTextDocumentParamsDTOImpl.make();
-                String uri = ((Document) document).getFile().getPath();
-                changeDTO.setUri(uri);
-                VersionedTextDocumentIdentifierDTOImpl versionedDocId = DtoClientImpls.VersionedTextDocumentIdentifierDTOImpl.make();
-                versionedDocId.setUri(uri);
-                versionedDocId.setVersion(version.incrementAndGet());
-                changeDTO.setTextDocument(versionedDocId);
-                TextDocumentContentChangeEventDTOImpl actualChange = DtoClientImpls.TextDocumentContentChangeEventDTOImpl.make();
-                RangeDTOImpl range = DtoClientImpls.RangeDTOImpl.make();
-                PositionDTOImpl start = DtoClientImpls.PositionDTOImpl.make();
-                start.setLine(startPosition.getLine());
-                start.setCharacter(startPosition.getCharacter());
-                PositionDTOImpl end = DtoClientImpls.PositionDTOImpl.make();
-                end.setLine(endPosition.getLine());
-                end.setCharacter(endPosition.getCharacter());
-                range.setStart(start);
-                range.setEnd(end);
-                actualChange.setRange(range);
-                actualChange.setText(event.getText());
-                changeDTO.addContentChanges(actualChange);
-                textDocumentService.didChange(changeDTO);
-            }
-        };
-        this.reconciler = new ReconcilerWithAutoSave(DocumentPartitioner.DEFAULT_CONTENT_TYPE, constantPartitioner);
+        this.annotationModel = annotationModelFactory.get(docPositionMapProvider.get());
+
+        this.reconciler = new ReconcilerWithAutoSave(DocumentPartitioner.DEFAULT_CONTENT_TYPE, getPartitioner());
+        reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE, reconcileStrategyProvider.get());
     }
 
     @Override
@@ -95,11 +58,6 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     @Override
     public AnnotationModel getAnnotationModel() {
         return annotationModel;
-    }
-    
-    @Override
-    public DocumentPartitioner getPartitioner() {
-        return constantPartitioner;
     }
     
     @Override
