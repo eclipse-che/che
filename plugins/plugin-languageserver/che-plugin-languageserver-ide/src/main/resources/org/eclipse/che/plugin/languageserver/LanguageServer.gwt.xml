@@ -11,6 +11,7 @@
     <inherits name="org.eclipse.che.api.project.Project"/>
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="io.typefox.lsapi.LsApi"/>
+    <inherits name="org.eclipse.che.ide.editor.orion.OrionEditor"/>
 
     <source path="ide"/>
     <source path="shared"/>

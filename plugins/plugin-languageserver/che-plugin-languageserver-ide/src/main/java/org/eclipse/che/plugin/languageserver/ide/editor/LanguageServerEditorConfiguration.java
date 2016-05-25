@@ -40,10 +40,13 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     private final ReconcilerWithAutoSave reconciler;
 
     @Inject
-    public LanguageServerEditorConfiguration(final LanguageServerCodeAssistProcessor codeAssistProcessor, final Provider<DocumentPositionMap> docPositionMapProvider, final TextDocumentServiceClient textDocumentService) {
+    public LanguageServerEditorConfiguration(final LanguageServerCodeAssistProcessor codeAssistProcessor,
+                                             final Provider<DocumentPositionMap> docPositionMapProvider,
+                                             final TextDocumentServiceClient textDocumentService,
+                                             final LanguageServerAnnotationModelFactory annotationModelFactory) {
         this.codeAssistProcessor = codeAssistProcessor;
         this.documentPositionMap = docPositionMapProvider.get();
-        this.annotationModel = new AnnotationModelImpl(documentPositionMap);
+        this.annotationModel = annotationModelFactory.get(documentPositionMap);
         
         //HACK hijacked the partitioner to get document change events
         this.constantPartitioner = new ConstantPartitioner() {

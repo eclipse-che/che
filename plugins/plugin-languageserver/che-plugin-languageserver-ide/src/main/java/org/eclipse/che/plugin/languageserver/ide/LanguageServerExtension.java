@@ -1,5 +1,9 @@
 package org.eclipse.che.plugin.languageserver.ide;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
@@ -16,11 +20,15 @@ import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.DidSaveTe
 import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentIdentifierDTOImpl;
 import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentItemDTOImpl;
 
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
-
 @Extension(title = "LanguageServer")
+@Singleton
 public class LanguageServerExtension {
+
+    @Inject
+    protected void injectCss(LanguageServerResources resources) {
+        //we need to call this method one time
+        resources.css().ensureInjected();
+    }
 
     @Inject
     protected void configureFileTypes(FileTypeRegistry fileTypeRegistry, LanguageServerResources resources,
@@ -33,7 +41,8 @@ public class LanguageServerExtension {
         editorRegistry.registerDefaultEditor(fileType, editorProvider);
     }
     
-    @Inject protected void registerFileEventHandler(EventBus eventBus, final TextDocumentServiceClient serviceClient) {
+    @Inject
+    protected void registerFileEventHandler(EventBus eventBus, final TextDocumentServiceClient serviceClient) {
         eventBus.addHandler(FileEvent.TYPE, new FileEventHandler() {
             
             @Override
