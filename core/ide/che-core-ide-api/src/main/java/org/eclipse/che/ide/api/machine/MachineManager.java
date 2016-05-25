@@ -12,7 +12,6 @@ package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Promise;
 
 /**
@@ -79,14 +78,5 @@ public interface MachineManager {
      *         contains information about machine state
      */
     void restartMachine(final Machine machine);
-
-    /**
-     * Checks if the the status for dev machine is tracked by machine manager.
-     *
-     * @param machine
-     *         contains information about machine state
-     * @return {@code true} if status for dev machine is tracked by machine manager and {@code false} - otherwise.
-     */
-    boolean isDevMachineStatusTracked(MachineDto machine);
 
 }
