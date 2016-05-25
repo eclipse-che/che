@@ -10,16 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -84,9 +81,6 @@ import static org.testng.AssertJUnit.assertTrue;
 public class WorkspaceManagerTest {
 
     private static final String USER_ID      = "user123";
-    private static final String MACHINE_ID   = "machine123";
-    private static final String WORKSPACE_ID = "workspace123";
-    private static final String ENV          = "current_environment";
 
     @Mock
     private EventService                  eventService;
@@ -104,10 +98,6 @@ public class WorkspaceManagerTest {
     private WorkspaceRuntimes             runtimes;
     @Mock
     private UserManager                   userManager;
-    @Mock
-    private MachineImpl                   machine;
-    @Mock
-    private MachineConfigImpl             machineConfig;
     @Captor
     private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -580,42 +570,6 @@ public class WorkspaceManagerTest {
         workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), "account");
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), true);
-    }
-
-    @Test
-    public void shouldInvokeAsyncMachineCreationWithMachineManager()
-            throws MachineException, BadRequestException, SnapshotException, NotFoundException, ConflictException {
-        workspaceManager.createMachineAsync(machineConfig, WORKSPACE_ID, ENV);
-
-        verify(machineManager).createMachineAsync(machineConfig, WORKSPACE_ID, ENV);
-    }
-
-    @Test
-    public void shouldRemoveMachineFromWorkspaceRuntime() throws ConflictException, NotFoundException, ServerException {
-        when(machine.getConfig()).thenReturn(machineConfig);
-        when(machine.getId()).thenReturn(MACHINE_ID);
-        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
-        when(machineConfig.isDev()).thenReturn(false);
-
-        workspaceManager.removeMachineFromRuntime(machine.getId());
-
-        verify(runtimes).removeMachine(machine);
-    }
-
-    @Test(expectedExceptions = ConflictException.class)
-    public void shouldThrowConflictExceptionIfRemoveDevMachine() throws ConflictException, NotFoundException, ServerException {
-        when(machine.getConfig()).thenReturn(machineConfig);
-        when(machine.getId()).thenReturn(MACHINE_ID);
-        when(machineManager.getMachine(MACHINE_ID)).thenReturn(machine);
-        when(machineConfig.isDev()).thenReturn(true);
-
-        workspaceManager.removeMachineFromRuntime(machine.getId());
-    }
-
-    @Test(expectedExceptions = NullPointerException.class, expectedExceptionsMessageRegExp = "Require non-null machine id")
-    public void shouldThrowNullPointerExceptionIfMachineIdIsNullWhenRemoveMachineFromRuntime()
-            throws ConflictException, NotFoundException, ServerException {
-        workspaceManager.removeMachineFromRuntime(null);
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status) {

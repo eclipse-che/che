@@ -502,61 +502,6 @@ public class WorkspaceManager {
         return machineManager.getSnapshots(sessionUser().getUserId(), workspaceId);
     }
 
-    /**
-     * Creates and adds new machine into specified workspace runtime.
-     * If machine creation fails, then that machine will be destroyed.
-     *
-     * @param machineConfig
-     *         configuration of new machine
-     * @param workspaceId
-     *         id of workspace this machine belongs to
-     * @param activeEnv
-     *         current machine environment
-     * @return starting machine instance
-     * Throws the same exceptions as @{@link MachineManager#createMachineAsync(MachineConfig, String, String)}
-     */
-    public MachineImpl createMachineAsync(MachineConfig machineConfig, String workspaceId, String activeEnv)
-            throws MachineException,
-                   BadRequestException,
-                   SnapshotException,
-                   NotFoundException,
-                   ConflictException {
-        requireNonNull(machineConfig, "Require non-null machine config");
-        requireNonNull(workspaceId, "Require non-null workspace id");
-        requireNonNull(activeEnv, "Require non-null environment");
-
-        MachineImpl machine = machineManager.createMachineAsync(machineConfig, workspaceId, activeEnv);
-        new MachineStartSubscriber(machine.getId());
-        return machine;
-    }
-
-    /**
-     * Removes additional machine from workspace runtime.
-     *
-     * @param machineId
-     *         id of machine to remove
-     * @throws NotFoundException
-     *         when workspace from which machine is removing doesn't have runtime or
-     *         when workspace doesn't exist
-     * @throws ConflictException
-     *         when machine is dev-machine
-     * @throws MachineException
-     *         when another error occurs
-     * @throws NullPointerException
-     *         when {@code machineId} is null
-     */
-    public void removeMachineFromRuntime(String machineId) throws NotFoundException, ConflictException, MachineException {
-        requireNonNull(machineId, "Require non-null machine id");
-        MachineImpl machine = machineManager.getMachine(machineId);
-        if (machine.getConfig().isDev()) {
-            throw new ConflictException("Cannot remove dev-machine " + machine.getId() +
-                                        " from " + machine.getWorkspaceId() + " workspace." +
-                                        " Stop workspace to stop dev-machine");
-        }
-
-        runtimes.removeMachine(machine);
-    }
-
     /** Asynchronously starts given workspace. */
     @VisibleForTesting
     WorkspaceImpl performAsyncStart(WorkspaceImpl workspace,
@@ -768,65 +713,6 @@ public class WorkspaceManager {
         final String wsName = parts[1];
         final String ownerId = userName.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userName).getId();
         return workspaceDao.get(wsName, ownerId);
-    }
-
-    /** Adds machine to runtime or cleanup on fail to start */
-    private class MachineStartSubscriber implements EventSubscriber<MachineStatusEvent> {
-        String machineId;
-
-        MachineStartSubscriber(String machineId) {
-            this.machineId = machineId;
-
-            eventService.subscribe(this);
-        }
-
-        @Override
-        public void onEvent(MachineStatusEvent event) {
-            if (event.getMachineId().equals(machineId)) {
-                if (MachineStatusEvent.EventType.CREATING.equals(event.getEventType())) {
-                    return;
-                }
-
-                eventService.unsubscribe(this);
-
-                switch (event.getEventType()) {
-                    case RUNNING:
-                        onSuccessRun(event);
-                        break;
-                    case ERROR:
-                        onError(event);
-                        break;
-                }
-            }
-        }
-
-        private void onSuccessRun(MachineStatusEvent event) {
-            MachineImpl machine;
-            try {
-                machine = machineManager.getMachine(event.getMachineId());
-            } catch (NotFoundException | MachineException exception) {
-                LOG.error(exception.getLocalizedMessage(), exception);
-                return;
-            }
-            try {
-                runtimes.addMachine(machine);
-            } catch (ServerException | ConflictException | NotFoundException exception) {
-                try {
-                    machineManager.destroy(event.getMachineId(), true);
-                } catch (NotFoundException | MachineException e) {
-                    LOG.error(exception.getLocalizedMessage(), exception);
-                }
-            }
-        }
-
-        private void onError(MachineStatusEvent event) {
-            try {
-                machineManager.destroy(event.getMachineId(), true);
-            } catch (NotFoundException ignore) {
-            } catch (MachineException exception) {
-                LOG.error(exception.getLocalizedMessage(), exception);
-            }
-        }
     }
 
     /** No-operations workspace hooks. Each method does nothing */

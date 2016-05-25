@@ -21,11 +21,13 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -34,6 +36,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.Event
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -68,7 +71,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author Mykola Morhun
  */
 @Singleton
-public class WorkspaceRuntimes {
+public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(WorkspaceRuntimes.class);
 
@@ -87,6 +90,16 @@ public class WorkspaceRuntimes {
         this.descriptors = new HashMap<>();
         this.startQueues = new HashMap<>();
         this.rwLock = new ReentrantReadWriteLock();
+    }
+
+    @PostConstruct
+    private void subscribeOnMachineEvents() {
+        eventService.subscribe(this);
+    }
+
+    @PreDestroy
+    private void unsubscribeOnMachineEvents() {
+        eventService.unsubscribe(this);
     }
 
     /**
@@ -246,72 +259,6 @@ public class WorkspaceRuntimes {
     }
 
     /**
-     * Adds machine into running workspace.
-     * This method do not touch workspace configuration.
-     * Just adds machine to workspace runtime and destroy it on workspace stop.
-     * Does nothing if add already existing machine.
-     *
-     * @param machine
-     *         machine to add to specified runtime
-     * @throws NotFoundException
-     *         when workspace with specified id not running or not exists
-     * @throws ServerException
-     *         when application server is stopping
-     * @throws ConflictException
-     *         when workspace is not running
-     */
-    public void addMachine(MachineImpl machine) throws NotFoundException, ServerException, ConflictException {
-        ensurePreDestroyIsNotExecuted();
-
-        String workspaceId = machine.getWorkspaceId();
-
-        rwLock.writeLock().lock();
-        try {
-            ensurePreDestroyIsNotExecuted();
-            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
-            if (descriptor == null) {
-                throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
-            }
-            if (descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
-                throw new ConflictException("Cannot add machine " + machine.getId() + " to not running workspace.");
-            }
-
-            List<MachineImpl> machines = descriptor.getRuntime().getMachines();
-            if (!machines.stream().anyMatch(m -> machine.getId().equals(m.getId()))) {
-                machines.add(machine);
-            }
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-    }
-
-    /**
-     * Removes machine from running workspace.
-     * This method do not touch workspace configuration and is opposite to {@link #addMachine(MachineImpl)}
-     * Does nothing if remove nonexistent machine
-     *
-     * @param machine
-     *         machine to remove from specified runtime
-     * @throws NotFoundException
-     *         when workspace with specified id not running or not exists
-     */
-    public void removeMachine(MachineImpl machine) throws NotFoundException {
-        String workspaceId = machine.getWorkspaceId();
-
-        rwLock.writeLock().lock();
-        try {
-            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
-            if (descriptor == null) {
-                throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
-            }
-
-            rmFirst(descriptor.getRuntime().getMachines(), m -> machine.getId().equals(m.getId()));
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-    }
-
-    /**
      * Returns true if workspace was started and its status is
      * {@link WorkspaceStatus#RUNNING running}, {@link WorkspaceStatus#STARTING starting}
      * or {@link WorkspaceStatus#STOPPING stopping} - otherwise returns false.
@@ -343,6 +290,49 @@ public class WorkspaceRuntimes {
             return descriptors.containsKey(workspaceId);
         } finally {
             rwLock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public void onEvent(MachineStatusEvent event) {
+        if (hasRuntime(event.getWorkspaceId())) {
+            switch (event.getEventType()) {
+                case RUNNING:
+                    if (startQueues.get(event.getWorkspaceId()) == null) {
+                        try {
+                            addMachine(event.getMachineId());
+                        } catch (ServerException | ConflictException | NotFoundException exception) {
+                            try {
+                                machineManager.destroy(event.getMachineId(), true);
+                            } catch (NotFoundException | MachineException e) {
+                                LOG.error(exception.getLocalizedMessage(), exception);
+                            }
+                        }
+                    } else {
+                        LOG.warn("Cannot add machine into starting workspace");
+                        try {
+                            removeMachine(event.getMachineId());
+                        } catch (NotFoundException | MachineException exception) {
+                            LOG.error(exception.getLocalizedMessage(), exception);
+                        }
+                    }
+                    break;
+                case DESTROYING:
+                    try {
+                        removeMachine(event.getMachineId());
+                    } catch (NotFoundException | MachineException exception) {
+                        LOG.error(exception.getLocalizedMessage(), exception);
+                    }
+                    break;
+                case ERROR:
+                    try {
+                        machineManager.destroy(event.getMachineId(), true);
+                    } catch (NotFoundException ignore) {
+                    } catch (MachineException exception) {
+                        LOG.error(exception.getLocalizedMessage(), exception);
+                    }
+                    break;
+            }
         }
     }
 
@@ -387,6 +377,75 @@ public class WorkspaceRuntimes {
         rwLock.writeLock().lock();
         try {
             descriptors.remove(wsId);
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Adds machine into running workspace.
+     * This method do not touch workspace configuration.
+     * Just adds machine to workspace runtime and destroy it on workspace stop.
+     * Does nothing if add already existing machine.
+     *
+     * @param machineId
+     *         id of machine to add to specified runtime
+     * @throws NotFoundException
+     *         when workspace with specified id not running or not exists or
+     *         when machine with specified id doesn't exist
+     * @throws ServerException
+     *         when application server is stopping
+     * @throws ConflictException
+     *         when workspace is not running
+     */
+    void addMachine(String machineId) throws NotFoundException, ServerException, ConflictException {
+        ensurePreDestroyIsNotExecuted();
+
+        MachineImpl machine = machineManager.getMachine(machineId);
+        String workspaceId = machine.getWorkspaceId();
+
+        rwLock.writeLock().lock();
+        try {
+            ensurePreDestroyIsNotExecuted();
+            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
+            if (descriptor == null) {
+                throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
+            }
+            if (descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
+                throw new ConflictException("Cannot add machine " + machine.getId() + " to not running workspace.");
+            }
+
+            List<MachineImpl> machines = descriptor.getRuntime().getMachines();
+            if (!machines.stream().anyMatch(m -> machine.getId().equals(m.getId()))) {
+                machines.add(machine);
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Removes machine from running workspace.
+     * This method do not touch workspace configuration and is opposite to {@link #addMachine(String)}
+     *
+     * @param machineId
+     *         id of machine to remove from specified runtime
+     * @throws NotFoundException
+     *         when workspace with specified id not running or not exists
+     * @throws MachineException
+     */
+    void removeMachine(String machineId) throws NotFoundException, MachineException {
+        MachineImpl machine = machineManager.getMachine(machineId);
+        String workspaceId = machine.getWorkspaceId();
+
+        rwLock.writeLock().lock();
+        try {
+            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
+            if (descriptor == null) {
+                throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
+            }
+
+            rmFirst(descriptor.getRuntime().getMachines(), m -> machine.getId().equals(m.getId()));
         } finally {
             rwLock.writeLock().unlock();
         }
