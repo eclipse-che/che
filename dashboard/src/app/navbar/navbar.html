@@ -21,7 +21,7 @@
         <section class="left-sidebar-menu" layout="column" layout-align="center center">
           <md-list layout="column">
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
+              <md-button nav-bar-selected flex che-reload-href che-on-long-touch="navbarCtrl.openLinkInNewTab('{{navbarCtrl.menuItemUrl.dashboard}}')" ng-href="{{navbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-dashboard" aria-label="Dashboard"></md-icon>
@@ -30,7 +30,7 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
+              <md-button nav-bar-selected flex che-reload-href che-on-long-touch="navbarCtrl.openLinkInNewTab('{{navbarCtrl.menuItemUrl.workspaces}}')" ng-href="{{navbarCtrl.menuItemUrl.workspaces}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-workspace"></md-icon>
                   <span>Workspaces</span>
@@ -39,7 +39,7 @@
               </md-button>
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
-              <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left">
+              <md-button nav-bar-selected flex che-reload-href che-on-long-touch="navbarCtrl.openLinkInNewTab('{{navbarCtrl.menuItemUrl.projects}}')" ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-project"
                            style="font-size: 10px;"></md-icon>

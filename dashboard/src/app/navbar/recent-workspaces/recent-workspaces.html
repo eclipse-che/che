@@ -15,7 +15,8 @@
                     ng-repeat="workspace in navbarRecentWorkspacesCtrl.getRecentWorkspaces() | orderBy:'attributes.updated':'reverse' | limitTo:'5'"
                     ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesCtrl.isOpen(workspace.id)}">
         <md-button nav-bar-selected flex che-reload-href
-                   ng-href="#/ide/{{navbarRecentWorkspacesCtrl.getWorkspaceName(workspace.id)}}" layout-align="left"
+                   che-on-long-touch="navbarRecentWorkspacesCtrl.openLinkInNewTab(workspace.id)"
+                   ng-href="{{navbarRecentWorkspacesCtrl.getIdeLink(workspace.id)}}" layout-align="left"
                    target="_self">
           <div class="navbar-item" layout="row" layout-align="start center">
             <workspace-status-indicator-circle che-status="navbarRecentWorkspacesCtrl.getWorkspaceStatus(workspace.id)"
