@@ -26,7 +26,6 @@
         <module>che-core-commons-annotations</module>
         <module>che-core-commons-lang</module>
         <module>che-core-commons-inject</module>
-        <module>che-core-commons-env</module>
         <module>che-core-commons-json</module>
         <module>che-core-commons-xml</module>
         <module>che-core-commons-schedule</module>
