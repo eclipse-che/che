@@ -16,13 +16,14 @@ export class CheNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, onBoarding, $rootScope) {
+  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, onBoarding, $window) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
     this.onBoarding = onBoarding;
+    this.$window = $window;
     this.cheUser = cheAPI.getUser();
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
 
@@ -104,5 +105,9 @@ export class CheNavBarCtrl {
 
   getWorkspacesNumber() {
     return this.cheAPI.cheWorkspace.getWorkspaces().length;
+  }
+
+  openLinkInNewTab(url) {
+    this.$window.open(url, '_blank');
   }
 }
