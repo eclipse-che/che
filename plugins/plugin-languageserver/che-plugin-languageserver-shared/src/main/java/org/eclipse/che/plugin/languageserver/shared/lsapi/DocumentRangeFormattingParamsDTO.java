@@ -12,23 +12,40 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.DocumentRangeFormattingParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface DocumentRangeFormattingParamsDTO extends DocumentRangeFormattingParams {
     /**
-     * Overridden to return the DTO type.
+     * The range to format Overridden to return the DTO type.
      * 
      */
     public abstract RangeDTO getRange();
 
     /**
-     * Overridden to return the DTO type.
+     * The range to format
+     * 
+     */
+    public abstract void setRange(final RangeDTO range);
+
+    /**
+     * The document to format. Overridden to return the DTO type.
      * 
      */
     public abstract TextDocumentIdentifierDTO getTextDocument();
 
     /**
-     * Overridden to return the DTO type.
+     * The document to format.
+     * 
+     */
+    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+
+    /**
+     * The format options Overridden to return the DTO type.
      * 
      */
     public abstract FormattingOptionsDTO getOptions();
+
+    /**
+     * The format options
+     * 
+     */
+    public abstract void setOptions(final FormattingOptionsDTO options);
 }

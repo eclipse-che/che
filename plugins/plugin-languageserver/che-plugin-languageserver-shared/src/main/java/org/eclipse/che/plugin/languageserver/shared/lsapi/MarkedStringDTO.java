@@ -12,6 +12,8 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.MarkedString;
 
 @DTO
-@SuppressWarnings("all")
 public interface MarkedStringDTO extends MarkedString {
+    public abstract void setLanguage(final String language);
+
+    public abstract void setValue(final String value);
 }

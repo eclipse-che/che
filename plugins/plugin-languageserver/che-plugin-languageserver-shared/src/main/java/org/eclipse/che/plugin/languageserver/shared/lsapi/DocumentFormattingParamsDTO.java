@@ -12,17 +12,28 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.DocumentFormattingParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface DocumentFormattingParamsDTO extends DocumentFormattingParams {
     /**
-     * Overridden to return the DTO type.
+     * The document to format. Overridden to return the DTO type.
      * 
      */
     public abstract TextDocumentIdentifierDTO getTextDocument();
 
     /**
-     * Overridden to return the DTO type.
+     * The document to format.
+     * 
+     */
+    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+
+    /**
+     * The format options Overridden to return the DTO type.
      * 
      */
     public abstract FormattingOptionsDTO getOptions();
+
+    /**
+     * The format options
+     * 
+     */
+    public abstract void setOptions(final FormattingOptionsDTO options);
 }

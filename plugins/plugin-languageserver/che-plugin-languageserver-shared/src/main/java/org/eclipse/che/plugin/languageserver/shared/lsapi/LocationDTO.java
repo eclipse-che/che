@@ -12,11 +12,14 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.Location;
 
 @DTO
-@SuppressWarnings("all")
 public interface LocationDTO extends Location {
+    public abstract void setUri(final String uri);
+
     /**
      * Overridden to return the DTO type.
      * 
      */
     public abstract RangeDTO getRange();
+
+    public abstract void setRange(final RangeDTO range);
 }

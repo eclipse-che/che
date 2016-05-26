@@ -14,9 +14,17 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.WorkspaceEdit;
 
 @DTO
-@SuppressWarnings("all")
 public interface WorkspaceEditDTO extends WorkspaceEdit {
-
-    @Override
-    Map<String, TextEditDTO> getChanges();
+    /**
+     * Holds changes to existing resources.
+     * Overridden to return the DTO type.
+     * 
+     */
+    public abstract Map<String, TextEditDTO> getChanges();
+    
+    /**
+     * Holds changes to existing resources.
+     * 
+     */
+    public abstract void setChanges(final Map<String, TextEditDTO> changes);
 }

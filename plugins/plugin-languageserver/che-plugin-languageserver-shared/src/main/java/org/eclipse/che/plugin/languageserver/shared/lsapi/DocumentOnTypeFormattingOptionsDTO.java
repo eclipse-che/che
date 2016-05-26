@@ -7,11 +7,23 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
+import java.util.List;
+
 import org.eclipse.che.dto.shared.DTO;
 
 import io.typefox.lsapi.DocumentOnTypeFormattingOptions;
 
 @DTO
-@SuppressWarnings("all")
 public interface DocumentOnTypeFormattingOptionsDTO extends DocumentOnTypeFormattingOptions {
+    /**
+     * A character on which formatting should be triggered, like `}`.
+     * 
+     */
+    public abstract void setFirstTriggerCharacter(final String firstTriggerCharacter);
+
+    /**
+     * More trigger characters.
+     * 
+     */
+    public abstract void setMoreTriggerCharacter(final List<String> moreTriggerCharacter);
 }

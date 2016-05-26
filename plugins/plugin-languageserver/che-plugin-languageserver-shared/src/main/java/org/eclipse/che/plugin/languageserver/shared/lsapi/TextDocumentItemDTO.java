@@ -12,6 +12,29 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.TextDocumentItem;
 
 @DTO
-@SuppressWarnings("all")
 public interface TextDocumentItemDTO extends TextDocumentItem {
+    /**
+     * The text document's uri.
+     * 
+     */
+    public abstract void setUri(final String uri);
+
+    /**
+     * The text document's language identifier
+     * 
+     */
+    public abstract void setLanguageId(final String languageId);
+
+    /**
+     * The version number of this document (it will strictly increase after each
+     * change, including undo/redo).
+     * 
+     */
+    public abstract void setVersion(final int version);
+
+    /**
+     * The content of the opened text document.
+     * 
+     */
+    public abstract void setText(final String text);
 }

@@ -12,11 +12,29 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.TextDocumentContentChangeEvent;
 
 @DTO
-@SuppressWarnings("all")
 public interface TextDocumentContentChangeEventDTO extends TextDocumentContentChangeEvent {
     /**
-     * Overridden to return the DTO type.
+     * The range of the document that changed. Overridden to return the DTO
+     * type.
      * 
      */
     public abstract RangeDTO getRange();
+
+    /**
+     * The range of the document that changed.
+     * 
+     */
+    public abstract void setRange(final RangeDTO range);
+
+    /**
+     * The length of the range that got replaced.
+     * 
+     */
+    public abstract void setRangeLength(final Integer rangeLength);
+
+    /**
+     * The new text of the document.
+     * 
+     */
+    public abstract void setText(final String text);
 }

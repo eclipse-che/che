@@ -14,17 +14,37 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.DidChangeTextDocumentParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface DidChangeTextDocumentParamsDTO extends DidChangeTextDocumentParams {
     /**
-     * Overridden to return the DTO type.
+     * The document that did change. The version number points to the version
+     * after all provided content changes have been applied. Overridden to
+     * return the DTO type.
      * 
      */
     public abstract VersionedTextDocumentIdentifierDTO getTextDocument();
 
     /**
-     * Overridden to return the DTO type.
+     * The document that did change. The version number points to the version
+     * after all provided content changes have been applied.
+     * 
+     */
+    public abstract void setTextDocument(final VersionedTextDocumentIdentifierDTO textDocument);
+
+    /**
+     * Legacy property to support protocol version 1.0 requests.
+     * 
+     */
+    public abstract void setUri(final String uri);
+
+    /**
+     * The actual content changes. Overridden to return the DTO type.
      * 
      */
     public abstract List<TextDocumentContentChangeEventDTO> getContentChanges();
+
+    /**
+     * The actual content changes.
+     * 
+     */
+    public abstract void setContentChanges(final List<TextDocumentContentChangeEventDTO> contentChanges);
 }

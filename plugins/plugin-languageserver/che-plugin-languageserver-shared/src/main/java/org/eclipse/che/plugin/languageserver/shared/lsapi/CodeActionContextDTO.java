@@ -14,11 +14,16 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.CodeActionContext;
 
 @DTO
-@SuppressWarnings("all")
 public interface CodeActionContextDTO extends CodeActionContext {
     /**
-     * Overridden to return the DTO type.
+     * An array of diagnostics. Overridden to return the DTO type.
      * 
      */
     public abstract List<DiagnosticDTO> getDiagnostics();
+
+    /**
+     * An array of diagnostics.
+     * 
+     */
+    public abstract void setDiagnostics(final List<DiagnosticDTO> diagnostics);
 }

@@ -12,6 +12,16 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.VersionedTextDocumentIdentifier;
 
 @DTO
-@SuppressWarnings("all")
 public interface VersionedTextDocumentIdentifierDTO extends VersionedTextDocumentIdentifier {
+    /**
+     * The version number of this document.
+     * 
+     */
+    public abstract void setVersion(final int version);
+
+    /**
+     * The text document's uri.
+     * 
+     */
+    public abstract void setUri(final String uri);
 }

@@ -12,11 +12,16 @@ import org.eclipse.che.dto.shared.DTO;
 import io.typefox.lsapi.DidSaveTextDocumentParams;
 
 @DTO
-@SuppressWarnings("all")
 public interface DidSaveTextDocumentParamsDTO extends DidSaveTextDocumentParams {
     /**
-     * Overridden to return the DTO type.
+     * The document that was closed. Overridden to return the DTO type.
      * 
      */
     public abstract TextDocumentIdentifierDTO getTextDocument();
+
+    /**
+     * The document that was closed.
+     * 
+     */
+    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 }
