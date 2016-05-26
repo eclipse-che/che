@@ -1407,8 +1407,8 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/commit")
-                                                            .query("container", params.getContainer())
-                                                            .query("repo", params.getRepository())) {
+                                                            .query("container", params.getContainer())) {
+            addQueryParamIfNotNull(connection, "repo", params.getRepository());
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             addQueryParamIfNotNull(connection, "comment", (params.getComment() == null) ?
                                                           null : URLEncoder.encode(params.getComment(), "UTF-8"));
