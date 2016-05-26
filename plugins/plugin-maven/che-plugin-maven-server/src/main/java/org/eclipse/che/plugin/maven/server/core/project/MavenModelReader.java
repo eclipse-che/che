@@ -156,11 +156,13 @@ public class MavenModelReader {
             if (sourceDirectory == null) {
                 sourceDirectory = "src/main/java";
             }
+            String testSourceDirectory = build.getTestSourceDirectory();
+            if (testSourceDirectory == null) {
+                testSourceDirectory = "src/test/java";
+            }
             result.getBuild().setSources(Collections.singletonList(sourceDirectory));
-            result.getBuild().setTestSources(Collections.singletonList(build.getTestSourceDirectory()));
+            result.getBuild().setTestSources(Collections.singletonList(testSourceDirectory));
             result.getBuild().setResources(convertResources(build.getResources()));
-            //TODO add test sources
-//            result.getBuild().setTestSources(convertResources(build.getPlugins()));
         }
         //TODO add profiles
         return new ModelReadingResult(result, problems, enabledProfiles);
