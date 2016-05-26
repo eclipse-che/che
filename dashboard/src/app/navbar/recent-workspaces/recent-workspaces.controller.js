@@ -18,15 +18,15 @@
  */
 export class NavbarRecentWorkspacesCtrl {
 
-
   /**
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, lodash, ideSvc) {
+  constructor(cheWorkspace, lodash, ideSvc, $window) {
     this.cheWorkspace = cheWorkspace;
     this.lodash = lodash;
     this.ideSvc = ideSvc;
+    this.$window = $window;
 
     // fetch workspaces when initializing
     this.cheWorkspace.fetchWorkspaces();
@@ -68,5 +68,14 @@ export class NavbarRecentWorkspacesCtrl {
 
   isOpen(workspaceId) {
     return this.ideSvc.lastWorkspace && this.ideSvc.lastWorkspace.id === workspaceId;
+  }
+
+  getIdeLink(workspaceId) {
+    return '#/ide/' + this.getWorkspaceName(workspaceId);
+  }
+
+  openLinkInNewTab(workspaceId) {
+    let url = this.getIdeLink(workspaceId);
+    this.$window.open(url, '_blank');
   }
 }

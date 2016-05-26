@@ -36,7 +36,7 @@ export class NavBarSelected {
   /**
    * Monitor click
    */
-  link($scope, element, attrs, controller) {
+  link($scope, element, attrs) {
     let select = (elem) => {
       // if there is a previous selected element, unselect it
       if (this.$rootScope.selectedNavBarElement) {
@@ -56,8 +56,24 @@ export class NavBarSelected {
     }
 
     // highlight item on click
-    element.bind('click', () => {
+    element.bind('click', (event) => {
+      // prevent activating menu item if Ctrl key is pressed
+      if (event.ctrlKey) {
+        this.$rootScope.selectedNavBarElement.focus();
+        return;
+      }
       select(element);
+    });
+    element.bind('mousedown', (event) => {
+      element.addClass('navbar-item-no-hover');
+    });
+    element.bind('mouseup', (event) => {
+      if (element !== this.$rootScope.selectedNavBarElement) {
+        element.blur();
+      }
+    });
+    element.bind('mouseover', () => {
+      element.removeClass('navbar-item-no-hover');
     });
 
     $scope.$on('navbar-selected:clear', () => {
