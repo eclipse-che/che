@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.commons.subject;
 
-import javax.ws.rs.ForbiddenException;
+import org.eclipse.che.api.core.ForbiddenException;
 
 /**
  * Subject represents authenticated user
