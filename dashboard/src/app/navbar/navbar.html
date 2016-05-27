@@ -34,7 +34,7 @@
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon chefont cheico-workspace"></md-icon>
                   <span>Workspaces</span>
-                  <span class="admin-navbar-menu-workspaces-number" ng-show="navbarCtrl.getWorkspacesNumber()">&nbsp;({{navbarCtrl.getWorkspacesNumber()}})</span>
+                  <span class="navbar-number" ng-show="navbarCtrl.getWorkspacesNumber()">&nbsp;({{navbarCtrl.getWorkspacesNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
@@ -44,6 +44,7 @@
                   <md-icon md-font-icon="navbar-icon chefont cheico-project"
                            style="font-size: 10px;"></md-icon>
                   <span>Projects</span>
+                  <span class="navbar-number" ng-show="navbarCtrl.getProjectsNumber()">&nbsp;({{navbarCtrl.getProjectsNumber()}})</span>
                 </div>
               </md-button>
             </md-list-item>
