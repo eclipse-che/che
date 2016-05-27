@@ -213,21 +213,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>analyze</id>
-                        <configuration>
-                            <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che.plugin:che-plugin-java-ext-lang-shared</ignoredDependency>
-                            </ignoredDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-tomcat-libs</id>
+                        <id>copy-jar-lib-for-test</id>
                         <phase>process-resources</phase>
                         <goals>
                             <goal>copy</goal>
