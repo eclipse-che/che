@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.NAME_STATUS;
@@ -92,7 +93,8 @@ public class CompareWithLatestAction extends GitAction {
         pattern = path.replaceFirst(project.getPath(), "");
         pattern = (pattern.startsWith("/")) ? pattern.replaceFirst("/", "") : pattern;
 
-        gitService.diff(appContext.getDevMachine(), project, Collections.singletonList(pattern), NAME_STATUS, false, 0, REVISION, false,
+        gitService.diff(appContext.getDevMachine(), project, pattern.isEmpty() ? null : Collections.singletonList(pattern),
+                        NAME_STATUS, false, 0, REVISION, false,
                         new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                             @Override
                             protected void onSuccess(String result) {

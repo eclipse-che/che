@@ -8,10 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.git.impl.nativegit;
+package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
