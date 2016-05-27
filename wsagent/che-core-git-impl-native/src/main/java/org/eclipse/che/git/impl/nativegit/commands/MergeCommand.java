@@ -12,7 +12,6 @@ package org.eclipse.che.git.impl.nativegit.commands;
 
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.git.impl.nativegit.NativeGitMergeResult;
 import org.eclipse.che.api.git.shared.GitUser;
 import org.eclipse.che.api.git.shared.MergeResult;
 
@@ -21,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Join two development histories together
@@ -51,7 +53,7 @@ public class MergeCommand extends GitCommand<MergeResult> {
         reset();
         commandLine.add("merge", commit);
         //result of merging
-        NativeGitMergeResult mergeResult = new NativeGitMergeResult();
+        MergeResult mergeResult = newDto(MergeResult.class);
         //get merge commits
         ArrayList<String> mergedCommits = new ArrayList<>(2);
         mergedCommits.add(new LogCommand(getRepository()).setCount(1).execute().get(0).getId());
@@ -65,28 +67,25 @@ public class MergeCommand extends GitCommand<MergeResult> {
             start();
             // if not failed and not conflict
             if (lines.getFirst().startsWith("Already")) {
-                mergeResult.setStatus(MergeResult.MergeStatus.ALREADY_UP_TO_DATE);
+                mergeResult.setMergeStatus(MergeResult.MergeStatus.ALREADY_UP_TO_DATE);
             } else if (lines.getFirst().startsWith("Updating") && lines.get(1).startsWith("Fast")) {
-                mergeResult.setStatus(MergeResult.MergeStatus.FAST_FORWARD);
+                mergeResult.setMergeStatus(MergeResult.MergeStatus.FAST_FORWARD);
             } else {
-                mergeResult.setStatus(MergeResult.MergeStatus.MERGED);
+                mergeResult.setMergeStatus(MergeResult.MergeStatus.MERGED);
             }
         } catch (GitException e) {
             clear();
             lines.addAll(Arrays.asList(e.getMessage().split("\n")));
             //if Auto-merging is first line then it is CONFLICT situation cause of exception.
             if (lines.getFirst().startsWith("Auto-merging")) {
-                mergeResult.setStatus(MergeResult.MergeStatus.CONFLICTING);
-                List<String> conflictFiles = new LinkedList<>();
-                for (String outLine : lines) {
-                    if (outLine.startsWith("CONFLICT")) {
-                        conflictFiles.add(outLine.substring(outLine.indexOf("in") + 3));
-                    }
-                }
+                mergeResult.setMergeStatus(MergeResult.MergeStatus.CONFLICTING);
+                List<String> conflictFiles = lines.stream().filter(outLine -> outLine.startsWith("CONFLICT"))
+                                                  .map(outLine -> outLine.substring(outLine.indexOf("in") + 3))
+                                                  .collect(Collectors.toCollection(LinkedList::new));
                 mergeResult.setConflicts(conflictFiles);
                 //if Updating is first then it is Failed situation cause of exception
             } else if (lines.getFirst().startsWith("Updating")) {
-                mergeResult.setStatus(MergeResult.MergeStatus.FAILED);
+                mergeResult.setMergeStatus(MergeResult.MergeStatus.FAILED);
                 List<String> failedFiles = new LinkedList<>();
                 /*
                 * First 2 lines contain not needed information:
@@ -99,15 +98,13 @@ public class MergeCommand extends GitCommand<MergeResult> {
                 * Please move or remove them before you can merge.
                 * Aborting
                 */
-                for (String line : lines.subList(2, lines.size())) {
-                    failedFiles.add(line.trim());
-                }
+                failedFiles.addAll(lines.subList(2, lines.size()).stream().map(String::trim).collect(Collectors.toList()));
                 mergeResult.setFailed(failedFiles);
             } else {
-                mergeResult.setStatus(MergeResult.MergeStatus.NOT_SUPPORTED);
+                mergeResult.setMergeStatus(MergeResult.MergeStatus.NOT_SUPPORTED);
             }
         }
-        mergeResult.setHead(new LogCommand(getRepository()).setCount(1).execute().get(0).getId());
+        mergeResult.setNewHead(new LogCommand(getRepository()).setCount(1).execute().get(0).getId());
         return mergeResult;
     }
 

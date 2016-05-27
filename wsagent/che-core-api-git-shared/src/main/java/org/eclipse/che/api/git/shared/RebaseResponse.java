@@ -22,34 +22,57 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface RebaseResponse {
-    public enum RebaseStatus {
-        OK("OK"), 
-        ABORTED("Aborted"), 
-        FAST_FORWARD("Fast-forward"), 
-        ALREADY_UP_TO_DATE("Already up-to-date"), 
-        FAILED("Failed"), 
-        MERGED("Merged"), 
-        CONFLICTING("Conflicting"), 
+   enum RebaseStatus {
+        OK("OK"),
+        ABORTED("Aborted"),
+        FAST_FORWARD("Fast-forward"),
+        ALREADY_UP_TO_DATE("Already up-to-date"),
+        NOTHING_TO_COMMIT("Nothing to commit"),
+        FAILED("Failed"),
+        MERGED("Merged"),
+        CONFLICTING("Conflicting"),
         STOPPED("Stopped"),
-        UNCOMMITTED_CHANGES("Uncommitted Changes"), 
-        NOT_SUPPORTED("Not-yet-supported");
-        
+        UNCOMMITTED_CHANGES("Uncommitted Changes"),
+        NOT_SUPPORTED("Not-yet-supported"),
+        EDITED("Edited"),
+        INTERACTIVE_PREPARED("Interactive prepared"), STASH_APPLY_CONFLICTS("Stash apply conflicts");
+
         private final String value;
 
-		private RebaseStatus(String value) {
+        RebaseStatus(String value) {
             this.value = value;
         }
-		
+
         public String getValue() {
             return value;
         }
     }
-    
-    public RebaseStatus getStatus();
-	
-    /* @return files that has conflicts. Empty array if there is no conflicts */
-    public List<String> getConflicts();
-	
-    /* @return files that failed to merge. Empty array if there is aren't any */
-    public List<String> getFailed();
+
+    RebaseStatus getStatus();
+
+    void setStatus(RebaseStatus status);
+
+    RebaseResponse withStatus(RebaseStatus status);
+
+    /**
+     * Files that have conflicts.
+     *
+     * @return list of files that have conflicts. Empty collection if there are no conflicts
+     */
+    List<String> getConflicts();
+
+    void setConflicts(List<String> conflicts);
+
+    RebaseResponse withConflicts(List<String> conflicts);
+
+    /**
+     * Files that failed to merge.
+     *
+     * @return list of files that failed to merge. Empty collection if there are no failed files
+     */
+    List<String> getFailed();
+
+    void setFailed(List<String> failed);
+
+    RebaseResponse withFailed(List<String> failed);
 }
