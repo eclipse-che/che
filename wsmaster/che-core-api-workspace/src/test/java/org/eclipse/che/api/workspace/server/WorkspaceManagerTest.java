@@ -450,6 +450,8 @@ public class WorkspaceManagerTest {
     @Test
     public void shouldBeAbleToStopWorkspace() throws Exception {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
 
         workspaceManager.stopWorkspace(workspace.getId());
@@ -473,7 +475,7 @@ public class WorkspaceManagerTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Could not create a snapshot of the workspace " +
+          expectedExceptionsMessageRegExp = "Could not stop the workspace " +
                                             "'.*' because its status is 'STARTING'.")
     public void shouldFailCreatingSnapshotWhenStoppingWorkspaceWhichIsNotRunning() throws Exception {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
@@ -504,6 +506,8 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         workspace.setTemporary(true);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
 
         workspaceManager.stopWorkspace(workspace.getId());
 

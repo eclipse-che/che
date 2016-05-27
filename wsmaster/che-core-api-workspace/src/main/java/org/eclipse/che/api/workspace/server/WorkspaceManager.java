@@ -469,7 +469,7 @@ public class WorkspaceManager {
     public void createSnapshot(String workspaceId) throws NotFoundException, ServerException, ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = normalizeState(workspaceDao.get(workspaceId));
-        checkWorkspaceBeforeCreatingSnapshot(workspace);
+        checkWorkspaceIsRunning(workspace, "create a snapshot of");
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             createSnapshotSync(workspace.getRuntime(), workspace.getNamespace(), workspaceId);
         }));
@@ -558,11 +558,9 @@ public class WorkspaceManager {
      */
     @VisibleForTesting
     void performAsyncStop(WorkspaceImpl workspace) throws ConflictException {
+        checkWorkspaceIsRunning(workspace, "stop");
         final String autoSnapshotAttr = workspace.getAttributes().get(AUTO_CREATE_SNAPSHOT);
         final boolean createSnapshot = autoSnapshotAttr == null ? defaultAutoSnapshot : parseBoolean(autoSnapshotAttr);
-        if (createSnapshot) {
-            checkWorkspaceBeforeCreatingSnapshot(workspace);
-        }
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
             LOG.info("Workspace '{}:{}' with id '{}' is being stopped by user '{}'",
@@ -627,9 +625,10 @@ public class WorkspaceManager {
         return devMachineSnapshotFailMessage == null;
     }
 
-    private void checkWorkspaceBeforeCreatingSnapshot(WorkspaceImpl workspace) throws ConflictException {
+    private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
-            throw new ConflictException(format("Could not create a snapshot of the workspace '%s:%s' because its status is '%s'.",
+            throw new ConflictException(format("Could not %s the workspace '%s:%s' because its status is '%s'.",
+                                               operation,
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),
                                                workspace.getStatus()));
