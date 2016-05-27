@@ -296,31 +296,64 @@ public class WorkspaceRuntimes implements EventSubscriber<MachineStatusEvent> {
     @Override
     public void onEvent(MachineStatusEvent event) {
         if (!event.isDev()) {
+            String machineId = event.getMachineId();
             switch (event.getEventType()) {
                 case RUNNING:
+                    RuntimeDescriptor descriptor;
                     try {
-                        Queue<MachineConfigImpl> queue = startQueues.get(event.getWorkspaceId());
-                        if (queue != null && queue.stream()
-                                .anyMatch(machine -> machine.getName().equals(event.getMachineName()))) {
+                        descriptor = get(event.getWorkspaceId());
+                    } catch (NotFoundException e) {
+                        LOG.error("Attempt to add machine {} to not running or not existing workspace {}",
+                                  machineId,
+                                  event.getWorkspaceId());
+                        destroyMachine(event.getMachineId());
+                        return;
+                    }
+                    WorkspaceStatus status = descriptor.getRuntimeStatus();
+                    if (status != WorkspaceStatus.RUNNING) {
+                        LOG.warn("Attempt to add machine {} to workspace {} which is {}",
+                                 machineId,
+                                 event.getWorkspaceId(),
+                                 status);
+                        destroyMachine(event.getMachineId());
+                    }
+
+                    Queue<MachineConfigImpl> queue = startQueues.get(event.getWorkspaceId());
+                    // If queue exists then workspace is not fully started
+                    if (queue != null) {
+                        if (queue.stream().anyMatch(machine -> machine.getName().equals(event.getMachineName()))) {
                             return;
+                        } else {
+                            try {
+                                addMachine(machineId);
+                            } catch (NotFoundException | ServerException | ConflictException e) {
+                                destroyMachine(machineId);
+                            }
                         }
-                        addMachine(event.getMachineId());
-                    } catch (ServerException | ConflictException | NotFoundException exception) {
+                    } else {
                         try {
-                            machineManager.destroy(event.getMachineId(), true);
-                        } catch (NotFoundException | MachineException e) {
-                            LOG.error(exception.getLocalizedMessage(), exception);
+                            addMachine(machineId);
+                        } catch (NotFoundException | ServerException | ConflictException e) {
+                            destroyMachine(machineId);
                         }
                     }
                     break;
                 case DESTROYING:
                     try {
-                        removeMachine(event.getMachineId());
+                        removeMachine(machineId);
                     } catch (NotFoundException | MachineException exception) {
                         LOG.error(exception.getLocalizedMessage(), exception);
                     }
                     break;
             }
+        }
+    }
+
+    private void destroyMachine(String machineId) {
+        try {
+            machineManager.destroy(machineId, true);
+        } catch (NotFoundException | MachineException exception) {
+            LOG.error(exception.getLocalizedMessage(), exception);
         }
     }
 
