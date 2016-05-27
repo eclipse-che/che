@@ -105,11 +105,8 @@ public class ClasspathUpdaterService {
         RegisteredProject project = projectRegistry.getProject(projectPath);
 
         NewProjectConfig projectConfig = new NewProjectConfig(projectPath,
-                                                              project.getType(),
-                                                              project.getMixins(),
                                                               project.getName(),
-                                                              project.getDescription(),
-                                                              project.getAttributes(),
+                                                              project.getType(),
                                                               project.getSource());
         projectManager.updateProject(projectConfig);
     }

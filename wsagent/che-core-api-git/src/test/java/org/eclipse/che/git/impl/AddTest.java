@@ -70,15 +70,6 @@ public class AddTest {
         assertTrue(files.contains("testAdd"));
     }
 
-    @Test(expectedExceptions = GitException.class, dataProvider = "GitConnectionFactory", dataProviderClass =
-            GitConnectionFactoryProvider.class)
-    public void testNoAddWithWrongFilePattern(GitConnectionFactory connectionFactory) throws GitException, IOException {
-        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-        connection.add(newDto(AddRequest.class)
-                               .withFilepattern(ImmutableList.of("otherFile"))
-                               .withUpdate(false));
-    }
-
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
     public void testAddUpdate(GitConnectionFactory connectionFactory) throws GitException, IOException {
         //given

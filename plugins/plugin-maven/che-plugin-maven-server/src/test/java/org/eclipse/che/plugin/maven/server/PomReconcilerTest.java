@@ -53,7 +53,7 @@ public class PomReconcilerTest extends BaseTest {
 
     @Test
     public void testProblemPosition() throws Exception {
-        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager);
+        MavenServerService serverService = new MavenServerService(null, projectRegistry, pm, projectManager, null, null);
         FolderEntry testProject = createTestProject("A", "");
         VirtualFileEntry child = testProject.getChild("pom.xml");
         String newContent = getPomContent("<ss");

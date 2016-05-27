@@ -49,8 +49,6 @@ public class NavigateToFilePresenterTest {
     @Mock
     private NavigateToFileView       view;
     @Mock
-    private AppContext               appContext;
-    @Mock
     private EventBus                 eventBus;
     @Mock
     private MessageBusProvider       messageBusProvider;
@@ -78,12 +76,9 @@ public class NavigateToFilePresenterTest {
 
     @Before
     public void setUp() {
-        when(appContext.getCurrentProject()).thenReturn(project);
-        when(appContext.getWorkspace()).thenReturn(workspace);
         when(messageBusProvider.getMachineMessageBus()).thenReturn(messageBus);
 
         presenter = new NavigateToFilePresenter(view,
-                                                appContext,
                                                 eventBus,
                                                 dtoUnmarshallerFactory,
                                                 explorerPresenter,

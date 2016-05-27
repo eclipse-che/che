@@ -23,8 +23,6 @@ import org.testng.annotations.Test;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,28 +56,5 @@ public class TagCreateTest {
         //then
         int afterTagCount = connection.tagList(newDto(TagListRequest.class)).size();
         assertEquals(afterTagCount, beforeTagCount + 1);
-    }
-
-    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
-    public void testCreateTagForce(GitConnectionFactory connectionFactory) throws GitException, IOException {
-        //given
-        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
-        TagCreateRequest request = newDto(TagCreateRequest.class);
-        request.setName("v1");
-        request.setMessage("first version");
-        connection.tagCreate(request);
-        //when
-        try {
-            //try add same tag
-            connection.tagCreate(request);
-            fail("It is not force, should be exception.");
-        } catch (GitException ignored) {
-        }
-        //try again with force
-        request.setMessage("first version");
-        request.setForce(true);
-        connection.tagCreate(request);
-        //then
-        assertTrue(connection.tagList(newDto(TagListRequest.class)).get(0).getName().equals("v1"));
     }
 }

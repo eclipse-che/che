@@ -13,6 +13,7 @@ package org.eclipse.che.ide.websocket;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.ide.rest.HTTPHeader;
 import org.eclipse.che.ide.util.ListenerManager;
@@ -38,29 +39,19 @@ import java.util.Map;
  */
 abstract class AbstractMessageBus implements MessageBus {
     /** Period (in milliseconds) to send heartbeat pings. */
-    private final static int    HEARTBEAT_PERIOD                     = 50 * 1000;
+    private final static int    HEARTBEAT_PERIOD          = 50 * 1000;
     /** Period (in milliseconds) between reconnection attempts after connection has been closed. */
-    private final static int    FREQUENTLY_RECONNECTION_PERIOD       = 2 * 1000;
-    /**
-     * Period (in milliseconds) between reconnection attempts after all previous
-     * <code>MAX_FREQUENTLY_RECONNECTION_ATTEMPTS</code> attempts is failed.
-     */
-    private final static int    SELDOM_RECONNECTION_PERIOD           = 60 * 1000;
-    /** Max. number of attempts to reconnect for every <code>FREQUENTLY_RECONNECTION_PERIOD</code> ms. */
-    private final static int    MAX_FREQUENTLY_RECONNECTION_ATTEMPTS = 5;
-    /** Max. number of attempts to reconnect for every <code>SELDOM_RECONNECTION_PERIOD</code> ms. */
-    private final static int    MAX_SELDOM_RECONNECTION_ATTEMPTS     = 5;
-    private final static String MESSAGE_TYPE_HEADER_NAME             = "x-everrest-websocket-message-type";
+    private final static int    RECONNECTION_PERIOD       = 2 * 1000;
+    /** Max. number of attempts to reconnect for every <code>RECONNECTION_PERIOD</code> ms. */
+    private final static int    MAX_RECONNECTION_ATTEMPTS = 5;
+    private final static String MESSAGE_TYPE_HEADER_NAME  = "x-everrest-websocket-message-type";
 
     /** Timer for sending heartbeat pings to prevent autoclosing an idle WebSocket connection. */
-    private final Timer   heartbeatTimer;
+    private final Timer                                    heartbeatTimer;
     /** Timer for reconnecting WebSocket. */
-    private final Timer   frequentlyReconnectionTimer;
-    private final Timer   seldomReconnectionTimer;
-    private final Message heartbeatMessage;
-
-    private final String wsConnectionUrl;
-
+    private final Timer                                    reconnectionTimer;
+    private final Message                                  heartbeatMessage;
+    private final String                                   wsConnectionUrl;
     private final List<String>                             messages2send;
     /** Map of the message identifier to the {@link org.eclipse.che.ide.websocket.events.ReplyHandler}. */
     private final Map<String, RequestCallback>             requestCallbackMap;
@@ -70,11 +61,10 @@ abstract class AbstractMessageBus implements MessageBus {
     private final ListenerManager<ConnectionOpenedHandler> connectionOpenedHandlers;
     private final ListenerManager<ConnectionClosedHandler> connectionClosedHandlers;
     private final ListenerManager<ConnectionErrorHandler>  connectionErrorHandlers;
+    private       AsyncCallback                            reconnectionCallback;
 
     /** Counter of attempts to reconnect. */
-    private int        frequentlyReconnectionAttemptsCounter;
-    /** Counter of attempts to reconnect. */
-    private int        seldomReconnectionAttemptsCounter;
+    private int        reconnectionAttemptsCounter;
     private WebSocket  ws;
     private WsListener wsListener;
 
@@ -113,37 +103,23 @@ abstract class AbstractMessageBus implements MessageBus {
             }
         };
 
-        this.frequentlyReconnectionTimer = new Timer() {
+        this.reconnectionTimer = new Timer() {
             @Override
             public void run() {
-                if (frequentlyReconnectionAttemptsCounter == MAX_FREQUENTLY_RECONNECTION_ATTEMPTS) {
+                if (reconnectionAttemptsCounter == MAX_RECONNECTION_ATTEMPTS) {
                     cancel();
-                    seldomReconnectionTimer.scheduleRepeating(SELDOM_RECONNECTION_PERIOD);
+                    reconnectionCallback.onFailure(new Exception("The maximum number of reconnection attempts has been reached"));
                     return;
                 }
-                frequentlyReconnectionAttemptsCounter++;
-                initialize();
-            }
-        };
-
-        this.seldomReconnectionTimer = new Timer() {
-            @Override
-            public void run() {
-                if (seldomReconnectionAttemptsCounter == MAX_SELDOM_RECONNECTION_ATTEMPTS) {
-                    cancel();
-                    return;
-                }
-                seldomReconnectionAttemptsCounter++;
+                reconnectionAttemptsCounter++;
                 initialize();
             }
         };
     }
 
     public void cancelReconnection() {
-        frequentlyReconnectionAttemptsCounter = MAX_FREQUENTLY_RECONNECTION_ATTEMPTS;
-        seldomReconnectionAttemptsCounter = MAX_SELDOM_RECONNECTION_ATTEMPTS;
-        frequentlyReconnectionTimer.cancel();
-        seldomReconnectionTimer.cancel();
+        reconnectionAttemptsCounter = MAX_RECONNECTION_ATTEMPTS;
+        reconnectionTimer.cancel();
     }
 
     private void initialize() {
@@ -153,6 +129,24 @@ abstract class AbstractMessageBus implements MessageBus {
         ws.setOnOpenHandler(wsListener);
         ws.setOnCloseHandler(wsListener);
         ws.setOnErrorHandler(wsListener);
+    }
+
+    private void handleConnectionClosure(final WebSocketClosedEvent event) {
+        connectionClosedHandlers.dispatch(new ListenerManager.Dispatcher<ConnectionClosedHandler>() {
+            @Override
+            public void dispatch(ConnectionClosedHandler listener) {
+                listener.onClose(event);
+            }
+        });
+    }
+
+    private void handleErrorConnection() {
+        connectionErrorHandlers.dispatch(new ListenerManager.Dispatcher<ConnectionErrorHandler>() {
+            @Override
+            public void dispatch(ConnectionErrorHandler listener) {
+                listener.onError();
+            }
+        });
     }
 
     /**
@@ -513,35 +507,49 @@ abstract class AbstractMessageBus implements MessageBus {
         @Override
         public void onClose(final WebSocketClosedEvent event) {
             heartbeatTimer.cancel();
-            frequentlyReconnectionTimer.scheduleRepeating(FREQUENTLY_RECONNECTION_PERIOD);
-            connectionClosedHandlers.dispatch(new ListenerManager.Dispatcher<ConnectionClosedHandler>() {
+
+            reconnectionCallback = new AsyncCallback() {
                 @Override
-                public void dispatch(ConnectionClosedHandler listener) {
-                    listener.onClose(event);
+                public void onFailure(Throwable caught) {
+                    handleConnectionClosure(event);
                 }
-            });
+
+                @Override
+                public void onSuccess(Object result) {
+
+                }
+            };
+            reconnectionTimer.schedule(RECONNECTION_PERIOD);
         }
 
         @Override
         public void onError() {
-            connectionErrorHandlers.dispatch(new ListenerManager.Dispatcher<ConnectionErrorHandler>() {
+            ReadyState state = getReadyState();
+            if (state != ReadyState.CLOSING && state != ReadyState.CLOSED) {
+                handleErrorConnection();
+                return;
+            }
+
+            reconnectionCallback = new AsyncCallback() {
                 @Override
-                public void dispatch(ConnectionErrorHandler listener) {
-                    listener.onError();
+                public void onFailure(Throwable caught) {
+                    handleErrorConnection();
                 }
-            });
+
+                @Override
+                public void onSuccess(Object result) {
+
+                }
+            };
+            reconnectionTimer.schedule(RECONNECTION_PERIOD);
         }
 
         @Override
         public void onOpen() {
             // If the any timer has been started then stop it.
-            if (frequentlyReconnectionAttemptsCounter > 0)
-                frequentlyReconnectionTimer.cancel();
-            if (seldomReconnectionAttemptsCounter > 0)
-                seldomReconnectionTimer.cancel();
+            reconnectionTimer.cancel();
 
-            frequentlyReconnectionAttemptsCounter = 0;
-            seldomReconnectionAttemptsCounter = 0;
+            reconnectionAttemptsCounter = 0;
             heartbeatTimer.scheduleRepeating(HEARTBEAT_PERIOD);
             connectionOpenedHandlers.dispatch(new ListenerManager.Dispatcher<ConnectionOpenedHandler>() {
                 @Override
@@ -559,7 +567,6 @@ abstract class AbstractMessageBus implements MessageBus {
                 Log.error(MessageBusImpl.class, e);
             }
         }
-
     }
 
 }

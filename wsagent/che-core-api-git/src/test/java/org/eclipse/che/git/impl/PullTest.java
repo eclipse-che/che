@@ -35,6 +35,7 @@ import java.util.Arrays;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -84,7 +85,7 @@ public class PullTest {
             throws ServerException, URISyntaxException, IOException, UnauthorizedException {
         //given
         //create new repository clone of default
-        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
 
         connection2.clone(newDto(CloneRequest.class).withRemoteUri(connection.getWorkingDir().getAbsolutePath()));
@@ -100,14 +101,14 @@ public class PullTest {
                                  .withRefSpec("refs/heads/b1:refs/heads/b1")
                                  .withTimeout(-1));
         int branchesAfter = connection2.branchList(newDto(BranchListRequest.class).withListMode(BranchListRequest.LIST_LOCAL)).size();
-        assertEquals(branchesAfter, branchesBefore + 2);
+        assertEquals(branchesAfter, branchesBefore + 1);
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
     public void testPullRemote(GitConnectionFactory connectionFactory)
             throws GitException, IOException, URISyntaxException, UnauthorizedException {
         //given
-        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         String branchName = "remoteBranch";
         connection.checkout(newDto(CheckoutRequest.class).withCreateNew(true).withName(branchName));
         addFile(connection, "remoteFile", "");
@@ -138,25 +139,5 @@ public class PullTest {
         //when
         PullRequest request = newDto(PullRequest.class);
         connection.pull(request);
-    }
-
-    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
-            expectedExceptions = UnauthorizedException.class, expectedExceptionsMessageRegExp = "fatal: '" + UNKNOWN + "' does not appear to be a git repository\n" +
-            "fatal: Could not read from remote repository.\n" +
-            "\n" +
-            "Please make sure you have the correct access rights\n" +
-            "and the repository exists.\n")
-    public void testWithUnknownRemote(GitConnectionFactory connectionFactory) throws Exception {
-        //given
-        //create new repository clone of default
-        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-        GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
-        connection2.clone(newDto(CloneRequest.class)
-                .withRemoteUri(connection.getWorkingDir().getAbsolutePath()));
-        addFile(connection, "newfile1", "new file1 content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Test commit"));
-        //when
-        connection2.pull(newDto(PullRequest.class).withRemote(UNKNOWN).withTimeout(-1));
     }
 }

@@ -24,6 +24,7 @@ import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -79,6 +80,17 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
                                           return downloaded;
                                       }
                                   });
+    }
+
+    @Override
+    public Promise<Void> reimportDependencies(@NotNull List<String> projectsPaths) {
+        StringBuilder queryParameters = new StringBuilder();
+        for (String path : projectsPaths) {
+            queryParameters.append("&projectPath=").append(path);
+        }
+        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + servicePath + "reimport" +
+                           queryParameters.toString().replaceFirst("&", "?");
+        return asyncRequestFactory.createPutRequest(url, null).send();
     }
 
     @Override

@@ -15,7 +15,7 @@ import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
-import org.eclipse.che.git.impl.nativegit.GitUrl;
+import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.plugin.ssh.key.script.SshScript;
 import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
@@ -62,7 +62,7 @@ public abstract class RemoteOperationCommand<T> extends GitCommand<T> {
 
     @Override
     protected void start() throws GitException {
-        if (GitUrl.isSSH(remoteUri)) {
+        if (GitUrlUtils.isSSH(remoteUri)) {
             SshScript sshScript = getSshScript();
             setCommandEnvironment("GIT_SSH", sshScript.getSshScriptFile().getAbsolutePath());
 
