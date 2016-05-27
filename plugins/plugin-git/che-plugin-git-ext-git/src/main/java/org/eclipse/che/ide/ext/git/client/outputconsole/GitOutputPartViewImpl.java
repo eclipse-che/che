@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.outputconsole;
 
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.user.client.DOM;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
@@ -25,6 +28,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ui.button.ConsoleButton;
 import org.eclipse.che.ide.ui.button.ConsoleButtonFactory;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -49,10 +53,10 @@ public class GitOutputPartViewImpl extends Composite implements GitOutputPartVie
     FlowPanel buttons;
 
     @UiField
-    FlowPanel consoleArea;
+    ScrollPanel scrollPanel;
 
     @UiField
-    ScrollPanel scrollPanel;
+    FlowPanel consoleLines;
 
     @Inject
     public GitOutputPartViewImpl(GitLocalizationConstant constant,
@@ -82,31 +86,29 @@ public class GitOutputPartViewImpl extends Composite implements GitOutputPartVie
     /** {@inheritDoc} */
     @Override
     public void print(String text) {
-        String preStyle = " style='margin:0px; font-size: 12px;' ";
-
-        HTML html = new HTML();
-        html.setHTML("<pre" + preStyle + ">" + SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</pre>");
-        html.getElement().setAttribute("style", "padding-left: 2px;");
-
-        consoleArea.add(html);
+        PreElement pre = DOM.createElement("pre").cast();
+        pre.setInnerText(text.isEmpty() ? "&nbsp;" : text);
+        consoleLines.getElement().appendChild(pre);
     }
 
     @Override
     public void print(String text, String color) {
-        String preStyle = " style='margin:0px; font-size: 12px;' ";
+        PreElement pre = DOM.createElement("pre").cast();
+        pre.setInnerText(text.isEmpty() ? "&nbsp;" : text);
 
-        HTML html = new HTML();
-        html.setHTML("<pre" + preStyle + "><span style='color:" + SimpleHtmlSanitizer.sanitizeHtml(color).asString() +
-                     ";'>" + SimpleHtmlSanitizer.sanitizeHtml(text).asString() + "</span></pre>");
+        try {
+            pre.getStyle().setColor(SimpleHtmlSanitizer.sanitizeHtml(color).asString());
+        } catch (Exception e) {
+            Log.error(getClass(), "Unable to set color [" + color + "]", e);
+        }
 
-        html.getElement().setAttribute("style", "padding-left: 2px;");
-        consoleArea.add(html);
+        consoleLines.getElement().appendChild(pre);
     }
 
     /** {@inheritDoc} */
     @Override
     public void clear() {
-        consoleArea.clear();
+        consoleLines.clear();
     }
 
     /** {@inheritDoc} */

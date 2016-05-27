@@ -248,7 +248,6 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("view.targets.delete.error")
     String targetsViewDeleteError(String target);
 
-
     @Key("process.active")
     String processActive();
 
@@ -380,6 +379,23 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("view.consoles.title")
     String viewConsolesTitle();
+
+
+    @Key("consoles.reRunButton.tooltip")
+    String consolesReRunButtonTooltip();
+
+    @Key("consoles.stopButton.tooltip")
+    String consolesStopButtonTooltip();
+
+    @Key("consoles.clearOutputsButton.tooltip")
+    String consolesClearOutputsButtonTooltip();
+
+    @Key("consoles.wrapTextButton.tooltip")
+    String consolesWrapTextButtonTooltip();
+
+    @Key("consoles.autoScrollButton.tooltip")
+    String consolesAutoScrollButtonTooltip();
+
 
     @Key("view.processes.tooltip")
     String viewProcessesTooltip();

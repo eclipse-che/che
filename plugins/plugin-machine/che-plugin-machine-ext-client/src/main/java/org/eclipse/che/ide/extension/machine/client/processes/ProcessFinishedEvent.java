@@ -8,16 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.processes.event;
+package org.eclipse.che.ide.extension.machine.client.processes;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
 /**
  * @author Dmitry Shnurenko
  */
-public class ProcessFinishedEvent extends GwtEvent<ProcessFinishedHandler> {
+public class ProcessFinishedEvent extends GwtEvent<ProcessFinishedEvent.Handler> {
 
-    public static final Type<ProcessFinishedHandler> TYPE = new Type<>();
+    public interface Handler extends EventHandler {
+
+        /** Implement this method to handle ProcessFinishedEvent. */
+        void onProcessFinished(ProcessFinishedEvent event);
+
+    }
+
+    public static final Type<ProcessFinishedEvent.Handler> TYPE = new Type<>();
 
     private final String processID;
 
@@ -30,12 +38,12 @@ public class ProcessFinishedEvent extends GwtEvent<ProcessFinishedHandler> {
     }
 
     @Override
-    public Type<ProcessFinishedHandler> getAssociatedType() {
+    public Type<ProcessFinishedEvent.Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(ProcessFinishedHandler handler) {
+    protected void dispatch(Handler handler) {
         handler.onProcessFinished(this);
     }
 
