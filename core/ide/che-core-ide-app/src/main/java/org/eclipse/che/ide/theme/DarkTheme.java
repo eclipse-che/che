@@ -767,6 +767,36 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String consolesToolbarBackground() {
+        return "#21252B";
+    }
+
+    @Override
+    public String colsolesToolbarBorderColor() {
+        return "#121416";
+    }
+
+    @Override
+    public String consolesToolbarButtonColor() {
+        return "#aaaaaa";
+    }
+
+    @Override
+    public String consolesToolbarHoveredButtonColor() {
+        return "#e0e0e0";
+    }
+
+    @Override
+    public String consolesToolbarDisabledButtonColor() {
+        return "#777777";
+    }
+
+    @Override
+    public String consolesToolbarToggledButtonColor() {
+        return "rgba(0, 0, 0, 0.6)";
+    }
+
+    @Override
     public String processTreeDevLabel() {
         return "white";
     }

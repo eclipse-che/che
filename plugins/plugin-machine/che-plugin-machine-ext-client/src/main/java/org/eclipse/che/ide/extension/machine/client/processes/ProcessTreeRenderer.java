@@ -298,7 +298,6 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         return stopProcessButton;
     }
 
-
     @Override
     public void updateNodeContents(TreeNodeElement<ProcessTreeNode> treeNode) {
     }

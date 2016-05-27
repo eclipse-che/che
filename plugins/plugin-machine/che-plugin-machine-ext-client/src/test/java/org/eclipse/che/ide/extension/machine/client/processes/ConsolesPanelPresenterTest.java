@@ -45,7 +45,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.extension.machine.client.processes.event.ProcessFinishedEvent;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.junit.Before;

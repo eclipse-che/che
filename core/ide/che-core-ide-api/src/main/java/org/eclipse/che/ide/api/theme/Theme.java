@@ -994,6 +994,48 @@ public interface Theme {
     String processTreeBackgroundColor();
 
     /**
+     * Background color for toolbar in consoles panel.
+     *
+     * @return color
+     */
+    String consolesToolbarBackground();
+
+    /**
+     * Border color for consoles toolbar border.
+     *
+     * @return color
+     */
+    String colsolesToolbarBorderColor();
+
+    /**
+     * Button color on consoles toolbar.
+     *
+     * @return color
+     */
+    String consolesToolbarButtonColor();
+
+    /**
+     * Hovered button color on consoles toolbar.
+     *
+     * @return color
+     */
+    String consolesToolbarHoveredButtonColor();
+
+    /**
+     * Disabled button on the consoles toolbar.
+     *
+     * @return color
+     */
+    String consolesToolbarDisabledButtonColor();
+
+    /**
+     * Toggled button on the consoles toolbar.
+     *
+     * @return color
+     */
+    String consolesToolbarToggledButtonColor();
+
+    /**
      * Text color for DEV label in process tree.
      *
      * @return color
