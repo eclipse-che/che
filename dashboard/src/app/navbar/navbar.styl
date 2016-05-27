@@ -68,6 +68,16 @@ che-nav-bar
   min-height 0
   margin-top -4px
 
+.admin-navbar-menu
+  .navbar-section span.navbar-section-title
+    padding-top 16px
+    padding-left 10px
+    text-transform uppercase
+    font-size 0.9em
+    white-space nowrap
+  .navbar-section + md-list
+    padding-top 2px
+
 /* text color */
 .admin-navbar-menu .navbar-header,
 .admin-navbar-menu .navbar-identity,
@@ -77,6 +87,9 @@ che-nav-bar
 
 .admin-navbar-menu md-list-item a.md-button span.admin-navbar-menu-workspaces-number
   color $navbar-menu-dark-text-color
+
+.admin-navbar-menu .navbar-section span.navbar-section-title
+  color $navbar-section-title-color
 
 .admin-navbar-menu section a.md-button .navbar-icon,
 .navbar-submenu-content a.md-button .navbar-icon
