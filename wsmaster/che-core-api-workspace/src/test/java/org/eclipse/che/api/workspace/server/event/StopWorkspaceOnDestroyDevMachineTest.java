@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Shnurenko
  */
 @Listeners(MockitoTestNGListener.class)
-public class MachineStateListenerTest {
+public class StopWorkspaceOnDestroyDevMachineTest {
 
     @Mock
     private WorkspaceManager workspaceManager;
@@ -45,7 +45,7 @@ public class MachineStateListenerTest {
     private WorkspaceImpl      workspace;
 
     @InjectMocks
-    private MachineStateListener listener;
+    private StopWorkspaceOnDestroyDevMachine listener;
 
     @Test
     public void workspaceShouldNotBeStoppedWhenStoppedMachineIsNotDev() throws Exception {

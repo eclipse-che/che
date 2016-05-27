@@ -75,7 +75,7 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
-        bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
+        bind(org.eclipse.che.api.workspace.server.event.StopWorkspaceOnDestroyDevMachine.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
                 .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);

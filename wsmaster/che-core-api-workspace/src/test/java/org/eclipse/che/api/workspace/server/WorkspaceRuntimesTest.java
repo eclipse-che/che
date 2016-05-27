@@ -54,6 +54,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yevhenii Voevodin
@@ -62,12 +63,15 @@ import static org.testng.Assert.assertNotNull;
 public class WorkspaceRuntimesTest {
 
     private static final String WORKSPACE_ID = "workspace123";
+    private static final String MACHINE_ID   = "machine123";
 
     @Mock
     private MachineManager machineManagerMock;
 
     @Mock
     private EventService eventService;
+    @Mock
+    private MachineImpl  machine;
 
     private WorkspaceRuntimes runtimes;
 
@@ -404,6 +408,42 @@ public class WorkspaceRuntimesTest {
         } catch (MachineException ex) {
             verify(runtimes).publishEvent(EventType.ERROR, workspace.getId(), ex.getLocalizedMessage());
         }
+    }
+
+    @Test
+    public void shouldAddNewMachineIntoRuntime() throws NotFoundException, ServerException, ConflictException {
+        final WorkspaceImpl workspace = createWorkspace();
+        final MachineImpl machine = createMachine(new MachineConfigImpl());
+
+        when(machineManagerMock.getMachine(MACHINE_ID)).thenReturn(machine);
+
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+
+        runtimes.addMachine(MACHINE_ID);
+
+        assertTrue(runtimes.get(WORKSPACE_ID)
+                           .getRuntime()
+                           .getMachines()
+                           .contains(machine));
+    }
+
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = "Could not perform operation because application server is stopping")
+    public void shouldThrowServerExceptionIfAddMachineAfterPreDestroy() throws NotFoundException, ServerException, ConflictException {
+        when(machineManagerMock.getMachine(MACHINE_ID)).thenReturn(machine);
+        when(machine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+
+        runtimes.cleanup();
+
+        runtimes.addMachine(MACHINE_ID);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionIfWorkspaceIsNotRunningWhenAddMachine() throws NotFoundException, ServerException, ConflictException {
+        when(machineManagerMock.getMachine(MACHINE_ID)).thenReturn(machine);
+        when(machine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+
+        runtimes.addMachine(MACHINE_ID);
     }
 
     private static MachineImpl createMachine(MachineConfig cfg) {
