@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.commons.subject;
 
-import javax.ws.rs.ForbiddenException;
+import org.eclipse.che.api.core.ForbiddenException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;

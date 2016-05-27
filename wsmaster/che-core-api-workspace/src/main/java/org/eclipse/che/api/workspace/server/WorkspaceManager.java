@@ -246,22 +246,22 @@ public class WorkspaceManager {
     }
 
     /**
-     * Gets all user's workspaces(workspaces where user is owner).
+     * Gets list of workspaces which user can read
      *
      * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
      * or status defined by their runtime instances(if those exist).
      *
-     * @param namespace
-     *         the id of the user whose workspaces should be fetched
-     * @return the list of workspaces or empty list if user doesn't own any workspace
+     * @param user
+     *         the id of the user
+     * @return the list of workspaces or empty list if user can't read any workspace
      * @throws NullPointerException
      *         when {@code owner} is null
      * @throws ServerException
-     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
+     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getWorkspaces(String)}
      */
-    public List<WorkspaceImpl> getWorkspaces(String namespace) throws ServerException {
-        requireNonNull(namespace, "Required non-null workspace namespace");
-        final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
+    public List<WorkspaceImpl> getWorkspaces(String user) throws ServerException {
+        requireNonNull(user, "Required non-null user id");
+        final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
         workspaces.forEach(this::normalizeState);
         return workspaces;
     }
@@ -701,9 +701,9 @@ public class WorkspaceManager {
         if (parts.length == 1) {
             return workspaceDao.get(key);
         }
-        final String userName = parts[0];
+        final String userId = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userName.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userName).getId();
+        final String ownerId = userId.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userId).getId();
         return workspaceDao.get(wsName, ownerId);
     }
 

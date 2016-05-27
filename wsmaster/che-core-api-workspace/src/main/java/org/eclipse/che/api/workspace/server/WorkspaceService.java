@@ -179,7 +179,7 @@ public class WorkspaceService extends Service {
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
     @GenerateLink(rel = LINK_REL_GET_WORKSPACES)
-    @ApiOperation(value = "Get the workspaces owned by the current user",
+    @ApiOperation(value = "Get workspaces which user can read",
                   notes = "This operation can be performed only by authorized user",
                   response = WorkspaceDto.class,
                   responseContainer = "List")

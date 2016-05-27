@@ -47,7 +47,6 @@ import static org.testng.Assert.assertNotNull;
 public class LocalRecipeDaoImplTest {
 
     private static Gson GSON = new GsonBuilder().setPrettyPrinting()
-                                                .registerTypeAdapter(InstanceKey.class, new InstanceKeyAdapter())
                                                 .create();
 
     private LocalRecipeDaoImpl recipeDao;
