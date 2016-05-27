@@ -1,16 +1,13 @@
 <div class="admin-navbar-menu recent-workspaces"
      ng-show="navbarRecentWorkspacesCtrl.getRecentWorkspaces().length">
-  <section class="left-sidebar-menu" layout="column" layout-align="center center">
+  <section class="left-sidebar-menu" layout="column" layout-align="start start">
+
+    <div class="navbar-section"
+         flex layout="row" layout-align="start start">
+      <span flex class="navbar-section-title">Recent workspaces</span>
+    </div>
+
     <md-list layout="column">
-
-      <md-list-item flex class="navbar-subsection-item">
-        <div flex layout-align="left">
-          <div layout="row" layout-align="start center">
-            <span class="recent-workspaces-section-caption">Recent workspaces</span>
-          </div>
-        </div>
-      </md-list-item>
-
       <md-list-item flex class="navbar-subsection-item"
                     ng-repeat="workspace in navbarRecentWorkspacesCtrl.getRecentWorkspaces() | orderBy:'attributes.updated':'reverse' | limitTo:'5'"
                     ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesCtrl.isOpen(workspace.id)}">
