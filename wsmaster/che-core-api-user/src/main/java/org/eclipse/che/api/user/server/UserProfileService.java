@@ -14,6 +14,7 @@ package org.eclipse.che.api.user.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.Description;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.notification.ProfileUpdatedEvent;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
@@ -93,12 +95,14 @@ public class UserProfileService extends Service {
     private final UserProfileDao profileDao;
     private final UserDao        userDao;
     private final PreferenceDao  preferenceDao;
+    private final EventService   eventService;
 
     @Inject
-    public UserProfileService(UserProfileDao profileDao, PreferenceDao preferenceDao, UserDao userDao) {
+    public UserProfileService(UserProfileDao profileDao, PreferenceDao preferenceDao, UserDao userDao, EventService eventService) {
         this.profileDao = profileDao;
         this.userDao = userDao;
         this.preferenceDao = preferenceDao;
+        this.eventService = eventService;
     }
 
     /**
@@ -178,6 +182,7 @@ public class UserProfileService extends Service {
         profile.getAttributes().putAll(updates);
         profileDao.update(profile);
         logEventUserUpdateProfile(user, profile.getAttributes());
+        eventService.publish(new ProfileUpdatedEvent(profile));
         return toDescriptor(profile, context);
     }
 
@@ -214,6 +219,7 @@ public class UserProfileService extends Service {
         profileDao.update(profile);
         final User user = userDao.getById(profile.getUserId());
         logEventUserUpdateProfile(user, profile.getAttributes());
+        eventService.publish(new ProfileUpdatedEvent(profile));
         return toDescriptor(profile, context);
     }
 
