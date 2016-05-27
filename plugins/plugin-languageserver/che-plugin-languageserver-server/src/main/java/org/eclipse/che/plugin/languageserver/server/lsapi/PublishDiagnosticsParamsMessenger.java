@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import io.typefox.lsapi.PublishDiagnosticsParams;
+import io.typefox.lsapi.PublishDiagnosticsParamsImpl;
 
 @Singleton
 public class PublishDiagnosticsParamsMessenger implements EventSubscriber<PublishDiagnosticsParams> {
@@ -32,6 +33,9 @@ public class PublishDiagnosticsParamsMessenger implements EventSubscriber<Publis
 
     public void onEvent(final PublishDiagnosticsParams event) {
         try {
+            if (event instanceof PublishDiagnosticsParamsImpl && event.getUri().startsWith("file:///projects")) {
+                ((PublishDiagnosticsParamsImpl)event).setUri(event.getUri().substring(16));
+            }
             final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
             bm.setChannel("languageserver/textDocument/publishDiagnostics");
             bm.setBody(new Gson().toJson(event));

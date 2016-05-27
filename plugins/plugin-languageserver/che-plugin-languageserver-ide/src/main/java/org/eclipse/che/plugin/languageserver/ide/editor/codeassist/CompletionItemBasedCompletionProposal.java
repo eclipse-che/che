@@ -72,12 +72,17 @@ class CompletionItemBasedCompletionProposal implements CompletionProposal {
         @Override
         public void apply(Document document) {
             //TODO in general resolve completion item may not provide getTextEdit, need to add checks
-            RangeDTO range = completionItem.getTextEdit().getRange();
-            int startOffset = document.getIndexFromPosition(
-                    new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
-            int endOffset = document
-                    .getIndexFromPosition(new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
-            document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
+            if (completionItem.getTextEdit() != null) {
+                RangeDTO range = completionItem.getTextEdit().getRange();
+                int startOffset = document.getIndexFromPosition(
+                        new TextPosition(range.getStart().getLine(), range.getStart().getCharacter()));
+                int endOffset = document
+                        .getIndexFromPosition(new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
+                document.replace(startOffset, endOffset - startOffset, completionItem.getTextEdit().getNewText());
+            } else {
+                String insertText = completionItem.getInsertText()==null?completionItem.getLabel():completionItem.getInsertText();
+                document.replace(document.getCursorOffset(), 0, insertText);
+            }
         }
 
         @Override

@@ -34,12 +34,17 @@ public class TextDocumentServiceImpl {
     public TextDocumentServiceImpl(LanguageServerRegistry languageServerRegistry) {
         this.languageServerRegistry = languageServerRegistry;
     }
+    
+    private String prefixURI(String relativePath) {
+        return "file:///projects"+relativePath;
+    }
 
     @POST
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) {
+        textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         List<? extends CompletionItem> completion = server.getTextDocumentService()
                                                           .completion(textDocumentPositionParams);
@@ -60,6 +65,7 @@ public class TextDocumentServiceImpl {
     @Path("didChange")
     @Consumes(MediaType.APPLICATION_JSON)
     public void didChange(DidChangeTextDocumentParamsDTO change) {
+        change.getTextDocument().setUri(prefixURI(change.getTextDocument().getUri()));
         LanguageServer server = getServer(change.getTextDocument().getUri());
         server.getTextDocumentService().didChange(change);
     }
@@ -68,6 +74,7 @@ public class TextDocumentServiceImpl {
     @Path("didOpen")
     @Consumes(MediaType.APPLICATION_JSON)
     public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
+        openEvent.getTextDocument().setUri(prefixURI(openEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
         server.getTextDocumentService().didOpen(openEvent);
     }
@@ -76,6 +83,7 @@ public class TextDocumentServiceImpl {
     @Path("didClose")
     @Consumes(MediaType.APPLICATION_JSON)
     public void didClose(DidCloseTextDocumentParamsDTO closeEvent) {
+        closeEvent.getTextDocument().setUri(prefixURI(closeEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(closeEvent.getTextDocument().getUri());
         server.getTextDocumentService().didClose(closeEvent);
     }
@@ -84,6 +92,7 @@ public class TextDocumentServiceImpl {
     @Path("didSave")
     @Consumes(MediaType.APPLICATION_JSON)
     public void didSave(DidSaveTextDocumentParamsDTO saveEvent) {
+        saveEvent.getTextDocument().setUri(prefixURI(saveEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(saveEvent.getTextDocument().getUri());
         server.getTextDocumentService().didSave(saveEvent);
     }
