@@ -56,9 +56,9 @@
         </che-panel>
         <che-panel che-title="Delete Project">
           <div layout="row" flex layout-align="space-around start">
-            <label flex="15"></label>
+            <label flex flex-gt-xs="15"></label>
 
-            <div layout="column" flex="85">
+            <div layout="column" flex-xs="none" flex-gt-xs="85">
               <che-button-danger che-button-title="Delete" ng-click="projectDetailsCtrl.deleteProject($event)"/>
             </div>
           </div>

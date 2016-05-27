@@ -58,7 +58,7 @@ export class CheInput {
       var pattern = attrs.chePattern;
 
       var template = '<div class="che-input">'
-          + '<md-input-container hide-gt-md>'
+          + '<md-input-container hide-gt-xs>'
           + '<label>' + labelName + '</label>'
           + '<input type="text" name="' + inputName + '"';
       if (attrs.chePattern) {
@@ -70,7 +70,7 @@ export class CheInput {
           + '<div ng-messages="myForm.' + inputName + '.$error"></div>'
           + '</md-input-container>'
           + ''
-          + '    <div class="che-input-desktop" hide-xs hide-sm hide-md layout="column" flex>'
+          + '    <div class="che-input-desktop" hide-xs layout="column" flex>'
           + '<div layout="row" flex layout-align="space-around start">'
           + ' <label flex="15" class="che-input-desktop-label" ng-if="labelName">' + labelName + ': </label>'
           + ''
