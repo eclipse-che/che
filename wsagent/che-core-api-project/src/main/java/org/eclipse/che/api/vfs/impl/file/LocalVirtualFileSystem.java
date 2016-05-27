@@ -243,7 +243,7 @@ public class LocalVirtualFileSystem implements VirtualFileSystem {
         return newArrayList(path.elements()).contains(".vfs");
     }
 
-    List<VirtualFile> getChildren(LocalVirtualFile parent, VirtualFileFilter filter) throws ServerException {
+    synchronized List<VirtualFile> getChildren(LocalVirtualFile parent, VirtualFileFilter filter) throws ServerException {
         if (parent.isFolder()) {
             final List<VirtualFile> children = doGetChildren(parent, DOT_VFS_DIR_FILTER, filter);
             Collections.sort(children);

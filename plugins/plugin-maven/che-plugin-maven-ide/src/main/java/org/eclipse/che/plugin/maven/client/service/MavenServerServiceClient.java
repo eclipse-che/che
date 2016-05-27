@@ -44,6 +44,14 @@ public interface MavenServerServiceClient {
     Promise<Boolean> downloadSources(String projectPath, String fqn);
 
     /**
+     * Invokes reimporting maven dependencies.
+     *
+     * @param projectsPaths
+     *         the paths to projects which need to be reimported dependencies
+     */
+    Promise<Void> reimportDependencies(List<String> projectsPaths);
+
+    /**
      * Invokes reconciling for pom.xml file
      * @param pomPath tha path to pom.xml file
      * @return list of problems if any

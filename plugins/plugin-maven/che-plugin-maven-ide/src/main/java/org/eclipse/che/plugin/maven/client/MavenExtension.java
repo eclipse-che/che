@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
-import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.extension.Extension;
@@ -23,6 +22,8 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.plugin.maven.client.actions.GetEffectivePomAction;
+import org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants;
+import org.eclipse.che.plugin.maven.client.actions.ReimportMavenDependenciesAction;
 import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
@@ -32,8 +33,10 @@ import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_BUILD_CONTEXT_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL;
+import static org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants.MAVEN_GROUP_CONTEXT_MENU_ID;
+import static org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants.MAVEN_GROUP_CONTEXT_MENU_NAME;
 
 /**
  * Maven extension entry point.
@@ -44,11 +47,14 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL
 @Extension(title = "Maven", version = "3.0.0")
 public class MavenExtension {
     private static List<MavenArchetype> archetypes;
+    private final  MavenResources       resources;
 
     @Inject
     public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager,
                           MavenMessagesHandler messagesHandler,
-                          ClassFileSourcesDownloader downloader) {
+                          ClassFileSourcesDownloader downloader,
+                          MavenResources resources) {
+        this.resources = resources;
 
         preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
 
@@ -65,17 +71,29 @@ public class MavenExtension {
     @Inject
     private void prepareActions(ActionManager actionManager,
                                 DependencyResolverAction dependencyResolverAction,
-                                GetEffectivePomAction getEffectivePomAction) {
+                                GetEffectivePomAction getEffectivePomAction,
+                                ReimportMavenDependenciesAction reimportMavenDependenciesAction) {
         // register actions
         actionManager.registerAction("getEffectivePom", getEffectivePomAction);
+        actionManager.registerAction("reimportMavenDependenciesAction", reimportMavenDependenciesAction);
 
         // add actions in main menu
-        DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_ASSISTANT);
+        DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
         assistantGroup.add(getEffectivePomAction, Constraints.LAST);
 
+        // create maven context menu
+        DefaultActionGroup mavenContextMenuGroup = new DefaultActionGroup(MAVEN_GROUP_CONTEXT_MENU_NAME, true, actionManager);
+        actionManager.registerAction(MAVEN_GROUP_CONTEXT_MENU_ID, mavenContextMenuGroup);
+        mavenContextMenuGroup.getTemplatePresentation().setSVGResource(resources.maven());
+
+        // add maven context menu to main context menu
+        DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
+        mainContextMenuGroup.addSeparator();
+        mainContextMenuGroup.add(mavenContextMenuGroup, Constraints.LAST);
+
         // add actions in context menu
-        DefaultActionGroup buildContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_BUILD_CONTEXT_MENU);
-        buildContextMenuGroup.addSeparator();
+        mavenContextMenuGroup.add(reimportMavenDependenciesAction);
+        mavenContextMenuGroup.addSeparator();
 
         // add resolver widget on right part of bottom panel
         final DefaultActionGroup rightStatusPanelGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);

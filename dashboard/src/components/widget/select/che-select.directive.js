@@ -31,25 +31,19 @@ export class CheSelect {
     // scope values
     this.scope = {
       value: '=cheValue',
-      selectName: '@cheName',
       labelName: '@cheLabelName',
       placeHolder: '@chePlaceHolder',
-      size: '@cheSize',
       optionValues: '=cheOptionValues'
     };
-
   }
 
-
   compile(element, attrs) {
-
-    var keys = Object.keys(attrs);
+    let keys = Object.keys(attrs);
 
     // search the select field
-    var selectElements = element.find('select');
+    let selectElements = element.find('md-select');
 
     keys.forEach((key) => {
-
       // don't reapply internal properties
       if (key.indexOf('$') === 0) {
         return;
@@ -58,92 +52,19 @@ export class CheSelect {
       if (key.indexOf('che') === 0) {
         return;
       }
-      // avoid model
-      if (key === 'ngModel') {
+      // don't reapply class
+      if (key.indexOf('class') === 0) {
         return;
       }
-      var value = attrs[key];
-
-      // handle empty values as boolean
-      if (value === '') {
-        value = 'true';
+      // don't reapply model
+      if (key.indexOf('ngModel') !== -1) {
+        return;
       }
 
       // set the value of the attribute
-      selectElements.attr(attrs.$attr[key], value);
-
+      selectElements.attr(attrs.$attr[key], attrs[key] !== '' ? attrs[key] : 'true');
       element.removeAttr(attrs.$attr[key]);
-
     });
-
-
-  }
-
-
-  /**
-   * Keep reference to the model controller
-   */
-  link($scope, element) {
-    // search the select field
-    var selectElements = element.find('select');
-
-    let optionValuesContent = '';
-    $scope.optionValues.forEach((optionValue) => {
-      optionValuesContent += '<option  value=\'' + (optionValue.id ? optionValue.id : optionValue.name) + '\'>' + optionValue.name + '</option>';
-    });
-    // Append the value elements in the select element. The operation is performed after rendering the page.
-    // It is important for the speed of loading
-    selectElements.append(optionValuesContent);
-    //update current state when widget is ready
-    if ($scope.value) {
-      angular.forEach(selectElements, (selectElement) => {
-        //Sets current value
-        selectElement.value = $scope.value;
-      });
-    }
-
-    $scope.$watch('value', (newVal) => {
-      if (newVal === '' || typeof newVal === 'undefined') {
-        selectElements.addClass('disabled');
-      } else {
-        selectElements.removeClass('disabled');
-      }
-      if ($scope.valueModel !== newVal) {
-        angular.forEach(selectElements, (selectElement) => {
-          //Sets current value
-          selectElement.value = $scope.value;
-        });
-      }
-    });
-
-    $scope.$watch('valueModel', (newVal) => {
-      if (typeof newVal !== 'undefined' && $scope.value !== newVal) {
-        $scope.value = newVal;
-        $scope.hideOptions();
-      }
-    });
-
-    $scope.showOptions = function () {
-      let size = $scope.size;
-      let valuesLength = $scope.optionValues.length;
-
-      if (!size || size < 2) {
-        // set default value
-        size = 10;
-      }
-      if(size >= valuesLength) {
-        size = valuesLength;
-        selectElements.addClass('che-select-overflow-hidden');
-      }
-      selectElements.attr('size', size);
-      selectElements.addClass('che-select-border');
-    };
-
-    $scope.hideOptions = function () {
-      selectElements.attr('size', 0);
-      selectElements.removeClass('che-select-border');
-    };
-
   }
 
 }

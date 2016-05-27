@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.maven.server.core;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -20,7 +21,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.ProjectDeletedEvent;
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathHelper;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
@@ -55,11 +55,10 @@ public class MavenWorkspace {
 
     private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
-    private final MavenProjectManager manager;
-    private final ProjectManager      projectManager;
-    private final ProjectRegistry     projectRegistry;
-    private final MavenCommunication  communication;
-    private final ClasspathManager    classpathManager;
+    private final MavenProjectManager       manager;
+    private final Provider<ProjectRegistry> projectRegistryProvider;
+    private final MavenCommunication        communication;
+    private final ClasspathManager          classpathManager;
 
     private MavenTaskExecutor resolveExecutor;
     private MavenTaskExecutor classPathExecutor;
@@ -71,17 +70,15 @@ public class MavenWorkspace {
     public MavenWorkspace(MavenProjectManager manager,
                           MavenProgressNotifier notifier,
                           MavenExecutorService executorService,
-                          ProjectRegistry projectRegistry,
+                          Provider<ProjectRegistry> projectRegistryProvider,
                           MavenCommunication communication,
                           ClasspathManager classpathManager,
-                          ProjectManager projectManager,
                           EventService eventService,
                           EclipseWorkspaceProvider workspaceProvider) {
-        this.projectRegistry = projectRegistry;
+        this.projectRegistryProvider = projectRegistryProvider;
         this.communication = communication;
         this.classpathManager = classpathManager;
         this.manager = manager;
-        this.projectManager = projectManager;
         resolveExecutor = new MavenTaskExecutor(executorService, notifier);
         eventService.subscribe(new EventSubscriber<ProjectDeletedEvent>() {
             @Override
@@ -124,7 +121,7 @@ public class MavenWorkspace {
                      .forEach(project -> {
                          try {
                              String path = project.getProject().getFullPath().toOSString();
-                             projectRegistry.setProjectType(path, MAVEN_ID, false);
+                             projectRegistryProvider.get().setProjectType(path, MAVEN_ID, false);
                          } catch (ConflictException | ServerException | NotFoundException e) {
                              LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
                          }
@@ -135,7 +132,7 @@ public class MavenWorkspace {
     private void removeProjects(List<MavenProject> removed) {
         removed.forEach(project -> {
             try {
-                projectRegistry.removeProjectType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
+                projectRegistryProvider.get().removeProjectType(project.getProject().getFullPath().toOSString(), MAVEN_ID);
             } catch (ServerException | ForbiddenException | ConflictException | NotFoundException e) {
                 LOG.error(e.getMessage(), e);
             }

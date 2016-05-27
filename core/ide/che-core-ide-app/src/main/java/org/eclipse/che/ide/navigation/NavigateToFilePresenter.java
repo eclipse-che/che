@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -60,7 +59,6 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
     private final NavigateToFileView       view;
     private final DtoFactory               dtoFactory;
-    private final AppContext               appContext;
 
     private Map<String, ItemReference> resultMap;
     private String                     SEARCH_URL;
@@ -68,7 +66,6 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
 
     @Inject
     public NavigateToFilePresenter(NavigateToFileView view,
-                                   AppContext appContext,
                                    EventBus eventBus,
                                    DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                    ProjectExplorerPresenter projectExplorer,
@@ -76,7 +73,6 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
                                    DtoFactory dtoFactory) {
         this.view = view;
         this.dtoFactory = dtoFactory;
-        this.appContext = appContext;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.projectExplorer = projectExplorer;
         this.messageBusProvider = messageBusProvider;
@@ -90,7 +86,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
         wsMessageBus = messageBusProvider.getMachineMessageBus();
-        SEARCH_URL = "/project/" + appContext.getWorkspace().getId() + "/search";
+        SEARCH_URL = "/project/search";
     }
 
     @Override

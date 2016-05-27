@@ -102,7 +102,7 @@ public class RecipeServiceClientImpl implements RecipeServiceClient {
                      tagsParam.toString();
 
         if (type != null) {
-            url += "type=" + type;
+            url += "&type=" + type;
         }
 
         return asyncRequestFactory.createGetRequest(url)

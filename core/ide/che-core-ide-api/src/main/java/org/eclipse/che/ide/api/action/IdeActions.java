@@ -32,7 +32,6 @@ public interface IdeActions {
     String GROUP_RIGHT_TOOLBAR  = "rightToolBar";
 
     String GROUP_MAIN_CONTEXT_MENU             = "mainContextMenu";
-    String GROUP_BUILD_CONTEXT_MENU            = "buildGroupContextMenu";
     String GROUP_RUN_CONTEXT_MENU              = "runGroupContextMenu";
     String GROUP_DEBUG_CONTEXT_MENU            = "debugGroupContextMenu";
     String GROUP_PROJECT_EXPLORER_CONTEXT_MENU = "projectExplorerContextMenu";

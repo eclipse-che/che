@@ -66,7 +66,7 @@ public class ShowFileContentTest {
         //when
         final ShowFileContentResponse response = connection.showFileContent(newDto(ShowFileContentRequest.class).withFile("newFile").withVersion("HEAD"));
         //then
-        assertEquals("new file content\n", response.getContent());
+        assertEquals("new file content", response.getContent());
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
@@ -82,7 +82,7 @@ public class ShowFileContentTest {
         //when
         final ShowFileContentResponse response = connection.showFileContent(newDto(ShowFileContentRequest.class).withFile("newFile").withVersion("new-branch"));
         //then
-        assertEquals("new file content\n", response.getContent());
+        assertEquals("new file content", response.getContent());
     }
 
 

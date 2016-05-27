@@ -37,7 +37,15 @@ public class ConfigImpl extends Config {
     @Override
     public String get(String name) throws GitException {
         final GetConfigCommand command = new GetConfigCommand(repository).setValue(name);
-        command.execute();
+        try {
+            command.execute();
+        } catch (GitException exception) {
+            if (exception.getMessage().isEmpty()) {
+                throw new GitException("Can not find property '" + name + "' in repository configuration");
+            } else {
+                throw exception;
+            }
+        }
         final List<String> output = command.getLines();
         if (output.isEmpty()) {
             return null;

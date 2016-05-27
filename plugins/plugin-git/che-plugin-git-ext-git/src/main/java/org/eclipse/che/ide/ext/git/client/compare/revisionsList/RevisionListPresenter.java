@@ -171,8 +171,8 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     }
 
     private void compare() {
-        gitService.diff(appContext.getDevMachine(), project, Collections.singletonList(selectedFile), NAME_STATUS, false, 0, selectedRevision.getId(),
-                        false, new AsyncRequestCallback<String>(new StringUnmarshaller()) {
+        gitService.diff(appContext.getDevMachine(), project, Collections.singletonList(selectedFile), NAME_STATUS, false, 0,
+                        selectedRevision.getId(), false, new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                             @Override
                             protected void onSuccess(String result) {
                                 if (result.isEmpty()) {
