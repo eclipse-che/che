@@ -46,6 +46,7 @@ import org.eclipse.che.ide.extension.machine.client.command.valueproviders.Serve
 import org.eclipse.che.ide.extension.machine.client.machine.console.ClearConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleToolbar;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
+import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
@@ -95,6 +96,18 @@ public class MachineExtension {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 machinePortProvider.get();
+
+                /**
+                 * There is a bug in perspective management and it's unable to add Consoles part in
+                 * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
+                 */
+
+                /* Add Outputs and Consoles to Operation perspective */
+                perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
+                workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
+                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
+
+                /* Add Outputs and Consoles to Project perspective */
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
