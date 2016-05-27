@@ -96,6 +96,10 @@ export class CheNavBarCtrl {
     return this.cheAPI.cheWorkspace.getWorkspaces().length;
   }
 
+  getProjectsNumber() {
+    return this.cheAPI.cheWorkspace.getAllProjects().length;
+  }
+
   openLinkInNewTab(url) {
     this.$window.open(url, '_blank');
   }
