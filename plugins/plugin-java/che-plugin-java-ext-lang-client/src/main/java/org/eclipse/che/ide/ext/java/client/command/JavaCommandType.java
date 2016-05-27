@@ -108,7 +108,7 @@ public class JavaCommandType implements CommandType {
                " -d " + outputDirProvider.getKey() +
                " src/Main.java" +
                " && java -classpath " + classpathProvider.getKey() + outputDirProvider.getKey() +
-               " com.company.Main";
+               " Main";
     }
 
     @Override

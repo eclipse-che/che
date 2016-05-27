@@ -14,8 +14,8 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.LsFilesRequest;
 import org.eclipse.che.api.git.shared.RmRequest;
+import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,14 +23,13 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 /**
  * @author Eugene Voevodin
@@ -57,7 +56,8 @@ public class RemoveTest {
         connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")).withCached(false));
         //then
         assertFalse(new File(connection.getWorkingDir(), "README.txt").exists());
-        assertNotCached(connection, "README.txt");
+        assertEquals(connection.status(StatusFormat.SHORT).getRemoved().get(0), "README.txt");
+        assertTrue(connection.status(StatusFormat.SHORT).getUntracked().isEmpty());
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
@@ -68,16 +68,8 @@ public class RemoveTest {
         connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")).withCached(true));
         //then
         assertTrue(new File(connection.getWorkingDir(), "README.txt").exists());
-        assertNotCached(connection, "README.txt");
-    }
-
-    private void assertNotCached(GitConnection connection, String... fileNames) throws GitException {
-        List<String> output = connection.listFiles(newDto(LsFilesRequest.class).withCached(true));
-        for (String fName : fileNames) {
-            if (output.contains(fName)) {
-                fail("Cache contains " + fName);
-            }
-        }
+        assertEquals(connection.status(StatusFormat.SHORT).getRemoved().get(0), "README.txt");
+        assertEquals(connection.status(StatusFormat.SHORT).getUntracked().get(0), "README.txt");
     }
 }
 

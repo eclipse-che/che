@@ -11,7 +11,9 @@
 package org.eclipse.che.plugin.maven.server.classpath;
 
 import com.google.gson.JsonObject;
+import com.google.inject.Provider;
 
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.maven.server.BaseTest;
 import org.eclipse.che.plugin.maven.server.MavenWrapperManager;
@@ -31,6 +33,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.mockito.Mock;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,6 +43,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -49,13 +54,17 @@ import static org.testng.Assert.assertTrue;
  */
 public class ClasspathManagerTest extends BaseTest {
 
-    private MavenProjectManager projectManager;
-    private MavenWorkspace      mavenWorkspace;
-    private ClasspathManager    classpathManager;
-    private File                localRepository;
+    private   MavenProjectManager       mavenProjectManager;
+    private   MavenWorkspace            mavenWorkspace;
+    private   ClasspathManager          classpathManager;
+    private   File                      localRepository;
+    @Mock
+    protected Provider<ProjectRegistry> projectRegistryProvider;
 
     @BeforeMethod
     public void setUp() throws Exception {
+        Provider<ProjectRegistry> projectRegistryProvider = (Provider<ProjectRegistry>)mock(Provider.class);
+        when(projectRegistryProvider.get()).thenReturn(projectRegistry);
         MavenServerManagerTest.MyMavenServerProgressNotifier mavenNotifier = new MavenServerManagerTest.MyMavenServerProgressNotifier();
         MavenTerminal terminal = (level, message, throwable) -> {
             System.out.println(message);
@@ -67,10 +76,10 @@ public class ClasspathManagerTest extends BaseTest {
         localRepository.mkdirs();
         mavenServerManager.setLocalRepository(localRepository);
         MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
-        projectManager =
+        mavenProjectManager =
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
-        classpathManager = new ClasspathManager(root.getAbsolutePath(), wrapperManager, projectManager, terminal, mavenNotifier);
-        mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
+        classpathManager = new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal, mavenNotifier);
+        mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
                                             new MavenCommunication() {
                                                 @Override
                                                 public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
@@ -86,7 +95,7 @@ public class ClasspathManagerTest extends BaseTest {
                                                 public void send(JsonObject object, MessageType type) {
 
                                                 }
-                                            }, classpathManager, pm, eventService, new EclipseWorkspaceProvider());
+                                            }, classpathManager, eventService, new EclipseWorkspaceProvider());
     }
 
     @AfterMethod

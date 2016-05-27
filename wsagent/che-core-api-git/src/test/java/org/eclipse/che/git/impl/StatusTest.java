@@ -92,7 +92,6 @@ public class StatusTest {
         assertTrue(status.getConflicting().isEmpty());
         assertTrue(status.getMissing().isEmpty());
         assertTrue(status.getRemoved().isEmpty());
-        assertTrue(status.getUntracked().isEmpty());
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)

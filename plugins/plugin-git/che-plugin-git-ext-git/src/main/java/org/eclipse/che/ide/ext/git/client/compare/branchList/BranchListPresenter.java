@@ -131,7 +131,8 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
         pattern = path.replaceFirst(project.getPath(), "");
         pattern = (pattern.startsWith("/")) ? pattern.replaceFirst("/", "") : pattern;
 
-        gitService.diff(appContext.getDevMachine(), project, Collections.singletonList(pattern), NAME_STATUS, false, 0, selectedBranch.getName(), false,
+        gitService.diff(appContext.getDevMachine(), project, pattern.isEmpty() ? null : Collections.singletonList(pattern),
+                        NAME_STATUS, false, 0, selectedBranch.getName(), false,
                         new AsyncRequestCallback<String>(new StringUnmarshaller()) {
                             @Override
                             protected void onSuccess(String result) {

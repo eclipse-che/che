@@ -11,8 +11,10 @@
 package org.eclipse.che.plugin.maven.server;
 
 import com.google.gson.JsonObject;
+import com.google.inject.Provider;
 
 import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
@@ -54,18 +56,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Evgen Vidolob
  */
 public class WorkspaceTest extends BaseTest {
 
-    private MavenWorkspace      mavenWorkspace;
-    private MavenProjectManager projectManager;
+    private   MavenWorkspace            mavenWorkspace;
+    private   MavenProjectManager       mavenProjectManager;
+
 
 
     @BeforeMethod
     public void setUp() throws Exception {
+        Provider<ProjectRegistry> projectRegistryProvider = (Provider<ProjectRegistry>)mock(Provider.class);
+        when(projectRegistryProvider.get()).thenReturn(projectRegistry);
         MavenServerManagerTest.MyMavenServerProgressNotifier mavenNotifier = new MavenServerManagerTest.MyMavenServerProgressNotifier();
         MavenTerminal terminal = new MavenTerminal() {
             @Override
@@ -77,9 +84,9 @@ public class WorkspaceTest extends BaseTest {
             }
         };
         MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
-        projectManager =
+        mavenProjectManager =
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
-        mavenWorkspace = new MavenWorkspace(projectManager, mavenNotifier, new MavenExecutorService(), projectRegistry,
+        mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
                                             new MavenCommunication() {
                                                 @Override
                                                 public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
@@ -95,8 +102,8 @@ public class WorkspaceTest extends BaseTest {
                                                 public void send(JsonObject object, MessageType type) {
 
                                                 }
-                                            }, new ClasspathManager(root.getAbsolutePath(), wrapperManager, projectManager, terminal,
-                                                                    mavenNotifier), pm, eventService, new EclipseWorkspaceProvider());
+                                            }, new ClasspathManager(root.getAbsolutePath(), wrapperManager, mavenProjectManager, terminal,
+                                                                    mavenNotifier), eventService, new EclipseWorkspaceProvider());
     }
 
 
@@ -117,7 +124,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(test);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
 
         List<MavenArtifact> dependencies = mavenProject.getDependencies();
         assertThat(dependencies).isNotNull().hasSize(2);
@@ -168,7 +175,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(test);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
 
         MavenKey mavenKey = mavenProject.getMavenKey();
         assertThat(mavenKey.getArtifactId()).isEqualTo("testArtifact");
@@ -194,7 +201,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(test);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
 
         String name = mavenProject.getName();
         assertThat(name).isNotNull().isNotEmpty().isEqualTo("testArtifact");
@@ -218,7 +225,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(test);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
 
         String name = mavenProject.getName();
         assertThat(name).isNotNull().isNotEmpty().isEqualTo("testName");
@@ -328,7 +335,7 @@ public class WorkspaceTest extends BaseTest {
         IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject("test2");
         mavenWorkspace.update(Arrays.asList(project1, project2));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(project2);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(project2);
 
         List<MavenArtifact> dependencies = mavenProject.getDependencies();
         assertThat(dependencies).isNotNull().hasSize(3);
@@ -565,7 +572,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(test);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
 
         IJavaProject javaProject = JavaCore.create(test);
         IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
@@ -658,7 +665,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("parent");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = projectManager.findMavenProject(test);
+        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
         assertThat(mavenProject).isNotNull();
 
         pm.delete("parent");
@@ -670,7 +677,7 @@ public class WorkspaceTest extends BaseTest {
         IProject test2 = ResourcesPlugin.getWorkspace().getRoot().getProject("parent2");
         mavenWorkspace.update(Collections.singletonList(test2));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject2 = projectManager.findMavenProject(test2);
+        MavenProject mavenProject2 = mavenProjectManager.findMavenProject(test2);
         assertThat(mavenProject2).isNotNull();
     }
 
