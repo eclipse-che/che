@@ -25,6 +25,7 @@ import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.data.MavenResource;
 import org.eclipse.che.maven.server.MavenProjectInfo;
 import org.eclipse.che.maven.server.MavenServerResult;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_RESOURCES_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
 
 /**
  * @author Evgen Vidolob
@@ -145,22 +151,24 @@ public class MavenModelReader {
 
         Build build = model.getBuild();
         if (build == null) {
-            result.getBuild().setSources(Collections.singletonList("src/main/java"));
-            result.getBuild().setTestSources(Collections.singletonList("src/test/java"));
+            result.getBuild().setSources(Collections.singletonList(DEFAULT_SOURCE_FOLDER));
+            result.getBuild().setTestSources(Collections.singletonList(DEFAULT_TEST_SOURCE_FOLDER));
             result.getBuild().setResources(Collections.singletonList(
-                    new MavenResource("src/main/resources", false, null, Collections.emptyList(), Collections.emptyList())));
+                    new MavenResource(DEFAULT_RESOURCES_FOLDER, false, null, Collections.emptyList(), Collections.emptyList())));
             result.getBuild().setTestResources(Collections.singletonList(
-                    new MavenResource("src/test/resources", false, null, Collections.emptyList(), Collections.emptyList())));
+                    new MavenResource(DEFAULT_TEST_RESOURCES_FOLDER, false, null, Collections.emptyList(), Collections.emptyList())));
         } else {
             String sourceDirectory = build.getSourceDirectory();
             if (sourceDirectory == null) {
-                sourceDirectory = "src/main/java";
+                sourceDirectory = DEFAULT_SOURCE_FOLDER;
+            }
+            String testSourceDirectory = build.getTestSourceDirectory();
+            if (testSourceDirectory == null) {
+                testSourceDirectory = DEFAULT_TEST_SOURCE_FOLDER;
             }
             result.getBuild().setSources(Collections.singletonList(sourceDirectory));
-            result.getBuild().setTestSources(Collections.singletonList(build.getTestSourceDirectory()));
+            result.getBuild().setTestSources(Collections.singletonList(testSourceDirectory));
             result.getBuild().setResources(convertResources(build.getResources()));
-            //TODO add test sources
-//            result.getBuild().setTestSources(convertResources(build.getPlugins()));
         }
         //TODO add profiles
         return new ModelReadingResult(result, problems, enabledProfiles);

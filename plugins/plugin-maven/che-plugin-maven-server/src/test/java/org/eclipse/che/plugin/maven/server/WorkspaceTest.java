@@ -301,6 +301,79 @@ public class WorkspaceTest extends BaseTest {
     }
 
     @Test
+    public void testShouldContainsDefaultTestSourceDirectory() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>" +
+                     "<build>" +
+                     "</build>";
+
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
+        IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
+        assertThat(classpath).onProperty("path").is(new Condition<Object[]>() {
+            @Override
+            public boolean matches(Object[] value) {
+                return Stream.of(value).filter(o -> {
+                    if (o instanceof IPath) {
+                        return ((IPath)o).toOSString().endsWith("src/test/java");
+                    }
+                    return false;
+                }).findFirst().isPresent();
+            }
+        });
+    }
+
+    @Test
+    public void testShouldContainsCustomTestSourceDirectory() throws Exception {
+        String pom = "<groupId>test</groupId>" +
+                     "<artifactId>testArtifact</artifactId>" +
+                     "<version>42</version>" +
+                     "<dependencies>" +
+                     "    <dependency>" +
+                     "        <groupId>junit</groupId>" +
+                     "        <artifactId>junit</artifactId>" +
+                     "        <version>4.12</version>" +
+                     "    </dependency>" +
+                     "</dependencies>" +
+                     "<build>" +
+                     "<testSourceDirectory>/mytest</testSourceDirectory>" +
+                     "</build>";
+
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+
+        JavaProject javaProject = (JavaProject)JavaCore.create(test);
+        IClasspathEntry[] classpath = javaProject.getResolvedClasspath();
+        assertThat(classpath).onProperty("path").is(new Condition<Object[]>() {
+            @Override
+            public boolean matches(Object[] value) {
+                return Stream.of(value).filter(o -> {
+                    if (o instanceof IPath) {
+                        return ((IPath)o).toOSString().endsWith("test");
+                    }
+                    return false;
+                }).findFirst().isPresent();
+            }
+        });
+    }
+
+    @Test
     public void testUpdateProjectThatHasDependencyInWorkspace() throws Exception {
         String pom = "<groupId>test</groupId>" +
                      "<artifactId>testArtifact</artifactId>" +
