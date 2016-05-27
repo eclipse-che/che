@@ -36,13 +36,10 @@ public class LanguageServerRegistry {
 
     public void registerForExtension(String extension, LanguageServer server) {
         this.extensionToServer.put(extension, server);
-        server.initialize(new InitializeParamsImpl() {
-            {
-                //HACK hard coded properties
-                setProcessId(4711);
-                setRootPath("/projects/");
-            }
-        });
+        InitializeParamsImpl initializeParams = new InitializeParamsImpl();
+        initializeParams.setProcessId(4711);
+        initializeParams.setRootPath("/projects/");
+        server.initialize(initializeParams);
         server.getTextDocumentService().onPublishDiagnostics(new NotificationCallback<PublishDiagnosticsParams>() {
             @Override
             public void call(PublishDiagnosticsParams param) {

@@ -59,7 +59,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
     private void handleDocumentChange(DocumentChangeEvent event) {
         Document document = event.getDocument().getDocument();
         TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
-        TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getLength());
+        TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getRemoveCharCount());
 
         DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);
         String uri = document.getFile().getPath();
