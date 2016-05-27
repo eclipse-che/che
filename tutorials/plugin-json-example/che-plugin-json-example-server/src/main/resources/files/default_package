@@ -1,0 +1,7 @@
+{
+  "name": "validator-project",
+  "version": "0.0.0",
+  "dependencies": {
+    "ajv": "latest"
+  }
+}
