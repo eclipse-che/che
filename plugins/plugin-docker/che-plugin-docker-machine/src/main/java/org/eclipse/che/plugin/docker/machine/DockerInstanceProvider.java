@@ -42,6 +42,7 @@ import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
@@ -93,6 +94,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final Set<String>                      commonMachineEnvVariables;
     private final String[]                         allMachinesExtraHosts;
     private final String                           projectFolderPath;
+    private final boolean                          snapshotUseRegistry;
 
     @Inject
     public DockerInstanceProvider(DockerConnector docker,
@@ -110,9 +112,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
                                   @Named("machine.docker.privilege_mode") boolean privilegeMode,
                                   @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
-                                  @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables)
-            throws IOException {
-
+                                  @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
+                                  @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) throws IOException {
         this.docker = docker;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
@@ -122,6 +123,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.privilegeMode = privilegeMode;
         this.supportedRecipeTypes = Collections.singleton("dockerfile");
         this.projectFolderPath = projectFolderPath;
+        this.snapshotUseRegistry = snapshotUseRegistry;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -239,9 +241,9 @@ public class DockerInstanceProvider implements InstanceProvider {
                                    Machine machine,
                                    LineConsumer creationLogsOutput) throws NotFoundException, MachineException {
         final DockerInstanceKey dockerInstanceKey = new DockerInstanceKey(instanceKey);
-
-        pullImage(dockerInstanceKey, creationLogsOutput);
-
+        if (snapshotUseRegistry) {
+            pullImage(dockerInstanceKey, creationLogsOutput);
+        }
         final String userName = EnvironmentContext.getCurrent().getSubject().getUserName();
         final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
                                                                                          machine.getId(),
@@ -361,8 +363,16 @@ public class DockerInstanceProvider implements InstanceProvider {
         // use registry API directly because docker doesn't have such API yet
         // https://github.com/docker/docker-registry/issues/45
         final DockerInstanceKey dockerInstanceKey = new DockerInstanceKey(instanceKey);
-        String registry = dockerInstanceKey.getRegistry();
-        String repository = dockerInstanceKey.getRepository();
+        if (!snapshotUseRegistry) {
+            try {
+                docker.removeImage(RemoveImageParams.create(dockerInstanceKey.getFullName()));
+            } catch (IOException ignore) {
+            }
+            return;
+        }
+
+        final String registry = dockerInstanceKey.getRegistry();
+        final String repository = dockerInstanceKey.getRepository();
         if (registry == null || repository == null) {
             LOG.error("Failed to remove instance snapshot: invalid instance key: {}", instanceKey);
             throw new SnapshotException("Snapshot removing failed. Snapshot attributes are not valid");
