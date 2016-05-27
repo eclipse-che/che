@@ -1,17 +1,5 @@
 package org.eclipse.che.plugin.languageserver.server.dummyimpl;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.base.Splitter;
-import com.google.common.io.Files;
-
 import io.typefox.lsapi.CodeActionParams;
 import io.typefox.lsapi.CodeLens;
 import io.typefox.lsapi.CodeLensParams;
@@ -48,9 +36,28 @@ import io.typefox.lsapi.TextEdit;
 import io.typefox.lsapi.TextEditImpl;
 import io.typefox.lsapi.WorkspaceEdit;
 
+import com.google.common.base.Splitter;
+import com.google.common.io.Files;
+import com.google.gson.JsonElement;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+
 public class FooTextDocumentService implements TextDocumentService {
-    
+
+    private final List<NotificationCallback<PublishDiagnosticsParams>> publishDiagnosticsCallbacks = newArrayList();
     private String rootPath;
+    private Map<String, Document> openDocuments = newHashMap();
+
+    private TextDocumentPositionParams lastDocumentPosition;
+    private Map<String, String> lastCompletionMap = newHashMap();
 
     public FooTextDocumentService(String rootPath) {
         this.rootPath = rootPath;
@@ -58,22 +65,31 @@ public class FooTextDocumentService implements TextDocumentService {
 
     @Override
     public List<? extends CompletionItem> completion(TextDocumentPositionParams position) {
+        lastDocumentPosition = position;
+        lastCompletionMap.clear();
         List<CompletionItem> result = newArrayList();
         result.add(newCompletionItem("foo", position.getPosition().getLine(), position.getPosition().getCharacter()));
         result.add(newCompletionItem("bar", position.getPosition().getLine(), position.getPosition().getCharacter()));
         return result;
     }
-    
+
     private CompletionItemImpl newCompletionItem(String newText, int line, int character) {
         CompletionItemImpl item = new CompletionItemImpl();
-        item.setLabel(newText+" - Inserts "+newText);
-        TextEditImpl textEdit = new TextEditImpl();
-        textEdit.setNewText(newText);
-        textEdit.setRange(newRange(line, character, line, character));
-        item.setTextEdit(textEdit);
+        item.setLabel(newText + " - Inserts " + newText);
+        String data = generateUID();
+        item.setData(data);
+        lastCompletionMap.put(data, newText);
+//        TextEditImpl textEdit = new TextEditImpl();
+//        textEdit.setNewText(newText);
+//        textEdit.setRange(newRange(line, character, line, character));
+//        item.setTextEdit(textEdit);
         return item;
     }
-    
+
+    private String generateUID() {
+        return UUID.randomUUID().toString();
+    }
+
     private RangeImpl newRange(int line, int character, int line2, int character2) {
         RangeImpl result = new RangeImpl();
         PositionImpl start = new PositionImpl();
@@ -86,48 +102,7 @@ public class FooTextDocumentService implements TextDocumentService {
         result.setEnd(end);
         return result;
     }
-    
-    private Map<String, Document> openDocuments = newHashMap();
-    
-    private static class Document {
-        int version;
-        String contents;
-        
-        public Document(int version, String contents) {
-            this.version = version;
-            this.contents = contents;
-        }
 
-        public void apply(TextDocumentContentChangeEvent change) {
-            int start = getOffSet(change.getRange().getStart());
-            int end = getOffSet(change.getRange().getEnd());
-            if (end < start) {
-                end = start;
-            }
-            if (start > -1) 
-                this.contents = contents.substring(0, start)+change.getText()+contents.substring(end); 
-        }
-        
-        public int getOffSet(Position pos) {
-            char[] charArray = contents.toCharArray();
-            int line = 0;
-            int character = 0;
-            for (int i = 0; i < charArray.length; i++) {
-                char c = charArray[i];
-                if (c == '\n') {
-                    line++;
-                    character = 0;
-                } else {
-                    character++;
-                }
-                if (line == pos.getLine() && character == pos.getCharacter()) {
-                    return i+1;
-                }
-            }
-            return -1;
-        }
-    }
-    
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
         String uri = params.getTextDocument().getUri();
@@ -154,7 +129,7 @@ public class FooTextDocumentService implements TextDocumentService {
         }
         validateDocument(uri);
     }
-    
+
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         String uri = params.getTextDocument().getUri();
@@ -192,7 +167,7 @@ public class FooTextDocumentService implements TextDocumentService {
                 DiagnosticImpl diagnosticImpl = new DiagnosticImpl();
                 diagnosticImpl.setCode("no.uppercase.foo");
                 diagnosticImpl.setMessage("Please use lower case 'foo'.");
-                diagnosticImpl.setRange(newRange(lineIdx, indexOf, lineIdx, indexOf+3));
+                diagnosticImpl.setRange(newRange(lineIdx, indexOf, lineIdx, indexOf + 3));
                 diagnosticImpl.setSeverity(Diagnostic.SEVERITY_ERROR);
                 diagnosticsMessage.getDiagnostics().add(diagnosticImpl);
             }
@@ -201,9 +176,7 @@ public class FooTextDocumentService implements TextDocumentService {
             callback.call(diagnosticsMessage);
         }
     }
-    
-    private final List<NotificationCallback<PublishDiagnosticsParams>> publishDiagnosticsCallbacks = newArrayList();
-    
+
     @Override
     public void onPublishDiagnostics(NotificationCallback<PublishDiagnosticsParams> callback) {
         publishDiagnosticsCallbacks.add(callback);
@@ -211,8 +184,25 @@ public class FooTextDocumentService implements TextDocumentService {
 
     @Override
     public CompletionItem resolveCompletionItem(CompletionItem unresolved) {
-        // TODO Auto-generated method stub
-        return null;
+        CompletionItemImpl item = new CompletionItemImpl();
+        item.setLabel(unresolved.getLabel());
+        item.setDetail(unresolved.getDetail());
+        item.setDocumentation("Doc!");
+        item.setKind(unresolved.getKind());
+        item.setFilterText(unresolved.getFilterText());
+        TextEditImpl textEdit = new TextEditImpl();
+        //TODO need to throw exception here
+        String text = "Can't find insert string";
+        if(unresolved.getData() instanceof JsonElement){
+            text = lastCompletionMap.get(((JsonElement)unresolved.getData()).getAsString());
+        }
+        textEdit.setNewText(text);
+        textEdit.setRange(newRange(lastDocumentPosition.getPosition().getLine(),
+                                   lastDocumentPosition.getPosition().getCharacter(),
+                                   lastDocumentPosition.getPosition().getLine(),
+                                   lastDocumentPosition.getPosition().getCharacter()));
+        item.setTextEdit(textEdit);
+        return item;
     }
 
     @Override
@@ -291,6 +281,45 @@ public class FooTextDocumentService implements TextDocumentService {
     public WorkspaceEdit rename(RenameParams params) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private static class Document {
+        int    version;
+        String contents;
+
+        public Document(int version, String contents) {
+            this.version = version;
+            this.contents = contents;
+        }
+
+        public void apply(TextDocumentContentChangeEvent change) {
+            int start = getOffSet(change.getRange().getStart());
+            int end = getOffSet(change.getRange().getEnd());
+            if (end < start) {
+                end = start;
+            }
+            if (start > -1)
+                this.contents = contents.substring(0, start) + change.getText() + contents.substring(end);
+        }
+
+        public int getOffSet(Position pos) {
+            char[] charArray = contents.toCharArray();
+            int line = 0;
+            int character = 0;
+            for (int i = 0; i < charArray.length; i++) {
+                char c = charArray[i];
+                if (c == '\n') {
+                    line++;
+                    character = 0;
+                } else {
+                    character++;
+                }
+                if (line == pos.getLine() && character == pos.getCharacter()) {
+                    return i + 1;
+                }
+            }
+            return -1;
+        }
     }
 
 }

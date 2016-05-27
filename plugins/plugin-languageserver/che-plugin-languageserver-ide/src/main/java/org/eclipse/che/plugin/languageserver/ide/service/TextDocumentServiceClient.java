@@ -1,10 +1,9 @@
 package org.eclipse.che.plugin.languageserver.ide.service;
 
-import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+import io.typefox.lsapi.CompletionItem;
 
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -30,8 +29,11 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentPar
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.List;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
+import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 
 @Singleton
 public class TextDocumentServiceClient {
@@ -75,6 +77,20 @@ public class TextDocumentServiceClient {
                 .newListUnmarshaller(CompletionItemDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
                 .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) position).toJson()).send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#resolveCompletionItem(CompletionItem)}
+     *
+     * @param completionItem
+     * @return
+     */
+    public Promise<CompletionItemDTO> resolveCompletionItem (CompletionItemDTO completionItem){
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completionItem/resolve";
+        Unmarshallable<CompletionItemDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(CompletionItemDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, completionItem)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON).send(unmarshaller);
     }
     
     /**

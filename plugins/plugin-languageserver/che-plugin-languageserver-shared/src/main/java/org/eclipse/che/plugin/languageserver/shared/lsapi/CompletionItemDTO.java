@@ -7,12 +7,21 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.CompletionItem;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface CompletionItemDTO extends CompletionItem {
+
+    /**
+     * The TextDocumentIdentifier for which this completion item was generated.
+     * Used to select proper language server
+     */
+    public abstract TextDocumentIdentifierDTO getTextDocumentIdentifier();
+
+    public abstract void setTextDocumentIdentifier(TextDocumentIdentifierDTO identifier);
+
     /**
      * The label of this completion item. By default also the text that is
      * inserted when selecting this completion.

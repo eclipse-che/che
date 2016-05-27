@@ -41,7 +41,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
         position.setCharacter(textPos.getCharacter());
         position.setLine(textPos.getLine());
         documentPosition.setPosition(position);
-        TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+        final TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
         documentId.setUri(editor.getEditorInput().getFile().getPath());
         documentPosition.setTextDocument(documentId);
         this.lastErrorMessage = null;
@@ -51,7 +51,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             public void apply(List<CompletionItemDTO> items) throws OperationException {
                 List<CompletionProposal> proposals = newArrayList();
                 for (CompletionItemDTO item : items) {
-                    proposals.add(new CompletionItemBasedCompletionProposal(item));
+                    proposals.add(new CompletionItemBasedCompletionProposal(item, documentServiceClient, documentId));
                 }
                 callback.proposalComputed(proposals);
             }
