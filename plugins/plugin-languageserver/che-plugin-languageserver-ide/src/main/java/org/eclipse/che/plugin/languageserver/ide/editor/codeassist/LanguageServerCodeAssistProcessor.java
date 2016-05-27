@@ -1,8 +1,6 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.List;
+import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -12,34 +10,38 @@ import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.PositionDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentIdentifierDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentPositionParamsDTOImpl;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
-import com.google.inject.Inject;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
     private TextDocumentServiceClient documentServiceClient;
+    private final DtoFactory dtoFactory;
 
     @Inject
-    public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient) {
+    public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient, DtoFactory dtoFactory) {
         this.documentServiceClient = documentServiceClient;
+        this.dtoFactory = dtoFactory;
     }
 
     @Override
     public void computeCompletionProposals(TextEditor editor, int offset, final CodeAssistCallback callback) {
-        TextDocumentPositionParamsDTOImpl documentPosition = DtoClientImpls.TextDocumentPositionParamsDTOImpl.make();
+        TextDocumentPositionParamsDTO documentPosition = dtoFactory.createDto(TextDocumentPositionParamsDTO.class);
         documentPosition.setUri(editor.getEditorInput().getFile().getContentUrl());
-        PositionDTOImpl position = DtoClientImpls.PositionDTOImpl.make();
+        PositionDTO position = dtoFactory.createDto(PositionDTO.class);
         TextPosition textPos = editor.getDocument().getPositionFromIndex(offset);
         position.setCharacter(textPos.getCharacter());
         position.setLine(textPos.getLine());
         documentPosition.setPosition(position);
-        TextDocumentIdentifierDTOImpl documentId = DtoClientImpls.TextDocumentIdentifierDTOImpl.make();
+        TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
         documentId.setUri(editor.getEditorInput().getFile().getPath());
         documentPosition.setTextDocument(documentId);
         this.lastErrorMessage = null;

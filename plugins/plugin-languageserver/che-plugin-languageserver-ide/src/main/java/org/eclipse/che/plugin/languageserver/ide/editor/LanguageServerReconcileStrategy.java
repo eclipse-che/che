@@ -19,13 +19,15 @@ import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentContentChangeEventDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.VersionedTextDocumentIdentifierDTO;
 
-import static org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.DidChangeTextDocumentParamsDTOImpl;
-import static org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.PositionDTOImpl;
-import static org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.RangeDTOImpl;
-import static org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentContentChangeEventDTOImpl;
-import static org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.VersionedTextDocumentIdentifierDTOImpl;
+import java.util.Collections;
 
 /**
  * @author Evgen Vidolob
@@ -34,12 +36,14 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
 
     private final TextDocumentServiceClient textDocumentService;
+    private final DtoFactory dtoFactory;
 
     private int version = 0;
 
     @Inject
-    public LanguageServerReconcileStrategy(final TextDocumentServiceClient textDocumentService) {
+    public LanguageServerReconcileStrategy(final TextDocumentServiceClient textDocumentService, final DtoFactory dtoFactory) {
         this.textDocumentService = textDocumentService;
+        this.dtoFactory = dtoFactory;
     }
 
     @Override
@@ -57,26 +61,26 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
         TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
         TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getLength());
 
-        DidChangeTextDocumentParamsDTOImpl changeDTO = DidChangeTextDocumentParamsDTOImpl.make();
+        DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);
         String uri = document.getFile().getPath();
         changeDTO.setUri(uri);
-        VersionedTextDocumentIdentifierDTOImpl versionedDocId = VersionedTextDocumentIdentifierDTOImpl.make();
+        VersionedTextDocumentIdentifierDTO versionedDocId = dtoFactory.createDto(VersionedTextDocumentIdentifierDTO.class);
         versionedDocId.setUri(uri);
         versionedDocId.setVersion(++version);
         changeDTO.setTextDocument(versionedDocId);
-        TextDocumentContentChangeEventDTOImpl actualChange = TextDocumentContentChangeEventDTOImpl.make();
-        RangeDTOImpl range = RangeDTOImpl.make();
-        PositionDTOImpl start = PositionDTOImpl.make();
+        TextDocumentContentChangeEventDTO actualChange = dtoFactory.createDto(TextDocumentContentChangeEventDTO.class);
+        RangeDTO range = dtoFactory.createDto(RangeDTO.class);
+        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
         start.setLine(startPosition.getLine());
         start.setCharacter(startPosition.getCharacter());
-        PositionDTOImpl end = PositionDTOImpl.make();
+        PositionDTO end = dtoFactory.createDto(PositionDTO.class);
         end.setLine(endPosition.getLine());
         end.setCharacter(endPosition.getCharacter());
         range.setStart(start);
         range.setEnd(end);
         actualChange.setRange(range);
         actualChange.setText(event.getText());
-        changeDTO.addContentChanges(actualChange);
+        changeDTO.setContentChanges(Collections.singletonList(actualChange));
         textDocumentService.didChange(changeDTO);
     }
 
@@ -86,7 +90,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
     }
 
     public void doReconcile() {
-
+        //TODO use DocumentHighlight to add additional highlight for file
     }
 
     @Override

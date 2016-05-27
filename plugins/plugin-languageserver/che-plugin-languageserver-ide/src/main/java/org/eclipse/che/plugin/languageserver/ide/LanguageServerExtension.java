@@ -10,15 +10,15 @@ import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.DidCloseTextDocumentParamsDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.DidOpenTextDocumentParamsDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.DidSaveTextDocumentParamsDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentIdentifierDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentItemDTOImpl;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentItemDTO;
 
 @Extension(title = "LanguageServer")
 @Singleton
@@ -42,17 +42,17 @@ public class LanguageServerExtension {
     }
     
     @Inject
-    protected void registerFileEventHandler(EventBus eventBus, final TextDocumentServiceClient serviceClient) {
+    protected void registerFileEventHandler(EventBus eventBus, final TextDocumentServiceClient serviceClient, final DtoFactory dtoFactory) {
         eventBus.addHandler(FileEvent.TYPE, new FileEventHandler() {
             
             @Override
             public void onFileOperation(FileEvent event) {
-                TextDocumentIdentifierDTOImpl documentId = DtoClientImpls.TextDocumentIdentifierDTOImpl.make();
+                TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
                 documentId.setUri(event.getFile().getPath());
                 switch (event.getOperationType()) {
                 case OPEN:
-                    DidOpenTextDocumentParamsDTOImpl openEvent = DtoClientImpls.DidOpenTextDocumentParamsDTOImpl.make();
-                    TextDocumentItemDTOImpl documentItem = DtoClientImpls.TextDocumentItemDTOImpl.make();
+                    DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
+                    TextDocumentItemDTO documentItem = dtoFactory.createDto(TextDocumentItemDTO.class);
                     documentItem.setUri(event.getFile().getPath());
                     documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
                     //TODO send text?
@@ -60,12 +60,12 @@ public class LanguageServerExtension {
                     serviceClient.didOpen(openEvent);
                     break;
                 case CLOSE:
-                    DidCloseTextDocumentParamsDTOImpl closeEvent = DtoClientImpls.DidCloseTextDocumentParamsDTOImpl.make();
+                    DidCloseTextDocumentParamsDTO closeEvent = dtoFactory.createDto(DidCloseTextDocumentParamsDTO.class);
                     closeEvent.setTextDocument(documentId);
                     serviceClient.didClose(closeEvent);
                     break;
                 case SAVE:
-                    DidSaveTextDocumentParamsDTOImpl saveEvent = DtoClientImpls.DidSaveTextDocumentParamsDTOImpl.make();
+                    DidSaveTextDocumentParamsDTO saveEvent = dtoFactory.createDto(DidSaveTextDocumentParamsDTO.class);
                     saveEvent.setTextDocument(documentId);
                     serviceClient.didSave(saveEvent);
                     break;
