@@ -86,8 +86,6 @@ class IdeSvc {
   }
 
   startIde(workspace) {
-    let defer = this.$q.defer();
-
     this.currentStep = 1;
 
     let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
@@ -314,16 +312,30 @@ class IdeSvc {
       this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
     }
 
-    this.$timeout(() => {
+    let defer = this.$q.defer();
+    if (workspace.status === 'RUNNING') {
+      defer.resolve();
+    } else {
+      this.cheWorkspace.fetchStatusChange(workspace.id, 'STARTING').then(() => {
+        defer.resolve();
+      }, (error) => {
+        defer.reject(error);
+        this.$log.error('Unable to start workspace: ', error);
+      })
+    }
+
+    defer.promise.then(() => {
+      // update list of recent workspaces
+      this.cheWorkspace.fetchWorkspaces();
+
+      // hide loader and show IDE
       let re = new RegExp(workspace.config.name);
       // check if we are still waiting for current workspace to be loaded
       if (re.test(ideUrlLink)) {
         this.$rootScope.showIDE = true;
         this.$rootScope.hideLoader = true;
       }
-    }, 2000);
-
-    this.cheWorkspace.fetchWorkspaces();
+    });
   }
 
   /**
