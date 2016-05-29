@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -149,7 +150,8 @@ public class WorkspaceRuntimesTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Couldn't stop '.*' workspace because its status is 'STARTING'")
+          expectedExceptionsMessageRegExp = "Couldn't stop '.*' workspace because its status is 'STARTING'. " +
+                                            "Workspace can be stopped only if it is 'RUNNING'")
     public void shouldNotStopWorkspaceIfItIsStarting() throws Exception {
         final MachineManager machineManagerMock = mock(MachineManager.class);
         final WorkspaceRuntimes registry = new WorkspaceRuntimes(machineManagerMock, eventService);
@@ -179,9 +181,19 @@ public class WorkspaceRuntimesTest {
             runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
         } catch (ConflictException ex) {
             assertEquals(ex.getMessage(), "Workspace '" + workspace.getId() + "' start interrupted. " +
-                                          "Workspace was stopped before all its machines were started");
+                                          "Workspace stopped before all its machines started");
         }
         verify(machineManagerMock, times(2)).destroy(any(), anyBoolean());
+    }
+
+    @Test
+    public void testCleanup() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+
+        runtimes.cleanup();
+
+        assertFalse(runtimes.hasRuntime(workspace.getId()));
     }
 
     @Test
@@ -282,16 +294,6 @@ public class WorkspaceRuntimesTest {
         final RuntimeDescriptor descriptor = runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
 
         assertEquals(runtimes.get(workspace.getId()).getRuntime(), descriptor.getRuntime());
-    }
-
-    @Test
-    public void testCleanup() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-
-        runtimes.cleanup();
-
-        assertFalse(runtimes.hasRuntime(workspace.getId()));
     }
 
     @Test
