@@ -1,10 +1,13 @@
 package org.eclipse.che.plugin.languageserver.server;
 
-import io.typefox.lsapi.CompletionItem;
-import io.typefox.lsapi.LanguageServer;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
@@ -13,12 +16,11 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentPar
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.services.LanguageServer;
 
 /**
  * REST API for the textDocument/* services defined in https://github.com/Microsoft/vscode-languageserver-protocol
@@ -43,11 +45,11 @@ public class TextDocumentServiceImpl {
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) {
+    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException, ExecutionException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         List<? extends CompletionItem> completion = server.getTextDocumentService()
-                                                          .completion(textDocumentPositionParams);
+                                                          .completion(textDocumentPositionParams).get().getItems();
         return completion;
     }
 
@@ -56,9 +58,9 @@ public class TextDocumentServiceImpl {
     @Path("completionItem/resolve")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) {
+    public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException, ExecutionException {
         LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
-        return server.getTextDocumentService().resolveCompletionItem(unresolved);
+        return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
     }
 
     @POST

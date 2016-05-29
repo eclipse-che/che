@@ -34,6 +34,10 @@
             <artifactId>io.typefox.lsapi</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.typefox.lsapi</groupId>
+            <artifactId>io.typefox.lsapi.services</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>

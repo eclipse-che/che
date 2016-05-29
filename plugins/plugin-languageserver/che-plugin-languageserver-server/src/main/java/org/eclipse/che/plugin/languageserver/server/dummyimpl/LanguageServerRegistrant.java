@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import io.typefox.lsapi.json.JsonBasedLanguageServer;
+import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 
 @Singleton
 public class LanguageServerRegistrant {

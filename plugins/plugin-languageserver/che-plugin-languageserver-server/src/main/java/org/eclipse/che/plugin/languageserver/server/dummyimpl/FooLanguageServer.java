@@ -1,5 +1,7 @@
 package org.eclipse.che.plugin.languageserver.server.dummyimpl;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.eclipse.che.plugin.languageserver.server.LanguageServerRegistry;
 
 import com.google.inject.Inject;
@@ -7,10 +9,10 @@ import com.google.inject.Singleton;
 
 import io.typefox.lsapi.InitializeParams;
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageServer;
-import io.typefox.lsapi.TextDocumentService;
-import io.typefox.lsapi.WindowService;
-import io.typefox.lsapi.WorkspaceService;
+import io.typefox.lsapi.services.LanguageServer;
+import io.typefox.lsapi.services.TextDocumentService;
+import io.typefox.lsapi.services.WindowService;
+import io.typefox.lsapi.services.WorkspaceService;
 
 /**
  * A dummy language server.
@@ -32,7 +34,7 @@ public class FooLanguageServer implements LanguageServer {
     }
 
     @Override
-    public InitializeResult initialize(InitializeParams params) {
+    public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
         rootPath = params.getRootPath();
         this.documentService = new FooTextDocumentService(rootPath);
         return null;

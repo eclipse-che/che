@@ -3,6 +3,7 @@ package org.eclipse.che.plugin.languageserver.server;
 import static com.google.common.collect.Maps.newHashMap;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.che.plugin.languageserver.server.lsapi.PublishDiagnosticsParamsMessenger;
 
@@ -10,9 +11,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import io.typefox.lsapi.InitializeParamsImpl;
-import io.typefox.lsapi.LanguageServer;
-import io.typefox.lsapi.NotificationCallback;
 import io.typefox.lsapi.PublishDiagnosticsParams;
+import io.typefox.lsapi.services.LanguageServer;
 
 @Singleton
 public class LanguageServerRegistry {
@@ -40,9 +40,9 @@ public class LanguageServerRegistry {
         initializeParams.setProcessId(4711);
         initializeParams.setRootPath("/projects/");
         server.initialize(initializeParams);
-        server.getTextDocumentService().onPublishDiagnostics(new NotificationCallback<PublishDiagnosticsParams>() {
+        server.getTextDocumentService().onPublishDiagnostics(new Consumer<PublishDiagnosticsParams>() {
             @Override
-            public void call(PublishDiagnosticsParams param) {
+            public void accept(PublishDiagnosticsParams param) {
                 publishDiagnosticsMessenger.onEvent(param);
             }
         });

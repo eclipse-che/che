@@ -29,5 +29,10 @@ public interface InitializeParamsDTO extends InitializeParams {
      * The capabilities provided by the client (editor)
      * 
      */
-    public abstract void setCapabilities(final Object capabilities);
+    public abstract void setCapabilities(final ClientCapabilitiesDTO capabilities);
+    
+    /**
+     * The capabilities provided by the client (editor)
+     */
+    public abstract ClientCapabilitiesDTO getCapabilities();
 }
