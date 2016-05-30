@@ -116,17 +116,6 @@ Vagrant.configure(2) do |config|
       printf "#"
       sleep 10
     done
-  SHELL
-
-  config.vm.provision "shell" do |s| 
-    s.inline = $script
-    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
-  end
-
-  $script2 = <<-SHELL
-    CHE_VERSION=$1
-    IP=$2
-    PORT=$3
 
     echo "--------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE"
@@ -139,7 +128,18 @@ Vagrant.configure(2) do |config|
               `-v /home/user/che/che.properties:/container/che.properties `
               `-e CHE_LOCAL_CONF_DIR=/container `
               `codenvy/che:${CHE_VERSION} --remote:${IP} --port:${PORT} run &>/dev/null
-    
+  SHELL
+
+  config.vm.provision "shell" do |s| 
+    s.inline = $script
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
+  end
+
+  $script2 = <<-SHELL
+    CHE_VERSION=$1
+    IP=$2
+    PORT=$3
+
     # Test the default dashboard page to see when it returns a non-error value.
     # Che is active once it returns success        
     while [ true ]; do
