@@ -13,6 +13,7 @@ package org.eclipse.che.api.user.server;
 import sun.security.acl.PrincipalImpl;
 
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
@@ -66,6 +67,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -93,6 +95,8 @@ public class UserProfileServiceTest {
     @Mock
     private PreferenceDao      preferenceDao;
     @Mock
+    private EventService       eventService;
+    @Mock
     private User               testUser;
     @Mock
     private UriInfo            uriInfo;
@@ -111,6 +115,7 @@ public class UserProfileServiceTest {
         dependencies.addComponent(UserDao.class, userDao);
         dependencies.addComponent(UserProfileDao.class, profileDao);
         dependencies.addComponent(PreferenceDao.class, preferenceDao);
+        dependencies.addComponent(EventService.class, eventService);
         final URI uri = new URI(BASE_URI);
         final ContainerRequest req = new ContainerRequest(null, uri, uri, null, null, securityContext);
         final ApplicationContextImpl contextImpl = new ApplicationContextImpl(req, null, ProviderBinder.getInstance());
@@ -315,6 +320,7 @@ public class UserProfileServiceTest {
 
         assertEquals(response.getStatus(), OK.getStatusCode());
         verify(profileDao, times(1)).update(profile);
+        verify(eventService).publish(any());
         assertEquals(((ProfileDescriptor)response.getEntity()).getAttributes(), attributes);
     }
 
@@ -361,6 +367,7 @@ public class UserProfileServiceTest {
         assertEquals(response.getStatus(), OK.getStatusCode());
         assertEquals(((ProfileDescriptor)response.getEntity()).getAttributes(), attributes);
         verify(profileDao, times(1)).update(profile);
+        verify(eventService).publish(any());
     }
 
     @Test
