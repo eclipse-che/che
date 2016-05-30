@@ -15,7 +15,6 @@ import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClasspathNodeInterceptor;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
 
@@ -29,7 +28,7 @@ public interface SelectNodeView extends View<SelectNodeView.ActionDelegate> {
     /** Needs for delegate some function into SelectPath view. */
     interface ActionDelegate {
         /** Sets selected node. */
-        void setSelectedNode(String path, SVGResource icon);
+        void setSelectedNode(String path);
     }
 
     /**

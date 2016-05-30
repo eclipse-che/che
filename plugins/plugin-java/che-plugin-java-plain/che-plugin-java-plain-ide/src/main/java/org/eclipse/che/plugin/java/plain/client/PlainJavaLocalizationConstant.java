@@ -24,4 +24,7 @@ public interface PlainJavaLocalizationConstant extends Messages {
 
     @Key("source.folder.attribute.label.name")
     String sourceFolderAttribute();
+
+    @Key("library.folder.attribute.label.name")
+    String libraryFolderAttribute();
 }

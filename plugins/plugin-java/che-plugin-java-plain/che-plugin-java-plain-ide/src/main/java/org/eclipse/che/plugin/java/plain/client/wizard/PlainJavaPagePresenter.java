@@ -29,6 +29,7 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREA
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
 
 /**
  * Presenter of the wizard page which configures Plain Java project.
@@ -41,6 +42,8 @@ class PlainJavaPagePresenter extends AbstractWizardPage<ProjectConfigDto> implem
 
     private final PlainJavaPageView   view;
     private final SelectNodePresenter selectNodePresenter;
+
+    private boolean isSourceSelected;
 
     @Inject
     public PlainJavaPagePresenter(PlainJavaPageView view, SelectNodePresenter selectNodePresenter) {
@@ -83,19 +86,32 @@ class PlainJavaPagePresenter extends AbstractWizardPage<ProjectConfigDto> implem
     @Override
     public void onCoordinatesChanged() {
         setAttribute(SOURCE_FOLDER, view.getSourceFolder());
+        setAttribute(LIBRARY_FOLDER, view.getLibraryFolder());
 
         validateCoordinates();
         updateDelegate.updateControls();
     }
 
     @Override
-    public void onBrowseButtonClicked() {
+    public void onBrowseSourceButtonClicked() {
+        isSourceSelected = true;
+        selectNodePresenter.show(this, dataObject.getName());
+    }
+
+    @Override
+    public void onBrowseLibraryButtonClicked() {
+        isSourceSelected = false;
         selectNodePresenter.show(this, dataObject.getName());
     }
 
     @Override
     public void onNodeSelected(String path) {
-        view.setSourceFolder(path.substring(dataObject.getName().length() + 1));
+        int projectNameLength = dataObject.getName().length();
+        if (isSourceSelected) {
+            view.setSourceFolder(path.substring(projectNameLength + 1));
+        } else {
+            view.setLibraryFolder(path.substring(projectNameLength + 1));
+        }
 
         onCoordinatesChanged();
     }
@@ -124,10 +140,12 @@ class PlainJavaPagePresenter extends AbstractWizardPage<ProjectConfigDto> implem
 
         view.changeBrowseBtnVisibleState(!isCreateWizard);
         view.changeSourceFolderFieldState(isCreateWizard);
+        view.changeLibraryPanelVisibleState(!isCreateWizard);
 
         Map<String, List<String>> attributes = dataObject.getAttributes();
 
         view.setSourceFolder(attributes.get(SOURCE_FOLDER) == null ? "" : getAttribute(SOURCE_FOLDER));
+        view.setLibraryFolder(getAttribute(LIBRARY_FOLDER));
     }
 
     private void validateCoordinates() {
