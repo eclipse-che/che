@@ -76,9 +76,9 @@ public class TestUtils {
         public String getRepositoryUrl(final String projectPath) throws IOException {
             return "";
         }
-    });
+    }, null);
 
-    public static final String[] GREEK_TREE = new String[]{
+    public static final String[] GREEK_TREE = new String[] {
             "/",
             "/iota",
             "/A/",

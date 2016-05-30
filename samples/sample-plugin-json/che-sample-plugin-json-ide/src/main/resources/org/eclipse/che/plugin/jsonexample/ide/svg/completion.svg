@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   x="0px"
+   y="0px"
+   width="32px"
+   height="32px"
+   viewBox="0 0 32 32"
+   enable-background="new 0 0 32 32"
+   xml:space="preserve"
+   id="svg2">
+					 <defs
+     id="defs9" /><text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:10px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     x="3.1186442"
+     y="20.474575"
+     id="text3339"><tspan
+       id="tspan3341"
+       x="3.1186442"
+       y="20.474575"
+       style="font-size:20px;fill:#aad400">{}</tspan></text>
+</svg>

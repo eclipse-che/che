@@ -39,10 +39,25 @@ public class CommitParams {
      * @return arguments holder with required parameters
      * @throws NullPointerException
      *         if {@code container} or {@code repository} is null
+     * @deprecated use {@link CommitParams#create(String)} instead
      */
+    @Deprecated
     public static CommitParams create(@NotNull String container, @NotNull String repository) {
         return new CommitParams().withContainer(container)
                                  .withRepository(repository);
+    }
+
+    /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param container
+     *         id or name of container
+     * @return arguments holder with required parameters
+     * @throws NullPointerException
+     *         if {@code container} is null
+     */
+    public static CommitParams create(@NotNull String container) {
+        return new CommitParams().withContainer(container);
     }
 
     private CommitParams() {}
@@ -68,11 +83,8 @@ public class CommitParams {
      * @param repository
      *         full repository name
      * @return this params instance
-     * @throws NullPointerException
-     *         if {@code repository} is null
      */
-    public CommitParams withRepository(@NotNull String repository) {
-        requireNonNull(repository);
+    public CommitParams withRepository(String repository) {
         this.repository = repository;
         return this;
     }

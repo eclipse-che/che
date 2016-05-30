@@ -73,11 +73,16 @@ describe('unique-project-name-validator', function() {
       // flush HTTP backend
       httpBackend.flush();
 
-      $scope.model = { name: null, workspaceSelected: workspace1 };
+      $scope.model = {
+        name: null,
+        getWorkspaceProjects() {
+          return workspace.getWorkspaceProjects()[idWorkspace1];
+        }
+      };
 
       var element = angular.element(
         '<form name="form">' +
-        '<input ng-model="model.name" name="name" unique-project-name="model.workspaceSelected" />' +
+        '<input ng-model="model.name" name="name" unique-project-name="model.getWorkspaceProjects()" />' +
         '</form>'
       );
       $compiler(element)($scope);
@@ -112,11 +117,16 @@ describe('unique-project-name-validator', function() {
       // flush HTTP backend
       httpBackend.flush();
 
-      $scope.model = { name: null, workspaceSelected: workspace1 };
+      $scope.model = {
+        name: null,
+        getWorkspaceProjects() {
+          return workspace.getWorkspaceProjects()[idWorkspace1];
+        }
+      };
 
       var element = angular.element(
         '<form name="form">' +
-        '<input ng-model="model.name" name="name" unique-project-name="model.workspaceSelected" />' +
+        '<input ng-model="model.name" name="name" unique-project-name="model.getWorkspaceProjects()" />' +
         '</form>'
       );
       $compiler(element)($scope);

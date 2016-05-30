@@ -13,6 +13,7 @@ package org.eclipse.che.api.machine.server.spi;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -76,7 +77,7 @@ public interface Instance extends Machine {
      * @throws MachineException
      *         if error occurs on storing state of the instance
      */
-    InstanceKey saveToSnapshot(String owner) throws MachineException;
+    MachineSource saveToSnapshot(String owner) throws MachineException;
 
     /**
      * Destroy instance

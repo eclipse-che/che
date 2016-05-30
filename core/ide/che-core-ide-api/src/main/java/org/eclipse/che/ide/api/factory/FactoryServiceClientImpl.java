@@ -30,6 +30,11 @@ import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
+import static org.eclipse.che.ide.json.JsonHelper.toJson;
+import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
 /**
  * Implementation of {@link FactoryServiceClient} service.
@@ -54,16 +59,22 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
     }
 
     /**
-     * {@inheritDoc}
+     * Get valid JSON factory object based on input factory ID
+     *
+     * @param factoryId
+     *         factory ID to retrieve
+     * @param validate
+     *         indicates whether or not factory should be validated by accept validator
+     * @return Factory through a Promise
      */
     @Override
-    public void getFactory(@NotNull String factoryId, boolean validate, @NotNull AsyncRequestCallback<Factory> callback) {
+    public Promise<Factory> getFactory(@NotNull String factoryId, boolean validate) {
         StringBuilder url = new StringBuilder(API_FACTORY_BASE_URL).append(factoryId);
         if (validate) {
             url.append("?").append("validate=true");
         }
-        asyncRequestFactory.createGetRequest(url.toString()).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
-                           .send(callback);
+        return asyncRequestFactory.createGetRequest(url.toString()).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                                  .send(unmarshallerFactory.newUnmarshaller(Factory.class));
     }
 
     /**
@@ -139,6 +150,30 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
                                   .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Updating factory..."))
                                   .send(unmarshallerFactory.newUnmarshaller(Factory.class));
+    }
+
+
+    /**
+     * Resolve factory object based on user parameters
+     *
+     * @param factoryParameters
+     *         map containing factory data parameters provided through URL
+     * @param validate
+     *         indicates whether or not factory should be validated by accept validator
+     * @return Factory through a Promise
+     */
+    @Override
+    public Promise<Factory> resolveFactory(@NotNull final Map<String, String> factoryParameters, boolean validate) {
+
+        // Init string with JAX-RS path
+        StringBuilder url = new StringBuilder(API_FACTORY_BASE_URL + "resolver");
+
+        // If validation, needs to add the flag
+        if (validate) {
+            url.append("?validate=true");
+        }
+        return asyncRequestFactory.createPostRequest(url.toString(), toJson(factoryParameters)).header(ACCEPT, APPLICATION_JSON)
+                           .send(unmarshallerFactory.newUnmarshaller(Factory.class));
     }
 
     /**

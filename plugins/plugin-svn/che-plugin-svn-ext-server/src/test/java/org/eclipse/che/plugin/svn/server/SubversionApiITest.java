@@ -12,8 +12,11 @@ package org.eclipse.che.plugin.svn.server;
 
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
+import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
@@ -23,7 +26,6 @@ import org.eclipse.che.plugin.svn.shared.MoveRequest;
 import org.eclipse.che.plugin.svn.shared.PropertyDeleteRequest;
 import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
-import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +55,8 @@ public class SubversionApiITest {
     private CredentialsProvider   credentialsProvider;
     @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
+    @Mock
+    private SshKeyProvider sshKeyProvider;
 
     private SubversionApi subversionApi;
     private File          repoRoot;
@@ -68,7 +72,7 @@ public class SubversionApiITest {
         tmpAbsolutePath = tmpDir.toFile().getAbsolutePath();
         tmpDir.toFile().deleteOnExit();
 
-        this.subversionApi = new SubversionApi(credentialsProvider, repositoryUrlProvider);
+        this.subversionApi = new SubversionApi(credentialsProvider, repositoryUrlProvider, new SshScriptProvider(sshKeyProvider));
     }
 
     /**

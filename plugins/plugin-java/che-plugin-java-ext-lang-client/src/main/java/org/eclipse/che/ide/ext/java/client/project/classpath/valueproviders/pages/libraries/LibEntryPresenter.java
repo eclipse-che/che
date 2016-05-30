@@ -27,7 +27,6 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.sele
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.JarNodeInterceptor;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
 import java.util.Map;
@@ -156,7 +155,7 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter implements
     }
 
     @Override
-    public void addNode(String path, int kind, SVGResource icon) {
+    public void addNode(String path, int kind) {
         if (categories.containsKey(path)) {
             return;
         }

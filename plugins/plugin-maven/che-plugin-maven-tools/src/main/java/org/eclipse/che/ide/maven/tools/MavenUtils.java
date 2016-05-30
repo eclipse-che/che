@@ -18,8 +18,6 @@ import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.vfs.VirtualFile;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -40,9 +38,6 @@ import static java.nio.file.Files.exists;
  */
 public class MavenUtils {
     public static final Pattern MAVEN_LOGGER_PREFIX_REMOVER = Pattern.compile("(\\[INFO\\]|\\[WARNING\\]|\\[DEBUG\\]|\\[ERROR\\])\\s+(.*)");
-    @Inject
-    @Named("packaging2file-extension")
-    private static Map<String, String> packagingToFileExtensionMapping;
 
     /** Not instantiable. */
     private MavenUtils() {
@@ -54,14 +49,6 @@ public class MavenUtils {
             return origin.substring(matcher.start(2));
         }
         return origin;
-    }
-
-    /** Get file extension of artifact by packaging, e.g. <packaging>play</packaging> */
-    public static String getFileExtensionByPackaging(String packaging) {
-        if (packagingToFileExtensionMapping == null) {
-            return null;
-        }
-        return packagingToFileExtensionMapping.get(packaging);
     }
 
     /**

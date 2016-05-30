@@ -15,13 +15,13 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
@@ -140,7 +140,7 @@ public class SshMachineInstance extends AbstractInstance {
      * {@inheritDoc}
      */
     @Override
-    public InstanceKey saveToSnapshot(String owner) throws MachineException {
+    public MachineSource saveToSnapshot(String owner) throws MachineException {
         throw new MachineException("Snapshot feature is unsupported for ssh machine implementation");
     }
 

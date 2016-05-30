@@ -18,6 +18,7 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_NAME;
 
@@ -34,6 +35,8 @@ public class PlainJavaProjectType extends ProjectTypeDef {
 
         setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
         setValueProviderFactory(OUTPUT_FOLDER, valueProviderFactory);
+
+        addVariableDefinition(LIBRARY_FOLDER, "java library folder", false, valueProviderFactory);
 
         addParent(JAVA_ID);
     }

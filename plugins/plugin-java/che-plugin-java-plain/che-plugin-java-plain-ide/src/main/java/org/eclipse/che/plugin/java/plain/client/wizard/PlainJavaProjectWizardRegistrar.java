@@ -30,9 +30,12 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
  * @author Valeriy Svydenko
  */
 public class PlainJavaProjectWizardRegistrar implements ProjectWizardRegistrar {
+    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
+
     @Inject
-    public PlainJavaProjectWizardRegistrar() {
-        new ArrayList<>();
+    public PlainJavaProjectWizardRegistrar(Provider<PlainJavaPagePresenter> plainJavaPagePresenterProvider) {
+        wizardPages = new ArrayList<>();
+        wizardPages.add(plainJavaPagePresenterProvider);
     }
 
     @NotNull
@@ -47,6 +50,6 @@ public class PlainJavaProjectWizardRegistrar implements ProjectWizardRegistrar {
 
     @NotNull
     public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
-        return new ArrayList<>();
+        return wizardPages;
     }
 }

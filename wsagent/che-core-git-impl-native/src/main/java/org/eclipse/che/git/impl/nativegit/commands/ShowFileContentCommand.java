@@ -13,9 +13,11 @@ package org.eclipse.che.git.impl.nativegit.commands;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 
+import static java.lang.System.lineSeparator;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.io.File;
+import java.util.stream.Collectors;
 
 /**
  * Used for getting content of the file from specified revision or branch.
@@ -44,12 +46,7 @@ public class ShowFileContentCommand extends GitCommand<ShowFileContentResponse> 
         commandLine.add(version + ":" + file);
         start();
 
-        String content = "";
-
-        for (String line : lines) {
-            content = content.concat(line + "\n");
-        }
-
+        String content = lines.stream().collect(Collectors.joining(lineSeparator()));
         return newDto(ShowFileContentResponse.class).withContent(content);
     }
 

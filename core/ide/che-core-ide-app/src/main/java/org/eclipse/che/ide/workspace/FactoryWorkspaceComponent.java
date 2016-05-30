@@ -17,32 +17,38 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.ide.api.factory.FactoryServiceClient;
 import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.ide.api.machine.MachineManager;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.factory.FactoryServiceClient;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.collections.Jso;
+import org.eclipse.che.ide.collections.js.JsoArray;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -56,8 +62,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class FactoryWorkspaceComponent extends WorkspaceComponent implements Component {
-    private final FactoryServiceClient factoryServiceClient;
-    private String                     workspaceId;
+    private final FactoryServiceClient           factoryServiceClient;
+    private       String                         workspaceId;
 
     @Inject
     public FactoryWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -101,27 +107,46 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent implements Com
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-        String factoryParams = browserQueryFieldRenderer.getParameterFromURLByName("factory");
+        Jso factoryParams = browserQueryFieldRenderer.getParameters();
+        JsoArray<String> keys = factoryParams.getKeys();
+        Map<String, String> factoryParameters = new HashMap<>();
+        // check all factory parameters
+        for (String key : keys.toList()) {
+            if (key.startsWith("factory-")) {
+                String value = factoryParams.getStringField(key);
+                factoryParameters.put(key.substring("factory-".length()), value);
+            }
+        }
 
         // get workspace ID to use dedicated workspace for this factory
         this.workspaceId = browserQueryFieldRenderer.getParameterFromURLByName("workspaceId");
 
-        factoryServiceClient.getFactory(factoryParams, true,
-                                        new AsyncRequestCallback<Factory>(dtoUnmarshallerFactory.newUnmarshaller(Factory.class)) {
-                                            @Override
-                                            protected void onSuccess(Factory result) {
-                                                appContext.setFactory(result);
+        Promise<Factory> factoryPromise;
+        // now search if it's a factory based on id or from parameters
+        if (factoryParameters.containsKey("id")) {
+            factoryPromise = factoryServiceClient.getFactory(factoryParameters.get("id"), true);
+        } else {
+            factoryPromise = factoryServiceClient.resolveFactory(factoryParameters, true);
+        }
 
-                                                // get workspace
-                                                tryStartWorkspace();
-                                            }
+        Promise<Void> promise = factoryPromise.then(new Function<Factory, Void>() {
+            @Override
+            public Void apply(final Factory factory) throws FunctionException {
+                appContext.setFactory(factory);
 
-                                            @Override
-                                            protected void onFailure(Throwable error) {
-                                                Log.error(FactoryWorkspaceComponent.class, "Unable to load Factory", error);
-                                                callback.onFailure(new Exception(error.getCause()));
-                                            }
-                                        });
+                // get workspace
+                tryStartWorkspace();
+
+                return null;
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                Log.error(FactoryWorkspaceComponent.class, "Unable to load Factory", error);
+                callback.onFailure(new Exception(error.getCause()));
+            }
+        });
+
     }
 
     @Override

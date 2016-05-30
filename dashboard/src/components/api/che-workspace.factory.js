@@ -89,6 +89,14 @@ export class CheWorkspace {
     return null;
   }
 
+/**
+ * Gets all workspace agents of this remote
+ * @returns {Map}
+ */
+  getWorkspaceAgents() {
+    return this.workspaceAgents;
+  }
+
   /**
    * Add a listener that need to have the onChangeWorkspaces(workspaces: Array) method
    * @param listener a changing listener
@@ -334,17 +342,11 @@ export class CheWorkspace {
    */
   getWebsocketUrl(workspaceId) {
     let workspace = this.workspacesById.get(workspaceId);
-    if (!workspace || !workspace.runtime || !workspace.runtime.links) {
+    if (!workspace || !workspace.runtime || !workspace.runtime.devMachine) {
       return '';
     }
-
-    for (let i = 0; i < workspace.runtime.links.length; i++) {
-      let link = workspace.runtime.links[i];
-      if (link.rel === 'wsagent.websocket') {
-        return link.href;
-      }
-    }
-    return '';
+    let websocketLink = this.lodash.find(workspace.runtime.devMachine.links, l => l.rel === "wsagent.websocket");
+    return websocketLink ? websocketLink.href : '';
   }
 
   getIdeUrl(workspaceName) {

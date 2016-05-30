@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.debug.shared.dto.action;
 
+import org.eclipse.che.api.debug.shared.dto.BreakpointDto;
 import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
 
 /**
  * @author Anatoliy Bazko
@@ -23,4 +26,10 @@ public interface StartActionDto extends ActionDto, StartAction {
     void setType(TYPE type);
 
     StartActionDto withType(TYPE type);
+
+    List<BreakpointDto> getBreakpoints();
+
+    void setBreakpoints(List<BreakpointDto> breakpoints);
+
+    StartActionDto withBreakpoints(List<BreakpointDto> breakpoints);
 }

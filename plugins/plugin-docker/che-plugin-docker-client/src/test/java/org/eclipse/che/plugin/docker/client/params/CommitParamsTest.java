@@ -31,16 +31,16 @@ public class CommitParamsTest {
 
     @BeforeMethod
     private void prepare() {
-        commitParams = CommitParams.create(CONTAINER, REPOSITORY);
+        commitParams = CommitParams.create(CONTAINER);
     }
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        commitParams = CommitParams.create(CONTAINER, REPOSITORY);
+        commitParams = CommitParams.create(CONTAINER);
 
         assertEquals(commitParams.getContainer(), CONTAINER);
-        assertEquals(commitParams.getRepository(), REPOSITORY);
 
+        assertNull(commitParams.getRepository());
         assertNull(commitParams.getTag());
         assertNull(commitParams.getComment());
         assertNull(commitParams.getAuthor());
@@ -48,10 +48,11 @@ public class CommitParamsTest {
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        commitParams = CommitParams.create(CONTAINER, REPOSITORY)
-                                                .withTag(TAG)
-                                                .withComment(COMMENT)
-                                                .withAuthor(AUTHOR);
+        commitParams = CommitParams.create(CONTAINER)
+                                   .withRepository(REPOSITORY)
+                                   .withTag(TAG)
+                                   .withComment(COMMENT)
+                                   .withAuthor(AUTHOR);
 
         assertEquals(commitParams.getContainer(), CONTAINER);
         assertEquals(commitParams.getRepository(), REPOSITORY);
@@ -62,22 +63,12 @@ public class CommitParamsTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterIsNull() {
-        commitParams = CommitParams.create(null, REPOSITORY);
-    }
-
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterIsNull() {
-        commitParams = CommitParams.create(CONTAINER, null);
+        commitParams = CommitParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfContainerRequiredParameterResetWithNull() {
         commitParams.withContainer(null);
-    }
-
-    @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterResetWithNull() {
-        commitParams.withRepository(null);
     }
 
     @Test
@@ -89,8 +80,18 @@ public class CommitParamsTest {
     }
 
     @Test
+    public void repositoryParameterShouldEqualsNullIfItNotSet() {
+        commitParams.withComment(COMMENT)
+                    .withTag(TAG)
+                    .withAuthor(AUTHOR);
+
+        assertNull(commitParams.getRepository());
+    }
+
+    @Test
     public void commentParameterShouldEqualsNullIfItNotSet() {
-        commitParams.withTag(TAG)
+        commitParams.withContainer(CONTAINER)
+                    .withTag(TAG)
                     .withAuthor(AUTHOR);
 
         assertNull(commitParams.getComment());
@@ -98,7 +99,8 @@ public class CommitParamsTest {
 
     @Test
     public void authorParameterShouldEqualsNullIfItNotSet() {
-        commitParams.withTag(TAG)
+        commitParams.withContainer(CONTAINER)
+                    .withTag(TAG)
                     .withComment(COMMENT);
 
         assertNull(commitParams.getAuthor());

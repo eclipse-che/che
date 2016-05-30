@@ -45,7 +45,7 @@ public class JavaCommandType implements CommandType {
     private final CurrentProjectPathProvider                                           currentProjectPathProvider;
     private final SourcepathProvider                                                   sourcepathProvider;
     private final OutputDirProvider                                                    outputDirProvider;
-    private final ClasspathProvider classpathProvider;
+    private final ClasspathProvider                                                    classpathProvider;
     private final JavaCommandConfigurationFactory                                      configurationFactory;
     private final Collection<CommandConfigurationPage<? extends CommandConfiguration>> pages;
 
@@ -106,9 +106,9 @@ public class JavaCommandType implements CommandType {
                " && javac -classpath " + classpathProvider.getKey() +
                " -sourcepath " + sourcepathProvider.getKey() +
                " -d " + outputDirProvider.getKey() +
-               " src/com/company/Main.java" +
+               " src/Main.java" +
                " && java -classpath " + classpathProvider.getKey() + outputDirProvider.getKey() +
-               " com.company.Main";
+               " Main";
     }
 
     @Override

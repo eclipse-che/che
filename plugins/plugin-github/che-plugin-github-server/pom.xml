@@ -79,19 +79,19 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
+            <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-json</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-git-impl-native</artifactId>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-shared</artifactId>
+            <artifactId>che-plugin-ssh-key-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.kohsuke</groupId>

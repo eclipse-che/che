@@ -33,7 +33,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 public class UploadFilePresenter extends BasicUploadPresenter implements UploadFileView.ActionDelegate {
 
     private final UploadFileView           view;
-    private final String                   workspaceId;
     private final EventBus                 eventBus;
     private final NotificationManager      notificationManager;
     private final ProjectExplorerPresenter projectExplorer;
@@ -49,7 +48,6 @@ public class UploadFilePresenter extends BasicUploadPresenter implements UploadF
                                CoreLocalizationConstant locale) {
         super(projectExplorer);
         this.appContext = appContext;
-        this.workspaceId = appContext.getWorkspace().getId();
         this.eventBus = eventBus;
         this.view = view;
         this.projectExplorer = projectExplorer;
@@ -91,7 +89,7 @@ public class UploadFilePresenter extends BasicUploadPresenter implements UploadF
     @Override
     public void onUploadClicked() {
         view.setEncoding(FormPanel.ENCODING_MULTIPART);
-        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() +"/project/" + workspaceId + "/uploadfile"
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() +"/project/uploadfile"
                        + ((HasStorablePath)getResourceBasedNode()).getStorablePath());
         view.submit();
     }

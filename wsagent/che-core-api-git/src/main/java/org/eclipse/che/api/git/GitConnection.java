@@ -90,6 +90,21 @@ public interface GitConnection extends Closeable {
     void checkout(CheckoutRequest request) throws GitException;
 
     /**
+     * Perform clone with sparse-checkout to specified directory.
+     *
+     * @param directory
+     *         path to keep in working tree
+     * @param remoteUrl
+     *         url to clone
+     * @param branch
+     *         branch to checkout
+     * @throws GitException
+     * @throws UnauthorizedException
+     *         if any error occurs when add files to the index
+     */
+    void cloneWithSparseCheckout(String directory, String remoteUrl, String branch) throws GitException, UnauthorizedException;
+
+    /**
      * Create new branch.
      *
      * @param request

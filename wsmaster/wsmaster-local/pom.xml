@@ -81,10 +81,6 @@
             <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>

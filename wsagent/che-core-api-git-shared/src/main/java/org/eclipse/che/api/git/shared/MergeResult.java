@@ -41,15 +41,35 @@ public interface MergeResult {
     /** @return head after the merge */
     String getNewHead();
 
+    void setNewHead(String newHead);
+
+    MergeResult withNewHead(String newHead);
+
     /** @return status of merge */
     MergeStatus getMergeStatus();
 
-    /** @return merged commits */
+    void setMergeStatus(MergeStatus mergeStatus);
+
+    MergeResult withMergeStatus(MergeStatus mergeStatus);
+
+    /** @return list of merged commits or empty list if no commits where merged. */
     List<String> getMergedCommits();
 
-    /** @return files that has conflicts. May return <code>null</code> or empty array if there is no conflicts */
+    void setMergedCommits(List<String> mergedCommits);
+
+    MergeResult withMergedCommits(List<String> mergedCommits);
+
+    /** @return files that have conflicts or empty list if there are no conflicts. */
     List<String> getConflicts();
 
-    /** @return files that failed to merge (not files that has conflicts). */
+    void setConflicts(List<String> conflicts);
+
+    MergeResult withConflicts(List<String> conflicts);
+
+    /** @return list of files that failed to merge (not files that have conflicts) or empty list if there are no failed files. */
     List<String> getFailed();
+
+    void setFailed(List<String> failed);
+
+    MergeResult withFailed(List<String> failed);
 }

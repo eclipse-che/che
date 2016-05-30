@@ -58,7 +58,15 @@
 @eval partToolbarSeparatorTopColor org.eclipse.che.ide.api.theme.Style.theme.partToolbarSeparatorTopColor();
 @eval partToolbarSeparatorBottomColor org.eclipse.che.ide.api.theme.Style.theme.partToolbarSeparatorBottomColor();
 
+@eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
+
 @eval consolePanelColor org.eclipse.che.ide.api.theme.Style.theme.consolePanelColor();
+@eval consolesToolbarBackground org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarBackground();
+@eval colsolesToolbarBorderColor org.eclipse.che.ide.api.theme.Style.theme.colsolesToolbarBorderColor();
+@eval consolesToolbarButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarButtonColor();
+@eval consolesToolbarHoveredButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarHoveredButtonColor();
+@eval consolesToolbarDisabledButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarDisabledButtonColor();
+@eval consolesToolbarToggledButtonColor org.eclipse.che.ide.api.theme.Style.theme.consolesToolbarToggledButtonColor();
 
 @eval tabBorderShadow org.eclipse.che.ide.api.theme.Style.theme.tabBorderShadow();
 
@@ -179,6 +187,9 @@
 @def largeLabel 12px;
 @def largeDropdownLabel 12px;
 @def buttonFontSize 11px;
+
+@def consoleFontSize 11px;
+@def consoleLineHeight 13px;
 
 /* Fonts */
 @def alternativeFontFamily "Helvetica Neue", "Myriad Pro","open sans", arial, sans-serif;

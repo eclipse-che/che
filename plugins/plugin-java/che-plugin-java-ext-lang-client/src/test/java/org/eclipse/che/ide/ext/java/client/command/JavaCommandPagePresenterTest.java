@@ -36,11 +36,20 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class JavaCommandPagePresenterTest {
-    private static final String MAIN_CLASS_PATH          = "/project/src/com/company/Main.java";
-    private static final String RELATIVE_MAIN_CLASS_PATH = "src/com/company/Main.java";
+    private static final String MAIN_CLASS_PATH          = "/project/src/com/company/MainClass.java";
+    private static final String RELATIVE_MAIN_CLASS_PATH = "src/com/company/MainClass.java";
     private static final String PROJECT_PATH             = "/project";
-    private static final String MAIN_CLASS_FQN           = "com.company.Main";
-    private static final String COMMAND_LINE             = "command-line";
+    private static final String MAIN_CLASS_FQN           = "com.company.MainClass";
+    private static final String COMMAND_LINE             = "cd ${current.project.path} &&" +
+                                                           "javac -classpath ${project.java.classpath}" +
+                                                           "-sourcepath ${project.java.sourcepath} -d ${project" +
+                                                           ".java.output.dir} src/Main.java &&" +
+                                                           "java -classpath ${project.java.classpath}${project.java.output.dir} Main";
+    private static final String NEW_COMMAND_LINE         = "cd ${current.project.path} &&" +
+                                                           "javac -classpath ${project.java.classpath}" +
+                                                           "-sourcepath ${project.java.sourcepath} -d ${project" +
+                                                           ".java.output.dir} src/com/company/MainClass.java &&" +
+                                                           "java -classpath ${project.java.classpath}${project.java.output.dir} com.company.MainClass";
 
     @Mock
     private JavaCommandPageView view;
@@ -130,6 +139,26 @@ public class JavaCommandPagePresenterTest {
 
         verify(view).setMainClass(RELATIVE_MAIN_CLASS_PATH);
         verify(configuration).setMainClass(RELATIVE_MAIN_CLASS_PATH);
+
+        verify(listener).onDirtyStateChanged();
+    }
+
+    @Test
+    public void mainClassShouldBeUpdated2() throws Exception {
+        CommandConfigurationPage.DirtyStateListener listener = mock(CommandConfigurationPage.DirtyStateListener.class);
+        String oldMainClass = "src/Main.java";
+        String oldMainClassFqn = "Main";
+
+        when(configuration.getMainClass()).thenReturn(oldMainClass);
+        when(configuration.getMainClassFqn()).thenReturn(oldMainClassFqn);
+
+        presenter.setDirtyStateListener(listener);
+        presenter.resetFrom(configuration);
+        presenter.setMainClass(MAIN_CLASS_PATH, MAIN_CLASS_FQN);
+
+        verify(view).setMainClass(RELATIVE_MAIN_CLASS_PATH);
+        verify(configuration).setMainClass(RELATIVE_MAIN_CLASS_PATH);
+        verify(configuration).setCommandLine(NEW_COMMAND_LINE);
 
         verify(listener).onDirtyStateChanged();
     }

@@ -51,6 +51,7 @@ import org.everrest.core.RequestFilter;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -108,11 +109,12 @@ import static org.testng.Assert.assertTrue;
 public class WorkspaceServiceTest {
 
     @SuppressWarnings("unused")
-    private static final ApiExceptionMapper MAPPER  = new ApiExceptionMapper();
-    private static final String             USER_ID = "user123";
-    private static final LinkedList<String> ROLES   = new LinkedList<>(singleton("user"));
+    private static final ApiExceptionMapper MAPPER      = new ApiExceptionMapper();
+    private static final String             USER_ID     = "user123";
+    private static final String             IDE_CONTEXT = "ws";
+    private static final LinkedList<String> ROLES       = new LinkedList<>(singleton("user"));
     @SuppressWarnings("unused")
-    private static final EnvironmentFilter  FILTER  = new EnvironmentFilter();
+    private static final EnvironmentFilter  FILTER      = new EnvironmentFilter();
 
     @Mock
     private WorkspaceManager   wsManager;
@@ -122,6 +124,11 @@ public class WorkspaceServiceTest {
     private WorkspaceValidator validator;
     @InjectMocks
     private WorkspaceService   service;
+
+    @BeforeMethod
+    public void setup() {
+        service = new WorkspaceService(wsManager, machineManager, validator, new WorkspaceServiceLinksInjector(IDE_CONTEXT));
+    }
 
     @Test
     public void shouldCreateWorkspace() throws Exception {
@@ -714,7 +721,7 @@ public class WorkspaceServiceTest {
                                                               .setDev(true)
                                                               .setName("dev-machine")
                                                               .setType("docker")
-                                                              .setSource(new MachineSourceImpl("location", "recipe"))
+                                                              .setSource(new MachineSourceImpl("location").setLocation("recipe"))
                                                               .setServers(asList(new ServerConfImpl("wsagent",
                                                                                                     "8080",
                                                                                                     "https",

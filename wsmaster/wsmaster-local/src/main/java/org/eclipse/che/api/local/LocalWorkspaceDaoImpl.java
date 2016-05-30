@@ -31,7 +31,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +139,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     }
 
     @Override
-    public List<WorkspaceImpl> getWorkspaces(String username) throws ServerException {
+    public List<WorkspaceImpl> getWorkspaces(String userId) throws ServerException {
         return new ArrayList<>(workspaces.values());
     }
 

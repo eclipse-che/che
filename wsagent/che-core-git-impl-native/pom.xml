@@ -43,10 +43,6 @@
             <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
@@ -88,15 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-ssh-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -105,6 +93,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-ssh-key-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>

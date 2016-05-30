@@ -50,8 +50,6 @@ import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -73,8 +71,6 @@ import java.io.IOException;
  */
 @Path("svn")
 public class SubversionService extends Service {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SubversionService.class);
 
     @Inject
     private ProjectRegistry projectRegistry;

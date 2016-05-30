@@ -14,22 +14,9 @@ import com.google.gwt.storage.client.Storage;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
-import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
-import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
-import org.eclipse.che.ide.api.project.node.HasProjectConfig.ProjectConfig;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.api.project.tree.VirtualFileImpl;
-import org.eclipse.che.ide.api.project.tree.VirtualFileInfo;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.Breakpoint.Type;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -38,10 +25,21 @@ import org.eclipse.che.ide.api.debug.BreakpointManagerObserver;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer.LineChangeAction;
 import org.eclipse.che.ide.api.debug.HasBreakpointRenderer;
-import org.eclipse.che.ide.debug.dto.BreakpointDto;
-import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
+import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
+import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
+import org.eclipse.che.ide.api.project.node.HasProjectConfig.ProjectConfig;
+import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.project.tree.VirtualFileImpl;
+import org.eclipse.che.ide.api.project.tree.VirtualFileInfo;
+import org.eclipse.che.ide.debug.dto.BreakpointDto;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
@@ -567,27 +565,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
     public void onActiveDebuggerChanged(@Nullable Debugger activeDebugger) {}
 
     @Override
-    public void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) {
-        connect.then(new Operation<Void>() {
-            @Override
-            public void apply(Void arg) throws OperationException {
-                reAddBreakpointsToServer();
-            }
-        });
-    }
-
-    private void reAddBreakpointsToServer() {
-        Debugger debugger = debuggerManager.getActiveDebugger();
-        if (debugger == null) {
-            return;
-        }
-
-        for (Entry<String, List<Breakpoint>> entry : breakpoints.entrySet()) {
-            for (final Breakpoint breakpoint : entry.getValue()) {
-                debugger.addBreakpoint(breakpoint.getFile(), breakpoint.getLineNumber());
-            }
-        }
-    }
+    public void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) { }
 
     @Override
     public void onDebuggerDisconnected() {

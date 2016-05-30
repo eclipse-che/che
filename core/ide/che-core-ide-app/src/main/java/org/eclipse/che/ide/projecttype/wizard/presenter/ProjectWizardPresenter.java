@@ -209,8 +209,8 @@ public class ProjectWizardPresenter implements Wizard.UpdateDelegate,
             Map<String, List<String>> prevDataAttributes = prevData.getAttributes();
             Map<String, List<String>> newAttributes = new HashMap<>();
             for (AttributeDto attribute : attributes) {
-                if (prevDataAttributes.containsKey(attribute.getId())) {
-                    newAttributes.put(attribute.getId(), prevDataAttributes.get(attribute.getId()));
+                if (prevDataAttributes.containsKey(attribute.getName())) {
+                    newAttributes.put(attribute.getName(), prevDataAttributes.get(attribute.getName()));
                 }
             }
             newProject.setAttributes(newAttributes);

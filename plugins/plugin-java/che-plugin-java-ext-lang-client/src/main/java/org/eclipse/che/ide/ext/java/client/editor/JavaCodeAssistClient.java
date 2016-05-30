@@ -44,6 +44,7 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  */
 @Singleton
 public class JavaCodeAssistClient {
+    private final static String CODE_ASSIST_URL_PREFIX = "/java/code-assist";
 
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
@@ -62,14 +63,14 @@ public class JavaCodeAssistClient {
     }
 
     public void computeProposals(String projectPath, String fqn, int offset, String contents, AsyncRequestCallback<Proposals> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/code-assist/compute/completion" + "/?projectpath=" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/compute/completion" + "/?projectpath=" +
                      projectPath + "&fqn=" + fqn + "&offset=" + offset;
         asyncRequestFactory.createPostRequest(url, null).data(contents).send(callback);
     }
 
     public void computeAssistProposals(String projectPath, String fqn, int offset, List<Problem> problems,
                                        AsyncRequestCallback<Proposals> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/code-assist/compute/assist" + "/?projectpath=" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/compute/assist" + "/?projectpath=" +
                      projectPath + "&fqn=" + fqn + "&offset=" + offset;
         List<Problem> prob = new ArrayList<>();
         prob.addAll(problems);
@@ -78,10 +79,9 @@ public class JavaCodeAssistClient {
 
 
     public void applyProposal(String sessionId, int index, boolean insert, final AsyncCallback<ProposalApplyResult> callback) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/code-assist/apply/completion/?sessionid=" +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/apply/completion/?sessionid=" +
                      sessionId + "&index=" + index + "&insert=" + insert;
-        Unmarshallable<ProposalApplyResult> unmarshaller =
-                unmarshallerFactory.newUnmarshaller(ProposalApplyResult.class);
+        Unmarshallable<ProposalApplyResult> unmarshaller = unmarshallerFactory.newUnmarshaller(ProposalApplyResult.class);
         asyncRequestFactory.createGetRequest(url).send(new AsyncRequestCallback<ProposalApplyResult>(unmarshaller) {
             @Override
             protected void onSuccess(ProposalApplyResult proposalApplyResult) {
@@ -96,13 +96,14 @@ public class JavaCodeAssistClient {
     }
 
     public String getProposalDocUrl(int id, String sessionId) {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + "/jdt/code-assist/compute/info?sessionid=" + sessionId +
+        return appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/compute/info?sessionid=" + sessionId +
                "&index=" + id;
     }
 
     /**
      * Creates edits that describe how to format the given string.
      * Returns the changes required to format source.
+     * Note: Java code formatting is supported only.
      *
      * @param offset
      *         The given offset to start recording the edits (inclusive).
@@ -116,8 +117,9 @@ public class JavaCodeAssistClient {
         return newPromise(new AsyncPromiseHelper.RequestCall<List<Change>>() {
             @Override
             public void makeCall(AsyncCallback<List<Change>> callback) {
-                String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/code-formatting/format?offset=" + offset +
-                             "&length=" + length;
+                String url =
+                        appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/format?offset=" + offset + "&length=" +
+                        length;
                 asyncRequestFactory.createPostRequest(url, null)
                                    .header(CONTENT_TYPE, MimeType.TEXT_PLAIN)
                                    .data(content)
@@ -145,10 +147,9 @@ public class JavaCodeAssistClient {
      * @return list of imports which have conflicts
      */
     public Promise<List<ConflictImportDTO>> organizeImports(String projectPath, String fqn) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() +
-                     "/jdt/code-assist/organize-imports?projectpath=" + projectPath +
-                     "&fqn=" + fqn;
-
+        String url =
+                appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/organize-imports?projectpath=" + projectPath +
+                "&fqn=" + fqn;
         return asyncRequestFactory.createPostRequest(url, null)
                                   .loader(loader)
                                   .send(unmarshallerFactory.newListUnmarshaller(ConflictImportDTO.class));
@@ -163,10 +164,8 @@ public class JavaCodeAssistClient {
      *         fully qualified name of the java file
      */
     public Promise<Void> applyChosenImports(String projectPath, String fqn, ConflictImportDTO chosen) {
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() +
-                     "/jdt/code-assist/apply-imports?projectpath=" + projectPath +
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/apply-imports?projectpath=" + projectPath +
                      "&fqn=" + fqn;
-
         return asyncRequestFactory.createPostRequest(url, chosen)
                                   .loader(loader)
                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)

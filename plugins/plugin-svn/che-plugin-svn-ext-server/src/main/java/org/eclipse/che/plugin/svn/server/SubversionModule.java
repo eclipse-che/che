@@ -14,8 +14,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
-import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
+import org.eclipse.che.api.project.server.type.ValueProviderFactory;
+import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.credentials.CurrentUserPreferencesAccess;
 import org.eclipse.che.plugin.svn.server.credentials.CurrentUserPreferencesAccessImpl;
@@ -23,7 +24,6 @@ import org.eclipse.che.plugin.svn.server.credentials.PreferencesCredentialsProvi
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProviderImpl;
 import org.eclipse.che.plugin.svn.server.rest.SubversionService;
-import org.eclipse.che.inject.DynaModule;
 
 /**
  * Module for wiring up the server-side portion of this extension.

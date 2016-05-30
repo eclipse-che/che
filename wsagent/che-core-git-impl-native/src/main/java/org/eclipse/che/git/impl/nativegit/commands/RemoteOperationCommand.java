@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.nativegit.commands;
 
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.CredentialsLoader;
-import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
-import org.eclipse.che.git.impl.nativegit.GitUrl;
+import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.UserCredential;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScript;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.git.impl.nativegit.GitAskPassScript;
+import org.eclipse.che.api.git.GitUrlUtils;
+import org.eclipse.che.plugin.ssh.key.script.SshScript;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
 
@@ -27,21 +28,21 @@ import static com.google.common.base.MoreObjects.firstNonNull;
  */
 public abstract class RemoteOperationCommand<T> extends GitCommand<T> {
 
-    private final GitSshScriptProvider gitSshScriptProvider;
-    private final CredentialsLoader    credentialsLoader;
-    private final GitAskPassScript     gitAskPassScript;
-    private       String               remoteUri;
+    private final SshScriptProvider sshScriptProvider;
+    private final CredentialsLoader credentialsLoader;
+    private final GitAskPassScript  gitAskPassScript;
+    private       String            remoteUri;
 
     /**
      * @param repository
      *         directory where command will be executed
      */
     public RemoteOperationCommand(File repository,
-                                  GitSshScriptProvider gitSshScriptProvider,
+                                  SshScriptProvider sshScriptProvider,
                                   CredentialsLoader credentialsLoader,
                                   GitAskPassScript gitAskPassScript) {
         super(repository);
-        this.gitSshScriptProvider = gitSshScriptProvider;
+        this.sshScriptProvider = sshScriptProvider;
         this.credentialsLoader = credentialsLoader;
         this.gitAskPassScript = gitAskPassScript;
     }
@@ -61,14 +62,14 @@ public abstract class RemoteOperationCommand<T> extends GitCommand<T> {
 
     @Override
     protected void start() throws GitException {
-        if (GitUrl.isSSH(remoteUri)) {
-            GitSshScript sshScript = gitSshScriptProvider.gitSshScript(remoteUri);
+        if (GitUrlUtils.isSSH(remoteUri)) {
+            SshScript sshScript = getSshScript();
             setCommandEnvironment("GIT_SSH", sshScript.getSshScriptFile().getAbsolutePath());
 
             try {
                 super.start();
             } finally {
-                sshScript.delete();
+                deleteSshScript(sshScript);
             }
         } else {
             UserCredential credentials = firstNonNull(credentialsLoader.getUserCredential(remoteUri), UserCredential.EMPTY_CREDENTIALS);
@@ -79,6 +80,22 @@ public abstract class RemoteOperationCommand<T> extends GitCommand<T> {
             } finally {
                 gitAskPassScript.remove();
             }
+        }
+    }
+
+    private SshScript getSshScript() throws GitException {
+        try {
+            return sshScriptProvider.getSshScript(remoteUri);
+        } catch (ServerException e) {
+            throw new GitException(e.getServiceError());
+        }
+    }
+
+    private void deleteSshScript(SshScript sshScript) throws GitException {
+        try {
+            sshScript.delete();
+        } catch (ServerException e) {
+            throw new GitException(e.getServiceError());
         }
     }
 }

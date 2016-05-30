@@ -15,6 +15,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -28,6 +30,12 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.ui.Tooltip;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
  * View representation of output console.
@@ -41,6 +49,8 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     private static final OutputConsoleViewUiBinder UI_BINDER   = GWT.create(OutputConsoleViewUiBinder.class);
+
+    private ActionDelegate delegate;
 
     @UiField
     DockLayoutPanel consolePanel;
@@ -66,6 +76,21 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     @UiField
     Anchor          previewUrlLabel;
 
+    @UiField
+    FlowPanel       reRunProcessButton;
+
+    @UiField
+    FlowPanel       stopProcessButton;
+
+    @UiField
+    FlowPanel       clearOutputsButton;
+
+    @UiField
+    FlowPanel       wrapTextButton;
+
+    @UiField
+    FlowPanel       scrollToBottomButton;
+
     /** If true - next printed line should replace the previous one. */
     private boolean carriageReturn;
 
@@ -76,13 +101,93 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     private boolean followScheduled = false;
 
     @Inject
-    public OutputConsoleViewImpl() {
+    public OutputConsoleViewImpl(MachineResources resources,
+                                 MachineLocalizationConstant localization) {
         initWidget(UI_BINDER.createAndBindUi(this));
+
+        reRunProcessButton.add(new SVGImage(resources.reRunIcon()));
+        stopProcessButton.add(new SVGImage(resources.stopIcon()));
+        clearOutputsButton.add(new SVGImage(resources.clearOutputsIcon()));
+
+        wrapTextButton.add(new SVGImage(resources.lineWrapIcon()));
+        scrollToBottomButton.add(new SVGImage(resources.scrollToBottomIcon()));
+
         scrollPanel.addDomHandler(this, ScrollEvent.getType());
+
+        reRunProcessButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!reRunProcessButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.reRunProcessButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        stopProcessButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!stopProcessButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.stopProcessButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        clearOutputsButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!clearOutputsButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.clearOutputsButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        wrapTextButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if (!wrapTextButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.wrapTextButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        scrollToBottomButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (!scrollToBottomButton.getElement().hasAttribute("disabled") && delegate != null) {
+                    delegate.scrollToBottomButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        Tooltip.create((elemental.dom.Element) reRunProcessButton.getElement(),
+                BOTTOM,
+                MIDDLE,
+                localization.consolesReRunButtonTooltip());
+
+        Tooltip.create((elemental.dom.Element) stopProcessButton.getElement(),
+                BOTTOM,
+                MIDDLE,
+                localization.consolesStopButtonTooltip());
+
+        Tooltip.create((elemental.dom.Element) clearOutputsButton.getElement(),
+                BOTTOM,
+                MIDDLE,
+                localization.consolesClearOutputsButtonTooltip());
+
+        Tooltip.create((elemental.dom.Element) wrapTextButton.getElement(),
+                BOTTOM,
+                MIDDLE,
+                localization.consolesWrapTextButtonTooltip());
+
+        Tooltip.create((elemental.dom.Element) scrollToBottomButton.getElement(),
+                BOTTOM,
+                MIDDLE,
+                localization.consolesAutoScrollButtonTooltip());
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     @Override
@@ -96,12 +201,59 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
-    public void printCommandLine(String commandLine) {
+    public void wrapText(boolean wrap) {
+        if (wrap) {
+            consoleLines.getElement().setAttribute("wrap", "");
+        } else {
+            consoleLines.getElement().removeAttribute("wrap");
+        }
+    }
+
+    @Override
+    public void enableAutoScroll(boolean enable) {
+        followOutput = enable;
+        followOutput();
+    }
+
+    @Override
+    public void clearConsole() {
+        consoleLines.getElement().setInnerHTML("");
+    }
+
+    @Override
+    public void toggleWrapTextButton(boolean toggle) {
+        if (toggle) {
+            wrapTextButton.getElement().setAttribute("toggled", "");
+        } else {
+            wrapTextButton.getElement().removeAttribute("toggled");
+        }
+    }
+
+    @Override
+    public void toggleScrollToEndButton(boolean toggle) {
+        if (toggle) {
+            scrollToBottomButton.getElement().setAttribute("toggled", "");
+        } else {
+            scrollToBottomButton.getElement().removeAttribute("toggled");
+        }
+    }
+
+    @Override
+    public void enableStopButton(boolean enable) {
+        if (enable) {
+            stopProcessButton.getElement().removeAttribute("disabled");
+        } else {
+            stopProcessButton.getElement().setAttribute("disabled", "");
+        }
+    }
+
+    @Override
+    public void showCommandLine(String commandLine) {
         commandLabel.setText(commandLine);
     }
 
     @Override
-    public void printPreviewUrl(String previewUrl) {
+    public void showPreviewUrl(String previewUrl) {
         if (Strings.isNullOrEmpty(previewUrl)) {
             hidePreview();
         } else {
@@ -112,7 +264,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
-    public void print(String message, boolean cr) {
+    public void print(String text, boolean cr) {
         if (carriageReturn) {
             Node lastChild = consoleLines.getElement().getLastChild();
             if (lastChild != null) {
@@ -123,7 +275,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         carriageReturn = cr;
 
         PreElement pre = DOM.createElement("pre").cast();
-        pre.setInnerText(message.isEmpty() ? " " : message);
+        pre.setInnerText(text.isEmpty() ? " " : text);
         consoleLines.getElement().appendChild(pre);
 
         followOutput();
@@ -133,6 +285,10 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     public void onScroll(ScrollEvent event) {
         // Do nothing if content height less scroll area height
         if (scrollPanel.getElement().getScrollHeight() < scrollPanel.getElement().getOffsetHeight()) {
+            followOutput = true;
+            if (delegate != null) {
+                delegate.onOutputScrolled(followOutput);
+            }
             return;
         }
 
@@ -141,6 +297,10 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
             followOutput = true;
         } else {
             followOutput = false;
+        }
+
+        if (delegate != null) {
+            delegate.onOutputScrolled(followOutput);
         }
     }
 
@@ -155,6 +315,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         /** Scroll bottom immediately if view is visible */
         if (scrollPanel.getElement().getOffsetParent() != null) {
             scrollPanel.scrollToBottom();
+            scrollPanel.scrollToLeft();
             return;
         }
 
@@ -172,6 +333,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
 
                     if (scrollPanel.getElement().getOffsetParent() != null) {
                         scrollPanel.scrollToBottom();
+                        scrollPanel.scrollToLeft();
                         followScheduled = false;
                         return false;
                     }

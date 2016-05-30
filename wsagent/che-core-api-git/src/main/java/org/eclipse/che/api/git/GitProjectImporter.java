@@ -141,20 +141,10 @@ public class GitProjectImporter implements ProjectImporter {
             final DtoFactory dtoFactory = DtoFactory.getInstance();
             final String location = storage.getLocation();
             final String projectName = baseFolder.getName();
+            git = gitConnectionFactory.getConnection(localPath, consumerFactory);
             if (keepDir != null) {
-                final File temp = Files.createTempDirectory(null).toFile();
-                try {
-                    git = gitConnectionFactory.getConnection(temp, consumerFactory);
-                    sparsecheckout(git, projectName, location, branch == null ? "master" : branch, startPoint, keepDir, dtoFactory);
-                    // Copy content of directory to the project folder.
-                    final File projectDir = new File(localPath);
-                    IoUtil.copy(temp, projectDir, IoUtil.ANY_FILTER);
-                } finally {
-                    FileCleaner.addFile(temp);
-                }
+                git.cloneWithSparseCheckout(keepDir, location, branch == null ? "master" : branch);
             } else {
-
-                git = gitConnectionFactory.getConnection(localPath, consumerFactory);
                 if (baseFolder.getChildren().size() == 0) {
                     cloneRepository(git, "origin", location, dtoFactory);
                     if (commitId != null) {
@@ -297,36 +287,6 @@ public class GitProjectImporter implements ProjectImporter {
         } catch (GitException ex) {
             throw new GitException(ex.getMessage(), errorCode);
         }
-    }
-
-    private void sparsecheckout(GitConnection git,
-                                String projectName,
-                                String url,
-                                String branch,
-                                String startPoint,
-                                String directory,
-                                DtoFactory dtoFactory)
-            throws GitException, UnauthorizedException {
-        /*
-        Does following sequence of Git commands:
-        $ git init
-        $ git remote add origin <URL>
-        $ git config core.sparsecheckout true
-        $ echo keepDir >> .git/info/sparse-checkout
-        $ git pull origin master
-        */
-        initRepository(git, dtoFactory);
-        addRemote(git, "origin", url, dtoFactory);
-        git.getConfig().add("core.sparsecheckout", "true");
-        final File workingDir = git.getWorkingDir();
-        final File sparseCheckout = new File(workingDir, ".git" + File.separator + "info" + File.separator + "sparse-checkout");
-        try (BufferedWriter writer = Files.newBufferedWriter(sparseCheckout.toPath(), Charset.forName("UTF-8"))) {
-            writer.write(directory.startsWith(File.separator) ? directory : File.separator + directory);
-        } catch (IOException e) {
-            throw new GitException(e);
-        }
-        fetchBranch(git, "origin", branch, dtoFactory);
-        checkoutBranch(git, projectName, branch, startPoint, dtoFactory);
     }
 
     private void cleanGit(File project) {

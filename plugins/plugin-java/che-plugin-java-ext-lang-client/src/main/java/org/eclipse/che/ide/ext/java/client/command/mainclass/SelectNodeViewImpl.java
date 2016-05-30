@@ -52,7 +52,7 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 @Singleton
 public class SelectNodeViewImpl extends Window implements SelectNodeView {
     private final JavaContentRootInterceptor javaContentRootInterceptor;
-    private final ClassNodeInterceptor classNodeInterceptor;
+    private final ClassNodeInterceptor       classNodeInterceptor;
 
     private Tree                     tree;
     private ActionDelegate           delegate;

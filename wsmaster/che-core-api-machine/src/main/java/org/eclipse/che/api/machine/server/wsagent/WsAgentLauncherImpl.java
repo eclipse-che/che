@@ -42,7 +42,8 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     public static final String WS_AGENT_PROCESS_START_COMMAND = "machine.ws_agent.run_command";
     public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
 
-    private static final Logger LOG                             = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
+
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
 
     private final Provider<MachineManager> machineManagerProvider;
@@ -77,22 +78,13 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     @Override
     public void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException {
         final Machine devMachine = getMachineManager().getDevMachine(workspaceId);
-        String wsAgentPingUrl = devMachine.getRuntime()
-                                                .getServers()
-                                                .get(Constants.WS_AGENT_PORT)
-                                                .getUrl();
-        if (!wsAgentPingUrl.endsWith("/"))
-            wsAgentPingUrl = wsAgentPingUrl.concat("/");
+        final HttpJsonRequest wsAgentPingRequest = createPingRequest(devMachine);
+        final String wsAgentPingUrl = wsAgentPingRequest.getUrl();
         try {
             getMachineManager().exec(devMachine.getId(),
                                      new CommandImpl(WS_AGENT_PROCESS_NAME, wsAgentStartCommandLine, "Arbitrary"),
                                      getWsAgentProcessOutputChannel(workspaceId));
-
-
-            final HttpJsonRequest wsAgentPingRequest = httpJsonRequestFactory.fromUrl(wsAgentPingUrl)
-                                                                             .setMethod(HttpMethod.GET)
-                                                                             .setTimeout(wsAgentPingConnectionTimeoutMs);
-            long pingStartTimestamp = System.currentTimeMillis();
+            final long pingStartTimestamp = System.currentTimeMillis();
             LOG.debug("Starts pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}",
                       workspaceId,
                       wsAgentPingUrl,
@@ -110,6 +102,22 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
         }
         LOG.error("Fail pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}", workspaceId, wsAgentPingUrl);
         throw new MachineException(pingTimedOutErrorMessage);
+    }
+
+    // forms the ping request based on information about the machine.
+    protected HttpJsonRequest createPingRequest(Machine machine) {
+        String wsAgentPingUrl = machine.getRuntime()
+                                       .getServers()
+                                       .get(Constants.WS_AGENT_PORT)
+                                       .getUrl();
+        // since everrest mapped on the slash in case of it absence
+        // we will always obtain not found response
+        if (!wsAgentPingUrl.endsWith("/")) {
+            wsAgentPingUrl = wsAgentPingUrl.concat("/");
+        }
+        return httpJsonRequestFactory.fromUrl(wsAgentPingUrl)
+                                     .setMethod(HttpMethod.GET)
+                                     .setTimeout(wsAgentPingConnectionTimeoutMs);
     }
 
     private boolean pingWsAgent(HttpJsonRequest wsAgentPingRequest) throws MachineException {

@@ -131,6 +131,17 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     }
 
     @Override
+    public String getUrl() {
+        final UriBuilder ub = UriBuilder.fromUri(url);
+        if (queryParams != null) {
+            for (Pair<String, ?> parameter : queryParams) {
+                ub.queryParam(parameter.first, parameter.second);
+            }
+        }
+        return ub.build().toString();
+    }
+
+    @Override
     public HttpJsonResponse request() throws IOException,
                                              ServerException,
                                              UnauthorizedException,

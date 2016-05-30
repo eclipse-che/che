@@ -44,6 +44,7 @@ import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,8 @@ public class WorkspaceManager {
     private final ExecutorService   executor;
     private final MachineManager    machineManager;
     private final UserManager       userManager;
+    private final boolean           defaultAutoSnapshot;
+    private final boolean           defaultAutoRestore;
 
     private WorkspaceHooks hooks = new NoopWorkspaceHooks();
 
@@ -96,12 +99,16 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             MachineManager machineManager,
-                            UserManager userManager) {
+                            UserManager userManager,
+                            @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
+                            @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.eventService = eventService;
         this.machineManager = machineManager;
         this.userManager = userManager;
+        this.defaultAutoSnapshot = defaultAutoSnapshot;
+        this.defaultAutoRestore = defaultAutoRestore;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
@@ -239,22 +246,22 @@ public class WorkspaceManager {
     }
 
     /**
-     * Gets all user's workspaces(workspaces where user is owner).
+     * Gets list of workspaces which user can read
      *
      * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
      * or status defined by their runtime instances(if those exist).
      *
-     * @param namespace
-     *         the id of the user whose workspaces should be fetched
-     * @return the list of workspaces or empty list if user doesn't own any workspace
+     * @param user
+     *         the id of the user
+     * @return the list of workspaces or empty list if user can't read any workspace
      * @throws NullPointerException
      *         when {@code owner} is null
      * @throws ServerException
-     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
+     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getWorkspaces(String)}
      */
-    public List<WorkspaceImpl> getWorkspaces(String namespace) throws ServerException {
-        requireNonNull(namespace, "Required non-null workspace namespace");
-        final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
+    public List<WorkspaceImpl> getWorkspaces(String user) throws ServerException {
+        requireNonNull(user, "Required non-null user id");
+        final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
         workspaces.forEach(this::normalizeState);
         return workspaces;
     }
@@ -343,9 +350,10 @@ public class WorkspaceManager {
                                                                            ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-        final boolean autoRestore = parseBoolean(workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT))
-                                    && !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, autoRestore, accountId);
+        final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
+        final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
+        final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
+        return performAsyncStart(workspace, envName, snapshotExists && autoRestore, accountId);
     }
 
     /**
@@ -461,7 +469,7 @@ public class WorkspaceManager {
     public void createSnapshot(String workspaceId) throws NotFoundException, ServerException, ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = normalizeState(workspaceDao.get(workspaceId));
-        checkWorkspaceBeforeCreatingSnapshot(workspace);
+        checkWorkspaceIsRunning(workspace, "create a snapshot of");
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             createSnapshotSync(workspace.getRuntime(), workspace.getNamespace(), workspaceId);
         }));
@@ -550,10 +558,9 @@ public class WorkspaceManager {
      */
     @VisibleForTesting
     void performAsyncStop(WorkspaceImpl workspace) throws ConflictException {
-        final boolean createSnapshot = parseBoolean(workspace.getAttributes().get(AUTO_CREATE_SNAPSHOT));
-        if (createSnapshot) {
-            checkWorkspaceBeforeCreatingSnapshot(workspace);
-        }
+        checkWorkspaceIsRunning(workspace, "stop");
+        final String autoSnapshotAttr = workspace.getAttributes().get(AUTO_CREATE_SNAPSHOT);
+        final boolean createSnapshot = autoSnapshotAttr == null ? defaultAutoSnapshot : parseBoolean(autoSnapshotAttr);
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
             LOG.info("Workspace '{}:{}' with id '{}' is being stopped by user '{}'",
@@ -618,9 +625,10 @@ public class WorkspaceManager {
         return devMachineSnapshotFailMessage == null;
     }
 
-    private void checkWorkspaceBeforeCreatingSnapshot(WorkspaceImpl workspace) throws ConflictException {
+    private void checkWorkspaceIsRunning(WorkspaceImpl workspace, String operation) throws ConflictException {
         if (workspace.getStatus() != RUNNING) {
-            throw new ConflictException(format("Could not create a snapshot of the workspace '%s:%s' because its status is '%s'.",
+            throw new ConflictException(format("Could not %s the workspace '%s:%s' because its status is '%s'.",
+                                               operation,
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),
                                                workspace.getStatus()));
@@ -693,9 +701,9 @@ public class WorkspaceManager {
         if (parts.length == 1) {
             return workspaceDao.get(key);
         }
-        final String userName = parts[0];
+        final String userId = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userName.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userName).getId();
+        final String ownerId = userId.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userId).getId();
         return workspaceDao.get(wsName, ownerId);
     }
 

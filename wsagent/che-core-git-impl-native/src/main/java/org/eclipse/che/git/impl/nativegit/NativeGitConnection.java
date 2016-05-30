@@ -24,7 +24,6 @@ import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitException;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
-import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
@@ -44,6 +43,7 @@ import org.eclipse.che.api.git.shared.LsRemoteRequest;
 import org.eclipse.che.api.git.shared.MergeRequest;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.MoveRequest;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.shared.PullRequest;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushRequest;
@@ -84,16 +84,20 @@ import org.eclipse.che.git.impl.nativegit.commands.PushCommand;
 import org.eclipse.che.git.impl.nativegit.commands.RemoteListCommand;
 import org.eclipse.che.git.impl.nativegit.commands.RemoteOperationCommand;
 import org.eclipse.che.git.impl.nativegit.commands.ShowFileContentCommand;
-import org.eclipse.che.git.impl.nativegit.ssh.GitSshScriptProvider;
+import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * Native implementation of GitConnection
@@ -122,16 +126,16 @@ public class NativeGitConnection implements GitConnection {
     /**
      * @param repository
      *         directory where commands will be invoked
-     * @param gitSshScriptProvider
+     * @param sshScriptProvider
      *         manager for ssh keys. If it is null default ssh will be used;
      * @param credentialsLoader
      *         loader for credentials
      * @throws GitException
      *         when some error occurs
      */
-    public NativeGitConnection(File repository, GitSshScriptProvider gitSshScriptProvider,
+    public NativeGitConnection(File repository, SshScriptProvider sshScriptProvider,
                                CredentialsLoader credentialsLoader, GitUserResolver userResolver) throws GitException {
-        this(new NativeGit(repository, gitSshScriptProvider, credentialsLoader, new GitAskPassScript()), credentialsLoader, userResolver);
+        this(new NativeGit(repository, sshScriptProvider, credentialsLoader, new GitAskPassScript()), credentialsLoader, userResolver);
     }
 
     /**
@@ -174,6 +178,39 @@ public class NativeGitConnection implements GitConnection {
                  .setFilePaths(request.getFiles())
                  .setNoTrack(request.isNoTrack())
                  .execute();
+    }
+
+    @Override
+    public void cloneWithSparseCheckout(String directory, String remoteUrl, String branch) throws GitException, UnauthorizedException {
+        /*
+        Does following sequence of Git commands:
+        $ git init
+        $ git remote add origin <URL>
+        $ git config core.sparsecheckout true
+        $ echo keepDirectory >> .git/info/sparse-checkout
+        $ git pull origin master
+        */
+        init(newDto(InitRequest.class).withBare(false));
+        remoteAdd(newDto(RemoteAddRequest.class).withName("origin").withUrl(remoteUrl));
+        getConfig().add("core.sparsecheckout", "true");
+        try {
+            Files.write(Paths.get(getWorkingDir() + "/.git/info/sparse-checkout"),
+                        (directory.startsWith("/") ? directory : "/" + directory).getBytes());
+        } catch (IOException exception) {
+            throw new GitException(exception.getMessage(), exception);
+        }
+        try {
+            fetch(newDto(FetchRequest.class).withRemote("origin"));
+        } catch (GitException exception) {
+            throw new GitException(
+                    String.format("Unable to fetch remote branch %s. Make sure it exists and can be accessed.", branch), exception);
+        }
+        try {
+            checkout(newDto(CheckoutRequest.class).withName(branch));
+        } catch (GitException exception) {
+            throw new GitException(
+                    String.format("Unable to checkout branch %s. Make sure it exists and can be accessed.", branch), exception);
+        }
     }
 
     @Override
