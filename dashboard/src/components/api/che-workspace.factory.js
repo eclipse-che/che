@@ -89,6 +89,14 @@ export class CheWorkspace {
     return null;
   }
 
+/**
+ * Gets all workspace agents of this remote
+ * @returns {Map}
+ */
+  getWorkspaceAgents() {
+    return this.workspaceAgents;
+  }
+
   /**
    * Add a listener that need to have the onChangeWorkspaces(workspaces: Array) method
    * @param listener a changing listener
