@@ -55,6 +55,14 @@ public interface DebugConfigurationsManager {
     /** Remove the given listener. */
     void removeConfigurationsChangedListener(ConfigurationChangedListener listener);
 
+    /**
+     * Apply configuration. Establish connection with configured debugger.
+     *
+     * @param debugConfiguration
+     *      the debug configuration to use
+     */
+    void apply(DebugConfiguration debugConfiguration);
+
     /** Listener that will be called when debug configuration has been changed. */
     interface ConfigurationChangedListener {
         void onConfigurationAdded(DebugConfiguration configuration);

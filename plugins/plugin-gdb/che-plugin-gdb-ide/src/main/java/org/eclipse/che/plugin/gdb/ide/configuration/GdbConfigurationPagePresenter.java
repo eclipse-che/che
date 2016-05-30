@@ -10,15 +10,31 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
-import com.google.common.base.Optional;
+import com.google.gwt.core.client.JsArrayMixed;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.RecipeServiceClient;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.json.JsonHelper;
+import org.eclipse.che.ide.util.Pair;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Page allows to edit GDB debug configuration.
@@ -28,9 +44,15 @@ import java.util.Map;
 @Singleton
 public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.ActionDelegate, DebugConfigurationPage<DebugConfiguration> {
 
-    public static final String BIN_PATH_CONNECTION_PROPERTY = "BINARY";
+    public static final String BIN_PATH_CONNECTION_PROPERTY   = "BINARY";
+    public static final String DEFAULT_EXECUTABLE_TARGET_NAME = "a.out";
 
-    private final GdbConfigurationPageView view;
+    private final GdbConfigurationPageView   view;
+    private final MachineServiceClient       machineServiceClient;
+    private final AppContext                 appContext;
+    private final RecipeServiceClient        recipeServiceClient;
+    private final DtoFactory                 dtoFactory;
+    private final CurrentProjectPathProvider currentProjectPathProvider;
 
     private DebugConfiguration editedConfiguration;
     private String             originHost;
@@ -39,15 +61,27 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     private DirtyStateListener listener;
 
     @Inject
-    public GdbConfigurationPagePresenter(GdbConfigurationPageView view) {
+    public GdbConfigurationPagePresenter(GdbConfigurationPageView view,
+                                         MachineServiceClient machineServiceClient,
+                                         AppContext appContext,
+                                         DtoFactory dtoFactory,
+                                         RecipeServiceClient recipeServiceClient,
+                                         CurrentProjectPathProvider currentProjectPathProvider) {
         this.view = view;
+        this.machineServiceClient = machineServiceClient;
+        this.appContext = appContext;
+        this.recipeServiceClient = recipeServiceClient;
+        this.dtoFactory = dtoFactory;
+        this.currentProjectPathProvider = currentProjectPathProvider;
+
         view.setDelegate(this);
     }
 
-    private static String getBinaryPath(DebugConfiguration editedConfiguration) {
-        Map<String, String> connectionProperties = editedConfiguration.getConnectionProperties();
-        Optional<String> binPathOptional = Optional.fromNullable(connectionProperties.get(BIN_PATH_CONNECTION_PROPERTY));
-        return binPathOptional.or("");
+    private String getBinaryPath(DebugConfiguration debugConfiguration) {
+        Map<String, String> connectionProperties = debugConfiguration.getConnectionProperties();
+        String binaryPath = connectionProperties.get(BIN_PATH_CONNECTION_PROPERTY);
+        return binaryPath == null ? currentProjectPathProvider.getKey() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME
+                                  : binaryPath;
     }
 
     @Override
@@ -66,6 +100,54 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         view.setHost(editedConfiguration.getHost());
         view.setPort(editedConfiguration.getPort());
         view.setBinaryPath(getBinaryPath(editedConfiguration));
+
+        setHostsList();
+    }
+
+    private void setHostsList() {
+        machineServiceClient.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
+            @Override
+            public void apply(List<MachineDto> machines) throws OperationException {
+                @SuppressWarnings("unchecked")
+                Promise<RecipeDescriptor>[] recipePromises = (Promise<RecipeDescriptor>[])new Promise[machines.size()];
+
+                for (int i = 0; i < machines.size(); i++) {
+                    String location = machines.get(i).getConfig().getSource().getLocation();
+                    String recipeId = getRecipeId(location);
+                    recipePromises[i] = recipeServiceClient.getRecipe(recipeId);
+                }
+
+                setHostsList(recipePromises, machines);
+            }
+        });
+    }
+
+    private void setHostsList(final Promise<RecipeDescriptor>[] recipePromises, final List<MachineDto> machines) {
+        Promises.all(recipePromises).then(new Operation<JsArrayMixed>() {
+            @Override
+            public void apply(JsArrayMixed recipes) throws OperationException {
+                Set<Pair<String, String>> hosts = new HashSet<>();
+
+                for (int i = 0; i < recipes.length(); i++) {
+                    String recipeJson = recipes.getObject(i).toString();
+                    RecipeDescriptor recipeDescriptor = dtoFactory.createDtoFromJson(recipeJson, RecipeDescriptor.class);
+
+                    String script = recipeDescriptor.getScript();
+
+                    String host;
+                    try {
+                        Map<String, String> m = JsonHelper.toMap(script);
+                        host = m.containsKey("host") ? m.get("host") : "localhost";
+                    } catch (Exception e) {
+                        host = "localhost";
+                    }
+                    String description = host + " (" + machines.get(i).getConfig().getName() + ")";
+                    hosts.add(new Pair<>(description, host));
+                }
+
+                view.setHostsList(hosts);
+            }
+        });
     }
 
     @Override
@@ -100,4 +182,10 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         editedConfiguration.setConnectionProperties(connectionProperties);
         listener.onDirtyStateChanged();
     }
+
+    private String getRecipeId(String location) {
+        location = location.substring(0, location.lastIndexOf("/"));
+        return location.substring(location.lastIndexOf("/") + 1);
+    }
+
 }

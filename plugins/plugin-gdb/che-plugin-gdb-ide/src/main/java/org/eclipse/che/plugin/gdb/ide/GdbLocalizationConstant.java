@@ -26,4 +26,7 @@ public interface GdbLocalizationConstant extends com.google.gwt.i18n.client.Mess
 
     @Key("view.gdbConfigurationPage.binPathLabel")
     String gdbConfigurationPageViewBinPathLabel();
+
+    @Key("view.gdbConfigurationPage.binPathDescription")
+    String gdbConfigurationPageViewBinPathDescription();
 }

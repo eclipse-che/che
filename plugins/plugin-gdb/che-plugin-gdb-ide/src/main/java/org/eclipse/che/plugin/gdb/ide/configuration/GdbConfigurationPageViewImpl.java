@@ -19,6 +19,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.ui.listbox.CustomComboBox;
+import org.eclipse.che.ide.util.Pair;
+
+import java.util.Collection;
+
 /**
  * The implementation of {@link GdbConfigurationPageView}.
  *
@@ -31,11 +36,11 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
     private final FlowPanel rootElement;
 
     @UiField
-    TextBox host;
+    CustomComboBox host;
     @UiField
-    TextBox port;
+    TextBox        port;
     @UiField
-    TextBox binaryPath;
+    TextBox        binaryPath;
 
     private ActionDelegate delegate;
 
@@ -81,6 +86,14 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
     @Override
     public void setBinaryPath(String path) {
         this.binaryPath.setValue(path);
+    }
+
+    @Override
+    public void setHostsList(Collection<Pair<String, String>> hosts) {
+        host.clear();
+        for (Pair<String, String> entry : hosts) {
+            host.addItem(entry.first, entry.second);
+        }
     }
 
     @UiHandler({"host"})
