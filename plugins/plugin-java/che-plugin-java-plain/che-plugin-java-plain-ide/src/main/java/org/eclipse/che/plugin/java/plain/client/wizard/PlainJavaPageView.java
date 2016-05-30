@@ -27,6 +27,12 @@ interface PlainJavaPageView extends View<PlainJavaPageView.ActionDelegate> {
     /** Sets value of the source folder attribute. */
     void setSourceFolder(String value);
 
+    /** Returns value of the library folder attribute. */
+    String getLibraryFolder();
+
+    /** Sets value of the library folder attribute. */
+    void setLibraryFolder(String value);
+
     /**
      * Marks a field with information about source folder as empty.
      *
@@ -44,6 +50,14 @@ interface PlainJavaPageView extends View<PlainJavaPageView.ActionDelegate> {
     void changeBrowseBtnVisibleState(boolean isVisible);
 
     /**
+     * Sets whether Library folder panel is visible.
+     *
+     * @param isVisible
+     *         <code>true</code> to show the object, <code>false</code> to hide it
+     */
+    void changeLibraryPanelVisibleState(boolean isVisible);
+
+    /**
      * Sets whether source folder field is enabled.
      *
      * @param isEnable
@@ -55,7 +69,10 @@ interface PlainJavaPageView extends View<PlainJavaPageView.ActionDelegate> {
         /** Performs any actions appropriate in response to the user having changed on the fields. */
         void onCoordinatesChanged();
 
-        /** Called when Browse button is clicked. */
-        void onBrowseButtonClicked();
+        /** Called when Browse button is clicked for choosing source folder. */
+        void onBrowseSourceButtonClicked();
+
+        /** Called when Browse button is clicked for choosing library folder. */
+        void onBrowseLibraryButtonClicked();
     }
 }

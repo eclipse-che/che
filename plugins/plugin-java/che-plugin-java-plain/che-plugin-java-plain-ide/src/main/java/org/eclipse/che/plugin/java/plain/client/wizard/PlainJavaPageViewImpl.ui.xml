@@ -91,7 +91,13 @@
         <g:FlowPanel addStyleNames="{style.attribute-container}">
             <g:Label text="{locale.sourceFolderAttribute}" addStyleNames="{style.attribute-name} {style.margin}"/>
             <g:TextBox ui:field="sourceFolderField" debugId="mavenPageView-version" addStyleNames="{style.field} {style.margin}"/>
-            <g:Button text="{locale.browseButton}" ui:field="browseButton" addStyleNames="{style.margin} {style.button}"/>
+            <g:Button text="{locale.browseButton}" ui:field="browseSourceBtn" addStyleNames="{style.margin} {style.button}"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="libraryFolderContainer" addStyleNames="{style.attribute-container}">
+            <g:Label text="{locale.libraryFolderAttribute}" addStyleNames="{style.attribute-name} {style.margin}"/>
+            <g:TextBox ui:field="libFolderField" enabled="false" debugId="mavenPageView-version" addStyleNames="{style.field} {style.margin}"/>
+            <g:Button text="{locale.browseButton}" ui:field="browseLibBtn" addStyleNames="{style.margin} {style.button}"/>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

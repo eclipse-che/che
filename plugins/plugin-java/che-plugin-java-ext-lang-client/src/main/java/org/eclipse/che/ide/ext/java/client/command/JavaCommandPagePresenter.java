@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDelegate, CommandConfigurationPage<JavaCommandConfiguration> {
     private final JavaCommandPageView view;
     private final SelectNodePresenter selectNodePresenter;
-    private final AppContext appContext;
+    private final AppContext          appContext;
 
     private JavaCommandConfiguration editedConfiguration;
     private String                   originCommandLine;
@@ -100,8 +100,12 @@ public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDeleg
         String relativePath = path.substring(path.indexOf(projectPath) + projectPath.length() + 1);
 
         view.setMainClass(relativePath);
-        editedConfiguration.setCommandLine(editedConfiguration.getCommandLine().replace(editedConfiguration.getMainClass(),relativePath));
-        editedConfiguration.setCommandLine(editedConfiguration.getCommandLine().replace(editedConfiguration.getMainClassFqn(),fqn));
+
+        String commandLine = editedConfiguration.getCommandLine();
+        commandLine = commandLine.replace(editedConfiguration.getMainClass(), relativePath);
+        commandLine = commandLine.replace(' ' + editedConfiguration.getMainClassFqn(),' ' + fqn);
+        editedConfiguration.setCommandLine(commandLine);
+
         editedConfiguration.setMainClass(relativePath);
         listener.onDirtyStateChanged();
     }

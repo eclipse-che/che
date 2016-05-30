@@ -24,9 +24,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_LIBRARY_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_OUTPUT_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
@@ -46,22 +49,22 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
     public void onCreateProject(FolderEntry baseFolder,
                                 Map<String, AttributeValue> attributes,
                                 Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
-        String sourceFolderValue;
+        List<String> sourceFolders;
         if (attributes.containsKey(SOURCE_FOLDER) && !attributes.get(SOURCE_FOLDER).isEmpty()) {
-            sourceFolderValue = attributes.get(SOURCE_FOLDER).getString();
+            sourceFolders = attributes.get(SOURCE_FOLDER).getList();
         } else {
-            sourceFolderValue = DEFAULT_SOURCE_FOLDER_VALUE;
+            sourceFolders = singletonList(DEFAULT_SOURCE_FOLDER_VALUE);
         }
 
         baseFolder.createFolder(DEFAULT_OUTPUT_FOLDER_VALUE);
-        FolderEntry sourceFolder = baseFolder.createFolder(sourceFolderValue);
+        FolderEntry sourceFolder = baseFolder.createFolder(sourceFolders.get(0));
 
         sourceFolder.createFile(FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/main_class_content"));
 
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(baseFolder.getPath().toString());
         IJavaProject javaProject = JavaCore.create(project);
 
-        classpathBuilder.generateClasspath(javaProject);
+        classpathBuilder.generateClasspath(javaProject, sourceFolders, singletonList(DEFAULT_LIBRARY_FOLDER_VALUE));
     }
 
     @Override
