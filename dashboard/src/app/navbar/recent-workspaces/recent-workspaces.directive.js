@@ -14,7 +14,7 @@
  * @ngdoc directive
  * @name navbar.directive:NavbarRecentWorkspaces
  * @description This class is handling the directive of the listing recent opened workspaces in the navbar
- * @author Oleksii Orel
+ * @author Oleksii Kurinnyi
  */
 export class NavbarRecentWorkspaces {
 

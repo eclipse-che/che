@@ -17,6 +17,9 @@ import {NavBarSelected} from './navbar-selected.directive';
 import {NavbarRecentWorkspacesCtrl} from './recent-workspaces/recent-workspaces.controller';
 import {NavbarRecentWorkspaces} from './recent-workspaces/recent-workspaces.directive';
 
+import {NavbarDropdownCtrl} from './navbar-dropdown/navbar-dropdown.controller';
+import {NavbarDropdown} from './navbar-dropdown/navbar-dropdown.directive';
+
 export class NavbarConfig {
 
   constructor(register) {
@@ -27,5 +30,8 @@ export class NavbarConfig {
 
     register.controller('NavbarRecentWorkspacesCtrl', NavbarRecentWorkspacesCtrl);
     register.directive('navbarRecentWorkspaces', NavbarRecentWorkspaces);
+
+    register.controller('NavbarDropdownCtrl', NavbarDropdownCtrl);
+    register.directive('navbarDropdown', NavbarDropdown);
   }
 }
