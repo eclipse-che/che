@@ -22,9 +22,10 @@ export class CheWebsocket {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($websocket, $location, proxySettings, userDashboardConfig) {
+  constructor ($websocket, $location, $interval, proxySettings, userDashboardConfig) {
 
     this.$websocket = $websocket;
+    this.$interval = $interval;
 
     var wsUrl;
     let inDevMode = userDashboardConfig.developmentMode;
@@ -49,7 +50,7 @@ export class CheWebsocket {
 
 
   getExistingBus(datastream) {
-    return new MessageBus(datastream);
+    return new MessageBus(datastream, this.$interval);
   }
 
 
@@ -59,7 +60,7 @@ export class CheWebsocket {
       // needs to initialize
       var url = this.wsBaseUrl + workspaceId;
       var dataStream = this.$websocket(url);
-      var bus = new MessageBus(dataStream);
+      var bus = new MessageBus(dataStream, this.$interval);
       this.sockets.set(workspaceId, bus);
       currentBus = bus;
     }
@@ -76,7 +77,7 @@ export class CheWebsocket {
     var currentBus = this.sockets.get(workspaceId);
     if (!currentBus) {
       var dataStream = this.$websocket(websocketURL + workspaceId);
-      var bus = new MessageBus(dataStream);
+      var bus = new MessageBus(dataStream, this.$interval);
       this.sockets.set(workspaceId, bus);
       currentBus = bus;
     }
@@ -126,6 +127,16 @@ class MessageBuilder {
     return this;
   }
 
+  /**
+   * Prepares ping frame for server.
+   *
+   * @returns {MessageBuilder}
+   */
+  ping() {
+    var header = {name:this.TYPE, value: 'ping'};
+    this.message.headers.push(header);
+    return this;
+  }
 
   build() {
     return this.message;
@@ -145,15 +156,45 @@ class MessageBuilder {
 
 class MessageBus { // jshint ignore:line
 
-  constructor(datastream) {
+  constructor(datastream, $interval) {
     this.datastream = datastream;
+    this.$interval = $interval;
+
+    this.heartbeatPeriod = 1000 * 50; //ping each 50 seconds
 
     this.subscribersByChannel = new Map();
 
-
+    this.setKeepAlive();
     this.datastream.onMessage((message) => {this.handleMessage(message);});
   }
 
+  /**
+   * Sets the keep alive interval, which sends
+   * ping frame to server to keep connection alive.
+   * */
+  setKeepAlive() {
+    this.keepAlive = this.$interval(() => {
+      this.ping();
+    }, this.heartbeatPeriod);
+  }
+
+  /**
+   * Sends ping frame to server.
+   */
+  ping() {
+    this.send(new MessageBuilder().ping().build());
+  }
+
+  /**
+   * Restart ping timer (cancel previous and start again).
+   */
+  restartPing () {
+    if (this.keepAlive) {
+      this.$interval.cancel(this.keepAlive);
+    }
+
+    this.setKeepAlive();
+  }
 
   /**
    * Subscribes a new callback which will listener for messages sent to the specified channel.
@@ -247,6 +288,8 @@ class MessageBus { // jshint ignore:line
       }
     }
 
+    //Restart ping after received message
+    this.restartPing();
   }
 
 }
