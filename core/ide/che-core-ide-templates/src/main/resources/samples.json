@@ -168,7 +168,7 @@
     "mixins": [],
     "attributes": {
       "language": [
-        "ruby"
+        "python"
       ]
     },
     "modules": [],
@@ -194,7 +194,42 @@
       "Python 2.7"
     ]
   },
-{
+  {
+    "name": "web-python-gae-simple",
+    "displayName": "web-python-gae-simple",
+    "path": "/web-python-gae-simple",
+    "description": "Simple Python2.7 Project to deploy to GAE.",
+    "projectType": "python",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "python"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-python-gae-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Python-GAE"
+    ]
+  },
+  {
     "name": "web-rails-simple",
     "displayName": "web-rails-simple",
     "path": "/web-rails-simple",
@@ -514,6 +549,41 @@
     ]
   },
   {
+    "name": "web-php-gae-simple",
+    "displayName": "web-php-gae-simple",
+    "path": "/web-php-gae-simple",
+    "description": "A hello world PHP script to deploy to GAE.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-php-gae-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${GAE} && ./dev_appserver.py 2>&1 --php_executable_path=/usr/bin/php5-cgi --skip_sdk_update_check true --host=0.0.0.0 --admin_host=0.0.0.0 ${current.project.path}",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "PHP-GAE"
+    ]
+  },
+  {
     "name": "console-java-simple",
     "displayName": "console-java-simple",
     "path": "/console-java-simple",
@@ -558,10 +628,10 @@
     ]
   },
   {
-    "name": "console-dotnet-simple",
-    "displayName": "console-dotnet-simple",
-    "path": "/console-dotnet-simple",
-    "description": "The app will print current date to the console.",
+    "name": "aspnet-web-simple",
+    "displayName": "aspnet-web-simple",
+    "path": "/aspnet-mvc-simple",
+    "description": "A simple ASP.net web sample.",
     "projectType": "blank",
     "mixins": [],
     "attributes": {
@@ -573,14 +643,14 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/che-samples/console-dotnet-simple.git",
+      "location": "https://github.com/che-samples/aspnet-web-simple.git",
       "parameters": {}
     },
     "commands": [
       {
         "name": "update dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && dnu restore",
+        "commandLine": "cd ${current.project.path} && dotnet restore",
         "attributes": {
           "previewUrl": ""
         }
@@ -588,63 +658,16 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "dnx -p ${current.project.path}/project.json run",
+        "commandLine": "cd ${current.project.path} && dotnet run",
         "attributes": {
-          "previewUrl": ""
+          "previewUrl": "http://${server.port.5000}"
         }
       }
     ],
     "links": [],
     "category": "Samples",
     "tags": [
-      "dotnet",
-      "dnx",
-      "mono"
-    ]
-  },
-  {
-    "name": "web-aspnet-simple",
-    "displayName": "web-aspnet-simple",
-    "path": "/web-aspnet-simple",
-    "description": "Sample web application with asp.net.",
-    "projectType": "blank",
-    "mixins": [],
-    "attributes": {
-      "language": [
-        "aspnet"
-      ]
-    },
-    "modules": [],
-    "problems": [],
-    "source": {
-      "type": "git",
-      "location": "https://github.com/che-samples/web-aspnet-simple.git",
-      "parameters": {}
-    },
-    "commands": [
-      {
-        "name": "update dependencies",
-        "type": "custom",
-        "commandLine": "cd ${current.project.path} && dnu restore",
-        "attributes": {
-          "previewUrl": ""
-        }
-      },
-      {
-        "name": "run",
-        "type": "custom",
-        "commandLine": "dnx -p ${current.project.path}/project.json web",
-        "attributes": {
-          "previewUrl": "http://${server.port.5004}"
-        }
-      }
-    ],
-    "links": [],
-    "category": "Samples",
-    "tags": [
-      "aspnet",
-      "dnx",
-      "mono"
+      "dotnet"
     ]
   },
   {
