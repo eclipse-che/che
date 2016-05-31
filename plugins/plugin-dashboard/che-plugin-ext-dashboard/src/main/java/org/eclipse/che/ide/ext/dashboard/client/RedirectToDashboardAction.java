@@ -21,7 +21,8 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.ui.Tooltip;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.LEFT;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.RIGHT;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
@@ -60,7 +61,7 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
 
         Tooltip.create((elemental.dom.Element) arrow,
                 BOTTOM,
-                MIDDLE,
+                RIGHT,
                 constant.openDashboardToolbarButtonTitle());
 
         return panel;
