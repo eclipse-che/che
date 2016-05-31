@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.gdb.server.parser.GdbClear;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
@@ -211,7 +212,7 @@ public class Gdb extends GdbProcess {
     /**
      * `target remote` command.
      */
-    public void targetRemote(String host, int port) throws IOException, InterruptedException, GdbParseException {
+    public void targetRemote(String host, int port) throws IOException, InterruptedException, GdbParseException, DebuggerException {
         String command = "target remote " + (host != null ? host : "") + ":" + port;
         sendCommand(command);
         GdbTargetRemote.parse(outputs.take());

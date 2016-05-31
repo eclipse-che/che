@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server.parser;
 
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -35,6 +36,13 @@ public class GdbTargetRemoteTest {
     @Test(expectedExceptions = GdbParseException.class)
     public void testParseFail() throws Exception {
         GdbOutput gdbOutput = GdbOutput.of("some text");
+        GdbTargetRemote.parse(gdbOutput);
+    }
+
+    @Test(expectedExceptions = DebuggerException.class, expectedExceptionsMessageRegExp = "localhost:1223: Connection timed out.")
+    public void testShouldThrowDebuggerExceptionIfConnectionTimedOut() throws Exception {
+        GdbOutput gdbOutput = GdbOutput.of("localhost:1223: Connection timed out.");
+
         GdbTargetRemote.parse(gdbOutput);
     }
 }

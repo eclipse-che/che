@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
-import org.eclipse.che.api.debug.shared.model.SimpleValue;
-import org.eclipse.che.api.debugger.server.Debugger;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
@@ -25,13 +23,15 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
+import org.eclipse.che.api.debugger.server.Debugger;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
@@ -45,11 +45,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.nio.file.Files.exists;
 import static java.util.Collections.singletonList;
 
 /**
@@ -110,8 +112,16 @@ public class GdbDebugger implements Debugger {
                                           String file,
                                           String srcDirectory,
                                           DebuggerCallback debuggerCallback) throws DebuggerException {
-        Gdb gdb;
+        Gdb gdb = null;
         try {
+            if (!exists(Paths.get(file))) {
+                throw new IOException("Binary " + file + " not found");
+            }
+
+            if (!exists(Paths.get(srcDirectory))) {
+                throw new IOException("Source directory " + srcDirectory + " does not exist");
+            }
+
             gdb = Gdb.start();
             GdbDirectory directory = gdb.directory(srcDirectory);
             LOG.debug("Source directories: " + directory.getDirectories());
@@ -120,8 +130,15 @@ public class GdbDebugger implements Debugger {
             if (port > 0) {
                 gdb.targetRemote(host, port);
             }
-        } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't initialize GDB", e);
+        } catch (DebuggerException | IOException | GdbParseException | InterruptedException e) {
+            if (gdb != null) {
+                try {
+                    gdb.quit();
+                } catch (IOException e1) {
+                    LOG.error("Can't stop GDB: " + e1.getMessage(), e);
+                }
+            }
+            throw new DebuggerException("Can't start GDB: " + e.getMessage(), e);
         }
 
         GdbVersion gdbVersion = gdb.getGdbVersion();
