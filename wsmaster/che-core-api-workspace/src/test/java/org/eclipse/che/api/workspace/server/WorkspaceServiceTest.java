@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -127,7 +128,10 @@ public class WorkspaceServiceTest {
 
     @BeforeMethod
     public void setup() {
-        service = new WorkspaceService(wsManager, machineManager, validator, new WorkspaceServiceLinksInjector(IDE_CONTEXT));
+        service = new WorkspaceService(wsManager,
+                                       machineManager,
+                                       validator,
+                                       new WorkspaceServiceLinksInjector(IDE_CONTEXT, new MachineServiceLinksInjector()));
     }
 
     @Test

@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.MachineService;
+import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -83,7 +84,6 @@ public class WorkspaceService extends Service {
     private final WorkspaceManager   workspaceManager;
     private final WorkspaceValidator validator;
     private final MachineManager     machineManager;
-
     private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
@@ -726,8 +726,8 @@ public class WorkspaceService extends Service {
                                                                       workspace.getRuntime().getActiveEnv());
 
         return Response.status(201)
-                       .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
-                                                          getServiceContext()))
+                       .entity(linksInjector.injectMachineLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
+                                                                getServiceContext()))
                        .build();
     }
 
