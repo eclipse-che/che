@@ -37,6 +37,7 @@ export class NavbarRecentWorkspacesCtrl {
    * @returns {*}
    */
   getRecentWorkspaces() {
+    let lastWorkspaceId = this.ideSvc && this.ideSvc.lastWorkspace ? this.ideSvc.lastWorkspace.id : 0;
     return this.lodash.filter(this.cheWorkspace.getWorkspaces(), (workspace) => {
       if (!workspace.attributes) {
         return false;
@@ -44,6 +45,14 @@ export class NavbarRecentWorkspacesCtrl {
       if (!workspace.attributes.updated) {
         workspace.attributes.updated = workspace.attributes.created;
       }
+
+      // mark workspace
+      if (workspace.id === lastWorkspaceId) {
+        workspace.attributes.opening = 1;
+      } else {
+        workspace.attributes.opening = 0;
+      }
+
       return workspace.attributes.updated;
     });
   }

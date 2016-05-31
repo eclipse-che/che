@@ -46,6 +46,7 @@ export class NavbarDropdownCtrl {
   }
 
   process(item) {
+    console.log('>>> process: ', item);
     if (item.url) {
       this.redirect(item.url);
       return;
