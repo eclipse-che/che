@@ -17,15 +17,18 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -34,6 +37,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.Event
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -53,9 +57,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 /**
  * Defines an internal API for managing {@link WorkspaceRuntimeImpl} instances.
  *
- * <p>This component implements {@link WorkspaceStatus} spec,
- * except of the {@link WorkspaceStatus#STOPPED} status, if workspace is STOPPED
- * then {@link #get(String)} will thrown {@link NotFoundException}.
+ * <p>This component implements {@link WorkspaceStatus} contract.
  *
  * <p>All the operations performed by this component are synchronous.
  *
@@ -76,12 +78,18 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class WorkspaceRuntimes {
 
     private static final Logger                 LOG     = LoggerFactory.getLogger(WorkspaceRuntimes.class);
+    // 16 - experimental value for stripes count, it comes from default hash map size
     private static final Striped<ReadWriteLock> STRIPED = Striped.readWriteLock(16);
 
-    private final Map<String, RuntimeDescriptor>        descriptors;
-    private final Map<String, Queue<MachineConfigImpl>> startQueues;
-    private final MachineManager                        machineManager;
-    private final EventService                          eventService;
+    @VisibleForTesting
+    final Map<String, RuntimeDescriptor>        descriptors;
+    @VisibleForTesting
+    final Map<String, Queue<MachineConfigImpl>> startQueues;
+
+    private final MachineManager                      machineManager;
+    private final EventService                        eventService;
+    private final EventSubscriber<MachineStatusEvent> addMachineEventSubscriber;
+    private final EventSubscriber<MachineStatusEvent> removeMachineEventSubscriber;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -91,6 +99,8 @@ public class WorkspaceRuntimes {
         this.eventService = eventService;
         this.descriptors = new HashMap<>();
         this.startQueues = new HashMap<>();
+        this.addMachineEventSubscriber = new AddMachineEventSubscriber();
+        this.removeMachineEventSubscriber = new RemoveMachineEventSubscriber();
     }
 
     /**
@@ -258,10 +268,10 @@ public class WorkspaceRuntimes {
                 throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running.");
             }
             if (descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
-                throw new ConflictException(format("Couldn't stop '%s' workspace because its status is '%s'. " +
-                                                   "Workspace can be stopped only if it is 'RUNNING'",
-                                                   workspaceId,
-                                                   descriptor.getRuntimeStatus()));
+                throw new ConflictException(
+                        format("Couldn't stop '%s' workspace because its status is '%s'. Workspace can be stopped only if it is 'RUNNING'",
+                               workspaceId,
+                               descriptor.getRuntimeStatus()));
             }
 
             // According to the WorkspaceStatus specification workspace runtime
@@ -319,6 +329,12 @@ public class WorkspaceRuntimes {
         }
     }
 
+    @PostConstruct
+    private void subscribe() {
+        eventService.subscribe(addMachineEventSubscriber);
+        eventService.subscribe(removeMachineEventSubscriber);
+    }
+
     /**
      * Removes all descriptors from the in-memory storage, while
      * {@link MachineManager#cleanup()} is responsible for machines destroying.
@@ -328,16 +344,20 @@ public class WorkspaceRuntimes {
     void cleanup() {
         isPreDestroyInvoked = true;
 
-        // Acquiring all the locks
+        // Unsubscribe from events
+        eventService.unsubscribe(addMachineEventSubscriber);
+        eventService.unsubscribe(removeMachineEventSubscriber);
+
+        // Acquire all the locks
         for (int i = 0; i < STRIPED.size(); i++) {
             STRIPED.getAt(i).writeLock().lock();
         }
 
-        // cleaning up
+        // clean up
         descriptors.clear();
         startQueues.clear();
 
-        // Releasing all the locks
+        // Release all the locks
         for (int i = 0; i < STRIPED.size(); i++) {
             STRIPED.getAt(i).writeLock().unlock();
         }
@@ -362,8 +382,7 @@ public class WorkspaceRuntimes {
         }
     }
 
-    @VisibleForTesting
-    void removeRuntime(String workspaceId) {
+    private void removeRuntime(String workspaceId) {
         acquireWriteLock(workspaceId);
         try {
             descriptors.remove(workspaceId);
@@ -489,8 +508,7 @@ public class WorkspaceRuntimes {
                 if (machine != null) {
                     machineManager.destroy(machine.getId(), false);
                 }
-                throw new ConflictException(format("Workspace '%s' start interrupted. " +
-                                                   "Workspace stopped before all its machines started",
+                throw new ConflictException(format("Workspace '%s' start interrupted. Workspace stopped before all its machines started",
                                                    workspaceId));
             }
 
@@ -537,9 +555,9 @@ public class WorkspaceRuntimes {
             ensurePreDestroyIsNotExecuted();
             final Queue<MachineConfigImpl> queue = startQueues.get(workspaceId);
             if (queue == null) {
-                throw new ConflictException(format("Workspace '%s' start interrupted. " +
-                                                   "Workspace was stopped before all its machines were started",
-                                                   workspaceId));
+                throw new ConflictException(
+                        format("Workspace '%s' start interrupted. Workspace was stopped before all its machines were started",
+                               workspaceId));
             }
             return queue.peek();
         } finally {
@@ -596,24 +614,6 @@ public class WorkspaceRuntimes {
         return machine;
     }
 
-    private <T> T removeFirstMatching(List<? extends T> elements, Predicate<T> predicate) {
-        T element = null;
-        for (final Iterator<? extends T> it = elements.iterator(); it.hasNext() && element == null; ) {
-            final T next = it.next();
-            if (predicate.test(next)) {
-                element = next;
-                it.remove();
-            }
-        }
-        return element;
-    }
-
-    private void ensurePreDestroyIsNotExecuted() throws ServerException {
-        if (isPreDestroyInvoked) {
-            throw new ServerException("Could not perform operation because application server is stopping");
-        }
-    }
-
     /**
      * Wrapper for the {@link WorkspaceRuntime} instance.
      * Knows the state of the started workspace runtime,
@@ -650,6 +650,161 @@ public class WorkspaceRuntimes {
 
         private void setRuntimeStatus(WorkspaceStatus status) {
             this.status = status;
+        }
+    }
+
+    @VisibleForTesting
+    class AddMachineEventSubscriber implements EventSubscriber<MachineStatusEvent> {
+        @Override
+        public void onEvent(MachineStatusEvent event) {
+            if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
+                try {
+                    final MachineImpl machine = machineManager.getMachine(event.getMachineId());
+                    if (!addMachine(machine)) {
+                        machineManager.destroy(machine.getId(), true);
+                    }
+                } catch (NotFoundException | MachineException x) {
+                    LOG.warn(format("An error occurred during an attempt to add the machine '%s' to the workspace '%s'",
+                                    event.getMachineId(),
+                                    event.getWorkspaceId()),
+                             x);
+                }
+            }
+        }
+    }
+
+    /**
+     * Tries to add the machine to the WorkspaceRuntime.
+     *
+     * @return true if machine is added or will be added to the corresponding WorkspaceRuntime,
+     * returns false when incoming machine can't be added and should be destroyed.
+     */
+    @VisibleForTesting
+    boolean addMachine(Machine machine) throws NotFoundException, MachineException {
+        final String workspaceId = machine.getWorkspaceId();
+
+        acquireWriteLock(workspaceId);
+        try {
+            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
+
+            // Ensure that workspace runtime exists for such machine
+            // if it is not, then the machine should be immediately destroyed
+            if (descriptor == null) {
+                LOG.warn("Could not add machine '{}' to the workspace '{}' because workspace is in not running",
+                         machine.getId(),
+                         workspaceId);
+                return false;
+            }
+
+            // This may happen when either dev-machine started by WorkspaceRuntimes,
+            // or dev-machine started by direct call to MachineManager before WorkspaceRuntimes
+            // started it. In this case WorkspaceRuntimes#startMachine will fail & then if such
+            // machine exists it will be added to the corresponding WorkspaceRuntime.
+            if (machine.getConfig().isDev()) {
+                if (descriptor.getRuntimeStatus() == WorkspaceStatus.STARTING) {
+                    return true;
+                }
+                LOG.warn("Could not add another dev-machine '{}' to the workspace '{}'",
+                         machine.getId(),
+                         workspaceId);
+                return false;
+            }
+
+            // When workspace is not running then started machine must be immediately destroyed
+            // Example: status == STARTING & machine is non-dev
+            if (descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
+                LOG.warn("Could not add machine '{}' to the workspace '{}' because workspace status is '{}'",
+                         machine.getId(),
+                         workspaceId,
+                         descriptor.getRuntimeStatus());
+                return false;
+            }
+
+            // Workspace is RUNNING and there is no start queue
+            // which means that machine can be added to the workspace
+            if (!startQueues.containsKey(workspaceId)) {
+                descriptor.getRuntime().getMachines().add(new MachineImpl(machine));
+                return true;
+            }
+
+            // These are configs of machines which are not started yet
+            final Queue<MachineConfigImpl> machineConfigs = startQueues.get(workspaceId);
+
+            // If there is no config equal to the machine config
+            // then the machine can be added to the workspace runtime
+            // otherwise it will be added later, after WorkspaceRuntimes starts it
+            if (!machineConfigs.stream().anyMatch(m -> m.equals(machine.getConfig()))) {
+                descriptor.getRuntime().getMachines().add(new MachineImpl(machine));
+            }
+
+            // All the cases are covered, in this case machine will be added
+            // directly by WorkspaceRuntimes, after it fails on #startMachine
+            return true;
+        } finally {
+            releaseWriteLock(workspaceId);
+        }
+    }
+
+    @VisibleForTesting
+    class RemoveMachineEventSubscriber implements EventSubscriber<MachineStatusEvent> {
+
+        @Override
+        public void onEvent(MachineStatusEvent event) {
+            // This event subscriber doesn't handle dev-machine destroyed events
+            // as in that case workspace should be stopped, and stop should be asynchronous
+            // but WorkspaceRuntimes provides only synchronous operations.
+            if (event.getEventType() == MachineStatusEvent.EventType.DESTROYED && !event.isDev()) {
+                removeMachine(event.getMachineId(),
+                              event.getMachineName(),
+                              event.getWorkspaceId());
+            }
+        }
+    }
+
+    /** Removes machine from the workspace runtime. */
+    @VisibleForTesting
+    void removeMachine(String machineId, String machineName, String workspaceId) {
+        acquireWriteLock(workspaceId);
+        try {
+            final RuntimeDescriptor descriptor = descriptors.get(workspaceId);
+
+            // Machine can be removed only from existing runtime with 'RUNNING' status
+            if (descriptor == null || descriptor.getRuntimeStatus() != WorkspaceStatus.RUNNING) {
+                return;
+            }
+
+            // Try to remove non-dev machine from the runtime machines list
+            // It is unusual but still possible to get the state when such machine
+            // doesn't exist, in this case an appropriate warning will be logged
+            if (!descriptor.getRuntime()
+                           .getMachines()
+                           .removeIf(m -> m.getConfig().getName().equals(machineName))) {
+                LOG.warn("An attempt to remove the machine '{}' from the workspace runtime '{}' failed. " +
+                         "Workspace doesn't contain machine with name '{}'",
+                         machineId,
+                         workspaceId,
+                         machineName);
+            }
+        } finally {
+            releaseWriteLock(workspaceId);
+        }
+    }
+
+    private static <T> T removeFirstMatching(List<? extends T> elements, Predicate<T> predicate) {
+        T element = null;
+        for (final Iterator<? extends T> it = elements.iterator(); it.hasNext() && element == null; ) {
+            final T next = it.next();
+            if (predicate.test(next)) {
+                element = next;
+                it.remove();
+            }
+        }
+        return element;
+    }
+
+    private void ensurePreDestroyIsNotExecuted() throws ServerException {
+        if (isPreDestroyInvoked) {
+            throw new ServerException("Could not perform operation because application server is stopping");
         }
     }
 
