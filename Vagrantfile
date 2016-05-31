@@ -51,6 +51,8 @@ Vagrant.configure(2) do |config|
     HTTPS_PROXY=$2
     NO_PROXY=$3
     CHE_VERSION=$4
+    IP=$5
+    PORT=$6
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
       echo "-------------------------------------"
@@ -132,13 +134,12 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell" do |s| 
     s.inline = $script
-    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version]
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $port]
   end
 
   $script2 = <<-SHELL
-    CHE_VERSION=$1
-    IP=$2
-    PORT=$3
+    IP=$1
+    PORT=$2
 
     # Test the default dashboard page to see when it returns a non-error value.
     # Che is active once it returns success        
@@ -159,7 +160,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", run: "always" do |s|
     s.inline = $script2
-    s.args = [$che_version, $ip, $port]
+    s.args = [$ip, $port]
   end
 
 end
