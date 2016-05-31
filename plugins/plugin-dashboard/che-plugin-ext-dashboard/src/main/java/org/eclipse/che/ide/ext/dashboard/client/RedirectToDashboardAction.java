@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.dashboard.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
@@ -20,6 +20,9 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.ui.Tooltip;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Action to provide Dashboard button onto toolbar.
@@ -43,22 +46,24 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
 
     @Override
     public Widget createCustomComponent(Presentation presentation) {
-        final Anchor dashboardButton = new Anchor();
-        final Element tooltipContainer = DOM.createDiv();
-        final Element tooltipElement = DOM.createSpan();
+        FlowPanel panel = new FlowPanel();
+        panel.setWidth("24px");
+        panel.setHeight("24px");
 
-        dashboardButton.ensureDebugId("dashboard-toolbar-button");
-        dashboardButton.addStyleName(resources.dashboardCSS().dashboardButton());
-        dashboardButton.setHref(constant.openDashboardRedirectUrl());
-        dashboardButton.getElement().setAttribute("target", "_blank");
-        dashboardButton.getElement().insertFirst(resources.dashboardButtonBackground().getSvg().getElement());
-        dashboardButton.getElement().appendChild(resources.dashboardButtonIcon().getSvg().getElement());
-        tooltipElement.setInnerText(constant.openDashboardToolbarButtonTitle());
-        tooltipContainer.appendChild(tooltipElement);
-        tooltipContainer.setClassName(resources.dashboardCSS().tooltip());
-        dashboardButton.getElement().appendChild(tooltipContainer);
+        Element arrow = DOM.createAnchor();
+        arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+        arrow.setInnerHTML("<i class=\"fa fa-chevron-right\" />");
+        panel.getElement().appendChild(arrow);
 
-        return dashboardButton;
+        arrow.setAttribute("href", constant.openDashboardRedirectUrl());
+        arrow.setAttribute("target", "_blank");
+
+        Tooltip.create((elemental.dom.Element) arrow,
+                BOTTOM,
+                MIDDLE,
+                constant.openDashboardToolbarButtonTitle());
+
+        return panel;
     }
 
 }
