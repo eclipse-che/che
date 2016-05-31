@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.json.JsonHelper;
-import org.eclipse.che.commons.json.JsonNameConvention;
-import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -48,8 +48,12 @@ import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.Image;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
+import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
 import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
 import org.eclipse.che.plugin.docker.client.json.Version;
+import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
+import org.eclipse.che.plugin.docker.client.json.network.DisconnectContainer;
+import org.eclipse.che.plugin.docker.client.json.network.Network;
 import org.eclipse.che.plugin.docker.client.params.AttachContainerParams;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
@@ -68,17 +72,24 @@ import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.WaitContainerParams;
+import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.DisconnectContainerFromNetworkParams;
+import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
+import org.eclipse.che.plugin.docker.client.params.network.InspectNetworkParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -117,7 +128,11 @@ import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
  */
 @Singleton
 public class DockerConnector {
-    private static final Logger LOG = LoggerFactory.getLogger(DockerConnector.class);
+    private static final Logger LOG  = LoggerFactory.getLogger(DockerConnector.class);
+    // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of {"id":"123"}
+    private static final Gson   GSON = new GsonBuilder().disableHtmlEscaping()
+                                                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                                                        .create();
 
     private final URI                        dockerDaemonUri;
     private final DockerRegistryAuthResolver authResolver;
@@ -153,8 +168,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), org.eclipse.che.plugin.docker.client.json.SystemInfo.class);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -174,8 +187,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), Version.class);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -195,8 +206,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<Image>>() {}.getType());
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -228,7 +237,7 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "since", params.getSince());
             addQueryParamIfNotNull(connection, "before", params.getBefore());
             if (filters != null) {
-                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(filters)));
+                connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
             }
             DockerResponse response = connection.request();
             final int status = response.getStatus();
@@ -236,8 +245,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<ContainerListEntry>>() {}.getType());
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -362,8 +369,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -595,8 +600,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerExitStatus.class).getStatusCode();
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -641,8 +644,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -765,7 +766,7 @@ public class DockerConnector {
         final ExecConfig execConfig = new ExecConfig().withCmd(params.getCmd())
                                                       .withAttachStderr(params.isDetach() == Boolean.FALSE)
                                                       .withAttachStdout(params.isDetach() == Boolean.FALSE);
-        byte[] entityBytesArray = JsonHelper.toJson(execConfig, FIRST_LETTER_LOWERCASE).getBytes();
+        byte[] entityBytesArray = toJson(execConfig).getBytes();
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -778,8 +779,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return new Exec(params.getCmd(), parseResponseStreamAndClose(response.getInputStream(), ExecCreated.class).getId());
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -802,7 +801,8 @@ public class DockerConnector {
     public void startExec(final StartExecParams params, @Nullable MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
         final ExecStart execStart = new ExecStart().withDetach(params.isDetach() == Boolean.TRUE)
                                                    .withTty(params.isTty() == Boolean.TRUE);
-        byte[] entityBytesArray = JsonHelper.toJson(execStart, FIRST_LETTER_LOWERCASE).getBytes();
+
+        byte[] entityBytesArray = toJson(execStart).getBytes();
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/exec/" + params.getExecId() + "/start")
@@ -893,8 +893,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerProcesses.class);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -1067,7 +1065,7 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "since", params.getSinceSecond());
             addQueryParamIfNotNull(connection, "until", params.getUntilSecond());
             if (filters != null) {
-                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(filters.getFilters())));
+                connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
             }
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {
@@ -1270,7 +1268,7 @@ public class DockerConnector {
         removeImage(params, dockerDaemonUri);
     }
 
-    private void removeImage(final RemoveImageParams params,URI dockerDaemonUri) throws IOException {
+    private void removeImage(final RemoveImageParams params, URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("DELETE")
                                                             .path("/images/" + params.getImage())) {
@@ -1483,8 +1481,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerCommitted.class).getId();
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -1619,7 +1615,7 @@ public class DockerConnector {
     }
 
     private ContainerCreated createContainer(final CreateContainerParams params, URI dockerDaemonUri) throws IOException {
-        byte[] entityBytesArray = JsonHelper.toJson(params.getContainerConfig(), FIRST_LETTER_LOWERCASE).getBytes();
+        byte[] entityBytesArray = toJson(params.getContainerConfig()).getBytes();
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -1633,8 +1629,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerCreated.class);
-        } catch (JsonParseException e) {
-            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -1647,7 +1641,7 @@ public class DockerConnector {
                                     URI dockerDaemonUri) throws IOException {
         final List<Pair<String, ?>> headers = new ArrayList<>(2);
         headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
-        final String entity = (hostConfig == null) ? "{}" : JsonHelper.toJson(hostConfig, FIRST_LETTER_LOWERCASE);
+        final String entity = (hostConfig == null) ? "{}" : toJson(hostConfig);
         byte[] entityBytesArray = entity.getBytes();
         headers.add(Pair.of("Content-Length", entityBytesArray.length));
 
@@ -1695,6 +1689,183 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * Returns list of docker networks
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public List<Network> getNetworks() throws IOException {
+        return getNetworks(GetNetworksParams.create());
+    }
+
+    /**
+     * Returns list of docker networks which was filtered by {@link GetNetworksParams}
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public List<Network> getNetworks(GetNetworksParams params) throws IOException {
+        final Filters filters = params.getFilters();
+
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("GET")
+                                                            .path("/networks")) {
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(toJson(filters.getFilters())));
+            }
+            DockerResponse response = connection.request();
+            if (response.getStatus() / 100 != 2) {
+                throw getDockerException(response);
+            }
+            return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<Network>>() {}.getType());
+        }
+    }
+
+    /**
+     * Returns docker network matching provided id
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public Network inspectNetwork(@NotNull String netId) throws IOException {
+        return inspectNetwork(InspectNetworkParams.create(netId));
+    }
+
+    /**
+     * Returns docker network matching provided params
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public Network inspectNetwork(InspectNetworkParams params) throws IOException {
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("GET")
+                                                            .path("/networks/" + params.getNetworkId())) {
+            final DockerResponse response = connection.request();
+            if (response.getStatus() / 100 != 2) {
+                throw getDockerException(response);
+            }
+            return parseResponseStreamAndClose(response.getInputStream(), Network.class);
+        }
+    }
+
+    /**
+     * Creates docker network
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public NetworkCreated createNetwork(CreateNetworkParams params) throws IOException {
+        byte[] entityBytesArray = toJson(params.getNetwork()).getBytes();
+
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("POST")
+                                                            .path("/networks/create")
+                                                            .header("Content-Type", MediaType.APPLICATION_JSON)
+                                                            .header("Content-Length", entityBytesArray.length)
+                                                            .entity(entityBytesArray)) {
+            final DockerResponse response = connection.request();
+            if (response.getStatus() / 100 != 2) {
+                throw getDockerException(response);
+            }
+            return parseResponseStreamAndClose(response.getInputStream(), NetworkCreated.class);
+        }
+    }
+
+    /**
+     * Connects container to docker network
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public void connectContainerToNetwork(String netId, String containerId) throws IOException {
+        connectContainerToNetwork(ConnectContainerToNetworkParams.create(netId, new ConnectContainer().withContainer(containerId)));
+    }
+
+    /**
+     * Connects container to docker network
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public void connectContainerToNetwork(ConnectContainerToNetworkParams params) throws IOException {
+        byte[] entityBytesArray = toJson(params.getConnectContainer()).getBytes();
+
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("POST")
+                                                            .path("/networks/" + params.getNetworkId() + "/connect")
+                                                            .header("Content-Type", MediaType.APPLICATION_JSON)
+                                                            .header("Content-Length", entityBytesArray.length)
+                                                            .entity(entityBytesArray)) {
+            final DockerResponse response = connection.request();
+            if (response.getStatus() / 100 != 2) {
+                throw getDockerException(response);
+            }
+        }
+    }
+
+    /**
+     * Disconnects container from docker network
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public void disconnectContainerFromNetwork(@NotNull String netId, @NotNull String containerId) throws IOException {
+        disconnectContainerFromNetwork(
+                DisconnectContainerFromNetworkParams.create(netId,
+                                                            new DisconnectContainer().withContainer(containerId)));
+    }
+
+    /**
+     * Disconnects container from docker network
+     *
+     * @throws IOException
+     *         when problems occurs with docker api calls
+     */
+    public void disconnectContainerFromNetwork(DisconnectContainerFromNetworkParams params) throws IOException {
+        byte[] entityBytesArray = toJson(params.getDisconnectContainer()).getBytes();
+
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("POST")
+                                                            .path("/networks/" + params.getNetworkId() + "/disconnect")
+                                                            .header("Content-Type", MediaType.APPLICATION_JSON)
+                                                            .header("Content-Length", entityBytesArray.length)
+                                                            .entity(entityBytesArray)) {
+            final DockerResponse response = connection.request();
+            if (response.getStatus() / 100 != 2) {
+                throw getDockerException(response);
+            }
+        }
+    }
+
+    /**
+     * Removes network matching provided id
+     *
+     * @throws IOException
+     *         when a problem occurs with docker api calls
+     */
+    public void removeNetwork(@NotNull String netId) throws IOException {
+        removeNetwork(RemoveNetworkParams.create(netId));
+    }
+
+    /**
+     * Removes network matching provided params
+     *
+     * @throws IOException
+     *         when a problem occurs with docker api calls
+     */
+    public void removeNetwork(RemoveNetworkParams params) throws IOException {
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("DELETE")
+                                                            .path("/networks/" + params.getNetworkId())) {
+            final DockerResponse response = connection.request();
+            if (response.getStatus() / 100 != 2) {
+                throw getDockerException(response);
+            }
+        }
+    }
+
     private String getBuildImageId(ProgressStatus progressStatus) {
         final String stream = progressStatus.getStream();
         if (stream != null && stream.startsWith("Successfully built ")) {
@@ -1707,24 +1878,19 @@ public class DockerConnector {
         return null;
     }
 
-    @VisibleForTesting
-    <T> T parseResponseStreamAndClose(InputStream inputStream, Class<T> clazz) throws IOException, JsonParseException {
-        try (InputStream responseStream = inputStream) {
-            return JsonHelper.fromJson(responseStream,
-                                       clazz,
-                                       null,
-                                       FIRST_LETTER_LOWERCASE);
+    protected <T> T parseResponseStreamAndClose(InputStream inputStream, Class<T> clazz) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            return GSON.fromJson(reader, clazz);
+        } catch (JsonParseException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
-    @VisibleForTesting
-    @SuppressWarnings("unchecked")
-    <T> List<T> parseResponseStreamAsListAndClose(InputStream inputStream, Type type) throws IOException, JsonParseException {
-        try (InputStream responseStream = inputStream) {
-            return (List<T>)JsonHelper.fromJson(responseStream,
-                                                List.class,
-                                                type,
-                                                FIRST_LETTER_LOWERCASE);
+    protected <T> List<T> parseResponseStreamAsListAndClose(InputStream inputStream, Type type) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+            return GSON.fromJson(reader, type);
+        } catch (JsonParseException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -1737,20 +1903,6 @@ public class DockerConnector {
                     response.getStatus());
         }
     }
-
-    // Unfortunately we can't use generated DTO here.
-    // Docker uses uppercase in first letter in names of json objects, e.g. {"Id":"123"} instead of {"id":"123"}
-    protected static JsonNameConvention FIRST_LETTER_LOWERCASE = new JsonNameConvention() {
-        @Override
-        public String toJsonName(String javaName) {
-            return Character.toUpperCase(javaName.charAt(0)) + javaName.substring(1);
-        }
-
-        @Override
-        public String toJavaName(String jsonName) {
-            return Character.toLowerCase(jsonName.charAt(0)) + jsonName.substring(1);
-        }
-    };
 
     private void createTarArchive(File tar, File... files) throws IOException {
         TarUtils.tarFiles(tar, 0, files);
@@ -1784,4 +1936,19 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * Serializes object into JSON.
+     * Needed to avoid usage try catch blocks with {@link JsonParseException} runtime exception catching.
+     *
+     * @param object object that should be converted into JSON
+     * @return json as a string
+     * @throws IOException if serialization to JSON fails
+     */
+    private String toJson(Object object) throws IOException {
+        try {
+            return GSON.toJson(object);
+        } catch (JsonParseException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
+    }
 }

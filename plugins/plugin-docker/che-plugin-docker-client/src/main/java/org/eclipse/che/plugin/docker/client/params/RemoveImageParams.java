@@ -48,7 +48,7 @@ public class RemoveImageParams {
      *         image identifier, either id or name
      * @return this params instance
      * @throws NullPointerException
-     *         if {@code container} is null
+     *         if {@code image} is null
      */
     public RemoveImageParams withImage(@NotNull String image) {
         requireNonNull(image);
