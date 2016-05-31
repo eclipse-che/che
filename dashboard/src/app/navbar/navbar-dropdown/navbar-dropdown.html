@@ -1,0 +1,16 @@
+<div tabindex="0"
+     class="navbar-dropdown">
+  <div ng-transclude
+       ng-click="navbarDropdownCtrl.toggleDropdown()"></div>
+  <div class="navbar-dropdown-elements"
+       ng-show="navbarDropdownCtrl.showDropdown">
+    <ul>
+      <li ng-repeat="item in navbarDropdownCtrl.dropdownItems">
+      <span class="navbar-click-area"
+            ng-click="navbarDropdownCtrl.process(item)">
+        {{item.name}}
+      </span>
+      </li>
+    </ul>
+  </div>
+</div>
