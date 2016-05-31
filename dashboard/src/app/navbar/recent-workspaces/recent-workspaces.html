@@ -9,7 +9,9 @@
 
     <md-list layout="column">
       <md-list-item flex class="navbar-subsection-item"
-                    ng-repeat="workspace in navbarRecentWorkspacesCtrl.getRecentWorkspaces() | orderBy:'attributes.updated':'reverse' | limitTo:'5'"
+                    ng-repeat="workspace in navbarRecentWorkspacesCtrl.getRecentWorkspaces()
+                    | orderBy:['attributes.opening', 'attributes.updated']:'reverse'
+                    | limitTo:5"
                     ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesCtrl.isOpen(workspace.id)}">
         <md-button nav-bar-selected flex che-reload-href
                    che-on-long-touch="navbarRecentWorkspacesCtrl.openLinkInNewTab(workspace.id)"

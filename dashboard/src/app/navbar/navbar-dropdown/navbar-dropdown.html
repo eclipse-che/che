@@ -5,9 +5,9 @@
   <div class="navbar-dropdown-elements"
        ng-show="navbarDropdownCtrl.showDropdown">
     <ul>
-      <li ng-repeat="item in navbarDropdownCtrl.dropdownItems">
-      <span class="navbar-click-area"
-            ng-click="navbarDropdownCtrl.process(item)">
+      <li ng-repeat="item in navbarDropdownCtrl.dropdownItems"
+          ng-click="navbarDropdownCtrl.process(item)">
+      <span class="navbar-click-area">
         {{item.name}}
       </span>
       </li>
