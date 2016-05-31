@@ -120,7 +120,7 @@ public interface DebuggerLocalizationConstant extends com.google.gwt.i18n.client
     String debuggerAlreadyConnected();
 
     @Key("failed.to.connect.to.remote.debugger.description")
-    String failedToConnectToRemoteDebuggerDescription(String address);
+    String failedToConnectToRemoteDebuggerDescription(String address, String cause);
 
     @Key("failed.to.get.variable.value.title")
     String failedToGetVariableValueTitle();

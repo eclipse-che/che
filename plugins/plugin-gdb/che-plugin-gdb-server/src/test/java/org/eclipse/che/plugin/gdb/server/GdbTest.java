@@ -11,12 +11,12 @@
 package org.eclipse.che.plugin.gdb.server;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLine;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoProgram;
 import org.eclipse.che.plugin.gdb.server.parser.GdbPType;
-import org.eclipse.che.plugin.gdb.server.parser.GdbParseException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbPrint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbRun;
 import org.testng.annotations.AfterMethod;
@@ -97,7 +97,7 @@ public class GdbTest {
         }
     }
 
-    @Test(expectedExceptions = GdbParseException.class)
+    @Test(expectedExceptions = DebuggerException.class)
     public void testTargetRemoteFailWhenNoGdbServer() throws Exception {
         gdb.file(file);
         gdb.targetRemote("localhost", 1111);

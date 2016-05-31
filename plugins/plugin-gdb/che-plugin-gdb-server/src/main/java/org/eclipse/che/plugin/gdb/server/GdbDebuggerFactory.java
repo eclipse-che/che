@@ -39,12 +39,11 @@ public class GdbDebuggerFactory implements DebuggerFactory {
 
         String host = normalizedProps.get("host");
 
-        String portProp = normalizedProps.get("port");
         int port;
         try {
-            port = portProp != null ? Integer.parseInt(portProp) : 0;
+            port = Integer.parseInt(normalizedProps.getOrDefault("port", "0"));
         } catch (NumberFormatException e) {
-            throw new DebuggerException("Unknown port property format: " + portProp);
+            throw new DebuggerException("Unknown port property format: " + normalizedProps.get("port"));
         }
 
         String file = normalizedProps.get("binary");

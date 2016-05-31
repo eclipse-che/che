@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server.parser;
 
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +23,7 @@ import java.util.regex.Pattern;
 public class GdbTargetRemote {
 
     private static final Pattern GDB_TARGET_REMOTE = Pattern.compile("Remote debugging using (.*):(.*)\n.*");
+    private static final Pattern CONNECTION_TIMED_OUT = Pattern.compile(".*Connection timed out.*");
 
     private final String host;
     private final String port;
@@ -41,7 +44,7 @@ public class GdbTargetRemote {
     /**
      * Factory method.
      */
-    public static GdbTargetRemote parse(GdbOutput gdbOutput) throws GdbParseException {
+    public static GdbTargetRemote parse(GdbOutput gdbOutput) throws GdbParseException, DebuggerException {
         String output = gdbOutput.getOutput();
 
         Matcher matcher = GDB_TARGET_REMOTE.matcher(output);
@@ -49,6 +52,8 @@ public class GdbTargetRemote {
             String host = matcher.group(1);
             String port = matcher.group(2);
             return new GdbTargetRemote(host, port);
+        } else if (CONNECTION_TIMED_OUT.matcher(output).find()) {
+            throw new DebuggerException(output);
         }
 
         throw new GdbParseException(GdbTargetRemote.class, output);
