@@ -25,6 +25,8 @@ public interface DashboardResources extends ClientBundle {
         String tooltip();
 
         String dashboardButton();
+
+        String dashboardArrow();
     }
 
     @Source({"Dashboard.css", "org/eclipse/che/ide/api/ui/style.css"})
