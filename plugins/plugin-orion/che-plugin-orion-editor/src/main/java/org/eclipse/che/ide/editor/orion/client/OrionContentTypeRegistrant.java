@@ -24,6 +24,11 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * Component to register new content types and corresponding highlighting configuration.
+ * 
+ * @author Sven Efftinge (typefox.io)
+ */
 public class OrionContentTypeRegistrant {
 
     final MultipleMethodFileIdentifier fileTypeIdentifier;

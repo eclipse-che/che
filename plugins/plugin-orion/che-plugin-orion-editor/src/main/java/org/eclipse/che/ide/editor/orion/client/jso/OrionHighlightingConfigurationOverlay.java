@@ -13,6 +13,12 @@ package org.eclipse.che.ide.editor.orion.client.jso;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 
+/**
+ * The "Service attributes" for registering orion 'orion.edit.highlight' service.
+ * See <a href="https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#orion.edit.highlighter">Orion documentation</a> for details.
+ * 
+ * @author Sven Efftinge
+ */
 public class OrionHighlightingConfigurationOverlay extends JavaScriptObject {
     
     protected OrionHighlightingConfigurationOverlay() {
@@ -38,6 +44,12 @@ public class OrionHighlightingConfigurationOverlay extends JavaScriptObject {
         this.contentTypes = theContentTypes;
     }-*/;
     
+    /**
+     * The proper grammar description. 
+     * See <a href="https://wiki.eclipse.org/Orion/Documentation/Developer_Guide/Plugging_into_the_editor#Pattern_objects">Orion documentation</a> for details.  
+     *  
+     * @param patternsAsJsonArray
+     */
     public final native void setPatterns(String patternsAsJsonArray) /*-{
         this.patterns = eval(patternsAsJsonArray);
     }-*/;
