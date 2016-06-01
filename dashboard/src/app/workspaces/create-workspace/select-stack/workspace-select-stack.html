@@ -10,8 +10,8 @@
                             layout="row"
                             layout-wrap
                             che-stack="workspaceSelectStackCtrl.readyToGoStack"
-                            che-on-change="workspaceSelectStackCtrl.onStackSelect(workspaceSelectStackCtrl.readyToGoStack)"
-          ></ready-to-go-stacks>
+                            che-on-change="workspaceSelectStackCtrl.onStackSelect(workspaceSelectStackCtrl.readyToGoStack)">
+        </ready-to-go-stacks>
       </md-tab-body>
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-library')">
@@ -20,7 +20,7 @@
         <span class="che-tab-label-title">Stack library</span>
       </md-tab-label>
       <md-tab-body>
-        <create-project-stack-library che-stacks="workspaceSelectStackCtrl.stacks"></create-project-stack-library>
+        <create-project-stack-library></create-project-stack-library>
       </md-tab-body>
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
