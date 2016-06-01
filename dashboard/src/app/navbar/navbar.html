@@ -14,9 +14,11 @@
   <md-toolbar class="flex-shrink-none">
     <md-progress-linear md-mode="indeterminate" ng-hide="navbarCtrl.email"></md-progress-linear>
     <div ng-show="navbarCtrl.email">
-      <section class="navbar-top-logo" layout="column" layout-align="center left">
-        <div class="logo-color-white" ng-include="branding.logoURL"></div>
+      <section class="navbar-top-logo logo-color-white" layout="column" layout-align="center left" ng-include="branding.logoText">
       </section>
+
+      <md-divider md-theme="factory-theme"></md-divider>
+
       <div class="admin-navbar-menu">
         <section class="left-sidebar-menu" layout="column" layout-align="center center">
           <md-list layout="column">
