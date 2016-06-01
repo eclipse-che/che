@@ -1,6 +1,6 @@
 <div class="che-select">
   <!-- Mobile version -->
-  <md-input-container class="che-select-mobile" hide-gt-md>
+  <md-input-container class="che-select-mobile" hide-gt-xs>
     <label>{{value ? labelName : placeHolder}}</label>
     <md-select ng-model="value"
                md-container-class="che-custom-dropdown"
@@ -12,7 +12,7 @@
   </md-input-container>
 
   <!-- Desktop version -->
-  <div class="che-select-desktop" hide-sm hide-md layout="column" flex>
+  <div class="che-select-desktop" hide-xs layout="column" flex>
     <div layout="row" flex layout-align="space-around start">
       <label flex="15">{{labelName}}: </label>
 
