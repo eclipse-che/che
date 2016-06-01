@@ -13,17 +13,25 @@ package org.eclipse.che.plugin.debugger.ide.configuration;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.configuration.dto.DebugConfigurationDto;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,15 +53,24 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
     private final Optional<LocalStorage>            localStorageOptional;
     private final Set<ConfigurationChangedListener> configurationChangedListeners;
     private final List<DebugConfiguration>          configurations;
+    private final DebuggerManager                   debuggerManager;
+    private final DialogFactory                     dialogFactory;
+    private final DebuggerLocalizationConstant      localizationConstants;
 
     private DebugConfiguration currentDebugConfiguration;
 
     @Inject
     public DebugConfigurationsManagerImpl(LocalStorageProvider localStorageProvider,
                                           DtoFactory dtoFactory,
-                                          DebugConfigurationTypeRegistry debugConfigurationTypeRegistry) {
+                                          DebugConfigurationTypeRegistry debugConfigurationTypeRegistry,
+                                          DebuggerManager debuggerManager,
+                                          DialogFactory dialogFactory,
+                                          DebuggerLocalizationConstant localizationConstants) {
         this.dtoFactory = dtoFactory;
-        configurationTypeRegistry = debugConfigurationTypeRegistry;
+        this.configurationTypeRegistry = debugConfigurationTypeRegistry;
+        this.debuggerManager = debuggerManager;
+        this.dialogFactory = dialogFactory;
+        this.localizationConstants = localizationConstants;
         localStorageOptional = Optional.fromNullable(localStorageProvider.get());
         configurationChangedListeners = new HashSet<>();
         configurations = new ArrayList<>();
@@ -198,6 +215,37 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
     @Override
     public void removeConfigurationsChangedListener(ConfigurationChangedListener listener) {
         configurationChangedListeners.remove(listener);
+    }
+
+    @Override
+    public void apply(DebugConfiguration debugConfiguration) {
+        if (debugConfiguration == null) {
+            return;
+        }
+
+        if (debuggerManager.getActiveDebugger() != null) {
+            dialogFactory.createMessageDialog(localizationConstants.connectToRemote(),
+                                              localizationConstants.debuggerAlreadyConnected(),
+                                              null).show();
+            return;
+        }
+
+        final Debugger debugger = debuggerManager.getDebugger(debugConfiguration.getType().getId());
+        if (debugger != null) {
+            debuggerManager.setActiveDebugger(debugger);
+
+            Map<String, String> connectionProperties = new HashMap<>(2 + debugConfiguration.getConnectionProperties().size());
+            connectionProperties.put("HOST", debugConfiguration.getHost());
+            connectionProperties.put("PORT", String.valueOf(debugConfiguration.getPort()));
+            connectionProperties.putAll(debugConfiguration.getConnectionProperties());
+
+            debugger.connect(connectionProperties).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError arg) throws OperationException {
+                    debuggerManager.setActiveDebugger(null);
+                }
+            });
+        }
     }
 
     private void fireConfigurationAdded(DebugConfiguration configuration) {
