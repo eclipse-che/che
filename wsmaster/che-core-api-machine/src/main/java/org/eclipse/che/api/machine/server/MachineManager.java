@@ -424,19 +424,14 @@ public class MachineManager {
     /**
      * Find machines connected with specific workspace
      *
-     * @param owner
-     *         id of owner of machine
      * @param workspaceId
      *         workspace binding
      * @return list of machines or empty list
      */
-    public List<MachineImpl> getMachines(String owner, String workspaceId) throws MachineException, BadRequestException {
-        requiredNotNull(owner, "Owner");
-
+    public List<MachineImpl> getMachines(String workspaceId) throws MachineException, BadRequestException {
         return machineRegistry.getMachines()
                               .stream()
-                              .filter(machine -> owner.equals(machine.getOwner())
-                                                 && machine.getWorkspaceId().equals(workspaceId))
+                              .filter(machine -> machine.getWorkspaceId().equals(workspaceId))
                               .collect(Collectors.toList());
     }
 
