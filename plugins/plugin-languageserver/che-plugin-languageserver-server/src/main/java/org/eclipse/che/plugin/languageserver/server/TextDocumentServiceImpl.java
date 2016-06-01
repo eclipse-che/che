@@ -1,5 +1,7 @@
 package org.eclipse.che.plugin.languageserver.server;
 
+import static java.util.Collections.emptyList;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -48,6 +50,9 @@ public class TextDocumentServiceImpl {
     public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException, ExecutionException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
+        if (server == null) {
+        	return emptyList();
+        }
         List<? extends CompletionItem> completion = server.getTextDocumentService()
                                                           .completion(textDocumentPositionParams).get().getItems();
         return completion;
@@ -60,7 +65,10 @@ public class TextDocumentServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException, ExecutionException {
         LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
-        return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
+        if (server != null)
+        	return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
+        else
+        	return unresolved;
     }
 
     @POST
@@ -69,7 +77,8 @@ public class TextDocumentServiceImpl {
     public void didChange(DidChangeTextDocumentParamsDTO change) {
         change.getTextDocument().setUri(prefixURI(change.getTextDocument().getUri()));
         LanguageServer server = getServer(change.getTextDocument().getUri());
-        server.getTextDocumentService().didChange(change);
+        if (server != null)
+        	server.getTextDocumentService().didChange(change);
     }
 
     @POST
@@ -78,7 +87,8 @@ public class TextDocumentServiceImpl {
     public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
         openEvent.getTextDocument().setUri(prefixURI(openEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
-        server.getTextDocumentService().didOpen(openEvent);
+        if (server != null)
+        	server.getTextDocumentService().didOpen(openEvent);
     }
 
     @POST
@@ -87,7 +97,8 @@ public class TextDocumentServiceImpl {
     public void didClose(DidCloseTextDocumentParamsDTO closeEvent) {
         closeEvent.getTextDocument().setUri(prefixURI(closeEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(closeEvent.getTextDocument().getUri());
-        server.getTextDocumentService().didClose(closeEvent);
+        if (server != null)
+        	server.getTextDocumentService().didClose(closeEvent);
     }
 
     @POST
@@ -96,14 +107,12 @@ public class TextDocumentServiceImpl {
     public void didSave(DidSaveTextDocumentParamsDTO saveEvent) {
         saveEvent.getTextDocument().setUri(prefixURI(saveEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(saveEvent.getTextDocument().getUri());
-        server.getTextDocumentService().didSave(saveEvent);
+        if (server != null)
+        	server.getTextDocumentService().didSave(saveEvent);
     }
 
     private LanguageServer getServer(String uri) {
         LanguageServer server = languageServerRegistry.findServer(uri);
-        if (server == null) {
-            throw new IllegalStateException("Couldn't find registered language server for path '" + uri + "'.");
-        }
         return server;
     }
 }
