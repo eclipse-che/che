@@ -40,13 +40,14 @@ export class NavbarDropdown {
   }
 
   link($scope, $element, $attrs, ctrl) {
-    let elemHeight = $element.height();
-    let $dropdownList = $element.find('.navbar-dropdown-elements');
+    let elemHeight = $element.height(),
+      dropdownOffset = elemHeight - 1,
+      $dropdownList = $element.find('.navbar-dropdown-elements');
     if ($dropdownList.length) {
       if (ctrl.moveupDropdown) {
-        $dropdownList.css('bottom', elemHeight+'px');
+        $dropdownList.css('bottom', dropdownOffset + 'px');
       } else {
-        $dropdownList.css('top', elemHeight+'px');
+        $dropdownList.css('top', dropdownOffset + 'px');
       }
     }
 
@@ -55,6 +56,8 @@ export class NavbarDropdown {
     $scope.$watch(() => {return ctrl.showDropdown;}, (doShow) => {
       if (doShow){
         $element.focus();
+      } else {
+        $element.blur();
       }
     });
     $element.bind('blur', () => {
