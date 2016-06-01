@@ -219,6 +219,10 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
 
     @Override
     public void apply(DebugConfiguration debugConfiguration) {
+        if (debugConfiguration == null) {
+            return;
+        }
+
         if (debuggerManager.getActiveDebugger() != null) {
             dialogFactory.createMessageDialog(localizationConstants.connectToRemote(),
                                               localizationConstants.debuggerAlreadyConnected(),

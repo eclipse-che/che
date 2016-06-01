@@ -20,9 +20,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.ui.listbox.CustomComboBox;
-import org.eclipse.che.ide.util.Pair;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * The implementation of {@link GdbConfigurationPageView}.
@@ -89,10 +88,10 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
     }
 
     @Override
-    public void setHostsList(Collection<Pair<String, String>> hosts) {
+    public void setHostsList(Map<String, String> hosts) {
         host.clear();
-        for (Pair<String, String> entry : hosts) {
-            host.addItem(entry.first, entry.second);
+        for (Map.Entry<String, String> entry : hosts.entrySet()) {
+            host.addItem(entry.getValue(), entry.getKey());
         }
     }
 

@@ -29,12 +29,10 @@ import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.eclipse.che.ide.json.JsonHelper;
-import org.eclipse.che.ide.util.Pair;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Page allows to edit GDB debug configuration.
@@ -78,10 +76,17 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     }
 
     private String getBinaryPath(DebugConfiguration debugConfiguration) {
+        if (debugConfiguration == null) {
+            return getDefaultBinaryPath();
+        }
+
         Map<String, String> connectionProperties = debugConfiguration.getConnectionProperties();
         String binaryPath = connectionProperties.get(BIN_PATH_CONNECTION_PROPERTY);
-        return binaryPath == null ? currentProjectPathProvider.getKey() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME
-                                  : binaryPath;
+        return binaryPath == null ? getDefaultBinaryPath() : binaryPath;
+    }
+
+    private String getDefaultBinaryPath() {
+        return currentProjectPathProvider.getKey() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME;
     }
 
     @Override
@@ -126,7 +131,7 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         Promises.all(recipePromises).then(new Operation<JsArrayMixed>() {
             @Override
             public void apply(JsArrayMixed recipes) throws OperationException {
-                Set<Pair<String, String>> hosts = new HashSet<>();
+                Map<String, String> hosts = new HashMap<>();
 
                 for (int i = 0; i < recipes.length(); i++) {
                     String recipeJson = recipes.getObject(i).toString();
@@ -142,7 +147,7 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
                         host = "localhost";
                     }
                     String description = host + " (" + machines.get(i).getConfig().getName() + ")";
-                    hosts.add(new Pair<>(description, host));
+                    hosts.put(host, description);
                 }
 
                 view.setHostsList(hosts);

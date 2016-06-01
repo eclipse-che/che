@@ -11,9 +11,8 @@
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.util.Pair;
 
-import java.util.Collection;
+import java.util.Map;
 
 /**
  * The view of {@link GdbConfigurationPagePresenter}.
@@ -46,7 +45,7 @@ public interface GdbConfigurationPageView extends View<GdbConfigurationPageView.
      * @param hosts
      *         the hosts list to set into the view
      */
-    void setHostsList(Collection<Pair<String, String>> hosts);
+    void setHostsList(Map<String, String> hosts);
 
     /** Action handler for the view's controls. */
     interface ActionDelegate {

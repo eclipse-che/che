@@ -53,12 +53,9 @@ public class DebugAction extends AbstractPerspectiveAction {
     public void updateInPerspective(ActionEvent event) {
         Optional<DebugConfiguration> configurationOptional = configurationsManager.getCurrentDebugConfiguration();
 
-        event.getPresentation().setEnabled(configurationOptional.isPresent());
+        event.getPresentation().setEnabledAndVisible(configurationOptional.isPresent());
         if (configurationOptional.isPresent()) {
-            event.getPresentation().setVisible(true);
             event.getPresentation().setText(localizationConstants.debugActionTitle() + " '" + configurationOptional.get().getName() + "'");
-        } else {
-            event.getPresentation().setVisible(false);
         }
     }
 

@@ -67,7 +67,7 @@ public class DebugConfigurationActionTest {
 
         action.updateInPerspective(event);
 
-        verify(presentation).setVisible(true);
+        verify(presentation).setEnabledAndVisible(true);
     }
 
     @Test

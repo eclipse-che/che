@@ -50,11 +50,9 @@ public class DebugConfigurationAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(ActionEvent event) {
         Optional<DebugConfiguration> configurationOptional = configurationsManager.getCurrentDebugConfiguration();
-        if (configurationOptional.isPresent() && configuration.equals(configurationOptional.get())) {
-            event.getPresentation().setVisible(false);
-        } else {
-            event.getPresentation().setVisible(true);
-        }
+        boolean isCurrentConfig = configurationOptional.isPresent() && configuration.equals(configurationOptional.get());
+
+        event.getPresentation().setEnabledAndVisible(!isCurrentConfig);
     }
 
     @Override
