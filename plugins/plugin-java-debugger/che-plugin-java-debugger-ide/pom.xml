@@ -156,7 +156,6 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/*.svg</exclude>
                         <exclude>**/*.png</exclude>
                     </excludes>
                 </configuration>
