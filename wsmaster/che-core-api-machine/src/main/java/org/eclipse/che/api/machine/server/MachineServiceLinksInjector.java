@@ -141,18 +141,20 @@ public class MachineServiceLinksInjector {
 
     protected void injectTerminalLink(MachineDto machine, ServiceContext serviceContext, List<Link> links) {
         final String scheme = serviceContext.getBaseUriBuilder().build().getScheme();
-        final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
-        servers.stream()
-               .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
-               .findAny()
-               .ifPresent(terminal -> links.add(createLink("GET",
-                                                           UriBuilder.fromUri(terminal.getUrl())
-                                                                     .scheme("https".equals(scheme) ? "wss"
-                                                                                                    : "ws")
-                                                                     .path("/pty")
-                                                                     .build()
-                                                                     .toString(),
+        if (machine.getRuntime() != null) {
+            final Collection<ServerDto> servers = machine.getRuntime().getServers().values();
+            servers.stream()
+                   .filter(server -> TERMINAL_REFERENCE.equals(server.getRef()))
+                   .findAny()
+                   .ifPresent(terminal -> links.add(createLink("GET",
+                                                               UriBuilder.fromUri(terminal.getUrl())
+                                                                         .scheme("https".equals(scheme) ? "wss"
+                                                                                                        : "ws")
+                                                                         .path("/pty")
+                                                                         .build()
+                                                                         .toString(),
                                                            TERMINAL_REFERENCE)));
+        }
     }
 
     public void injectMachineChannelsLinks(MachineConfigDto machineConfig,
