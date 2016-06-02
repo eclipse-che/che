@@ -1,8 +1,18 @@
 package org.eclipse.che.plugin.languageserver.server;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
+import io.typefox.lsapi.InitializeParamsImpl;
+import io.typefox.lsapi.InitializeResult;
+import io.typefox.lsapi.LanguageDescription;
+import io.typefox.lsapi.services.LanguageServer;
+
+import com.google.common.base.Joiner;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.plugin.languageserver.server.lsapi.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
@@ -11,22 +21,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 
-import org.eclipse.che.plugin.languageserver.server.lsapi.PublishDiagnosticsParamsMessenger;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Joiner;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
-import io.typefox.lsapi.InitializeParamsImpl;
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
-import io.typefox.lsapi.PublishDiagnosticsParams;
-import io.typefox.lsapi.services.LanguageServer;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
 
 @Singleton
 public class LanguageServerRegistry {
@@ -124,11 +122,8 @@ public class LanguageServerRegistry {
 	}
 
 	private void connect(LanguageServer server) {
-		server.getTextDocumentService().onPublishDiagnostics(new Consumer<PublishDiagnosticsParams>() {
-			@Override
-			public void accept(PublishDiagnosticsParams param) {
-				publishDiagnosticsMessenger.onEvent(param);
-			}
-		});
+		server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsMessenger::onEvent);
+        //TODO do we need to send this log messages ot client(browser)?
+		server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
 	}
 }

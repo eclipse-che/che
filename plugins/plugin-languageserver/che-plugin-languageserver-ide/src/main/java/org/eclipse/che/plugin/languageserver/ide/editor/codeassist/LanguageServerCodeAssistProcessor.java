@@ -35,7 +35,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     @Override
     public void computeCompletionProposals(TextEditor editor, int offset, final CodeAssistCallback callback) {
         TextDocumentPositionParamsDTO documentPosition = dtoFactory.createDto(TextDocumentPositionParamsDTO.class);
-        documentPosition.setUri(editor.getEditorInput().getFile().getContentUrl());
+        documentPosition.setUri(editor.getEditorInput().getFile().getPath());
         PositionDTO position = dtoFactory.createDto(PositionDTO.class);
         TextPosition textPos = editor.getDocument().getPositionFromIndex(offset);
         position.setCharacter(textPos.getCharacter());

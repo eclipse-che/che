@@ -1,15 +1,10 @@
 package org.eclipse.che.plugin.languageserver.server;
 
-import static java.util.Collections.emptyList;
+import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.services.LanguageServer;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
@@ -18,11 +13,15 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentPar
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import io.typefox.lsapi.CompletionItem;
-import io.typefox.lsapi.services.LanguageServer;
+import static java.util.Collections.emptyList;
 
 /**
  * REST API for the textDocument/* services defined in https://github.com/Microsoft/vscode-languageserver-protocol
@@ -49,6 +48,7 @@ public class TextDocumentServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException, ExecutionException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
+        textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         if (server == null) {
         	return emptyList();
@@ -76,6 +76,7 @@ public class TextDocumentServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     public void didChange(DidChangeTextDocumentParamsDTO change) {
         change.getTextDocument().setUri(prefixURI(change.getTextDocument().getUri()));
+        change.setUri(prefixURI(change.getUri()));
         LanguageServer server = getServer(change.getTextDocument().getUri());
         if (server != null)
         	server.getTextDocumentService().didChange(change);
@@ -86,6 +87,7 @@ public class TextDocumentServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
         openEvent.getTextDocument().setUri(prefixURI(openEvent.getTextDocument().getUri()));
+        openEvent.setUri(prefixURI(openEvent.getUri()));
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
         if (server != null)
         	server.getTextDocumentService().didOpen(openEvent);
@@ -112,7 +114,6 @@ public class TextDocumentServiceImpl {
     }
 
     private LanguageServer getServer(String uri) {
-        LanguageServer server = languageServerRegistry.findServer(uri);
-        return server;
+        return languageServerRegistry.findServer(uri);
     }
 }

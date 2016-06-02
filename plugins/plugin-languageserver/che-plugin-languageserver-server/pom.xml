@@ -15,12 +15,13 @@
     <name>Che Plugin :: Language Server :: Server</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
+        <xtext-version>2.10.0</xtext-version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
-		  <artifactId>gson</artifactId>
-		</dependency>
+            <artifactId>gson</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -65,6 +66,11 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-languageserver-shared</artifactId>
         </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.eclipse.xtend</groupId>-->
+        <!--<artifactId>org.eclipse.xtend.lib</artifactId>-->
+        <!--<version>${xtext-version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-websockets</artifactId>
@@ -72,6 +78,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
