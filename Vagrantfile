@@ -12,8 +12,8 @@ $http_proxy  = ""
 $https_proxy = ""
 $no_proxy    = "localhost,127.0.0.1"
 $che_version = "nightly"
-$ip          = "192.168.28.111"
-$port        = 9000
+$ip          = "192.168.28.100"
+$port        = 8080
 
 Vagrant.configure(2) do |config|
   puts ("ECLIPSE CHE: VAGRANT INSTALLER")
