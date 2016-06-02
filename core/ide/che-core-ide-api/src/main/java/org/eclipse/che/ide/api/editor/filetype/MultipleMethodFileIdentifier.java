@@ -13,6 +13,8 @@ package org.eclipse.che.ide.api.editor.filetype;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.util.loging.Log;
 
+import com.google.inject.Singleton;
+
 import java.util.List;
 
 /**
@@ -20,12 +22,17 @@ import java.util.List;
  *
  * @author "Mickaël Leduque"
  */
+@Singleton
 public class MultipleMethodFileIdentifier implements FileTypeIdentifier {
 
     private final FileNameFileTypeIdentifier  fileNameFileTypeIdentifier  = new FileNameFileTypeIdentifier();
     private final ExtensionFileTypeIdentifier extensionFileTypeIdentifier = new ExtensionFileTypeIdentifier();
     private final FirstLineFileTypeIdentifier firstLineFileTypeIdentifier = new FirstLineFileTypeIdentifier();
 
+    public void registerNewExtension(String extension, List<String> contentTypes) {
+        extensionFileTypeIdentifier.registerNewExtension(extension, contentTypes);
+    }
+    
     @Override
     public List<String> identifyType(final VirtualFile file) {
         Log.debug(MultipleMethodFileIdentifier.class, "Try identification by file name.");

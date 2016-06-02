@@ -45,6 +45,13 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         }
         return null;
     }
+    
+    public void registerNewExtension(String extension, List<String> contentTypes) {
+        if (mappings.containsKey(extension)) {
+            Log.warn(ExtensionFileTypeIdentifier.class, "Replacing content types for extension '" + extension +"'.");
+        }
+        mappings.put(extension, contentTypes);
+    }
 
     /** Prepares the know extension registry. */
     public void init() {
