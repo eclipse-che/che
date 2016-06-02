@@ -323,11 +323,12 @@ class IdeSvc {
         this.$log.error('Unable to start workspace: ', error);
       })
     }
-
     defer.promise.then(() => {
       // update list of recent workspaces
       this.cheWorkspace.fetchWorkspaces();
+    });
 
+    this.$timeout(() => {
       // hide loader and show IDE
       let re = new RegExp(workspace.config.name);
       // check if we are still waiting for current workspace to be loaded
@@ -335,7 +336,7 @@ class IdeSvc {
         this.$rootScope.showIDE = true;
         this.$rootScope.hideLoader = true;
       }
-    });
+    }, 2000);
   }
 
   /**
