@@ -103,7 +103,6 @@ public class PushTest {
         assertEquals(branchesAfter - 1, branchesBefore);
     }
 
-
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
             expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
             "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
