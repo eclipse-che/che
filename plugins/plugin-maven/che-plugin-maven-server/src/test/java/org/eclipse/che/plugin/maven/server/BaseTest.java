@@ -63,8 +63,9 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
  */
 public abstract class BaseTest {
 
-    protected static final String wsPath     = "target/workspace";
-    protected final static String INDEX_PATH = "target/fs_index";
+    protected static final String wsPath       = "target/workspace";
+    protected final static String INDEX_PATH   = "target/fs_index";
+    protected final static String PROJECT_NAME = "testProject";
 
     protected static Map<String, String> options      = new HashMap<>();
     protected static EventService        eventService = new EventService();
@@ -72,17 +73,19 @@ public abstract class BaseTest {
     protected static JavaPlugin        javaPlugin        = new JavaPlugin(wsPath + "/set", null, null);
     protected static FileBuffersPlugin fileBuffersPlugin = new FileBuffersPlugin();
     protected static TestWorkspaceHolder workspaceHolder;
+
     private final String mavenServerPath = BaseTest.class.getResource("/maven-server").getPath();
-    protected File root;
-    protected ProjectManager pm;
+
+    protected File                           root;
+    protected ProjectManager                 pm;
     protected LocalVirtualFileSystemProvider vfsProvider;
-    protected ProjectRegistry projectRegistry;
+    protected ProjectRegistry                projectRegistry;
     protected FileWatcherNotificationHandler fileWatcherNotificationHandler;
-    protected FileTreeWatcher fileTreeWatcher;
-    protected ProjectTypeRegistry projectTypeRegistry;
-    protected ProjectHandlerRegistry projectHandlerRegistry;
-    protected ProjectImporterRegistry importerRegistry;
-    protected MavenServerManager mavenServerManager;
+    protected FileTreeWatcher                fileTreeWatcher;
+    protected ProjectTypeRegistry            projectTypeRegistry;
+    protected ProjectHandlerRegistry         projectHandlerRegistry;
+    protected ProjectImporterRegistry        importerRegistry;
+    protected MavenServerManager             mavenServerManager;
 
     public BaseTest() {
         options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);

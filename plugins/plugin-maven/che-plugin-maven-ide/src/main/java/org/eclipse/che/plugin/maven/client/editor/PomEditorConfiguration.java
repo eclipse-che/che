@@ -35,10 +35,10 @@ public class PomEditorConfiguration extends AutoSaveTextEditorConfiguration {
     @Inject
     public PomEditorConfiguration(Provider<DocumentPositionMap> docPositionMapProvider,
                                   JavaAnnotationModelFactory javaAnnotationModelFactory,
-                                  PomReconsilingStrategyFactory reconsilingStrategyFactory,
+                                  PomReconcilingStrategyFactory reconcilingStrategyFactory,
                                   @Assisted @NotNull final TextEditorPresenter<?> editor) {
         annotationModel = javaAnnotationModelFactory.create(docPositionMapProvider.get());
-        PomReconsilingStrategy reconsilingStrategy = reconsilingStrategyFactory.create(annotationModel, editor);
+        PomReconcilingStrategy reconsilingStrategy = reconcilingStrategyFactory.create(annotationModel, editor);
         Reconciler reconciler = getReconciler();
         reconciler.addReconcilingStrategy(DEFAULT_CONTENT_TYPE, reconsilingStrategy);
     }
