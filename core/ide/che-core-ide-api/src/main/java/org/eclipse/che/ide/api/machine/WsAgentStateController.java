@@ -10,22 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
+import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
+import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WS_AGENT_BOOTING;
+import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
+import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.SUCCESS;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestServiceInfo;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
@@ -39,14 +39,14 @@ import org.eclipse.che.ide.websocket.events.ConnectionErrorHandler;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
-import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
-import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WS_AGENT_BOOTING;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.SUCCESS;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * @author Roman Nikitenko
@@ -67,8 +67,8 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private MessageBus                messageBus;
     private WsAgentState              state;
-    private AsyncCallback<MessageBus> messageBusCallback;
-    private AsyncCallback<DevMachine> devMachineCallback;
+    private List<AsyncCallback<MessageBus>> messageBusCallbacks = newArrayList();
+    private List<AsyncCallback<DevMachine>> devMachineCallbacks = newArrayList();
 
     @Inject
     public WsAgentStateController(EventBus eventBus,
@@ -132,12 +132,16 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), SUCCESS);
         loader.hide();
 
-        if (messageBusCallback != null) {
-            messageBusCallback.onSuccess(messageBus);
+        for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
+        	callback.onSuccess(messageBus);
+		}
+        messageBusCallbacks = null;
+        
+        for (AsyncCallback<DevMachine> callback : devMachineCallbacks) {
+        	callback.onSuccess(devMachine);
         }
-        if (devMachineCallback != null) {
-            devMachineCallback.onSuccess(devMachine);
-        }
+        devMachineCallbacks = null;
+        
         eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }
 
@@ -152,7 +156,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                 if (messageBus != null) {
                     callback.onSuccess(messageBus);
                 } else {
-                    WsAgentStateController.this.messageBusCallback = callback;
+                    WsAgentStateController.this.messageBusCallbacks.add(callback);
                 }
             }
         });
@@ -166,7 +170,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                 if (messageBus != null) {
                     callback.onSuccess(devMachine);
                 } else {
-                    WsAgentStateController.this.devMachineCallback = callback;
+                    WsAgentStateController.this.devMachineCallbacks.add(callback);
                 }
             }
         });
