@@ -14,11 +14,11 @@ import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
- * Factory class for creating PomReconsiligStrategy
+ * Factory class for creating PomReconcilingStrategy
  *
  * @author Evgen Vidolob
  */
-public interface PomReconsilingStrategyFactory {
+public interface PomReconcilingStrategyFactory {
 
-    PomReconsilingStrategy create(AnnotationModel annotationModel, TextEditorPresenter<?> editor);
+    PomReconcilingStrategy create(AnnotationModel annotationModel, TextEditorPresenter<?> editor);
 }

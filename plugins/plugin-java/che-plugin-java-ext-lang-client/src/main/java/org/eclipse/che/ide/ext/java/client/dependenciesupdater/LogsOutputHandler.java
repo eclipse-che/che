@@ -17,8 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
-import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEventHandler;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
@@ -41,7 +39,7 @@ import java.util.Map;
  * @author Dmitry Shnurenko
  */
 @Singleton
-public class LogsOutputHandler implements DependencyUpdatedEventHandler, WsAgentStateHandler {
+public class LogsOutputHandler implements WsAgentStateHandler {
 
     private final CommandConsoleFactory          consoleFactory;
     private final OutputsContainerPresenter      outputsContainerPresenter;
@@ -62,7 +60,6 @@ public class LogsOutputHandler implements DependencyUpdatedEventHandler, WsAgent
         this.channelParameters = new HashMap<>();
         this.messageBusProvider = messageBusProvider;
 
-        eventBus.addHandler(DependencyUpdatedEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
 
@@ -75,20 +72,23 @@ public class LogsOutputHandler implements DependencyUpdatedEventHandler, WsAgent
     public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
-    @Override
-    public void onDependencyUpdated(DependencyUpdatedEvent event) {
-        String updatedChannel = event.getChannel();
+    /**
+     * Unsubscribes from special channel.
+     *
+     * @param channel
+     *         channel identifier
+     */
+    void unsubscribe(String channel) {
+        channelParameters.get(channel).outputEnded();
 
-        channelParameters.get(updatedChannel).outputEnded();
-
-        flushBuffer(updatedChannel);
+        flushBuffer(channel);
 
         try {
             if (outputHandler == null) {
                 return;
             }
 
-            messageBus.unsubscribe(updatedChannel, outputHandler);
+            messageBus.unsubscribe(channel, outputHandler);
         } catch (WebSocketException exception) {
             Log.error(getClass(), exception);
         }

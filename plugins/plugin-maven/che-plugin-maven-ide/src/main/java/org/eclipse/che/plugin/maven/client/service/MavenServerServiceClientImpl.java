@@ -95,7 +95,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
 
     @Override
     public Promise<List<Problem>> reconcilePom(String pomPath) {
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + servicePath + "pom/reconsile?pompath=" + pomPath;
+        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + servicePath + "pom/reconcile?pompath=" + pomPath;
         Unmarshallable<List<Problem>> unmarshallable = dtoUnmarshallerFactory.newListUnmarshaller(Problem.class);
         return asyncRequestFactory.createGetRequest(url)
                                   .send(unmarshallable);

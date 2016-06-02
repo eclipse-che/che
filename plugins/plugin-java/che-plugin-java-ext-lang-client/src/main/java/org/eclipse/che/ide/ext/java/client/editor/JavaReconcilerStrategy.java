@@ -60,7 +60,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy {
 
         handlerRegistration = eventBus.addHandler(DependencyUpdatedEvent.TYPE, new DependencyUpdatedEventHandler() {
             @Override
-            public void onDependencyUpdated(DependencyUpdatedEvent event) {
+            public void onDependencyUpdated() {
                 parse();
             }
         });

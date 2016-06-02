@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.plugin.maven.client.actions.GetEffectivePomAction;
-import org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants;
 import org.eclipse.che.plugin.maven.client.actions.ReimportMavenDependenciesAction;
 import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
@@ -105,7 +104,7 @@ public class MavenExtension {
                                   MavenResources mavenResources,
                                   EditorRegistry editorRegistry,
                                   PomEditorProvider editorProvider) {
-        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml");
+        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml", "pom\\.xml");
         fileTypeRegistry.registerFileType(pomFile);
         editorRegistry.register(pomFile, editorProvider);
     }
