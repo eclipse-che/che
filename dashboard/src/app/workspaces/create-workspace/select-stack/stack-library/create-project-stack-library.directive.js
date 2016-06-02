@@ -36,9 +36,7 @@ export class CreateProjectStackLibrary {
     this.bindToController = true;
 
     // scope values
-    this.scope = {
-      stacks: '=cheStacks'
-    };
+    this.scope = {};
 
   }
 
