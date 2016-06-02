@@ -12,8 +12,8 @@ $http_proxy  = ""
 $https_proxy = ""
 $no_proxy    = "localhost,127.0.0.1"
 $che_version = "nightly"
-$ip          = "192.168.28.100"
-$port        = 8080
+$ip          = "192.168.28.111"
+$port        = 9000
 
 Vagrant.configure(2) do |config|
   puts ("ECLIPSE CHE: VAGRANT INSTALLER")
@@ -65,8 +65,8 @@ Vagrant.configure(2) do |config|
       source /home/vagrant/.bashrc
 
       # Configuring the Che properties file - mounted into Che container when it starts
-      echo 'http.proxy="'$HTTP_PROXY'"' >> /home/user/che/che.properties
-      echo 'https.proxy="'$HTTPS_PROXY'"' >> /home/user/che/che.properties
+      echo 'http.proxy="'$HTTP_PROXY'"' >> /home/user/che/conf/che.properties
+      echo 'https.proxy="'$HTTPS_PROXY'"' >> /home/user/che/conf/che.properties
 
       echo "HTTP PROXY set to: $HTTP_PROXY"
       echo "HTTPS PROXY set to: $HTTPS_PROXY"
@@ -127,7 +127,7 @@ Vagrant.configure(2) do |config|
               `-v /home/user/che/lib:/home/user/che/lib-copy `
               `-v /home/user/che/workspaces:/home/user/che/workspaces `
               `-v /home/user/che/storage:/home/user/che/storage `
-              `-v /home/user/che/che.properties:/container/che.properties `
+              `-v /home/user/che/conf:/container `
               `-e CHE_LOCAL_CONF_DIR=/container `
               `codenvy/che:${CHE_VERSION} --remote:${IP} --port:${PORT} run &>/dev/null
   SHELL
