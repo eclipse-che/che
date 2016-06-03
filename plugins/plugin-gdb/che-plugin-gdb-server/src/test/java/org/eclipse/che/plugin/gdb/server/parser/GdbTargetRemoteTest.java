@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.gdb.server.parser;
 
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;

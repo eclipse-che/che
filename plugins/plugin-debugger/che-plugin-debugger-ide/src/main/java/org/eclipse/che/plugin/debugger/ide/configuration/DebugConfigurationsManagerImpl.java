@@ -24,11 +24,12 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
-import org.eclipse.che.plugin.debugger.ide.configuration.dto.DebugConfigurationDto;
+import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
+import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
+import org.eclipse.che.plugin.debugger.ide.configuration.dto.DebugConfigurationDto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +57,7 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
     private final DebuggerManager                   debuggerManager;
     private final DialogFactory                     dialogFactory;
     private final DebuggerLocalizationConstant      localizationConstants;
+    private final CurrentProjectPathProvider currentProjectPathProvider;
 
     private DebugConfiguration currentDebugConfiguration;
 
@@ -65,12 +67,14 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
                                           DebugConfigurationTypeRegistry debugConfigurationTypeRegistry,
                                           DebuggerManager debuggerManager,
                                           DialogFactory dialogFactory,
-                                          DebuggerLocalizationConstant localizationConstants) {
+                                          DebuggerLocalizationConstant localizationConstants,
+                                          CurrentProjectPathProvider currentProjectPathProvider) {
         this.dtoFactory = dtoFactory;
         this.configurationTypeRegistry = debugConfigurationTypeRegistry;
         this.debuggerManager = debuggerManager;
         this.dialogFactory = dialogFactory;
         this.localizationConstants = localizationConstants;
+        this.currentProjectPathProvider = currentProjectPathProvider;
         localStorageOptional = Optional.fromNullable(localStorageProvider.get());
         configurationChangedListeners = new HashSet<>();
         configurations = new ArrayList<>();
@@ -218,7 +222,7 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
     }
 
     @Override
-    public void apply(DebugConfiguration debugConfiguration) {
+    public void apply(final DebugConfiguration debugConfiguration) {
         if (debugConfiguration == null) {
             return;
         }
@@ -234,18 +238,32 @@ public class DebugConfigurationsManagerImpl implements DebugConfigurationsManage
         if (debugger != null) {
             debuggerManager.setActiveDebugger(debugger);
 
-            Map<String, String> connectionProperties = new HashMap<>(2 + debugConfiguration.getConnectionProperties().size());
-            connectionProperties.put("HOST", debugConfiguration.getHost());
-            connectionProperties.put("PORT", String.valueOf(debugConfiguration.getPort()));
-            connectionProperties.putAll(debugConfiguration.getConnectionProperties());
-
-            debugger.connect(connectionProperties).catchError(new Operation<PromiseError>() {
+            currentProjectPathProvider.getValue().then(new Operation<String>() {
                 @Override
-                public void apply(PromiseError arg) throws OperationException {
-                    debuggerManager.setActiveDebugger(null);
+                public void apply(String arg) throws OperationException {
+                    Map<String, String> connectionProperties = prepareConnectionProperties(debugConfiguration, arg);
+
+                    debugger.connect(connectionProperties).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError arg) throws OperationException {
+                            debuggerManager.setActiveDebugger(null);
+                        }
+                    });
                 }
             });
         }
+    }
+
+    private Map<String, String> prepareConnectionProperties(DebugConfiguration debugConfiguration, String currentProjectPath) {
+        Map<String, String> connectionProperties = new HashMap<>(2 + debugConfiguration.getConnectionProperties().size());
+        connectionProperties.put("HOST", debugConfiguration.getHost());
+        connectionProperties.put("PORT", String.valueOf(debugConfiguration.getPort()));
+
+        for (Map.Entry<String, String> entry : debugConfiguration.getConnectionProperties().entrySet()) {
+            String newValue = entry.getValue().replace(currentProjectPathProvider.getKey(), currentProjectPath);
+            connectionProperties.put(entry.getKey(), newValue);
+        }
+        return connectionProperties;
     }
 
     private void fireConfigurationAdded(DebugConfiguration configuration) {
