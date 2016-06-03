@@ -112,6 +112,20 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
+    public Promise<WorkspaceDto> getWorkspace(@NotNull final String namespace, @NotNull final String workspaceName){
+        return newPromise(new RequestCall<WorkspaceDto>() {
+            @Override
+            public void makeCall(AsyncCallback<WorkspaceDto> callback) {
+                final String url = baseHttpUrl + '/' + namespace + ":" + workspaceName;
+                asyncRequestFactory.createGetRequest(url)
+                                   .header(ACCEPT, APPLICATION_JSON)
+                                   .loader(loaderFactory.newLoader("Getting info about workspace..."))
+                                   .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class)));
+            }
+        });
+    }
+
+    @Override
     public Promise<List<WorkspaceDto>> getWorkspaces(int skip, int limit) {
         return newPromise(new RequestCall<List<WorkspaceDto>>() {
             @Override

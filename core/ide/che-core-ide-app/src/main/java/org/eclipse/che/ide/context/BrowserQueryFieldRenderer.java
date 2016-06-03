@@ -30,6 +30,7 @@ import org.eclipse.che.ide.collections.Jso;
 public class BrowserQueryFieldRenderer {
 
     private static final int WORKSPACE_ORDER_IN_URL = 2;
+    private static final int NAMESPACE_ORDER_IN_URL = 1;
     //Used in the JSNI methods follow
     private static final int AMOUNT_URL_PARTS = 4;
 
@@ -178,6 +179,15 @@ public class BrowserQueryFieldRenderer {
 
         String[] urlParts = browserUrl.split("/");
 
-        return urlParts.length < 3 ? "" : urlParts[WORKSPACE_ORDER_IN_URL];
+        return urlParts.length < 2 ? "" : urlParts[WORKSPACE_ORDER_IN_URL];
+    }
+
+    /** Returns namespace name from browser query fields. */
+    public String getNamespace() {
+        String browserUrl = Window.Location.getPath();
+
+        String[] urlParts = browserUrl.split("/");
+
+        return urlParts.length < 2 ? "" : urlParts[NAMESPACE_ORDER_IN_URL];
     }
 }

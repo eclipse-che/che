@@ -23,7 +23,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
@@ -62,13 +61,10 @@ public class WorkspaceServiceLinksInjector {
 
     //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
     //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
-    private final String                      ideContext;
     private final MachineServiceLinksInjector machineLinksInjector;
 
     @Inject
-    public WorkspaceServiceLinksInjector(@Named("che.ide.context") String ideContext,
-                                         MachineServiceLinksInjector machineLinksInjector) {
-        this.ideContext = ideContext;
+    public WorkspaceServiceLinksInjector(MachineServiceLinksInjector machineLinksInjector) {
         this.machineLinksInjector = machineLinksInjector;
     }
 
@@ -113,7 +109,8 @@ public class WorkspaceServiceLinksInjector {
 
         //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
         final URI ideUri = uriBuilder.clone()
-                                     .replacePath(ideContext)
+                                     .replacePath("")
+                                     .path(workspace.getNamespace())
                                      .path(workspace.getConfig().getName())
                                      .build();
         links.add(createLink("GET", ideUri.toString(), TEXT_HTML, LINK_REL_IDE_URL));
