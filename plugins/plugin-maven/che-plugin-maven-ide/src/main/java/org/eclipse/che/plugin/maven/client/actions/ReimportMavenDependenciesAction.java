@@ -73,7 +73,7 @@ public class ReimportMavenDependenciesAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        mavenServerServiceClient.reimportDependencies(getPathsToSelectedMavenProject()).catchError(new Operation<PromiseError>() {
+        mavenServerServiceClient.reImportProjects(getPathsToSelectedMavenProject()).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 notificationManager.notify("Problem with reimporting maven dependencies", arg.getMessage(), FAIL, EMERGE_MODE);

@@ -151,7 +151,7 @@ public class MavenServerService {
         return Boolean.toString(classpathManager.downloadSources(projectPath, fqn));
     }
 
-    @PUT
+    @GET
     @Path("reimport")
     @ApiOperation(value = "Reimport maven dependencies")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
