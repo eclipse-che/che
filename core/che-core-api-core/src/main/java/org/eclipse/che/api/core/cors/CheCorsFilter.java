@@ -14,8 +14,6 @@ import com.google.inject.Singleton;
 
 import org.apache.catalina.filters.CorsFilter;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -39,16 +37,12 @@ import static org.apache.catalina.filters.CorsFilter.PARAM_CORS_SUPPORT_CREDENTI
 /**
  * The special filter which provides filtering requests in according to settings which are set to {@link CorsFilter}. More information
  * about filter and parameters you can find in documentation.
- * The class contains business logic which allows to get allowed origin from api endpoint parameter. For che version we set default
- * allows origin parameter, which allows send requests to server from any host.
+ * The class contains business logic which allows to get allowed origin from any endpoint as it is used by export workspace.
  *
  * @author Dmitry Shnurenko
  */
 @Singleton
 public class CheCorsFilter implements Filter {
-    @Inject
-    @Named("api.endpoint")
-    private String apiEndpoint;
 
     private CorsFilter corsFilter;
 
@@ -70,39 +64,13 @@ public class CheCorsFilter implements Filter {
         corsFilter.destroy();
     }
 
-    private String getAllowedOrigin(String url) {
-        if (url == null || url.isEmpty()) {
-            throw new IllegalArgumentException("Api endpoint url can not be null.");
-        }
-
-        String allowedOrigin = "";
-
-        if (url.startsWith("http://")) {
-            allowedOrigin = getOriginOf(url, "http://");
-        } else if (url.startsWith("https://")) {
-            allowedOrigin = getOriginOf(url, "https://");
-        }
-
-        if (allowedOrigin.isEmpty()) {
-            throw new IllegalArgumentException("The origin has to starts from http or https, " + url + " is not valid");
-        }
-
-        return allowedOrigin.contains("che-host") ? DEFAULT_ALLOWED_ORIGINS : allowedOrigin;
-    }
-
-    private String getOriginOf(String url, String httpProtocol) {
-        url = url.replace(httpProtocol, "");
-
-        return httpProtocol + url.substring(0, url.indexOf('/'));
-    }
-
     private class CodenvyCorsFilterConfig implements FilterConfig {
 
         private final Map<String, String> filterParams;
 
         public CodenvyCorsFilterConfig() {
             filterParams = new HashMap<>();
-            filterParams.put(PARAM_CORS_ALLOWED_ORIGINS, getAllowedOrigin(apiEndpoint));
+            filterParams.put(PARAM_CORS_ALLOWED_ORIGINS, DEFAULT_ALLOWED_ORIGINS);
             filterParams.put(PARAM_CORS_ALLOWED_METHODS, "GET," +
                                                          "POST," +
                                                          "HEAD," +
