@@ -8,26 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.server.parser;
+package org.eclipse.che.plugin.gdb.server.exception;
 
-import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
-import org.testng.annotations.Test;
+import static java.lang.Math.min;
 
 /**
  * @author Anatoliy Bazko
  */
-public class GdbClearTest {
+@SuppressWarnings("serial")
+public class GdbParseException extends GdbException {
 
-    @Test
-    public void testParse() throws Exception {
-        GdbOutput gdbOutput = GdbOutput.of("Deleted breakpoint 1\n");
+    public static final int MAX_OUTPUT_LENGTH = 80;
 
-        GdbClear.parse(gdbOutput);
-    }
-
-    @Test(expectedExceptions = GdbParseException.class)
-    public void testParseFail() throws Exception {
-        GdbOutput gdbOutput = GdbOutput.of("some text");
-        GdbClear.parse(gdbOutput);
+    public GdbParseException(Class clazz, String output) {
+        super("Can't parse '"
+              + output.substring(0, min(output.length(), MAX_OUTPUT_LENGTH))
+              + "' into "
+              + clazz.getSimpleName());
     }
 }

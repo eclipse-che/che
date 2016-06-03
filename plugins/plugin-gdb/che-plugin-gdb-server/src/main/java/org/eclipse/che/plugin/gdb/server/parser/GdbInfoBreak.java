@@ -14,6 +14,7 @@ import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 
 import java.util.ArrayList;
 import java.util.List;

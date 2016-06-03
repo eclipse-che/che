@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -97,6 +98,11 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
 
     @UiHandler({"host"})
     void onHostKeyUp(KeyUpEvent event) {
+        delegate.onHostChanged();
+    }
+
+    @UiHandler({"host"})
+    void onHostChanged(ChangeEvent event) {
         delegate.onHostChanged();
     }
 
