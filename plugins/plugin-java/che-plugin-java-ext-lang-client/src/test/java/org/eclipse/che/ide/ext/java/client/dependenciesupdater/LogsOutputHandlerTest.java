@@ -12,7 +12,6 @@ package org.eclipse.che.ide.ext.java.client.dependenciesupdater;
 
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
@@ -55,8 +54,6 @@ public class LogsOutputHandlerTest {
     private MessageBus             messageBus;
     @Mock
     private DefaultOutputConsole   console;
-    @Mock
-    private DependencyUpdatedEvent event;
 
     private LogsOutputHandler logsOutputHandler;
 
@@ -64,23 +61,16 @@ public class LogsOutputHandlerTest {
     public void setUp() {
         when(messageBusProvider.getMachineMessageBus()).thenReturn(messageBus);
         when(consoleFactory.create(TAB_NAME)).thenReturn(console);
-        when(event.getChannel()).thenReturn(CHANNEL);
 
         logsOutputHandler = new LogsOutputHandler(consoleFactory, outputsContainerPresenter, eventBus, messageBusProvider);
     }
 
     @Test
-    public void dependencyUpdatedEventShouldBeAdded() {
-        verify(eventBus).addHandler(DependencyUpdatedEvent.TYPE, logsOutputHandler);
-    }
-
-    @Test
-    public void dependencyUpdatedEventShouldBeCaughtAndMessageBusShouldBeUnsubscribed() throws Exception {
+    public void messageBusShouldBeUnsubscribed() throws Exception {
         logsOutputHandler.subscribeToOutput(CHANNEL, TAB_NAME);
 
-        logsOutputHandler.onDependencyUpdated(event);
+        logsOutputHandler.unsubscribe(CHANNEL);
 
-        verify(event).getChannel();
         verify(messageBus).unsubscribe(eq(CHANNEL), Matchers.<MessageHandler>anyObject());
     }
 

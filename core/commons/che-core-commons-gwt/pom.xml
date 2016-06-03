@@ -184,7 +184,6 @@
                         <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.js</exclude>
                         <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.map</exclude>
                         <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.swf</exclude>
-                        <exclude>**/*.svg</exclude>
                         <exclude>**/*.png</exclude>
                     </excludes>
                 </configuration>

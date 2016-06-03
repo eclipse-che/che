@@ -19,7 +19,7 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.plugin.maven.client.editor.PomReconsilingStrategy;
+import org.eclipse.che.plugin.maven.client.editor.PomReconcilingStrategy;
 
 import java.util.HashSet;
 import java.util.List;
@@ -54,8 +54,8 @@ public class PomEditorReconciler {
                             final Reconciler reconciler = ((TextEditor)openedEditor).getConfiguration().getReconciler();
                             if (reconciler != null) {
                                 final ReconcilingStrategy strategy = reconciler.getReconcilingStrategy(DEFAULT_CONTENT_TYPE);
-                                if (strategy instanceof PomReconsilingStrategy) {
-                                    ((PomReconsilingStrategy)strategy).doReconcile();
+                                if (strategy instanceof PomReconcilingStrategy) {
+                                    ((PomReconcilingStrategy)strategy).doReconcile();
                                 }
                             }
                         }

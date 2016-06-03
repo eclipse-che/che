@@ -108,9 +108,7 @@ public class MachineService extends Service {
 
         requiredNotNull(workspaceId, "Parameter workspace");
 
-        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-
-        return machineManager.getMachines(userId, workspaceId)
+        return machineManager.getMachines(workspaceId)
                              .stream()
                              .map(DtoConverter::asDto)
                              .map(machineDto -> linksInjector.injectLinks(machineDto, getServiceContext()))

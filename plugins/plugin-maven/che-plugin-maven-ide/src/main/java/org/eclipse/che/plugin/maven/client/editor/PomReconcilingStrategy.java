@@ -36,17 +36,15 @@ import java.util.List;
  *
  * @author Evgen Vidolob
  */
-public class PomReconsilingStrategy implements ReconcilingStrategy {
+public class PomReconcilingStrategy implements ReconcilingStrategy {
 
     private final AnnotationModel          annotationModel;
-    private final TextEditorPresenter<?>
-                                           editor;
+    private final TextEditorPresenter<?>   editor;
     private final MavenServerServiceClient client;
     private       String                   pomPath;
-    private       String                   projectPath;
 
     @Inject
-    public PomReconsilingStrategy(@Assisted AnnotationModel annotationModel,
+    public PomReconcilingStrategy(@Assisted AnnotationModel annotationModel,
                                   @Assisted @NotNull final TextEditorPresenter<?> editor,
                                   MavenServerServiceClient client) {
         this.annotationModel = annotationModel;
@@ -57,7 +55,6 @@ public class PomReconsilingStrategy implements ReconcilingStrategy {
     @Override
     public void setDocument(Document document) {
         pomPath = document.getFile().getPath();
-        projectPath = document.getFile().getProject().getProjectConfig().getPath();
     }
 
     @Override

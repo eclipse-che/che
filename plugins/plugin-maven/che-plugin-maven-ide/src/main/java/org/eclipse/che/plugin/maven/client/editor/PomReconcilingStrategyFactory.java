@@ -8,14 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.client.event;
+package org.eclipse.che.plugin.maven.client.editor;
 
-import com.google.gwt.event.shared.EventHandler;
+import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
- * Handle {@link DependencyUpdatedEvent}
- * @author Alexander Andrienko
+ * Factory class for creating PomReconcilingStrategy
+ *
+ * @author Evgen Vidolob
  */
-public interface DependencyUpdatedEventHandler extends EventHandler {
-    void onDependencyUpdated();
+public interface PomReconcilingStrategyFactory {
+
+    PomReconcilingStrategy create(AnnotationModel annotationModel, TextEditorPresenter<?> editor);
 }

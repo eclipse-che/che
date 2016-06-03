@@ -31,8 +31,6 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 public class DebugConfigurationAction extends AbstractPerspectiveAction {
 
-    private static final String TICK = "> ";
-
     private final DebugConfigurationsManager configurationsManager;
     private final DebugConfiguration         configuration;
 
@@ -52,15 +50,14 @@ public class DebugConfigurationAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(ActionEvent event) {
         Optional<DebugConfiguration> configurationOptional = configurationsManager.getCurrentDebugConfiguration();
-        if (configurationOptional.isPresent() && configuration.equals(configurationOptional.get())) {
-            event.getPresentation().setText(TICK + configuration.getName());
-        } else {
-            event.getPresentation().setText(configuration.getName());
-        }
+        boolean isCurrentConfig = configurationOptional.isPresent() && configuration.equals(configurationOptional.get());
+
+        event.getPresentation().setEnabledAndVisible(!isCurrentConfig);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         configurationsManager.setCurrentDebugConfiguration(configuration);
+        configurationsManager.apply(configuration);
     }
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.server.parser;
+package org.eclipse.che.plugin.gdb.server.exception;
 
 import static java.lang.Math.min;
 
@@ -16,7 +16,7 @@ import static java.lang.Math.min;
  * @author Anatoliy Bazko
  */
 @SuppressWarnings("serial")
-public class GdbParseException extends Exception {
+public class GdbParseException extends GdbException {
 
     public static final int MAX_OUTPUT_LENGTH = 80;
 

@@ -11,14 +11,16 @@
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
     <ui:with field='locale' type='org.eclipse.che.plugin.gdb.ide.GdbLocalizationConstant'/>
 
     <g:FlowPanel debugId="gdbDebugConfigurationPageView-mainPanel">
         <g:Label text="{locale.gdbConfigurationPageViewHostLabel}"/>
-        <g:TextBox ui:field="host"/>
+        <che:CustomComboBox ui:field="host"/>
         <g:Label text="Port"/>
         <g:TextBox ui:field="port"/>
+        <g:Label text="{locale.gdbConfigurationPageViewBinPathDescription}"/>
         <g:Label text="{locale.gdbConfigurationPageViewBinPathLabel}"/>
         <g:TextBox ui:field="binaryPath"/>
     </g:FlowPanel>

@@ -8,17 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.client.editor;
-
-import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+package org.eclipse.che.plugin.gdb.server.exception;
 
 /**
- * Factory class for creating PomReconsiligStrategy
- *
- * @author Evgen Vidolob
+ * @author Anatoliy Bazko
  */
-public interface PomReconsilingStrategyFactory {
+public class GdbTerminatedException extends GdbException {
+    public GdbTerminatedException(String message) {
+        super(message);
+    }
 
-    PomReconsilingStrategy create(AnnotationModel annotationModel, TextEditorPresenter<?> editor);
+    public GdbTerminatedException(String message, Exception cause) {
+        super(message, cause);
+    }
 }

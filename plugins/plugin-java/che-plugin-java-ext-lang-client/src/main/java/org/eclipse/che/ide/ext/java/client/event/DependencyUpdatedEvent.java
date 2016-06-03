@@ -21,16 +21,6 @@ public class DependencyUpdatedEvent extends GwtEvent<DependencyUpdatedEventHandl
 
     public static final Type<DependencyUpdatedEventHandler> TYPE = new Type<>();
 
-    private final String channel;
-
-    public DependencyUpdatedEvent(String channel) {
-        this.channel = channel;
-    }
-
-    public String getChannel() {
-        return channel;
-    }
-
     @Override
     public Type<DependencyUpdatedEventHandler> getAssociatedType() {
         return TYPE;
@@ -38,6 +28,6 @@ public class DependencyUpdatedEvent extends GwtEvent<DependencyUpdatedEventHandl
 
     @Override
     protected void dispatch(DependencyUpdatedEventHandler handler) {
-        handler.onDependencyUpdated(this);
+        handler.onDependencyUpdated();
     }
 }
