@@ -77,6 +77,8 @@
     <inherits name="org.eclipse.che.api.debug.Debug"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
 
+    <inherits name="org.eclipse.che.ide.ext.java.testing.TestExtension"/>
+
     <stylesheet src="IDE.css"/>
 
     <!-- Specify the app entry point class.                         -->
@@ -85,4 +87,8 @@
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>
     <source path='shared'/>
+
+    <!--todo remove this-->
+    <set-property name="user.agent" value="safari"/>
+    <collapse-all-properties />
 </module>
