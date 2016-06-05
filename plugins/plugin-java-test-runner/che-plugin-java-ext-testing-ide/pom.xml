@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
-    <artifactId>che-plugin-java-ext-testing-client</artifactId>
+    <artifactId>che-plugin-java-ext-testing-ide</artifactId>
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>

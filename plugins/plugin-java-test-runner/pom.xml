@@ -22,7 +22,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>che-plugin-java-ext-testing-server</module>
-        <module>che-plugin-java-ext-testing-client</module>
+        <module>che-plugin-java-ext-testing-ide</module>
         <module>che-plugin-java-ext-testing-shared</module>
     </modules>
 
