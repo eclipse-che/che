@@ -35,11 +35,17 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
     private final FlowPanel rootElement;
 
     @UiField
-    Style   style;
+    Style     style;
     @UiField
-    TextBox sourceFolderField;
+    TextBox   sourceFolderField;
     @UiField
-    Button  browseButton;
+    Button    browseSourceBtn;
+    @UiField
+    TextBox   libFolderField;
+    @UiField
+    Button    browseLibBtn;
+    @UiField
+    FlowPanel libraryFolderContainer;
 
     private ActionDelegate delegate;
 
@@ -47,10 +53,17 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
     public PlainJavaPageViewImpl() {
         rootElement = ourUiBinder.createAndBindUi(this);
 
-        browseButton.addClickHandler(new ClickHandler() {
+        browseSourceBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onBrowseButtonClicked();
+                delegate.onBrowseSourceButtonClicked();
+            }
+        });
+
+        browseLibBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onBrowseLibraryButtonClicked();
             }
         });
     }
@@ -75,6 +88,16 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
         sourceFolderField.setText(value);
     }
 
+    @Override
+    public String getLibraryFolder() {
+        return libFolderField.getText();
+    }
+
+    @Override
+    public void setLibraryFolder(String value) {
+        libFolderField.setText(value);
+    }
+
     @UiHandler({"sourceFolderField"})
     void onKeyUp(KeyUpEvent event) {
         delegate.onCoordinatesChanged();
@@ -91,7 +114,12 @@ public class PlainJavaPageViewImpl implements PlainJavaPageView {
 
     @Override
     public void changeBrowseBtnVisibleState(boolean isVisible) {
-        browseButton.setVisible(isVisible);
+        browseSourceBtn.setVisible(isVisible);
+    }
+
+    @Override
+    public void changeLibraryPanelVisibleState(boolean isVisible) {
+        libraryFolderContainer.setVisible(isVisible);
     }
 
     @Override

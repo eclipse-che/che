@@ -91,6 +91,10 @@ public class MachineConfigImpl implements MachineConfig {
         return source;
     }
 
+    public void setSource(MachineSource machineSource) {
+        this.source = new MachineSourceImpl(machineSource);
+    }
+
     @Override
     public boolean isDev() {
         return isDev;

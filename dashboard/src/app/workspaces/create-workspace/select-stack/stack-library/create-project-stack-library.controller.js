@@ -13,6 +13,7 @@
 /**
  * This class is handling the controller for the creating stack library projects
  * @author Florent Benoit
+ * @author Oleksii Orel
  */
 export class CreateProjectStackLibraryCtrl {
 
@@ -26,7 +27,6 @@ export class CreateProjectStackLibraryCtrl {
     this.cheWorkspace = cheWorkspace;
     this.lodash = lodash;
 
-    this.stacks = [];
     this.workspaces = [];
 
     this.allStackTags = [];
@@ -34,17 +34,14 @@ export class CreateProjectStackLibraryCtrl {
 
     this.onChoice();
 
-    let promiseStack = cheStack.fetchStacks();
-    promiseStack.then(() => {
-        this.updateDataStacks();
-      },
-      (error) => {
-        // etag handling so also retrieve last data that were fetched before
-        if (error.status === 304) {
-          // ok
-          this.updateDataStacks();
-        }
+    this.stacks = cheStack.getStacks();
+    if (this.stacks.length) {
+      this.updateData();
+    } else {
+      cheStack.fetchStacks().then(() => {
+        this.updateData();
       });
+    }
 
     $scope.$on('event:selectStackId', (event, data) => {
       this.selectedStackId = data;
@@ -105,12 +102,8 @@ export class CreateProjectStackLibraryCtrl {
   /**
    * Update stacks' data
    */
-  updateDataStacks() {
-    this.stacks.length = 0;
-    var remoteStacks = this.cheStack.getStacks();
-    // remote stacks are
-    remoteStacks.forEach((stack) => {
-      this.stacks.push(stack);
+  updateData() {
+    this.stacks.forEach((stack) => {
       this.filteredStackIds.push(stack.id);
       this.allStackTags = this.allStackTags.concat(stack.tags);
     });

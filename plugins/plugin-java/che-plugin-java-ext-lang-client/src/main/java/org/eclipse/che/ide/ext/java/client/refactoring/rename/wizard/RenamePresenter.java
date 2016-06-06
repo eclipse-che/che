@@ -55,8 +55,11 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.COMPILATION_UNIT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.JAVA_ELEMENT;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring.RenameType.PACKAGE;
+import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
+import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.INFO;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
+import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.WARNING;
 
 /**
  * The class that manages Move panel widget.
@@ -289,11 +292,11 @@ public class RenamePresenter implements ActionDelegate {
                 int severityCode = arg.getStatus().getSeverity();
 
                 switch (severityCode) {
-                    case 2:
-                    case 3:
+                    case WARNING:
+                    case ERROR:
                         showWarningDialog(session, arg);
                         break;
-                    case 4:
+                    case FATAL:
                         if (!arg.isCanShowPreviewPage()) {
                             view.showErrorMessage(arg.getStatus());
                         }

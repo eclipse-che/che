@@ -33,7 +33,6 @@ import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileOperation;
 import org.eclipse.che.ide.api.event.FileEventHandler;

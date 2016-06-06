@@ -32,7 +32,7 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
     private final ProjectExplorerPresenter projectExplorerPresenter;
     private final AppContext               appContext;
 
-    private       JavaCommandPagePresenter delegate;
+    private JavaCommandPagePresenter delegate;
 
     @Inject
     public SelectNodePresenter(SelectNodeView view,

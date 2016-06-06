@@ -18,7 +18,8 @@ import org.eclipse.che.ide.api.mvp.View;
  * @author Andrey Plotnikov
  */
 public interface GitOutputPartView extends View<GitOutputPartView.ActionDelegate> {
-    public interface ActionDelegate {
+
+    interface ActionDelegate {
         /**
          * Handle user clicks on clear console button.
          */

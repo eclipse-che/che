@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.MachineService;
+import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -83,7 +84,6 @@ public class WorkspaceService extends Service {
     private final WorkspaceManager   workspaceManager;
     private final WorkspaceValidator validator;
     private final MachineManager     machineManager;
-
     private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
@@ -179,7 +179,7 @@ public class WorkspaceService extends Service {
     @Produces(APPLICATION_JSON)
     @RolesAllowed("user")
     @GenerateLink(rel = LINK_REL_GET_WORKSPACES)
-    @ApiOperation(value = "Get the workspaces owned by the current user",
+    @ApiOperation(value = "Get workspaces which user can read",
                   notes = "This operation can be performed only by authorized user",
                   response = WorkspaceDto.class,
                   responseContainer = "List")
@@ -712,7 +712,9 @@ public class WorkspaceService extends Service {
         requiredNotNull(machineConfig.getType(), "Machine type");
         requiredNotNull(machineConfig.getSource(), "Machine source");
         requiredNotNull(machineConfig.getSource().getType(), "Machine source type");
-        requiredNotNull(machineConfig.getSource().getLocation(), "Machine source location");
+        // definition of source should come either with a content or with location
+        requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
+                        "Machine source should provide either location or content");
 
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
         if (workspace.getRuntime() == null) {
@@ -724,8 +726,8 @@ public class WorkspaceService extends Service {
                                                                       workspace.getRuntime().getActiveEnv());
 
         return Response.status(201)
-                       .entity(MachineService.injectLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
-                                                          getServiceContext()))
+                       .entity(linksInjector.injectMachineLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
+                                                                getServiceContext()))
                        .build();
     }
 
@@ -762,6 +764,27 @@ public class WorkspaceService extends Service {
      */
     private void requiredNotNull(Object object, String subject) throws BadRequestException {
         if (object == null) {
+            throw new BadRequestException(subject + " required");
+        }
+    }
+
+    /**
+     * Checks only one of the given object reference is {@code null}
+     *
+     * @param object1
+     *         object reference to check
+     * @param object2
+     *         object reference to check
+     * @param subject
+     *         used as subject of exception message "{subject} required"
+     * @throws BadRequestException
+     *         when objects are both null or have both a value reference is {@code null}
+     */
+    private void requiredOnlyOneNotNull(Object object1, Object object2, String subject) throws BadRequestException {
+        if (object1 == null && object2 == null) {
+            throw new BadRequestException(subject + " required");
+        }
+        if (object1 != null && object2 != null) {
             throw new BadRequestException(subject + " required");
         }
     }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-commons-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-commons-gwt</artifactId>
     <name>Che Core :: Commons :: GWT</name>
@@ -184,7 +184,6 @@
                         <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.js</exclude>
                         <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.map</exclude>
                         <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.swf</exclude>
-                        <exclude>**/*.svg</exclude>
                         <exclude>**/*.png</exclude>
                     </excludes>
                 </configuration>

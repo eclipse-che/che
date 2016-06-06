@@ -315,10 +315,10 @@ public final class ProjectManager {
         }
 
         // Preparing websocket output publisher to broadcast output of import process to the ide clients while importing
-        String normalizePath = (path.startsWith("/")) ? path : "/".concat(path);
         final LineConsumerFactory outputOutputConsumerFactory =
-                () -> new ProjectImportOutputWSLineConsumer(normalizePath, workspaceProjectsHolder.getWorkspaceId(), 300);
+                () -> new ProjectImportOutputWSLineConsumer(path, workspaceProjectsHolder.getWorkspaceId(), 300);
 
+        String normalizePath = (path.startsWith("/")) ? path : "/".concat(path);
         FolderEntry folder = asFolder(normalizePath);
         if (folder != null && !rewrite) {
             throw new ConflictException(String.format("Project %s already exists ", path));

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-ssh-key-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-ssh-key-server</artifactId>
     <packaging>jar</packaging>
@@ -49,10 +49,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-ssh</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-ssh-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

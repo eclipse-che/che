@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-ext-jdt-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>org.eclipse.core.filebuffers</artifactId>
     <packaging>jar</packaging>
@@ -74,7 +74,6 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/*.svg</exclude>
                         <exclude>**/*.png</exclude>
                         <exclude>**/*.gif</exclude>
                         <exclude>**/*.rscjson</exclude>

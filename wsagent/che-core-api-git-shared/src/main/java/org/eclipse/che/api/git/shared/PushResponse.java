@@ -11,6 +11,8 @@
 package org.eclipse.che.api.git.shared;
 
 import org.eclipse.che.dto.shared.DTO;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Info received from push response
@@ -27,4 +29,12 @@ public interface PushResponse {
     String getCommandOutput();
 
     PushResponse withCommandOutput(String commandOutput);
+
+    /** set list of push updates */
+    void setUpdates(List<Map<String, String>> updates);
+
+    /** @return list of push updates */
+    List<Map<String, String>> getUpdates();
+
+    PushResponse withUpdates(List<Map<String, String>> updates);
 }

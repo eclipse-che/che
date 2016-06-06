@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>wsagent-local</artifactId>
     <name>Che Core :: API :: Agent</name>
@@ -63,10 +63,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

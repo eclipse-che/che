@@ -12,18 +12,15 @@ package org.eclipse.che.plugin.debugger.ide.actions;
 
 import com.google.common.base.Optional;
 
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.debug.DebugConfigurationsManager;
-import org.eclipse.che.ide.debug.Debugger;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -31,9 +28,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,19 +74,8 @@ public class DebugActionTest {
         when(configurationOptional.get()).thenReturn(debugConfiguration);
         when(debugConfigurationsManager.getCurrentDebugConfiguration()).thenReturn(configurationOptional);
 
-        Debugger debugger = mock(Debugger.class);
-        when(debugger.connect(anyMap())).thenReturn(mock(Promise.class));
-        when(debuggerManager.getDebugger(anyString())).thenReturn(debugger);
-
         action.actionPerformed(null);
 
-        ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(debugger).connect(mapArgumentCaptor.capture());
-
-        Map actualConnectionProperties = mapArgumentCaptor.getValue();
-        assertEquals("localhost", actualConnectionProperties.get("HOST"));
-        assertEquals("8000", actualConnectionProperties.get("PORT"));
-        assertEquals("val1", actualConnectionProperties.get("prop1"));
-        assertEquals("val2", actualConnectionProperties.get("prop2"));
+        verify(debugConfigurationsManager).apply(debugConfiguration);
     }
 }

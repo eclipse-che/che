@@ -24,6 +24,11 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
+/**
+ * Component to register new content types and corresponding highlighting configuration.
+ *
+ * @author Sven Efftinge (typefox.io)
+ */
 public class OrionContentTypeRegistrant {
 
     final MultipleMethodFileIdentifier fileTypeIdentifier;
@@ -48,7 +53,7 @@ public class OrionContentTypeRegistrant {
             fileTypeIdentifier.registerNewExtension(extension, newArrayList(contentType.getId()));
         }
         
-        EditorModuleReadyCallback callback = new EditorModuleReadyCallback() {
+        editorModule.waitReady(new EditorModuleReadyCallback() {
             
             @Override
             public void onEditorModuleReady() {
@@ -60,24 +65,7 @@ public class OrionContentTypeRegistrant {
             @Override
             public void onEditorModuleError() {
             }
-        };
-        if (editorModule.isReady()) {
-        	callback.onEditorModuleReady();
-        } else {
-        	editorModule.waitReady(new EditorModuleReadyCallback() {
-        		
-        		@Override
-        		public void onEditorModuleReady() {
-        			OrionServiceRegistryOverlay serviceRegistry = codeEditWidgetProvider.get().getServiceRegistry();
-        			serviceRegistry.doRegisterService("orion.core.contenttype", JavaScriptObject.createObject(), contentType.toServiceObject());
-        			serviceRegistry.doRegisterService("orion.edit.highlighter", JavaScriptObject.createObject(), config);
-        		}
-        		
-        		@Override
-        		public void onEditorModuleError() {
-        		}
-        	});
-        }
+        });
         
     }
 }

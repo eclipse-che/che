@@ -46,8 +46,6 @@ import {CheSearch} from './search/che-search.directive';
 import {CheSelect} from './select/che-select.directive';
 import {CheSelecterCtrl} from './selecter/che-selecter.controller';
 import {CheSelecter} from './selecter/che-selecter.directive';
-import {CheSimpleSelecterCtrl} from './simple-selecter/che-simple-selecter.controller';
-import {CheSimpleSelecter} from './simple-selecter/che-simple-selecter.directive';
 import {CheSlider} from './slider/che-slider.directive';
 import {CheLogsOutput} from './logs-output/che-logs-output.directive';
 import {CheTextInfo} from './text-info/che-text-info.directive';
@@ -114,9 +112,6 @@ export class WidgetConfig {
       .controller('CheSelecterCtrl', CheSelecterCtrl)
       .directive('cheSelecter', CheSelecter)
 
-      .controller('CheSimpleSelecterCtrl', CheSimpleSelecterCtrl)
-      .directive('cheSimpleSelecter', CheSimpleSelecter)
-
       .directive('cheSlider', CheSlider)
 
       .directive('cheLogsOutput', CheLogsOutput)
@@ -128,7 +123,7 @@ export class WidgetConfig {
       .directive('cheToggle', CheToggle)
 
       .directive('cheToolbar', CheToolbar)
-    //notifications
+      //notifications
       .directive('cheErrorNotification', CheErrorNotification)
       .directive('cheInfoNotification', CheInfoNotification)
 

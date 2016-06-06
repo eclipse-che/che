@@ -51,7 +51,7 @@ public class DebugConfigurationActionTest {
     }
 
     @Test
-    public void shouldSetTitleOnUpdate() {
+    public void shouldBeVisibleOnUpdate() {
         String confName = "test_conf";
         when(debugConfiguration.getName()).thenReturn(confName);
 
@@ -67,13 +67,14 @@ public class DebugConfigurationActionTest {
 
         action.updateInPerspective(event);
 
-        verify(presentation).setText(eq(confName));
+        verify(presentation).setEnabledAndVisible(true);
     }
 
     @Test
-    public void shouldSetCurrentConfigurationOnActionPerformed() {
+    public void shouldSetCurrentConfigurationAndApplyOnActionPerformed() {
         action.actionPerformed(null);
 
         verify(debugConfigurationsManager).setCurrentDebugConfiguration(eq(debugConfiguration));
+        verify(debugConfigurationsManager).apply(eq(debugConfiguration));
     }
 }

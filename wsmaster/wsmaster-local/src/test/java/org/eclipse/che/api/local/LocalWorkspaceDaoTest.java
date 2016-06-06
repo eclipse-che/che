@@ -94,7 +94,7 @@ public class LocalWorkspaceDaoTest {
         recipe.setType("dockerfile");
         recipe.setScript("FROM codenvy/jdk7\nCMD tail -f /dev/null");
 
-        final MachineSourceImpl machineSource = new MachineSourceImpl("recipe", "recipe-url");
+        final MachineSourceImpl machineSource = new MachineSourceImpl("recipe").setLocation("recipe-url");
         final MachineConfigImpl machineCfg1 = new MachineConfigImpl(true,
                                                                     "dev-machine",
                                                                     "machine-type",

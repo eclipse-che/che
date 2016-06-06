@@ -96,17 +96,17 @@ public class DebuggerExtension {
         actionManager.registerAction(SHOW_HIDE_DEBUGGER_PANEL_ID, showHideDebuggerPanelAction);
 
         // create group for selecting (changing) debug configurations
-        final DefaultActionGroup debugConfigurationsGroup = new DefaultActionGroup(localizationConstants.debugConfigurationsActionTitle(),
-                                                                                   true,
-                                                                                   actionManager);
-        debugConfigurationsGroup.add(editConfigurationsAction);
-        debugConfigurationsGroup.addSeparator();
-        debugConfigurationsGroup.add(configurationsGroup);
+        final DefaultActionGroup debugActionGroup = new DefaultActionGroup(localizationConstants.debugActionTitle(),
+                                                                           true,
+                                                                           actionManager);
+        debugActionGroup.add(debugAction);
+        debugActionGroup.addSeparator();
+        debugActionGroup.add(configurationsGroup);
 
         // add actions in main menu
         runMenu.addSeparator();
-        runMenu.add(debugConfigurationsGroup, LAST);
-        runMenu.add(debugAction, LAST);
+        runMenu.add(debugActionGroup, LAST);
+        runMenu.add(editConfigurationsAction, LAST);
         runMenu.add(disconnectDebuggerAction, LAST);
         runMenu.addSeparator();
         runMenu.add(stepIntoAction, LAST);

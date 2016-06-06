@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-ext-jdt-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>org.eclipse.jdt.ui</artifactId>
     <packaging>jar</packaging>
@@ -48,15 +48,15 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

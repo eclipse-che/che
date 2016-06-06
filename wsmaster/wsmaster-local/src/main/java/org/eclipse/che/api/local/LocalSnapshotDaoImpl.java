@@ -13,13 +13,13 @@ package org.eclipse.che.api.local;
 import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.adapters.InstanceKeyAdapter;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
+import org.eclipse.che.api.machine.server.model.impl.adapter.MachineSourceAdapter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -50,7 +50,7 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
     @Inject
     public LocalSnapshotDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         snapshots = new HashMap<>();
-        snapshotStorage = storageFactory.create("snapshots.json", singletonMap(InstanceKey.class, new InstanceKeyAdapter()));
+        snapshotStorage = storageFactory.create("snapshots.json", singletonMap(MachineSource.class, new MachineSourceAdapter()));
     }
 
     @Override

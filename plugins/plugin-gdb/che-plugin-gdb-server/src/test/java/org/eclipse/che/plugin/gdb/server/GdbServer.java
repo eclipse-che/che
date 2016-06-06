@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
-import org.eclipse.che.plugin.gdb.server.parser.GdbParseException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 
 import java.io.IOException;
 

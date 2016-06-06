@@ -45,7 +45,7 @@ public class JavaCommandType implements CommandType {
     private final CurrentProjectPathProvider                                           currentProjectPathProvider;
     private final SourcepathProvider                                                   sourcepathProvider;
     private final OutputDirProvider                                                    outputDirProvider;
-    private final ClasspathProvider classpathProvider;
+    private final ClasspathProvider                                                    classpathProvider;
     private final JavaCommandConfigurationFactory                                      configurationFactory;
     private final Collection<CommandConfigurationPage<? extends CommandConfiguration>> pages;
 

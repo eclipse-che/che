@@ -39,17 +39,23 @@ public class DockerExtServerModule extends AbstractModule {
         volumesMultibinder.addBinding()
                           .toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtServerVolumeProvider.class);
 
-        Multibinder<String> debMachineEnvVars = Multibinder.newSetBinder(binder(),
+        Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,
-                                                                         Names.named("machine.docker.dev_machine.machine_env"));
-        debMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ApiEndpointEnvVariableProvider.class);
-        debMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ProjectsRootEnvVariableProvider.class);
-        debMachineEnvVars.addBinding()
+                                                                         Names.named("machine.docker.dev_machine.machine_env"))
+                                                           .permitDuplicates();
+        devMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ApiEndpointEnvVariableProvider.class);
+        devMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ProjectsRootEnvVariableProvider.class);
+        devMachineEnvVars.addBinding()
                          .toInstance(CheBootstrap.CHE_LOCAL_CONF_DIR
                                      + '='
                                      + org.eclipse.che.plugin.docker.machine.ext.provider.DockerExtConfBindingProvider
                                              .EXT_CHE_LOCAL_CONF_DIR);
-
+        Multibinder<String> allMachinesEnvVars = Multibinder.newSetBinder(binder(),
+                                                                          String.class,
+                                                                          Names.named("machine.docker.machine_env"))
+                                                            .permitDuplicates();
+        allMachinesEnvVars.addBinding()
+                          .toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ApiEndpointEnvVariableProvider.class);
         org.eclipse.che.plugin.docker.machine.ext.provider.DockerExtConfBindingProvider extConfBindingProvider =
                 new org.eclipse.che.plugin.docker.machine.ext.provider.DockerExtConfBindingProvider();
         if (extConfBindingProvider.get() != null) {

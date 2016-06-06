@@ -16,16 +16,17 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>4.3.0-RC1-SNAPSHOT</version>
+    <version>4.3.0-RC2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
         <module>core</module>
         <module>plugins</module>
+        <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
     </modules>
@@ -33,10 +34,11 @@
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/che.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/codenvy/che-core</url>
+        <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.lib.version>4.3.0-RC1-SNAPSHOT</che.lib.version>
+        <che.lib.version>4.3.0-RC2-SNAPSHOT</che.lib.version>
+        <che.version>4.3.0-RC2-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -54,257 +56,252 @@
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsagent-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsagent-war</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsmaster-war</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-auth</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-core</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-debug</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-debug-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-dto-maven-plugin</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-factory</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-factory-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-git</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-git</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-git-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-infrastructure-local</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-machine</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-machine-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-model</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-project</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-project-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-project-templates</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-project-templates-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-ssh</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-ssh-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-workspace</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-workspace-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-annotations</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-commons-env</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-gwt</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-inject</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-json</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-lang</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-schedule</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-xml</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-git-impl-jgit</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-git-impl-native</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-api</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-app</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-generators</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-stacks</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-templates</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-ide-ui</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>wsagent-local</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>wsmaster-local</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.dashboard</groupId>
                 <artifactId>che-dashboard-war</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
@@ -341,147 +338,147 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-cpp-lang-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-cpp-lang-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-cpp-lang-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-debugger-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-docker-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-docker-ext-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-docker-machine</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ext-dashboard-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-gdb-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-gdb-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-git-ext-git</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-git-provider-che</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-oauth2</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-provider-github</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-gwt-ext-gwt</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-help-ext-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-debugger-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-debugger-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-ext-lang-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-ext-lang-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-ext-lang-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-jdt-core-repack</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-maven-tools</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-plain-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-plain-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-plain-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
@@ -501,198 +498,213 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-machine-ext-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-machine-ext-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-machine-ssh-client</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-maven-generator-archetype</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-maven-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-maven-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-maven-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-nodejs-lang-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-nodejs-lang-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-nodejs-lang-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-orion-compare</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-orion-editor</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-product-info</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-python-lang-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-python-lang-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-python-lang-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-sdk-env-local</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-sdk-ext-plugins</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-sdk-tools</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-sdk-tools</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <classifier>jar-with-dependencies</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ssh-key-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ssh-key-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ssh-machine</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-svn-ext-ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-svn-ext-server</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-svn-ext-shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-web-ext-web</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>maven-server-api</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>maven-server-impl</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.core.filebuffers</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.core.filesystem</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.core.resources</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.jdt.ui</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.jface</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.jface.text</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.search</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>org.eclipse.ui.ide</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>shared</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-json-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-json-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-json-shared</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.xtend</groupId>
@@ -702,7 +714,7 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-test</artifactId>
-                <version>${project.version}</version>
+                <version>${che.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.server.impl;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.shared.dto.Author;
@@ -47,6 +48,24 @@ public class FactoryEditValidatorImplTest {
     @Test(expectedExceptions = ServerException.class)
     public void testNoAuthor() throws ApiException {
         setCurrentUser("");
+        factoryEditValidator.validate(factory);
+    }
+
+    /**
+     * Check when user is not  same than the one than create the factory
+     * @throws ApiException
+     */
+    @Test(expectedExceptions = ForbiddenException.class)
+    public void testUserIsNotTheAuthor() throws ApiException {
+        String userId = "florent";
+        setCurrentUser(userId);
+
+        Author author = mock(Author.class);
+        doReturn(author).when(factory)
+                        .getCreator();
+        doReturn("john").when(author)
+                        .getUserId();
+
         factoryEditValidator.validate(factory);
     }
 

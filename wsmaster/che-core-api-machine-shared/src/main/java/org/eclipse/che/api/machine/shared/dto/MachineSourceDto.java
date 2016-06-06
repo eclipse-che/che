@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.dto.shared.DTO;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
+import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 /**
  * @author Alexander Garagatyi
@@ -30,10 +31,33 @@ public interface MachineSourceDto extends MachineSource {
     MachineSourceDto withType(String type);
 
     @Override
-    @FactoryParameter(obligation = MANDATORY)
+    @FactoryParameter(obligation = OPTIONAL)
     String getLocation();
 
     void setLocation(String location);
 
     MachineSourceDto withLocation(String location);
+
+    /**
+     * @return content of the machine source. No need to use an external link.
+     */
+    @Override
+    @FactoryParameter(obligation = OPTIONAL)
+    String getContent();
+
+    /**
+     * Defines the new content to use for this machine source.
+     * Alternate way is to provide a location
+     * @param content the content instead of an external link like with location
+     */
+    void setContent(String content);
+
+    /**
+     * Defines the new content to use for this machine source.
+     * Alternate way is to provide a location
+     * @param content the content instead of an external link like with location
+     * @return the current intance of the object
+     */
+    MachineSourceDto withContent(String content);
+
 }

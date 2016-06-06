@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server.parser;
 
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +27,7 @@ public class GdbVersion {
     private final String name;
     private final String version;
 
-    private GdbVersion(String name, String version) {
+    public GdbVersion(String name, String version) {
         this.name = name;
         this.version = version;
     }
