@@ -18,11 +18,13 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.commons.exception.UnmarshallerException;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
+import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -83,14 +85,15 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
     }
 
     @Override
-    public Promise<Void> reimportDependencies(@NotNull List<String> projectsPaths) {
+    public Promise<Void> reImportProjects(@NotNull List<String> projectsPaths) {
         StringBuilder queryParameters = new StringBuilder();
         for (String path : projectsPaths) {
             queryParameters.append("&projectPath=").append(path);
         }
         final String url = appContext.getDevMachine().getWsAgentBaseUrl() + servicePath + "reimport" +
                            queryParameters.toString().replaceFirst("&", "?");
-        return asyncRequestFactory.createPutRequest(url, null).send();
+
+        return asyncRequestFactory.createPostRequest(url, null).send();
     }
 
     @Override
