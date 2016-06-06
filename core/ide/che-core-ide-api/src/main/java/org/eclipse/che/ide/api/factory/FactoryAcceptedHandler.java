@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.factory;
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * //
+ * Handel FactoryAcceptedEvent
  *
  * @author Vitalii Parfonov
  */

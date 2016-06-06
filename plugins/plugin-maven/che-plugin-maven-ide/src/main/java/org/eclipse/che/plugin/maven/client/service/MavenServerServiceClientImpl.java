@@ -88,13 +88,11 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
     public Promise<Void> reImportProjects(@NotNull List<String> projectsPaths) {
         StringBuilder queryParameters = new StringBuilder();
         for (String path : projectsPaths) {
-            Log.info(getClass(), ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + path);
             queryParameters.append("&projectPath=").append(path);
         }
         final String url = appContext.getDevMachine().getWsAgentBaseUrl() + servicePath + "reimport" +
                            queryParameters.toString().replaceFirst("&", "?");
 
-        Log.info(getClass(), url);
         return asyncRequestFactory.createGetRequest(url).send();
     }
 

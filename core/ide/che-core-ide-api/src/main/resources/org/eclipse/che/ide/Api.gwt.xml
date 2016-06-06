@@ -24,6 +24,7 @@
     <inherits name="org.eclipse.che.api.promises.Promises"/>
     <inherits name="org.eclipse.che.api.project.Project"/>
     <inherits name="org.eclipse.che.api.git.Git"/>
+    <inherits name="org.eclipse.che.api.factory.Factory"/>
 
     <source path="api"/>
 </module>

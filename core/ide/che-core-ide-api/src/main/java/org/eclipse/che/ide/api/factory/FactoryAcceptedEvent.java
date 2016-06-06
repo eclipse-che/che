@@ -16,7 +16,7 @@ import org.eclipse.che.api.factory.shared.dto.Factory;
 
 
 /**
- * //
+ * Event then indicate that factory accepted. Means that projects are imported, actions applied
  *
  * @author Vitalii Parfonov
  */
