@@ -31,6 +31,41 @@ public interface LanguageServerResources extends ClientBundle {
     @Source("svg/import.svg")
     SVGResource importItem();
 
+    @Source("svg/codeassist/class.svg")
+    SVGResource classItem();
+
+    @Source("svg/codeassist/interface.svg")
+    SVGResource interfaceItem();
+
+    @Source("svg/codeassist/enum_type.svg")
+    SVGResource enumItem();
+
+    @Source("svg/codeassist/package.svg")
+    SVGResource moduleItem();
+
+    @Source("svg/codeassist/field.svg")
+    SVGResource fieldItem();
+
+    @Source("svg/codeassist/method.svg")
+    SVGResource methodItem();
+
+    @Source("svg/codeassist/generic_file.svg")
+    SVGResource fileItem();
+
+    @Source("svg/codeassist/local.svg")
+    SVGResource variableItem();
+
+    @Source("svg/codeassist/template.svg")
+    SVGResource snippetItem();
+
+    @Source("svg/codeassist/text.svg")
+    SVGResource textItem();
+
+    @Source("svg/codeassist/property.svg")
+    SVGResource propertyItem();
+
+    @Source("svg/codeassist/value.svg")
+    SVGResource valueItem();
 
     interface LSCss extends CssResource {
 
@@ -45,5 +80,8 @@ public interface LanguageServerResources extends ClientBundle {
 
         @ClassName("mark-element")
         String markElement();
+
+        @ClassName("codeassistant-detail")
+        String codeassistantDetail();
     }
 }

@@ -1,8 +1,8 @@
 package org.eclipse.che.plugin.languageserver.ide;
 
-import static com.google.common.collect.Lists.newArrayList;
-
-import java.util.List;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -13,7 +13,6 @@ import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -31,9 +30,9 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentItemDTO;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 @Extension(title = "LanguageServer")
 @Singleton
@@ -127,6 +126,7 @@ public class LanguageServerExtension {
 							documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
 							documentItem.setText(text);
 							openEvent.setTextDocument(documentItem);
+                            openEvent.setUri(event.getFile().getPath());
 							serviceClient.didOpen(openEvent);
 						}
 					});
