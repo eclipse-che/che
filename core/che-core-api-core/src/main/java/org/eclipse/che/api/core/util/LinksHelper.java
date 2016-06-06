@@ -58,6 +58,15 @@ public class LinksHelper {
         return DtoFactory.getInstance().createDto(Link.class).withMethod(method).withHref(href).withRel(rel);
     }
 
+    public static Link createLink(String method, String href, String rel, List<LinkParameter> params) {
+        return DtoFactory.getInstance()
+                         .createDto(Link.class)
+                         .withMethod(method)
+                         .withHref(href)
+                         .withRel(rel)
+                         .withParameters(params);
+    }
+
     private LinksHelper() {
     }
 }
