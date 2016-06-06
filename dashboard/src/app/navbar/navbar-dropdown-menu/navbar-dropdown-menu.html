@@ -1,0 +1,14 @@
+<md-menu md-offset="{{navbarDropdownMenuCtrl.offset}}">
+  <div ng-transclude></div>
+  <md-menu-content class="navbar-dropdown-menu {{navbarDropdownMenuCtrl.externalCssClass}}" width="3">
+    <md-menu-item ng-repeat="item in navbarDropdownMenuCtrl.dropdownItems"
+                  ng-if="!item.hidden"
+                  ng-disabled="item.disabled"
+                  ng-click="navbarDropdownMenuCtrl.process(item)">
+        <span class="navbar-click-area">
+          <i ng-if="item.icon" class="navbar-dropdown-icon {{item.icon}}" aria-hidden="true"></i>
+          {{item.name}}
+        </span>
+    </md-menu-item>
+  </md-menu-content>
+</md-menu>

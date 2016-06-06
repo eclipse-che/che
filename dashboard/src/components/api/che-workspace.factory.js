@@ -61,7 +61,8 @@ export class CheWorkspace {
         deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
+        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
+        createSnapshot: {method: 'POST', url: '/api/workspace/:workspaceId/snapshot'}
       }
     );
   }
@@ -403,4 +404,11 @@ export class CheWorkspace {
       });
     }
   }
+
+  createSnapshot(workspaceId) {
+    alert(workspaceId);
+    let promise = this.remoteWorkspaceAPI.createSnapshot({workspaceId : workspaceId}, {}).$promise;
+    return promise;
+  }
+
 }

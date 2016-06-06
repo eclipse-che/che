@@ -1,0 +1,48 @@
+navbar-dropdown-menu
+  height inherit
+  min-height inherit
+
+  *
+    outline none
+
+  md-menu
+    outline none
+    height inherit
+    min-height inherit
+
+    div
+      height inherit
+      min-height inherit
+
+md-menu-content.navbar-dropdown-menu
+  che-border-radius(2px)
+  color $label-secondary-color
+  padding 3px 0
+
+  *
+    outline none
+
+  md-menu-item
+    height 21px
+    min-height 21px
+    font-size 11px
+
+    &:not([disabled]):hover
+      che-brightness(85%)
+      background-color $mouse-gray-color
+      cursor pointer
+
+    &[disabled] .navbar-click-area
+      color lighten($label-secondary-color, 50%)
+
+    .navbar-click-area
+      che-border-radius(2px)
+      display block
+      padding 2px 8px
+      color $label-secondary-color
+      cursor pointer
+      outline none
+
+      .navbar-dropdown-icon
+        padding-right 3px
+

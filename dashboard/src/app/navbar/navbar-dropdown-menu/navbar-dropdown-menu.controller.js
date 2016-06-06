@@ -12,41 +12,22 @@
 
 
 /**
- * This class is handling the controller for the dropdown
+ * This class is handling the controller for the dropdown menu on navbar
  * @author Oleksii Kurinnyi
  */
-export class NavbarDropdownCtrl {
+export class NavbarDropdownMenuCtrl {
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $window, $scope) {
-    this.$timeout = $timeout;
-    this.showDropdown = false;
+  constructor($window) {
     this.$window = $window;
-    this.$scope = $scope;
 
-    this.moveupDropdown = !angular.isUndefined(this.moveDropdownAbove);
-  }
-
-  toggleDropdown() {
-    if (this.isDisabled) {
-      this.showDropdown = false;
-      return;
-    }
-
-    this.showDropdown = !this.showDropdown;
-  }
-
-  closeDropdown() {
-    this.$timeout(() => {
-      this.showDropdown = false;
-    }, 100);
+    this.offset = angular.isUndefined(this.offset) ? '0 0' : this.offset;
   }
 
   process(item) {
-    console.log('>>> process: ', item);
     if (item.url) {
       this.redirect(item.url);
       return;
@@ -63,11 +44,6 @@ export class NavbarDropdownCtrl {
     }
     this.$window.location.href = newPath;
   }
-
-  getVisibility() {
-    return this.showDropdown;
-  }
-
 }
 
 
