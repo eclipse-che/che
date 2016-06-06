@@ -93,7 +93,7 @@ public class MavenServerServiceClientImpl implements MavenServerServiceClient {
         final String url = appContext.getDevMachine().getWsAgentBaseUrl() + servicePath + "reimport" +
                            queryParameters.toString().replaceFirst("&", "?");
 
-        return asyncRequestFactory.createGetRequest(url).send();
+        return asyncRequestFactory.createPostRequest(url, null).send();
     }
 
     @Override

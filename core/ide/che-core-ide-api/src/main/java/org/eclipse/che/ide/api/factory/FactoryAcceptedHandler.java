@@ -13,11 +13,17 @@ package org.eclipse.che.ide.api.factory;
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Handel FactoryAcceptedEvent
+ * Handler for FactoryAcceptedEvent.
+ * You can use this handler in case need to do some action on after accepting factory
  *
  * @author Vitalii Parfonov
  */
 public interface FactoryAcceptedHandler extends EventHandler {
 
+    /**
+     * Will be called the factory accepted on IDE side.
+     * Project already imported, actions performed.
+     * @param event
+     */
     void onFactoryAccepted(FactoryAcceptedEvent event);
 }
