@@ -20,6 +20,7 @@ import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
  * Module for components that are needed for deal with proxy in {@link DockerInstanceProvider}
  *
  * @author Mykola Morhun
+ * @author Roman Iuvshyn
  */
 public class DockerProxyModule extends AbstractModule {
 
@@ -32,6 +33,8 @@ public class DockerProxyModule extends AbstractModule {
                             .toProvider(org.eclipse.che.plugin.docker.machine.proxy.HttpProxyEnvVariableProvider.class);
         proxySettingsEnvVars.addBinding()
                             .toProvider(org.eclipse.che.plugin.docker.machine.proxy.HttpsProxyEnvVariableProvider.class);
+        proxySettingsEnvVars.addBinding()
+                            .toProvider(org.eclipse.che.plugin.docker.machine.proxy.NoProxyEnvVariableProvider.class);
     }
 
 }
