@@ -22,14 +22,40 @@ export class NavbarRecentWorkspacesCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, lodash, ideSvc, $window) {
+  constructor(cheWorkspace, lodash, ideSvc, $window, $log) {
     this.cheWorkspace = cheWorkspace;
     this.lodash = lodash;
     this.ideSvc = ideSvc;
     this.$window = $window;
+    this.$log = $log;
 
     // fetch workspaces when initializing
     this.cheWorkspace.fetchWorkspaces();
+
+    this.dropdownItemTempl = [
+      // running
+      {
+        name: 'Stop',
+        scope: 'RUNNING',
+        icon: 'fa fa-stop',
+        // onclick: this.stopRecentWorkspace
+        _onclick: (workspaceId) => { this.stopRecentWorkspace(workspaceId) }
+      },
+      {
+        name: 'Snapshot',
+        scope: 'RUNNING',
+        icon: 'fa fa-clock-o',
+        _onclick: (workspaceId) => { this.createSnapshotRecentWorkspace(workspaceId) }
+      },
+      // stopped
+      {
+        name: 'Run',
+        scope: 'STOPPED',
+        icon: 'fa fa-stop',
+        _onclick: (workspaceId) => { this.runRecentWorkspace(workspaceId) }
+      }
+    ];
+    this.dropdownItems = {};
   }
 
   /**
@@ -86,5 +112,46 @@ export class NavbarRecentWorkspacesCtrl {
   openLinkInNewTab(workspaceId) {
     let url = this.getIdeLink(workspaceId);
     this.$window.open(url, '_blank');
+  }
+
+  getDropdownItems(workspaceId) {
+    let workspace = this.cheWorkspace.getWorkspaceById(workspaceId),
+      disabled = workspace && (workspace.status === 'STARTING' || workspace.status === 'STOPPING'),
+      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING')) ? 'RUNNING' : 'STOPPED';
+
+    if (!this.dropdownItems[workspaceId]) {
+      this.dropdownItems[workspaceId] = [];
+      this.dropdownItems[workspaceId] = angular.copy(this.dropdownItemTempl);
+    }
+
+    this.dropdownItems[workspaceId].forEach((item) => {
+      item.disabled = disabled;
+      item.hidden = item.scope !== visibleScope;
+      item.onclick = () => {
+        item._onclick(workspace.id)
+      };
+    });
+
+    return this.dropdownItems[workspaceId];
+  }
+
+  stopRecentWorkspace(workspaceId) {
+    this.cheWorkspace.stopWorkspace(workspaceId).then(() => {}, (error) => {
+      this.$log.error(error);
+    });
+  }
+
+  runRecentWorkspace(workspaceId) {
+    let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+
+    this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {}, (error) => {
+      this.$log.error(error);
+    });
+  }
+
+  createSnapshotRecentWorkspace(workspaceId) {
+    this.cheWorkspace.createSnapshot(workspaceId).then(() => {}, (error) => {
+      this.$log.error(error);
+    });
   }
 }
