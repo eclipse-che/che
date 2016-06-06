@@ -8,26 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.server.parser;
+package org.eclipse.che.plugin.gdb.server.exception;
 
-import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
-import org.testng.annotations.Test;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 
 /**
  * @author Anatoliy Bazko
  */
-public class GdbClearTest {
-
-    @Test
-    public void testParse() throws Exception {
-        GdbOutput gdbOutput = GdbOutput.of("Deleted breakpoint 1\n");
-
-        GdbClear.parse(gdbOutput);
+public class GdbException extends DebuggerException {
+    public GdbException(String message) {
+        super(message);
     }
 
-    @Test(expectedExceptions = GdbParseException.class)
-    public void testParseFail() throws Exception {
-        GdbOutput gdbOutput = GdbOutput.of("some text");
-        GdbClear.parse(gdbOutput);
+    public GdbException(String message, Exception cause) {
+        super(message, cause);
     }
 }

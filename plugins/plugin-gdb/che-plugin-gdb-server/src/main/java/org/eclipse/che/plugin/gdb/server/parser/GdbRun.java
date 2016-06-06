@@ -15,6 +15,7 @@ import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

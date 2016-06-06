@@ -8,22 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.server.parser;
-
-import static java.lang.Math.min;
+package org.eclipse.che.plugin.gdb.server.exception;
 
 /**
  * @author Anatoliy Bazko
  */
-@SuppressWarnings("serial")
-public class GdbParseException extends Exception {
+public class GdbTerminatedException extends GdbException {
+    public GdbTerminatedException(String message) {
+        super(message);
+    }
 
-    public static final int MAX_OUTPUT_LENGTH = 80;
-
-    public GdbParseException(Class clazz, String output) {
-        super("Can't parse '"
-              + output.substring(0, min(output.length(), MAX_OUTPUT_LENGTH))
-              + "' into "
-              + clazz.getSimpleName());
+    public GdbTerminatedException(String message, Exception cause) {
+        super(message, cause);
     }
 }

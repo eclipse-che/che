@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server.parser;
 
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;

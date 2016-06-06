@@ -16,16 +16,28 @@ package org.eclipse.che.plugin.gdb.server.parser;
  * @author Anatoliy Bazko
  */
 public class GdbOutput {
+    private final String  output;
+    private final boolean terminated;
 
-    private final String output;
-
-    private GdbOutput(String output) {this.output = output;}
+    private GdbOutput(String output, boolean terminated) {
+        this.output = output;
+        this.terminated = terminated;
+    }
 
     public static GdbOutput of(String output) {
-        return new GdbOutput(output);
+        return new GdbOutput(output, false);
     }
+
+    public static GdbOutput of(String output, boolean terminated) {
+        return new GdbOutput(output, terminated);
+    }
+
 
     public String getOutput() {
         return output;
+    }
+
+    public boolean isTerminated() {
+        return terminated;
     }
 }

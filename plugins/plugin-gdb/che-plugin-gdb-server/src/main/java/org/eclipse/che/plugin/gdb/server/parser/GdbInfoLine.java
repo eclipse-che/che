@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.gdb.server.parser;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,8 @@ import java.util.regex.Pattern;
  */
 public class GdbInfoLine {
 
-    private static final Pattern GDB_INFO_LINE = Pattern.compile("Line ([0-9]*) of \"(.*)\"\\s.*");
+    private static final Pattern GDB_INFO_LINE         = Pattern.compile("Line ([0-9]*) of \"(.*)\"\\s.*");
+    private static final Pattern GDB_LINE_OUT_OF_RANGE = Pattern.compile("Line number ([0-9]*) is out of range for \"(.*)\".*");
 
     private final Location location;
 
@@ -45,7 +47,13 @@ public class GdbInfoLine {
         if (matcher.find()) {
             String lineNumber = matcher.group(1);
             String file = matcher.group(2);
+            return new GdbInfoLine(new LocationImpl(file, Integer.parseInt(lineNumber)));
+        }
 
+        matcher = GDB_LINE_OUT_OF_RANGE.matcher(output);
+        if (matcher.find()) {
+            String lineNumber = matcher.group(1);
+            String file = matcher.group(2);
             return new GdbInfoLine(new LocationImpl(file, Integer.parseInt(lineNumber)));
         }
 
