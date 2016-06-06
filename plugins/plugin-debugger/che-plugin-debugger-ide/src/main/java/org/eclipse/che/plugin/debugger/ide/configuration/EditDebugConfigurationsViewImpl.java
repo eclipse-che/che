@@ -93,6 +93,7 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
     private Button                                                cancelButton;
     private Button                                                saveButton;
     private Button                                                closeButton;
+    private Button                                                debugButton;
     private ActionDelegate                                        delegate;
     private CategoriesList                                        list;
     private Map<DebugConfigurationType, List<DebugConfiguration>> categories;
@@ -349,6 +350,14 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
         });
         overFooter.add(cancelButton);
 
+        debugButton = createButton(coreLocale.debug(), "window-edit-debug-configurations-debug", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onDebugClicked();
+            }
+        });
+        overFooter.add(debugButton);
+
         closeButton = createButton(coreLocale.close(), "window-edit-debug-configurations-close",
                                    new ClickHandler() {
                                        @Override
@@ -420,6 +429,11 @@ public class EditDebugConfigurationsViewImpl extends Window implements EditDebug
     @Override
     public void setSaveButtonState(boolean enabled) {
         saveButton.setEnabled(enabled);
+    }
+
+    @Override
+    public void setDebugButtonState(boolean enabled) {
+        debugButton.setEnabled(enabled);
     }
 
     @Override

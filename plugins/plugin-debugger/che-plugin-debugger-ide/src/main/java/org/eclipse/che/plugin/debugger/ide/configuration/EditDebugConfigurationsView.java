@@ -62,6 +62,9 @@ public interface EditDebugConfigurationsView extends View<EditDebugConfiguration
     /** Sets enabled state of the 'Save' button. */
     void setSaveButtonState(boolean enabled);
 
+    /** Sets enabled state of the 'Debug' button. */
+    void setDebugButtonState(boolean enabled);
+
     /** Sets enabled state of the filter input field. */
     void setFilterState(boolean enabled);
 
@@ -96,6 +99,9 @@ public interface EditDebugConfigurationsView extends View<EditDebugConfiguration
 
         /** Called when 'Cancel' button is clicked. */
         void onCancelClicked();
+
+        /** Called when 'Cancel' button is clicked. */
+        void onDebugClicked();
 
         /** Called when 'Add' button is clicked. */
         void onAddClicked();
