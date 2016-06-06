@@ -23,7 +23,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
-            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+            <outputFileNameMapping>ide.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-ide-war</include>
             </includes>
