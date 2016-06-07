@@ -1,6 +1,9 @@
 package org.eclipse.che.ide.ext.java.testing.server;
 
 
+import org.eclipse.che.api.core.util.CommandLine;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.util.ProcessUtil;
 import org.eclipse.che.ide.ext.java.testing.server.junit4x.JUnit4TestRunner;
 
 
@@ -59,18 +62,25 @@ public class TestRunnerFactory {
 
     private boolean buildClasspath(String projectPath) throws IOException, InterruptedException {
 
+        final CommandLine commandLineClassPath = new CommandLine("mvn","clean", "dependency:build-classpath",
+                "-Dmdep.outputFile=target/test.classpath.maven");
         Process processBuildClassPath = new ProcessBuilder()
                 .redirectErrorStream(true)
                 .directory(new File(projectPath))
-                .command("mvn","clean", "dependency:build-classpath","-Dmdep.outputFile=target/test.classpath.maven")
+                .command(commandLineClassPath.toShellCommand())
                 .start();
+        ProcessUtil.process(processBuildClassPath, LineConsumer.DEV_NULL, LineConsumer.DEV_NULL);
         processBuildClassPath.waitFor();
-        Process process = new ProcessBuilder()
+
+        final CommandLine commandLineTestCompile = new CommandLine("mvn", "test-compile");
+        Process processTestCompile = new ProcessBuilder()
                 .redirectErrorStream(true)
                 .directory(new File(projectPath))
-                .command("mvn", "test-compile")
+                .command(commandLineTestCompile.toShellCommand())
                 .start();
-        return process.waitFor() == 0;
+        ProcessUtil.process(processTestCompile, LineConsumer.DEV_NULL, LineConsumer.DEV_NULL);
+        return processTestCompile.waitFor() == 0;
+
     }
 
     private List<URL> getProjectClasspath(String projectPath) throws IOException {
