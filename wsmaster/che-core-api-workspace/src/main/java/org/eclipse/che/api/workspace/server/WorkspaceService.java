@@ -28,8 +28,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.MachineService;
-import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -140,7 +138,7 @@ public class WorkspaceService extends Service {
         validator.validateAttributes(attributes);
         validator.validateConfig(config);
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(config,
-                                                                         getCurrentUserId(),
+                                                                         getCurrentNamespace(),
                                                                          attributes,
                                                                          accountId);
         if (startAfterCreate) {
@@ -316,7 +314,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(cfg, "Workspace configuration");
         validator.validateConfig(cfg);
         return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(cfg,
-                                                                               getCurrentUserId(),
+                                                                               getCurrentNamespace(),
                                                                                firstNonNull(isTemporary, false),
                                                                                accountId)), getServiceContext());
     }
@@ -751,6 +749,11 @@ public class WorkspaceService extends Service {
     private static String getCurrentUserId() {
         return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
+
+    private static String getCurrentNamespace() {
+        return EnvironmentContext.getCurrent().getSubject().getUserName();
+    }
+
 
     /**
      * Checks object reference is not {@code null}

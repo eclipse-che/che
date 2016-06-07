@@ -701,10 +701,10 @@ public class WorkspaceManager {
         if (parts.length == 1) {
             return workspaceDao.get(key);
         }
-        final String userId = parts[0];
+        final String nsPart = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userId.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userId).getId();
-        return workspaceDao.get(wsName, ownerId);
+        final String namespace = nsPart.isEmpty() ? sessionUser().getUserName() : nsPart;
+        return workspaceDao.get(wsName, namespace);
     }
 
     /** No-operations workspace hooks. Each method does nothing */
