@@ -26,8 +26,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.CancellableEvent;
 import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
@@ -51,7 +51,7 @@ import java.util.Set;
  * Class that perform loading node children. May transform nodes if ones passed set of node interceptors.
  *
  * @author Vlad Zhukovskiy
- * @see org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor
+ * @see NodeInterceptor
  */
 public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     /**
@@ -67,7 +67,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
     /**
      * Set of node interceptors. They need to modify children nodes before they will be set into parent node.
      *
-     * @see org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor
+     * @see NodeInterceptor
      */
     private List<NodeInterceptor> nodeInterceptors;
 
@@ -228,7 +228,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      * Creates a new tree node value provider instance.
      *
      * @param nodeInterceptors
-     *         set of {@link org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor}
+     *         set of {@link NodeInterceptor}
      */
     public NodeLoader(@Nullable Set<NodeInterceptor> nodeInterceptors) {
         this.nodeInterceptors = new ArrayList<>();

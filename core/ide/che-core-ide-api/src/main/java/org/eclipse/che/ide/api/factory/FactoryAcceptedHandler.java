@@ -8,29 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
+package org.eclipse.che.ide.api.factory;
 
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Store attributes in specified node.
+ * Handler for FactoryAcceptedEvent.
+ * You can use this handler in case need to do some action on after accepting factory
  *
- * @author Vlad Zhukovskiy
+ * @author Vitalii Parfonov
  */
-public interface HasAttributes {
-    /**
-     * Get attributes.
-     *
-     * @return attributes map
-     */
-    Map<String, List<String>> getAttributes();
+public interface FactoryAcceptedHandler extends EventHandler {
 
     /**
-     * Store attributes.
-     *
-     * @param attributes
-     *         attributes map
+     * Will be called the factory accepted on IDE side.
+     * Project already imported, actions performed.
+     * @param event
      */
-    void setAttributes(Map<String, List<String>> attributes);
+    void onFactoryAccepted(FactoryAcceptedEvent event);
 }

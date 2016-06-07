@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 import java.util.Collections;

@@ -8,29 +8,28 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
+package org.eclipse.che.plugin.docker.machine.proxy;
 
-import javax.validation.constraints.NotNull;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
 
 /**
- * Indicates that specified node can contains data object, e.g. project descriptor or item reference.
+ * Add env variable to docker environment with no proxy settings.
  *
- * @author Vlad Zhukovskiy
+ * @author Roman Iuvshyn
  */
-public interface HasDataObject<D> {
-    /**
-     * Retrieve stored data object.
-     *
-     * @return data object
-     */
-    @NotNull
-    D getData();
+public class NoProxyEnvVariableProvider implements Provider<String> {
 
-    /**
-     * Store data object.
-     *
-     * @param data
-     *         data object
-     */
-    void setData(@NotNull D data);
+    private static final String NO_PROXY = "no_proxy=";
+
+    @Inject
+    @Named("no_proxy")
+    private String noProxy;
+
+    @Override
+    public String get() {
+        return noProxy.isEmpty() ? "" : NO_PROXY + noProxy;
+    }
+
 }

@@ -8,19 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
+package org.eclipse.che.ide.api.data.tree.settings;
 
 /**
- * Indicates that specified node can be transformed into leaf node.
+ * Interface for loading stored node settings.
  *
  * @author Vlad Zhukovskiy
  */
-public interface MutableNode {
+public interface SettingsProvider {
     /**
-     * Set current node status into leaf.
+     * Load settings from anywhere.
      *
-     * @param leaf
-     *         true if node should be transformed into leaf
+     * @return node settings
      */
-    void setLeaf(boolean leaf);
+    NodeSettings getSettings();
+
+    /**
+     * Store node settings.
+     *
+     * @param settings
+     *         node settings
+     */
+    void setSettings(NodeSettings settings);
 }

@@ -26,59 +26,78 @@ import java.util.regex.Pattern;
  */
 public class DockerImageIdentifierParser {
 
-    private static final String HOSTNAME_COMPONENT = "(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])";
-    private static final String REGISTRY           = HOSTNAME_COMPONENT + "(?:\\." + HOSTNAME_COMPONENT + ")*([:][0-9]+)?";
-    private static final String CAPTURED_REGISTRY  = "(?<registry>" + REGISTRY + ")";
-    private static final String SEPARATOR           = "(?:[_.]|__|[-]*)";
-    private static final String ALPHA_NUMERIC       = "[a-z0-9]+";
-    private static final String NAME_COMPONENT      = ALPHA_NUMERIC + "(?:" + SEPARATOR + ALPHA_NUMERIC + ")*";
-    private static final String REPOSITORY          = NAME_COMPONENT + "(?:[/]" + NAME_COMPONENT + ")*";
-    private static final String CAPTURED_REPOSITORY = "(?<repository>" + REPOSITORY + ")";
-    private static final String NAME                = "(?:" + CAPTURED_REGISTRY + "[/])?" + CAPTURED_REPOSITORY;
+    // Validation rules are taken from https://github.com/docker/distribution/blob/master/reference/regexp.go
+    private static final String  HOSTNAME_COMPONENT = "(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])";
+    private static final String  REGISTRY           = HOSTNAME_COMPONENT + "(?:\\." + HOSTNAME_COMPONENT + ")*(?::[0-9]+)?";
+    private static final String  SEPARATOR          = "(?:[._]|__|[-]*)";
+    private static final String  ALPHA_NUMERIC      = "[a-z0-9]+";
+    private static final String  NAME_COMPONENT     = ALPHA_NUMERIC + "(?:" + SEPARATOR + ALPHA_NUMERIC + ")*";
+    private static final String  REPOSITORY         = NAME_COMPONENT + "(?:/" + NAME_COMPONENT + ")*";
+    private static final String  TAG                = "[\\w][\\w.-]*";
+    private static final String  DIGEST             = "[\\w+.:-]+";
+    private static final String  NAME               = "(?:" + REGISTRY + "/)?" + REPOSITORY;
+    private static final String  REFERENCE          = NAME + "(?::" + TAG + ")?" + "(?:@" + DIGEST + ")?";
+    private static final Pattern IMAGE_PATTERN      = Pattern.compile(REFERENCE);
 
-    private static final Pattern IMAGE_PATTERN = Pattern.compile(NAME);
-
-
+    /**
+     * Validates and parse docker image reference into object that holds reference components
+     *
+     * @param image image reference to parse
+     * @throws DockerFileException if validation fails
+     */
     public static DockerImageIdentifier parse(final String image) throws DockerFileException {
-        if (image == null) {
-            throw new IllegalArgumentException("Null argument value is forbidden");
+        if (image == null || image.isEmpty()) {
+            throw new DockerFileException("Null and empty argument value is forbidden");
         }
 
-        String workingCopyOfImage = image;
-        String digest = "";
-        String tag = "";
-
-        // find digest
-        int index = workingCopyOfImage.lastIndexOf('@');
-        if (index != -1) {
-            digest = workingCopyOfImage.substring(index + 1);
-            if (!digest.isEmpty()) {
-                workingCopyOfImage = workingCopyOfImage.substring(0, index);
-            }
-        }
-
-        // find tag
-        index = workingCopyOfImage.lastIndexOf(':');
-        if (index != -1) {
-            if (workingCopyOfImage.lastIndexOf('/') < index) {
-                tag = workingCopyOfImage.substring(index + 1);
-                if (!tag.isEmpty()) {
-                    workingCopyOfImage = workingCopyOfImage.substring(0, index);
-                }
-            }
-        }
-
-        Matcher matcher = IMAGE_PATTERN.matcher(workingCopyOfImage);
+        Matcher matcher = IMAGE_PATTERN.matcher(image);
         if (!matcher.matches()) {
             throw new DockerFileException("Provided image reference is invalid");
         }
 
-        return DockerImageIdentifier.builder()
-                                    .setRepository(matcher.group("repository"))
-                                    .setRegistry(matcher.group("registry"))
-                                    .setTag(tag.isEmpty() ? null : tag)
-                                    .setDigest(digest.isEmpty() ? null : digest)
-                                    .build();
+        DockerImageIdentifier.DockerImageIdentifierBuilder identifierBuilder = DockerImageIdentifier.builder();
+        String workingCopyOfImage = image;
+
+        // extract digest
+        int index = workingCopyOfImage.lastIndexOf('@');
+        if (index != -1) {
+            String digest = workingCopyOfImage.substring(index + 1);
+            if (!digest.isEmpty()) {
+                workingCopyOfImage = workingCopyOfImage.substring(0, index);
+                identifierBuilder.setDigest(digest);
+            }
+        }
+
+        // extract tag
+        index = workingCopyOfImage.lastIndexOf(':');
+        if (index != -1) {
+            if (workingCopyOfImage.lastIndexOf('/') < index) {
+                String tag = workingCopyOfImage.substring(index + 1);
+                if (!tag.isEmpty()) {
+                    workingCopyOfImage = workingCopyOfImage.substring(0, index);
+                    identifierBuilder.setTag(tag);
+                }
+            }
+        }
+
+        // find first part of the name that can be registry or first repository part
+        index = workingCopyOfImage.indexOf('/');
+        String beforeSlash = index > -1 ? workingCopyOfImage.substring(0, index) : "";
+        // consider first part of the name as registry if:
+        // - there is dot symbol in it (consider it as dot in the hostname, e.g. eclipse.com)
+        // - there is colon symbol in it (consider it as registry port mark)
+        // - it is equal to 'localhost'
+        if (!beforeSlash.isEmpty() && (beforeSlash.contains(".") ||
+                                       beforeSlash.contains(":") ||
+                                       "localhost".equals(beforeSlash))) {
+
+            identifierBuilder.setRegistry(beforeSlash)
+                             .setRepository(workingCopyOfImage.substring(index + 1));
+        } else {
+            identifierBuilder.setRepository(workingCopyOfImage);
+        }
+
+        return identifierBuilder.build();
     }
 
     private DockerImageIdentifierParser() {}

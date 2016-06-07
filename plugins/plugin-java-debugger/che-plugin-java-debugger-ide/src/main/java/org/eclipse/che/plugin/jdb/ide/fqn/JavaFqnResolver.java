@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.jdb.ide.fqn;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 
 import javax.validation.constraints.NotNull;

@@ -33,8 +33,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,9 +71,10 @@ public class GdbConfigurationPagePresenterTest {
 
     @Test
     public void testResetting() throws Exception {
-        verify(configuration).getHost();
-        verify(configuration).getPort();
-        verify(configuration).getConnectionProperties();
+        verify(configuration, atLeastOnce()).getHost();
+        verify(configuration, atLeastOnce()).getPort();
+        verify(configuration, atLeastOnce()).getConnectionProperties();
+        verify(currentProjectPathProvider).getKey();
     }
 
     @Test
@@ -84,12 +85,15 @@ public class GdbConfigurationPagePresenterTest {
         pagePresenter.go(container);
 
         verify(container).setWidget(eq(pageView));
-        verify(configuration, times(2)).getHost();
-        verify(configuration, times(2)).getPort();
-        verify(configuration, times(2)).getConnectionProperties();
+        verify(configuration, atLeastOnce()).getHost();
+        verify(configuration, atLeastOnce()).getPort();
+        verify(configuration, atLeastOnce()).getConnectionProperties();
         verify(pageView).setHost(eq(HOST));
         verify(pageView).setPort(eq(PORT));
         verify(pageView).setBinaryPath(anyString());
+        verify(pageView).setDevHost(eq(false));
+        verify(pageView).setPortEnableState(eq(true));
+        verify(pageView).setHostEnableState(eq(true));
     }
 
     @Test

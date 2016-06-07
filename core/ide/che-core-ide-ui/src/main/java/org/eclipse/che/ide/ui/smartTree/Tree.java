@@ -28,9 +28,9 @@ import com.google.gwt.user.client.ui.impl.FocusImpl;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.DelayedTask;
-import org.eclipse.che.ide.api.project.node.HasAction;
-import org.eclipse.che.ide.api.project.node.MutableNode;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.HasAction;
+import org.eclipse.che.ide.api.data.tree.MutableNode;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeCollapseNodeEvent;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeCollapseNodeEvent.HasBeforeCollapseItemHandlers;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;
@@ -446,7 +446,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
      *
      * @param node   node to expand/collapse
      * @param expand true if node should be expanded, otherwise false
-     * @see Tree#setExpanded(org.eclipse.che.ide.api.project.node.Node, boolean, boolean)
+     * @see Tree#setExpanded(Node, boolean, boolean)
      */
     public void setExpanded(Node node, boolean expand) {
         checkNotNull(node, NULL_NODE_MSG);

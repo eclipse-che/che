@@ -12,7 +12,7 @@ package org.eclipse.che.ide.search.selectpath;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.search.FullTextSearchView;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;

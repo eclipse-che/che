@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.java.client.project.node.jar;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
+import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 import org.eclipse.che.ide.project.node.SyntheticBasedNode;
 
