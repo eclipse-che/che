@@ -93,8 +93,10 @@ public class GdbDebugger extends AbstractDebugger {
 
     @Override
     protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
-        String address = connectionProperties.get(HOST.toString()) + ":" +
-                         connectionProperties.get(PORT.toString());
+        String host = connectionProperties.get(HOST.toString());
+        String port = connectionProperties.get(PORT.toString());
+        String address = host + (port.isEmpty() || port.equals("0") ? ""
+                                                                    : (":" + port));
         return new DebuggerDescriptor("", address);
     }
 

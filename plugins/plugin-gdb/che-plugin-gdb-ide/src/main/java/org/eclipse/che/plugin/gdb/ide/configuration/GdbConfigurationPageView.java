@@ -39,6 +39,9 @@ public interface GdbConfigurationPageView extends View<GdbConfigurationPageView.
     /** Sets path to the binary. */
     void setBinaryPath(String path);
 
+    /** Sets 'dev machine' flag state. */
+    void setDevHost(boolean value);
+
     /**
      * Sets the list of hosts to help user to choose an appropriate one.
      *
@@ -46,6 +49,12 @@ public interface GdbConfigurationPageView extends View<GdbConfigurationPageView.
      *         the hosts list to set into the view
      */
     void setHostsList(Map<String, String> hosts);
+
+    /** Sets enable state for host text box. */
+    void setHostEnableState(boolean enable);
+
+    /** Sets enable state for port text box. */
+    void setPortEnableState(boolean enable);
 
     /** Action handler for the view's controls. */
     interface ActionDelegate {
@@ -58,5 +67,8 @@ public interface GdbConfigurationPageView extends View<GdbConfigurationPageView.
 
         /** Called when 'Binary Path' has been changed. */
         void onBinaryPathChanged();
+
+        /** Called when 'dev machine' flag has been changed. */
+        void onDevHostChanged(boolean value);
     }
 }

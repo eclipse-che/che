@@ -75,20 +75,6 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         view.setDelegate(this);
     }
 
-    private String getBinaryPath(DebugConfiguration debugConfiguration) {
-        if (debugConfiguration == null) {
-            return getDefaultBinaryPath();
-        }
-
-        Map<String, String> connectionProperties = debugConfiguration.getConnectionProperties();
-        String binaryPath = connectionProperties.get(BIN_PATH_CONNECTION_PROPERTY);
-        return binaryPath == null ? getDefaultBinaryPath() : binaryPath;
-    }
-
-    private String getDefaultBinaryPath() {
-        return currentProjectPathProvider.getKey() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME;
-    }
-
     @Override
     public void resetFrom(DebugConfiguration configuration) {
         editedConfiguration = configuration;
@@ -96,6 +82,21 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         originHost = configuration.getHost();
         originPort = configuration.getPort();
         originBinaryPath = getBinaryPath(configuration);
+
+        if (originBinaryPath == null) {
+            String defaultBinaryPath = getDefaultBinaryPath();
+            editedConfiguration.getConnectionProperties().put(BIN_PATH_CONNECTION_PROPERTY, defaultBinaryPath);
+            originBinaryPath = defaultBinaryPath;
+        }
+    }
+
+    private String getBinaryPath(DebugConfiguration debugConfiguration) {
+        Map<String, String> connectionProperties = debugConfiguration.getConnectionProperties();
+        return connectionProperties.get(BIN_PATH_CONNECTION_PROPERTY);
+    }
+
+    private String getDefaultBinaryPath() {
+        return currentProjectPathProvider.getKey() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME;
     }
 
     @Override
@@ -105,6 +106,11 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         view.setHost(editedConfiguration.getHost());
         view.setPort(editedConfiguration.getPort());
         view.setBinaryPath(getBinaryPath(editedConfiguration));
+
+        boolean devHost = "localhost".equals(editedConfiguration.getHost()) && editedConfiguration.getPort() <= 0;
+        view.setDevHost(devHost);
+        view.setPortEnableState(!devHost);
+        view.setHostEnableState(!devHost);
 
         setHostsList();
     }
@@ -188,9 +194,23 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
         listener.onDirtyStateChanged();
     }
 
+    @Override
+    public void onDevHostChanged(boolean value) {
+        view.setHostEnableState(!value);
+        view.setPortEnableState(!value);
+        if (value) {
+            editedConfiguration.setHost("localhost");
+            view.setHost(editedConfiguration.getHost());
+
+            editedConfiguration.setPort(0);
+            view.setPort(0);
+
+            listener.onDirtyStateChanged();
+        }
+    }
+
     private String getRecipeId(String location) {
         location = location.substring(0, location.lastIndexOf("/"));
         return location.substring(location.lastIndexOf("/") + 1);
     }
-
 }

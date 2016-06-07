@@ -102,7 +102,7 @@ public abstract class GdbProcess {
                 }
             }
 
-            LOG.warn(getName() + " has been stopped");
+            LOG.debug(getName() + " has been stopped");
         }
 
         private InputStream getInput() throws IOException {

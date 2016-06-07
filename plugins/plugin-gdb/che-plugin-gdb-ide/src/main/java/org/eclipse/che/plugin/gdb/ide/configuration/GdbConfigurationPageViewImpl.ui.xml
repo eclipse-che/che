@@ -16,6 +16,7 @@
     <ui:with field='locale' type='org.eclipse.che.plugin.gdb.ide.GdbLocalizationConstant'/>
 
     <g:FlowPanel debugId="gdbDebugConfigurationPageView-mainPanel">
+        <g:CheckBox ui:field="devHost" text="{locale.gdbConfigurationPageViewDevMachineCheckbox}"/>
         <g:Label text="{locale.gdbConfigurationPageViewHostLabel}"/>
         <che:CustomComboBox ui:field="host"/>
         <g:Label text="Port"/>
