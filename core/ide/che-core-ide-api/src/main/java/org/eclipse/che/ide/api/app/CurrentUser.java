@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.app;
 
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
+
 import com.google.inject.Singleton;
 import java.util.Map;
 
@@ -22,17 +23,17 @@ import java.util.Map;
 @Singleton
 public class CurrentUser {
 
-    private ProfileDescriptor   profileDescriptor;
+    private ProfileDto          profileDescriptor;
     private Map<String, String> preferences;
 
     public CurrentUser() {
     }
 
-    public CurrentUser(ProfileDescriptor profileDescriptor) {
+    public CurrentUser(ProfileDto profileDescriptor) {
         this(profileDescriptor, null);
     }
 
-    public CurrentUser(ProfileDescriptor profileDescriptor, Map<String, String> preferences) {
+    public CurrentUser(ProfileDto profileDescriptor, Map<String, String> preferences) {
         this.profileDescriptor = profileDescriptor;
         this.preferences = preferences;
     }
@@ -42,11 +43,11 @@ public class CurrentUser {
      *
      * @return
      */
-    public ProfileDescriptor getProfile() {
+    public ProfileDto getProfile() {
         return profileDescriptor;
     }
 
-    public void setProfile(ProfileDescriptor profileDescriptor) {
+    public void setProfile(ProfileDto profileDescriptor) {
         this.profileDescriptor = profileDescriptor;
     }
 

@@ -16,6 +16,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 import org.eclipse.che.dto.shared.DTO;
 
+// TODO should be removed by CODENVY-480
+
 /**
  * Defines if the current user is or not in a current role
  * @author Florent Benoit

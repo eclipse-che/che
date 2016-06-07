@@ -10,43 +10,47 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.shared.dto;
 
+import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
+
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author andrew00x
+ * This object used for transporting profile data to/from client.
+ *
+ * @author Yevhenii Voevodin
+ * @see Profile
+ * @see DtoFactory
  */
 @DTO
-public interface ProfileDescriptor {
-
-    void setId(String id);
-
-    @ApiModelProperty("Profile ID")
-    String getId();
-
-    ProfileDescriptor withId(String id);
-
-    @ApiModelProperty("User ID")
-    String getUserId();
+public interface ProfileDto extends Profile {
 
     void setUserId(String id);
 
-    ProfileDescriptor withUserId(String id);
+    @ApiModelProperty("Profile ID")
+    String getUserId();
+
+    ProfileDto withUserId(String id);
 
     @ApiModelProperty("Profile attributes")
     Map<String, String> getAttributes();
 
     void setAttributes(Map<String, String> attributes);
 
-    ProfileDescriptor withAttributes(Map<String, String> attributes);
+    ProfileDto withAttributes(Map<String, String> attributes);
 
     List<Link> getLinks();
 
     void setLinks(List<Link> links);
 
-    ProfileDescriptor withLinks(List<Link> links);
+    ProfileDto withLinks(List<Link> links);
+
+    String getEmail();
+
+    ProfileDto withEmail(String email);
 }

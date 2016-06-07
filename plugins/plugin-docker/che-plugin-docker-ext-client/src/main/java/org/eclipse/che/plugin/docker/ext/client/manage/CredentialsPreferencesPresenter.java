@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
@@ -44,6 +45,7 @@ public class CredentialsPreferencesPresenter extends AbstractPreferencePagePrese
     private static final String DEFAULT_SERVER       = "https://index.docker.io/v1/";
 
     private final CredentialsPreferencesView view;
+    private final PreferencesServiceClient   preferencesService;
     private final UserProfileServiceClient   userProfileServiceClient;
     private final DtoFactory                 dtoFactory;
     private final CredentialsDialogFactory   inputDialogFactory;
@@ -55,12 +57,14 @@ public class CredentialsPreferencesPresenter extends AbstractPreferencePagePrese
     public CredentialsPreferencesPresenter(DockerLocalizationConstant locale,
                                            CredentialsPreferencesView view,
                                            UserProfileServiceClient userProfileServiceClient,
+                                           PreferencesServiceClient preferencesServiceClient,
                                            DtoFactory dtoFactory,
                                            CredentialsDialogFactory credentialsDialogFactory,
                                            AppContext appContext,
                                            DialogFactory dialogFactory) {
         super(locale.dockerPreferencesTitle(), locale.dockerPreferencesCategory());
         this.view = view;
+        this.preferencesService = preferencesServiceClient;
         this.view.setDelegate(this);
         this.userProfileServiceClient = userProfileServiceClient;
         this.dtoFactory = dtoFactory;
@@ -156,7 +160,7 @@ public class CredentialsPreferencesPresenter extends AbstractPreferencePagePrese
     private void updateAuthConfigs(AuthConfigs authConfigs) {
         HashMap<String, String> preferences = new HashMap<>();
         preferences.put(AUTH_PREFERENCE_NAME, Base64.encode(dtoFactory.toJson(authConfigs)));
-        userProfileServiceClient.updatePreferences(preferences).then(new Operation<Map<String, String>>() {
+        preferencesService.updatePreferences(preferences).then(new Operation<Map<String, String>>() {
             @Override
             public void apply(Map<String, String> result) throws OperationException {
                 appContext.getCurrentUser().setPreferences(result);

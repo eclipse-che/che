@@ -10,56 +10,62 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.shared.dto;
 
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
+
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
 /**
- * @author andrew00x
+ * This object used for transporting user data to/from client.
+ *
+ * @author Yevhenii Voevodin
+ * @see User
+ * @see DtoFactory
  */
 @DTO
-public interface UserDescriptor {
+public interface UserDto extends User {
     @ApiModelProperty("User ID")
     String getId();
 
     void setId(String id);
 
-    UserDescriptor withId(String id);
-
+    UserDto withId(String id);
 
     @ApiModelProperty("User alias which is used for oAuth")
     List<String> getAliases();
 
     void setAliases(List<String> aliases);
 
-    UserDescriptor withAliases(List<String> aliases);
+    UserDto withAliases(List<String> aliases);
 
     @ApiModelProperty("User email")
     String getEmail();
 
     void setEmail(String email);
 
-    UserDescriptor withEmail(String email);
+    UserDto withEmail(String email);
 
     @ApiModelProperty("User name")
     String getName();
 
     void setName(String name);
 
-    UserDescriptor withName(String name);
+    UserDto withName(String name);
 
     @ApiModelProperty("User password")
     String getPassword();
 
     void setPassword(String password);
 
-    UserDescriptor withPassword(String password);
+    UserDto withPassword(String password);
 
     List<Link> getLinks();
 
     void setLinks(List<Link> links);
 
-    UserDescriptor withLinks(List<Link> links);
+    UserDto withLinks(List<Link> links);
 }

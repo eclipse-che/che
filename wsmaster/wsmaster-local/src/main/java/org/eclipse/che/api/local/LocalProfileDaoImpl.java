@@ -16,8 +16,9 @@ import com.google.common.reflect.TypeToken;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.user.server.dao.Profile;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.core.model.user.Profile;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.spi.ProfileDao;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -34,31 +35,30 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Anton Korneta
  */
 @Singleton
-public class LocalProfileDaoImpl implements UserProfileDao {
+public class LocalProfileDaoImpl implements ProfileDao {
 
-    private final Map<String, Profile> profiles;
-    private final ReadWriteLock        lock;
-    private final LocalStorage         profileStorage;
+    private final Map<String, ProfileImpl> profiles;
+    private final ReadWriteLock            lock;
+    private final LocalStorage             profileStorage;
 
     @Inject
     public LocalProfileDaoImpl(LocalStorageFactory storageFactory) throws IOException {
-        profiles = new HashMap<>();
+        profiles = new LinkedHashMap<>();
         lock = new ReentrantReadWriteLock();
         profileStorage = storageFactory.create("profiles.json");
     }
 
     @PostConstruct
     private void start() {
-        profiles.putAll(profileStorage.loadMap(new TypeToken<Map<String, Profile>>() {}));
+        profiles.putAll(profileStorage.loadMap(new TypeToken<Map<String, ProfileImpl>>() {}));
         // Add default entry if file doesn't exist or invalid or empty.
         if (profiles.isEmpty()) {
             final Map<String, String> attributes = new HashMap<>(2);
             attributes.put("firstName", "Che");
             attributes.put("lastName", "Codenvy");
-            Profile profile = new Profile().withId("che")
-                                           .withUserId("che")
-                                           .withAttributes(attributes);
-            profiles.put(profile.getId(), profile);
+
+            ProfileImpl profile = new ProfileImpl("che", "che@eclipse.org", attributes);
+            profiles.put(profile.getUserId(), profile);
         }
     }
 
@@ -68,25 +68,23 @@ public class LocalProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void create(Profile profile) {
+    public void create(ProfileImpl profile) {
         lock.writeLock().lock();
         try {
             // just replace existed profile
-            final Profile copy = new Profile().withId(profile.getId()).withUserId(profile.getUserId())
-                                              .withAttributes(new LinkedHashMap<>(profile.getAttributes()));
-            profiles.put(copy.getId(), copy);
+            profiles.put(profile.getUserId(), new ProfileImpl(profile));
         } finally {
             lock.writeLock().unlock();
         }
     }
 
     @Override
-    public void update(Profile profile) throws NotFoundException {
+    public void update(ProfileImpl profile) throws NotFoundException {
         lock.writeLock().lock();
         try {
-            final Profile myProfile = profiles.get(profile.getId());
+            final Profile myProfile = profiles.get(profile.getUserId());
             if (myProfile == null) {
-                throw new NotFoundException(String.format("Profile not found %s", profile.getId()));
+                throw new NotFoundException(String.format("Profile with id '%s' not found", profile.getUserId()));
             }
             myProfile.getAttributes().clear();
             myProfile.getAttributes().putAll(profile.getAttributes());
@@ -96,28 +94,24 @@ public class LocalProfileDaoImpl implements UserProfileDao {
     }
 
     @Override
-    public void remove(String id) throws NotFoundException {
+    public void remove(String id) {
         lock.writeLock().lock();
         try {
-            final Profile profile = profiles.remove(id);
-            if (profile == null) {
-                throw new NotFoundException(String.format("Profile not found %s", id));
-            }
+           profiles.remove(id);
         } finally {
             lock.writeLock().unlock();
         }
     }
 
     @Override
-    public Profile getById(String id) throws NotFoundException {
+    public ProfileImpl getById(String id) throws NotFoundException {
         lock.readLock().lock();
         try {
             final Profile profile = profiles.get(id);
             if (profile == null) {
-                throw new NotFoundException(String.format("Profile not found %s", id));
+                throw new NotFoundException(String.format("Profile with id '%s' not found", id));
             }
-            return new Profile().withId(profile.getId()).withUserId(profile.getUserId())
-                                .withAttributes(new LinkedHashMap<>(profile.getAttributes()));
+            return new ProfileImpl(profile);
         } finally {
             lock.readLock().unlock();
         }

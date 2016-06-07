@@ -35,11 +35,11 @@ export class CheNavBarCtrl {
     });
 
     this.profile = cheAPI.getProfile().getProfile();
-    if (this.profile.attributes) {
-      this.email = this.profile.attributes.email;
+    if (this.profile.email) {
+      this.email = this.profile.email;
     } else {
       this.profile.$promise.then(() => {
-        this.email = this.profile.attributes.email ? this.profile.attributes.email : 'N/A ';
+        this.email = this.profile.email ? this.profile.email : 'N/A ';
       }, () => {
         this.email = 'N/A ';
       });

@@ -23,7 +23,7 @@ export class OnBoarding {
   constructor(cheAPI) {
     this.cheUser = cheAPI.getUser();
     this.profile = cheAPI.getProfile().getProfile();
-    this.preferences = cheAPI.getProfile().getPreferences();
+    this.preferences = cheAPI.getPreferences().getPreferences();
   }
 
   isUserOnBoarding() {
@@ -38,4 +38,3 @@ export class OnBoarding {
   }
 
 }
-

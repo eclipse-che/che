@@ -32,7 +32,8 @@ export class CheProfileBuilder {
    * @returns {CheProfileBuilder}
    */
   withEmail(email) {
-    return this.withAttribute('email', email);
+    this.profile.email = email;
+    return this;
   }
 
   /**

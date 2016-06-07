@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.ConflictException;
 public interface TokenValidator {
 
     /**
-     * Validates {@param token}
+     * Validates {@code token}.
      *
      * @return user email
      * @throws ConflictException
