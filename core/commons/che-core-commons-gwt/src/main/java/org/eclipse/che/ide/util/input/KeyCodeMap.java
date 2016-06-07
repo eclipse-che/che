@@ -262,6 +262,7 @@ public class KeyCodeMap {
             case ARROW_RIGHT: return "→";
             case ARROW_UP: return "↑";
             case ARROW_DOWN: return "↓";
+            case DELETE: return "Delete";
             //todo add others keys
         }
 
