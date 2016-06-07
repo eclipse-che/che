@@ -1,5 +1,5 @@
 <md-menu md-offset="{{navbarDropdownMenuCtrl.offset}}">
-  <div ng-transclude></div>
+  <div class="navbar-dropdown-button" ng-transclude></div>
   <md-menu-content class="navbar-dropdown-menu {{navbarDropdownMenuCtrl.externalCssClass}}" width="3">
     <md-menu-item ng-repeat="item in navbarDropdownMenuCtrl.dropdownItems"
                   ng-if="!item.hidden"
