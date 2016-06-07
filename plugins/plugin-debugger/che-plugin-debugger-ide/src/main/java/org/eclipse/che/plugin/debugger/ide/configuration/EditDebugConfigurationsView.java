@@ -100,7 +100,7 @@ public interface EditDebugConfigurationsView extends View<EditDebugConfiguration
         /** Called when 'Cancel' button is clicked. */
         void onCancelClicked();
 
-        /** Called when 'Cancel' button is clicked. */
+        /** Called when 'Debug' button is clicked. */
         void onDebugClicked();
 
         /** Called when 'Add' button is clicked. */
