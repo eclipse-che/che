@@ -14,6 +14,19 @@ import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface Failure {
+
+    String getFailingClass();
+
+    void setFailingClass(String className);
+
+    String getFailingMethod();
+
+    void setFailingMethod(String methodName);
+
+    Integer getFailingLine();
+
+    void setFailingLine(Integer lineNumber);
+
     String getMessage();
 
     void setMessage(String message);

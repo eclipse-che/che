@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.java.testing.server;
 
 
-import org.eclipse.che.ide.ext.java.testing.server.junit.JUnitTestRunner;
 import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -21,15 +20,26 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-@Path("testing/{ws-id}")
+@Path("java/testing")
 public class TestingService {
 
     @GET
-    @Path("run")
+    @Path("runClass")
     @Produces(MediaType.APPLICATION_JSON)
-    public TestResult reconcile(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) throws Exception {
+    public TestResult runClass(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) throws Exception {
         String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
-        TestRunner testRunner = new JUnitTestRunner(absoluteProjectPath);
+        TestRunnerFactory runnerFactory = new TestRunnerFactory();
+        TestRunner testRunner = runnerFactory.getTestRunner(absoluteProjectPath);
         return testRunner.run(fqn);
+    }
+
+    @GET
+    @Path("runAll")
+    @Produces(MediaType.APPLICATION_JSON)
+    public TestResult runAll(@QueryParam("projectpath") String projectPath) throws Exception {
+        String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
+        TestRunnerFactory runnerFactory = new TestRunnerFactory();
+        TestRunner testRunner = runnerFactory.getTestRunner(absoluteProjectPath);
+        return testRunner.runAll();
     }
 }
