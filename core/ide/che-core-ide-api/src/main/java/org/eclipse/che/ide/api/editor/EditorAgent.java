@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.editor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;

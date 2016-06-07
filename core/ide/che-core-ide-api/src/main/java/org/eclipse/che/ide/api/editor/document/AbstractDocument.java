@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.editor.document;
 
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /** An abstract implementation of {@link Document}. */
 public abstract class AbstractDocument implements Document, DocumentHandle {

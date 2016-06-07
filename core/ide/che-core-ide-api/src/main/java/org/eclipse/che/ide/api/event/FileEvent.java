@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.project.tree.generic.FileNode;
 import com.google.gwt.event.shared.GwtEvent;
 

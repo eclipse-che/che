@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide.fqn;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import javax.validation.constraints.NotNull;
 

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
