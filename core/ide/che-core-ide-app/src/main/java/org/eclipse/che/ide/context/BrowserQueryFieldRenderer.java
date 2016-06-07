@@ -32,7 +32,7 @@ public class BrowserQueryFieldRenderer {
     private static final int WORKSPACE_ORDER_IN_URL = 3;
     private static final int NAMESPACE_ORDER_IN_URL = 2;
     //Used in the JSNI methods follow
-    private static final int AMOUNT_URL_PARTS = 4;
+    private static final int AMOUNT_URL_PARTS = 5;
 
     //Used in the JSNI methods follow
     private final ProductInfoDataProvider productInfoDataProvider;
@@ -148,9 +148,9 @@ public class BrowserQueryFieldRenderer {
             var browserUrl = window.location.pathname;
             var urlParts = browserUrl.split('/');
 
-            urlParts[1] = namespace;
-            urlParts[2] = workspaceName;
-            urlParts[3] = projectName;
+            urlParts[2] = namespace;
+            urlParts[3] = workspaceName;
+            urlParts[4] = projectName;
 
             var sliceIndex = @org.eclipse.che.ide.context.BrowserQueryFieldRenderer::AMOUNT_URL_PARTS;
             if (namespace == null || namespace.length == 0) {
