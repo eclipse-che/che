@@ -17,7 +17,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage.StoreSortInfo;
 import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeExpandNodeEvent;

@@ -8,23 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node.settings.impl;
-
-import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
-import org.eclipse.che.ide.api.project.node.settings.SettingsProvider;
+package org.eclipse.che.ide.api.data;
 
 /**
+ * Indicates that specified node can contains data object, e.g. project descriptor or item reference.
+ *
  * @author Vlad Zhukovskiy
  */
-public class UserProfileNodeSettingsProvider implements SettingsProvider {
-    @Override
-    public NodeSettings getSettings() {
-        //TODO logic for loading node settings from user profile
-        return null;
-    }
+public interface HasDataObject<D> {
+    /**
+     * Retrieve stored data object.
+     *
+     * @return data object
+     */
+    D getData();
 
-    @Override
-    public void setSettings(NodeSettings settings) {
-        //TODO logic for storing node settings into user profile
-    }
+    /**
+     * Store data object.
+     *
+     * @param data
+     *         data object
+     */
+    void setData(D data);
 }

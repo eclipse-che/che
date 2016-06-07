@@ -35,13 +35,13 @@ import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.parts.base.ToolButton;
-import org.eclipse.che.ide.api.project.node.HasAction;
-import org.eclipse.che.ide.api.project.node.HasAttributes;
+import org.eclipse.che.ide.api.data.tree.HasAction;
+import org.eclipse.che.ide.api.data.tree.HasAttributes;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
-import org.eclipse.che.ide.api.project.node.settings.HasSettings;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.settings.HasSettings;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.menu.ContextMenu;
 import org.eclipse.che.ide.project.node.ProjectNode;
@@ -72,7 +72,6 @@ import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static java.util.Collections.singletonList;

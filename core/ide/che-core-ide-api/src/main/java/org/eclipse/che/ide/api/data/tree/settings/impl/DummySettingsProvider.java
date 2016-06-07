@@ -8,29 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
+package org.eclipse.che.ide.api.data.tree.settings.impl;
 
-import java.util.List;
-import java.util.Map;
+import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
+import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 
 /**
- * Store attributes in specified node.
- *
  * @author Vlad Zhukovskiy
  */
-public interface HasAttributes {
-    /**
-     * Get attributes.
-     *
-     * @return attributes map
-     */
-    Map<String, List<String>> getAttributes();
+public class DummySettingsProvider implements SettingsProvider {
+    @Override
+    public NodeSettings getSettings() {
+        return NodeSettings.DEFAULT_SETTINGS;
+    }
 
-    /**
-     * Store attributes.
-     *
-     * @param attributes
-     *         attributes map
-     */
-    void setAttributes(Map<String, List<String>> attributes);
+    @Override
+    public void setSettings(NodeSettings settings) {
+        //stub
+    }
 }

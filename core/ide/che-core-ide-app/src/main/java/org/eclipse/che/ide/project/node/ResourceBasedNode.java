@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.project.node.resource.DeleteProcessor;
 import org.eclipse.che.ide.api.project.node.resource.RenameProcessor;
 import org.eclipse.che.ide.api.project.node.resource.SupportDelete;
 import org.eclipse.che.ide.api.project.node.resource.SupportRename;
-import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
+import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeRenamedEvent;
 import org.eclipse.che.ide.util.loging.Log;

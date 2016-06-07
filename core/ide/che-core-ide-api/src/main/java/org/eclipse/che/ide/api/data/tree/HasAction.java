@@ -8,26 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node.settings;
+package org.eclipse.che.ide.api.data.tree;
 
 /**
- * Interface for loading stored node settings.
+ * Indicates that specified node can perform actions when it has been activated e.g. by double click.
  *
  * @author Vlad Zhukovskiy
  */
-public interface SettingsProvider {
+public interface HasAction {
     /**
-     * Load settings from anywhere.
-     *
-     * @return node settings
+     * Perform action.
      */
-    NodeSettings getSettings();
-
-    /**
-     * Store node settings.
-     *
-     * @param settings
-     *         node settings
-     */
-    void setSettings(NodeSettings settings);
+    void actionPerformed();
 }

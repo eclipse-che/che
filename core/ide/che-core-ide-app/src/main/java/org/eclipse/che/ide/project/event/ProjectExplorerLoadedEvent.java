@@ -13,7 +13,7 @@ package org.eclipse.che.ide.project.event;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.project.node.AbstractProjectBasedNode;
 
 import javax.validation.constraints.NotNull;

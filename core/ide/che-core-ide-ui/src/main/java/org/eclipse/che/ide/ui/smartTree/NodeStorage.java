@@ -17,7 +17,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.ui.smartTree.event.StoreAddEvent;
 import org.eclipse.che.ide.ui.smartTree.event.StoreClearEvent;
@@ -41,9 +41,9 @@ import java.util.Map;
 /**
  * Hierarchical type storage. Based on Parent-Child relationship,
  * which is uses internally by tree. To obtain parent or children
- * uses specified methods such as {@link #getParent(org.eclipse.che.ide.api.project.node.Node)} or
- * {@link #getChildren(org.eclipse.che.ide.api.project.node.Node)}. Modifications performs by calling
- * such methods like {@link #add(org.eclipse.che.ide.api.project.node.Node)} or {@link #remove(org.eclipse.che.ide.api.project.node.Node)},
+ * uses specified methods such as {@link #getParent(Node)} or
+ * {@link #getChildren(Node)}. Modifications performs by calling
+ * such methods like {@link #add(Node)} or {@link #remove(Node)},
  * etc.
  *
  * @author Vlad Zhukovskiy

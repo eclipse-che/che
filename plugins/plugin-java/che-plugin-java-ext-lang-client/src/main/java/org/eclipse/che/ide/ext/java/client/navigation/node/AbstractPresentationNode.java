@@ -14,7 +14,7 @@ import elemental.html.SpanElement;
 
 import com.google.gwt.dom.client.Element;
 
-import org.eclipse.che.ide.api.project.node.AbstractTreeNode;
+import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;

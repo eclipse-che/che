@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.explorer.project;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.node.SyntheticBasedNode;

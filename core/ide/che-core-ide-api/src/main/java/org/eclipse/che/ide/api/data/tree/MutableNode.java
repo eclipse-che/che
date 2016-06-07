@@ -8,29 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
-
-import javax.validation.constraints.NotNull;
+package org.eclipse.che.ide.api.data.tree;
 
 /**
- * Indicates that specified node can contains data object, e.g. project descriptor or item reference.
+ * Indicates that specified node can be transformed into leaf node.
  *
  * @author Vlad Zhukovskiy
  */
-public interface HasDataObject<D> {
+public interface MutableNode {
     /**
-     * Retrieve stored data object.
+     * Set current node status into leaf.
      *
-     * @return data object
+     * @param leaf
+     *         true if node should be transformed into leaf
      */
-    @NotNull
-    D getData();
-
-    /**
-     * Store data object.
-     *
-     * @param data
-     *         data object
-     */
-    void setData(@NotNull D data);
+    void setLeaf(boolean leaf);
 }

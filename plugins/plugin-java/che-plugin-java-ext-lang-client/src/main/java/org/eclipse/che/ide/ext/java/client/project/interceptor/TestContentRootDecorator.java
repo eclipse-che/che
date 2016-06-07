@@ -14,9 +14,9 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.project.node.HasAttributes;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.HasAttributes;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
 
