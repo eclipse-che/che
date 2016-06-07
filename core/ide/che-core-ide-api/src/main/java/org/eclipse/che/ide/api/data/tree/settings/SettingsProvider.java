@@ -8,11 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node.settings;
+package org.eclipse.che.ide.api.data.tree.settings;
 
 /**
+ * Interface for loading stored node settings.
+ *
  * @author Vlad Zhukovskiy
  */
-public interface HasSettings {
+public interface SettingsProvider {
+    /**
+     * Load settings from anywhere.
+     *
+     * @return node settings
+     */
     NodeSettings getSettings();
+
+    /**
+     * Store node settings.
+     *
+     * @param settings
+     *         node settings
+     */
+    void setSettings(NodeSettings settings);
 }

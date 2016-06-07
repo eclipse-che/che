@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.project.settings;
 
-import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
+import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 
 /**
  * @author Vlad Zhukovskiy

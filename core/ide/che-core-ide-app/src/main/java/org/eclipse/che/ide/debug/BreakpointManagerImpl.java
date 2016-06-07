@@ -34,7 +34,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
 import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig.ProjectConfig;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
 import org.eclipse.che.ide.api.project.tree.VirtualFileImpl;
 import org.eclipse.che.ide.api.project.tree.VirtualFileInfo;

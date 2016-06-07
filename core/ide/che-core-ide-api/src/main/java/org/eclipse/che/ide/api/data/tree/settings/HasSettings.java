@@ -8,16 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
+package org.eclipse.che.ide.api.data.tree.settings;
 
 /**
- * Indicates that specified node can perform actions when it has been activated e.g. by double click.
- *
  * @author Vlad Zhukovskiy
  */
-public interface HasAction {
-    /**
-     * Perform action.
-     */
-    void actionPerformed();
+public interface HasSettings {
+    NodeSettings getSettings();
 }

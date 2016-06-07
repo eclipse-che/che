@@ -13,11 +13,7 @@ package org.eclipse.che.ide.part.editor.event;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.ide.api.project.node.Node;
 import org.eclipse.che.ide.api.project.tree.VirtualFile;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Event fires when editor tab either pinned or not.
