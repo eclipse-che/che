@@ -94,7 +94,7 @@ usage () {
 error_exit () {
   echo
   echo "!!!"
-  echo "!!! ${1}"
+  echo -e "!!! ${1}"
   echo "!!!"
   echo 
   JUMP_TO_END=true
@@ -386,7 +386,7 @@ get_docker_ready () {
       OTHER_READ=$(cut -c8 <(echo $PERMS))
       OTHER_WRITE=$(cut -c9 <(echo $PERMS))
 
-      if [[ "$OWNE_RREAD" != "r" || "$OWNER_WRITE" != "w" || `
+      if [[ "$OWNER_READ" != "r" || "$OWNER_WRITE" != "w" || `
            `"$GROUP_READ" != "r" || "$GROUP_WRITE" != "w" || `
            `"$OTHER_READ" != "r" || "$OTHER_WRITE" != "w" ]]; then
         error_exit "Running 'docker' succeeded, but 'docker ps' failed. \n`
