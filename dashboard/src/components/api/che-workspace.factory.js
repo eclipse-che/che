@@ -246,7 +246,7 @@ export class CheWorkspace {
   }
 
   createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
-    let data = this.formWorkspaceConfig(workspaceName,recipeUrl, ram);
+    let data = this.formWorkspaceConfig({}, workspaceName,recipeUrl, ram);
 
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
     let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;

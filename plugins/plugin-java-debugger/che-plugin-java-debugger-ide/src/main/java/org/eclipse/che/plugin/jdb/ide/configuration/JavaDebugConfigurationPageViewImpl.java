@@ -88,12 +88,21 @@ public class JavaDebugConfigurationPageViewImpl implements JavaDebugConfiguratio
 
     @Override
     public int getPort() {
-        return Integer.valueOf(port.getValue());
+        String port = this.port.getValue().trim();
+        if (port.isEmpty()) {
+            return 0;
+        }
+
+        try {
+            return Integer.valueOf(port);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override
     public void setPort(int port) {
-        this.port.setValue(String.valueOf(port));
+        this.port.setValue(port <= 0 ? "" : String.valueOf(port));
     }
 
     @Override
