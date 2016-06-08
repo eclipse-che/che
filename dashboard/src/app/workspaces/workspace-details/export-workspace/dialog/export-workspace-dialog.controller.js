@@ -153,18 +153,27 @@ export class ExportWorkspaceDialogController {
       });
 
 
-      //TODO when token for wsagent is ready - will need to use it instead of wsmaster one:
-      let agentAuthData = {url: wsAgentLink.href, token: authData.token};
-      let remoteProjectAPI = this.cheRemote.newProject(agentAuthData);
+      // grab token for machine
+      let tokenPromise = remoteWorkspaceAPI.getMachineToken(remoteWorkspace.id);
+      tokenPromise.then((machineTokenResult) => {
+        // ask with machine token
+        let agentAuthData = {url: wsAgentLink.href, token: machineTokenResult.machineToken};
+        let remoteProjectAPI = this.cheRemote.newProject(agentAuthData);
 
-      this.exportInCloudSteps += 'ok !<br>';
-      // ok now we've to import each project with a location into the remote workspace
-      let importProjectsPromise = this.importProjectsIntoWorkspace(remoteProjectAPI, remoteWorkspace);
-      importProjectsPromise.then(() => {
-        this.finishWorkspaceExporting(remoteWorkspace);
+        this.exportInCloudSteps += 'ok !<br>';
+        // ok now we've to import each project with a location into the remote workspace
+        let importProjectsPromise = this.importProjectsIntoWorkspace(remoteProjectAPI, remoteWorkspace);
+        importProjectsPromise.then(() => {
+          this.finishWorkspaceExporting(remoteWorkspace);
+        }, (error) => {
+          this.handleError(error);
+        })
       }, (error) => {
         this.handleError(error);
-      })
+      });
+
+
+
     }, (error) => {
       this.handleError(error);
     });

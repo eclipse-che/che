@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors;
 
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 
 /**

@@ -15,12 +15,12 @@ import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.plugin.maven.client.command.MavenCommandType;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorConfigurationFactory;
-import org.eclipse.che.plugin.maven.client.editor.PomReconsilingStrategyFactory;
+import org.eclipse.che.plugin.maven.client.editor.PomReconcilingStrategyFactory;
 import org.eclipse.che.plugin.maven.client.project.MavenContentRootInterceptor;
 import org.eclipse.che.plugin.maven.client.project.MavenExternalLibrariesInterceptor;
 import org.eclipse.che.plugin.maven.client.project.PomNodeInterceptor;
@@ -45,7 +45,7 @@ public class MavenGinModule extends AbstractGinModule {
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(MavenExternalLibrariesInterceptor.class);
         GinMultibinder.newSetBinder(binder(), NodeInterceptor.class).addBinding().to(PomNodeInterceptor.class);
 
-        install(new GinFactoryModuleBuilder().build(PomReconsilingStrategyFactory.class));
+        install(new GinFactoryModuleBuilder().build(PomReconcilingStrategyFactory.class));
         install(new GinFactoryModuleBuilder().build(PomEditorConfigurationFactory.class));
     }
 }

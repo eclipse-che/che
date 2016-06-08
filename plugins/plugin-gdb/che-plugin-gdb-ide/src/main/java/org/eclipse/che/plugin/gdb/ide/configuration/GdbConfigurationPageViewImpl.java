@@ -11,13 +11,21 @@
 package org.eclipse.che.plugin.gdb.ide.configuration;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+
+import org.eclipse.che.ide.ui.listbox.CustomComboBox;
+
+import java.util.Map;
 
 /**
  * The implementation of {@link GdbConfigurationPageView}.
@@ -31,16 +39,24 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
     private final FlowPanel rootElement;
 
     @UiField
-    TextBox host;
+    CheckBox       devHost;
     @UiField
-    TextBox port;
+    CustomComboBox host;
     @UiField
-    TextBox binaryPath;
+    TextBox        port;
+    @UiField
+    TextBox        binaryPath;
 
     private ActionDelegate delegate;
 
     public GdbConfigurationPageViewImpl() {
         rootElement = UI_BINDER.createAndBindUi(this);
+        devHost.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                delegate.onDevHostChanged(event.getValue());
+            }
+        });
     }
 
     @Override
@@ -65,12 +81,21 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
 
     @Override
     public int getPort() {
-        return Integer.valueOf(port.getValue());
+        String port = this.port.getValue().trim();
+        if (port.isEmpty()) {
+            return 0;
+        }
+
+        try {
+            return Integer.valueOf(port);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     @Override
     public void setPort(int port) {
-        this.port.setValue(String.valueOf(port));
+        this.port.setValue(port <= 0 ? "" : String.valueOf(port));
     }
 
     @Override
@@ -83,8 +108,36 @@ public class GdbConfigurationPageViewImpl implements GdbConfigurationPageView {
         this.binaryPath.setValue(path);
     }
 
+    @Override
+    public void setDevHost(boolean value) {
+        devHost.setValue(value);
+    }
+
+    @Override
+    public void setHostsList(Map<String, String> hosts) {
+        host.clear();
+        for (Map.Entry<String, String> entry : hosts.entrySet()) {
+            host.addItem(entry.getValue(), entry.getKey());
+        }
+    }
+
+    @Override
+    public void setHostEnableState(boolean enable) {
+        host.setEnabled(enable);
+    }
+
+    @Override
+    public void setPortEnableState(boolean enable) {
+        port.setEnabled(enable);
+    }
+
     @UiHandler({"host"})
     void onHostKeyUp(KeyUpEvent event) {
+        delegate.onHostChanged();
+    }
+
+    @UiHandler({"host"})
+    void onHostChanged(ChangeEvent event) {
         delegate.onHostChanged();
     }
 

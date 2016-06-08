@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.editor;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
  * Event that describes the fact that editor is opened.

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.smartTree;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 
 import javax.validation.constraints.NotNull;
 

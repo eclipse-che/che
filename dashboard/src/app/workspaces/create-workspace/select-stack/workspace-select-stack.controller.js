@@ -22,10 +22,15 @@ export class WorkspaceSelectStackCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $scope, lodash) {
+  constructor($timeout, $scope, lodash, cheStack) {
     this.$timeout = $timeout;
     this.$scope = $scope;
     this.lodash = lodash;
+
+    this.stacks = cheStack.getStacks();
+    if (!this.stacks.length) {
+      cheStack.fetchStacks();
+    }
 
     $scope.$on('event:selectStackId', (event, data) => {
       event.stopPropagation();
@@ -34,7 +39,9 @@ export class WorkspaceSelectStackCtrl {
       });
       if (findStack) {
         this.stackLibraryUser = findStack;
-        this.onStackSelect(findStack);
+        if (this.tabName === 'stack-library') {
+          this.onStackSelect(findStack);
+        }
       }
     });
   }
@@ -62,6 +69,9 @@ export class WorkspaceSelectStackCtrl {
    * Callback when stack has been select
    */
   onStackSelect(stack) {
+    if (!stack && this.tabName !== 'custom-stack') {
+      return;
+    }
     this.stack = stack;
     this.$timeout(() => {
       this.onStackChange();

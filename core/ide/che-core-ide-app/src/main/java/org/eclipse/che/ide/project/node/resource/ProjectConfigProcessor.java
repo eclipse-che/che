@@ -27,7 +27,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.project.CreateProjectEvent;
 import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
-import org.eclipse.che.ide.api.project.node.HasDataObject;
+import org.eclipse.che.ide.api.data.HasDataObject;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.project.node.ProjectNode;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;

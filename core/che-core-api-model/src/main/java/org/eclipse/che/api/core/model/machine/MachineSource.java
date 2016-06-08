@@ -24,4 +24,10 @@ public interface MachineSource {
      * Returns URL or ID
      */
     String getLocation();
+
+    /**
+     * @return content of the machine source. No need to use an external link.
+     */
+    String getContent();
+
 }

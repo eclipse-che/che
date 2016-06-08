@@ -456,6 +456,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("print")
     String print();
 
+    @Key("debug")
+    String debug();
+
     @Key("projectProblem.title")
     String projectProblemTitle();
 

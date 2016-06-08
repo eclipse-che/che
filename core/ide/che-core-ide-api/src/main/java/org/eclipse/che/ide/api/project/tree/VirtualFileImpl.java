@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.project.tree;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.project.node.HasProjectConfig;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
  * Implementation of {@link VirtualFile}. Keeps only necessary information.

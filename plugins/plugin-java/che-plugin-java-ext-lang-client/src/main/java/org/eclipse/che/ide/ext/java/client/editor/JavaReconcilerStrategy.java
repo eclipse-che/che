@@ -16,7 +16,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.editor.text.Region;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEventHandler;
@@ -60,7 +60,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy {
 
         handlerRegistration = eventBus.addHandler(DependencyUpdatedEvent.TYPE, new DependencyUpdatedEventHandler() {
             @Override
-            public void onDependencyUpdated(DependencyUpdatedEvent event) {
+            public void onDependencyUpdated() {
                 parse();
             }
         });

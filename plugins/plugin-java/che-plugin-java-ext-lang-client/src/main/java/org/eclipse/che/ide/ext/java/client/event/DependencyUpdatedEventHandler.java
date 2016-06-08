@@ -12,12 +12,10 @@ package org.eclipse.che.ide.ext.java.client.event;
 
 import com.google.gwt.event.shared.EventHandler;
 
-import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
-
 /**
- * Handle {@link EditorDirtyStateChangedEvent}
+ * Handle {@link DependencyUpdatedEvent}
  * @author Alexander Andrienko
  */
 public interface DependencyUpdatedEventHandler extends EventHandler {
-    void onDependencyUpdated(DependencyUpdatedEvent event);
+    void onDependencyUpdated();
 }

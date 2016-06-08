@@ -60,6 +60,21 @@ public interface MachineResources extends ClientBundle {
     @Source("images/process/add-terminal.svg")
     SVGResource addTerminalIcon();
 
+    @Source("images/process/re-run.svg")
+    SVGResource reRunIcon();
+
+    @Source("images/process/stop.svg")
+    SVGResource stopIcon();
+
+    @Source("images/process/clear-outputs.svg")
+    SVGResource clearOutputsIcon();
+
+    @Source("images/process/scroll-to-bottom.svg")
+    SVGResource scrollToBottomIcon();
+
+    @Source("images/process/line-wrap.svg")
+    SVGResource lineWrapIcon();
+
     /** Returns the icon for 'Custom' command type. */
     @Source("command/arbitrary/custom-command-type.svg")
     SVGResource customCommandType();

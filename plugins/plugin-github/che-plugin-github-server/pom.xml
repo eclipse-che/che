@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-github-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-github-server</artifactId>
     <packaging>jar</packaging>
@@ -76,10 +76,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-env</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

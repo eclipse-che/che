@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.project.node;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
+import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 
 import javax.validation.constraints.NotNull;
 

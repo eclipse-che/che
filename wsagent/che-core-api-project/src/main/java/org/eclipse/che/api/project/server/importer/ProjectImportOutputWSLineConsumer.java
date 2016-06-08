@@ -34,14 +34,14 @@ public class ProjectImportOutputWSLineConsumer implements LineConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectImportOutputWSLineConsumer.class);
 
     protected final AtomicInteger            lineCounter;
-    protected final String                   fPath;
-    protected final String                   fWorkspace;
+    protected final String                   projectName;
+    protected final String                   workspaceId;
     protected final BlockingQueue<String>    lineToSendQueue;
     protected final ScheduledExecutorService executor;
 
-    public ProjectImportOutputWSLineConsumer(String fPath, String fWorkspace, int delayBetweenMessages) {
-        this.fPath = fPath;
-        this.fWorkspace = fWorkspace;
+    public ProjectImportOutputWSLineConsumer(String projectName, String workspaceId, int delayBetweenMessages) {
+        this.projectName = projectName;
+        this.workspaceId = workspaceId;
         lineToSendQueue = new ArrayBlockingQueue<>(1024);
         executor = Executors.newSingleThreadScheduledExecutor(
                 new ThreadFactoryBuilder().setNameFormat(ProjectImportOutputWSLineConsumer.class.getSimpleName()+"-%d").setDaemon(true).build());
@@ -77,7 +77,7 @@ public class ProjectImportOutputWSLineConsumer implements LineConsumer {
 
     protected void sendMessage(String line) {
         final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
-        bm.setChannel("importProject:output:" + fWorkspace + ":" + fPath);
+        bm.setChannel("importProject:output:" + workspaceId + ":" + projectName);
         bm.setBody(String.format("{\"num\":%d, \"line\":%s}",
                                  lineCounter.getAndIncrement(), JsonUtils.getJsonString(line)));
         sendMessageToWS(bm);

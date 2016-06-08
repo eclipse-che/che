@@ -48,8 +48,6 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.extension.machine.client.processes.event.ProcessFinishedEvent;
-import org.eclipse.che.ide.extension.machine.client.processes.event.ProcessFinishedHandler;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -79,7 +77,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
 @Singleton
 public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPanelView.ActionDelegate,
                                                                      HasView,
-                                                                     ProcessFinishedHandler,
+                                                                     ProcessFinishedEvent.Handler,
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStoppedHandler,
                                                                      MachineStateEvent.Handler {
@@ -146,8 +144,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.consoleCommands = new HashMap<>();
         this.machineNodes = new HashMap<>();
 
-        fetchMachines();
-
         this.view.setDelegate(this);
         this.view.setTitle(localizationConstant.viewConsolesTitle());
 
@@ -165,6 +161,8 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
+
+        fetchMachines();
     }
 
     @Override

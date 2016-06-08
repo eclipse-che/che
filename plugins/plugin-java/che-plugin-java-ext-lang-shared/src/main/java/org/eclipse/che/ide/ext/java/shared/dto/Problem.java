@@ -33,6 +33,8 @@ public interface Problem {
 
     void setOriginatingFileName(String originatingFileName);
 
+    Problem withOriginatingFileName(String originatingFileName);
+
     /**
      * Answer a localized, human-readable message string which describes the problem.
      *
@@ -41,6 +43,8 @@ public interface Problem {
     String getMessage();
 
     void setMessage(String message);
+
+    Problem withMessage(String message);
 
     /**
      * Returns the problem id
@@ -51,6 +55,8 @@ public interface Problem {
 
     void setID(int ID);
 
+    Problem withID(int ID);
+
     /**
      * Answer back the original arguments recorded into the problem.
      *
@@ -59,6 +65,8 @@ public interface Problem {
     List<String> getArguments();
 
     void setArguments(List<String> arguments);
+
+    Problem withArguments(List<String> arguments);
 
     /**
      * Answer the start position of the problem (inclusive), or -1 if unknown.
@@ -69,6 +77,8 @@ public interface Problem {
 
     void setSourceStart(int start);
 
+    Problem withSourceStart(int start);
+
     /**
      * Answer the end position of the problem (inclusive), or -1 if unknown.
      *
@@ -77,6 +87,8 @@ public interface Problem {
     int getSourceEnd();
 
     void setSourceEnd(int end);
+
+    Problem withSourceEnd(int end);
 
     /**
      * Answer the line number in source where the problem begins.
@@ -87,6 +99,8 @@ public interface Problem {
 
     void setSourceLineNumber(int lineNumber);
 
+    Problem withSourceLineNumber(int lineNumber);
+
     /**
      * Checks the severity to see if the Error bit is set.
      *
@@ -96,6 +110,8 @@ public interface Problem {
 
     void setError(boolean isError);
 
+    Problem withError(boolean isError);
+
     /**
      * Checks the severity to see if the Error bit is not set.
      *
@@ -104,4 +120,6 @@ public interface Problem {
     boolean isWarning();
 
     void setWarning(boolean isWarning);
+
+    Problem withWarning(boolean isWarning);
 }

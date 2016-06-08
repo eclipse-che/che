@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /**
  * An abstraction over the editor representation of the document.

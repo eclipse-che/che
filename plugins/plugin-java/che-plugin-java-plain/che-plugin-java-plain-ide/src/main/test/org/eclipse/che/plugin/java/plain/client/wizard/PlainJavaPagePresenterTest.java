@@ -127,7 +127,7 @@ public class PlainJavaPagePresenterTest {
     @Test
     public void showSelectWindowWhenBrowseButtonWasClicked() throws Exception {
         page.init(dataObject);
-        page.onBrowseButtonClicked();
+        page.onBrowseSourceButtonClicked();
 
         verify(selectNodePresenter).show(page, "name");
     }

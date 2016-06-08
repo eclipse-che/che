@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
-import org.eclipse.che.api.debug.shared.model.SimpleValue;
-import org.eclipse.che.api.debugger.server.Debugger;
-import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.DebuggerInfo;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.api.debug.shared.model.SimpleValue;
 import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
@@ -25,19 +23,23 @@ import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
-import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
+import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariableImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.DisconnectEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
+import org.eclipse.che.api.debugger.server.Debugger;
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbTerminatedException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLine;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoProgram;
-import org.eclipse.che.plugin.gdb.server.parser.GdbParseException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbParseException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbPrint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbRun;
 import org.eclipse.che.plugin.gdb.server.parser.GdbVersion;
@@ -45,11 +47,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.nio.file.Files.exists;
 import static java.util.Collections.singletonList;
 
 /**
@@ -58,13 +62,16 @@ import static java.util.Collections.singletonList;
  * @author Anatoliy Bazko
  */
 public class GdbDebugger implements Debugger {
-    private static final Logger LOG = LoggerFactory.getLogger(GdbDebugger.class);
+    private static final Logger LOG                 = LoggerFactory.getLogger(GdbDebugger.class);
+    private static final int    CONNECTION_ATTEMPTS = 5;
 
     private final String host;
     private final int    port;
     private final String name;
     private final String version;
     private final String file;
+
+    private Location currentLocation;
 
     private final Gdb              gdb;
     private final DebuggerCallback debuggerCallback;
@@ -110,9 +117,39 @@ public class GdbDebugger implements Debugger {
                                           String file,
                                           String srcDirectory,
                                           DebuggerCallback debuggerCallback) throws DebuggerException {
+        if (!exists(Paths.get(file))) {
+            throw new DebuggerException("Can't start GDB: binary " + file + " not found");
+        }
+
+        if (!exists(Paths.get(srcDirectory))) {
+            throw new DebuggerException("Can't start GDB: source directory " + srcDirectory + " does not exist");
+        }
+
+        for (int i = 0; i < CONNECTION_ATTEMPTS - 1; i++) {
+            try {
+                return init(host, port, file, srcDirectory, debuggerCallback);
+            } catch (DebuggerException e) {
+                LOG.error("Connection attempt " + i + ": " + e.getMessage(), e);
+            }
+        }
+
+        return init(host, port, file, srcDirectory, debuggerCallback);
+    }
+
+    private static GdbDebugger init(String host,
+                                    int port,
+                                    String file,
+                                    String srcDirectory,
+                                    DebuggerCallback debuggerCallback) throws DebuggerException {
+
         Gdb gdb;
         try {
             gdb = Gdb.start();
+        } catch (IOException e) {
+            throw new DebuggerException("Can't start GDB: " + e.getMessage(), e);
+        }
+
+        try {
             GdbDirectory directory = gdb.directory(srcDirectory);
             LOG.debug("Source directories: " + directory.getDirectories());
 
@@ -120,8 +157,13 @@ public class GdbDebugger implements Debugger {
             if (port > 0) {
                 gdb.targetRemote(host, port);
             }
-        } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't initialize GDB", e);
+        } catch (DebuggerException | IOException | InterruptedException e) {
+            try {
+                gdb.quit();
+            } catch (IOException | InterruptedException | GdbException e1) {
+                LOG.error("Can't stop GDB: " + e1.getMessage(), e1);
+            }
+            throw new DebuggerException("Can't initialize GDB: " + e.getMessage(), e);
         }
 
         GdbVersion gdbVersion = gdb.getGdbVersion();
@@ -140,13 +182,14 @@ public class GdbDebugger implements Debugger {
     }
 
     @Override
-    public void disconnect() throws DebuggerException {
+    public void disconnect() {
+        currentLocation = null;
         debuggerCallback.onEvent(new DisconnectEventImpl());
 
         try {
             gdb.quit();
-        } catch (IOException e) {
-            throw new DebuggerException("quit failed", e);
+        } catch (IOException | InterruptedException | GdbException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -161,8 +204,11 @@ public class GdbDebugger implements Debugger {
             }
 
             debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't add breakpoint: " + breakpoint, e);
+            throw new DebuggerException("Can't add breakpoint: " + breakpoint + ". " + e.getMessage(), e);
         }
     }
 
@@ -174,8 +220,11 @@ public class GdbDebugger implements Debugger {
             } else {
                 gdb.clear(location.getTarget(), location.getLineNumber());
             }
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't delete breakpoint: " + location, e);
+            throw new DebuggerException("Can't delete breakpoint: " + location + ". " + e.getMessage(), e);
         }
     }
 
@@ -183,8 +232,11 @@ public class GdbDebugger implements Debugger {
     public void deleteAllBreakpoints() throws DebuggerException {
         try {
             gdb.delete();
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't delete all breakpoints", e);
+            throw new DebuggerException("Can't delete all breakpoints. " + e.getMessage(), e);
         }
     }
 
@@ -193,8 +245,11 @@ public class GdbDebugger implements Debugger {
         try {
             GdbInfoBreak gdbInfoBreak = gdb.infoBreak();
             return gdbInfoBreak.getBreakpoints();
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't get all breakpoints", e);
+            throw new DebuggerException("Can't get all breakpoints. " + e.getMessage(), e);
         }
     }
 
@@ -219,6 +274,7 @@ public class GdbDebugger implements Debugger {
             }
 
             if (breakpoint != null) {
+                currentLocation = breakpoint.getLocation();
                 debuggerCallback.onEvent(new SuspendEventImpl(breakpoint.getLocation()));
             } else {
                 GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
@@ -226,8 +282,11 @@ public class GdbDebugger implements Debugger {
                     disconnect();
                 }
             }
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Error during running.", e);
+            throw new DebuggerException("Error during running. " + e.getMessage(), e);
         }
     }
 
@@ -244,9 +303,13 @@ public class GdbDebugger implements Debugger {
                 return;
             }
 
+            currentLocation = gdbInfoLine.getLocation();
             debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation()));
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Step into error.", e);
+            throw new DebuggerException("Step into error. " + e.getMessage(), e);
         }
     }
 
@@ -259,9 +322,13 @@ public class GdbDebugger implements Debugger {
                 return;
             }
 
+            currentLocation = gdbInfoLine.getLocation();
             debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation()));
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Step into error.", e);
+            throw new DebuggerException("Step into error. " + e.getMessage(), e);
         }
     }
 
@@ -274,9 +341,13 @@ public class GdbDebugger implements Debugger {
                 return;
             }
 
+            currentLocation = gdbInfoLine.getLocation();
             debuggerCallback.onEvent(new SuspendEventImpl(gdbInfoLine.getLocation()));
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Step out error.", e);
+            throw new DebuggerException("Step out error. " + e.getMessage(), e);
         }
     }
 
@@ -287,6 +358,7 @@ public class GdbDebugger implements Debugger {
             Breakpoint breakpoint = gdbContinue.getBreakpoint();
 
             if (breakpoint != null) {
+                currentLocation = breakpoint.getLocation();
                 debuggerCallback.onEvent(new SuspendEventImpl(breakpoint.getLocation()));
             } else {
                 GdbInfoProgram gdbInfoProgram = gdb.infoProgram();
@@ -294,8 +366,11 @@ public class GdbDebugger implements Debugger {
                     disconnect();
                 }
             }
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Resume error.", e);
+            throw new DebuggerException("Resume error. " + e.getMessage(), e);
         }
     }
 
@@ -307,8 +382,11 @@ public class GdbDebugger implements Debugger {
                 throw new DebuggerException("Variable path is empty");
             }
             gdb.setVar(path.get(0), variable.getValue());
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't set value for " + variable.getName(), e);
+            throw new DebuggerException("Can't set value for " + variable.getName() + ". " + e.getMessage(), e);
         }
     }
 
@@ -322,8 +400,11 @@ public class GdbDebugger implements Debugger {
 
             GdbPrint gdbPrint = gdb.print(path.get(0));
             return new SimpleValueImpl(Collections.emptyList(), gdbPrint.getValue());
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't get value for " + variablePath, e);
+            throw new DebuggerException("Can't get value for " + variablePath + ". " + e.getMessage(), e);
         }
     }
 
@@ -332,8 +413,11 @@ public class GdbDebugger implements Debugger {
         try {
             GdbPrint gdbPrint = gdb.print(expression);
             return gdbPrint.getValue();
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't evaluate '" + expression + "'", e);
+            throw new DebuggerException("Can't evaluate '" + expression + "'. " + e.getMessage(), e);
         }
     }
 
@@ -342,7 +426,6 @@ public class GdbDebugger implements Debugger {
      */
     @Override
     public StackFrameDump dumpStackFrame() throws DebuggerException {
-
         try {
             Map<String, String> locals = gdb.infoLocals().getVariables();
             locals.putAll(gdb.infoArgs().getVariables());
@@ -365,8 +448,11 @@ public class GdbDebugger implements Debugger {
             }
 
             return new StackFrameDumpImpl(Collections.emptyList(), variables);
+        } catch (GdbTerminatedException e) {
+            disconnect();
+            throw e;
         } catch (IOException | GdbParseException | InterruptedException e) {
-            throw new DebuggerException("Can't dump stack frame", e);
+            throw new DebuggerException("Can't dump stack frame. " + e.getMessage(), e);
         }
     }
 }

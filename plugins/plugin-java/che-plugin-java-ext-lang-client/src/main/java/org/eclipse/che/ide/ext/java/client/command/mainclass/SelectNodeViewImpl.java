@@ -23,8 +23,8 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaContentRootInterceptor;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
@@ -52,7 +52,7 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 @Singleton
 public class SelectNodeViewImpl extends Window implements SelectNodeView {
     private final JavaContentRootInterceptor javaContentRootInterceptor;
-    private final ClassNodeInterceptor classNodeInterceptor;
+    private final ClassNodeInterceptor       classNodeInterceptor;
 
     private Tree                     tree;
     private ActionDelegate           delegate;

@@ -21,6 +21,7 @@ public class Constants {
     public static final String LINK_REL_SEARCH_RECIPES             = "search recipes";
     public static final String LINK_REL_UPDATE_RECIPE              = "update recipe";
 
+    public static final String LINK_REL_SELF                       = "self link";
     public static final String LINK_REL_GET_MACHINE                = "get machine";
     public static final String LINK_REL_GET_MACHINES               = "get machines";
     public static final String LINK_REL_DESTROY_MACHINE            = "destroy machine";

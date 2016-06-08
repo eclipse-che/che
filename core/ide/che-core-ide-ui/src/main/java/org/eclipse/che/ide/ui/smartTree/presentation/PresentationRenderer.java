@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ui.smartTree.presentation;
 
 import com.google.gwt.dom.client.Element;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.Tree.Joint;
 import org.vectomatic.dom.svg.ui.SVGResource;
 

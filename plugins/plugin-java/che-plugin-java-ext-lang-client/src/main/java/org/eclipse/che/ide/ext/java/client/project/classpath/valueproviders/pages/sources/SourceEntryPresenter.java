@@ -26,7 +26,6 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.page
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.SelectNodePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.SourceFolderNodeInterceptor;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.List;
 import java.util.Map;
@@ -41,12 +40,12 @@ import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.SOURCE;
  */
 @Singleton
 public class SourceEntryPresenter extends AbstractClasspathPagePresenter implements SourceEntryView.ActionDelegate {
-    private final DtoFactory dtoFactory;
-    private final ClasspathContainer classpathContainer;
-    private final ClasspathResolver classpathResolver;
-    private final AppContext                appContext;
-    private final SelectNodePresenter       selectNodePresenter;
-    private final SourceEntryView           view;
+    private final DtoFactory          dtoFactory;
+    private final ClasspathContainer  classpathContainer;
+    private final ClasspathResolver   classpathResolver;
+    private final AppContext          appContext;
+    private final SelectNodePresenter selectNodePresenter;
+    private final SourceEntryView     view;
 
     private boolean                        dirty;
     private boolean                        isPlainJava;
@@ -146,7 +145,7 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter impleme
     }
 
     @Override
-    public void addNode(String path, int kind, SVGResource icon) {
+    public void addNode(String path, int kind) {
         if (categories.containsKey(path)) {
             return;
         }

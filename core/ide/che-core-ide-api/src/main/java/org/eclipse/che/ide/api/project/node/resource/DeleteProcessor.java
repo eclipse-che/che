@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.api.project.node.resource;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.project.node.HasDataObject;
+import org.eclipse.che.ide.api.data.HasDataObject;
 
 import javax.validation.constraints.NotNull;
 

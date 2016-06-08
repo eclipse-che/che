@@ -11,8 +11,7 @@
 package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.machine.server.spi.impl.InstanceKeyImpl;
-import org.eclipse.che.api.machine.server.spi.InstanceKey;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Snapshot;
 import org.eclipse.che.commons.lang.NameGenerator;
 
@@ -41,7 +40,7 @@ public class SnapshotImpl implements Snapshot {
     private final long    creationDate;
 
     private String          description;
-    private InstanceKeyImpl instanceKey;
+    private MachineSourceImpl machineSource;
 
     public SnapshotImpl(Snapshot snapshot) {
         this(snapshot.getId(),
@@ -58,7 +57,7 @@ public class SnapshotImpl implements Snapshot {
 
     public SnapshotImpl(String id,
                         String type,
-                        InstanceKey instanceKey,
+                        MachineSource machineSource,
                         String namespace,
                         long creationDate,
                         String workspaceId,
@@ -72,7 +71,7 @@ public class SnapshotImpl implements Snapshot {
         this.workspaceId = requireNonNull(workspaceId, "Required non-null workspace id for snapshot");
         this.machineName = requireNonNull(machineName, "Required non-null snapshot machine name");
         this.envName = requireNonNull(envName, "Required non-null environment name for snapshot");
-        this.instanceKey = instanceKey != null ? new InstanceKeyImpl(instanceKey) : null;
+        this.machineSource = machineSource != null ? new MachineSourceImpl(machineSource) : null;
         this.description = description;
         this.isDev = isDev;
         this.creationDate = creationDate;
@@ -88,8 +87,8 @@ public class SnapshotImpl implements Snapshot {
         return type;
     }
 
-    public InstanceKey getInstanceKey() {
-        return instanceKey;
+    public MachineSourceImpl getMachineSource() {
+        return machineSource;
     }
 
     @Override
@@ -127,8 +126,8 @@ public class SnapshotImpl implements Snapshot {
         return this.isDev;
     }
 
-    public void setInstanceKey(InstanceKey instanceKey) {
-        this.instanceKey = instanceKey != null ? new InstanceKeyImpl(instanceKey.getFields()) : null;
+    public void setMachineSourceImpl(MachineSource machineSource) {
+        this.machineSource = machineSource != null ? new MachineSourceImpl(machineSource) : null;
     }
 
     public void setDescription(String description) {
@@ -148,7 +147,7 @@ public class SnapshotImpl implements Snapshot {
                && isDev == snapshot.isDev
                && Objects.equals(id, snapshot.id)
                && Objects.equals(type, snapshot.type)
-               && Objects.equals(instanceKey, snapshot.instanceKey)
+               && Objects.equals(machineSource, snapshot.machineSource)
                && Objects.equals(namespace, snapshot.namespace)
                && Objects.equals(workspaceId, snapshot.workspaceId)
                && Objects.equals(description, snapshot.description)
@@ -163,7 +162,7 @@ public class SnapshotImpl implements Snapshot {
         hash = hash * 31 + Boolean.hashCode(isDev);
         hash = hash * 31 + Objects.hashCode(id);
         hash = hash * 31 + Objects.hashCode(type);
-        hash = hash * 31 + Objects.hashCode(instanceKey);
+        hash = hash * 31 + Objects.hashCode(machineSource);
         hash = hash * 31 + Objects.hashCode(namespace);
         hash = hash * 31 + Objects.hashCode(workspaceId);
         hash = hash * 31 + Objects.hashCode(description);
@@ -177,7 +176,7 @@ public class SnapshotImpl implements Snapshot {
         return "SnapshotImpl{" +
                "id='" + id + '\'' +
                ", type='" + type + '\'' +
-               ", instanceKey=" + instanceKey +
+               ", machineSource=" + machineSource +
                ", namespace='" + namespace + '\'' +
                ", creationDate=" + creationDate +
                ", isDev=" + isDev +
@@ -200,7 +199,7 @@ public class SnapshotImpl implements Snapshot {
         private String      type;
         private String      namespace;
         private String      description;
-        private InstanceKey instanceKey;
+        private MachineSource machineSource;
         private boolean     isDev;
         private long        creationDate;
 
@@ -250,8 +249,8 @@ public class SnapshotImpl implements Snapshot {
             return this;
         }
 
-        public SnapshotBuilder setInstanceKey(InstanceKey instanceKey) {
-            this.instanceKey = instanceKey;
+        public SnapshotBuilder setMachineSource(MachineSource machineSource) {
+            this.machineSource = machineSource;
             return this;
         }
 
@@ -271,7 +270,7 @@ public class SnapshotImpl implements Snapshot {
         }
 
         public SnapshotImpl build() {
-            return new SnapshotImpl(id, type, instanceKey, namespace, creationDate, workspaceId, description, isDev, machineName, envName);
+            return new SnapshotImpl(id, type, machineSource, namespace, creationDate, workspaceId, description, isDev, machineName, envName);
         }
     }
 }

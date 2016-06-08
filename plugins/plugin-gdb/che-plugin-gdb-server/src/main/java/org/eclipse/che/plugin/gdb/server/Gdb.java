@@ -10,20 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.server;
 
+import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.plugin.gdb.server.exception.GdbException;
+import org.eclipse.che.plugin.gdb.server.exception.GdbTerminatedException;
+import org.eclipse.che.plugin.gdb.server.parser.GdbBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbClear;
 import org.eclipse.che.plugin.gdb.server.parser.GdbContinue;
 import org.eclipse.che.plugin.gdb.server.parser.GdbDelete;
-import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLine;
-import org.eclipse.che.plugin.gdb.server.parser.GdbBreak;
 import org.eclipse.che.plugin.gdb.server.parser.GdbDirectory;
 import org.eclipse.che.plugin.gdb.server.parser.GdbFile;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoArgs;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoBreak;
+import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLine;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoLocals;
 import org.eclipse.che.plugin.gdb.server.parser.GdbInfoProgram;
+import org.eclipse.che.plugin.gdb.server.parser.GdbOutput;
 import org.eclipse.che.plugin.gdb.server.parser.GdbPType;
-import org.eclipse.che.plugin.gdb.server.parser.GdbParseException;
 import org.eclipse.che.plugin.gdb.server.parser.GdbPrint;
 import org.eclipse.che.plugin.gdb.server.parser.GdbRun;
 import org.eclipse.che.plugin.gdb.server.parser.GdbTargetRemote;
@@ -46,17 +49,23 @@ public class Gdb extends GdbProcess {
     private static final String PROCESS_NAME     = "gdb";
     private static final String OUTPUT_SEPARATOR = "(gdb) ";
 
-    private final GdbVersion gdbVersion;
+    private GdbVersion gdbVersion;
 
-    Gdb() throws IOException, GdbParseException, InterruptedException {
+    Gdb() throws IOException {
         super(OUTPUT_SEPARATOR, PROCESS_NAME);
-        gdbVersion = GdbVersion.parse(outputs.take());
+
+        try {
+            gdbVersion = GdbVersion.parse(grabGdbOutput());
+        } catch (InterruptedException | DebuggerException e) {
+            LOG.error(e.getMessage(), e);
+            gdbVersion = new GdbVersion("Unknown", "Unknown");
+        }
     }
 
     /**
      * Starts GDB.
      */
-    public static Gdb start() throws InterruptedException, GdbParseException, IOException {
+    public static Gdb start() throws IOException {
         return new Gdb();
     }
 
@@ -67,59 +76,56 @@ public class Gdb extends GdbProcess {
     /**
      * `run` command.
      */
-    public GdbRun run() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("run");
-        return GdbRun.parse(outputs.take());
+    public GdbRun run() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("run");
+        return GdbRun.parse(gdbOutput);
     }
 
     /**
      * `set var` command.
      */
-    public void setVar(String varName, String value) throws IOException, InterruptedException, GdbParseException {
+    public void setVar(String varName, String value) throws IOException, InterruptedException, DebuggerException {
         String command = "set var " + varName + "=" + value;
         sendCommand(command);
-        outputs.take();
     }
 
     /**
      * `ptype` command.
      */
-    public GdbPType ptype(String variable) throws IOException, InterruptedException, GdbParseException {
-        sendCommand("ptype " + variable);
-        return GdbPType.parse(outputs.take());
+    public GdbPType ptype(String variable) throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("ptype " + variable);
+        return GdbPType.parse(gdbOutput);
     }
 
     /**
      * `print` command.
      */
-    public GdbPrint print(String variable) throws IOException, InterruptedException, GdbParseException {
-        sendCommand("print " + variable);
-        return GdbPrint.parse(outputs.take());
+    public GdbPrint print(String variable) throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("print " + variable);
+        return GdbPrint.parse(gdbOutput);
     }
 
     /**
      * `continue` command.
      */
-    public GdbContinue cont() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("continue");
-        return GdbContinue.parse(outputs.take());
+    public GdbContinue cont() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("continue");
+        return GdbContinue.parse(gdbOutput);
     }
 
     /**
      * `step` command.
      */
-    public GdbInfoLine step() throws IOException, InterruptedException, GdbParseException {
+    public GdbInfoLine step() throws IOException, InterruptedException, DebuggerException {
         sendCommand("step");
-        outputs.take();
         return infoLine();
     }
 
     /**
      * `finish` command.
      */
-    public GdbInfoLine finish() throws IOException, InterruptedException, GdbParseException {
+    public GdbInfoLine finish() throws IOException, InterruptedException, DebuggerException {
         sendCommand("finish");
-        outputs.take();
         return infoLine();
     }
 
@@ -127,11 +133,11 @@ public class Gdb extends GdbProcess {
      * `next` command.
      */
     @Nullable
-    public GdbInfoLine next() throws IOException, InterruptedException, GdbParseException {
+    public GdbInfoLine next() throws IOException, InterruptedException, DebuggerException {
         sendCommand("next");
-        outputs.take();
 
-        if (infoProgram().getStoppedAddress() == null) {
+        GdbInfoProgram gdbInfoProgram = infoProgram();
+        if (gdbInfoProgram.getStoppedAddress() == null) {
             return null;
         }
 
@@ -141,129 +147,155 @@ public class Gdb extends GdbProcess {
     /**
      * `quit` command.
      */
-    public void quit() throws IOException {
-        sendCommand("quit");
-        stop();
+    public void quit() throws IOException, GdbException, InterruptedException {
+        try {
+            sendCommand("quit", false);
+        } finally {
+            stop();
+        }
     }
 
     /**
      * `break` command
      */
-    public void breakpoint(@NotNull String file, int lineNumber) throws IOException, InterruptedException, GdbParseException {
+    public void breakpoint(@NotNull String file, int lineNumber) throws IOException,
+                                                                        InterruptedException,
+                                                                        DebuggerException {
         String command = "break " + file + ":" + lineNumber;
-        sendCommand(command);
-        GdbBreak.parse(outputs.take());
+        GdbOutput gdbOutput = sendCommand(command);
+        GdbBreak.parse(gdbOutput);
     }
 
     /**
      * `break` command
      */
-    public void breakpoint(int lineNumber) throws IOException, InterruptedException, GdbParseException {
+    public void breakpoint(int lineNumber) throws IOException, InterruptedException, DebuggerException {
         String command = "break " + lineNumber;
-        sendCommand(command);
-        GdbBreak.parse(outputs.take());
+        GdbOutput gdbOutput = sendCommand(command);
+        GdbBreak.parse(gdbOutput);
     }
 
     /**
      * `directory` command.
      */
-    public GdbDirectory directory(@NotNull String directory) throws IOException, GdbParseException, InterruptedException {
-        sendCommand("directory " + directory);
-        return GdbDirectory.parse(outputs.take());
+    public GdbDirectory directory(@NotNull String directory) throws IOException,
+                                                                    InterruptedException,
+                                                                    DebuggerException {
+        GdbOutput gdbOutput = sendCommand("directory " + directory);
+        return GdbDirectory.parse(gdbOutput);
     }
 
     /**
      * `file` command.
      */
-    public void file(@NotNull String file) throws IOException, GdbParseException, InterruptedException {
-        sendCommand("file " + file);
-        GdbFile.parse(outputs.take());
+    public void file(@NotNull String file) throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("file " + file);
+        GdbFile.parse(gdbOutput);
     }
 
     /**
      * `clear` command.
      */
-    public void clear(@NotNull String file, int lineNumber) throws IOException, InterruptedException, GdbParseException {
+    public void clear(@NotNull String file, int lineNumber) throws IOException, InterruptedException, DebuggerException {
         String command = "clear " + file + ":" + lineNumber;
-        sendCommand(command);
+        GdbOutput gdbOutput = sendCommand(command);
 
-        GdbClear.parse(outputs.take());
+        GdbClear.parse(gdbOutput);
     }
 
     /**
      * `clear` command.
      */
-    public void clear(int lineNumber) throws IOException, InterruptedException, GdbParseException {
+    public void clear(int lineNumber) throws IOException, InterruptedException, DebuggerException {
         String command = "clear " + lineNumber;
-        sendCommand(command);
+        GdbOutput gdbOutput = sendCommand(command);
 
-        GdbClear.parse(outputs.take());
+        GdbClear.parse(gdbOutput);
     }
 
     /**
      * `delete` command.
      */
-    public void delete() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("delete");
-        GdbDelete.parse(outputs.take());
+    public void delete() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("delete");
+        GdbDelete.parse(gdbOutput);
     }
 
     /**
      * `target remote` command.
      */
-    public void targetRemote(String host, int port) throws IOException, InterruptedException, GdbParseException {
+    public void targetRemote(String host, int port) throws IOException, InterruptedException, DebuggerException {
         String command = "target remote " + (host != null ? host : "") + ":" + port;
-        sendCommand(command);
-        GdbTargetRemote.parse(outputs.take());
+        GdbOutput gdbOutput = sendCommand(command);
+        GdbTargetRemote.parse(gdbOutput);
     }
 
     /**
      * `info break` command.
      */
-    public GdbInfoBreak infoBreak() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("info break");
-        return GdbInfoBreak.parse(outputs.take());
+    public GdbInfoBreak infoBreak() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("info break");
+        return GdbInfoBreak.parse(gdbOutput);
     }
 
     /**
      * `info args` command.
      */
-    public GdbInfoArgs infoArgs() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("info args");
-        return GdbInfoArgs.parse(outputs.take());
+    public GdbInfoArgs infoArgs() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("info args");
+        return GdbInfoArgs.parse(gdbOutput);
     }
 
     /**
      * `info locals` command.
      */
-    public GdbInfoLocals infoLocals() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("info locals");
-        return GdbInfoLocals.parse(outputs.take());
+    public GdbInfoLocals infoLocals() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("info locals");
+        return GdbInfoLocals.parse(gdbOutput);
     }
 
     /**
      * `info line` command.
      */
-    public GdbInfoLine infoLine() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("info line");
-        return GdbInfoLine.parse(outputs.take());
+    public GdbInfoLine infoLine() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("info line");
+        return GdbInfoLine.parse(gdbOutput);
     }
 
     /**
      * `info program` command.
      */
-    public GdbInfoProgram infoProgram() throws IOException, InterruptedException, GdbParseException {
-        sendCommand("info program");
-        return GdbInfoProgram.parse(outputs.take());
+    public GdbInfoProgram infoProgram() throws IOException, InterruptedException, DebuggerException {
+        GdbOutput gdbOutput = sendCommand("info program");
+        return GdbInfoProgram.parse(gdbOutput);
     }
 
-    private void sendCommand(String command) throws IOException {
+    private GdbOutput sendCommand(String command) throws IOException,
+                                                         GdbTerminatedException,
+                                                         InterruptedException {
+        return sendCommand(command, true);
+    }
+
+    private synchronized GdbOutput sendCommand(String command, boolean grabOutput) throws IOException,
+                                                                                          GdbTerminatedException,
+                                                                                          InterruptedException {
         LOG.debug(command);
 
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
         writer.write(command);
         writer.newLine();
         writer.flush();
+
+        return grabOutput ? grabGdbOutput() : null;
     }
 
+    private GdbOutput grabGdbOutput() throws InterruptedException, GdbTerminatedException {
+        GdbOutput gdbOutput = outputs.take();
+        if (gdbOutput.isTerminated()) {
+            String errorMsg = "GDB has been terminated with output: " + gdbOutput.getOutput();
+            LOG.error(errorMsg);
+            throw new GdbTerminatedException(errorMsg);
+        }
+        return gdbOutput;
+    }
 }

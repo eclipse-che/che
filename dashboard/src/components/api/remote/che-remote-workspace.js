@@ -28,6 +28,7 @@ export class CheRemoteWorkspace {
     // remote call
     this.remoteWorkspaceAPI = this.$resource('', {}, {
         getDetails: {method: 'GET', url: authData.url + '/api/workspace/:workspaceId?token=' + authData.token},
+        getMachineToken: {method: 'GET', url: authData.url + '/api/machine/token/:workspaceId?token=' + authData.token},
         create: {method: 'POST', url: authData.url + '/api/workspace?account=:accountId&token=' + authData.token},
         startWorkspace: {method: 'POST', url : authData.url + '/api/workspace/:workspaceId/runtime?environment=:envName&token=' + authData.token}
       }
@@ -36,6 +37,26 @@ export class CheRemoteWorkspace {
 
   createWorkspaceFromConfig(accountId, workspaceConfig) {
     return this.remoteWorkspaceAPI.create({accountId : accountId}, workspaceConfig).$promise;
+  }
+
+
+  /**
+   * Provides machine token for given workspace
+   * @param workspaceId the ID of the workspace
+   * @returns {*}
+     */
+  getMachineToken(workspaceId) {
+    let deferred = this.$q.defer();
+    let deferredPromise = deferred.promise;
+
+    let promise = this.remoteWorkspaceAPI.getMachineToken({workspaceId: workspaceId}, {}).$promise;
+    promise.then((workspace) => {
+      deferred.resolve(workspace);
+    }, (error) => {
+      deferred.reject(error);
+    });
+
+    return deferredPromise;
   }
 
   /**

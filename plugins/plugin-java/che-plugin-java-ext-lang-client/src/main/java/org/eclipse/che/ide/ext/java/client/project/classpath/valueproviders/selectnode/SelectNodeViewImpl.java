@@ -23,12 +23,11 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.node.interceptor.NodeInterceptor;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.selectnode.interceptors.ClasspathNodeInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaContentRootInterceptor;
-import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -38,7 +37,6 @@ import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.window.Window;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
@@ -187,16 +185,7 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
             return;
         }
         Node selectedNode = nodes.get(0);
-        SVGResource icon;
-        if (ClasspathEntryKind.SOURCE == interceptor.getKind()) {
-            icon = javaResources.sourceFolder();
-        } else if (selectedNode.getName().endsWith(".jar")) {
-            icon = javaResources.jarFileIcon();
-        } else {
-            icon = nodesResources.simpleFolder();
-        }
-
-        delegate.setSelectedNode(((HasStorablePath)selectedNode).getStorablePath(), icon);
+        delegate.setSelectedNode(((HasStorablePath)selectedNode).getStorablePath());
 
         hide();
     }

@@ -12,7 +12,7 @@ package org.eclipse.che.ide.filetypes;
 
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import com.google.common.base.Strings;
 import com.google.gwt.regexp.shared.RegExp;

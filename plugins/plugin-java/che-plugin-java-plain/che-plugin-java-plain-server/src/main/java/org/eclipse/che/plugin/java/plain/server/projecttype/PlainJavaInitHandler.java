@@ -11,8 +11,12 @@
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -22,7 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
 
 /**
@@ -34,8 +40,14 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
  */
 public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
+    private final ClasspathBuilder classpathBuilder;
+    private final Provider<ProjectRegistry> projectRegistryProvider;
+
     @Inject
-    private ClasspathBuilder classpathBuilder;
+    public PlainJavaInitHandler(ClasspathBuilder classpathBuilder, Provider<ProjectRegistry> projectRegistryProvider) {
+        this.classpathBuilder = classpathBuilder;
+        this.projectRegistryProvider = projectRegistryProvider;
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
 
@@ -56,7 +68,11 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
             return;
         }
 
-        classpathBuilder.generateClasspath(javaProject);
+        RegisteredProject project = projectRegistryProvider.get().getProject(javaProject.getPath().toOSString());
+        List<String> sourceFolders = project.getAttributes().get(Constants.SOURCE_FOLDER);
+        List<String> library = project.getAttributes().get(LIBRARY_FOLDER);
+
+        classpathBuilder.generateClasspath(javaProject, sourceFolders, library);
     }
 
     @Override

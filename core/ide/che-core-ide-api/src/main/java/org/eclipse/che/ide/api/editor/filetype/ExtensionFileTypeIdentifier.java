@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.filetype;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
@@ -44,6 +44,13 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
             return result;
         }
         return null;
+    }
+    
+    public void registerNewExtension(String extension, List<String> contentTypes) {
+        if (mappings.containsKey(extension)) {
+            Log.warn(ExtensionFileTypeIdentifier.class, "Replacing content types for extension '" + extension +"'.");
+        }
+        mappings.put(extension, contentTypes);
     }
 
     /** Prepares the know extension registry. */
