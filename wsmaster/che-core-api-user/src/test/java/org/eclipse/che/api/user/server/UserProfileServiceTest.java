@@ -23,14 +23,15 @@ import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.subject.Subject;
-import org.everrest.core.impl.ApplicationContextImpl;
-import org.everrest.core.impl.ApplicationProviderBinder;
+import org.everrest.core.ApplicationContext;
 import org.everrest.core.impl.ContainerRequest;
 import org.everrest.core.impl.ContainerResponse;
 import org.everrest.core.impl.EnvironmentContext;
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.EverrestProcessor;
 import org.everrest.core.impl.ProviderBinder;
+import org.everrest.core.impl.RequestDispatcher;
+import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.ResourceBinderImpl;
 import org.everrest.core.tools.DependencySupplierImpl;
 import org.everrest.core.tools.ResourceLauncher;
@@ -66,6 +67,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.everrest.core.ApplicationContext.anApplicationContext;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -108,24 +110,24 @@ public class UserProfileServiceTest {
         final ResourceBinderImpl resources = new ResourceBinderImpl();
         resources.addResource(UserProfileService.class, null);
         final DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        dependencies.addComponent(UserDao.class, userDao);
-        dependencies.addComponent(UserProfileDao.class, profileDao);
-        dependencies.addComponent(PreferenceDao.class, preferenceDao);
+        dependencies.addInstance(UserDao.class, userDao);
+        dependencies.addInstance(UserProfileDao.class, profileDao);
+        dependencies.addInstance(PreferenceDao.class, preferenceDao);
         final URI uri = new URI(BASE_URI);
         final ContainerRequest req = new ContainerRequest(null, uri, uri, null, null, securityContext);
-        final ApplicationContextImpl contextImpl = new ApplicationContextImpl(req, null, ProviderBinder.getInstance());
-        contextImpl.setDependencySupplier(dependencies);
-        ApplicationContextImpl.setCurrent(contextImpl);
-        final ApplicationProviderBinder binder = new ApplicationProviderBinder();
-        binder.addExceptionMapper(ApiExceptionMapper.class);
-        final EverrestProcessor processor = new EverrestProcessor(resources,
-                                                                  binder,
+        ProviderBinder providers = ProviderBinder.getInstance();
+        ApplicationContext.setCurrent(anApplicationContext()
+                                              .withProviders(providers)
+                                              .withRequest(req)
+                                              .withDependencySupplier(dependencies).build());
+        providers.addExceptionMapper(ApiExceptionMapper.class);
+        final EverrestProcessor processor = new EverrestProcessor(new EverrestConfiguration(),
                                                                   dependencies,
-                                                                  new EverrestConfiguration(),
+                                                                  new RequestHandlerImpl(new RequestDispatcher(resources), providers),
                                                                   null);
         launcher = new ResourceLauncher(processor);
-        service = (UserProfileService)resources.getMatchedResource("/profile", new ArrayList<String>())
-                                               .getInstance(ApplicationContextImpl.getCurrent());
+        service = (UserProfileService)resources.getMatchedResource("/profile", new ArrayList<>())
+                                               .getInstance(ApplicationContext.getCurrent());
         //setup testUser
         final String id = "user123abc456def";
         final String email = "user@testuser.com";

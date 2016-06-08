@@ -20,13 +20,14 @@ import org.eclipse.che.api.user.shared.dto.UserInRoleDescriptor;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.core.impl.ApplicationContextImpl;
-import org.everrest.core.impl.ApplicationProviderBinder;
+import org.everrest.core.ApplicationContext;
 import org.everrest.core.impl.ContainerResponse;
 import org.everrest.core.impl.EnvironmentContext;
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.EverrestProcessor;
 import org.everrest.core.impl.ProviderBinder;
+import org.everrest.core.impl.RequestDispatcher;
+import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.ResourceBinderImpl;
 import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.everrest.core.tools.DependencySupplierImpl;
@@ -54,6 +55,7 @@ import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.everrest.core.ApplicationContext.anApplicationContext;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
@@ -94,8 +96,8 @@ public class UserServiceTest {
     public void setUp() throws Exception {
         ResourceBinderImpl resources = new ResourceBinderImpl();
         DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        dependencies.addComponent(UserManager.class, userManager);
-        dependencies.addComponent(TokenValidator.class, tokenValidator);
+        dependencies.addInstance(UserManager.class, userManager);
+        dependencies.addInstance(TokenValidator.class, tokenValidator);
 
         userService = new UserService(userManager, tokenValidator, true);
         final Field uriField = userService.getClass()
@@ -106,15 +108,14 @@ public class UserServiceTest {
 
         resources.addResource(userService, null);
 
-        EverrestProcessor processor = new EverrestProcessor(resources,
-                                                            new ApplicationProviderBinder(),
+        ProviderBinder providers = ProviderBinder.getInstance();
+        EverrestProcessor processor = new EverrestProcessor(new EverrestConfiguration(),
                                                             dependencies,
-                                                            new EverrestConfiguration(),
+                                                            new RequestHandlerImpl(new RequestDispatcher(resources), providers),
                                                             null);
         launcher = new ResourceLauncher(processor);
-        ProviderBinder providerBinder = ProviderBinder.getInstance();
-        providerBinder.addExceptionMapper(ApiExceptionMapper.class);
-        ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, providerBinder));
+        providers.addExceptionMapper(ApiExceptionMapper.class);
+        ApplicationContext.setCurrent(anApplicationContext().withProviders(providers).build());
         //set up user
         final User user = createUser();
         when(environmentContext.get(SecurityContext.class)).thenReturn(securityContext);
