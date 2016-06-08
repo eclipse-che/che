@@ -70,7 +70,7 @@ public class DevMachine {
             }
         }
         //should not be
-        final String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
+        final String message = "Reference " + Constants.WSAGENT_WEBSOCKET_REFERENCE + " not found in DevMachine description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
@@ -82,7 +82,7 @@ public class DevMachine {
             }
         }
         //should not be
-        final String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
+        final String message = "Reference " + Constants.TERMINAL_REFERENCE + " not found in DevMachine description";
         Log.error(getClass(), message);
         throw new RuntimeException(message);
     }
@@ -130,4 +130,7 @@ public class DevMachine {
         return devMachineDescriptor.getId();
     }
 
+    public List<Link> getDevMachineLinks() {
+        return devMachineLinks;
+    }
 }
