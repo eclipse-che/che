@@ -333,8 +333,8 @@ class IdeSvc {
       let re = new RegExp(workspace.config.name);
       // check if we are still waiting for current workspace to be loaded
       if (re.test(ideUrlLink)) {
-        this.$rootScope.showIDE = true;
-        this.$rootScope.hideLoader = true;
+        //this.$rootScope.showIDE = true;
+        //this.$rootScope.hideLoader = true;
       }
     }, 2000);
   }
