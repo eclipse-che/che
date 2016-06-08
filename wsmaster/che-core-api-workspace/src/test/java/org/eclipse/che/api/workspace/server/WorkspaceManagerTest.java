@@ -43,7 +43,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -121,7 +120,7 @@ public class WorkspaceManagerTest {
         EnvironmentContext.setCurrent(new EnvironmentContext() {
             @Override
             public Subject getSubject() {
-                return new SubjectImpl(NAMESPACE, USER_ID, "token", new ArrayList<>(), false);
+                return new SubjectImpl(NAMESPACE, USER_ID, "token", null, false);
             }
         });
     }
