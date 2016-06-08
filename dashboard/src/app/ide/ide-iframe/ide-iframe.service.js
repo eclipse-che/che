@@ -22,13 +22,20 @@ class IdeIFrameSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($timeout, $compile) {
+  constructor ($timeout, $compile, $rootScope) {
     this.iframeAdded = false;
     this.$timeout = $timeout;
     this.$compile = $compile;
 
+    window.addEventListener("message", function(event) {
+      if ("ide-loaded" == event.data) {
+        $rootScope.$apply(() => {
+          $rootScope.showIDE = true;
+          $rootScope.hideLoader = true;
+        });
+      }
+    }, false);
   }
-
 
   addIFrame() {
     if (!this.iframeAdded) {
@@ -46,8 +53,6 @@ class IdeIFrameSvc {
     }
   }
 
-
 }
 
 export default IdeIFrameSvc;
-
