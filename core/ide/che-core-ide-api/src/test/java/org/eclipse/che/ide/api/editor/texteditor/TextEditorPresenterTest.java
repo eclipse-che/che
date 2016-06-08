@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidget.WidgetInitializedCallback;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.junit.Test;

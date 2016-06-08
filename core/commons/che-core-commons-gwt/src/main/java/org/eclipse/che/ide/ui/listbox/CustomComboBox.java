@@ -95,10 +95,12 @@ public class CustomComboBox extends FocusWidget implements HasChangeHandlers {
         addDomHandler(new MouseDownHandler() {
             @Override
             public void onMouseDown(MouseDownEvent event) {
-                //Update isActive state. It actually when we lose onBlur event in the parent widget.
-                isActive = isActive(getElement());
-                if (!isActive) {
-                    optionsPanel.setVisible(true);
+                if (!currentInputElement.isDisabled()) {
+                    //Update isActive state. It actually when we lose onBlur event in the parent widget.
+                    isActive = isActive(getElement());
+                    if (!isActive) {
+                        optionsPanel.setVisible(true);
+                    }
                 }
             }
         }, MouseDownEvent.getType());
@@ -106,10 +108,12 @@ public class CustomComboBox extends FocusWidget implements HasChangeHandlers {
         addDomHandler(new MouseUpHandler() {
             @Override
             public void onMouseUp(MouseUpEvent event) {
-                if (isActive) {
-                    optionsPanel.setVisible(!optionsPanel.isVisible());
-                } else {
-                    isActive = true;
+                if (!currentInputElement.isDisabled()) {
+                    if (isActive) {
+                        optionsPanel.setVisible(!optionsPanel.isVisible());
+                    } else {
+                        isActive = true;
+                    }
                 }
             }
         }, MouseUpEvent.getType());
@@ -477,6 +481,11 @@ public class CustomComboBox extends FocusWidget implements HasChangeHandlers {
                 inputElement.setChecked(false);
             }
         }
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        currentInputElement.setDisabled(!enabled);
     }
 
     @Override

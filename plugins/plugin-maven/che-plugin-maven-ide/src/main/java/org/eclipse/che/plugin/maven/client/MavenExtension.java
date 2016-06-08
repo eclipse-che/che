@@ -27,6 +27,7 @@ import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorProvider;
+import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 import java.util.Arrays;
@@ -52,6 +53,7 @@ public class MavenExtension {
     public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager,
                           MavenMessagesHandler messagesHandler,
                           ClassFileSourcesDownloader downloader,
+                          MavenModelImporter importMavenModelHandler,
                           MavenResources resources) {
         this.resources = resources;
 

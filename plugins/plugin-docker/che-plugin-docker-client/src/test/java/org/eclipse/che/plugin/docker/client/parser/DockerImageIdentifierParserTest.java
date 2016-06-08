@@ -28,9 +28,16 @@ public class DockerImageIdentifierParserTest {
         assertEquals(actualParsedIdentifier, expectedImageIdentifier);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Null argument value is forbidden")
+    @Test(expectedExceptions = DockerFileException.class,
+          expectedExceptionsMessageRegExp = "Null and empty argument value is forbidden")
     public void shouldThrowIllegalArgumentExceptionIfArgumentIsNull() throws Exception {
         DockerImageIdentifierParser.parse(null);
+    }
+
+    @Test(expectedExceptions = DockerFileException.class,
+          expectedExceptionsMessageRegExp = "Null and empty argument value is forbidden")
+    public void shouldThrowIllegalArgumentExceptionIfArgumentIsEmpty() throws Exception {
+        DockerImageIdentifierParser.parse("");
     }
 
     @Test(dataProvider = "invalidImages",
@@ -44,172 +51,215 @@ public class DockerImageIdentifierParserTest {
     @DataProvider(name = "validImages")
     public static Object[][] validImages() {
         return new Object[][] {
-                {"single_repo_component",
+                {"ubuntu",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("ubuntu")
                          .build()},
-                {"single_repo_component:latest",
+                {"codenvy/ubuntu_jdk8",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("codenvy/ubuntu_jdk8")
+                        .build()},
+                {"localhost:5000/ubuntu",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("ubuntu")
+                                      .setRegistry("localhost:5000")
+                         .build()},
+                {"myserver:5000/ubuntu",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("ubuntu")
+                                      .setRegistry("myserver:5000")
+                         .build()},
+                {"myserver.com/ubuntu",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("ubuntu")
+                                      .setRegistry("myserver.com")
+                         .build()},
+                {"myserver.com/codenvy/ubuntu",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("codenvy/ubuntu")
+                                      .setRegistry("myserver.com")
+                         .build()},
+                {"docker.io/ubuntu",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("ubuntu")
+                                      .setRegistry("docker.io")
+                         .build()},
+                {"docker.io/codenvy/ubuntu",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("codenvy/ubuntu")
+                                      .setRegistry("docker.io")
+                         .build()},
+                {"codenvy/agaragatyi/ubuntu_jdk8",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("codenvy/agaragatyi/ubuntu_jdk8")
+                         .build()},
+                {"ubuntu:latest",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("ubuntu")
                                       .setTag("latest")
                          .build()},
-                {"single_repo_component:some_Tag.with.dots",
+                {"ubuntu:8080",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
-                                      .setTag("some_Tag.with.dots")
+                                      .setRepository("ubuntu")
+                                      .setTag("8080")
                          .build()},
-                {"single_repo_component@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                {"debian:t.com",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("debian")
+                                      .setTag("t.com")
+                         .build()},
+                {"ubuntu@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                 DockerImageIdentifier.builder()
+                                      .setRepository("ubuntu")
                                       .setDigest("sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD")
                          .build()},
-                {"registry1-my-registries.com.ua/single_repo_component",
+                {"registry1-my-registries.com.ua/ubuntu",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("ubuntu")
                                       .setRegistry("registry1-my-registries.com.ua")
                          .build()},
-                {"registry1-my-registries.com.ua/single_repo_component:latest",
+                {"registry1-my-registries.com.ua/ubuntu:latest",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("ubuntu")
                                       .setRegistry("registry1-my-registries.com.ua")
                                       .setTag("latest")
                          .build()},
-                {"registry1-my-registries.com.ua/single_repo_component:some.Tag-with_Different.Symbols",
+                {"registry1-my-registries.com.ua/debian:some.Tag-with_Different.Symbols",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("debian")
                                       .setRegistry("registry1-my-registries.com.ua")
                                       .setTag("some.Tag-with_Different.Symbols")
                          .build()},
-                {"registry1-my-registries.com.ua/single_repo_component@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                {"registry1-my-registries.com.ua/alpine@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("alpine")
                                       .setRegistry("registry1-my-registries.com.ua")
                                       .setDigest("sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD")
                          .build()},
-                {"registry1-my-registries.com.ua:5050/single_repo_component",
+                {"registry1-my-registries.com.ua:5050/alpine_12",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("alpine_12")
                                       .setRegistry("registry1-my-registries.com.ua:5050")
                          .build()},
-                {"registry1-my-registries.com.ua:50900/single_repo_component:latest",
+                {"registry1-my-registries.com.ua:50900/debian:latest",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("debian")
                                       .setRegistry("registry1-my-registries.com.ua:50900")
                                       .setTag("latest")
                          .build()},
-                {"registry1-my-registries.com.ua:81/single_repo_component:someTag",
+                {"registry1-my-registries.com.ua:81/debian:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("debian")
                                       .setRegistry("registry1-my-registries.com.ua:81")
                                       .setTag("someTag")
                          .build()},
-                {"registry1-my-registries.com.ua:80/single_repo_component:someTag",
+                {"registry1-my-registries.com.ua:80/debian:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("debian")
                                       .setRegistry("registry1-my-registries.com.ua:80")
                                       .setTag("someTag")
                          .build()},
-                {"registry1-my-registries.com.ua:443/single_repo_component:someTag",
+                {"registry1-my-registries.com.ua:443/alpine:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("alpine")
                                       .setRegistry("registry1-my-registries.com.ua:443")
                                       .setTag("someTag")
                          .build()},
-                {"registry1-my-registries.com.ua:22/single_repo_component@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                {"registry1-my-registries.com.ua:22/ubuntu@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
                  DockerImageIdentifier.builder()
-                                      .setRepository("single_repo_component")
+                                      .setRepository("ubuntu")
                                       .setRegistry("registry1-my-registries.com.ua:22")
                                       .setDigest("sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD")
                          .build()},
-                {"my_repo_component1/my_repo_component2",
+                {"eclipse/che",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                          .build()},
-                {"my_repo_component1/my_repo_component2:latest",
+                {"eclipse/che:latest",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setTag("latest")
                          .build()},
-                {"my_repo_component1/my_repo_component2:someTag",
+                {"eclipse/che:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setTag("someTag")
                          .build()},
-                {"my_repo_component1/my_repo_component2@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                {"eclipse/che@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setDigest("sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD")
                          .build()},
-                {"my.other.registry.com/my_repo_component1/my_repo_component2",
+                {"my.other.registry.com/eclipse/che",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com")
                          .build()},
-                {"my.other.registry.com/my_repo_component1/my_repo_component2:latest",
+                {"my.other.registry.com/eclipse/che:latest",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com")
                                       .setTag("latest")
                          .build()},
-                {"my.other.registry.com/my_repo_component1/my_repo_component2:someTag",
+                {"my.other.registry.com/eclipse/che:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com")
                                       .setTag("someTag")
                          .build()},
-                {"my.other.registry.com/my_repo_component1/my_repo_component2@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                {"my.other.registry.com/eclipse/che@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com")
                                       .setDigest("sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD")
                          .build()},
-                {"my.other.registry.com:80/my_repo_component1/my_repo_component2",
+                {"my.other.registry.com:80/eclipse/che",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com:80")
                          .build()},
-                {"my.other.registry.com:9080/my_repo_component1/my_repo_component2:latest",
+                {"my.other.registry.com:9080/eclipse/che:latest",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com:9080")
                                       .setTag("latest")
                          .build()},
-                {"my.other.registry.com:5000/my_repo_component1/my_repo_component2:someTag",
+                {"my.other.registry.com:5000/eclipse/che:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com:5000")
                                       .setTag("someTag")
                          .build()},
-                {"my.other.registry.com:5000/my_repo_component1/my_repo_component2/my_repo_component3:someTag",
+                {"my.other.registry.com:5000/eclipse/che/something:someTag",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2/my_repo_component3")
+                                      .setRepository("eclipse/che/something")
                                       .setRegistry("my.other.registry.com:5000")
                                       .setTag("someTag")
                          .build()},
-                {"my.other.registry.com:32800/my_repo_component1/my_repo_component2@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
+                {"my.other.registry.com:32800/eclipse/che@sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setRegistry("my.other.registry.com:32800")
                                       .setDigest("sha256:acd122209878932bcdafafdFADCDBafaadacdbeEFAD")
                          .build()},
-                {"my_repo_component1/my_repo_component2@some-digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
+                {"eclipse/che@some-digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setDigest("some-digest:adfbac09548AFCBDFACDAFdcedfedfedfdde")
                          .build()},
-                {"my_repo_component1/my_repo_component2@some_digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
+                {"eclipse/che@some_digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setDigest("some_digest:adfbac09548AFCBDFACDAFdcedfedfedfdde")
                          .build()},
-                {"my_repo_component1/my_repo_component2@some+digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
+                {"eclipse/che@some+digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setDigest("some+digest:adfbac09548AFCBDFACDAFdcedfedfedfdde")
                          .build()},
-                {"my_repo_component1/my_repo_component2@some.digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
+                {"eclipse/che@some.digest:adfbac09548AFCBDFACDAFdcedfedfedfdde",
                  DockerImageIdentifier.builder()
-                                      .setRepository("my_repo_component1/my_repo_component2")
+                                      .setRepository("eclipse/che")
                                       .setDigest("some.digest:adfbac09548AFCBDFACDAFdcedfedfedfdde")
                          .build()}
         };
@@ -228,7 +278,7 @@ public class DockerImageIdentifierParserTest {
                 {"@image"},
                 {"repo/image:tag@digest:aaaaaa098@digest"},
                 {"repo/image:tag:tag1"},
-                {"my.other.registry.com:-8080/my_repo_component1/my_repo_component2/my_repo_component3"}
+                {"my.other.registry.com:-8080/eclipse/che/some"}
         };
     }
 }

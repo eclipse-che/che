@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.search.node;
 
-import org.eclipse.che.ide.api.project.node.AbstractTreeNode;
+import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 

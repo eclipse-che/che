@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;

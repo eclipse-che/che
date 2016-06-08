@@ -26,7 +26,7 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.project.node.HasStorablePath.StorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;

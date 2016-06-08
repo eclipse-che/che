@@ -32,7 +32,7 @@ public class HostConfig {
     private String[]       devices;
     private String         containerIDFile;
     private long           memory;
-    private int            memorySwap;
+    private long           memorySwap;
     private LogConfig      logConfig;
     private String         ipcMode;
     private String         cgroupParent;
@@ -266,15 +266,15 @@ public class HostConfig {
         return this;
     }
 
-    public int getMemorySwap() {
+    public long getMemorySwap() {
         return memorySwap;
     }
 
-    public void setMemorySwap(int memorySwap) {
+    public void setMemorySwap(long memorySwap) {
         this.memorySwap = memorySwap;
     }
 
-    public HostConfig withMemorySwap(int memorySwap) {
+    public HostConfig withMemorySwap(long memorySwap) {
         this.memorySwap = memorySwap;
         return this;
     }

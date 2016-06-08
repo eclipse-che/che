@@ -215,32 +215,38 @@ export class CheWorkspace {
     return promise;
   }
 
+  /**
+   * Returns workspace config
+   * @param config
+   * @param workspaceName
+   * @param recipeUrl
+   * @param ram
+   * @returns {*}
+   */
+  formWorkspaceConfig(config, workspaceName, recipeUrl, ram) {
+    config = config || {};
+    config.name = workspaceName;
+    config.projects = [];
+    config.defaultEnv = workspaceName;
+    config.description = null;
+    ram = ram || 2048;
+    config.environments = [{
+      'name': workspaceName,
+      'recipe': null,
+      'machineConfigs': [{
+        'name': 'ws-machine',
+        'limits': {'ram': ram},
+        'type': 'docker',
+        'source': {'location': recipeUrl, 'type': 'dockerfile'},
+        'dev': true
+      }]
+    }];
+
+    return config;
+  }
 
   createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
-    let data = {
-      'environments': [],
-      'name': workspaceName,
-      'projects': [],
-      'defaultEnv': workspaceName,
-      'description': null,
-      'commands': []
-    };
-
-    let memory = ram || 2048;
-
-    let envEntry = {
-        'name': workspaceName,
-        'recipe': null,
-        'machineConfigs': [{
-          'name': 'ws-machine',
-          'limits': {'ram': memory},
-          'type': 'docker',
-          'source': {'location': recipeUrl, 'type': 'dockerfile'},
-          'dev': true
-        }]
-      };
-
-    data.environments.push(envEntry);
+    let data = this.formWorkspaceConfig({}, workspaceName,recipeUrl, ram);
 
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
     let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;

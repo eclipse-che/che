@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.action.PromisableAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.ui.smartTree.event.ExpandNodeEvent;
 import org.eclipse.che.ide.util.loging.Log;

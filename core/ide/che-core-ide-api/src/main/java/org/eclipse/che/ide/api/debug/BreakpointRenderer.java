@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.debug;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 /** Component that handles breakpoints display. */
 public interface BreakpointRenderer {

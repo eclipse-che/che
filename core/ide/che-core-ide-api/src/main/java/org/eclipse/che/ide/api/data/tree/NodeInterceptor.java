@@ -8,10 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node.interceptor;
+package org.eclipse.che.ide.api.data.tree;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.project.node.Node;
 
 import java.util.List;
 

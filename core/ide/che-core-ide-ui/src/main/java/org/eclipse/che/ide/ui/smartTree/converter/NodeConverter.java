@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.smartTree.converter;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 
 /**
  * Mechanism to convert node or specific part of node into another representation.

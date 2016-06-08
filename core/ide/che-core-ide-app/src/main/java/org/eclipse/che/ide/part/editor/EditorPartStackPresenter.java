@@ -27,7 +27,7 @@ import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.parts.PropertyListener;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.part.editor.event.CloseNonPinnedEditorsEvent;

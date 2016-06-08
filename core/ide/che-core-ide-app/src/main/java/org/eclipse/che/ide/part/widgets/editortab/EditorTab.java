@@ -14,7 +14,7 @@ import com.google.gwt.event.dom.client.DoubleClickHandler;
 
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import javax.validation.constraints.NotNull;
 

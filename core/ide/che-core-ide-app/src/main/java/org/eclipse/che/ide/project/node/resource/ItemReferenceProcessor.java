@@ -23,7 +23,7 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.project.node.HasDataObject;
+import org.eclipse.che.ide.api.data.HasDataObject;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;

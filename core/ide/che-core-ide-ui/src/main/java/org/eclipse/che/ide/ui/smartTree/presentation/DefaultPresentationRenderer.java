@@ -16,7 +16,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 

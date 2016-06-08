@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 import java.util.List;

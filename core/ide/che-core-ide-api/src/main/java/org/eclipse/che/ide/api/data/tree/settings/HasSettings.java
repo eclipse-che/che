@@ -8,22 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node.settings.impl;
-
-import org.eclipse.che.ide.api.project.node.settings.NodeSettings;
-import org.eclipse.che.ide.api.project.node.settings.SettingsProvider;
+package org.eclipse.che.ide.api.data.tree.settings;
 
 /**
  * @author Vlad Zhukovskiy
  */
-public class DummySettingsProvider implements SettingsProvider {
-    @Override
-    public NodeSettings getSettings() {
-        return NodeSettings.DEFAULT_SETTINGS;
-    }
-
-    @Override
-    public void setSettings(NodeSettings settings) {
-        //stub
-    }
+public interface HasSettings {
+    NodeSettings getSettings();
 }

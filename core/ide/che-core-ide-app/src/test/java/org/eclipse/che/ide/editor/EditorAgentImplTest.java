@@ -25,7 +25,7 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.project.tree.generic.FileNode;
 import org.eclipse.che.ide.project.node.NodeManager;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;

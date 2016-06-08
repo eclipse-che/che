@@ -8,16 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node;
+package org.eclipse.che.ide.api.data;
 
 /**
- * Indicates that specified node can perform actions when it has been activated e.g. by double click.
+ * Indicates that specified node can contains data object, e.g. project descriptor or item reference.
  *
  * @author Vlad Zhukovskiy
  */
-public interface HasAction {
+public interface HasDataObject<D> {
     /**
-     * Perform action.
+     * Retrieve stored data object.
+     *
+     * @return data object
      */
-    void actionPerformed();
+    D getData();
+
+    /**
+     * Store data object.
+     *
+     * @param data
+     *         data object
+     */
+    void setData(D data);
 }

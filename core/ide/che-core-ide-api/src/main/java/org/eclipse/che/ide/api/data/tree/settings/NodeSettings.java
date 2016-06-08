@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.project.node.settings;
+package org.eclipse.che.ide.api.data.tree.settings;
 
 /**
  * Common view settings for tree.

@@ -47,9 +47,9 @@ public interface MavenServerServiceClient {
      * Invokes reimporting maven dependencies.
      *
      * @param projectsPaths
-     *         the paths to projects which need to be reimported dependencies
+     *         the paths to projects which need to be re-imported maven model
      */
-    Promise<Void> reimportDependencies(List<String> projectsPaths);
+    Promise<Void> reImportProjects(List<String> projectsPaths);
 
     /**
      * Invokes reconciling for pom.xml file

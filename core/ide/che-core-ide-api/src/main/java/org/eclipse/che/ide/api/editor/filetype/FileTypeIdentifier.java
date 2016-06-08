@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.filetype;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import java.util.List;
 

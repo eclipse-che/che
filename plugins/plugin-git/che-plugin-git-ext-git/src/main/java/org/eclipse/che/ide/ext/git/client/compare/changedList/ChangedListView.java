@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.git.client.compare.changedList;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 
 import javax.validation.constraints.NotNull;

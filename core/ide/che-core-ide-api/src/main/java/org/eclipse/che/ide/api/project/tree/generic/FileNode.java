@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.project.tree.TreeNode;
 import org.eclipse.che.ide.api.project.tree.TreeStructure;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;

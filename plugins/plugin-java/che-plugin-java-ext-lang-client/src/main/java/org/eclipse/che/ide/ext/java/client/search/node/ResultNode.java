@@ -20,7 +20,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.promises.client.callback.PromiseHelper;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
