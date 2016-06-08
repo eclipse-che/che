@@ -66,7 +66,10 @@ export class NavbarRecentWorkspacesCtrl {
     let lastWorkspaceId = this.ideSvc && this.ideSvc.lastWorkspace ? this.ideSvc.lastWorkspace.id : 0;
     return this.lodash.filter(this.cheWorkspace.getWorkspaces(), (workspace) => {
       if (!workspace.attributes) {
-        return false;
+        workspace.attributes = {
+          updated: 0,
+          created: 0
+        }
       }
       if (!workspace.attributes.updated) {
         workspace.attributes.updated = workspace.attributes.created;
