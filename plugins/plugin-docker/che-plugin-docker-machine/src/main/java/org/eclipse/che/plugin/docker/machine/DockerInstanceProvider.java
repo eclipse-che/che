@@ -79,6 +79,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  *
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Roman Iuvshyn
  */
 public class DockerInstanceProvider implements InstanceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);
@@ -111,6 +112,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final String                           projectFolderPath;
     private final boolean                          snapshotUseRegistry;
     private final RecipeRetriever                  recipeRetriever;
+    private final double                           memorySwapMultiplier;
 
     @Inject
     public DockerInstanceProvider(DockerConnector docker,
@@ -130,7 +132,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   @Named("machine.docker.privilege_mode") boolean privilegeMode,
                                   @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                   @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                                  @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) throws IOException {
+                                  @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
+                                  @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier) throws IOException {
         this.docker = docker;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
@@ -142,6 +145,15 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.supportedRecipeTypes = Sets.newHashSet(DOCKER_FILE_TYPE, DOCKER_IMAGE_TYPE);
         this.projectFolderPath = projectFolderPath;
         this.snapshotUseRegistry = snapshotUseRegistry;
+        // usecases:
+        //  -1  enable unlimited swap
+        //  0   disable swap
+        //  0.5 enable swap with size equal to half of current memory size
+        //  1   enable swap with size equal to current memory size
+        //
+        //  according to docker docs field  memorySwap should be equal to memory+swap
+        //  we calculate this field as memorySwap=memory * (1+ multiplier) so we just add +1 to multiplier
+        this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -514,6 +526,10 @@ public class DockerInstanceProvider implements InstanceProvider {
                 volumes = commonMachineSystemVolumes;
                 env = new ArrayList<>(commonMachineEnvVariables);
             }
+
+            final long machineMemory = machine.getConfig().getLimits().getRam() * 1024 * 1024;
+            final long machineMemorySwap = memorySwapMultiplier == -1 ? -1 : (long)(machineMemory * memorySwapMultiplier);
+
             machine.getConfig()
                    .getServers()
                    .stream()
@@ -529,8 +545,8 @@ public class DockerInstanceProvider implements InstanceProvider {
             final HostConfig hostConfig = new HostConfig().withBinds(volumes)
                                                           .withExtraHosts(allMachinesExtraHosts)
                                                           .withPublishAllPorts(true)
-                                                          .withMemorySwap(-1)
-                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024)
+                                                          .withMemorySwap(machineMemorySwap)
+                                                          .withMemory(machineMemory)
                                                           .withPrivileged(privilegeMode);
             final ContainerConfig config = new ContainerConfig().withImage(imageName)
                                                                 .withExposedPorts(portsToExpose)

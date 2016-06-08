@@ -47,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -80,15 +81,16 @@ import static org.testng.Assert.assertTrue;
 
 @Listeners(MockitoTestNGListener.class)
 public class DockerInstanceProviderTest {
-    private static final String  PROJECT_FOLDER_PATH   = "/projects";
-    private static final String  CONTAINER_ID          = "containerId";
-    private static final String  WORKSPACE_ID          = "wsId";
-    private static final String  MACHINE_ID            = "machineId";
-    private static final String  MACHINE_NAME          = "machineName";
-    private static final String  USER_TOKEN            = "userToken";
-    private static final String  USER_NAME             = "user";
-    private static final int     MEMORY_LIMIT_MB       = 64;
-    private static final boolean SNAPSHOT_USE_REGISTRY = true;
+    private static final String  PROJECT_FOLDER_PATH    = "/projects";
+    private static final String  CONTAINER_ID           = "containerId";
+    private static final String  WORKSPACE_ID           = "wsId";
+    private static final String  MACHINE_ID             = "machineId";
+    private static final String  MACHINE_NAME           = "machineName";
+    private static final String  USER_TOKEN             = "userToken";
+    private static final String  USER_NAME              = "user";
+    private static final int     MEMORY_LIMIT_MB        = 64;
+    private static final boolean SNAPSHOT_USE_REGISTRY  = true;
+    private static final int     MEMORY_SWAP_MULTIPLIER = 0;
 
     @Mock
     private DockerConnector dockerConnector;
@@ -140,7 +142,8 @@ public class DockerInstanceProviderTest {
                                                                 false,
                                                                 Collections.emptySet(),
                                                                 Collections.emptySet(),
-                                                                SNAPSHOT_USE_REGISTRY));
+                                                                SNAPSHOT_USE_REGISTRY,
+                                                                MEMORY_SWAP_MULTIPLIER));
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setSubject(new SubjectImpl(USER_NAME, "userId", USER_TOKEN, null, false));
@@ -314,7 +317,8 @@ public class DockerInstanceProviderTest {
                                                                 true,
                                                                 Collections.emptySet(),
                                                                 Collections.emptySet(),
-                                                                SNAPSHOT_USE_REGISTRY));
+                                                                SNAPSHOT_USE_REGISTRY,
+                                                                MEMORY_SWAP_MULTIPLIER));
 
         createInstanceFromRecipe();
 
@@ -478,16 +482,49 @@ public class DockerInstanceProviderTest {
         assertEquals(createContainerCaptor.getValue().getHostConfig().getMemory(), memorySizeMB * 1024 * 1024);
     }
 
-    @Test
-    public void shouldDisableSwapMemorySizeInContainersOnInstanceCreationFromRecipe() throws Exception {
-        createInstanceFromRecipe();
+    @Test(dataProvider = "swapTestProvider")
+    public void shouldBeAbleToSetCorrectSwapSize(double swapMultiplier, int memoryMB, long expectedSwapSize) throws Exception {
+        // given
+        dockerInstanceProvider = spy(new DockerInstanceProvider(dockerConnector,
+                                                                dockerConnectorConfiguration,
+                                                                dockerMachineFactory,
+                                                                dockerInstanceStopDetector,
+                                                                containerNameGenerator,
+                                                                recipeRetriever,
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                null,
+                                                                workspaceFolderPathProvider,
+                                                                PROJECT_FOLDER_PATH,
+                                                                false,
+                                                                true,
+                                                                Collections.emptySet(),
+                                                                Collections.emptySet(),
+                                                                SNAPSHOT_USE_REGISTRY,
+                                                                swapMultiplier));
 
+        // when
+        createInstanceFromRecipe(memoryMB);
+
+        // then
         ArgumentCaptor<ContainerConfig> createContainerCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
         verify(dockerConnector).createContainer(createContainerCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
-        assertEquals(createContainerCaptor.getValue().getHostConfig().getMemorySwap(), -1);
+        assertEquals(createContainerCaptor.getValue().getHostConfig().getMemorySwap(), expectedSwapSize);
     }
 
+    @DataProvider(name = "swapTestProvider")
+    public static Object[][] swapTestProvider() {
+        return new Object[][]{
+                {-1, 1000, -1},
+                {0, 1000, 1000L * 1024 * 1024},
+                {0.7, 1000, (long)(1.7 * 1000 * 1024 * 1024)},
+                {1, 1000, 2L * 1000 * 1024 * 1024},
+                {2, 1000, 3L * 1000 * 1024 * 1024},
+                {2.5, 1000, (long)(3.5 * 1000 * 1024 * 1024)}
+        };
+    }
 
     @Test(expectedExceptions = InvalidRecipeException.class)
     public void checkExceptionIfImageWithContent() throws Exception {
@@ -495,16 +532,6 @@ public class DockerInstanceProviderTest {
         machine.getConfig().getSource().setContent("hello");
         machine.getConfig().getSource().setType(DOCKER_IMAGE_TYPE);
         createInstanceFromRecipe(machine);
-    }
-
-    @Test
-    public void shouldDisableSwapMemorySizeInContainersOnInstanceCreationFromSnapshot() throws Exception {
-        createInstanceFromSnapshot();
-
-        ArgumentCaptor<ContainerConfig> createContainerCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(createContainerCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
-        assertEquals(createContainerCaptor.getValue().getHostConfig().getMemorySwap(), -1);
     }
 
     @Test
@@ -539,7 +566,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -579,7 +607,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -625,7 +654,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -665,7 +695,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -706,7 +737,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -750,7 +782,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -794,7 +827,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -838,7 +872,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -877,7 +912,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
 
@@ -916,7 +952,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
 
@@ -954,7 +991,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn("/tmp/projects");
 
@@ -992,7 +1030,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn("/tmp/projects");
 
@@ -1037,7 +1076,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = true;
@@ -1083,7 +1123,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
 
@@ -1128,7 +1169,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1171,7 +1213,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1214,7 +1257,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = true;
@@ -1257,7 +1301,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1300,7 +1345,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = false;
@@ -1345,7 +1391,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1459,7 +1506,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             devEnv,
                                                             commonEnv,
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -1494,7 +1542,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             devEnv,
                                                             commonEnv,
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -1534,7 +1583,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             devEnv,
                                                             commonEnv,
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -1569,7 +1619,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             devEnv,
                                                             commonEnv,
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -1606,7 +1657,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -1651,7 +1703,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -1696,7 +1749,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = false;
 
@@ -1741,7 +1795,8 @@ public class DockerInstanceProviderTest {
                                                             false,
                                                             Collections.emptySet(),
                                                             Collections.emptySet(),
-                                                            SNAPSHOT_USE_REGISTRY);
+                                                            SNAPSHOT_USE_REGISTRY,
+                                                            MEMORY_SWAP_MULTIPLIER);
 
         final boolean isDev = true;
 
@@ -1860,7 +1915,8 @@ public class DockerInstanceProviderTest {
                                               false,
                                               Collections.emptySet(),
                                               Collections.emptySet(),
-                                              snapshotUseRegistry));
+                                              snapshotUseRegistry,
+                                              MEMORY_SWAP_MULTIPLIER));
     }
 
     private MachineConfigImpl.MachineConfigImplBuilder getMachineConfigBuilder() {
