@@ -51,7 +51,7 @@ export class NavbarRecentWorkspacesCtrl {
       {
         name: 'Run',
         scope: 'STOPPED',
-        icon: 'fa fa-stop',
+        icon: 'fa fa-play',
         _onclick: (workspaceId) => { this.runRecentWorkspace(workspaceId) }
       }
     ];
@@ -64,7 +64,8 @@ export class NavbarRecentWorkspacesCtrl {
    */
   getRecentWorkspaces() {
     let lastWorkspaceId = this.ideSvc && this.ideSvc.lastWorkspace ? this.ideSvc.lastWorkspace.id : 0;
-    return this.lodash.filter(this.cheWorkspace.getWorkspaces(), (workspace) => {
+    let workspaces = this.cheWorkspace.getWorkspaces();
+    workspaces.forEach((workspace) => {
       if (!workspace.attributes) {
         workspace.attributes = {
           updated: 0,
@@ -81,9 +82,8 @@ export class NavbarRecentWorkspacesCtrl {
       } else {
         workspace.attributes.opening = 0;
       }
-
-      return workspace.attributes.updated;
     });
+    return workspaces;
   }
 
   /**
