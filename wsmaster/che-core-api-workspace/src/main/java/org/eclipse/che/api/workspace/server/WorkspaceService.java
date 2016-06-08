@@ -754,7 +754,6 @@ public class WorkspaceService extends Service {
         return EnvironmentContext.getCurrent().getSubject().getUserName();
     }
 
-
     /**
      * Checks object reference is not {@code null}
      *
