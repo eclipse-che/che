@@ -26,6 +26,7 @@ import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.MessageBuilder;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -33,6 +34,8 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import javax.validation.constraints.NotNull;
+
+import java.util.logging.Logger;
 
 import static com.google.gwt.http.client.RequestBuilder.GET;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
@@ -46,14 +49,14 @@ public class TestServiceClient {
 //    private final String extPath;
 //    private final String wsID;
     private final WsAgentStateController wsAgentStateController;
-//    private final AppContext appContext;
+    private final AppContext appContext;
 
     @Inject
-    public TestServiceClient(WsAgentStateController wsAgentStateController) {
+    public TestServiceClient(AppContext appContext, WsAgentStateController wsAgentStateController) {
 //        this.asyncRequestFactory = asyncRequestFactory;
 //        this.loaderFactory = loaderFactory;
         this.wsAgentStateController = wsAgentStateController;
-//        this.appContext =  appContext;
+        this.appContext =  appContext;
         // extPath gets the relative path of Che app from the @Named DI in constructor
         // appContext is a Che class that provides access to workspace
 //        helloPath = extPath + "/testing/" + appContext.getWorkspace().getId();
@@ -77,9 +80,17 @@ public class TestServiceClient {
 
     public void runTest(String workspaceId, ProjectConfigDto project, String fqn,
                         RequestCallback<TestResult> callback) {
-        String url = "/testing/" + workspaceId + "/run/?projectpath=" + project.getPath() + "&fqn=" + fqn;
-//        asyncRequestFactory.createGetRequest(url)
-//                .loader(loaderFactory.newLoader("Loading test results...")).send(callback);
+
+        String url = "/java/testing/runClass/?projectpath=" + project.getPath() + "&fqn=" + fqn;
+        Log.info(TestServiceClient.class,url);
+        updateDependencies(url,callback);
+    }
+
+    public void runAllTest(String workspaceId, ProjectConfigDto project,
+                        RequestCallback<TestResult> callback) {
+
+        String url = "/java/testing/runAll/?projectpath=" + project.getPath();
+        Log.info(TestServiceClient.class,url);
         updateDependencies(url,callback);
     }
 
@@ -90,6 +101,7 @@ public class TestServiceClient {
         builder.header(ACCEPT, APPLICATION_JSON);
         Message message = builder.build();
         sendMessageToWS(message, callback);
+        Log.info(TestServiceClient.class,url);
     }
 
 

@@ -12,6 +12,8 @@ package org.eclipse.che.ide.ext.java.testing.client.view;
 
 import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.ext.java.testing.shared.Failure;
+import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
 
 
 @ImplementedBy(TestRunnerViewImpl.class)
@@ -21,9 +23,12 @@ public interface TestRunnerView extends View<TestRunnerView.ActionDelegate> {
         /** Performs any actions appropriate in response to the user having pressed the Cancel button. */
         void onCancelClicked();
 
-        /** Performs any actions appropriate in response to the user having pressed the Checkout button. */
+        /** Performs any actions appropriate in response to the user having pressed the Run button. */
         void onRunClicked();
 
+        void onRunAllClicked();
+
+        void onGotoError();
 
         /** Performs any actions appropriate in response to the user having clicked the Enter key. */
         void onEnterClicked();
@@ -36,4 +41,8 @@ public interface TestRunnerView extends View<TestRunnerView.ActionDelegate> {
     void close();
 
     void setText(String message);
+
+    void setTestResult(TestResult result);
+
+    Failure getSelectedFailure();
 }

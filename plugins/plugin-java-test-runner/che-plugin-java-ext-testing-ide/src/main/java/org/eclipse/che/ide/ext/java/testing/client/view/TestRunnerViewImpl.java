@@ -11,40 +11,61 @@
 package org.eclipse.che.ide.ext.java.testing.client.view;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import org.eclipse.che.ide.ext.java.testing.shared.Failure;
+import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
 import org.eclipse.che.ide.ui.window.Window;
 
 
 public class TestRunnerViewImpl extends Window implements TestRunnerView {
 
-    interface CheckoutReferenceViewImplUiBinder extends UiBinder<Widget, TestRunnerViewImpl> {
+    interface TestRunnerViewImplUiBinder extends UiBinder<Widget, TestRunnerViewImpl> {
     }
 
-    private static CheckoutReferenceViewImplUiBinder ourUiBinder = GWT.create(CheckoutReferenceViewImplUiBinder.class);
+    private static TestRunnerViewImplUiBinder uiBinder = GWT.create(TestRunnerViewImplUiBinder.class);
 
 
     private ActionDelegate delegate;
 
+    private TestResult lastTestResult;
+
     Button btnRunTest;
+    Button btnRunAllTest;
+    Button btnGotoError;
     Button btnCancel;
+
     @UiField
     TextArea reference;
+
+    @UiField
+    Label failureCount;
+
+    @UiField
+    Label testFramework;
+
+    @UiField
+    Label success;
+
+    @UiField
+    ListBox listBox;
 
     @Inject
     public TestRunnerViewImpl() {
 
-        Widget widget = ourUiBinder.createAndBindUi(this);
+        Widget widget = uiBinder.createAndBindUi(this);
 
         this.setTitle("Test Runner");
         this.setWidget(widget);
@@ -66,21 +87,43 @@ public class TestRunnerViewImpl extends Window implements TestRunnerView {
             }
         });
         addButtonToFooter(btnRunTest);
+
+
+        btnRunAllTest = createButton("Run All", "test-runner-run-all", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onRunAllClicked();
+            }
+        });
+        addButtonToFooter(btnRunAllTest);
+
+        btnGotoError = createButton("Goto Error", "test-runner-goto-error", new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onGotoError();
+            }
+        });
+        addButtonToFooter(btnGotoError);
+
+        testFramework.setText("Test Framework: ");
+        failureCount.setText("Failure Count: ");
+        success.setText("Success: ");
     }
 
     @Override
     public void showDialog() {
-        reference.setText("Waiting for run the tests...");
         reference.setReadOnly(true);
-        reference.setVisibleLines(10);
+        reference.setVisibleLines(21);
+        reference.getElement().setAttribute("wrap", "off");
         this.show();
-//        reference.setReadOnly(true);
-        new Timer() {
-            @Override
-            public void run() {
-                reference.setFocus(true);
-            }
-        }.schedule(300);
+//        new Timer() {
+//            @Override
+//            public void run() {
+//                reference.setFocus(true);
+//            }
+//        }.schedule(300);
     }
 
     @Override
@@ -91,6 +134,44 @@ public class TestRunnerViewImpl extends Window implements TestRunnerView {
     @Override
     public void setText(String message) {
         reference.setValue(message);
+    }
+
+    @Override
+    public void setTestResult(TestResult result) {
+        lastTestResult = result;
+        updateUI();
+    }
+
+    @Override
+    public Failure getSelectedFailure() {
+        int selectedIndex = listBox.getSelectedIndex();
+        if(selectedIndex >= 0 || selectedIndex < lastTestResult.getFailures().size()) {
+            return lastTestResult.getFailures().get(selectedIndex);
+        }
+        return null;
+    }
+
+    private void updateUI(){
+        testFramework.setText("Test Framework: " + lastTestResult.getTestFramework());
+        failureCount.setText("Failure Count: " + Integer.toString(lastTestResult.getFailureCount()));
+        success.setText("Success: " + (lastTestResult.isSuccess() ? "Yes" : "No"));
+        listBox.clear();
+        for(Failure failure : lastTestResult.getFailures()){
+            listBox.addItem(failure.getMessage() + " in class: " + failure.getFailingClass()
+                    + "(" + failure.getFailingMethod() + ")");
+        }
+
+        listBox.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent changeEvent) {
+                Failure selectedFailure = lastTestResult.getFailures().get(listBox.getSelectedIndex());
+                String message = "Failing class: " + selectedFailure.getFailingClass()
+                        + "\nFailing method: " + selectedFailure.getFailingMethod()
+                        + "\nAssertion error: " + selectedFailure.getMessage()
+                        + "\n\nStacktrace:\n" + selectedFailure.getTrace();
+                reference.setText(message);
+            }
+        });
     }
 
 

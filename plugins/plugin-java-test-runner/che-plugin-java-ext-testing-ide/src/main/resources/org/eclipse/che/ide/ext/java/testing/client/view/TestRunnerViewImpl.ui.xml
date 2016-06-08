@@ -23,18 +23,35 @@
             margin: 6px;
         }
     </ui:style>
-    <g:DockLayoutPanel unit="PX" width="310px" height="160px" addStyleNames="{style.emptyBorder}"
+    <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.emptyBorder}"
                        debugId="test-runner-mainForm">
-        <g:north size="26.0">
-            <g:FlowPanel>
-                <g:Label text="Java Test Runner..." addStyleNames=" {style.alignLeft}"/>
-            </g:FlowPanel>
+
+        <g:north size="90.0">
+            <g:VerticalPanel>
+                <g:Label width="300px" ui:field="testFramework" addStyleNames="{style.alignLeft}"
+                            debugId="test-runner-framework"/>
+
+                <g:Label width="300px" ui:field="success" addStyleNames="{style.alignLeft}"
+                            debugId="test-runner-success"/>
+
+                <g:Label width="300px" ui:field="failureCount" addStyleNames="{style.alignLeft}"
+                            debugId="test-runner-failure-count"/>
+            </g:VerticalPanel>
         </g:north>
-        <g:north size="120.0">
+
+
+        <g:west size="380.0">
             <g:FlowPanel>
-                <g:TextArea width="290px" ui:field="reference" addStyleNames="{style.alignLeft}"
-                           debugId="test-runner-reference"/>
+                <g:ListBox visibleItemCount="24" width="380px" ui:field="listBox" addStyleNames="{style.alignLeft}"
+                           debugId="test-runner-fail-list"/>
             </g:FlowPanel>
-        </g:north>
+        </g:west>
+
+        <g:east size="380.0">
+            <g:FlowPanel>
+                <g:TextArea width="360px" ui:field="reference" addStyleNames="{style.alignLeft}"
+                            debugId="test-runner-reference" visibleLines="21"/>
+            </g:FlowPanel>
+        </g:east>
     </g:DockLayoutPanel>
 </ui:UiBinder>

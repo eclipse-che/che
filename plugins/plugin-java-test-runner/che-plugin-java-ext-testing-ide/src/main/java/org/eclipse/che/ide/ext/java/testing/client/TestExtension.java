@@ -31,8 +31,8 @@ public class TestExtension {
 
         Log.info(TestExtension.class,"TestRunner ASFD");
         DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
-        DefaultActionGroup testMenu = new DefaultActionGroup("Test 23", true, actionManager);
-        mainMenu.add(testMenu,  new Constraints(Anchor.BEFORE, GROUP_HELP));
+        DefaultActionGroup testMenu = new DefaultActionGroup("Test", true, actionManager);
+        mainMenu.add(testMenu,  new Constraints(Anchor.AFTER, GROUP_RUN));
         actionManager.registerAction("TestMenuID", testMenu);
         actionManager.registerAction("TestActionID", action);
         testMenu.add(action);
