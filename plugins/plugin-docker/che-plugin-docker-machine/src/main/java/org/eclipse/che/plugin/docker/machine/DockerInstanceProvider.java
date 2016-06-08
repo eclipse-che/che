@@ -527,7 +527,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                 env = new ArrayList<>(commonMachineEnvVariables);
             }
 
-            final long machineMemory = machine.getConfig().getLimits().getRam() * 1024 * 1024;
+            final long machineMemory = machine.getConfig().getLimits().getRam() * 1024L * 1024L;
             final long machineMemorySwap = memorySwapMultiplier == -1 ? -1 : (long)(machineMemory * memorySwapMultiplier);
 
             machine.getConfig()
