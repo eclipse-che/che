@@ -18,12 +18,9 @@ import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.text.Region;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentContentChangeEventDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.VersionedTextDocumentIdentifierDTO;
 
@@ -36,7 +33,7 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
 
     private final TextDocumentServiceClient textDocumentService;
-    private final DtoFactory dtoFactory;
+    private final DtoFactory                dtoFactory;
 
     private int version = 0;
 
@@ -58,8 +55,13 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
 
     private void handleDocumentChange(DocumentChangeEvent event) {
         Document document = event.getDocument().getDocument();
-        TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
-        TextPosition endPosition = document.getPositionFromIndex(event.getOffset() + event.getRemoveCharCount());
+//        TextPosition startPosition = document.getPositionFromIndex(event.getOffset());
+//        TextPosition endPosition;
+//        if (event.getRemoveCharCount() != 0) {
+//            endPosition = new TextPosition(startPosition.getLine(),startPosition.getCharacter()+ event.getRemoveCharCount());
+//        } else {
+//            endPosition = new TextPosition(startPosition.getLine(),startPosition.getCharacter()+ event.getLength());
+//        }
 
         DidChangeTextDocumentParamsDTO changeDTO = dtoFactory.createDto(DidChangeTextDocumentParamsDTO.class);
         String uri = document.getFile().getPath();
@@ -69,17 +71,20 @@ public class LanguageServerReconcileStrategy implements ReconcilingStrategy {
         versionedDocId.setVersion(++version);
         changeDTO.setTextDocument(versionedDocId);
         TextDocumentContentChangeEventDTO actualChange = dtoFactory.createDto(TextDocumentContentChangeEventDTO.class);
-        RangeDTO range = dtoFactory.createDto(RangeDTO.class);
-        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
-        start.setLine(startPosition.getLine());
-        start.setCharacter(startPosition.getCharacter());
-        PositionDTO end = dtoFactory.createDto(PositionDTO.class);
-        end.setLine(endPosition.getLine());
-        end.setCharacter(endPosition.getCharacter());
-        range.setStart(start);
-        range.setEnd(end);
-        actualChange.setRange(range);
-        actualChange.setText(event.getText());
+        //TODO for now all vscode LS uses TextDocumentSyncKind#Full by default, we need to support all Sync kind
+
+//        RangeDTO range = dtoFactory.createDto(RangeDTO.class);
+//        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
+//        start.setLine(startPosition.getLine());
+//        start.setCharacter(startPosition.getCharacter());
+//        PositionDTO end = dtoFactory.createDto(PositionDTO.class);
+//        end.setLine(endPosition.getLine());
+//        end.setCharacter(endPosition.getCharacter());
+//        range.setStart(start);
+//        range.setEnd(end);
+//        actualChange.setRange(range);
+
+        actualChange.setText(event.getDocument().getDocument().getContents());
         changeDTO.setContentChanges(Collections.singletonList(actualChange));
         textDocumentService.didChange(changeDTO);
     }

@@ -11,6 +11,7 @@ import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
@@ -23,19 +24,27 @@ import static com.google.common.collect.Lists.newArrayList;
 
 public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
 
-    private TextDocumentServiceClient documentServiceClient;
-    private final DtoFactory dtoFactory;
+    private final DtoFactory                dtoFactory;
+    private final LanguageServerResources   resources;
+    private final CompletionImageProvider   imageProvider;
+    private       TextDocumentServiceClient documentServiceClient;
+    private String lastErrorMessage;
 
     @Inject
-    public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient, DtoFactory dtoFactory) {
+    public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient,
+                                             DtoFactory dtoFactory,
+                                             LanguageServerResources resources,
+                                             CompletionImageProvider imageProvider) {
         this.documentServiceClient = documentServiceClient;
         this.dtoFactory = dtoFactory;
+        this.resources = resources;
+        this.imageProvider = imageProvider;
     }
 
     @Override
     public void computeCompletionProposals(TextEditor editor, int offset, final CodeAssistCallback callback) {
         TextDocumentPositionParamsDTO documentPosition = dtoFactory.createDto(TextDocumentPositionParamsDTO.class);
-        documentPosition.setUri(editor.getEditorInput().getFile().getContentUrl());
+        documentPosition.setUri(editor.getEditorInput().getFile().getPath());
         PositionDTO position = dtoFactory.createDto(PositionDTO.class);
         TextPosition textPos = editor.getDocument().getPositionFromIndex(offset);
         position.setCharacter(textPos.getCharacter());
@@ -51,7 +60,11 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             public void apply(List<CompletionItemDTO> items) throws OperationException {
                 List<CompletionProposal> proposals = newArrayList();
                 for (CompletionItemDTO item : items) {
-                    proposals.add(new CompletionItemBasedCompletionProposal(item, documentServiceClient, documentId));
+                    proposals.add(new CompletionItemBasedCompletionProposal(item,
+                                                                            documentServiceClient,
+                                                                            documentId,
+                                                                            resources,
+                                                                            imageProvider.getIcon(item.getKind())));
                 }
                 callback.proposalComputed(proposals);
             }
@@ -62,8 +75,6 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
             }
         });
     }
-
-    private String lastErrorMessage;
 
     @Override
     public String getErrorMessage() {

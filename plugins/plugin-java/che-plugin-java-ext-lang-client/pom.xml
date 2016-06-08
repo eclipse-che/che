@@ -99,6 +99,10 @@
             <artifactId>che-plugin-orion-compare</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-orion-editor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
         </dependency>

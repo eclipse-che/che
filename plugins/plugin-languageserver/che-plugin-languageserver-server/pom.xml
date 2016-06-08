@@ -9,18 +9,19 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-languageserver-server</artifactId>
     <name>Che Plugin :: Language Server :: Server</name>
     <properties>
         <findbugs.failonerror>false</findbugs.failonerror>
+        <xtext-version>2.10.0</xtext-version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
-		  <artifactId>gson</artifactId>
-		</dependency>
+            <artifactId>gson</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -32,6 +33,10 @@
         <dependency>
             <groupId>io.typefox.lsapi</groupId>
             <artifactId>io.typefox.lsapi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.typefox.lsapi</groupId>
+            <artifactId>io.typefox.lsapi.services</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -61,6 +66,11 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-languageserver-shared</artifactId>
         </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.eclipse.xtend</groupId>-->
+        <!--<artifactId>org.eclipse.xtend.lib</artifactId>-->
+        <!--<version>${xtext-version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-websockets</artifactId>
@@ -68,6 +78,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -26,7 +26,7 @@ import com.google.inject.Provider;
 
 /**
  * Component to register new content types and corresponding highlighting configuration.
- * 
+ *
  * @author Sven Efftinge (typefox.io)
  */
 public class OrionContentTypeRegistrant {
