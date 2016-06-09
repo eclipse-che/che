@@ -212,7 +212,10 @@ export class CreateWorkspaceCtrl {
    */
   submitWorkspace() {
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-    let creationPromise = this.cheAPI.getWorkspace().createWorkspace(null, this.workspaceName, this.recipeUrl, this.workspaceRam, attributes);
+    let workspaceConfigTempl = this.stack ? this.stack.workspaceConfig : {};
+    let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(workspaceConfigTempl, this.workspaceName, this.recipeUrl, this.workspaceRam);
+
+    let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
 

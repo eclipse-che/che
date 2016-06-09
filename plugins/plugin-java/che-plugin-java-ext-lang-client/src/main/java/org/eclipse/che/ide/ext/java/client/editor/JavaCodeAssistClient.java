@@ -20,6 +20,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
@@ -49,17 +50,20 @@ public class JavaCodeAssistClient {
     private final DtoUnmarshallerFactory unmarshallerFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final MessageLoader          loader;
-    private final AppContext appContext;
+    private final AppContext             appContext;
+    private final WsAgentURLModifier     urlDecorator;
 
     @Inject
     public JavaCodeAssistClient(DtoUnmarshallerFactory unmarshallerFactory,
                                 AppContext appContext,
                                 LoaderFactory loaderFactory,
-                                AsyncRequestFactory asyncRequestFactory) {
+                                AsyncRequestFactory asyncRequestFactory,
+                                WsAgentURLModifier urlDecorator) {
         this.appContext = appContext;
         this.unmarshallerFactory = unmarshallerFactory;
         this.loader = loaderFactory.newLoader();
         this.asyncRequestFactory = asyncRequestFactory;
+        this.urlDecorator = urlDecorator;
     }
 
     public void computeProposals(String projectPath, String fqn, int offset, String contents, AsyncRequestCallback<Proposals> callback) {
@@ -96,8 +100,9 @@ public class JavaCodeAssistClient {
     }
 
     public String getProposalDocUrl(int id, String sessionId) {
-        return appContext.getDevMachine().getWsAgentBaseUrl() + CODE_ASSIST_URL_PREFIX + "/compute/info?sessionid=" + sessionId +
-               "&index=" + id;
+        return urlDecorator.modify(appContext.getDevMachine().getWsAgentBaseUrl() +
+                                   CODE_ASSIST_URL_PREFIX + "/compute/info?sessionid=" + sessionId +
+                                   "&index=" + id);
     }
 
     /**

@@ -14,6 +14,8 @@ import com.google.gwt.inject.client.AbstractGinModule;
 
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.api.machine.CheWsAgentLinksModifier;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.plugin.product.info.client.CheProductInfoDataProvider;
 
 /**
@@ -25,5 +27,6 @@ public class ProductInfoGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(ProductInfoDataProvider.class).to(CheProductInfoDataProvider.class);
+        bind(WsAgentURLModifier.class).to(CheWsAgentLinksModifier.class);
     }
 }
