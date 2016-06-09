@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.Unmarshallable;
 
