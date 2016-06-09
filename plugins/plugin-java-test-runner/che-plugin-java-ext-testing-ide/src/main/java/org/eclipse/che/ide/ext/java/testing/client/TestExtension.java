@@ -27,7 +27,8 @@ import static org.eclipse.che.ide.api.action.IdeActions.*;
 public class TestExtension {
 
     @Inject
-    public TestExtension(TestResources resources, ActionManager actionManager, TestAction action) {
+    public TestExtension(TestResources resources, ActionManager actionManager, TestAction action,
+                         TestAction2 action2) {
 
         Log.info(TestExtension.class,"TestRunner ASFD");
         DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
@@ -36,6 +37,17 @@ public class TestExtension {
         actionManager.registerAction("TestMenuID", testMenu);
         actionManager.registerAction("TestActionID", action);
         testMenu.add(action);
+
+        actionManager.registerAction("TestActionID2", action2);
+        testMenu.add(action2);
+
+
+
+        DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
+
+        actionManager.registerAction("TestActionID3", action2);
+        runMenu.add(action2);
+
 
         DefaultActionGroup exploermenu = (DefaultActionGroup) actionManager
                 .getAction(GROUP_MAIN_CONTEXT_MENU);
