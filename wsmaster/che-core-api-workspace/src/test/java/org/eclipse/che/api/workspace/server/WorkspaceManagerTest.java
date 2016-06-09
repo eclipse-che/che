@@ -43,7 +43,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -81,6 +80,7 @@ import static org.testng.AssertJUnit.assertTrue;
 public class WorkspaceManagerTest {
 
     private static final String USER_ID = "user123";
+    private static final String NAMESPACE = "userNS";
 
     @Mock
     private EventService                  eventService;
@@ -120,7 +120,7 @@ public class WorkspaceManagerTest {
         EnvironmentContext.setCurrent(new EnvironmentContext() {
             @Override
             public Subject getSubject() {
-                return new SubjectImpl("Test User", USER_ID, "token", new ArrayList<>(), false);
+                return new SubjectImpl(NAMESPACE, USER_ID, "token", null, false);
             }
         });
     }
@@ -187,11 +187,9 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
-        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
         when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
-        when(userManager.getByName(anyString())).thenReturn(new org.eclipse.che.api.user.server.dao.User()
-                                                                    .withId(workspace.getNamespace()));
 
         final WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
         assertEquals(result, workspace);
@@ -199,7 +197,7 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
-        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
         when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
