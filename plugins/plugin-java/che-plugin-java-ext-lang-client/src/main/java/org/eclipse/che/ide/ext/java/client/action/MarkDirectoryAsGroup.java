@@ -42,6 +42,6 @@ public class MarkDirectoryAsGroup extends DefaultActionGroup {
         if (currentProject == null) {
             e.getPresentation().setVisible(false);
         }
-        e.getPresentation().setVisible("plainJava".equals(currentProject.getProjectConfig().getType()));
+        e.getPresentation().setVisible("javac".equals(currentProject.getProjectConfig().getType()));
     }
 }

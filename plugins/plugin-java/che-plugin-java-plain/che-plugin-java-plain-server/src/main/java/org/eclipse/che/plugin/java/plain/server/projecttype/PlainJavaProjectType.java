@@ -19,8 +19,8 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_ID;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
-import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
-import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_NAME;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.JAVAC_PROJECT_ID;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.JAVAC_PROJECT_NAME;
 
 /**
  * Project type for plain java projects.
@@ -31,7 +31,7 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 public class PlainJavaProjectType extends ProjectTypeDef {
     @Inject
     public PlainJavaProjectType(PlainJavaValueProviderFactory valueProviderFactory) {
-        super(PLAIN_JAVA_PROJECT_ID, PLAIN_JAVA_PROJECT_NAME, true, false, true);
+        super(JAVAC_PROJECT_ID, JAVAC_PROJECT_NAME, true, false, true);
 
         setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
         setValueProviderFactory(OUTPUT_FOLDER, valueProviderFactory);

@@ -83,7 +83,7 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter implements
     @Override
     public void go(final AcceptsOneWidget container) {
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
-        isPlainJava = "plainJava".equals(projectConfig.getType());
+        isPlainJava = "javac".equals(projectConfig.getType());
 
         setReadOnlyMod();
 

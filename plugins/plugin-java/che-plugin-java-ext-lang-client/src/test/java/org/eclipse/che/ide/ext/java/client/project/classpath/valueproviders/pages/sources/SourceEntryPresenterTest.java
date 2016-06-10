@@ -58,8 +58,8 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class SourceEntryPresenterTest {
-    final private static String PLAIN_TYPE = "plainJava";
-    final private static String SOURCE     = "lib";
+    final private static String JAVAC  = "javac";
+    final private static String SOURCE = "lib";
 
     @Mock
     private SourceEntryView                           view;
@@ -113,7 +113,7 @@ public class SourceEntryPresenterTest {
     public void setUp() throws Exception {
         when(appContext.getCurrentProject()).thenReturn(currentProject);
         when(currentProject.getProjectConfig()).thenReturn(projectConfig);
-        when(projectConfig.getType()).thenReturn(PLAIN_TYPE);
+        when(projectConfig.getType()).thenReturn(JAVAC);
         when(projectConfig.getPath()).thenReturn("path");
         when(resources.removeNode()).thenReturn(icon);
         when(icon.getSvg()).thenReturn(svgElement);

@@ -81,7 +81,7 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter impleme
     @Override
     public void go(AcceptsOneWidget container) {
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
-        isPlainJava = "plainJava".equals(projectConfig.getType());
+        isPlainJava = "javac".equals(projectConfig.getType());
 
         setReadOnlyMod();
 

@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_CATEGORY;
-import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.JAVAC_PROJECT_ID;
 
 /**
  * Provides information for registering Plain Java project type into project wizard.
@@ -40,7 +40,7 @@ public class PlainJavaProjectWizardRegistrar implements ProjectWizardRegistrar {
 
     @NotNull
     public String getProjectTypeId() {
-        return PLAIN_JAVA_PROJECT_ID;
+        return JAVAC_PROJECT_ID;
     }
 
     @NotNull

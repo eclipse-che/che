@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
-import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.JAVAC_PROJECT_ID;
 
 /**
  * Init handler for simple java project.
@@ -77,6 +77,6 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
     @Override
     public String getProjectType() {
-        return PLAIN_JAVA_PROJECT_ID;
+        return JAVAC_PROJECT_ID;
     }
 }

@@ -58,8 +58,8 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class LibEntryPresenterTest {
-    final private static String PLAIN_TYPE = "plainJava";
-    final private static String LIB        = "lib";
+    final private static String JAVAC = "javac";
+    final private static String LIB   = "lib";
 
     @Mock
     private LibEntryView                              view;
@@ -114,7 +114,7 @@ public class LibEntryPresenterTest {
     public void setUp() throws Exception {
         when(appContext.getCurrentProject()).thenReturn(currentProject);
         when(currentProject.getProjectConfig()).thenReturn(projectConfig);
-        when(projectConfig.getType()).thenReturn(PLAIN_TYPE);
+        when(projectConfig.getType()).thenReturn(JAVAC);
         when(projectConfig.getPath()).thenReturn("path");
         when(javaResources.externalLibraries()).thenReturn(icon);
         when(javaResources.jarFileIcon()).thenReturn(icon);
