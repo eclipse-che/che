@@ -20,6 +20,7 @@ import {CheButtonWarning} from './button/che-button-warning.directive';
 import {CheButtonDropdownCtrl} from './button-dropdown/che-button-dropdown.controller';
 import {CheButtonDropdown} from './button-dropdown/che-button-dropdown.directive';
 import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
+import {CheCompile} from './compile/che-compile.directive';
 import {CheDropZoneCtrl} from './dropzone/che-dropzone.controller';
 import {CheDropZone} from './dropzone/che-dropzone.directive';
 import {CheEmptyState} from './empty-state/che-empty-state.directive';
@@ -76,6 +77,7 @@ export class WidgetConfig {
       .directive('cheButtonDropdown', CheButtonDropdown)
       //clipboard
       .directive('cheClipboard', CheClipboard)
+      .directive('cheCompile', CheCompile)
       //dropzone
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)

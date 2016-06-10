@@ -78,6 +78,8 @@ public class DockerInstanceTest {
     private DockerConnector            dockerConnectorMock;
     @Mock
     private DockerInstanceStopDetector dockerInstanceStopDetectorMock;
+    @Mock
+    private LineConsumer               outputConsumer;
 
     private DockerInstance dockerInstance;
 
@@ -160,6 +162,13 @@ public class DockerInstanceTest {
     }
 
     @Test
+    public void shouldCloseOutputConsumerOnDestroy() throws Exception {
+        dockerInstance.destroy();
+
+        verify(outputConsumer).close();
+    }
+
+    @Test
     public void shouldSaveDockerInstanceStateIntoRepository() throws Exception {
         final String digest = "image12";
         dockerInstance = getDockerInstance(getMachine(), REGISTRY, CONTAINER, IMAGE, true);
@@ -206,7 +215,7 @@ public class DockerInstanceTest {
                                   container,
                                   image,
                                   mock(DockerNode.class),
-                                  mock(LineConsumer.class),
+                                  outputConsumer,
                                   dockerInstanceStopDetectorMock,
                                   mock(DockerInstanceProcessesCleaner.class),
                                   snapshotUseRegistry);

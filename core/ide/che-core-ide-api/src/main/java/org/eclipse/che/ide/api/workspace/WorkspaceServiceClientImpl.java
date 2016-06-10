@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.workspace;
 
-import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
@@ -24,8 +23,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.RequestCall;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -112,6 +111,20 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
+    public Promise<WorkspaceDto> getWorkspace(@NotNull final String namespace, @NotNull final String workspaceName){
+        return newPromise(new RequestCall<WorkspaceDto>() {
+            @Override
+            public void makeCall(AsyncCallback<WorkspaceDto> callback) {
+                final String url = baseHttpUrl + '/' + namespace + ":" + workspaceName;
+                asyncRequestFactory.createGetRequest(url)
+                                   .header(ACCEPT, APPLICATION_JSON)
+                                   .loader(loaderFactory.newLoader("Getting info about workspace..."))
+                                   .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class)));
+            }
+        });
+    }
+
+    @Override
     public Promise<List<WorkspaceDto>> getWorkspaces(int skip, int limit) {
         return newPromise(new RequestCall<List<WorkspaceDto>>() {
             @Override
@@ -142,7 +155,7 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     @Override
     public Promise<WorkspaceDto> update(String wsId, WorkspaceDto workspaceDto) {
         final String url = baseHttpUrl + '/' + wsId;
-        return asyncRequestFactory.createRequest(RequestBuilder.PUT, url, workspaceDto, true)
+        return asyncRequestFactory.createPutRequest(url, workspaceDto)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
     }
 
@@ -286,7 +299,11 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     @Override
     public Promise<WorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv) {
-        return null;
+        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment", newEnv)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Adding environment..."))
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WorkspaceDto.class));
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -146,6 +147,11 @@ public class SshMachineInstance extends AbstractInstance {
 
     @Override
     public void destroy() throws MachineException {
+        try {
+            outputConsumer.close();
+        } catch (IOException ignored) {
+        }
+
         // session destroying stops all processes
         // todo kill all processes started by code, we should get parent pid of session and kill all children
         sshClient.stop();

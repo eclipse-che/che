@@ -68,6 +68,7 @@ import static org.eclipse.che.api.user.server.Constants.LINK_REL_REMOVE_USER_BY_
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_PASSWORD;
 import static org.eclipse.che.api.user.server.DtoConverter.toDescriptor;
 import static org.eclipse.che.api.user.server.LinksInjector.injectLinks;
+import static org.eclipse.che.api.user.server.UserNameValidator.isValidUserName;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -161,6 +162,9 @@ public class UserService extends Service {
         }
 
         final User user = context.isUserInRole("system/admin") ? fromEntity(userDescriptor) : fromToken(token);
+        if (!isValidUserName(user.getName())) {
+            throw new BadRequestException("Username must contain only letters and digits");
+        }
         userManager.create(user, isTemporary);
         return status(CREATED).entity(injectLinks(toDescriptor(user), getServiceContext())).build();
     }
@@ -452,7 +456,7 @@ public class UserService extends Service {
         if (token == null) {
             throw new UnauthorizedException("Missed token parameter");
         }
-        return new User().withEmail(tokenValidator.validateToken(token));
+        return tokenValidator.validateToken(token);
     }
 
     /**

@@ -161,15 +161,18 @@ public class UserServiceTest {
 
     @Test
     public void shouldBeAbleToCreateNewUser() throws Exception {
+        final User userByToken = new User().withEmail("test@email.com").withName("test");
         final String userEmail = "test@email.com";
+        final String userName = "test";
         final String token = "test_token";
-        when(tokenValidator.validateToken(token)).thenReturn(userEmail);
+        when(tokenValidator.validateToken(token)).thenReturn(userByToken);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create?token=" + token, null);
 
         assertEquals(response.getStatus(), CREATED.getStatusCode());
         final UserDescriptor user = (UserDescriptor)response.getEntity();
         assertEquals(user.getEmail(), userEmail);
+        assertEquals(user.getName(), userName);
         assertEquals(user.getPassword(), "<none>");
         verify(userManager).create(any(User.class), eq(false));
 
@@ -219,9 +222,11 @@ public class UserServiceTest {
         uriField.setAccessible(true);
         uriField.set(userService, false);
 
+        final User userByToken = new User().withEmail("test@email.com").withName("test");
         final String userEmail = "test@email.com";
+        final String userName = "test";
         final String token = "test_token";
-        when(tokenValidator.validateToken(token)).thenReturn(userEmail);
+        when(tokenValidator.validateToken(token)).thenReturn(userByToken);
 
         final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create?token=" + token, null);
 
@@ -249,6 +254,20 @@ public class UserServiceTest {
         assertEquals(user.getName(), newUser.getName());
         assertEquals(user.getPassword(), "<none>");
         verify(userManager).create(any(User.class), eq(false));
+    }
+
+    @Test
+    public void shouldThrowBadRequestExceptionWhenCreatingUserWithInvalidUsername() throws Exception {
+        final UserDescriptor newUser = DtoFactory.getInstance()
+                                                 .createDto(UserDescriptor.class)
+                                                 .withName("test-123@gmail.com")
+                                                 .withPassword("password");
+        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+
+        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
+
+        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
+        verify(userManager, never()).create(any(User.class), anyBoolean());
     }
 
     @Test

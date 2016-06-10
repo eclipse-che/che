@@ -114,6 +114,7 @@ public class WorkspaceServiceLinksInjector {
         //TODO here we add url to IDE with workspace name not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
         final URI ideUri = uriBuilder.clone()
                                      .replacePath(ideContext)
+                                     .path(workspace.getNamespace())
                                      .path(workspace.getConfig().getName())
                                      .build();
         links.add(createLink("GET", ideUri.toString(), TEXT_HTML, LINK_REL_IDE_URL));
