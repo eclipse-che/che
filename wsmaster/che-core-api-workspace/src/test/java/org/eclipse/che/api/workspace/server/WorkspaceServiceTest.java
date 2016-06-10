@@ -59,7 +59,6 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -113,7 +112,6 @@ public class WorkspaceServiceTest {
     private static final ApiExceptionMapper MAPPER      = new ApiExceptionMapper();
     private static final String             USER_ID     = "user123";
     private static final String             IDE_CONTEXT = "ws";
-    private static final LinkedList<String> ROLES       = new LinkedList<>(singleton("user"));
     @SuppressWarnings("unused")
     private static final EnvironmentFilter  FILTER      = new EnvironmentFilter();
 
@@ -754,7 +752,7 @@ public class WorkspaceServiceTest {
     public static class EnvironmentFilter implements RequestFilter {
 
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", ROLES, false));
+            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", false));
         }
     }
 }

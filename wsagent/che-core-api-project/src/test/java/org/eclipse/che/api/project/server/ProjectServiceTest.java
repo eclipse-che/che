@@ -377,7 +377,7 @@ public class ProjectServiceTest {
     @Test
     public void testGetProjectCheckUserPermissions() throws Exception {
         // Without roles Collections.<String>emptySet() should get default set of permissions
-        env.setSubject(new SubjectImpl(vfsUser, vfsUser, "dummy_token", Collections.<String>emptySet(), false));
+        env.setSubject(new SubjectImpl(vfsUser, vfsUser, "dummy_token", false));
         ContainerResponse response =
                 launcher.service(GET, "http://localhost:8080/api/project/my_project",
                                  "http://localhost:8080/api", null, null, null);

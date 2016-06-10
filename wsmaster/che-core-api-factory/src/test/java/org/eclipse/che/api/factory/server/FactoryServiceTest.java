@@ -178,8 +178,7 @@ public class FactoryServiceTest {
 
         public void doFilter(GenericContainerRequest request) {
             EnvironmentContext context = EnvironmentContext.getCurrent();
-            context.setSubject(new SubjectImpl(JettyHttpServer.ADMIN_USER_NAME, userId, "token-2323",
-                                               Collections.<String>emptyList(), false));
+            context.setSubject(new SubjectImpl(JettyHttpServer.ADMIN_USER_NAME, userId, "token-2323", false));
         }
 
     }

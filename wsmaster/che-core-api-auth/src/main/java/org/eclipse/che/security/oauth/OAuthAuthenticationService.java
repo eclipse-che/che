@@ -25,7 +25,6 @@ import org.eclipse.che.security.oauth.shared.dto.OAuthAuthenticatorDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.DELETE;
@@ -169,7 +168,6 @@ public class OAuthAuthenticationService {
     @GET
     @Path("token")
     @Produces(MediaType.APPLICATION_JSON)
-    @RolesAllowed({"user", "temp_user"})
     public OAuthToken token(@Required @QueryParam("oauth_provider") String oauthProvider)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
         OAuthAuthenticator provider = getAuthenticator(oauthProvider);
@@ -190,7 +188,6 @@ public class OAuthAuthenticationService {
 
     @DELETE
     @Path("token")
-    @RolesAllowed({"user", "temp_user"})
     public void invalidate(@Required @QueryParam("oauth_provider") String oauthProvider)
             throws BadRequestException, NotFoundException, ServerException, ForbiddenException {
 

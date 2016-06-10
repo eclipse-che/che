@@ -25,9 +25,6 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * The  class contains commons business logic for all environment workspace id initialization filters. The filters are necessary to set
@@ -45,10 +42,7 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
     public final void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException,
                                                                                                                  ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest)request;
-
-        final List<String> roles = new LinkedList<>();
-        Collections.addAll(roles, "workspace/admin", "workspace/developer", "system/admin", "system/manager", "user");
-        Subject subject = new SubjectImpl("che", "che", "dummy_token", roles, false);
+        Subject subject = new SubjectImpl("che", "che", "dummy_token", false);
         HttpSession session = httpRequest.getSession();
         session.setAttribute("codenvy_user", subject);
 
@@ -78,11 +72,6 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
             @Override
             public String getRemoteUser() {
                 return subject.getUserName();
-            }
-
-            @Override
-            public boolean isUserInRole(String role) {
-                return subject.isMemberOf(role);
             }
 
             @Override

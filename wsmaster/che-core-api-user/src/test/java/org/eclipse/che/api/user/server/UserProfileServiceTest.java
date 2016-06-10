@@ -45,7 +45,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,18 +53,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_CURRENT_USER_PROFILE;
-import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_CURRENT_USER_PROFILE;
-import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_USER_PROFILE_BY_ID;
-import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_PREFERENCES;
-import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_USER_PROFILE_BY_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_CURRENT_USER_PROFILE;
+import static org.eclipse.che.api.user.server.Constants.LINK_REL_GET_USER_PROFILE_BY_ID;
+import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_CURRENT_USER_PROFILE;
+import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_PREFERENCES;
+import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_USER_PROFILE_BY_ID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -139,11 +137,6 @@ public class UserProfileServiceTest {
             @Override
             public String getUserName() {
                 return testUser.getEmail();
-            }
-
-            @Override
-            public boolean isMemberOf(String s) {
-                return false;
             }
 
             @Override
@@ -364,35 +357,16 @@ public class UserProfileServiceTest {
     }
 
     @Test
-    public void testLinksForUser() {
+    public void testLinks() {
         final Profile profile = new Profile().withId(testUser.getId());
-        when(securityContext.isUserInRole("user")).thenReturn(true);
 
         final Set<String> expectedRels = new HashSet<>(asList(LINK_REL_GET_CURRENT_USER_PROFILE,
                                                               LINK_REL_UPDATE_CURRENT_USER_PROFILE,
                                                               LINK_REL_GET_USER_PROFILE_BY_ID,
-                                                              LINK_REL_UPDATE_PREFERENCES));
+                                                              LINK_REL_UPDATE_PREFERENCES,
+                                                              LINK_REL_UPDATE_USER_PROFILE_BY_ID));
 
-        assertEquals(asRels(service.toDescriptor(profile, securityContext).getLinks()), expectedRels);
-    }
-
-    @Test
-    public void testLinksForSystemAdmin() {
-        final Profile profile = new Profile().withId(testUser.getId());
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
-
-        final Set<String> expectedRels = new HashSet<>(asList(LINK_REL_UPDATE_USER_PROFILE_BY_ID,
-                                                              LINK_REL_GET_USER_PROFILE_BY_ID));
-
-        assertEquals(asRels(service.toDescriptor(profile, securityContext).getLinks()), expectedRels);
-    }
-
-    @Test
-    public void testLinksForSystemManager() {
-        final Profile profile = new Profile().withId(testUser.getId());
-        when(securityContext.isUserInRole("system/manager")).thenReturn(true);
-
-        assertEquals(asRels(service.toDescriptor(profile, securityContext).getLinks()), singleton(LINK_REL_GET_USER_PROFILE_BY_ID));
+        assertEquals(asRels(service.toDescriptor(profile).getLinks()), expectedRels);
     }
 
     private Set<String> asRels(List<Link> links) {

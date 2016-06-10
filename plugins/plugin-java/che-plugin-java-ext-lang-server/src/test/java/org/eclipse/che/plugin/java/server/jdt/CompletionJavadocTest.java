@@ -38,11 +38,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -52,8 +49,7 @@ import static org.mockito.Mockito.mock;
  */
 public class CompletionJavadocTest extends QuickFixTest {
 
-    final String      vfsUser       = "dev";
-    final Set<String> vfsUserGroups = new LinkedHashSet<>(Arrays.asList("workspace/developer"));
+    final String vfsUser = "dev";
     private IJavaProject         fJProject1;
     private IPackageFragmentRoot fSourceFolder;
 
@@ -87,7 +83,7 @@ public class CompletionJavadocTest extends QuickFixTest {
         super.setUp();
         EnvironmentContext customEnvironment = mock(EnvironmentContext.class);
         doReturn("1q2w3e").when(customEnvironment).getWorkspaceId();
-        doReturn(new SubjectImpl(vfsUser, "", "", vfsUserGroups, false)).when(customEnvironment).getSubject();
+        doReturn(new SubjectImpl(vfsUser, "", "", false)).when(customEnvironment).getSubject();
         EnvironmentContext.setCurrent(customEnvironment);
         fJProject1 = Java18ProjectTestSetup.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(fJProject1, "src");
