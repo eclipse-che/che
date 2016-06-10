@@ -12,7 +12,7 @@
 
 /**
  * @ngdoc controller
- * @name navbar.controller:NavbarLastWorkspacesController
+ * @name navbar.controller:NavbarRecentWorkspacesController
  * @description This class is handling the controller of the recent workspaces to display in the navbar
  * @author Oleksii Kurinnyi
  */
@@ -22,12 +22,12 @@ export class NavbarRecentWorkspacesCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, lodash, ideSvc, $window, $log) {
+  constructor(cheWorkspace, ideSvc, $window, $log, $rootScope) {
     this.cheWorkspace = cheWorkspace;
-    this.lodash = lodash;
     this.ideSvc = ideSvc;
     this.$window = $window;
     this.$log = $log;
+    this.$rootScope = $rootScope;
 
     // fetch workspaces when initializing
     this.cheWorkspace.fetchWorkspaces();
@@ -38,7 +38,6 @@ export class NavbarRecentWorkspacesCtrl {
         name: 'Stop',
         scope: 'RUNNING',
         icon: 'fa fa-stop',
-        // onclick: this.stopRecentWorkspace
         _onclick: (workspaceId) => { this.stopRecentWorkspace(workspaceId) }
       },
       {
@@ -56,6 +55,11 @@ export class NavbarRecentWorkspacesCtrl {
       }
     ];
     this.dropdownItems = {};
+
+    this.veryRecentWorkspaceId = '';
+    $rootScope.$on('recent-workspace:set', (event, workspaceId) => {
+      this.veryRecentWorkspaceId = workspaceId;
+    });
   }
 
   /**
@@ -63,7 +67,6 @@ export class NavbarRecentWorkspacesCtrl {
    * @returns {*}
    */
   getRecentWorkspaces() {
-    let lastWorkspaceId = this.ideSvc && this.ideSvc.lastWorkspace ? this.ideSvc.lastWorkspace.id : 0;
     let workspaces = this.cheWorkspace.getWorkspaces();
     workspaces.forEach((workspace) => {
       if (!workspace.attributes) {
@@ -75,12 +78,10 @@ export class NavbarRecentWorkspacesCtrl {
       if (!workspace.attributes.updated) {
         workspace.attributes.updated = workspace.attributes.created;
       }
-
-      // mark workspace
-      if (workspace.id === lastWorkspaceId) {
-        workspace.attributes.opening = 1;
+      if (this.veryRecentWorkspaceId === workspace.id) {
+        workspace.attributes.opened = 1;
       } else {
-        workspace.attributes.opening = 0;
+        workspace.attributes.opened = 0;
       }
     });
     return workspaces;
@@ -105,7 +106,7 @@ export class NavbarRecentWorkspacesCtrl {
   }
 
   isOpen(workspaceId) {
-    return this.ideSvc.lastWorkspace && this.ideSvc.lastWorkspace.id === workspaceId;
+    return this.ideSvc.openedWorkspace && this.ideSvc.openedWorkspace.id === workspaceId;
   }
 
   getIdeLink(workspaceId) {

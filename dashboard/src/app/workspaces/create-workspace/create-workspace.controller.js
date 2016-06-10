@@ -28,6 +28,7 @@ export class CreateWorkspaceCtrl {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
+    this.$rootScope = $rootScope;
 
     this.selectSourceOption = 'select-source-recipe';
 
@@ -230,6 +231,7 @@ export class CreateWorkspaceCtrl {
     promise.then((workspaceData) => {
       // update list of workspaces
       // for new workspace to show in recent workspaces
+      this.updateRecentWorkspace(workspaceData.id);
       this.cheAPI.cheWorkspace.fetchWorkspaces();
 
       let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
@@ -241,4 +243,13 @@ export class CreateWorkspaceCtrl {
     });
   }
 
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
+  }
 }

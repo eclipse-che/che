@@ -90,6 +90,8 @@ class IdeSvc {
     this.currentStep = 1;
     this.lastWorkspace = workspace;
 
+    this.updateRecentWorkspace(workspace.id);
+
     let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
 
     let startWorkspaceDefer = this.$q.defer();
@@ -273,6 +275,8 @@ class IdeSvc {
   openIde(workspaceId) {
     this.$rootScope.hideNavbar = false;
 
+    this.updateRecentWorkspace(workspaceId);
+
     if (this.openedWorkspace && this.openedWorkspace.id === workspaceId) {
       this.restoreIDE();
       return;
@@ -291,6 +295,7 @@ class IdeSvc {
     let appendUrl = '?uid=' + randVal;
 
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+    this.openedWorkspace = workspace;
 
     let selfLink = this.getHrefLink(workspace, 'self link');
     let ideUrlLink = this.getHrefLink(workspace, 'ide url');
@@ -385,6 +390,16 @@ class IdeSvc {
 
   getPreventRedirection() {
     return this.preventRedirection;
+  }
+
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 }
 

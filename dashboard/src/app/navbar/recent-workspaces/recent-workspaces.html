@@ -10,7 +10,7 @@
     <md-list layout="column">
       <md-list-item flex class="navbar-subsection-item"
                     ng-repeat="workspace in navbarRecentWorkspacesCtrl.getRecentWorkspaces()
-                    | orderBy:['attributes.opening', 'attributes.updated']:'reverse'
+                    | orderBy:['attributes.opened', 'attributes.updated']:'reverse'
                     | limitTo:5"
                     ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesCtrl.isOpen(workspace.id)}">
         <navbar-dropdown-menu flex
