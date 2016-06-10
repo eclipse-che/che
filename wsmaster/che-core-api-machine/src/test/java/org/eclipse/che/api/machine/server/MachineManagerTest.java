@@ -11,9 +11,12 @@
 package org.eclipse.che.api.machine.server;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Limits;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -26,6 +29,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -45,6 +49,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -84,6 +89,12 @@ public class MachineManagerTest {
     private Instance                 instance;
     @Mock
     private Limits                   limits;
+    @Mock
+    private Command                  command;
+    @Mock
+    private InstanceProcess          instanceProcess;
+    @Mock
+    private LineConsumer             processLogger;
 
     private MachineManager manager;
 
@@ -108,6 +119,7 @@ public class MachineManagerTest {
         RecipeImpl recipe = new RecipeImpl().withScript("script").withType("Dockerfile");
 //        doNothing().when(manager).createMachineLogsDir(anyString());
         doReturn(MACHINE_ID).when(manager).generateMachineId();
+        doReturn(processLogger).when(manager).getProcessLogger(MACHINE_ID, 111, "outputChannel");
         when(machineInstanceProviders.getProvider(anyString())).thenReturn(instanceProvider);
         HashSet<String> recipeTypes = new HashSet<>();
         recipeTypes.add("test type 1");
@@ -115,6 +127,12 @@ public class MachineManagerTest {
         when(instanceProvider.getRecipeTypes()).thenReturn(recipeTypes);
         when(instanceProvider.createInstance(any(Machine.class), any(LineConsumer.class))).thenReturn(instance);
         when(machineRegistry.getInstance(anyString())).thenReturn(instance);
+        when(command.getCommandLine()).thenReturn("CommandLine");
+        when(command.getName()).thenReturn("CommandName");
+        when(command.getType()).thenReturn("CommandType");
+        when(machineRegistry.getInstance(MACHINE_ID)).thenReturn(instance);
+        when(instance.createProcess(command, "outputChannel")).thenReturn(instanceProcess);
+        when(instanceProcess.getPid()).thenReturn(111);
     }
 
     @AfterMethod
@@ -196,6 +214,54 @@ public class MachineManagerTest {
             manager.destroy(MACHINE_ID, false);
         } catch (Exception e) {
             verify(machineRegistry).remove(MACHINE_ID);
+        }
+    }
+
+    @Test
+    public void shouldCloseProcessLoggerIfExecIsSuccess() throws Exception {
+        //when
+        manager.exec(MACHINE_ID, command, "outputChannel");
+        waitForExecutorIsCompletedTask();
+
+        //then
+        verify(processLogger).close();
+    }
+
+    @Test
+    public void shouldCloseProcessLoggerIfExecFails() throws Exception {
+        //given
+        doThrow(Exception.class).when(instanceProcess).start();
+
+        //when
+        manager.exec(MACHINE_ID, command, "outputChannel");
+        waitForExecutorIsCompletedTask();
+
+        //then
+        verify(processLogger).close();
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldCloseMachineLoggerIfMachineCreationFails() throws Exception {
+        //given
+        MachineConfig machineConfig = mock(MachineConfig.class);
+        MachineSource machineSource = mock(MachineSource.class);
+        LineConsumer machineLogger = mock(LineConsumer.class);
+        doReturn(machineLogger).when(manager).getMachineLogger(MACHINE_ID, "outputChannel");
+        when(machineConfig.getSource()).thenReturn(machineSource);
+        when(machineConfig.getName()).thenReturn("Name");
+        when(machineSource.getType()).thenReturn("dockerfile");
+        doThrow(ConflictException.class).when(machineRegistry).addMachine(any());
+
+        //when
+        manager.createMachineSync(machineConfig, "workspaceId", "environmentName");
+
+        //then
+        verify(machineLogger).close();
+    }
+
+    private void waitForExecutorIsCompletedTask() throws Exception {
+        for (int i = 0; ((ThreadPoolExecutor)manager.executor).getCompletedTaskCount() == 0 && i < 10; i++) {
+            Thread.sleep(300);
         }
     }
 
