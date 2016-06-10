@@ -11,6 +11,7 @@
 package org.eclipse.che.api.user.server;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.user.server.dao.User;
 
 /**
  * Validates token.
@@ -27,5 +28,5 @@ public interface TokenValidator {
      * @throws ConflictException
      *         when token is not valid
      */
-    String validateToken(String token) throws ConflictException;
+    User validateToken(String token) throws ConflictException;
 }
