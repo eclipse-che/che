@@ -16,14 +16,12 @@ export class CheNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, onBoarding) {
+  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
-    this.onBoarding = onBoarding;
-    this.cheUser = cheAPI.getUser();
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
 
     this.displayLoginItem = userDashboardConfig.developmentMode;
@@ -44,7 +42,6 @@ export class CheNavBarCtrl {
         this.email = 'N/A ';
       });
     }
-    this.cheUser.fetchUser();
 
     this.menuItemUrl = {
       dashboard: '#/',
@@ -92,14 +89,6 @@ export class CheNavBarCtrl {
    */
   toggleLeftMenu() {
     this.mdSidenav('left').toggle();
-  }
-
-  userIsAdmin() {
-    return this.cheUser.isAdmin();
-  }
-
-  isUser() {
-    return this.cheUser.isUser();
   }
 
   getWorkspacesNumber() {
