@@ -246,6 +246,11 @@ public class DockerInstance extends AbstractInstance {
 
     @Override
     public void destroy() throws MachineException {
+        try {
+            outputConsumer.close();
+        } catch (IOException ignored) {
+        }
+
         machineProcesses.clear();
         processesCleaner.untrackProcesses(getId());
         dockerInstanceStopDetector.stopDetection(container);
