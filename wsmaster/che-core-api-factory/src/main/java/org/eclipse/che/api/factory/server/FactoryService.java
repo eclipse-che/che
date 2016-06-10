@@ -577,11 +577,7 @@ public class FactoryService extends Service {
                                    @QueryParam("path")
                                    String path)
             throws ServerException, BadRequestException, NotFoundException, ForbiddenException {
-        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
         final WorkspaceImpl usersWorkspace = workspaceManager.getWorkspace(workspace);
-        if (!usersWorkspace.getNamespace().equals(userId)) {
-            throw new ForbiddenException("User '" + userId + "' doesn't have access to '" + usersWorkspace.getId() + "' workspace");
-        }
         excludeProjectsWithoutLocation(usersWorkspace, path);
         final Factory factory = newDto(Factory.class).withWorkspace(asDto(usersWorkspace.getConfig())).withV("4.0");
         return Response.ok(factory, APPLICATION_JSON)
