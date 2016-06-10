@@ -29,9 +29,10 @@ import org.eclipse.che.ide.collections.Jso;
 @Singleton
 public class BrowserQueryFieldRenderer {
 
-    private static final int WORKSPACE_ORDER_IN_URL = 2;
+    private static final int WORKSPACE_ORDER_IN_URL = 3;
+    private static final int NAMESPACE_ORDER_IN_URL = 2;
     //Used in the JSNI methods follow
-    private static final int AMOUNT_URL_PARTS = 4;
+    private static final int AMOUNT_URL_PARTS = 5;
 
     //Used in the JSNI methods follow
     private final ProductInfoDataProvider productInfoDataProvider;
@@ -118,11 +119,13 @@ public class BrowserQueryFieldRenderer {
      */
     public void setProjectName(String projectName) {
         String workspaceName = "";
+        String namespace = "";
         WorkspaceDto workspaceDto = appContextProvider.get().getWorkspace();
         if (workspaceDto != null) {
             workspaceName = workspaceDto.getConfig().getName();
+            namespace  = workspaceDto.getNamespace();
         }
-        setQueryField(workspaceName, projectName);
+        setQueryField(namespace, workspaceName, projectName);
     }
 
     /**
@@ -133,7 +136,7 @@ public class BrowserQueryFieldRenderer {
      * @param projectName
      *         name which will be set. Can be null or empty if workspace does not contain any projects
      */
-    public native void setQueryField(String workspaceName, String projectName) /*-{
+    public native void setQueryField(String namespace, String workspaceName, String projectName) /*-{
         try {
             var window = $wnd;
             var document = $doc;
@@ -145,10 +148,14 @@ public class BrowserQueryFieldRenderer {
             var browserUrl = window.location.pathname;
             var urlParts = browserUrl.split('/');
 
-            urlParts[2] = workspaceName;
-            urlParts[3] = projectName;
+            urlParts[2] = namespace;
+            urlParts[3] = workspaceName;
+            urlParts[4] = projectName;
 
             var sliceIndex = @org.eclipse.che.ide.context.BrowserQueryFieldRenderer::AMOUNT_URL_PARTS;
+            if (namespace == null || namespace.length == 0) {
+                sliceIndex--;
+            }
             if (projectName == null || projectName.length == 0) {
                 sliceIndex--;
             }
@@ -179,5 +186,14 @@ public class BrowserQueryFieldRenderer {
         String[] urlParts = browserUrl.split("/");
 
         return urlParts.length < 3 ? "" : urlParts[WORKSPACE_ORDER_IN_URL];
+    }
+
+    /** Returns namespace name from browser query fields. */
+    public String getNamespace() {
+        String browserUrl = Window.Location.getPath();
+
+        String[] urlParts = browserUrl.split("/");
+
+        return urlParts.length < 3 ? "" : urlParts[NAMESPACE_ORDER_IN_URL];
     }
 }

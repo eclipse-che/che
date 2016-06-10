@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.jsonexample.ide.editor;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorProvider;
+import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.api.editor.defaulteditor.DefaultTextEditorProvider;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -21,23 +22,18 @@ import javax.inject.Inject;
 /**
  * The JSON Example specific {@link EditorProvider}.
  */
-public class JsonExampleEditorProvider implements EditorProvider {
+public class JsonExampleEditorProvider extends AbstractTextEditorProvider {
 
-    private final DefaultTextEditorProvider             editorProvider;
     private final JsonExampleEditorConfigurationFactory editorConfigurationFactory;
 
     /**
      * Constructor.
      *
-     * @param editorProvider
-     *         the {@link DefaultTextEditorProvider}
      * @param editorConfigurationFactory
      *         the JSON Example Editor configuration factory
      */
     @Inject
-    public JsonExampleEditorProvider(final DefaultTextEditorProvider editorProvider,
-                                     final JsonExampleEditorConfigurationFactory editorConfigurationFactory) {
-        this.editorProvider = editorProvider;
+    public JsonExampleEditorProvider(final JsonExampleEditorConfigurationFactory editorConfigurationFactory) {
         this.editorConfigurationFactory = editorConfigurationFactory;
     }
 
@@ -52,10 +48,10 @@ public class JsonExampleEditorProvider implements EditorProvider {
     }
 
     @Override
-    public EditorPartPresenter getEditor() {
-        TextEditor editor = editorProvider.getEditor();
+    public TextEditor getEditor() {
+        TextEditor editor = super.getEditor();
         TextEditorConfiguration configuration = this.editorConfigurationFactory.create(editor);
-        editorProvider.getEditor().initialize(configuration);
+        editor.initialize(configuration);
         return editor;
     }
 }

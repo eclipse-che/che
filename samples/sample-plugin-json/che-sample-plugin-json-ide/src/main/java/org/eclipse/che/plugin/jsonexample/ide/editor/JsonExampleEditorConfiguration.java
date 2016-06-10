@@ -15,12 +15,11 @@ import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter.DEFAULT_CONTENT_TYPE;
 
 public class JsonExampleEditorConfiguration extends DefaultTextEditorConfiguration {
 
@@ -31,7 +30,7 @@ public class JsonExampleEditorConfiguration extends DefaultTextEditorConfigurati
                                           final JsonExampleCodeAssistProcessorFactory codeAssistProcessorFactory) {
         codeAssist = new LinkedHashMap<>();
         JsonExampleCodeAssistProcessor codeAssistProcessor = codeAssistProcessorFactory.create(editor);
-        codeAssist.put(DEFAULT_CONTENT_TYPE, codeAssistProcessor);
+        codeAssist.put(DocumentPartitioner.DEFAULT_CONTENT_TYPE, codeAssistProcessor);
     }
 
     @Override

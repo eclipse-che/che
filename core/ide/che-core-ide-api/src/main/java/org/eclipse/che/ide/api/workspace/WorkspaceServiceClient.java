@@ -47,9 +47,21 @@ public interface WorkspaceServiceClient {
      * @param wsId
      *         workspace ID
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#getByKey(String) (Integer, Integer)
+     * @see WorkspaceService#getByKey(String)
      */
     Promise<WorkspaceDto> getWorkspace(String wsId);
+
+    /**
+     * Gets workspace by namespace and name
+     *
+     * @param namespace
+     *         namespace
+     * @param  workspaceName
+     *         workspace name
+     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
+     * @see WorkspaceService#getByKey(String)
+     */
+    Promise<WorkspaceDto> getWorkspace(String namespace, String workspaceName);
 
     /**
      * Gets all workspaces of current user.

@@ -28,8 +28,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.MachineService;
-import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -140,7 +138,7 @@ public class WorkspaceService extends Service {
         validator.validateAttributes(attributes);
         validator.validateConfig(config);
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(config,
-                                                                         getCurrentUserId(),
+                                                                         EnvironmentContext.getCurrent().getSubject().getUserName(),
                                                                          attributes,
                                                                          accountId);
         if (startAfterCreate) {
@@ -197,7 +195,7 @@ public class WorkspaceService extends Service {
                                             @QueryParam("status")
                                             String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
-        return workspaceManager.getWorkspaces(getCurrentUserId())
+        return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId())
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -247,7 +245,7 @@ public class WorkspaceService extends Service {
                                                                                         ConflictException,
                                                                                         ForbiddenException {
         if (!workspaceManager.getSnapshot(id).isEmpty()) {
-            machineManager.removeSnapshots(getCurrentUserId(), id);
+            machineManager.removeSnapshots(EnvironmentContext.getCurrent().getSubject().getUserId(), id);
         }
         workspaceManager.removeWorkspace(id);
     }
@@ -316,7 +314,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(cfg, "Workspace configuration");
         validator.validateConfig(cfg);
         return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(cfg,
-                                                                               getCurrentUserId(),
+                                                                               EnvironmentContext.getCurrent().getSubject().getUserName(),
                                                                                firstNonNull(isTemporary, false),
                                                                                accountId)), getServiceContext());
     }
@@ -746,10 +744,6 @@ public class WorkspaceService extends Service {
             res.put(attribute.substring(0, colonIdx), attribute.substring(colonIdx + 1));
         }
         return res;
-    }
-
-    private static String getCurrentUserId() {
-        return EnvironmentContext.getCurrent().getSubject().getUserId();
     }
 
     /**

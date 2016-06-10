@@ -95,13 +95,13 @@
         </che-panel>
       </md-tab-body>
     </md-tab>
-    <md-tab>
+    <md-tab ng-repeat="section in workspaceDetailsCtrl.getSections()">
       <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_inbox_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Projects</span>
+        <md-icon md-font-icon="material-design {{section.icon}}" class="che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">{{section.title}}</span>
       </md-tab-label>
       <md-tab-body>
-        <workspace-details-projects></workspace-details-projects>
+        <div che-compile="section.content"></div>
       </md-tab-body>
     </md-tab>
   </md-tabs>

@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.download.DownloadContainer;
@@ -42,13 +43,15 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
     private final AppContext               appContext;
     private final DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
+    private final WsAgentURLModifier       wsAgentURLModifier;
 
     @Inject
     public DownloadAsZipAction(AppContext appContext,
                                CoreLocalizationConstant locale,
                                Resources resources,
                                DownloadContainer downloadContainer,
-                               ProjectExplorerPresenter projectExplorer) {
+                               ProjectExplorerPresenter projectExplorer,
+                               WsAgentURLModifier wsAgentURLModifier) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
               locale.downloadProjectAsZipName(),
               locale.downloadProjectAsZipDescription(),
@@ -57,13 +60,14 @@ public class DownloadAsZipAction extends AbstractPerspectiveAction {
         this.appContext = appContext;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
+        this.wsAgentURLModifier = wsAgentURLModifier;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/" + getPath();
-        downloadContainer.setUrl(url);
+        downloadContainer.setUrl(wsAgentURLModifier.modify(url));
     }
 
     /** {@inheritDoc} */

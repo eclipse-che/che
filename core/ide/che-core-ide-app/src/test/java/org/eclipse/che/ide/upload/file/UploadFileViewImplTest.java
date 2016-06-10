@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwtmockito.GwtMockito;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,18 +40,20 @@ import static org.mockito.Mockito.when;
 @RunWith(GwtMockitoTestRunner.class)
 public class UploadFileViewImplTest {
 
-    private UploadFileViewImpl  view;
+    private UploadFileViewImpl view;
 
     UploadFileViewImpl.UploadFileViewBinder binder;
     CoreLocalizationConstant                locale;
+    WsAgentURLModifier                      wsAgentURLModifier;
 
     @Before
     public void setup() {
         GwtMockito.initMocks(this);
         binder = GWT.create(UploadFileViewImpl.UploadFileViewBinder.class);
         locale = GWT.create(CoreLocalizationConstant.class);
+        wsAgentURLModifier = GWT.create(WsAgentURLModifier.class);
         UploadFilePresenter presenter = mock(UploadFilePresenter.class);
-        view = new UploadFileViewImpl(binder, locale);
+        view = new UploadFileViewImpl(binder, locale, wsAgentURLModifier);
         view.setDelegate(presenter);
     }
 
@@ -76,10 +79,11 @@ public class UploadFileViewImplTest {
     @Test
     public void setActionShouldBeExecuted() {
         view.submitForm = mock(FormPanel.class);
+        final String url = "url";
+        when(wsAgentURLModifier.modify(url)).thenReturn(url);
+        view.setAction(url);
 
-        view.setAction("url");
-
-        verify(view.submitForm).setAction(eq("url"));
+        verify(view.submitForm).setAction(eq(url));
         verify(view.submitForm).setMethod(eq(FormPanel.METHOD_POST));
     }
 
