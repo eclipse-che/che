@@ -40,6 +40,7 @@ class IdeSvc {
 
     this.currentStep = 0;
     this.lastWorkspace = null;
+    this.openedWorkspace = null;
 
     this.listeningChannels = [];
 
@@ -87,6 +88,7 @@ class IdeSvc {
 
   startIde(workspace) {
     this.currentStep = 1;
+    this.lastWorkspace = workspace;
 
     let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
 
@@ -118,6 +120,8 @@ class IdeSvc {
         // try to connect
         this.websocketReconnect = 50;
         this.connectToExtensionServer(websocketUrl, workspace.id);
+      } else {
+        this.cleanupChannels(workspace.id);
       }
       return this.$q.resolve();
     }, (error) => {
@@ -269,7 +273,7 @@ class IdeSvc {
   openIde(workspaceId) {
     this.$rootScope.hideNavbar = false;
 
-    if (this.lastWorkspace && this.lastWorkspace.id === workspaceId) {
+    if (this.openedWorkspace && this.openedWorkspace.id === workspaceId) {
       this.restoreIDE();
       return;
     }
@@ -287,7 +291,6 @@ class IdeSvc {
     let appendUrl = '?uid=' + randVal;
 
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
-    this.lastWorkspace = workspace;
 
     let selfLink = this.getHrefLink(workspace, 'self link');
     let ideUrlLink = this.getHrefLink(workspace, 'ide url');

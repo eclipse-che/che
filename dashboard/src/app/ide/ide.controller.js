@@ -130,7 +130,6 @@ class IdeCtrl {
 
     if (this.selectedWorkspace) {
       this.ideSvc.setPreventRedirection(false);
-      this.ideSvc.init();
       this.ideSvc.openIde(this.selectedWorkspace.id);
     }
   }
