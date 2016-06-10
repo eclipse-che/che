@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyBoolean;
@@ -58,7 +59,6 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class LibEntryPresenterTest {
-    final private static String JAVAC = "javac";
     final private static String LIB   = "lib";
 
     @Mock
