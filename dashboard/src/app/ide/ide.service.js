@@ -335,16 +335,6 @@ class IdeSvc {
       // update list of recent workspaces
       this.cheWorkspace.fetchWorkspaces();
     });
-
-    this.$timeout(() => {
-      // hide loader and show IDE
-      let re = new RegExp(workspace.config.name);
-      // check if we are still waiting for current workspace to be loaded
-      if (re.test(ideUrlLink)) {
-        //this.$rootScope.showIDE = true;
-        //this.$rootScope.hideLoader = true;
-      }
-    }, 2000);
   }
 
   /**
