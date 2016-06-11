@@ -21,6 +21,7 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.ext.java.testing.client.TestResources;
 import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -35,13 +36,13 @@ import java.util.List;
 public class TestResultPresenter extends BasePresenter implements TestResultView.ActionDelegate {
     private final WorkspaceAgent           workspaceAgent;
     private final CoreLocalizationConstant localizationConstant;
-    private final Resources                resources;
+    private final TestResources                resources;
     private final TestResultView           view;
 
     @Inject
     public TestResultPresenter(WorkspaceAgent workspaceAgent,
                                CoreLocalizationConstant localizationConstant,
-                               Resources resources,
+                               TestResources resources,
                                TestResultView view) {
         this.workspaceAgent = workspaceAgent;
         this.localizationConstant = localizationConstant;
@@ -72,8 +73,7 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
 
     @Override
     public SVGResource getTitleImage() {
-//        return (resources.find());
-        return null;
+        return resources.TestIcon();
     }
 
     @Override

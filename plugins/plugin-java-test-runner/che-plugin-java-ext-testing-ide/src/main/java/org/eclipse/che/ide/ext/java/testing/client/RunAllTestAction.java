@@ -32,7 +32,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 //import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 //import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 
-public class TestAction2 extends JavaEditorAction {
+public class RunAllTestAction extends JavaEditorAction {
 
     private final NotificationManager notificationManager;
     private final EditorAgent editorAgent;
@@ -41,10 +41,10 @@ public class TestAction2 extends JavaEditorAction {
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
 
     @Inject
-    public TestAction2(TestResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
+    public RunAllTestAction(TestResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
                        TestResultPresenter presenter, FileTypeRegistry fileTypeRegistry,
                        TestServiceClient service,DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        super("Open Test Runner...2", "Opens the test runner GUI", resources.TestIcon(), editorAgent, fileTypeRegistry);
+        super("Run All", "Run the all test cases", resources.TestIcon(), editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter =  presenter;
@@ -88,5 +88,10 @@ public class TestAction2 extends JavaEditorAction {
                 }
         );
 //        presenter.handleResponse(null);
+    }
+
+    @Override
+    protected void updateProjectAction(ActionEvent e) {
+
     }
 }

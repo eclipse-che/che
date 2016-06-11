@@ -86,7 +86,7 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
 //    private final Tree                  tree;
 //    private final FindResultNodeFactory findResultNodeFactory;
 
-    interface FindResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
+    interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
     }
 
     @UiField(provided = true)
@@ -116,7 +116,7 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                               EventBus eventBus,
                               FindResultNodeFactory findResultNodeFactory,
                               CoreLocalizationConstant localizationConstant,
-                              FindResultViewImplUiBinder uiBinder) {
+                              TestResultViewImplUiBinder uiBinder) {
         super(resources);
 
         this.editorAgent = editorAgent;

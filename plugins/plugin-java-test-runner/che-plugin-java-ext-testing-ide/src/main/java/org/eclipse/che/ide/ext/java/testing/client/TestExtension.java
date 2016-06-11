@@ -18,6 +18,8 @@ import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.util.loging.Log;
 
 import static org.eclipse.che.ide.api.action.IdeActions.*;
@@ -27,34 +29,58 @@ import static org.eclipse.che.ide.api.action.IdeActions.*;
 public class TestExtension {
 
     @Inject
-    public TestExtension(TestResources resources, ActionManager actionManager, TestAction action,
-                         TestAction2 action2) {
+    public TestExtension(TestResources resources, ActionManager actionManager, RunClassTestAction runClassTestAction,
+                         RunAllTestAction runAllTestAction, RunClassContextTestAction runClassContextTestAction,
+                         KeyBindingAgent keyBinding) {
 
         Log.info(TestExtension.class,"TestRunner ASFD");
-        DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
-        DefaultActionGroup testMenu = new DefaultActionGroup("Test", true, actionManager);
-        mainMenu.add(testMenu,  new Constraints(Anchor.AFTER, GROUP_RUN));
-        actionManager.registerAction("TestMenuID", testMenu);
-        actionManager.registerAction("TestActionID", action);
-        testMenu.add(action);
-
-        actionManager.registerAction("TestActionID2", action2);
-        testMenu.add(action2);
+//        DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
+//        DefaultActionGroup testMenu = new DefaultActionGroup("Test", true, actionManager);
+//        mainMenu.add(testMenu,  new Constraints(Anchor.AFTER, GROUP_RUN));
+//        actionManager.registerAction("TestMenuID", testMenu);
+//        actionManager.registerAction("TestActionID", action);
+//        testMenu.add(action);
+//
+//        actionManager.registerAction("TestActionID2", action2);
+//        testMenu.add(action2);
 
 
 
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
 
-        actionManager.registerAction("TestActionID3", action2);
-        runMenu.add(action2);
+        DefaultActionGroup testMainMenu = new DefaultActionGroup("Testing", true, actionManager);
+        actionManager.registerAction("TestMainGroup", testMainMenu);
+        runMenu.addSeparator();
+        runMenu.add(testMainMenu);
+
+        actionManager.registerAction("TestActionRunClass", runClassTestAction);
+        testMainMenu.add(runClassTestAction);
+        actionManager.registerAction("TestActionRunAll", runAllTestAction);
+        testMainMenu.add(runAllTestAction);
 
 
-        DefaultActionGroup exploermenu = (DefaultActionGroup) actionManager
-                .getAction(GROUP_MAIN_CONTEXT_MENU);
-        DefaultActionGroup testMenu2 = new DefaultActionGroup("Testrgr", true, actionManager);
-        exploermenu.add(action);
-        Log.info(TestExtension.class,"TestRunner test menu context");
-        actionManager.registerAction("TestMenuID2", action);
+        DefaultActionGroup explorerMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
+        DefaultActionGroup testContextMenu = new DefaultActionGroup("Testing", true, actionManager);
+        actionManager.registerAction("TestContextGroup", testContextMenu);
 
+        actionManager.registerAction("TestActionRunClassContext", runClassContextTestAction);
+        testContextMenu.add(runClassContextTestAction);
+
+        testContextMenu.add(runAllTestAction);
+
+        explorerMenu.addSeparator();
+        explorerMenu.add(testContextMenu);
+
+
+//        DefaultActionGroup testMenu2 = new DefaultActionGroup("Testrgr", true, actionManager);
+//        exploermenu.add(action);
+//        Log.info(TestExtension.class,"TestRunner test menu context");
+//        actionManager.registerAction("TestMenuID2", action);
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(),
+                "TestActionRunAll");
+
+        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(),
+                "TestActionRunClass");
     }
 }
