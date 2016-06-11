@@ -26,6 +26,8 @@ public final class Constants {
     public static String SOURCE_FOLDER               = "java.source.folder";
     public static String OUTPUT_FOLDER               = "java.output.folder";
 
+    public static String JAVAC                       = "javac";
+
     private Constants() {
         throw new UnsupportedOperationException("Unused constructor.");
     }

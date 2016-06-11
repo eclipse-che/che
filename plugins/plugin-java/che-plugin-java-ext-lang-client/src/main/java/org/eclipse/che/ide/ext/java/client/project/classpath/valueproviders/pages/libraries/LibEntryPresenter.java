@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.CONTAINER;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 
 /**
  * The page for the information about libraries which are including into classpath.
@@ -83,7 +84,7 @@ public class LibEntryPresenter extends AbstractClasspathPagePresenter implements
     @Override
     public void go(final AcceptsOneWidget container) {
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
-        isPlainJava = "plainJava".equals(projectConfig.getType());
+        isPlainJava = JAVAC.equals(projectConfig.getType());
 
         setReadOnlyMod();
 

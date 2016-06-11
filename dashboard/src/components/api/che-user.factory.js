@@ -161,6 +161,7 @@ export class CheUser {
     return promise;
   }
 
+  //TODO Should be fixed in CODENVY-557
   fetchIsUserInRole(role, scope, scopeId) {
     let promise = this.remoteUserAPI.inRole({role: role, scope: scope, scopeId: scopeId}).$promise;
     let parsedResultPromise = promise.then((userInRole) => {
@@ -175,6 +176,7 @@ export class CheUser {
    * Check if useris admin or not by checking the system admin role
    * @returns {*}
    */
+  //TODO Should be fixed in CODENVY-557
   isAdmin() {
     let userInRole = this.isUserInRoleMap.get('system/admin:');
     return userInRole && userInRole.isInRole;
@@ -184,6 +186,7 @@ export class CheUser {
    * Check if user is user or not by checking the user role
    * @returns {*}
    */
+  //TODO Should be fixed in CODENVY-557
   isUser() {
     let userInRole = this.isUserInRoleMap.get('system/user:');
     return userInRole && userInRole.isInRole;

@@ -29,13 +29,12 @@ public class DummyProjectManager /*implements ProjectManager*/ {
 
 
     final String      vfsUser       = "dev";
-    final Set<String> vfsUserGroups = new LinkedHashSet<>(Arrays.asList("workspace/developer"));
 //    private final LocalFileSystemProvider localFileSystemProvider;
 
     public DummyProjectManager(String workspacePath, EventService eventService) {
 
         EnvironmentContext context = new EnvironmentContext();
-        context.setSubject(new SubjectImpl(vfsUser, "", "", vfsUserGroups, false));
+        context.setSubject(new SubjectImpl(vfsUser, "", "", false));
         EnvironmentContext.setCurrent(context);
 //        localFileSystemProvider = new LocalFileSystemProvider("", new LocalFSMountStrategy() {
 //            @Override

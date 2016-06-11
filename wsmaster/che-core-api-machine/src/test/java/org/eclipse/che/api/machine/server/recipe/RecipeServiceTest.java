@@ -30,14 +30,12 @@ import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.UriInfo;
 import java.lang.reflect.Field;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.jayway.restassured.RestAssured.given;
@@ -64,7 +62,6 @@ public class RecipeServiceTest {
     @SuppressWarnings("unused")
     static final ApiExceptionMapper MAPPER  = new ApiExceptionMapper();
     static final String             USER_ID = "user123";
-    static final LinkedList<String> ROLES   = new LinkedList<>(asList("user"));
 
     @Mock
     RecipeDao     recipeDao;
@@ -82,11 +79,6 @@ public class RecipeServiceTest {
                                       .getDeclaredField("uriInfo");
         uriField.setAccessible(true);
         uriField.set(service, uriInfo);
-    }
-
-    @AfterMethod
-    public void cleanUp() {
-        ROLES.remove("system/admin");
     }
 
     @Test
@@ -313,7 +305,7 @@ public class RecipeServiceTest {
     public static class EnvironmentFilter implements RequestFilter {
 
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", ROLES, false));
+            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", false));
         }
     }
 

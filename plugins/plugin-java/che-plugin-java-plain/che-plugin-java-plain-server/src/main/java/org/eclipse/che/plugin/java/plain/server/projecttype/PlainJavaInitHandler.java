@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
-import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
 
 /**
  * Init handler for simple java project.
@@ -77,6 +77,6 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
     @Override
     public String getProjectType() {
-        return PLAIN_JAVA_PROJECT_ID;
+        return JAVAC;
     }
 }
