@@ -45,6 +45,7 @@ import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 //import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.testing.client.view.navigation.TestClassNavigation;
+import org.eclipse.che.ide.ext.java.testing.client.view.navigation.factory.TestResultNodeFactory;
 import org.eclipse.che.ide.ext.java.testing.client.view.navigation.nodes.TestResultClassNode;
 import org.eclipse.che.ide.ext.java.testing.client.view.navigation.nodes.TestResultGroupNode;
 import org.eclipse.che.ide.ext.java.testing.client.view.navigation.nodes.TestResultMethodNode;
@@ -96,7 +97,7 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
     private final ProjectExplorerPresenter projectExplorer;
     private final EditorAgent editorAgent;
     private final EventBus eventBus;
-
+    private final TestResultNodeFactory nodeFactory;
     //    @UiField(provided = true)
 //    Tree<String> processTree;
     private TestResult lastTestResult;
@@ -116,13 +117,15 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                               EventBus eventBus,
                               FindResultNodeFactory findResultNodeFactory,
                               CoreLocalizationConstant localizationConstant,
-                              TestResultViewImplUiBinder uiBinder) {
+                              TestResultViewImplUiBinder uiBinder,
+                              TestResultNodeFactory nodeFactory) {
         super(resources);
 
         this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.projectExplorer = projectExplorer;
         this.eventBus = eventBus;
+        this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(uiBinder.createAndBindUi(this));
 
@@ -221,7 +224,7 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
         resultTree.getNodeStorage().clear();
         outputResult.setText("");
 
-        TestResultGroupNode root = new TestResultGroupNode(lastTestResult);
+        TestResultGroupNode root = nodeFactory.getTestResultGroupNode(lastTestResult);
 
         HashMap<String, List<Node>> classNodeHashMap = new HashMap<>();
 
@@ -231,13 +234,13 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                 classNodeHashMap.put(failure.getFailingClass(), methodNodes);
             }
             classNodeHashMap.get(failure.getFailingClass())
-                    .add(new TestResultMethodNode(failure.getFailingMethod(), failure.getTrace(), failure.getMessage(),
-                            failure.getFailingLine(), this));
+                    .add(nodeFactory.getTestResultMethodNodeNode(failure.getFailingMethod(), failure.getTrace(),
+                            failure.getMessage(), failure.getFailingLine(), this));
         }
 
         List<Node> classNodes = new ArrayList<>();
         for (Map.Entry<String, List<Node>> entry : classNodeHashMap.entrySet()) {
-            TestResultClassNode classNode = new TestResultClassNode(entry.getKey());
+            TestResultClassNode classNode = nodeFactory.getTestResultClassNodeNode(entry.getKey());
             classNode.setChildren(entry.getValue());
             classNodes.add(classNode);
         }

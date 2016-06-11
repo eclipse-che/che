@@ -62,7 +62,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
                                      TestServiceClient service, DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      SelectionAgent selectionAgent) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
-                "Run Class", "Run the current test cases", null, resources.TestIcon());
+                "Run Class", "Run the current test cases", null, resources.testIcon());
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;

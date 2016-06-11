@@ -73,7 +73,7 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
 
     @Override
     public SVGResource getTitleImage() {
-        return resources.TestIcon();
+        return resources.testIcon();
     }
 
     @Override
@@ -86,8 +86,6 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
      *
      * @param response
      *         list of files which contains requested text
-     * @param request
-     *         requested text
      */
     public void handleResponse(TestResult response) {
         workspaceAgent.openPart(this, PartStackType.INFORMATION);
