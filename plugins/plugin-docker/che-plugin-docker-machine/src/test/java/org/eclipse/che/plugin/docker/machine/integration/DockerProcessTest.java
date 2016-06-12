@@ -16,6 +16,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.InitialAuthConfig;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.helper.DefaultNetworkFinder;
@@ -47,7 +48,8 @@ public class DockerProcessTest {
         dockerConnectorConfiguration = new DockerConnectorConfiguration(new InitialAuthConfig(),
                                                                         new DefaultNetworkFinder());
         docker = new DockerConnector(dockerConnectorConfiguration,
-                                     new DockerConnectionFactory(dockerConnectorConfiguration));
+                                     new DockerConnectionFactory(dockerConnectorConfiguration),
+                                     new DockerRegistryAuthResolver(null));
 
         final ContainerCreated containerCreated = docker.createContainer(new ContainerConfig().withImage("ubuntu")
                                                                                               .withCmd("tailf", "/dev/null"),
@@ -81,7 +83,8 @@ public class DockerProcessTest {
                                                                             new InitialAuthConfig(),
                                                                             new DefaultNetworkFinder());
             docker = new DockerConnector(dockerConnectorConfiguration,
-                                         new DockerConnectionFactory(dockerConnectorConfiguration));
+                                         new DockerConnectionFactory(dockerConnectorConfiguration),
+                                         new DockerRegistryAuthResolver(null));
         }
         Command command = new CommandImpl("tailf", "tailf /dev/null", "mvn");
         final DockerProcess dockerProcess = new DockerProcess(docker,

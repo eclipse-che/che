@@ -418,8 +418,8 @@ public class DockerInstanceProvider implements InstanceProvider {
             tag = dockerMachineSource.getTag();
         }
         PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
-                  .withTag(tag)
-                  .withRegistry(dockerMachineSource.getRegistry());
+                                          .withTag(tag)
+                                          .withRegistry(dockerMachineSource.getRegistry());
         try {
             final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
             docker.pull(pullParams,
@@ -434,7 +434,6 @@ public class DockerInstanceProvider implements InstanceProvider {
             throw new MachineException(e.getLocalizedMessage(), e);
         }
     }
-
 
     /**
      * Removes snapshot of the instance in implementation specific way.

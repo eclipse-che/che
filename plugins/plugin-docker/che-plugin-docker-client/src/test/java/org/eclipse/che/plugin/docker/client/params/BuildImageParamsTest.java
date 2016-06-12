@@ -29,6 +29,7 @@ import static org.testng.Assert.assertNull;
 public class BuildImageParamsTest {
 
     private static final String      REPOSITORY        = "repository";
+    private static final String      TAG               = "tag";
     private static final AuthConfigs AUTH_CONFIGS      = mock(AuthConfigs.class);
     private static final Boolean     DO_FORCE_PULL     = true;
     private static final Long        MEMORY_LIMIT      = 12345L;
@@ -55,6 +56,7 @@ public class BuildImageParamsTest {
         assertEquals(buildImageParams.getFiles(), FILES);
 
         assertNull(buildImageParams.getRepository());
+        assertNull(buildImageParams.getTag());
         assertNull(buildImageParams.getAuthConfigs());
         assertNull(buildImageParams.isDoForcePull());
         assertNull(buildImageParams.getMemoryLimit());
@@ -65,12 +67,14 @@ public class BuildImageParamsTest {
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
         buildImageParams = BuildImageParams.create(FILE)
                                            .withRepository(REPOSITORY)
+                                           .withTag(TAG)
                                            .withAuthConfigs(AUTH_CONFIGS)
                                            .withDoForcePull(DO_FORCE_PULL)
                                            .withMemoryLimit(MEMORY_LIMIT)
                                            .withMemorySwapLimit(MEMORY_SWAP_LIMIT);
 
         assertEquals(buildImageParams.getFiles(), FILES);
+        assertEquals(buildImageParams.getTag(), TAG);
         assertEquals(buildImageParams.getRepository(), REPOSITORY);
         assertEquals(buildImageParams.getAuthConfigs(), AUTH_CONFIGS);
         assertEquals(buildImageParams.isDoForcePull(), DO_FORCE_PULL);
@@ -103,7 +107,8 @@ public class BuildImageParamsTest {
 
     @Test
     public void repositoryParameterShouldEqualsNullIfItNotSet() {
-        buildImageParams.withAuthConfigs(AUTH_CONFIGS)
+        buildImageParams.withTag(TAG)
+                        .withAuthConfigs(AUTH_CONFIGS)
                         .withDoForcePull(DO_FORCE_PULL)
                         .withMemoryLimit(MEMORY_LIMIT)
                         .withMemorySwapLimit(MEMORY_SWAP_LIMIT);
@@ -112,8 +117,20 @@ public class BuildImageParamsTest {
     }
 
     @Test
+    public void tagParameterShouldEqualsNullIfItNotSet() {
+        buildImageParams.withRepository(REPOSITORY)
+                        .withAuthConfigs(AUTH_CONFIGS)
+                        .withDoForcePull(DO_FORCE_PULL)
+                        .withMemoryLimit(MEMORY_LIMIT)
+                        .withMemorySwapLimit(MEMORY_SWAP_LIMIT);
+
+        assertNull(buildImageParams.getTag());
+    }
+
+    @Test
     public void authConfigParameterShouldEqualsNullIfItNotSet() {
         buildImageParams.withRepository(REPOSITORY)
+                        .withTag(TAG)
                         .withDoForcePull(DO_FORCE_PULL)
                         .withMemoryLimit(MEMORY_LIMIT)
                         .withMemorySwapLimit(MEMORY_SWAP_LIMIT);
@@ -124,6 +141,7 @@ public class BuildImageParamsTest {
     @Test
     public void doForcePullParameterShouldEqualsNullIfItNotSet() {
         buildImageParams.withRepository(REPOSITORY)
+                        .withTag(TAG)
                         .withAuthConfigs(AUTH_CONFIGS)
                         .withMemoryLimit(MEMORY_LIMIT)
                         .withMemorySwapLimit(MEMORY_SWAP_LIMIT);
@@ -134,6 +152,7 @@ public class BuildImageParamsTest {
     @Test
     public void memoryLimitParameterShouldEqualsNullIfItNotSet() {
         buildImageParams.withRepository(REPOSITORY)
+                        .withTag(TAG)
                         .withAuthConfigs(AUTH_CONFIGS)
                         .withDoForcePull(DO_FORCE_PULL)
                         .withMemorySwapLimit(MEMORY_SWAP_LIMIT);
@@ -144,6 +163,7 @@ public class BuildImageParamsTest {
     @Test
     public void memorySwapLimitParameterShouldEqualsNullIfItNotSet() {
         buildImageParams.withRepository(REPOSITORY)
+                        .withTag(TAG)
                         .withAuthConfigs(AUTH_CONFIGS)
                         .withDoForcePull(DO_FORCE_PULL)
                         .withMemoryLimit(MEMORY_LIMIT);
