@@ -66,6 +66,7 @@ public class DockerInstanceTest {
     private static final String        NAME         = "suse-jdk";
     private static final String        TYPE         = "docker";
     private static final String        REGISTRY     = "registry";
+    private static final String        USERNAME     = "username";
     private static final String        REPOSITORY   = "eclipse-che";
     private static final String        TAG          = "latest";
     private static final MachineStatus STATUS       = MachineStatus.RUNNING;
@@ -210,6 +211,7 @@ public class DockerInstanceTest {
                                              boolean snapshotUseRegistry) {
         return new DockerInstance(dockerConnectorMock,
                                   registry,
+                                  USERNAME,
                                   mock(DockerMachineFactory.class),
                                   machine,
                                   container,

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
-import org.apache.commons.codec.binary.Base64;
-import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.inject.ConfigurationProperties;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfig;
@@ -31,7 +29,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * docker.registry.auth.url=localhost:5000
  * docker.registry.auth.username=user1
  * docker.registry.auth.password=pass
- * docker.registry.auth.email=user1@email.com
  * }</pre>
  *
  * @author Alexander Garagatyi
@@ -50,16 +47,12 @@ public class InitialAuthConfig {
     @Inject
     public InitialAuthConfig(ConfigurationProperties configurationProperties) {
         String serverAddress = "https://index.docker.io/v1/";
-        String username = null, password = null, email = null;
+        String username = null, password = null;
         for (Map.Entry<String, String> e : configurationProperties.getProperties(CONFIGURATION_PREFIX_PATTERN).entrySet()) {
             final String classifier = e.getKey().replaceFirst(CONFIGURATION_PREFIX, "");
             switch (classifier) {
                 case "url": {
                     serverAddress = e.getValue();
-                    break;
-                }
-                case "email": {
-                    email = e.getValue();
                     break;
                 }
                 case "username": {
@@ -72,19 +65,10 @@ public class InitialAuthConfig {
                 }
             }
         }
-        if (!isNullOrEmpty(serverAddress) && !isNullOrEmpty(username) && !isNullOrEmpty(password) && !isNullOrEmpty(email)) {
+        if (!isNullOrEmpty(serverAddress) && !isNullOrEmpty(username) && !isNullOrEmpty(password)) {
             predefinedConfig = DtoFactory.newDto(AuthConfig.class).withServeraddress(serverAddress)
                                          .withUsername(username)
-                                         .withPassword(password)
-                                         .withEmail(email);
-        }
-    }
-
-    public String getAuthConfigHeader() {
-        if (predefinedConfig != null) {
-            return Base64.encodeBase64String(JsonHelper.toJson(predefinedConfig).getBytes());
-        } else {
-            return "{}";
+                                         .withPassword(password);
         }
     }
 
@@ -95,4 +79,5 @@ public class InitialAuthConfig {
         }
         return authConfigs;
     }
+
 }
