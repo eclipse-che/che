@@ -73,6 +73,8 @@ public class UserServiceTest {
     @Mock
     TokenValidator     tokenValidator;
     @Mock
+    UserNameValidator  userNameValidator;
+    @Mock
     UriInfo            uriInfo;
     @Mock
     EnvironmentContext environmentContext;
@@ -90,7 +92,7 @@ public class UserServiceTest {
         dependencies.addComponent(UserManager.class, userManager);
         dependencies.addComponent(TokenValidator.class, tokenValidator);
 
-        userService = new UserService(userManager, tokenValidator, true);
+        userService = new UserService(userManager, tokenValidator, userNameValidator, true);
         final Field uriField = userService.getClass()
                                           .getSuperclass()
                                           .getDeclaredField("uriInfo");

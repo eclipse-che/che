@@ -59,7 +59,6 @@ import static org.eclipse.che.api.user.server.Constants.LINK_REL_REMOVE_USER_BY_
 import static org.eclipse.che.api.user.server.Constants.LINK_REL_UPDATE_PASSWORD;
 import static org.eclipse.che.api.user.server.DtoConverter.toDescriptor;
 import static org.eclipse.che.api.user.server.LinksInjector.injectLinks;
-import static org.eclipse.che.api.user.server.UserNameValidator.isValidUserName;
 
 /**
  * Provides REST API for user management
@@ -72,16 +71,19 @@ import static org.eclipse.che.api.user.server.UserNameValidator.isValidUserName;
 public class UserService extends Service {
     public static final String USER_SELF_CREATION_ALLOWED = "user.self.creation.allowed";
 
-    private final UserManager    userManager;
-    private final TokenValidator tokenValidator;
-    private final boolean        userSelfCreationAllowed;
+    private final UserManager       userManager;
+    private final TokenValidator    tokenValidator;
+    private final UserNameValidator userNameValidator;
+    private final boolean           userSelfCreationAllowed;
 
     @Inject
     public UserService(UserManager userManager,
                        TokenValidator tokenValidator,
+                       UserNameValidator userNameValidator,
                        @Named(USER_SELF_CREATION_ALLOWED) boolean userSelfCreationAllowed) {
         this.userManager = userManager;
         this.tokenValidator = tokenValidator;
+        this.userNameValidator = userNameValidator;
         this.userSelfCreationAllowed = userSelfCreationAllowed;
     }
 
@@ -144,7 +146,7 @@ public class UserService extends Service {
                                                        ServerException,
                                                        NotFoundException {
         final User user = isNullOrEmpty(token) ? fromEntity(userDescriptor) : fromToken(token);
-        if (!isValidUserName(user.getName())) {
+        if (!userNameValidator.isValidUserName(user.getName())) {
             throw new BadRequestException("Username must contain only letters and digits");
         }
         userManager.create(user, isTemporary);
