@@ -36,6 +36,10 @@ class IdeIFrameSvc {
             $rootScope.hideLoader = true;
           });
         }
+      } else if ("show-workspaces" === event.data){
+        $rootScope.$apply(() => {
+          $location.path('/workspaces');
+        });
       }
     }, false);
   }
