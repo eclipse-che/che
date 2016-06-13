@@ -491,8 +491,8 @@ public class WorkspaceManager {
     public List<SnapshotImpl> getSnapshot(String workspaceId) throws ServerException, NotFoundException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         // check if workspace exists
-        workspaceDao.get(workspaceId);
-        return machineManager.getSnapshots(sessionUser().getUserId(), workspaceId);
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        return machineManager.getSnapshots(workspace.getNamespace(), workspaceId);
     }
 
     /** Asynchronously starts given workspace. */

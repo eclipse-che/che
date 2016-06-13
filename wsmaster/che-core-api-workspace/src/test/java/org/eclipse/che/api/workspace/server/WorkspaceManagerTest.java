@@ -79,7 +79,7 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
 
-    private static final String USER_ID = "user123";
+    private static final String USER_ID   = "user123";
     private static final String NAMESPACE = "userNS";
 
     @Mock
@@ -528,7 +528,10 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToGetSnapshots() throws Exception {
-        when(machineManager.getSnapshots("user123", "workspace123")).thenReturn(singletonList(any()));
+        final String wsId = "workspace123";
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
+        when(workspaceDao.get(wsId)).thenReturn(workspace);
+        when(machineManager.getSnapshots(NAMESPACE, wsId)).thenReturn(singletonList(any()));
 
         final List<SnapshotImpl> snapshots = workspaceManager.getSnapshot("workspace123");
 
