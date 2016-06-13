@@ -86,7 +86,7 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
     @Override
     public void onWorkspaceStarted(WorkspaceStartedEvent event) {
         if (arrow != null) {
-            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(event.getWorkspace().getConfig().getName()));
         }
     }
 
