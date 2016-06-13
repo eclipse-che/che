@@ -60,8 +60,7 @@ public class RunAllTestAction extends JavaEditorAction {
 
         Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
 
-        service.runAllTest(appContext.getWorkspaceId(),
-                project,
+        service.runAllTest(project,
                 new RequestCallback<TestResult>(unmarshaller) {
                     @Override
                     protected void onSuccess(TestResult result) {

@@ -78,7 +78,7 @@ public class TestServiceClient {
 //                .send(new StringUnmarshaller());
 //    }
 
-    public void runTest(String workspaceId, ProjectConfigDto project, String fqn,
+    public void runTest(ProjectConfigDto project, String fqn,
                         RequestCallback<TestResult> callback) {
 
         String url = "/java/testing/runClass/?projectpath=" + project.getPath() + "&fqn=" + fqn;
@@ -86,7 +86,7 @@ public class TestServiceClient {
         updateDependencies(url,callback);
     }
 
-    public void runAllTest(String workspaceId, ProjectConfigDto project,
+    public void runAllTest(ProjectConfigDto project,
                         RequestCallback<TestResult> callback) {
 
         String url = "/java/testing/runAll/?projectpath=" + project.getPath();

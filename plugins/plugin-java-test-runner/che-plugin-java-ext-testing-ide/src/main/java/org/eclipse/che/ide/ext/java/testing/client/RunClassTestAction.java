@@ -66,9 +66,7 @@ public class RunClassTestAction extends JavaEditorAction {
         String fqn = JavaSourceFolderUtil.getFQNForFile(file);
         Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
 
-        service.runTest(appContext.getWorkspaceId(),
-                project,
-                fqn,
+        service.runTest(project, fqn,
                 new RequestCallback<TestResult>(unmarshaller) {
                     @Override
                     protected void onSuccess(TestResult result) {
