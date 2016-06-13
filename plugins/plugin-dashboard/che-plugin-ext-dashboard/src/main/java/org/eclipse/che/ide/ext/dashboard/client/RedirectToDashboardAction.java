@@ -16,12 +16,17 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.ide.ui.Tooltip;
-import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.LEFT;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.RIGHT;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -30,15 +35,26 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  *
  * @author Oleksii Orel
  */
-public class RedirectToDashboardAction extends Action implements CustomComponentAction {
+public class RedirectToDashboardAction extends Action implements CustomComponentAction,
+        WorkspaceStartedHandler, WorkspaceStoppedHandler {
+
     private final DashboardLocalizationConstant constant;
     private final DashboardResources            resources;
+    private final AppContext                    appContext;
+
+    private Element                             arrow;
 
     @Inject
     public RedirectToDashboardAction(DashboardLocalizationConstant constant,
-                                     DashboardResources resources) {
+                                     DashboardResources resources,
+                                     EventBus eventBus,
+                                     AppContext appContext) {
         this.constant = constant;
         this.resources = resources;
+        this.appContext = appContext;
+
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
@@ -51,12 +67,12 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
         panel.setWidth("24px");
         panel.setHeight("24px");
 
-        Element arrow = DOM.createAnchor();
+        arrow = DOM.createAnchor();
         arrow.setClassName(resources.dashboardCSS().dashboardArrow());
         arrow.setInnerHTML("<i class=\"fa fa-chevron-right\" />");
         panel.getElement().appendChild(arrow);
 
-        arrow.setAttribute("href", constant.openDashboardRedirectUrl());
+        arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
         arrow.setAttribute("target", "_blank");
 
         Tooltip.create((elemental.dom.Element) arrow,
@@ -65,6 +81,20 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
                 constant.openDashboardToolbarButtonTitle());
 
         return panel;
+    }
+
+    @Override
+    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+        if (arrow != null) {
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
+        }
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        if (arrow != null) {
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspaces());
+        }
     }
 
 }
