@@ -37,7 +37,7 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.lib.version>4.3.0</che.lib.version>
+        <che.lib.version>4.4.0-RC1-SNAPSHOT</che.lib.version>
         <che.version>4.4.0-RC1-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
