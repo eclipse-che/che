@@ -10,32 +10,44 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
+import org.eclipse.che.api.core.NotFoundException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.eclipse.che.api.user.server.UserNameValidator.isValidUserName;
-import static org.eclipse.che.api.user.server.UserNameValidator.normalizeUserName;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 
 /**
  * @author Mihail Kuznyetsov
  */
+@Listeners(MockitoTestNGListener.class)
 public class UserNameValidatorTest {
-    @BeforeMethod
-    public void setUp() {
-    }
+
+    @Mock
+    private UserManager userManager;
+
+    @InjectMocks
+    private UserNameValidator userNameValidator;
 
     @Test(dataProvider = "normalizeNames")
-    public void testNormalizeUserName(String input, String expected) {
-        Assert.assertEquals(normalizeUserName(input), expected);
+    public void testNormalizeUserName(String input, String expected) throws Exception {
+        doThrow(NotFoundException.class).when(userManager).getByName(anyString());
+
+        Assert.assertEquals(userNameValidator.normalizeUserName(input), expected);
     }
 
 
     @Test(dataProvider = "validNames")
-    public void testValidUserName(String input, boolean expected) {
+    public void testValidUserName(String input, boolean expected) throws Exception {
+        doThrow(NotFoundException.class).when(userManager).getByName(anyString());
 
-        Assert.assertEquals(isValidUserName(input), expected);
+        Assert.assertEquals(userNameValidator.isValidUserName(input), expected);
     }
 
     @DataProvider(name = "normalizeNames")
