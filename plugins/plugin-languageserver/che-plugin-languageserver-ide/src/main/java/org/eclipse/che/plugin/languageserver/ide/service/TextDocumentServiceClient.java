@@ -26,7 +26,9 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentP
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import java.util.List;
@@ -92,7 +94,22 @@ public class TextDocumentServiceClient {
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON).send(unmarshaller);
     }
-    
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#documentSymbol(io.typefox.lsapi.DocumentSymbolParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<List<SymbolInformationDTO>> documentSymbol(DocumentSymbolParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentSymbol";
+        Unmarshallable<List<SymbolInformationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformationDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
     /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didChange(io.typefox.lsapi.DidChangeTextDocumentParams)}
      * 

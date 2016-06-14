@@ -253,4 +253,18 @@ public class OrionDocument extends AbstractDocument {
             editorOverlay.getTextView().setTopIndex(topIndex > 0 ? topIndex : 0);
         }
     }
+
+    @Override
+    public void setSelectedRange(TextRange range) {
+        setSelectedRange(range, false);
+    }
+
+    @Override
+    public void setSelectedRange(TextRange range, boolean show) {
+        int lineStart = getLineStart(range.getFrom().getLine());
+        int lineEnd = getLineStart(range.getTo().getLine());
+        LinearRange linearRange =
+                LinearRange.createWithStart(lineStart + range.getFrom().getCharacter()).andEnd(lineEnd + range.getTo().getCharacter());
+        setSelectedRange(linearRange, show);
+    }
 }

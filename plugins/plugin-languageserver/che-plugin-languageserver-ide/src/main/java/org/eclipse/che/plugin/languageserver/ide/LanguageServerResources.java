@@ -4,6 +4,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
+import org.eclipse.che.ide.ui.list.SimpleList;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 public interface LanguageServerResources extends ClientBundle {
@@ -12,6 +13,9 @@ public interface LanguageServerResources extends ClientBundle {
 
     @Source("languageserver.css")
     LSCss css();
+
+    @Source({"QuickOpenList.css", "org/eclipse/che/ide/ui/constants.css", "org/eclipse/che/ide/api/ui/style.css"})
+    QuickOpenListCss quickOpenListCss();
 
     @Source("svg/file.svg")
     SVGResource file();
@@ -83,5 +87,20 @@ public interface LanguageServerResources extends ClientBundle {
 
         @ClassName("codeassistant-detail")
         String codeassistantDetail();
+    }
+
+    interface QuickOpenListCss extends SimpleList.Css{
+        int menuListBorderPx();
+
+        String listItem();
+
+        String listBase();
+
+        String listContainer();
+
+        @ClassName("search-match")
+        String searchMatch();
+
+        String groupSeparator();
     }
 }

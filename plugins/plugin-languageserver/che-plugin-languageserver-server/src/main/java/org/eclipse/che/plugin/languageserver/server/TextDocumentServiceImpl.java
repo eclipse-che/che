@@ -1,6 +1,7 @@
 package org.eclipse.che.plugin.languageserver.server;
 
 import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
@@ -11,6 +12,7 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentP
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import javax.ws.rs.Consumes;
@@ -56,6 +58,21 @@ public class TextDocumentServiceImpl {
         List<? extends CompletionItem> completion = server.getTextDocumentService()
                                                           .completion(textDocumentPositionParams).get().getItems();
         return completion;
+    }
+
+    @POST
+    @Path("documentSymbol")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<? extends SymbolInformation> documentSymbol(DocumentSymbolParamsDTO documentSymbolParams)
+            throws ExecutionException, InterruptedException {
+        documentSymbolParams.getTextDocument().setUri(prefixURI(documentSymbolParams.getTextDocument().getUri()));
+        LanguageServer server = getServer(documentSymbolParams.getTextDocument().getUri());
+        if (server == null) {
+            return emptyList();
+        }
+
+        return server.getTextDocumentService().documentSymbol(documentSymbolParams).get();
     }
 
 
