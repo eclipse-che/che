@@ -570,23 +570,42 @@ export class CreateProjectCtrl {
         if (estimateTypes.length > 0) {
           // wait estimate are all finished
           let waitEstimate = this.$q.all(estimatePromises);
+          let attributesByMatchingType = new Map();
 
           waitEstimate.then(() => {
-            var firstMatchingType;
-            var firstMatchingResult;
+            let firstMatchingType;
             estimateTypes.forEach((type) => {
               let resultEstimate = projectService.getEstimate(projectName, type);
               // add attributes
-              // there is a matching estimate
-              if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
-                firstMatchingType = type;
-                firstMatchingResult = resultEstimate.attributes;
+              if (Object.keys(resultEstimate.attributes).length > 0) {
+                attributesByMatchingType.set(type, resultEstimate.attributes);
+              }
+            });
+            
+            attributesByMatchingType.forEach((attributes, type) => {
+              if (!firstMatchingType) {
+                let projectType = projectTypesByCategory.get(type);
+                if (projectType && projectType.parents) {
+                  projectType.parents.forEach((parentType) => {
+                    if (parentType === 'java') {
+                      let additionalType = 'maven';
+                      if (attributesByMatchingType.get(additionalType)) {
+                        firstMatchingType = additionalType;
+                      }
+                    }
+                    if (!firstMatchingType) {
+                      firstMatchingType = attributesByMatchingType.get(parentType) ? parentType : type;
+                    }
+                  });
+                } else {
+                  firstMatchingType = type;
+                }
               }
             });
 
-          if (firstMatchingType) {
-            projectDetails.attributes = firstMatchingResult;
-            projectDetails.type = firstMatchingType;
+            if (firstMatchingType) {
+              projectDetails.attributes = attributesByMatchingType.get(firstMatchingType);
+              projectDetails.type = firstMatchingType;
             let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
             updateProjectPromise.then(() => {
               deferredResolve.resolve();
