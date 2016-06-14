@@ -1025,11 +1025,11 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
             // so default to using java.io.File
             // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96258
 
-            // temporary fix for release 4.3
-            // TODO: should fix Resource#getProjects()
+            // TODO: keep this comment code for the history
+            // TODO: this is original Eclipse code
 //            URI location = rscFile.getLocationURI();
 //            if (location == null)
-            throw new IOException("Cannot obtain a location URI for " + rscFile); //$NON-NLS-1$
+//            throw new IOException("Cannot obtain a location URI for " + rscFile); //$NON-NLS-1$
 //            File file = Util.toLocalFile(location, null/*no progress monitor available*/);
 //            if (file == null)
 //                throw new IOException("Unable to fetch file from " + location); //$NON-NLS-1$
@@ -1037,7 +1037,7 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
 //                bytes = org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(file);
 //            } catch (IOException e) {
 //                if (!file.exists())
-//                    return new IClasspathEntry[][]{defaultClasspath(), ClasspathEntry.NO_ENTRIES};
+                    return new IClasspathEntry[][]{defaultClasspath(), ClasspathEntry.NO_ENTRIES};
 //                throw e;
 //            }
         }
