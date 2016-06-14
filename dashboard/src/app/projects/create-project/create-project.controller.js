@@ -591,7 +591,15 @@ export class CreateProjectCtrl {
             updateProjectPromise.then(() => {
               deferredResolve.resolve();
             }, (error) => {
-              deferredResolve.reject(error);
+              this.$log.log('Update project error', projectDetails, error);
+              //a second attempt with type blank
+              projectDetails.attributes = {};
+              projectDetails.type = 'blank';
+              projectService.updateProject(projectName, projectDetails).then(() => {
+                deferredResolve.resolve();
+              }, (error) => {
+                deferredResolve.reject(error);
+              });
             });
           } else {
             deferredResolve.resolve();
