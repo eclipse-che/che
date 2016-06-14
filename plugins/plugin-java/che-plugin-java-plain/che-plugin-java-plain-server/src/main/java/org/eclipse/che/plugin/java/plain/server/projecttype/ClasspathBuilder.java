@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
-import com.google.common.collect.Collections2;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ServerException;
@@ -29,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
