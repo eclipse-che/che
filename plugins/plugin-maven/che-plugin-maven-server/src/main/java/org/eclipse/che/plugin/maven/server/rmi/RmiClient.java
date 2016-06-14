@@ -97,6 +97,7 @@ public abstract class RmiClient<Remote> {
         try {
             ProcessExecutor executor = getExecutor();
             handler = executor.execute();
+            LOG.debug("Maven Server JVM process executed: " + handler.toString());
         } catch (ExecutionException e) {
             removeProcessInfo(key, null, e.getMessage());
             return;
