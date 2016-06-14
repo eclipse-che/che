@@ -531,6 +531,8 @@ export class CreateProjectCtrl {
       let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
       updateProjectPromise.then(() => {
         deferredResolve.resolve();
+      }, (error) => {
+        deferredResolve.reject(error);
       });
       return;
     }
@@ -588,6 +590,8 @@ export class CreateProjectCtrl {
             let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
             updateProjectPromise.then(() => {
               deferredResolve.resolve();
+            }, (error) => {
+              deferredResolve.reject(error);
             });
           } else {
             deferredResolve.resolve();
