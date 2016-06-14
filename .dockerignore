@@ -1,0 +1,4 @@
+*
+!assembly/assembly-main/target/eclipse-che-*
+assembly/assembly-main/target/eclipse-che-*.tar.gz
+assembly/assembly-main/target/eclipse-che-*.zip
