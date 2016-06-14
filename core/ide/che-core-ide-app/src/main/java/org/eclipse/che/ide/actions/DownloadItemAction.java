@@ -48,7 +48,7 @@ public class DownloadItemAction extends Action {
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
 
-        BASE_URL = "/project/" + appContext.getWorkspace().getId() + "/export/";
+        BASE_URL = "/project/export/";
     }
 
     /** {@inheritDoc} */
