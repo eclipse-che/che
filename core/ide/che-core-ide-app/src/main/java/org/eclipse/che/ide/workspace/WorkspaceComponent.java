@@ -48,6 +48,8 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.ExceptionUtils;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
@@ -102,6 +104,8 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     private final InitialLoadingInfo       initialLoadingInfo;
     private final WorkspaceSnapshotCreator snapshotCreator;
 
+    private MessageLoader snapshotLoader;
+
     protected Callback<Component, Exception> callback;
     protected boolean                        needToReloadComponents;
     private   MessageBus                     messageBus;
@@ -122,7 +126,8 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
                               InitialLoadingInfo initialLoadingInfo,
-                              WorkspaceSnapshotCreator snapshotCreator) {
+                              WorkspaceSnapshotCreator snapshotCreator,
+                              LoaderFactory loaderFactory) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.createWorkspacePresenter = createWorkspacePresenter;
         this.startWorkspacePresenter = startWorkspacePresenter;
@@ -142,6 +147,8 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.snapshotCreator = snapshotCreator;
 
         this.needToReloadComponents = true;
+
+        this.snapshotLoader = loaderFactory.newLoader(locale.createSnapshotProgress());
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
@@ -330,11 +337,17 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                             eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                             break;
 
+                        case SNAPSHOT_CREATING:
+                            snapshotLoader.show();
+                            break;
+
                         case SNAPSHOT_CREATED:
+                            snapshotLoader.hide();
                             snapshotCreator.successfullyCreated();
                             break;
 
                         case SNAPSHOT_CREATION_ERROR:
+                            snapshotLoader.hide();
                             snapshotCreator.creationError("Snapshot creation error: " + statusEvent.getError());
                             break;
 

@@ -63,6 +63,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.AUTO_CREATE_SNAPSHO
 import static org.eclipse.che.api.workspace.shared.Constants.AUTO_RESTORE_FROM_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATED;
+import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATING;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATION_ERROR;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -601,6 +602,9 @@ public class WorkspaceManager {
      */
     @VisibleForTesting
     boolean createSnapshotSync(WorkspaceRuntimeImpl runtime, String namespace, String workspaceId) {
+        eventService.publish(newDto(WorkspaceStatusEvent.class)
+                                     .withEventType(SNAPSHOT_CREATING)
+                                     .withWorkspaceId(workspaceId));
         String devMachineSnapshotFailMessage = null;
         for (MachineImpl machine : runtime.getMachines()) {
             try {
