@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +74,7 @@ public class UserManager {
      *         when any other error occurs
      */
     public void create(User user, boolean isTemporary) throws ConflictException, ServerException {
-        if (isNameReserved(user.getName())) {
+        if (reservedNames.contains(user.getName())) {
             throw new ConflictException("Username is reserved");
         }
         user.withId(generate("user", ID_LENGTH))
@@ -174,9 +172,5 @@ public class UserManager {
      */
     public void remove(String id) throws NotFoundException, ServerException, ConflictException {
         userDao.remove(id);
-    }
-
-    private boolean isNameReserved(String name) {
-        return reservedNames.contains(name);
     }
 }
