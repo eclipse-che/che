@@ -17,10 +17,11 @@ import com.google.inject.name.Named;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
+import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
 import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
+import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.plugin.maven.server.core.MavenWorkspace;
-import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Path;
@@ -68,6 +69,16 @@ public class PomChangeListener {
                         projectToUpdate.add(new Path(eventPath).removeLastSegments(1).toOSString());
                     }
 //                    }
+                }
+            }
+        });
+
+        eventService.subscribe(new EventSubscriber<PomModifiedEventDto>() {
+            @Override
+            public void onEvent(PomModifiedEventDto event) {
+                String eventPath = event.getPath();
+                if (pomIsValid(eventPath)) {
+                    projectToUpdate.add(new Path(eventPath).removeLastSegments(1).toOSString());
                 }
             }
         });
