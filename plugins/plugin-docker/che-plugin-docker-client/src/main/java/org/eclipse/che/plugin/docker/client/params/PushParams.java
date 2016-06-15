@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#push(PushParams, ProgressMonitor)}.
@@ -36,10 +37,10 @@ public class PushParams {
      * Creates arguments holder with required parameters.
      *
      * @param repository
-     *         repository name in format: [username/]image
+     *         repository name
      * @return arguments holder with required parameters
      * @throws NullPointerException
-     *         if {@code registry} null
+     *         if {@code repository} null
      */
     public static PushParams create(@NotNull String repository) {
         return new PushParams().withRepository(repository);
@@ -117,10 +118,11 @@ public class PushParams {
     /**
      * Returns full repo.
      * It has following format: [registry/]image
-     * In case of docker.io registry is omitted
+     * In case of docker.io registry is omitted,
+     *  otherwise it may cause some troubles with swarm
      */
     public String getFullRepo() {
-        if (registry == null || DEFAULT_REGISTRY.contains(registry)) {
+        if (registry == null || DEFAULT_REGISTRY_SYNONYMS.contains(registry)) {
             return repository;
         } else {
             return registry + '/' + repository;
