@@ -61,7 +61,7 @@ public class UserManager {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferenceDao = preferenceDao;
-        this.reservedNames = Sets.newHashSet(Arrays.asList(reservedNames));
+        this.reservedNames = Sets.newHashSet(reservedNames);
     }
 
 
