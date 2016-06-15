@@ -31,7 +31,7 @@ public class TestExtension {
     @Inject
     public TestExtension(TestResources resources, ActionManager actionManager, RunClassTestAction runClassTestAction,
                          RunAllTestAction runAllTestAction, RunClassContextTestAction runClassContextTestAction,
-                         KeyBindingAgent keyBinding) {
+                         KeyBindingAgent keyBinding,TestLocalizationConstant localization) {
 
         Log.info(TestExtension.class,"TestRunner ASFD");
 //        DefaultActionGroup mainMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_MENU);
@@ -48,7 +48,8 @@ public class TestExtension {
 
         DefaultActionGroup runMenu = (DefaultActionGroup) actionManager.getAction(GROUP_RUN);
 
-        DefaultActionGroup testMainMenu = new DefaultActionGroup("Testing", true, actionManager);
+        DefaultActionGroup testMainMenu =
+                new DefaultActionGroup(localization.actionGroupMenuName(), true, actionManager);
         actionManager.registerAction("TestMainGroup", testMainMenu);
         runMenu.addSeparator();
         runMenu.add(testMainMenu);
@@ -60,7 +61,8 @@ public class TestExtension {
 
 
         DefaultActionGroup explorerMenu = (DefaultActionGroup) actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        DefaultActionGroup testContextMenu = new DefaultActionGroup("Testing", true, actionManager);
+        DefaultActionGroup testContextMenu =
+                new DefaultActionGroup(localization.actionGroupMenuName(), true, actionManager);
         actionManager.registerAction("TestContextGroup", testContextMenu);
 
         actionManager.registerAction("TestActionRunClassContext", runClassContextTestAction);

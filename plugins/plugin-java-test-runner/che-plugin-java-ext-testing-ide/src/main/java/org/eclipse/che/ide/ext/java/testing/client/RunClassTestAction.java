@@ -47,8 +47,10 @@ public class RunClassTestAction extends JavaEditorAction {
     @Inject
     public RunClassTestAction(TestResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
                               FileTypeRegistry fileTypeRegistry, TestResultPresenter presenter,
-                              TestServiceClient service,DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        super("Run Class", "Run the current test cases", resources.testIcon(), editorAgent, fileTypeRegistry);
+                              TestServiceClient service,DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                              TestLocalizationConstant localization) {
+        super(localization.actionRunClassTitle(), localization.actionRunClassDescription(), resources.testIcon(),
+                editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter = presenter;

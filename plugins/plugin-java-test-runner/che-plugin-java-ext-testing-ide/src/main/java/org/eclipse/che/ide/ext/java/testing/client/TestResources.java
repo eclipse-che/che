@@ -15,16 +15,16 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 public interface TestResources extends ClientBundle {
 
-    @Source("org/eclipse/che/ide/ext/java/testing/client/test.svg")
+    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test.svg")
     SVGResource testIcon();
 
-    @Source("org/eclipse/che/ide/ext/java/testing/client/test_all.svg")
+    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_all.svg")
     SVGResource testAllIcon();
 
 
-    @Source("org/eclipse/che/ide/ext/java/testing/client/test_results_pass.svg")
+    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_results_pass.svg")
     SVGResource testResultsPass();
 
-    @Source("org/eclipse/che/ide/ext/java/testing/client/test_results_fail.svg")
+    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_results_fail.svg")
     SVGResource testResultsFail();
 }

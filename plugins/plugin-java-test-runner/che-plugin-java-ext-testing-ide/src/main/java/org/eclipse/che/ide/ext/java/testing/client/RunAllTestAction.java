@@ -42,9 +42,10 @@ public class RunAllTestAction extends JavaEditorAction {
 
     @Inject
     public RunAllTestAction(TestResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
-                       TestResultPresenter presenter, FileTypeRegistry fileTypeRegistry,
-                       TestServiceClient service,DtoUnmarshallerFactory dtoUnmarshallerFactory) {
-        super("Run All", "Run the all test cases", resources.testAllIcon(), editorAgent, fileTypeRegistry);
+                       TestResultPresenter presenter, FileTypeRegistry fileTypeRegistry, TestServiceClient service,
+                            DtoUnmarshallerFactory dtoUnmarshallerFactory, TestLocalizationConstant localization) {
+        super(localization.actionRunAllTitle(), localization.actionRunAllDescription(), resources.testAllIcon(),
+                editorAgent, fileTypeRegistry);
         this.notificationManager = notificationManager;
         this.editorAgent = editorAgent;
         this.presenter =  presenter;
@@ -71,7 +72,7 @@ public class RunAllTestAction extends JavaEditorAction {
                             notification.setContent("All tests are passed");
                         } else {
                             notification.setTitle("Test runner executed successfully with test failures.");
-                            notification.setContent(result.getFailureCount() + " tests are failed.\n");
+                            notification.setContent(result.getFailureCount() + " test(s) failed.\n");
                         }
                         presenter.handleResponse(result);
                     }
