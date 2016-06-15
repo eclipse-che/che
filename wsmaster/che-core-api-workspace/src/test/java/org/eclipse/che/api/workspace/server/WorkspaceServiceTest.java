@@ -110,6 +110,7 @@ public class WorkspaceServiceTest {
 
     @SuppressWarnings("unused")
     private static final ApiExceptionMapper MAPPER      = new ApiExceptionMapper();
+    private static final String             NAMESPACE   = "user";
     private static final String             USER_ID     = "user123";
     private static final String             IDE_CONTEXT = "ws";
     @SuppressWarnings("unused")
@@ -295,7 +296,7 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 204);
-        verify(machineManager).removeSnapshots(USER_ID, workspace.getId());
+        verify(machineManager).removeSnapshots(NAMESPACE, workspace.getId());
         verify(wsManager).removeWorkspace(workspace.getId());
     }
 
@@ -694,7 +695,7 @@ public class WorkspaceServiceTest {
         return WorkspaceImpl.builder()
                             .setConfig(configDto)
                             .generateId()
-                            .setNamespace(USER_ID)
+                            .setNamespace(NAMESPACE)
                             .setStatus(status)
                             .build();
     }
@@ -752,7 +753,7 @@ public class WorkspaceServiceTest {
     public static class EnvironmentFilter implements RequestFilter {
 
         public void doFilter(GenericContainerRequest request) {
-            EnvironmentContext.getCurrent().setSubject(new SubjectImpl("user", USER_ID, "token", false));
+            EnvironmentContext.getCurrent().setSubject(new SubjectImpl(NAMESPACE, USER_ID, "token", false));
         }
     }
 }

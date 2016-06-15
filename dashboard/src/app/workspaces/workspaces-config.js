@@ -13,7 +13,6 @@
 import {ListWorkspacesCtrl} from './list-workspaces/list-workspaces.controller';
 import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.directive';
 import {CreateWorkspaceCtrl} from './create-workspace/create-workspace.controller';
-import {CreateWorkspaceAddMemberCtrl} from './create-workspace/create-workspace-add-member.controller';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceDetailsCtrl} from './workspace-details/workspace-details.controller';
@@ -55,7 +54,6 @@ export class WorkspacesConfig {
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('CreateWorkspaceCtrl', CreateWorkspaceCtrl);
-    register.controller('CreateWorkspaceAddMemberCtrl', CreateWorkspaceAddMemberCtrl);
 
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);

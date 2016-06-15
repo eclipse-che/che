@@ -58,10 +58,13 @@ public class MavenModelImporter implements FactoryAcceptedHandler {
         final List<ProjectConfigDto> projects = factory.getWorkspace().getProjects();
         final List<String> paths = new ArrayList<>();
         for (ProjectConfigDto project : projects) {
-            if (MavenAttributes.MAVEN_ID.equals(project.getType()))
+            if (MavenAttributes.MAVEN_ID.equals(project.getType())) {
                 paths.add(project.getPath());
+            }
         }
-        reimport(paths);
+        if (!paths.isEmpty()) {
+            reimport(paths);
+        }
     }
 
     /**

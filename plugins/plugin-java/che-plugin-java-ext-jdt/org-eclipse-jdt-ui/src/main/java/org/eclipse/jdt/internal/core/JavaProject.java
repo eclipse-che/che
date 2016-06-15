@@ -1024,19 +1024,22 @@ public class JavaProject extends Openable implements IJavaProject, SuffixConstan
             // when a project is imported, we get a first delta for the addition of the .project, but the .classpath is not accessible
             // so default to using java.io.File
             // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96258
-            URI location = rscFile.getLocationURI();
-            if (location == null)
-                throw new IOException("Cannot obtain a location URI for " + rscFile); //$NON-NLS-1$
-            File file = Util.toLocalFile(location, null/*no progress monitor available*/);
-            if (file == null)
-                throw new IOException("Unable to fetch file from " + location); //$NON-NLS-1$
-            try {
-                bytes = org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(file);
-            } catch (IOException e) {
-                if (!file.exists())
+
+            // TODO: keep this comment code for the history
+            // TODO: this is original Eclipse code
+//            URI location = rscFile.getLocationURI();
+//            if (location == null)
+//            throw new IOException("Cannot obtain a location URI for " + rscFile); //$NON-NLS-1$
+//            File file = Util.toLocalFile(location, null/*no progress monitor available*/);
+//            if (file == null)
+//                throw new IOException("Unable to fetch file from " + location); //$NON-NLS-1$
+//            try {
+//                bytes = org.eclipse.jdt.internal.compiler.util.Util.getFileByteContent(file);
+//            } catch (IOException e) {
+//                if (!file.exists())
                     return new IClasspathEntry[][]{defaultClasspath(), ClasspathEntry.NO_ENTRIES};
-                throw e;
-            }
+//                throw e;
+//            }
         }
         if (hasUTF8BOM(bytes)) { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=240034
             int length = bytes.length- IContentDescription.BOM_UTF_8.length;

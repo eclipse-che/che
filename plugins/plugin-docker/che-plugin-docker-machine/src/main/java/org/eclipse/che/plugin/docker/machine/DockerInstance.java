@@ -24,6 +24,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
@@ -56,6 +57,7 @@ import static java.lang.String.format;
  * @author andrew00x
  * @author Alexander Garagatyi
  * @author Anton Korneta
+ * @author Mykola Morhun
  */
 public class DockerInstance extends AbstractInstance {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstance.class);
@@ -87,6 +89,7 @@ public class DockerInstance extends AbstractInstance {
     private final String                                      image;
     private final LineConsumer                                outputConsumer;
     private final String                                      registry;
+    private final String                                      registryNamespace;
     private final DockerNode                                  node;
     private final DockerInstanceStopDetector                  dockerInstanceStopDetector;
     private final DockerInstanceProcessesCleaner              processesCleaner;
@@ -98,6 +101,7 @@ public class DockerInstance extends AbstractInstance {
     @Inject
     public DockerInstance(DockerConnector docker,
                           @Named("machine.docker.registry") String registry,
+                          @Named("machine.docker.snapshot.registry_namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
                           @Assisted Machine machine,
                           @Assisted("container") String container,
@@ -114,6 +118,7 @@ public class DockerInstance extends AbstractInstance {
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;
+        this.registryNamespace = registryNamespace;
         this.node = node;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.processesCleaner = processesCleaner;
@@ -198,27 +203,30 @@ public class DockerInstance extends AbstractInstance {
     @Override
     public MachineSource saveToSnapshot(String owner) throws MachineException {
         try {
-            final String repository = generateRepository();
+            String image = generateRepository();
             if(!snapshotUseRegistry) {
-                commitContainer(owner, repository, LATEST_TAG);
-                return new DockerMachineSource(repository).withTag(LATEST_TAG);
+                commitContainer(owner, image, LATEST_TAG);
+                return new DockerMachineSource(image).withTag(LATEST_TAG);
             }
-            final String repositoryName = registry + '/' + repository;
-            commitContainer(owner, repositoryName, LATEST_TAG);
+
+            PushParams pushParams = PushParams.create(image)
+                                              .withRegistry(registry)
+                                              .withTag(LATEST_TAG);
+
+            final String fullRepo = pushParams.getFullRepo();
+            commitContainer(owner, fullRepo, LATEST_TAG);
             //TODO fix this workaround. Docker image is not visible after commit when using swarm
             Thread.sleep(2000);
             final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
-            final String digest = docker.push(PushParams.create(repository)
-                                                        .withTag(LATEST_TAG)
-                                                        .withRegistry(registry),
+            final String digest = docker.push(pushParams,
                                               progressMonitor -> {
                                                   try {
                                                       outputConsumer.writeLine(lineFormatter.format(progressMonitor));
                                                   } catch (IOException ignored) {
                                                   }
                                               });
-            docker.removeImage(RemoveImageParams.create(repositoryName).withForce(false));
-            return new DockerMachineSource(repository).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
+            docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
+            return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
         } catch (IOException ioEx) {
             throw new MachineException(ioEx);
         } catch (InterruptedException e) {
@@ -241,6 +249,9 @@ public class DockerInstance extends AbstractInstance {
     }
 
     private String generateRepository() {
+        if (registryNamespace != null) {
+            return registryNamespace + '/' + NameGenerator.generate(null, 16);
+        }
         return NameGenerator.generate(null, 16);
     }
 

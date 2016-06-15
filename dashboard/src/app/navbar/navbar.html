@@ -16,15 +16,14 @@
     <div ng-show="navbarCtrl.email">
       <section class="navbar-top-dropdown" layout="column" layout-align="center left">
         <che-button-dropdown che-button-dropdown-href="#/create-project?resetProgress" che-button-dropdown-label="New Project"
-                             che-button-dropdown-controller="navbarCtrl"
-                             ng-if="navbarCtrl.isUser()"></che-button-dropdown>
+                             che-button-dropdown-controller="navbarCtrl"></che-button-dropdown>
       </section>
       <md-divider md-theme="factory-theme"></md-divider>
       <div class="admin-navbar-menu">
         <section class="left-sidebar-menu" layout="column" layout-align="center center">
           <md-list layout="column">
             <ide-list-item-navbar></ide-list-item-navbar>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
+            <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.dashboard}}" layout-align="left"
                          target="_self">
                 <div class="navbar-item" layout="row" layout-align="start center">
@@ -41,7 +40,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarCtrl.isUser()">
+            <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href ng-href="{{navbarCtrl.menuItemUrl.projects}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <i class="fa fa-folder-open icon">&nbsp;</i>
@@ -85,7 +84,7 @@
           </md-list>
         </section>
       </div>
-      <md-divider md-theme="factory-theme" ng-show="navbarCtrl.isUser()"></md-divider>
+      <md-divider md-theme="factory-theme"></md-divider>
     </div>
   </md-toolbar>
 </div>

@@ -239,7 +239,7 @@ public class WorkspaceService extends Service {
                                                                                         ConflictException,
                                                                                         ForbiddenException {
         if (!workspaceManager.getSnapshot(id).isEmpty()) {
-            machineManager.removeSnapshots(EnvironmentContext.getCurrent().getSubject().getUserId(), id);
+            machineManager.removeSnapshots(workspaceManager.getWorkspace(id).getNamespace(), id);
         }
         workspaceManager.removeWorkspace(id);
     }

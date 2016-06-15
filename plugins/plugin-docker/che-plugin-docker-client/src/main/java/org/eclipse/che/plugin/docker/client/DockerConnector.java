@@ -15,7 +15,6 @@ import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import org.apache.commons.codec.binary.Base64;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -115,17 +114,18 @@ import static javax.ws.rs.core.Response.Status.OK;
 public class DockerConnector {
     private static final Logger LOG = LoggerFactory.getLogger(DockerConnector.class);
 
-    private final URI                     dockerDaemonUri;
-    private final InitialAuthConfig       initialAuthConfig;
-    private final ExecutorService         executor;
-    private final DockerConnectionFactory connectionFactory;
+    private final URI                        dockerDaemonUri;
+    private final DockerRegistryAuthResolver authResolver;
+    private final ExecutorService            executor;
+    private final DockerConnectionFactory    connectionFactory;
 
     @Inject
     public DockerConnector(DockerConnectorConfiguration connectorConfiguration,
-                           DockerConnectionFactory connectionFactory) {
+                           DockerConnectionFactory connectionFactory,
+                           DockerRegistryAuthResolver authResolver) {
         this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
-        this.initialAuthConfig = connectorConfiguration.getAuthConfigs();
         this.connectionFactory = connectionFactory;
+        this.authResolver = authResolver;
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
                                                          .setNameFormat("DockerApiConnector-%d")
                                                          .setDaemon(true)
@@ -1123,7 +1123,10 @@ public class DockerConnector {
                               final ProgressMonitor progressMonitor,
                               File tar, // tar from params.files() (uses temporary until delete deprecated methods)
                               URI dockerDaemonUri) throws IOException, InterruptedException {
-        AuthConfigs authConfigs = firstNonNull(params.getAuthConfigs(), initialAuthConfig.getAuthConfigs());
+        final AuthConfigs authConfigs = params.getAuthConfigs();
+        final String repository = params.getRepository();
+        final String tag = params.getTag();
+
         try (InputStream tarInput = new FileInputStream(tar);
              DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -1133,10 +1136,13 @@ public class DockerConnector {
                                                             .header("Content-Type", "application/x-compressed-tar")
                                                             .header("Content-Length", tar.length())
                                                             .header("X-Registry-Config",
-                                                                    Base64.encodeBase64String(JsonHelper.toJson(authConfigs)
-                                                                                                        .getBytes()))
+                                                                    authResolver.getXRegistryConfigHeaderValue(authConfigs))
                                                             .entity(tarInput)) {
-            addQueryParamIfNotNull(connection, "t", params.getRepository());
+            if (tag == null) {
+                addQueryParamIfNotNull(connection, "t", repository);
+            } else {
+                addQueryParamIfNotNull(connection, "t", repository == null ? null : repository + ':' + tag);
+            }
             addQueryParamIfNotNull(connection, "memory", params.getMemoryLimit());
             addQueryParamIfNotNull(connection, "memswap", params.getMemorySwapLimit());
             addQueryParamIfNotNull(connection, "pull", params.isDoForcePull());
@@ -1297,14 +1303,16 @@ public class DockerConnector {
 
     private String push(final PushParams params, final ProgressMonitor progressMonitor, URI dockerDaemonUri)
             throws IOException, InterruptedException {
-        final String fullRepo = (params.getRegistry() != null) ?
-                                params.getRegistry() + '/' + params.getRepository() : params.getRepository();
-        final ValueHolder<String> digestHolder = new ValueHolder<>();
+        final String fullRepo = params.getFullRepo();
 
+        final ValueHolder<String> digestHolder = new ValueHolder<>();
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/" + fullRepo + "/push")
-                                                            .header("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader())) {
+                                                            .header("X-Registry-Auth",
+                                                                    authResolver.getXRegistryAuthHeaderValue(
+                                                                            params.getRegistry(),
+                                                                            params.getAuthConfigs()))) {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {
@@ -1477,14 +1485,14 @@ public class DockerConnector {
     private void pull(final PullParams params,
                       final ProgressMonitor progressMonitor,
                       final URI dockerDaemonUri) throws IOException, InterruptedException {
-        final String image = params.getImage();
-        final String registry = params.getRegistry();
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/create")
-                                                            .query("fromImage", registry != null ? registry + '/' + image : image)
-                                                            .header("X-Registry-Auth", initialAuthConfig.getAuthConfigHeader())) {
+                                                            .query("fromImage", params.getFullRepo())
+                                                            .header("X-Registry-Auth",
+                                                                    authResolver.getXRegistryAuthHeaderValue(
+                                                                            params.getRegistry(),
+                                                                            params.getAuthConfigs()))) {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {

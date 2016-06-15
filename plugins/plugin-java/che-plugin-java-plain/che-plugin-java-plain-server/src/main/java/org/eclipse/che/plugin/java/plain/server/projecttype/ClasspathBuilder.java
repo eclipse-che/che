@@ -71,8 +71,10 @@ public class ClasspathBuilder {
     }
 
     private void addJars(IJavaProject project, List<String> library, final List<IClasspathEntry> classpathEntries) {
+        if (library == null || library.isEmpty()) {
+            return;
+        }
         String libFolder = library.get(0);
-
         if (libFolder.isEmpty()) {
             return;
         }
