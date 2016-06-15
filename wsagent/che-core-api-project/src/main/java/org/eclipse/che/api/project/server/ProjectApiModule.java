@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
@@ -26,6 +27,12 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.GitCheckoutHiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
+import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
+import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
+import org.eclipse.che.api.vfs.impl.file.event.PomModifiedHiEventDetector;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -72,5 +79,15 @@ public class ProjectApiModule extends AbstractModule {
         bind(VirtualFileSystemProvider.class).to(LocalVirtualFileSystemProvider.class);
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
+
+        bind(LoEventListener.class);
+        bind(LoEventService.class);
+        bind(HiEventService.class);
+
+        Multibinder<HiEventDetector<?>> highLevelVfsEventDetectorMultibinder =
+                Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
+                });
+        highLevelVfsEventDetectorMultibinder.addBinding().to(PomModifiedHiEventDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
     }
 }
