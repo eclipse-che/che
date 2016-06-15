@@ -100,7 +100,6 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_VALUE;
 
 /**
  * Client for docker API.
@@ -116,17 +115,17 @@ public class DockerConnector {
     private static final Logger LOG = LoggerFactory.getLogger(DockerConnector.class);
 
     private final URI                        dockerDaemonUri;
-    private final DockerRegistryAuthResolver authManager;
+    private final DockerRegistryAuthResolver authResolver;
     private final ExecutorService            executor;
     private final DockerConnectionFactory    connectionFactory;
 
     @Inject
     public DockerConnector(DockerConnectorConfiguration connectorConfiguration,
                            DockerConnectionFactory connectionFactory,
-                           DockerRegistryAuthResolver authManager) {
+                           DockerRegistryAuthResolver authResolver) {
         this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
         this.connectionFactory = connectionFactory;
-        this.authManager = authManager;
+        this.authResolver = authResolver;
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
                                                          .setNameFormat("DockerApiConnector-%d")
                                                          .setDaemon(true)
@@ -1137,8 +1136,7 @@ public class DockerConnector {
                                                             .header("Content-Type", "application/x-compressed-tar")
                                                             .header("Content-Length", tar.length())
                                                             .header("X-Registry-Config",
-                                                                    authManager.getXRegistryConfigHeaderValue(
-                                                                            authConfigs != null ? authConfigs.getConfigs() : null))
+                                                                    authResolver.getXRegistryConfigHeaderValue(authConfigs))
                                                             .entity(tarInput)) {
             if (tag == null) {
                 addQueryParamIfNotNull(connection, "t", repository);
@@ -1305,7 +1303,6 @@ public class DockerConnector {
 
     private String push(final PushParams params, final ProgressMonitor progressMonitor, URI dockerDaemonUri)
             throws IOException, InterruptedException {
-        final String registry = params.getRegistry();
         final String fullRepo = params.getFullRepo();
 
         final ValueHolder<String> digestHolder = new ValueHolder<>();
@@ -1313,8 +1310,8 @@ public class DockerConnector {
                                                             .method("POST")
                                                             .path("/images/" + fullRepo + "/push")
                                                             .header("X-Registry-Auth",
-                                                                    authManager.getXRegistryAuthHeaderValue(
-                                                                            firstNonNull(registry, DEFAULT_REGISTRY_VALUE),
+                                                                    authResolver.getXRegistryAuthHeaderValue(
+                                                                            params.getRegistry(),
                                                                             params.getAuthConfigs()))) {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
@@ -1488,15 +1485,13 @@ public class DockerConnector {
     private void pull(final PullParams params,
                       final ProgressMonitor progressMonitor,
                       final URI dockerDaemonUri) throws IOException, InterruptedException {
-        final String registry = params.getRegistry();
-
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/create")
                                                             .query("fromImage", params.getFullRepo())
                                                             .header("X-Registry-Auth",
-                                                                    authManager.getXRegistryAuthHeaderValue(
-                                                                            firstNonNull(registry, DEFAULT_REGISTRY_VALUE),
+                                                                    authResolver.getXRegistryAuthHeaderValue(
+                                                                            params.getRegistry(),
                                                                             params.getAuthConfigs()))) {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
