@@ -36,6 +36,7 @@ public interface IdeActions {
     String GROUP_DEBUG_CONTEXT_MENU            = "debugGroupContextMenu";
     String GROUP_PROJECT_EXPLORER_CONTEXT_MENU = "projectExplorerContextMenu";
     String GROUP_EDITOR_TAB_CONTEXT_MENU       = "editorTabContextMenu";
+    String GROUP_CONSOLES_TREE_CONTEXT_MENU    = "consolesTreeContextMenu";
 
     String GROUP_OTHER_MENU      = "otherMenu";
     String GROUP_LEFT_MAIN_MENU  = "leftMainMenu";

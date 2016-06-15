@@ -112,6 +112,25 @@ public interface MachineLocalizationConstant extends Messages {
     String notificationMachineDestroyed(String machineId);
 
 
+    @Key("control.rerun.title")
+    String reRunControlTitle();
+
+    @Key("control.rerun.description")
+    String reRunControlDescription();
+
+    @Key("control.stop.title")
+    String stopControlTitle();
+
+    @Key("control.stop.description")
+    String stopControlDescription();
+
+    @Key("control.close.title")
+    String closeControlTitle();
+
+    @Key("control.close.description")
+    String closeControlDescription();
+
+
     /* MachinePanelPresenter */
     @Key("view.machinePanel.title")
     String machinePanelTitle();

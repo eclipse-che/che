@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PartStackView;
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsolePresenter;
-import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.RecipePartPresenter;
@@ -67,8 +66,6 @@ public class OperationsPerspectiveTest {
     private MachineAppliancePresenter  infoContainer;
     @Mock
     private NotificationManager        notificationManager;
-    @Mock
-    private OutputsContainerPresenter  outputsContainer;
     @Mock
     private RecipePartPresenter        recipePanel;
     @Mock
@@ -123,7 +120,6 @@ public class OperationsPerspectiveTest {
                                              machinePanel,
                                              recipePanel,
                                              notificationManager,
-                                             outputsContainer,
                                              infoContainer,
                                              eventBus);
     }
@@ -134,7 +130,6 @@ public class OperationsPerspectiveTest {
 
         verify(partStackPresenter).addPart(console, null);
         verify(partStackPresenter).addPart(notificationManager, Constraints.FIRST);
-        verify(partStackPresenter).addPart(outputsContainer, null);
         verify(partStackPresenter).addPart(machinePanel, null);
     }
 

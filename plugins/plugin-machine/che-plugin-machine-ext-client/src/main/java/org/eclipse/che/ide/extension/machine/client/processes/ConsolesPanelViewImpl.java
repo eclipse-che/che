@@ -142,7 +142,7 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
             @Override
             public void onNodeContextMenu(int mouseX, int mouseY, TreeNodeElement<ProcessTreeNode> node) {
-
+                delegate.onContextMenu(mouseX, mouseY, node.getData());
             }
 
             @Override
@@ -167,7 +167,6 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
             @Override
             public void onRootContextMenu(int mouseX, int mouseY) {
-
             }
 
             @Override

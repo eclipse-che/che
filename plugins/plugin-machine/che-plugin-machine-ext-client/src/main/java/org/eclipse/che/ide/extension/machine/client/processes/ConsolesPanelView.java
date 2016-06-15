@@ -134,5 +134,19 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          *         node of process to stop with closing output
          */
         void onCloseCommandOutputClick(@NotNull ProcessTreeNode node);
+
+        /**
+         * Is called when user clicked right mouse button.
+         *
+         * @param mouseX
+         *          mouse x coordinate
+         * @param mouseY
+         *          mouse y coordinate
+         * @param node
+         *          process tree node
+         */
+        void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
+
     }
+
 }
