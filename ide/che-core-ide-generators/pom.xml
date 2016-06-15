@@ -18,6 +18,7 @@
         <groupId>org.eclipse.che.core</groupId>
         <version>4.4.0-RC1-SNAPSHOT</version>
     </parent>
+    <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-generators</artifactId>
     <packaging>jar</packaging>
     <name>Che Core :: IDE :: Generators</name>

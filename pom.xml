@@ -25,6 +25,7 @@
     <name>Che Parent</name>
     <modules>
         <module>core</module>
+        <module>ide</module>
         <module>plugins</module>
         <module>samples</module>
         <module>dashboard</module>
