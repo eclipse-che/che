@@ -62,7 +62,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Florent Benoit
  */
 @Singleton
-public class FactoryWorkspaceComponent extends WorkspaceComponent implements Component {
+public class FactoryWorkspaceComponent extends WorkspaceComponent {
     private final FactoryServiceClient           factoryServiceClient;
     private       String                         workspaceId;
 

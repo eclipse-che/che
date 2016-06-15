@@ -78,7 +78,6 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * @author Dmitry Shnurenko
  * @author Yevhenii Voevodin
  */
-@Singleton
 public abstract class WorkspaceComponent implements Component, WsAgentStateHandler {
 
     protected final static int SKIP_COUNT = 0;

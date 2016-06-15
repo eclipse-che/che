@@ -54,7 +54,7 @@ import static org.eclipse.che.ide.statepersistance.AppStateManager.PREFERENCE_PR
  *
  */
 @Singleton
-public class DefaultWorkspaceComponent extends WorkspaceComponent implements Component {
+public class DefaultWorkspaceComponent extends WorkspaceComponent  {
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
