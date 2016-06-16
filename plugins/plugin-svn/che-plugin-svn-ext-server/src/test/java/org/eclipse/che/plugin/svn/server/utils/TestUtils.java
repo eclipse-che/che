@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,8 +165,7 @@ public class TestUtils {
      */
     public static void createTestUser(final UserProfileDao userProfileDao) throws Exception {
         // set current user
-        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null,
-                                                                   Arrays.asList("workspace/developer"), false));
+        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null, false));
 
         // rules for mock
         final Map<String, String> profileAttributes = new HashMap<>();
@@ -196,7 +194,7 @@ public class TestUtils {
         wcRoot.deleteOnExit();
 
         // Create the repository
-        final CommandLineResult result = UpstreamUtils.executeCommandLine(null, "svnadmin", new String[]{
+        final CommandLineResult result = UpstreamUtils.executeCommandLine(null, "svnadmin", new String[] {
                 "create",
                 repoRoot.getAbsolutePath()
         }, -1, repoRoot);

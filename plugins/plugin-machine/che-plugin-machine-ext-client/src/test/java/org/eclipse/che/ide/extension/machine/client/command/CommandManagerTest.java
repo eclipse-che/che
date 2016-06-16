@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistry;
-import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.junit.Test;
@@ -45,8 +44,6 @@ public class CommandManagerTest {
     private DtoFactory                           dtoFactory;
     @Mock
     private MachineServiceClient                 machineServiceClient;
-    @Mock
-    private OutputsContainerPresenter            outputsContainerPresenter;
     @Mock
     private ConsolesPanelPresenter               consolesPanelPresenter;
     @Mock

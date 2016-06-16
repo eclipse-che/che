@@ -50,7 +50,7 @@ public class RemotePreferenceDaoCompatibilityTest {
 
     @SuppressWarnings("unused") // used by EverrestJetty
     private static final EnvironmentFilter ENVIRONMENT_FILTER = new EnvironmentFilter();
-    private static final Subject           TEST_SUBJECT       = new SubjectImpl("name", "id", "token", null, false);
+    private static final Subject           TEST_SUBJECT       = new SubjectImpl("name", "id", "token", false);
 
     @Mock
     private PreferenceDao preferenceDaoMock;
@@ -116,7 +116,6 @@ public class RemotePreferenceDaoCompatibilityTest {
             // hacking security context
             try {
                 final SecurityContext securityContext = mock(SecurityContext.class, RETURNS_MOCKS);
-                when(securityContext.isUserInRole("user")).thenReturn(true);
                 final Field scField = request.getClass().getSuperclass().getDeclaredField("securityContext");
                 scField.setAccessible(true);
                 scField.set(request, securityContext);

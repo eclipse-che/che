@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @DTO
 public interface Credentials {
 
-    @ApiModelProperty(value = "Parameter used to login as system/admin. It is not necessary for users", allowableValues = "sysldap")
+    @ApiModelProperty(value = "Parameter used to by custom realm. It is optional.", allowableValues = "sysldap")
     String getRealm();
 
     void setRealm(String realm);

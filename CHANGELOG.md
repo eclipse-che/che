@@ -1,5 +1,69 @@
 # Change Log
 
+## [4.3.0](https://github.com/eclipse/che/tree/4.3.0) (2016-06-13)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.0-RC1...4.3.0)
+
+**Issues with 'enhancement' label:**
+
+- Workspace Commands Import [\#1377](https://github.com/eclipse/che/issues/1377)
+
+**Issues fixed with 'bugs' label:**
+
+- Commands not loading from new workspace. [\#1428](https://github.com/eclipse/che/issues/1428)
+
+**Issues with no labels:**
+
+- The latest code Compiling GWT Application failed [\#1485](https://github.com/eclipse/che/issues/1485)
+- Is there any tutorial to introduce how to deploy Che in a farm to keep every user has their own Che instance [\#1475](https://github.com/eclipse/che/issues/1475)
+- Workspace ram [\#1469](https://github.com/eclipse/che/issues/1469)
+- Browser JS error when starting agent [\#1462](https://github.com/eclipse/che/issues/1462)
+
+**Pull requests merged:**
+
+- CHE-1316: Temporary fix for to avoid cyclic dependencies of components [\#1492](https://github.com/eclipse/che/pull/1492) ([akorneta](https://github.com/akorneta))
+- CODENVY-645: add checking on empty list of paths [\#1489](https://github.com/eclipse/che/pull/1489) ([vparfonov](https://github.com/vparfonov))
+- CHE-1320 Fix redirection from IDE to dashboard - workspace is not selected [\#1488](https://github.com/eclipse/che/pull/1488) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- CODENVY-619 Handle normalization of fully illegal usernames [\#1487](https://github.com/eclipse/che/pull/1487) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- CODENVY-643: Fix getting the snapshots of the user workspace [\#1486](https://github.com/eclipse/che/pull/1486) ([akorneta](https://github.com/akorneta))
+- CODENVY-557: remove user role from dashboard [\#1479](https://github.com/eclipse/che/pull/1479) ([olexii4](https://github.com/olexii4))
+- CODENVY-641: Remove user verification during getting factory json [\#1478](https://github.com/eclipse/che/pull/1478) ([akorneta](https://github.com/akorneta))
+- Rename plainJava-\>javac [\#1477](https://github.com/eclipse/che/pull/1477) ([vparfonov](https://github.com/vparfonov))
+- CHE-1272: Implement method for adding workspace environment [\#1474](https://github.com/eclipse/che/pull/1474) ([azatsarynnyy](https://github.com/azatsarynnyy))
+- Set memory\_swap\_multiplier -1 to disable swap limit [\#1473](https://github.com/eclipse/che/pull/1473) ([riuvshin](https://github.com/riuvshin))
+- CHE-1222: make workspace details sections extendible [\#1472](https://github.com/eclipse/che/pull/1472) ([ashumilova](https://github.com/ashumilova))
+- CHE-1245: Update docker client to use new format of X-Registry-Config header [\#1471](https://github.com/eclipse/che/pull/1471) ([mmorhun](https://github.com/mmorhun))
+- Fix integer overflowing [\#1465](https://github.com/eclipse/che/pull/1465) ([riuvshin](https://github.com/riuvshin))
+- CHE-1239 Smooth transition when restarting an existing workspace [\#1464](https://github.com/eclipse/che/pull/1464) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- CODENVY-27; allow to open workspaces by using /ide/namespace/ws\_name schema [\#1463](https://github.com/eclipse/che/pull/1463) ([mshaposhnik](https://github.com/mshaposhnik))
+- CHE-459 Associate a set of commands with provided stacks [\#1460](https://github.com/eclipse/che/pull/1460) ([ddementieva](https://github.com/ddementieva))
+- Add text for the Delete key code [\#1456](https://github.com/eclipse/che/pull/1456) ([vzhukovskii](https://github.com/vzhukovskii))
+- CHE-1286: save commands into workspace config [\#1455](https://github.com/eclipse/che/pull/1455) ([akurinnoy](https://github.com/akurinnoy))
+- Added necessary dependencies [\#1452](https://github.com/eclipse/che/pull/1452) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Fix codeassist in sample json plugin [\#1450](https://github.com/eclipse/che/pull/1450) ([ashumilova](https://github.com/ashumilova))
+- Move classes related with data tree structure to dedicate package [\#1449](https://github.com/eclipse/che/pull/1449) ([vzhukovskii](https://github.com/vzhukovskii))
+- CHE-1286: save commands into workspace config [\#1447](https://github.com/eclipse/che/pull/1447) ([akurinnoy](https://github.com/akurinnoy))
+- CODENVY-610: add possibility to set no\_proxy ENV var in machine [\#1444](https://github.com/eclipse/che/pull/1444) ([riuvshin](https://github.com/riuvshin))
+- Add utility class to operate with arrays [\#1443](https://github.com/eclipse/che/pull/1443) ([vzhukovskii](https://github.com/vzhukovskii))
+- CODENVY-619 Restrict usernames to letters and digits only [\#1442](https://github.com/eclipse/che/pull/1442) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- CODENVY-583: Fix javadoc navigation in https mode [\#1441](https://github.com/eclipse/che/pull/1441) ([akorneta](https://github.com/akorneta))
+- Revert "Add utility class to operate with arrays" [\#1439](https://github.com/eclipse/che/pull/1439) ([vzhukovskii](https://github.com/vzhukovskii))
+- Add utility class to operate with arrays [\#1437](https://github.com/eclipse/che/pull/1437) ([vzhukovskii](https://github.com/vzhukovskii))
+- CHE-1094: GDB Debugger Connections UX Impovements [\#1435](https://github.com/eclipse/che/pull/1435) ([tolusha](https://github.com/tolusha))
+- CHE-1286: save commands into workspace config [\#1434](https://github.com/eclipse/che/pull/1434) ([akurinnoy](https://github.com/akurinnoy))
+- Interface and default implementation for promises [\#1432](https://github.com/eclipse/che/pull/1432) ([vzhukovskii](https://github.com/vzhukovskii))
+- CODENVY-568: Add possibility handel event then factory fully accepted  [\#1429](https://github.com/eclipse/che/pull/1429) ([vparfonov](https://github.com/vparfonov))
+- \[languageserver\] upgraded to latest version of ls-api [\#1380](https://github.com/eclipse/che/pull/1380) ([svenefftinge](https://github.com/svenefftinge))
+- CODENVY-608: Close output consumer on destroy machine [\#1466](https://github.com/eclipse/che/pull/1466) ([vinokurig](https://github.com/vinokurig))
+- CODENVY-595: add possibility to adjust machine swap size [\#1458](https://github.com/eclipse/che/pull/1458) ([riuvshin](https://github.com/riuvshin))
+- Fix docker image reference parsing by DockerImageIdentifierParser [\#1420](https://github.com/eclipse/che/pull/1420) ([garagatyi](https://github.com/garagatyi))
+- CHE-1196: Artik: Debugger hangs when debugging binaries using Artik SDK [\#1418](https://github.com/eclipse/che/pull/1418) ([tolusha](https://github.com/tolusha))
+- CODENVY-566 make workspace export working again [\#1417](https://github.com/eclipse/che/pull/1417) ([benoitf](https://github.com/benoitf))
+- CHE-1275: Add api endpoint into each non dev machine environment [\#1415](https://github.com/eclipse/che/pull/1415) ([akorneta](https://github.com/akorneta))
+- CHE-1233: fix wrong behavior for ready-to-go-stacks selector [\#1411](https://github.com/eclipse/che/pull/1411) ([olexii4](https://github.com/olexii4))
+- CODENVY-27; adapt machine sevice to workspace sharing [\#1409](https://github.com/eclipse/che/pull/1409) ([mshaposhnik](https://github.com/mshaposhnik))
+- CHE-1231. Show/hide error messages after updating pom.xml [\#1398](https://github.com/eclipse/che/pull/1398) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- CODENVY-480 Remove user's roles [\#1336](https://github.com/eclipse/che/pull/1336) ([sleshchenko](https://github.com/sleshchenko))
+
 ## [4.3.0-RC1](https://github.com/eclipse/che/tree/4.3.0-RC1) (2016-06-04)
 [Full Changelog](https://github.com/eclipse/che/compare/4.2.3...4.3.0-RC1)
 
@@ -28,11 +92,6 @@
 
 **Pull requests merged:**
 
-- CHE-1196: Artik: Debugger hangs when debugging binaries using Artik SDK [\#1418](https://github.com/eclipse/che/pull/1418) ([tolusha](https://github.com/tolusha))
-- CODENVY-566 make workspace export working again [\#1417](https://github.com/eclipse/che/pull/1417) ([benoitf](https://github.com/benoitf))
-- CHE-1275: Add api endpoint into each non dev machine environment [\#1415](https://github.com/eclipse/che/pull/1415) ([akorneta](https://github.com/akorneta))
-- CHE-1233: fix wrong behavior for ready-to-go-stacks selector [\#1411](https://github.com/eclipse/che/pull/1411) ([olexii4](https://github.com/olexii4))
-- CODENVY-27; adapt machine sevice to workspace sharing [\#1409](https://github.com/eclipse/che/pull/1409) ([mshaposhnik](https://github.com/mshaposhnik))
 - CHE-1260 Enable svg files license checking [\#1407](https://github.com/eclipse/che/pull/1407) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - CHE-1269: Add check for machine runtime during links formation [\#1406](https://github.com/eclipse/che/pull/1406) ([akorneta](https://github.com/akorneta))
 - CHE-1171 Remove duplicated menubar items exisiting in left navbar [\#1405](https://github.com/eclipse/che/pull/1405) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
@@ -40,7 +99,6 @@
 - CHE-1225 Change dashboard navigation button in IDE toolbar [\#1401](https://github.com/eclipse/che/pull/1401) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
 - CHE-1207: show warning dialog for rename refactoring [\#1400](https://github.com/eclipse/che/pull/1400) ([svor](https://github.com/svor))
 - CHE-1225 Change dashboard navigation button in IDE toolbar [\#1399](https://github.com/eclipse/che/pull/1399) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
-- CHE-1231. Show/hide error messages after updating pom.xml [\#1398](https://github.com/eclipse/che/pull/1398) ([RomanNikitenko](https://github.com/RomanNikitenko))
 - CODENVY-584: Add terminal link into each machine instance [\#1397](https://github.com/eclipse/che/pull/1397) ([akorneta](https://github.com/akorneta))
 - CHE-1058: Debugger connection failure: Indicate reasons [\#1396](https://github.com/eclipse/che/pull/1396) ([tolusha](https://github.com/tolusha))
 - CHE-1219: add heartbeat messages to keep websocket connection alive [\#1395](https://github.com/eclipse/che/pull/1395) ([ashumilova](https://github.com/ashumilova))

@@ -30,6 +30,7 @@ import static org.eclipse.che.plugin.docker.client.params.ParamsUtils.requireNon
 public class BuildImageParams {
 
     private String      repository;
+    private String      tag;
     private AuthConfigs authConfigs;
     private Boolean     doForcePull;
     private Long        memoryLimit;
@@ -63,6 +64,18 @@ public class BuildImageParams {
      */
     public BuildImageParams withRepository(String repository) {
         this.repository = repository;
+        return this;
+    }
+
+    /**
+     * Adds tag to this parameters.
+     *
+     * @param tag
+     *         tag of the image
+     * @return this params instance
+     */
+    public BuildImageParams withTag(String tag) {
+        this.tag = tag;
         return this;
     }
 
@@ -155,6 +168,10 @@ public class BuildImageParams {
 
     public String getRepository() {
         return repository;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     public AuthConfigs getAuthConfigs() {

@@ -41,8 +41,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConso
 import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleViewImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineView;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineViewImpl;
-import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerView;
-import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerViewImpl;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
@@ -58,6 +56,7 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.head
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeaderImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelView;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelViewImpl;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.extension.machine.client.targets.BaseTarget;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
@@ -102,7 +101,6 @@ public class MachineGinModule extends AbstractGinModule {
                         .implement(OutputConsole.class, Names.named("default"), DefaultOutputConsole.class)
                         .build(CommandConsoleFactory.class));
 
-        bind(OutputsContainerView.class).to(OutputsContainerViewImpl.class).in(Singleton.class);
         bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class).in(Singleton.class);
 
         bind(EditCommandsView.class).to(EditCommandsViewImpl.class).in(Singleton.class);
@@ -139,5 +137,7 @@ public class MachineGinModule extends AbstractGinModule {
         categoryPageBinder.addBinding().to(SshCategoryPresenter.class);
         categoryPageBinder.addBinding().to(DockerCategoryPresenter.class);
         categoryPageBinder.addBinding().to(DevelopmentCategoryPresenter.class);
+
+        install(new GinFactoryModuleBuilder().build(ConsoleTreeContextMenuFactory.class));
     }
 }

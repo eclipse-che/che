@@ -41,9 +41,8 @@ export class CreateProjectGithubCtrl {
     this.$timeout = $timeout;
 
     this.productName = cheBranding.getName();
-    var userAPI = cheAPI.getUser();
 
-    this.user = userAPI.getUser();
+    this.profile = cheAPI.getProfile().getProfile();
 
     this.currentTokenCheck = null;
     this.resolveOrganizationName = this.githubOrganizationNameResolver.resolve;
@@ -70,10 +69,10 @@ export class CreateProjectGithubCtrl {
     this.$q.all([
       oAuthProviderPromise,
       tabOpenDefer.promise,
-      this.user.$promise
+      this.profile.$promise
     ]).then(() => {
       if (this.isGitHubOAuthProviderAvailable) {
-        this.currentUserId = this.user.id;
+        this.currentUserId = this.profile.userId;
         this.askLoad();
       } else {
         this.state = 'NO_REPO';

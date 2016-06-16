@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,18 +35,14 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class NewTerminalActionTest {
-    private static final String MACHINE_ID = "machineID";
 
-    @Mock
-    private AppContext                  appContext;
-    @Mock
-    private DevMachine                  devMachine;
-    @Mock
-    private WorkspaceAgent              workspaceAgent;
     @Mock
     private ConsolesPanelPresenter      consolesPanelPresenter;
     @Mock
     private MachineLocalizationConstant locale;
+    @Mock
+    private MachineResources resources;
+
 
     @Mock(answer = RETURNS_DEEP_STUBS)
     private ActionEvent actionEvent;
@@ -55,40 +52,15 @@ public class NewTerminalActionTest {
 
     @Test
     public void constructorShouldBeVerified() {
-        verify(locale).newTerminalTitle();
+        verify(locale).newTerminal();
         verify(locale).newTerminalDescription();
     }
 
     @Test
     public void actionShouldBePerformed() throws Exception {
-        when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(devMachine.getId()).thenReturn(MACHINE_ID);
-
         action.actionPerformed(actionEvent);
 
-        verify(appContext).getDevMachine();
-        verify(consolesPanelPresenter).onAddTerminal(eq(MACHINE_ID));
-        verify(workspaceAgent).setActivePart(eq(consolesPanelPresenter));
+        verify(consolesPanelPresenter).newTerminal();
     }
 
-    @Test
-    public void actionShouldBeEnabledWhenDevMachineIsNotNull() throws Exception {
-        when(appContext.getDevMachine()).thenReturn(devMachine);
-
-        action.updateInPerspective(actionEvent);
-
-        verify(actionEvent.getPresentation()).setEnabled(eq(true));
-    }
-
-    @Test
-    public void actionShouldBeDisabledWhenDevMachineIsNull() throws Exception {
-        when(appContext.getDevMachine()).thenReturn(null);
-
-        action.updateInPerspective(actionEvent);
-
-        verify(actionEvent.getPresentation()).setEnabled(eq(false));
-
-        verify(consolesPanelPresenter, never()).onAddTerminal(eq(MACHINE_ID));
-        verify(workspaceAgent, never()).setActivePart(eq(consolesPanelPresenter));
-    }
 }

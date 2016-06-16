@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.3.0-RC2-SNAPSHOT</version>
+        <version>4.4.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
@@ -363,6 +363,8 @@
                     <modules>
                         <module>org.eclipse.che.ide.IDE</module>
                     </modules>
+                    <!-- don' remove it we will use it then need to found bug in compiled JS -->
+                    <!--style>DETAILED</style-->
                     <logLevel>${gwt.compiler.logLevel}</logLevel>
                     <enableClosureCompiler>${gwt.compiler.enableClosureCompiler}</enableClosureCompiler>
                 </configuration>

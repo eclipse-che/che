@@ -51,7 +51,7 @@ import static org.testng.Assert.assertEquals;
 public class RemotePreferenceDaoTest {
 
     private static final String  API_ENDPOINT = "http://localhost:8000/api";
-    private static final Subject TEST_SUBJECT = new SubjectImpl("name", "user123", "token", null, false);
+    private static final Subject TEST_SUBJECT = new SubjectImpl("name", "user123", "token", false);
 
     @Mock
     private HttpJsonRequestFactory requestFactory;

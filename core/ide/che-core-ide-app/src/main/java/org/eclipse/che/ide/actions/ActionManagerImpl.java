@@ -123,10 +123,13 @@ public class ActionManagerImpl implements ActionManager {
                 new DefaultActionGroup(IdeActions.GROUP_PROJECT_EXPLORER_CONTEXT_MENU, false, this);
         registerAction(IdeActions.GROUP_PROJECT_EXPLORER_CONTEXT_MENU, projectExplorerContextMenuGroup);
 
-        //Register context menu group for editor tab
-        DefaultActionGroup editorTabContextMenuGroup =
-                new DefaultActionGroup(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU, false, this);
-        registerAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU, editorTabContextMenuGroup);
+        // Register context menu group for editor tab
+        registerAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU,
+                new DefaultActionGroup(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU, false, this));
+
+        // Register context menu group for consoles tree
+        registerAction(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU,
+                new DefaultActionGroup(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU, false, this));
 
         // register default action groups for main toolbar
         DefaultActionGroup mainToolbarGroup = new DefaultActionGroup(this);

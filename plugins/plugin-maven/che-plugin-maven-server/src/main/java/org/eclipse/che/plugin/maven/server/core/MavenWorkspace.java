@@ -22,11 +22,14 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.server.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.RegisteredProject;
+import org.eclipse.che.ide.ext.java.shared.Constants;
+import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathHelper;
 import org.eclipse.che.plugin.maven.server.core.classpath.ClasspathManager;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.core.project.MavenProjectModifications;
-import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -188,22 +191,35 @@ public class MavenWorkspace {
             Element pluginConfigurationTestSource =
                     project.getPluginConfiguration("org.codehaus.mojo", "build-helper-maven-plugin", "add-test-source");
 
-            addSourcePathFromConfiguration(helper, project, pluginConfigurationSource);
-            addSourcePathFromConfiguration(helper, project, pluginConfigurationTestSource);
+            IPath projectPath = project.getProject().getFullPath();
+            RegisteredProject registeredProject = projectRegistryProvider.get().getProject(projectPath.toOSString());
+
+            List<String> sourceFolders = registeredProject.getAttributes().get(Constants.SOURCE_FOLDER);
+            List<String> testSourceFolders = registeredProject.getAttributes().get(MavenAttributes.TEST_SOURCE_FOLDER);
+
+            addSourcePathFromConfiguration(helper, project, pluginConfigurationSource, sourceFolders);
+            addSourcePathFromConfiguration(helper, project, pluginConfigurationTestSource, testSourceFolders);
             javaProject.setRawClasspath(helper.getEntries(), null);
         } catch (JavaModelException e) {
             LOG.error("Can't update Java project classpath with Maven build helper plugin configuration", e);
         }
     }
 
-    private void addSourcePathFromConfiguration(ClasspathHelper helper, MavenProject project, Element configuration) {
+    private void addSourcePathFromConfiguration(ClasspathHelper helper,
+                                                MavenProject project,
+                                                Element configuration,
+                                                List<String> attributes) {
         if (configuration != null) {
             Element sources = configuration.getChild("sources");
             if (sources != null) {
                 for (Object element : sources.getChildren()) {
                     String path = ((Element)element).getTextTrim();
                     IPath projectLocation = project.getProject().getLocation();
-                    helper.addSourceEntry(project.getProject().getFullPath().append(path.substring(projectLocation.toOSString().length())));
+                    String sourceFolder = path.substring(projectLocation.toOSString().length() + 1);
+                    helper.addSourceEntry(project.getProject().getFullPath().append(sourceFolder));
+                    if (!attributes.contains(sourceFolder)) {
+                        attributes.add(sourceFolder);
+                    }
                 }
             }
         }

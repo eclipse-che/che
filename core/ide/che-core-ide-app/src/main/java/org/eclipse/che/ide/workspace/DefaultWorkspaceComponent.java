@@ -35,6 +35,7 @@ import org.eclipse.che.ide.statepersistance.dto.AppState;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
@@ -53,7 +54,7 @@ import static org.eclipse.che.ide.statepersistance.AppStateManager.PREFERENCE_PR
  *
  */
 @Singleton
-public class DefaultWorkspaceComponent extends WorkspaceComponent implements Component {
+public class DefaultWorkspaceComponent extends WorkspaceComponent  {
 
     @Inject
     public DefaultWorkspaceComponent(WorkspaceServiceClient workspaceServiceClient,
@@ -72,7 +73,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Com
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceSnapshotCreator snapshotCreator) {
+                                     WorkspaceSnapshotCreator snapshotCreator,
+                                     LoaderFactory loaderFactory) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -89,7 +91,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent implements Com
               preferencesManager,
               dtoFactory,
               initialLoadingInfo,
-              snapshotCreator);
+              snapshotCreator,
+              loaderFactory);
     }
 
     /** {@inheritDoc} */

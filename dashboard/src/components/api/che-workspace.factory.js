@@ -23,17 +23,12 @@ export class CheWorkspace {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource, $q, cheUser, cheWebsocket, lodash) {
+  constructor ($resource, $q, cheWebsocket, lodash) {
     // keep resource
     this.$resource = $resource;
-
     this.$q = $q;
     this.lodash = lodash;
-
-    this.cheUser = cheUser;
     this.cheWebsocket = cheWebsocket;
-
-    this.lodash = lodash;
 
     // current list of workspaces
     this.workspaces = [];

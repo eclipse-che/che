@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.SOURCE;
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 
 /**
  * The page for the information about source folders which are including into classpath.
@@ -81,7 +82,7 @@ public class SourceEntryPresenter extends AbstractClasspathPagePresenter impleme
     @Override
     public void go(AcceptsOneWidget container) {
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getProjectConfig();
-        isPlainJava = "plainJava".equals(projectConfig.getType());
+        isPlainJava = JAVAC.equals(projectConfig.getType());
 
         setReadOnlyMod();
 
