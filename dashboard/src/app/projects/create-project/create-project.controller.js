@@ -537,7 +537,16 @@ export class CreateProjectCtrl {
       return;
     }
 
-    let resolvePromise = projectService.fetchResolve(projectName);
+    //TODO: fix auto project type
+    projectDetails.type = 'blank';
+    let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
+    updateProjectPromise.then(() => {
+      deferredResolve.resolve();
+    }, (error) => {
+      deferredResolve.reject(error);
+    });
+
+    /*    let resolvePromise = projectService.fetchResolve(projectName);
     resolvePromise.then(() => {
       let resultResolve = projectService.getResolve(projectName);
       // get project-types
@@ -631,7 +640,7 @@ export class CreateProjectCtrl {
 
     }, (error) => {
       deferredResolve.reject(error);
-    });
+    });*/
   }
 
 
