@@ -10,21 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.inject;
 
-import org.eclipse.che.commons.lang.Pair;
-import com.google.inject.Binder;
-import com.google.inject.Guice;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Module;
+import com.google.inject.*;
 import com.google.inject.name.Names;
 import com.google.inject.util.Modules;
-
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.Pair;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import javax.inject.Named;
 import java.net.MalformedURLException;
 import java.net.URI;
