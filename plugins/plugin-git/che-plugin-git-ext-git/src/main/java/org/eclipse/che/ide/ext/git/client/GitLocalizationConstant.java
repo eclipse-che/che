@@ -242,17 +242,17 @@ public interface GitLocalizationConstant extends Messages {
     @Key("messages.compare_save.question")
     String compareSaveQuestion();
 
-    @Key("importProject.messageStartWithWhiteSpace")
-    String importProjectMessageStartWithWhiteSpace();
+    @Key("git.url.start.with.white.space.message")
+    String gitUrlStartWithWhiteSpaceMessage();
 
-    @Key("importProject.messageNameRepoIncorrect")
-    String importProjectMessageNameRepoIncorrect();
+    @Key("git.url.name.repo.incorrect.message")
+    String gitUrlNameRepoIncorrectMessage();
 
-    @Key("importProject.messageProtocolIncorrect")
-    String importProjectMessageProtocolIncorrect();
+    @Key("git.url.protocol.incorrect.message")
+    String gitUrlProtocolIncorrectMessage();
 
-    @Key("importProject.messageHostIncorrect")
-    String importProjectMessageHostIncorrect();
+    @Key("git.url.host.incorrect.message")
+    String gitUrlHostIncorrectMessage();
 
     // ----VIEWS------------------------------------------------------------------
 

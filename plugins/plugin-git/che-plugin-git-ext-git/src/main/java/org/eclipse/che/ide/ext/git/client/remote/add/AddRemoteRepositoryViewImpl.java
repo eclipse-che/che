@@ -12,16 +12,18 @@ package org.eclipse.che.ide.ext.git.client.remote.add;
 
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
+import org.eclipse.che.ide.ui.TextBox;
 import org.eclipse.che.ide.ui.window.Window;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,26 +46,28 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
     TextBox name;
     @UiField
     TextBox url;
+    @UiField(provided = true)
+    Style   style;
+    @UiField
+    Label   labelUrlError;
+
     Button btnOk;
     Button btnCancel;
+
     @UiField(provided = true)
     final   GitResources            res;
     @UiField(provided = true)
     final   GitLocalizationConstant locale;
     private ActionDelegate          delegate;
 
-    /**
-     * Create view.
-     *
-     * @param resources
-     * @param locale
-     */
     @Inject
     protected AddRemoteRepositoryViewImpl(GitResources resources, GitLocalizationConstant locale) {
         this.res = resources;
         this.locale = locale;
         this.ensureDebugId("git-addRemoteRepository-window");
 
+        style = resources.addRemoteStyle();
+        style.ensureInjected();
         Widget widget = ourUiBinder.createAndBindUi(this);
 
         this.setTitle("Add remote repository");
@@ -98,6 +102,13 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
         if (isWidgetFocused(btnCancel)) {
             delegate.onCancelClicked();
         }
+    }
+
+    @Override
+    protected void onClose() {
+        name.unmark();
+        url.unmark();
+        labelUrlError.setText(null);
     }
 
     /** {@inheritDoc} */
@@ -136,6 +147,7 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
     @Override
     public void close() {
         this.hide();
+        onClose();
     }
 
     /** {@inheritDoc} */
@@ -146,13 +158,53 @@ public class AddRemoteRepositoryViewImpl extends Window implements AddRemoteRepo
 
     /** {@inheritDoc} */
     @Override
+    public void markNameValid() {
+        name.markValid();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void markNameInvalid() {
+        name.markInvalid();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void markURLValid() {
+        url.markValid();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void markURLInvalid() {
+        url.markInvalid();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void setURLErrorMessage(@NotNull String message) {
+        labelUrlError.setText(message);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
     }
 
-    @UiHandler({"name", "url"})
-    public void onValueChanged(KeyUpEvent event) {
-        delegate.onValueChanged();
+    @UiHandler("name")
+    protected void onRemoteNameChanged(KeyUpEvent event) {
+        delegate.onRemoteNameChanged();
     }
 
+    @UiHandler("url")
+    protected void onRemoteURLChanged(KeyUpEvent event) {
+        delegate.onRemoteURLChanged();
+    }
+
+    public interface Style extends CssResource {
+        String emptyBorder();
+
+        String labelErrorPosition();
+    }
 }

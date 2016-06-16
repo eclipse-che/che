@@ -29,7 +29,6 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -90,7 +89,7 @@ public class GitImporterPagePresenterTest {
         presenter.projectUrlChanged(incorrectUrl);
 
         verify(view).markURLInvalid();
-        verify(view).setURLErrorMessage(eq(locale.importProjectMessageStartWithWhiteSpace()));
+        verify(view).setURLErrorMessage(eq(locale.gitUrlStartWithWhiteSpaceMessage()));
 
         verify(dataObject).setName(eq(name));
         verify(view).setProjectName(name);
@@ -181,7 +180,7 @@ public class GitImporterPagePresenterTest {
         presenter.projectUrlChanged(incorrectUrl);
 
         verify(view).markURLInvalid();
-        verify(view).setURLErrorMessage(eq(locale.importProjectMessageProtocolIncorrect()));
+        verify(view).setURLErrorMessage(eq(locale.gitUrlProtocolIncorrectMessage()));
 
         verify(source).setLocation(eq(incorrectUrl));
         verify(view).setProjectName(anyString());
