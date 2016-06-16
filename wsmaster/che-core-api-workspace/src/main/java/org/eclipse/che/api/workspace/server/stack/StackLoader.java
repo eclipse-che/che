@@ -47,7 +47,7 @@ import static java.lang.String.format;
 public class StackLoader {
     private static final Logger LOG = LoggerFactory.getLogger(StackLoader.class);
 
-    private static final Gson GSON = new GsonBuilder().create();
+    private final Gson GSON;
 
     private final Path     stackJsonPath;
     private final Path     stackIconFolderPath;
@@ -60,6 +60,9 @@ public class StackLoader {
         this.stackJsonPath = Paths.get(stacksPath);
         this.stackIconFolderPath = Paths.get(stackIconFolder);
         this.stackDao = stackDao;
+
+        //TODO remove this strategy after fix https://jira.codenvycorp.com/browse/CODENVY-651
+        GSON = new GsonBuilder().setFieldNamingStrategy(field -> field.getName().equals("isDev") ? "dev" : field.getName()).create();
     }
 
     /**
