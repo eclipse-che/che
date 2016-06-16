@@ -14,21 +14,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-core-parent</artifactId>
+        <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
         <version>4.4.0-RC1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>che-core-commons-parent</artifactId>
-    <packaging>pom</packaging>
-    <name>Che Core :: Commons :: Parent</name>
-    <modules>
-        <module>che-core-commons-annotations</module>
-        <module>che-core-commons-lang</module>
-        <module>che-core-commons-inject</module>
-        <module>che-core-commons-json</module>
-        <module>che-core-commons-xml</module>
-        <module>che-core-commons-schedule</module>
-        <module>che-core-commons-test</module>
-    </modules>
+    <groupId>org.eclipse.che.core</groupId>
+    <artifactId>che-core-ide-templates</artifactId>
+    <packaging>jar</packaging>
+    <name>Che Core :: IDE :: TEMPLATES</name>
 </project>

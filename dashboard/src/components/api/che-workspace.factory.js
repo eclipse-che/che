@@ -211,37 +211,65 @@ export class CheWorkspace {
   }
 
   /**
-   * Returns workspace config
-   * @param config
-   * @param workspaceName
-   * @param recipeUrl
-   * @param ram
-   * @returns {*}
+   * Prepares workspace config using the data in provided one,
+   * workspace name, machine source, RAM.
+   *
+   * @param config provided base workspace config
+   * @param workspaceName workspace name
+   * @param source machine source
+   * @param ram workspace's RAM
+   * @returns {config} prepared workspace config
    */
-  formWorkspaceConfig(config, workspaceName, recipeUrl, ram) {
+  formWorkspaceConfig(config, workspaceName, source, ram) {
     config = config || {};
     config.name = workspaceName;
     config.projects = [];
-    config.defaultEnv = workspaceName;
+    config.defaultEnv = config.defaultEnv || workspaceName;
     config.description = null;
     ram = ram || 2048;
-    config.environments = [{
-      'name': workspaceName,
-      'recipe': null,
-      'machineConfigs': [{
+
+    //Check environments were provided in config:
+    config.environments = (config.environments && config.environments.length > 0) ? config.environments : [];
+
+    let defaultEnvironment = this.lodash.find(config.environments, (environment) => {
+      return environment.name === config.defaultEnv;
+    });
+
+    //Check default environment is provided and add if there is no:
+    if (!defaultEnvironment) {
+      defaultEnvironment = {
+        'name': config.defaultEnv,
+        'recipe': null,
+        'machineConfigs': []
+      }
+
+      config.environments.push(defaultEnvironment);
+    }
+
+    let devMachine = this.lodash.find(defaultEnvironment.machineConfigs, (config) => {
+      return config.dev;
+    });
+
+    //Check dev machine is provided and add if there is no:
+    if (!devMachine) {
+      devMachine = {
         'name': 'ws-machine',
         'limits': {'ram': ram},
         'type': 'docker',
-        'source': {'location': recipeUrl, 'type': 'dockerfile'},
+        'source': source,
         'dev': true
-      }]
-    }];
+      }
+      defaultEnvironment.machineConfigs.push(devMachine);
+    } else {
+      devMachine.limits = {'ram': ram};
+      devMachine.source = source;
+    }
 
     return config;
   }
 
-  createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
-    let data = this.formWorkspaceConfig({}, workspaceName,recipeUrl, ram);
+  createWorkspace(accountId, workspaceName, source, ram, attributes) {
+    let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
 
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
     let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;
