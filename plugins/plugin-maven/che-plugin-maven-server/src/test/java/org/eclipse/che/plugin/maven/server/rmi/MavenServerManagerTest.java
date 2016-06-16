@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.server.rmi;
 
-import org.eclipse.che.plugin.maven.server.MavenServerManager;
-import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
-import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
-import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
 import org.eclipse.che.maven.data.MavenArtifact;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
@@ -21,12 +17,17 @@ import org.eclipse.che.maven.data.MavenWorkspaceCache;
 import org.eclipse.che.maven.server.MavenProjectInfo;
 import org.eclipse.che.maven.server.MavenServerResult;
 import org.eclipse.che.maven.server.MavenTerminal;
+import org.eclipse.che.plugin.maven.server.MavenServerManager;
+import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
+import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
+import org.eclipse.che.plugin.maven.server.execution.JavaParameters;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,7 +54,8 @@ public class MavenServerManagerTest {
 
 
     @BeforeMethod
-    public void setUp() throws Exception {
+    public void setUp(Method method) throws Exception {
+        System.out.println("TEST NAME:  "+method.getName() + "!!!!!!!!!!!!!!!!!");
         workspaceCache = new MavenWorkspaceCache();
         workspaceCache.put(new MavenKey("com.codenvy.ide", "codenvy-ide-subModule", "1.0.0-TEST-SNAPSHOT"),
                            new File(MavenServerManagerTest.class.getResource("/multimoduleProject/subModule/pom.xml").getFile()));
