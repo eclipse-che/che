@@ -183,10 +183,7 @@ class AnnotationGroupImpl implements AnnotationGroup {
         if (s1 == s2) {
             return true;
         }
-        if (s1 == null) {
-            return false;
-        }
-        return s1.equals(s2);
+        return s1 != null && s1.equals(s2);
     }
 
     /**

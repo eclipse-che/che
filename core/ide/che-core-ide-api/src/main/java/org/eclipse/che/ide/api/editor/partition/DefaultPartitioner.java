@@ -124,7 +124,7 @@ public class DefaultPartitioner implements DocumentPartitioner {
             final List<TypedPosition> category = getPositions();
 
             TypedPosition previous = null;
-            TypedPosition current = null;
+            TypedPosition current;
             int start, end, gapOffset;
             final Position gap = new Position(0);
 
@@ -183,7 +183,7 @@ public class DefaultPartitioner implements DocumentPartitioner {
     public TypedRegion getPartition(final int offset) {
         final int contentLength = getContentLength();
 
-        List<TypedPosition> category = null;
+        List<TypedPosition> category;
         try {
             category = getPositions();
         } catch (final BadPositionCategoryException e) {
@@ -195,7 +195,7 @@ public class DefaultPartitioner implements DocumentPartitioner {
             return defaultRegion();
         }
 
-        Integer index = null;
+        Integer index;
         try {
             index = this.documentPositionMap.computeIndexInCategory(positionCategory, offset);
         } catch (final BadLocationException e) {
@@ -376,7 +376,7 @@ public class DefaultPartitioner implements DocumentPartitioner {
             return null;
         }
 
-        List<TypedPosition> category = null;
+        List<TypedPosition> category;
         try {
             category = getPositions();
         } catch (final BadPositionCategoryException e) {

@@ -48,9 +48,9 @@ public class FileNameFileTypeIdentifier implements FileTypeIdentifier {
 
     private static boolean contains(final String[] reference, final String searched) {
         for (final String value : reference) {
-            if (value != null && value.equals(searched)) {
+            if (value == null && searched == null) {
                 return true;
-            } else if (value == null && searched == null) {
+            } else if (value != null && value.equals(searched)) {
                 return true;
             }
         }

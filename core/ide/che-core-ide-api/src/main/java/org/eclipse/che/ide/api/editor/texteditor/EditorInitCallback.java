@@ -37,7 +37,8 @@ abstract class EditorInitCallback<T extends EditorWidget> implements DocumentCal
     /**
      * Constructor.
      * @param moduleAlreadyReady if set to true, the callback will not wait for editor module initialization.
-     * @param loader loader used to wait for editor impl initialization
+     * @param loaderFactory creates a loader that is used to wait for editor impl initialization
+     * @param constants
      */
     public EditorInitCallback(final boolean moduleAlreadyReady,
                               final LoaderFactory loaderFactory,
@@ -63,11 +64,7 @@ abstract class EditorInitCallback<T extends EditorWidget> implements DocumentCal
 
     @Override
     public void onDocumentReceived(final String content) {
-        if (content != null) {
-            this.receivedContent = content;
-        } else {
-            this.receivedContent = "";
-        }
+        this.receivedContent = content != null ? content : "";
         checkReadyAndContinue();
     }
 

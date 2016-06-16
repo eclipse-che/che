@@ -30,8 +30,6 @@ public class CodeAssistantImpl implements CodeAssistant {
 
     private final TextEditor textEditor;
 
-    private String lastErrorMessage;
-
     private final DocumentPartitioner partitioner;
 
 
@@ -50,22 +48,22 @@ public class CodeAssistantImpl implements CodeAssistant {
 
     @Override
     public void computeCompletionProposals(final int offset, final CodeAssistCallback callback) {
-        this.lastErrorMessage = "processing";
+        String lastErrorMessage;
 
         final CodeAssistProcessor processor = getProcessor(offset);
         if (processor != null) {
             processor.computeCompletionProposals(textEditor, offset, callback);
-            this.lastErrorMessage = processor.getErrorMessage();
-            if (this.lastErrorMessage != null) {
-                this.textEditor.showMessage(this.lastErrorMessage);
+            lastErrorMessage = processor.getErrorMessage();
+            if (lastErrorMessage != null) {
+                this.textEditor.showMessage(lastErrorMessage);
             }
         } else {
             final CodeAssistProcessor fallbackProcessor = getFallbackProcessor();
             if (fallbackProcessor != null) {
                 fallbackProcessor.computeCompletionProposals(textEditor, offset, callback);
-                this.lastErrorMessage = fallbackProcessor.getErrorMessage();
-                if (this.lastErrorMessage != null) {
-                    this.textEditor.showMessage(this.lastErrorMessage);
+                lastErrorMessage = fallbackProcessor.getErrorMessage();
+                if (lastErrorMessage != null) {
+                    this.textEditor.showMessage(lastErrorMessage);
                 }
             }
         }

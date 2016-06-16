@@ -59,7 +59,7 @@ public abstract class AbstractPerspectiveAction extends Action {
 
         Presentation presentation = event.getPresentation();
 
-        boolean inPerspective = perspectives == null || perspectives.isEmpty() ? true : perspectives.contains(manager.getPerspectiveId());
+        boolean inPerspective = ((perspectives == null) || perspectives.isEmpty()) || perspectives.contains(manager.getPerspectiveId());
 
         presentation.setEnabledAndVisible(inPerspective);
 

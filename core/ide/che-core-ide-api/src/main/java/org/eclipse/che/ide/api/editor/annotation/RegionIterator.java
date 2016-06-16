@@ -36,8 +36,8 @@ final class RegionIterator implements Iterator<Annotation> {
      * have a position in the given model inside the given region.
      *
      * @param parentIterator
-     *         iterator containing all annotations
-     * @param model
+     * @param model     *         iterator containing all annotations
+
      *         the model to use to retrieve positions from for each
      *         annotation
      * @param offset

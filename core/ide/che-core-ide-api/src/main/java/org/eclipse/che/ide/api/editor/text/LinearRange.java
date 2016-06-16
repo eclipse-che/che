@@ -112,7 +112,7 @@ public final class LinearRange {
 
         /**
          * Completes {@link LinearRange} instantiation with the given end.
-         * @param length the range end
+         * @param endOffset the range end
          * @return the range
          */
         public LinearRange andEnd(int endOffset) {

@@ -107,7 +107,7 @@ public class GutterAnnotationRenderer implements AnnotationModelHandler, ClearAn
             newGroup.getElement().addEventListener(Event.MOUSEOVER, new EventListener() {
                 @Override
                 public void handleEvent(final Event evt) {
-                    showToolTip(newGroup, textPosition.getLine());
+                    showToolTip(newGroup);
                 }
             }, false);
 
@@ -122,11 +122,9 @@ public class GutterAnnotationRenderer implements AnnotationModelHandler, ClearAn
 
     }
 
-    private void showToolTip(AnnotationGroup item, int line) {
+    private void showToolTip(AnnotationGroup item) {
         final List<String> messages = new ArrayList<>();
-        for (final String message : item.getMessages()) {
-            messages.add(message);
-        }
+        messages.addAll(item.getMessages());
 
 
         Tooltip tooltip = null;

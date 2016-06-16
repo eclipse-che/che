@@ -108,8 +108,7 @@ public class AnnotationModelImpl implements AnnotationModel {
     public void removeAnnotation(final Annotation annotation) {
         if (this.annotations.containsKey(annotation)) {
 
-            Position pos = null;
-            pos = this.annotations.get(annotation);
+            Position pos = this.annotations.get(annotation);
 
             this.annotations.remove(annotation);
             positions.remove(pos);
@@ -153,7 +152,7 @@ public class AnnotationModelImpl implements AnnotationModel {
         if (documentChanged) {
             documentChanged = false;
 
-            final List<Annotation> deleted = new ArrayList<Annotation>();
+            final List<Annotation> deleted = new ArrayList<>();
             final Iterator<Annotation> e = getAnnotationIterator();
             while (e.hasNext()) {
                 final Annotation annotation = e.next();
@@ -175,7 +174,7 @@ public class AnnotationModelImpl implements AnnotationModel {
                     });
                 }
             } else {
-                removeAnnotations(deleted, fireModelChanged);
+                removeAnnotations(deleted, false);
             }
         }
     }
@@ -211,8 +210,7 @@ public class AnnotationModelImpl implements AnnotationModel {
     protected void removeAnnotation(final Annotation annotation, final boolean fireModelChanged) {
         if (annotations.containsKey(annotation)) {
 
-            Position pos = null;
-            pos = annotations.get(annotation);
+            Position pos = annotations.get(annotation);
 
             annotations.remove(annotation);
             positions.remove(pos);
@@ -226,8 +224,7 @@ public class AnnotationModelImpl implements AnnotationModel {
 
     @Override
     public Position getPosition(final Annotation annotation) {
-        final Position position = annotations.get(annotation);
-        return position;
+        return annotations.get(annotation);
     }
 
     @Override
