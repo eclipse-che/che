@@ -75,7 +75,7 @@ public class UserManager {
      */
     public void create(User user, boolean isTemporary) throws ConflictException, ServerException {
         if (reservedNames.contains(user.getName())) {
-            throw new ConflictException("Username is reserved");
+            throw new ConflictException(String.format("Username \"%s\" is reserved", user.getName()));
         }
         user.withId(generate("user", ID_LENGTH))
             .withPassword(firstNonNull(user.getPassword(), generate("", PASSWORD_LENGTH)));
