@@ -33,8 +33,8 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
-import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.ExecConfig;
@@ -58,6 +58,7 @@ import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
@@ -69,7 +70,6 @@ import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.WaitContainerParams;
-import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1153,41 +1153,22 @@ public class DockerConnector {
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
-                final ValueHolder<IOException> errorHolder = new ValueHolder<>();
                 final ValueHolder<String> imageIdHolder = new ValueHolder<>();
-                // Here do some trick to be able interrupt build process. Basically for now it is not possible interrupt docker daemon while
-                // it's building images but here we need just be able to close connection to the unix socket. Thread is blocking while read
-                // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
-                // blocking on i/o.
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ProgressStatus progressStatus;
-                            while ((progressStatus = progressReader.next()) != null) {
-                                final String buildImageId = getBuildImageId(progressStatus);
-                                if (buildImageId != null) {
-                                    imageIdHolder.set(buildImageId);
-                                }
-                                progressMonitor.updateProgress(progressStatus);
+                executeInSeparateThread(() -> {
+                    try {
+                        ProgressStatus progressStatus;
+                        while ((progressStatus = progressReader.next()) != null) {
+                            final String buildImageId = getBuildImageId(progressStatus);
+                            if (buildImageId != null) {
+                                imageIdHolder.set(buildImageId);
                             }
-                        } catch (IOException e) {
-                            errorHolder.set(e);
+                            progressMonitor.updateProgress(progressStatus);
                         }
-                        synchronized (this) {
-                            notify();
-                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e.getLocalizedMessage(), e);
                     }
-                };
-                executor.execute(runnable);
-                // noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (runnable) {
-                    runnable.wait();
-                }
-                final IOException ioe = errorHolder.get();
-                if (ioe != null) {
-                    throw ioe;
-                }
+                });
+
                 if (imageIdHolder.get() == null) {
                     throw new IOException("Docker image build failed");
                 }
@@ -1321,64 +1302,39 @@ public class DockerConnector {
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
-                final ValueHolder<IOException> errorHolder = new ValueHolder<>();
-                //it is necessary to track errors during the push, this is useful in the case when docker API returns status 200 OK,
-                //but in fact we have an error (e.g docker registry is not accessible but we are trying to push).
-                final ValueHolder<String> exceptionHolder = new ValueHolder<>();
-                // Here do some trick to be able interrupt push process. Basically for now it is not possible interrupt docker daemon while
-                // it's pushing images but here we need just be able to close connection to the unix socket. Thread is blocking while read
-                // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
-                // blocking on i/o.
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            String digestPrefix = firstNonNull(params.getTag(), "latest") + ": digest: ";
-                            ProgressStatus progressStatus;
-                            while ((progressStatus = progressReader.next()) != null && exceptionHolder.get() == null) {
-                                progressMonitor.updateProgress(progressStatus);
-                                if (progressStatus.getError() != null) {
-                                    exceptionHolder.set(progressStatus.getError());
-                                }
-                                String status = progressStatus.getStatus();
-                                // Here we find string with digest which has following format:
-                                // <tag>: digest: <digest> size: <size>
-                                // for example:
-                                // latest: digest: sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size: 62189
-                                if (status != null && status.startsWith(digestPrefix)) {
-                                    String digest = status.substring(digestPrefix.length(), status.indexOf(" ", digestPrefix.length()));
-                                    digestHolder.set(digest);
-                                }
+                executeInSeparateThread(() -> {
+                    try {
+                        String digestPrefix = firstNonNull(params.getTag(), "latest") + ": digest: ";
+                        ProgressStatus progressStatus;
+                        while ((progressStatus = progressReader.next()) != null) {
+                            progressMonitor.updateProgress(progressStatus);
+                            if (progressStatus.getError() != null) {
+                                throw new RuntimeException(progressStatus.getError());
                             }
-                        } catch (IOException e) {
-                            errorHolder.set(e);
+                            String status = progressStatus.getStatus();
+                            // Here we find string with digest which has following format:
+                            // <tag>: digest: <digest> size: <size>
+                            // for example:
+                            // latest: digest: sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size: 62189
+                            if (status != null && status.startsWith(digestPrefix)) {
+                                String digest = status.substring(digestPrefix.length(), status.indexOf(" ", digestPrefix.length()));
+                                digestHolder.set(digest);
+                            }
                         }
-                        synchronized (this) {
-                            notify();
-                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e.getLocalizedMessage(), e);
                     }
-                };
-                executor.execute(runnable);
-                // noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (runnable) {
-                    runnable.wait();
-                }
-                if (exceptionHolder.get() != null) {
-                    throw new DockerException(exceptionHolder.get(), 500);
-                }
+                });
                 if (digestHolder.get() == null) {
                     LOG.error("Docker image {}:{} was successfully pushed, but its digest wasn't obtained",
                               fullRepo,
                               firstNonNull(params.getTag(), "latest"));
                     throw new DockerException("Docker image was successfully pushed, but its digest wasn't obtained", 500);
-                }
-                final IOException ioe = errorHolder.get();
-                if (ioe != null) {
-                    throw ioe;
+                } else {
+                    return digestHolder.get();
                 }
             }
         }
-        return digestHolder.get();
     }
 
     /**
@@ -1501,36 +1457,16 @@ public class DockerConnector {
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
-                final ValueHolder<IOException> errorHolder = new ValueHolder<>();
-                // Here do some trick to be able interrupt pull process. Basically for now it is not possible interrupt docker daemon while
-                // it's pulling images but here we need just be able to close connection to the unix socket. Thread is blocking while read
-                // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
-                // blocking on i/o.
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ProgressStatus progressStatus;
-                            while ((progressStatus = progressReader.next()) != null) {
-                                progressMonitor.updateProgress(progressStatus);
-                            }
-                        } catch (IOException e) {
-                            errorHolder.set(e);
+                executeInSeparateThread(() -> {
+                    try {
+                        ProgressStatus progressStatus;
+                        while ((progressStatus = progressReader.next()) != null) {
+                            progressMonitor.updateProgress(progressStatus);
                         }
-                        synchronized (this) {
-                            notify();
-                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e.getLocalizedMessage(), e);
                     }
-                };
-                executor.execute(runnable);
-                // noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (runnable) {
-                    runnable.wait();
-                }
-                final IOException ioe = errorHolder.get();
-                if (ioe != null) {
-                    throw ioe;
-                }
+                });
             }
         }
     }
@@ -1728,4 +1664,51 @@ public class DockerConnector {
         }
     }
 
+    // TODO add comments to each line :)
+
+    // todo check when closed by interruption exception is thrown
+
+    // Here do some trick to be able interrupt build process. Basically for now it is not possible interrupt docker daemon while
+    // it's building images but here we need just be able to close connection to the unix socket. Thread is blocking while read
+    // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
+    // blocking on i/o.
+
+    /**
+     * This method runs provided runnable in a separate thread in a such a way that that thread can be interrupted.
+     * It is supposed that it runs long-running task and at some point it can be stopped.
+     * <br/>Provided task should throw unchecked exception if exceptional situation happens.
+     * In that case {@link IOException#IOException(String, Throwable)} will be thrown
+     * with {@link Throwable#getLocalizedMessage()} and unchecked exception as arguments.
+     */
+    private void executeInSeparateThread(Runnable task) throws InterruptedException, IOException {
+        final ValueHolder<Throwable> errorHolder = new ValueHolder<>();
+        final ValueHolder<Boolean> parentThreadNotifiedFlagHolder = new ValueHolder<>(false);
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    task.run();
+                } catch (Throwable e) {
+                    errorHolder.set(e);
+                } finally {
+                    synchronized (this) {
+                        notify();
+                        parentThreadNotifiedFlagHolder.set(true);
+                    }
+                }
+            }
+        };
+        // noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (runnable) {
+            executor.execute(runnable);
+            //noinspection ThrowableResultOfMethodCallIgnored
+            while (errorHolder.get() == null && !parentThreadNotifiedFlagHolder.get()) {
+                runnable.wait();
+            }
+        }
+        final Throwable throwable = errorHolder.get();
+        if (throwable != null) {
+            throw new IOException(throwable.getLocalizedMessage(), throwable);
+        }
+    }
 }
