@@ -93,6 +93,36 @@ public class ProjectManagerReadTest extends WsAgentTestBase {
 
 
     @Test
+    public void testInitWithBadProject() throws Exception {
+
+        new File(root, "/foo").mkdir();
+        new File(root, "/bar").mkdir();
+
+        workspaceHolder.addProject(DtoFactory.newDto(ProjectConfigDto.class)
+                                             .withPath("/foo")
+                                             .withName("project1Name")
+                                             .withType("notFoundProjectType"));
+        workspaceHolder.addProject(DtoFactory.newDto(ProjectConfigDto.class)
+                                             .withPath("/bar")
+                                             .withName("project1Name")
+                                             .withType("pt3"));
+
+        ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
+        projectTypeRegistry.registerProjectType(new PT1());
+        projectTypeRegistry.registerProjectType(new PT3());
+
+        projectRegistry = new ProjectRegistry(workspaceHolder, vfsProvider, projectTypeRegistry, projectHandlerRegistry, eventService);
+        projectRegistry.initProjects();
+
+        assertEquals(6, projectRegistry.getProjects().size());
+        assertEquals(1, projectRegistry.getProject("/foo").getProblems().size());
+        assertEquals(13, projectRegistry.getProject("/foo").getProblems().get(0).code);
+        assertEquals(1, projectRegistry.getProject("/bar").getProblems().size());
+        assertEquals(12, projectRegistry.getProject("/bar").getProblems().get(0).code);
+    }
+
+
+    @Test
     public void testNormalProject() throws Exception {
 
         assertEquals(4, pm.getProjects().size());
