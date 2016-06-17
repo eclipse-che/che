@@ -32,6 +32,8 @@ import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -269,7 +271,11 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                @NotNull final CommandDto commandUpdate,
                                final String commandName,
                                @NotNull AsyncCallback<WorkspaceDto> callback) {
-        final String url = baseHttpUrl + '/' + wsId + "/command/" + commandName;
+        String url = null;
+        try {
+            url = baseHttpUrl + '/' + wsId + "/command/" + URLEncoder.encode(commandName, "UTF-8");
+        } catch (UnsupportedEncodingException ignored) {
+        }
         asyncRequestFactory.createRequest(PUT, url, commandUpdate, false)
                            .header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -290,7 +296,11 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     private void deleteCommand(@NotNull final String wsId,
                                @NotNull final String commandName,
                                @NotNull AsyncCallback<WorkspaceDto> callback) {
-        final String url = baseHttpUrl + '/' + wsId + "/command/" + commandName;
+        String url = null;
+        try {
+            url = baseHttpUrl + '/' + wsId + "/command/" + URLEncoder.encode(commandName, "UTF-8");
+        } catch (UnsupportedEncodingException ignored) {
+        }
         asyncRequestFactory.createDeleteRequest(url)
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Deleting command..."))
