@@ -68,7 +68,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -123,7 +123,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -197,7 +197,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -273,7 +273,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -354,7 +354,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -440,7 +440,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -545,7 +545,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -619,7 +619,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -706,7 +706,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -763,7 +763,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ]
@@ -840,7 +840,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -921,7 +921,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1008,7 +1008,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1082,7 +1082,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1153,7 +1153,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1233,7 +1233,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ]
@@ -1307,7 +1307,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1364,7 +1364,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ]
