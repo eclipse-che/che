@@ -484,6 +484,8 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         if (workspace.getConfig().getCommands().removeIf(command -> command.getName().equals(commandName))) {
             workspaceManager.updateWorkspace(id, workspace);
+        } else {
+            throw new NotFoundException(String.format("Failed to delete command '%s'", commandName));
         }
     }
 

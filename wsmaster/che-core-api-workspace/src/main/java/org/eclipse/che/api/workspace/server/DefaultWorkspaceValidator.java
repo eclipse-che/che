@@ -40,7 +40,9 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     private static final Pattern WS_NAME         = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,18}[a-zA-Z0-9]");
     private static final Pattern SERVER_PORT     = Pattern.compile("[1-9]+[0-9]*/(?:tcp|udp)");
     private static final Pattern SERVER_PROTOCOL = Pattern.compile("[a-z][a-z0-9-+.]*");
-    
+
+    private static final Pattern COMMAND_NAME = Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]*[a-zA-Z0-9]");
+
     private final MachineInstanceProviders machineInstanceProviders;
     
     @Inject
@@ -80,6 +82,9 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
             checkArgument(!isNullOrEmpty(command.getName()),
                           "Workspace %s contains command with null or empty name",
                           config.getName());
+            checkArgument(COMMAND_NAME.matcher(command.getName()).matches(),
+                          "Workspace command '%s' must only consist of letters, digits, and '-' '_' '.' in the middle",
+                          command.getName());
             checkArgument(!isNullOrEmpty(command.getCommandLine()),
                           "Command line required for command '%s' in workspace '%s'",
                           command.getName(),

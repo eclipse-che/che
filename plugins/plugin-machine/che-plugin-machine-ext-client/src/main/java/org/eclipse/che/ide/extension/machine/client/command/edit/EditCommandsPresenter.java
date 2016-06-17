@@ -142,6 +142,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
                 fetchCommands();
                 fireConfigurationUpdated(selectedConfiguration);
             }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                dialogFactory.createMessageDialog("Error", arg.toString(), null).show();
+            }
         });
     }
 
