@@ -156,6 +156,8 @@ export class CreateProjectCtrl {
     this.defaultWorkspaceName = null;
 
     cheAPI.cheWorkspace.getWorkspaces();
+
+    $rootScope.showIDE = false;
   }
 
   /**
@@ -411,7 +413,11 @@ export class CreateProjectCtrl {
     }
 
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
-    startWorkspacePromise.then(() => {}, (error) => {
+    startWorkspacePromise.then(() => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+    }, (error) => {
       let errorMessage;
 
       if (!error || !error.data) {
@@ -438,6 +444,8 @@ export class CreateProjectCtrl {
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
+    this.updateRecentWorkspace(workspaceId);
+
     this.createProjectSvc.setCurrentProgressStep(3);
 
     var promise;
@@ -581,7 +589,7 @@ export class CreateProjectCtrl {
                 attributesByMatchingType.set(type, resultEstimate.attributes);
               }
             });
-            
+
             attributesByMatchingType.forEach((attributes, type) => {
               if (!firstMatchingType) {
                 let projectType = projectTypesByCategory.get(type);
@@ -832,33 +840,16 @@ export class CreateProjectCtrl {
     // check workspace is selected
     if (option === 'create-workspace') {
       if (this.stack) {
-        // needs to get recipe URL from stack
-        let promise = this.computeRecipeForStack(this.stack);
-        promise.then((recipe) => {
-          let findLink = this.lodash.find(recipe.links, (link) => {
-            return link.rel === 'get recipe script';
-          });
-          if (findLink) {
-            this.recipeUrl = findLink.href;
-            this.createWorkspace();
-          }
-        });
+        this.createWorkspace(this.getSourceFromStack(this.stack));
       } else {
+        let source = {};
+        source.type = 'dockerfile';
         if (this.recipeUrl && this.recipeUrl.length > 0) {
-          this.createWorkspace();
+          source.location = this.recipeUrl;
+          this.createWorkspace(source);
         } else {
-          let recipeName = 'rcp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-          // needs to get recipe URL from custom recipe
-          let promise = this.submitRecipe(recipeName, this.recipeScript);
-          promise.then((recipe) => {
-            let findLink = this.lodash.find(recipe.links, (link) => {
-              return link.rel === 'get recipe script';
-            });
-            if (findLink) {
-              this.recipeUrl = findLink.href;
-              this.createWorkspace();
-            }
-          });
+          source.content = this.recipeScript;
+          this.createWorkspace(source);
         }
       }
     } else {
@@ -872,6 +863,30 @@ export class CreateProjectCtrl {
       this.createProjectSvc.showPopup();
       this.$location.path('/projects');
     }
+  }
+
+  /**
+   * Detects machine source from pointed stack.
+   *
+   * @param stack to retrieve described source
+   * @returns {source} machine source config
+   */
+  getSourceFromStack(stack) {
+    let source = {};
+    source.type = 'dockerfile';
+
+    switch (stack.source.type.toLowerCase()) {
+      case 'image':
+        source.content = 'FROM ' + stack.source.origin;
+        break;
+      case 'dockerfile':
+        source.content = stack.source.origin;
+        break;
+      default:
+        throw 'Not implemented';
+    }
+
+    return source;
   }
 
   /**
@@ -931,17 +946,22 @@ export class CreateProjectCtrl {
   }
 
   /**
-   * Create a new workspace from current workspace name, recipe url and workspace ram
+   * Create new workspace with provided machine source.
+   *
+   * @param source machine source
    */
-  createWorkspace() {
+  createWorkspace(source) {
     this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
 
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-    let workspaceConfigTempl = this.stack ? this.stack.workspaceConfig : {};
-    let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(workspaceConfigTempl, this.workspaceName, this.recipeUrl, this.workspaceRam);
+    let stackWorkspaceConfig = this.stack ? this.stack.workspaceConfig : {};
+    let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, this.workspaceRam);
+
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace) => {
+      this.updateRecentWorkspace(workspace.id);
+
       // init message bus if not there
       if (this.workspaces.length === 0) {
         this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
@@ -1221,5 +1241,15 @@ export class CreateProjectCtrl {
       return projects;
     }
     return [];
+  }
+
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 }

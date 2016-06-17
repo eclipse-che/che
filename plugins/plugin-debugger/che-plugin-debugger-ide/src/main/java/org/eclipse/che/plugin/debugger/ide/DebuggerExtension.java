@@ -44,7 +44,7 @@ import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
  * @author Artem Zatsarynnyi
  * @author Valeriy Svydenko
  * @author Anatoliy Bazko
- * @author Morhun Mykola
+ * @author Mykola Morhun
  */
 @Singleton
 @Extension(title = "Debugger", version = "4.1.0")

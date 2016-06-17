@@ -20,6 +20,10 @@ public interface DashboardLocalizationConstant extends Messages {
     @Key("open.dashboard.toolbar-button.title")
     String openDashboardToolbarButtonTitle();
 
-    @Key("open.dashboard.redirect.url")
-    String openDashboardRedirectUrl();
+    @Key("open.dashboard.url.workspace")
+    String openDashboardUrlWorkspace(String workspaceID);
+
+    @Key("open.dashboard.url.workspaces")
+    String openDashboardUrlWorkspaces();
+
 }

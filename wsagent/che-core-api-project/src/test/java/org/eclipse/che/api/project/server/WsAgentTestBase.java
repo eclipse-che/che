@@ -151,6 +151,7 @@ public class WsAgentTestBase {
 
         @Override
         protected void addProject(ProjectConfig project) throws ServerException {
+            projects.put(project.getPath(), project);
 
         }
 

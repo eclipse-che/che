@@ -41,6 +41,7 @@ export class CheBranding {
                 title: brandingData.title,
                 name: brandingData.name,
                 logoURL: assetPrefix + brandingData.logoFile,
+                logoText: assetPrefix + brandingData.logoTextFile,
                 favicon : assetPrefix + brandingData.favicon,
                 ideResourcesPath : brandingData.ideResources,
                 helpPath : brandingData.helpPath,
@@ -53,6 +54,7 @@ export class CheBranding {
             this.name = this.$rootScope.branding.name;
             this.productFavicon = this.$rootScope.branding.productFavicon;
             this.productLogo = this.$rootScope.branding.logoURL;
+            this.productLogoText = this.$rootScope.branding.logoText;
             this.ideResourcesPath = this.$rootScope.branding.ideResourcesPath;
             this.helpPath = this.$rootScope.branding.helpPath;
             this.helpTitle = this.$rootScope.branding.helpTitle;

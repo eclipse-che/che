@@ -95,12 +95,6 @@ export class CheToolbar {
     var template = '<div class=\"che-toolbar\"><md-toolbar md-theme=\"' + theme +'\">\n'
       + '<div layout=\"row\" layout-align=\"start center\" flex>';
 
-    //toggle menu button
-    template += '<div layout=\"row\" class=\"che-toolbar-section\" layout-align=\"start center\" hide-gt-md>'
-      + '<div class=\"che-toolbar-control-button\" ng-click=\"controller.toggleLeftMenu()\" >'
-      + '<md-icon md-font-icon=\"fa fa-bars\"></md-icon>'
-      + '</div></div>';
-
     if (breadcrumbHref) {
       template += '<a class=\"che-toolbar-control-button che-toolbar-breadcrumb\" href=\"' + breadcrumbHref
       + '\" title=\"' + breadcrumbTitle + '\">'

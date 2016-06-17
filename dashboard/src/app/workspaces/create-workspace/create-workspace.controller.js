@@ -23,11 +23,12 @@ export class CreateWorkspaceCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, cheNotification, lodash) {
+  constructor($location, cheAPI, cheNotification, lodash, $rootScope) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
+    this.$rootScope = $rootScope;
 
     this.selectSourceOption = 'select-source-recipe';
 
@@ -56,6 +57,8 @@ export class CreateWorkspaceCtrl {
     this.defaultWorkspaceName = null;
 
     cheAPI.cheWorkspace.fetchWorkspaces();
+
+    $rootScope.showIDE = false;
   }
 
   /**
@@ -114,25 +117,17 @@ export class CreateWorkspaceCtrl {
    * Create a new workspace
    */
   createWorkspace() {
+    let source = {};
+    source.type = 'dockerfile';
+    //User provides recipe URL or recipe's content:
     if (this.isCustomStack) {
       this.stack = null;
       if (this.recipeUrl && this.recipeUrl.length > 0) {
-        this.submitWorkspace();
+        source.location = this.recipeUrl;
+        this.submitWorkspace(source);
       } else {
-        let recipeName = 'rcp-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-        // needs to get recipe URL from custom recipe
-        let promise = this.submitRecipe(recipeName, this.recipeScript);
-        promise.then((recipe) => {
-          let findLink = this.lodash.find(recipe.links, function (link) {
-            return link.rel === 'get recipe script';
-          });
-          if (findLink) {
-            this.recipeUrl = findLink.href;
-            this.submitWorkspace();
-          }
-        }, (error) => {
-          this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
-        });
+        source.content = this.recipeScript;
+        this.submitWorkspace(source);
       }
     } else if (this.selectSourceOption === 'select-source-import') {
       let workspaceConfig = this.importWorkspace.length > 0 ? angular.fromJson(this.importWorkspace).config : {};
@@ -142,78 +137,48 @@ export class CreateWorkspaceCtrl {
       //check predefined recipe location
       if (this.stack && this.stack.source && this.stack.source.type === 'location') {
         this.recipeUrl = this.stack.source.origin;
-        this.submitWorkspace();
+        source.location = this.recipeUrl;
+        this.submitWorkspace(source);
       } else {
-        // needs to get recipe URL from stack
-        let promise = this.computeRecipeForStack(this.stack);
-        promise.then((recipe) => {
-          let findLink = this.lodash.find(recipe.links, function (link) {
-            return link.rel === 'get recipe script';
-          });
-          if (findLink) {
-            this.recipeUrl = findLink.href;
-            this.submitWorkspace();
-          }
-        }, (error) => {
-          this.cheNotification.showError(error.data.message ? error.data.message : 'Error during recipe creation.');
-        });
+        source = this.getSourceFromStack(this.stack);
+        this.submitWorkspace(source);
       }
     }
   }
 
   /**
-   * User has selected a stack. needs to find or add recipe for that stack
-   * @param stack the selected stack
-   * @returns {*} the promise
+   * Detects machine source from pointed stack.
+   *
+   * @param stack to retrieve described source
+   * @returns {source} machine source config
    */
-  computeRecipeForStack(stack) {
-    let recipeSource = stack.source;
-    // look at recipe
-    let recipeName = 'generated-' + stack.name;
-    let recipeScript;
-    // what is type of source ?
-    switch (recipeSource.type.toLowerCase()) {
+  getSourceFromStack(stack) {
+    let source = {};
+    source.type = 'dockerfile';
+
+    switch (stack.source.type.toLowerCase()) {
       case 'image':
-        recipeScript = 'FROM ' + recipeSource.origin;
+        source.content = 'FROM ' + stack.source.origin;
         break;
       case 'dockerfile':
-        recipeScript = recipeSource.origin;
+        source.content = stack.source.origin;
         break;
       default:
         throw 'Not implemented';
     }
 
-    let promise = this.submitRecipe(recipeName, recipeScript);
-
-    return promise;
+    return source;
   }
 
   /**
-   * Create a new recipe
-   * @param recipeName the recipe name
-   * @param recipeScript the recipe script
-   * @returns {*} the promise
+   * Submit a new workspace from current workspace name, source and workspace ram
+   *
+   * @param source machine source
    */
-  submitRecipe(recipeName, recipeScript) {
-    let recipe = angular.copy(this.cheAPI.getRecipeTemplate().getDefaultRecipe());
-    if (!recipe) {
-      return;
-    }
-    recipe.name = recipeName;
-    recipe.script = recipeScript;
-
-    let promise = this.cheAPI.getRecipe().create(recipe);
-
-    return promise;
-  }
-
-  /**
-   * Submit a new workspace from current workspace name, recipe url and workspace ram
-   */
-  submitWorkspace() {
+  submitWorkspace(source) {
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-    let workspaceConfigTempl = this.stack ? this.stack.workspaceConfig : {};
-    let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(workspaceConfigTempl, this.workspaceName, this.recipeUrl, this.workspaceRam);
+    let stackWorkspaceConfig = this.stack ? this.stack.workspaceConfig : {};
+    let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, this.workspaceRam);
 
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
@@ -226,6 +191,11 @@ export class CreateWorkspaceCtrl {
    */
   redirectAfterSubmitWorkspace(promise) {
     promise.then((workspaceData) => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.updateRecentWorkspace(workspaceData.id);
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+
       let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
       this.$location.path('/workspace/' + workspaceData.id);
@@ -235,4 +205,13 @@ export class CreateWorkspaceCtrl {
     });
   }
 
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
+  }
 }
