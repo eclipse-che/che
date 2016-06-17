@@ -7,9 +7,9 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.WorkspaceSymbolParams;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface WorkspaceSymbolParamsDTO extends WorkspaceSymbolParams {
@@ -18,4 +18,9 @@ public interface WorkspaceSymbolParamsDTO extends WorkspaceSymbolParams {
      * 
      */
     public abstract void setQuery(final String query);
+
+    //TODO this is temporary, until we don't have binding LS to project not a file
+    String getFileUri();
+
+    void setFileUri(String fileUri);
 }

@@ -12,6 +12,10 @@ package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+
 /**
  * @author Evgen Vidolob
  */
@@ -34,7 +38,12 @@ public class QuickOpenPresenter implements QuickOpenView.ActionDelegate {
 
     @Override
     public void valueChanged(String value) {
-        view.setModel(opts.getModel(value));
+        opts.getModel(value).then(new Operation<QuickOpenModel>() {
+            @Override
+            public void apply(QuickOpenModel model) throws OperationException {
+                view.setModel(model);
+            }
+        });
     }
 
     @Override
@@ -44,7 +53,7 @@ public class QuickOpenPresenter implements QuickOpenView.ActionDelegate {
 
     public interface QuickOpenPresenterOpts {
 
-        QuickOpenModel getModel(String value);
+        Promise<QuickOpenModel> getModel(String value);
 
         void onClose(boolean canceled);
     }

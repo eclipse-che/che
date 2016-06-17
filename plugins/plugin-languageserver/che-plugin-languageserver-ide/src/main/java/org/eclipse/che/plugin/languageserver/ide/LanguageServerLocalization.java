@@ -49,4 +49,7 @@ public interface LanguageServerLocalization extends Messages {
 
     @Key("constructor.type")
     String constructorType(int p0);
+
+    @Key("find.symbol.action.title")
+    String findSymbolActionTitle();
 }

@@ -15,8 +15,9 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.Resources;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -74,7 +75,6 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     @Inject
     public GoToSymbolAction(QuickOpenPresenter presenter,
                             LanguageServerLocalization localization,
-                            Resources resources,
                             TextDocumentServiceClient client,
                             EditorAgent editorAgent,
                             DtoFactory dtoFactory,
@@ -126,8 +126,8 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     }
 
     @Override
-    public QuickOpenModel getModel(String value) {
-        return new QuickOpenModel(toQuickOpenEntries(cachedItems, value));
+    public Promise<QuickOpenModel> getModel(String value) {
+        return Promises.resolve(new QuickOpenModel(toQuickOpenEntries(cachedItems, value)));
     }
 
     private List<SymbolEntry> toQuickOpenEntries(List<SymbolInformationDTO> items, final String value) {

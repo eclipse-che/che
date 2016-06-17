@@ -116,24 +116,6 @@ public class QuickOpenEntry {
         return false;
     }
 
-//    public static int compare(QuickOpenEntry a, QuickOpenEntry b, String lookFor) {
-//        if (lookFor != null) {
-//            lookFor = TextUtils.stripWildcards(lookFor).toLowerCase();
-//        }
-//
-//        List<Highlight> labelHighlightsA = a.getHighlights() != null ? a.getHighlights() : Collections.emptyList();
-//        List<Highlight> labelHighlightsB = b.getHighlights() != null ? b.getHighlights() : Collections.emptyList();
-//
-//        if (labelHighlightsA.isEmpty() && !labelHighlightsB.isEmpty()) {
-//            return -1;
-//        } else if(!labelHighlightsA.isEmpty() && labelHighlightsB.isEmpty()){
-//            return 1;
-//        }
-//
-//
-//
-//    }
-
     public enum Mode {
         OPEN, PREVIEW
     }

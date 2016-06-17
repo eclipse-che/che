@@ -7,13 +7,14 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.codeassist.Completion;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
@@ -78,6 +79,13 @@ class CompletionItemBasedCompletionProposal implements CompletionProposal {
                 @Override
                 public void apply(CompletionItemDTO arg) throws OperationException {
                     callback.onCompletion(new CompletionImpl(arg));
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError arg) throws OperationException {
+                    Log.error(getClass(), arg);
+                    //TODO we need to respect server capabilities, some LS don't supports resolve completion item
+                    callback.onCompletion(new CompletionImpl(completionItem));
                 }
             });
         } else {

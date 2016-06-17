@@ -30,6 +30,7 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
+import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageRegistryServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
@@ -118,10 +119,15 @@ public class LanguageServerExtension {
     }
 
     @Inject
-    protected void registerAction(ActionManager actionManager, GoToSymbolAction goToSymbolAction, KeyBindingManager keyBindingManager) {
+    protected void registerAction(ActionManager actionManager, GoToSymbolAction goToSymbolAction, KeyBindingManager keyBindingManager,
+                                  FindSymbolAction findSymbolAction) {
         actionManager.registerAction("LSGoToSymbolAction", goToSymbolAction);
+        actionManager.registerAction("LSFindSymbolAction", findSymbolAction);
+
         DefaultActionGroup assistantGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
         assistantGroup.add(goToSymbolAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
+        assistantGroup.add(findSymbolAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
+
         if (UserAgent.isMac()) {
             keyBindingManager.getGlobal().addKey(new KeyBuilder().control().charCode(KeyCodeMap.F12).build(), "LSGoToSymbolAction");
         } else {

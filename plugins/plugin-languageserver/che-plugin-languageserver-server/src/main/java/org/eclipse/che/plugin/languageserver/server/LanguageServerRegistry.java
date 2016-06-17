@@ -81,7 +81,7 @@ public class LanguageServerRegistry {
 	public void register(final LanguageServer server, final List<LanguageDescriptionDTO> languages) {
 		InitializeParamsImpl initializeParams = new InitializeParamsImpl();
 		initializeParams.setProcessId(PROCESS_ID);
-		initializeParams.setRootPath("/projects/");
+		initializeParams.setRootPath("/projects/test/");
 		initializeParams.setClientName("EclipseChe");
 		connect(server);
 		CompletableFuture<InitializeResult> result = server.initialize(initializeParams);
@@ -125,5 +125,6 @@ public class LanguageServerRegistry {
 		server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsMessenger::onEvent);
         //TODO do we need to send this log messages ot client(browser)?
 		server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
+		server.getWindowService().onTelemetryEvent(System.out::println);
 	}
 }

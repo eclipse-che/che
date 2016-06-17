@@ -114,7 +114,12 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
                         if (entryGroup.getGroupLabel() != null) {
                             group.setInnerText(entryGroup.getGroupLabel());
                         }
+                    } else {
+                        if (itemData.getDescription() != null) {
+                            group.setInnerText(itemData.getDescription());
+                        }
                     }
+
                     label.appendChild(spanElement);
                     itemElement.appendChild(label);
                     itemElement.appendChild(group);
@@ -222,6 +227,9 @@ public class QuickOpenViewImpl extends PopupPanel implements QuickOpenView {
     }
 
     protected void run(QuickOpenEntry entry, boolean isOpen) {
+        if (entry == null) {
+            return;
+        }
         if (model.run(entry, isOpen ? Mode.OPEN : Mode.PREVIEW)) {
             hide(false);
         }

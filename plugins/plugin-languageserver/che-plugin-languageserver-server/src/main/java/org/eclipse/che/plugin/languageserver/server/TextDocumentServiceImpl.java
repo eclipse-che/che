@@ -40,7 +40,7 @@ public class TextDocumentServiceImpl {
         this.languageServerRegistry = languageServerRegistry;
     }
     
-    private String prefixURI(String relativePath) {
+    static String prefixURI(String relativePath) {
         return "file:///projects"+relativePath;
     }
 
