@@ -20,7 +20,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>4.3.3</version>
+    <version>4.3.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -33,12 +33,12 @@
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/che.git</developerConnection>
-        <tag>4.3.3</tag>
+        <tag>4.3.0</tag>
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
         <che.lib.version>4.3.0</che.lib.version>
-        <che.version>4.3.3</che.version>
+        <che.version>4.3.4-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>

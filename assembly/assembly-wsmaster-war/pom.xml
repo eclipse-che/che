@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.3.3</version>
+        <version>4.3.4-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
