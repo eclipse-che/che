@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>4.3.3</version>
     </parent>
     <artifactId>che-core-ide-app</artifactId>
     <packaging>jar</packaging>

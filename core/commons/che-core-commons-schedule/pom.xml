@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-commons-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.3.3-SNAPSHOT</version>
+        <version>4.3.3</version>
     </parent>
     <artifactId>che-core-commons-schedule</artifactId>
     <packaging>jar</packaging>
