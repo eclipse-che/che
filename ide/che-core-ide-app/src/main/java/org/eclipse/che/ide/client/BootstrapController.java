@@ -211,7 +211,20 @@ public class BootstrapController {
 
         elemental.html.Window window = Browser.getWindow();
 
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                notifyIDELoaded();
+            }
+        });
     }
+
+    /**
+     * Sends a message to the parent frame to inform that IDE application has been loaded.
+     */
+    private native void notifyIDELoaded() /*-{
+        $wnd.parent.postMessage("ide-loaded", "*");
+    }-*/;
 
     /**
      * Handles any of initialization errors.

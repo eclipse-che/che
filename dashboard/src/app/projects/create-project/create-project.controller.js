@@ -156,6 +156,8 @@ export class CreateProjectCtrl {
     this.defaultWorkspaceName = null;
 
     cheAPI.cheWorkspace.getWorkspaces();
+
+    $rootScope.showIDE = false;
   }
 
   /**
@@ -411,7 +413,11 @@ export class CreateProjectCtrl {
     }
 
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
-    startWorkspacePromise.then(() => {}, (error) => {
+    startWorkspacePromise.then(() => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+    }, (error) => {
       let errorMessage;
 
       if (!error || !error.data) {
@@ -438,6 +444,8 @@ export class CreateProjectCtrl {
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
+    this.updateRecentWorkspace(workspaceId);
+
     this.createProjectSvc.setCurrentProgressStep(3);
 
     var promise;
@@ -952,6 +960,8 @@ export class CreateProjectCtrl {
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace) => {
+      this.updateRecentWorkspace(workspace.id);
+
       // init message bus if not there
       if (this.workspaces.length === 0) {
         this.messageBus = this.cheAPI.getWebsocket().getBus(workspace.id);
@@ -1231,5 +1241,15 @@ export class CreateProjectCtrl {
       return projects;
     }
     return [];
+  }
+
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 }

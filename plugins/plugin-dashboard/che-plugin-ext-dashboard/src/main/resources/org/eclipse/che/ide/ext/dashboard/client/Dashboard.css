@@ -8,83 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-@eval buttonIconColor "#FFFFFF";
-@eval buttonIconHoverColor "#E3E3E3";
 
-div.tooltip {
+.dashboardArrow {
     position: absolute;
-    width: 50%;
-    height: 0;
-    top: 100%;
-    left: 0;
-}
-
-.tooltip > span {
-    position: fixed;
-    color: mainFontColor;
-    border: 1px solid tooltipBackgroundColor;
-    background: tooltipBackgroundColor;
-    white-space: nowrap;
-    font-family: mainFontFamily;
-    font-size: 8pt;
-    font-weight: normal;
-    text-align: left;
-    padding: 10px 20px;
-    line-height: normal;
-    z-index: 16777271;
-    margin-left: 7px;
-    margin-top: 9px;
-    display: none;
-}
-
-.tooltip > span::after {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 0;
-    border: 10px solid;
-    border-color: transparent transparent tooltipBackgroundColor transparent;
-    top: -20px;
-    right: literal("calc(100% - 20px)");
-}
-
-.dashboardButton:hover > .tooltip > span {
-    display: inline-block;
-}
-
-.tooltip > span:hover {
-    pointer-events: none;
-}
-
-.dashboardButton {
-    position: relative;
-    margin: 0 20px 0 0;
-    height: 100%;
-    width: 50px;
-    padding: 0;
-    opacity: 1;
-    border: none;
-    box-shadow: none;
     cursor: pointer;
+    outline: none;
+    width: 24px;
+    height: 16px;
+    top: 4px;
+    background-color: #525c86;
+    color: #f1f1f1!important;
+    font-size: 8px;
+    padding: 0px;
+    line-height: 16px;
     text-align: center;
-}
-
-.dashboardButton svg:first-child {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 68px;
-    height: 24px;
-}
-
-.dashboardButton svg + svg {
-    position: absolute;
-    width: 18px;
-    height: 100%;
-    fill: buttonIconColor;
-    left: literal("calc(50% - 3px)");
-}
-
-.dashboardButton:hover svg + svg {
-    fill: buttonIconHoverColor;
 }

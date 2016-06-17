@@ -363,18 +363,6 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("action.showHiddenFiles.description")
     String actionShowHiddenFilesDescription();
 
-    @Key("action.redirectToDashboardProjects.title")
-    String actionRedirectToDashboardProjectsTitle();
-
-    @Key("action.redirectToDashboardProjects.description")
-    String actionRedirectToDashboardProjectsDescription();
-
-    @Key("action.redirectToDashboardWorkspaces.title")
-    String actionRedirectToDashboardWorkspacesTitle();
-
-    @Key("action.redirectToDashboardWorkspaces.description")
-    String actionRedirectToDashboardWorkspacesDescription();
-
     /* NewResource */
     @Key("newResource.title")
     String newResourceTitle(String title);

@@ -21,6 +21,7 @@ export class CheColorsConfig {
   '$che-green-color': '#60AB0A',
   '$che-purple-color': '#4E5A96',
   '$che-white-color' : '#FFFFFF',
+  '$che-black-color' : '#000000',
   '$che-ide-background-color' : '#292C2F ',
   '$che-logo-yellow-color' : '#FDB940',
   '$che-logo-blue-color' : '#525C86',

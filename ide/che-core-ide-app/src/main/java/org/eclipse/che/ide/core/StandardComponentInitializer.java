@@ -41,8 +41,6 @@ import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.OpenSelectedFileAction;
 import org.eclipse.che.ide.actions.PasteAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
-import org.eclipse.che.ide.actions.RedirectToDashboardProjectsAction;
-import org.eclipse.che.ide.actions.RedirectToDashboardWorkspacesAction;
 import org.eclipse.che.ide.actions.RedoAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.SaveAction;
@@ -280,12 +278,6 @@ public class StandardComponentInitializer {
     private ShowReferenceAction showReferenceAction;
 
     @Inject
-    private RedirectToDashboardProjectsAction redirectToDashboardProjectsAction;
-
-    @Inject
-    private RedirectToDashboardWorkspacesAction redirectToDashboardWorkspacesAction;
-
-    @Inject
     private ConvertFolderToProjectAction convertFolderToProjectAction;
 
     @Inject
@@ -507,13 +499,8 @@ public class StandardComponentInitializer {
 
         //Compose Profile menu
         DefaultActionGroup profileGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_PROFILE);
-        actionManager.registerAction("redirectToDashboardProjectsAction", redirectToDashboardProjectsAction);
-        actionManager.registerAction("redirectToDashboardWorkspacesAction", redirectToDashboardWorkspacesAction);
         actionManager.registerAction("showPreferences", showPreferencesAction);
-        profileGroup.add(redirectToDashboardProjectsAction);
-        profileGroup.add(redirectToDashboardWorkspacesAction);
 
-        profileGroup.addSeparator();
         profileGroup.add(showPreferencesAction);
 
         // Compose Help menu
@@ -631,4 +618,5 @@ public class StandardComponentInitializer {
         public void actionPerformed(ActionEvent e) {
         }
     }
+
 }

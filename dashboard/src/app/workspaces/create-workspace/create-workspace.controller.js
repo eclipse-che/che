@@ -23,11 +23,12 @@ export class CreateWorkspaceCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, cheNotification, lodash) {
+  constructor($location, cheAPI, cheNotification, lodash, $rootScope) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
+    this.$rootScope = $rootScope;
 
     this.selectSourceOption = 'select-source-recipe';
 
@@ -56,6 +57,8 @@ export class CreateWorkspaceCtrl {
     this.defaultWorkspaceName = null;
 
     cheAPI.cheWorkspace.fetchWorkspaces();
+
+    $rootScope.showIDE = false;
   }
 
   /**
@@ -188,6 +191,11 @@ export class CreateWorkspaceCtrl {
    */
   redirectAfterSubmitWorkspace(promise) {
     promise.then((workspaceData) => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.updateRecentWorkspace(workspaceData.id);
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+
       let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
       this.$location.path('/workspace/' + workspaceData.id);
@@ -197,4 +205,13 @@ export class CreateWorkspaceCtrl {
     });
   }
 
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
+  }
 }

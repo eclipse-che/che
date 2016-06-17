@@ -11,26 +11,25 @@
 'use strict';
 
 /**
- * This class is handling the controller for the item in navbar allowing to redirect to the IDE
- * @author Florent Benoit
+ * Defines a directive for creating an indicator of workspace's status, which contains
+ * both icon and text representation of current status
+ * @author Oleksii Kurinnyi
  */
-class IdeListItemNavbar {
+export class WorkspaceStatus {
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict='E';
-    this.templateUrl = 'app/ide/ide-list-item-navbar/ide-list-item-navbar.html';
+    this.restrict = 'E';
 
+    this.replace = true;
+    this.templateUrl = 'app/workspaces/workspace-status/workspace-status.html';
 
-    this.controller = 'IdeListItemNavbarCtrl';
-    this.controllerAs = 'ideListItemNavbarCtrl';
-    this.bindToController = true;
+    // scope values
+    this.scope = {
+      status : '=cheStatus'
+    };
   }
-
 }
-
-export default IdeListItemNavbar;
-
