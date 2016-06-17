@@ -17,6 +17,11 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.ide.ext.java.shared.Constants;
+import org.eclipse.che.ide.maven.tools.Model;
+import org.eclipse.che.maven.data.MavenArtifact;
+import org.eclipse.che.maven.data.MavenKey;
+import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.server.core.EclipseWorkspaceProvider;
 import org.eclipse.che.plugin.maven.server.core.MavenCommunication;
 import org.eclipse.che.plugin.maven.server.core.MavenExecutorService;
@@ -27,10 +32,6 @@ import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
 import org.eclipse.che.plugin.maven.server.rmi.MavenServerManagerTest;
 import org.eclipse.che.plugin.maven.shared.MessageType;
 import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
-import org.eclipse.che.ide.maven.tools.Model;
-import org.eclipse.che.maven.data.MavenArtifact;
-import org.eclipse.che.maven.data.MavenKey;
-import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -55,7 +56,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.TEST_SOURCE_FOLDER;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,10 +69,8 @@ import static org.mockito.Mockito.when;
  */
 public class WorkspaceTest extends BaseTest {
 
-    private   MavenWorkspace            mavenWorkspace;
-    private   MavenProjectManager       mavenProjectManager;
-
-
+    private MavenWorkspace      mavenWorkspace;
+    private MavenProjectManager mavenProjectManager;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -86,7 +89,10 @@ public class WorkspaceTest extends BaseTest {
         MavenWrapperManager wrapperManager = new MavenWrapperManager(mavenServerManager);
         mavenProjectManager =
                 new MavenProjectManager(wrapperManager, mavenServerManager, terminal, mavenNotifier, new EclipseWorkspaceProvider());
-        mavenWorkspace = new MavenWorkspace(mavenProjectManager, mavenNotifier, new MavenExecutorService(), projectRegistryProvider,
+        mavenWorkspace = new MavenWorkspace(mavenProjectManager,
+                                            mavenNotifier,
+                                            new MavenExecutorService(),
+                                            projectRegistryProvider,
                                             new MavenCommunication() {
                                                 @Override
                                                 public void sendUpdateMassage(Set<MavenProject> updated, List<MavenProject> removed) {
@@ -587,7 +593,7 @@ public class WorkspaceTest extends BaseTest {
         List<String> modules = new ArrayList<>(model.getModules());
         ListIterator<String> listIterator = modules.listIterator();
         while (listIterator.hasNext()) {
-            if("module2".equals(listIterator.next())){
+            if ("module2".equals(listIterator.next())) {
                 listIterator.remove();
                 break;
             }
@@ -607,7 +613,7 @@ public class WorkspaceTest extends BaseTest {
         String pom = "<groupId>test</groupId>\n" +
                      "<artifactId>testArtifact</artifactId>\n" +
                      "<version>42</version>\n" +
-                     "<properties>\n"+
+                     "<properties>\n" +
                      "    <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>\n" +
                      "</properties>\n" +
                      "<dependencies>\n" +
@@ -618,24 +624,36 @@ public class WorkspaceTest extends BaseTest {
                      "    </dependency>\n" +
                      "</dependencies>\n" +
                      "<build>\n" +
-                     "   <plugins>\n"+
-                     "       <plugin>\n"+
+                     "   <plugins>\n" +
+                     "       <plugin>\n" +
                      "          <groupId>org.codehaus.mojo</groupId>\n" +
                      "          <artifactId>build-helper-maven-plugin</artifactId>\n" +
                      "              <executions>\n" +
-                     "                  <execution>\n"+
-                     "                      <id>add-source</id>\n"+
-                     "                      <phase>process-sources</phase>\n"+
-                     "                      <goals>\n"+
-                     "                          <goal>add-source</goal>\n"+
+                     "                  <execution>\n" +
+                     "                      <id>add-source</id>\n" +
+                     "                      <phase>process-sources</phase>\n" +
+                     "                      <goals>\n" +
+                     "                          <goal>add-source</goal>\n" +
                      "                      </goals>\n" +
                      "                      <configuration>\n" +
                      "                          <sources>\n" +
-                     "                              <source>${dto-generator-out-directory}</source>\n"+
-                     "                          </sources>\n"+
-                     "                      </configuration>\n"+
-                     "                  </execution>\n"+
-                     "              </executions>\n"+
+                     "                              <source>${dto-generator-out-directory}</source>\n" +
+                     "                          </sources>\n" +
+                     "                      </configuration>\n" +
+                     "                  </execution>\n" +
+                     "                  <execution>\n" +
+                     "                      <id>add-test-source</id>\n" +
+                     "                      <phase>generate-sources</phase>\n" +
+                     "                      <goals>\n" +
+                     "                          <goal>add-test-source</goal>\n" +
+                     "                      </goals>\n" +
+                     "                      <configuration>\n" +
+                     "                          <sources>\n" +
+                     "                              <source>${dto-generator-out-directory}src-gen/test/java</source>\n" +
+                     "                          </sources>\n" +
+                     "                      </configuration>\n" +
+                     "                  </execution>" +
+                     "              </executions>\n" +
                      "       </plugin>\n" +
                      "   </plugins>\n" +
                      "</build>";
@@ -645,11 +663,19 @@ public class WorkspaceTest extends BaseTest {
         IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
         mavenWorkspace.update(Collections.singletonList(test));
         mavenWorkspace.waitForUpdate();
-        MavenProject mavenProject = mavenProjectManager.findMavenProject(test);
 
         IJavaProject javaProject = JavaCore.create(test);
         IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
         assertThat(rawClasspath).onProperty("path").contains(new Path("/test/target/generated-sources/dto/"));
+
+        //attributes should be updated
+        List<String> sourceFolders = projectRegistry.getProject("test").getAttributes().get(Constants.SOURCE_FOLDER);
+        List<String> testSourceFolders = projectRegistry.getProject("test").getAttributes().get(TEST_SOURCE_FOLDER);
+
+        assertEquals(2, sourceFolders.size());
+        assertThat(sourceFolders, hasItems("src/main/java", "target/generated-sources/dto/"));
+        assertEquals(2, testSourceFolders.size());
+        assertThat(testSourceFolders, hasItems("src/test/java", "target/generated-sources/dto/src-gen/test/java"));
     }
 
     @Test

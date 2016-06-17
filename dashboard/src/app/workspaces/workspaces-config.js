@@ -34,7 +34,8 @@ import {WorkspaceSelectStack} from './create-workspace/select-stack/workspace-se
 
 import {CheWorkspaceRamAllocationSliderCtrl} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
-import {WorkspaceStatusIndicator} from './workspace-status-indicator/workspace-status-indicator.directive';
+import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
+import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 
 import {CheStackLibraryFilterCtrl} from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
 import {CheStackLibraryFilter}     from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
@@ -75,6 +76,7 @@ export class WorkspacesConfig {
     register.controller('CheWorkspaceRamAllocationSliderCtrl', CheWorkspaceRamAllocationSliderCtrl);
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
 
+    register.directive('workspaceStatus', WorkspaceStatus);
     register.directive('workspaceStatusIndicator', WorkspaceStatusIndicator);
 
     register.controller('ReadyToGoStacksCtrl', ReadyToGoStacksCtrl);

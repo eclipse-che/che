@@ -12,54 +12,49 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
 
+import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.MachineResources;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * The action contains business logic which calls special method to create new terminal in processes panel.
+ * Action to open new terminal for the selected machine.
  *
- * @author Roman Nikitenko
+ * @author Vitaliy Guliy
  */
+@Singleton
 public class NewTerminalAction extends AbstractPerspectiveAction {
 
     private final ConsolesPanelPresenter consolesPanelPresenter;
-    private final AppContext             appContext;
-    private final WorkspaceAgent         workspaceAgent;
 
     @Inject
-    public NewTerminalAction(AppContext appContext,
-                             MachineLocalizationConstant locale,
-                             ConsolesPanelPresenter consolesPanelPresenter,
-                             WorkspaceAgent workspaceAgent) {
-        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
-              locale.newTerminalTitle(),
-              locale.newTerminalDescription(),
-              null, null);
+    public NewTerminalAction(MachineLocalizationConstant locale,
+                             MachineResources machineResources,
+                             ConsolesPanelPresenter consolesPanelPresenter) {
+        super(Collections.singletonList( PROJECT_PERSPECTIVE_ID),
+                locale.newTerminal(),
+                locale.newTerminalDescription(),
+                null, machineResources.addTerminalIcon());
 
         this.consolesPanelPresenter = consolesPanelPresenter;
-        this.appContext = appContext;
-        this.workspaceAgent = workspaceAgent;
     }
 
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabled(appContext.getDevMachine() != null);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(@NotNull ActionEvent event) {
-        consolesPanelPresenter.onAddTerminal(appContext.getDevMachine().getId());
-        workspaceAgent.setActivePart(consolesPanelPresenter);
+        consolesPanelPresenter.newTerminal();
     }
+
 }

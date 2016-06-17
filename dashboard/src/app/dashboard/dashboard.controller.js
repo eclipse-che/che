@@ -23,9 +23,8 @@ export class DashboardController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor() {
+  constructor($rootScope) {
+    'ngInject';
+    $rootScope.showIDE = false;
   }
-
-
 }
-

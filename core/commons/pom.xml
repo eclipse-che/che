@@ -29,7 +29,6 @@
         <module>che-core-commons-json</module>
         <module>che-core-commons-xml</module>
         <module>che-core-commons-schedule</module>
-        <module>che-core-commons-gwt</module>
         <module>che-core-commons-test</module>
     </modules>
 </project>

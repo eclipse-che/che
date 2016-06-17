@@ -19,6 +19,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#pull(PullParams, ProgressMonitor)}.
@@ -79,7 +80,7 @@ public class PullParams {
      *
      * @param registry
      *         host and port of registry, e.g. localhost:5000.
-     *         If it is not set, default value "hub.docker.com" will be used
+     *         If it is not set, default value will be used
      * @return this params instance
      */
     public PullParams withRegistry(String registry) {
@@ -118,10 +119,11 @@ public class PullParams {
     /**
      * Returns full repo.
      * It has following format: [registry/]image
-     * In case of docker.io registry is omitted
+     * In case of docker.io registry is omitted,
+     *  otherwise it may cause some troubles with swarm
      */
     public String getFullRepo() {
-        if (registry == null || DEFAULT_REGISTRY.contains(registry)) {
+        if (registry == null || DEFAULT_REGISTRY_SYNONYMS.contains(registry)) {
             return image;
         } else {
             return registry + '/' + image;

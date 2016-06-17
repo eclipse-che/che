@@ -47,6 +47,7 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,37 +86,39 @@ public class ConsolesPanelPresenterTest {
     private static final int    PID            = 101;
 
     @Mock
-    private DtoFactory                  dtoFactory;
+    private DtoFactory                          dtoFactory;
     @Mock
-    private CommandConsoleFactory       commandConsoleFactory;
+    private CommandConsoleFactory               commandConsoleFactory;
     @Mock
-    private CommandTypeRegistry         commandTypeRegistry;
+    private CommandTypeRegistry                 commandTypeRegistry;
     @Mock
-    private DialogFactory               dialogFactory;
+    private DialogFactory                       dialogFactory;
     @Mock
-    private WorkspaceAgent              workspaceAgent;
+    private WorkspaceAgent                      workspaceAgent;
     @Mock
-    private NotificationManager         notificationManager;
+    private NotificationManager                 notificationManager;
     @Mock
-    private MachineLocalizationConstant localizationConstant;
+    private MachineLocalizationConstant         localizationConstant;
     @Mock
-    private TerminalFactory             terminalFactory;
+    private TerminalFactory                     terminalFactory;
     @Mock
-    private ConsolesPanelView           view;
+    private ConsolesPanelView                   view;
     @Mock
-    private MachineResources            resources;
+    private MachineResources                    resources;
     @Mock
-    private AppContext                  appContext;
+    private AppContext                          appContext;
     @Mock
-    private MachineServiceClient        machineService;
+    private MachineServiceClient                machineService;
     @Mock
-    private EntityFactory               entityFactory;
+    private EntityFactory                       entityFactory;
     @Mock
-    private EventBus                    eventBus;
+    private EventBus                            eventBus;
     @Mock
-    private WorkspaceDto                workspace;
+    private WorkspaceDto                        workspace;
     @Mock
-    private OutputConsole               outputConsole;
+    private OutputConsole                       outputConsole;
+    @Mock
+    private ConsoleTreeContextMenuFactory       consoleTreeContextMenuFactory;
 
     @Mock
     private Promise<List<MachineDto>> machinesPromise;
@@ -155,7 +158,7 @@ public class ConsolesPanelPresenterTest {
         presenter =
                 new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
                                            commandTypeRegistry, workspaceAgent, notificationManager, localizationConstant,
-                                           machineService, resources, appContext);
+                                           machineService, resources, appContext, consoleTreeContextMenuFactory);
     }
 
     @Test

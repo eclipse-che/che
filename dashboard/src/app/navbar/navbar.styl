@@ -9,17 +9,15 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 
-$active-background-color = #3E4856
-$active-border-color = rgb(74, 144, 226)
-$navbar-menu-color = #C5D0DF
-$navbar-icon-color = #E2E2E3
 $faces-shadow = rgba(255, 255, 255, 0.5)
 $menu-font-size = 1em
-$submenu-font-size = 0.9em
+$submenu-font-size = 10px
+$circle-indicator-font-size = 0.7em
 
-.navbar-top-dropdown
-  margin: 0 10px
-  height 60px
+.navbar-top-logo
+  margin 5px 10px 0
+  height 54px
+  width 95px
 
 /* restore non-allcaps */
 .admin-navbar-menu section a.md-button
@@ -29,28 +27,39 @@ $submenu-font-size = 0.9em
 .admin-navbar-menu md-list-item a.md-button
   margin 0
 
+che-nav-bar
+  width 100%
+
 .left-sidebar-container
-  height 100vh
   display flex
+  flex 1
   flex-flow row wrap
   justify-content space-around
+  width 100%
 
 .left-sidebar-container md-toolbar
   box-shadow none
+  background-color $navbar-backgroud-color
+  border-right 1px solid $navbar-border-right-color
 
 .left-sidebar-menu
   width 100%
 
-.left-sidebar-menu .navbar-subsection-item .navbar-item i,
-.left-sidebar-menu .navbar-submenu-item .navbar-item i,
-.navbar-submenu-content i
-  width 40px
-  font-size 19px
-  line-height 12px
+.left-sidebar-menu .navbar-subsection-item .navbar-item .navbar-icon,
+.left-sidebar-menu .navbar-submenu-item .navbar-item .navbar-icon,
+.navbar-submenu-content .navbar-icon
+  width 20px
+  min-width 20px
+  font-size 14px
+  line-height 24px
   text-align center
+  margin 0 4px 0 7px
 
 .left-sidebar-menu .navbar-subsection-item.md-no-proxy
   padding 0
+
+.left-sidebar-menu md-list
+  padding-top 5px
 
 .admin-navbar-menu .navbar-subsection md-list
   padding-top 4px
@@ -59,33 +68,48 @@ $submenu-font-size = 0.9em
   min-height 0
   margin-top -4px
 
-.admin-navbar-menu .navbar-identity span
-  padding-left 3px
+.admin-navbar-menu
+  .navbar-section span.navbar-section-title
+    padding-top 10px
+    padding-left 10px
+    text-transform uppercase
+    font-size 0.9em
+    white-space nowrap
+  .navbar-section + md-list
+    padding-top 2px
 
 /* text color */
 .admin-navbar-menu .navbar-header,
 .admin-navbar-menu .navbar-identity,
 .admin-navbar-menu section a.md-button span,
 .navbar-submenu-content a.md-button span
-  color $navbar-menu-color
+  color $navbar-menu-text-color
 
-.admin-navbar-menu section a.md-button i,
-.navbar-submenu-content a.md-button i
-  color $navbar-icon-color
+.admin-navbar-menu md-list-item a.md-button span.navbar-number
+  color $navbar-menu-dark-text-color
+
+.admin-navbar-menu .navbar-section span.navbar-section-title
+  color $navbar-section-title-color
+
+.admin-navbar-menu section a.md-button .navbar-icon,
+.navbar-submenu-content a.md-button .navbar-icon
+  color $navbar-menu-icon-color
 
 .admin-navbar-menu section a.md-button,
 .navbar-submenu-content a.md-button
   height 36px
 
+.admin-navbar-menu md-list-item a.md-button.che-navbar-selected .navbar-icon
+  color $navbar-active-menu-icon-color
 .admin-navbar-menu md-list-item a.md-button.che-navbar-selected span
-  color $white-color
+  color $navbar-active-menu-text-color
 
 /* background color */
 
 .admin-navbar-menu md-list-item a.md-button.che-navbar-selected,
 .admin-navbar-menu md-list-item a.md-button:hover,
 .admin-navbar-menu md-menu a.md-button:hover
-  background-color $active-background-color
+  background-color $navbar-active-menu-background-color
 
 .admin-navbar-menu md-menu a.md-button.che-navbar-selected
   background-color inherit
@@ -104,28 +128,57 @@ $submenu-font-size = 0.9em
 .admin-navbar-menu md-list-item a.md-button
   width fill-available
   padding 0
+  height 26px
+  min-height 24px
+  border-radius 0
+
+.admin-navbar-menu .navbar-account-section md-list
+  padding 0
+
+.admin-navbar-menu .navbar-account-section md-list-item a.md-button
+  height inherit
+  min-height inherit
 
 .admin-navbar-menu .left-sidebar-menu md-list-item > a.md-button .navbar-item,
 .admin-navbar-menu .left-sidebar-menu md-menu > a.md-button .navbar-item,
 .navbar-submenu-content md-menu-item > a.md-button .navbar-item
-  padding-left 10px
+  padding-left 0
+  padding-right 5px
 
 .admin-navbar-menu .left-sidebar-menu md-list-item > a.md-button .navbar-item.navbar-item-no-icon,
 .admin-navbar-menu .left-sidebar-menu md-menu > a.md-button .navbar-item.navbar-item-no-icon,
 .navbar-submenu-content md-menu-item > a.md-button .navbar-item.navbar-item-no-icon
-  padding-left 51px
+  padding-left 36px
 
 .admin-navbar-menu md-list-item a.md-button .navbar-item
-  padding-left 87px
+  line-height 24px
+
+.admin-navbar-menu md-list-item a.md-button .navbar-item span
+  overflow: hidden
+  text-overflow ellipsis
+
+.admin-navbar-menu md-list-item a.md-button span.navbar-number
+  font-weight 600
 
 .admin-navbar-menu section md-list,
 .admin-navbar-menu .navbar-identity
   width fill-available
 
-.admin-navbar-menu .navbar-subsection md-list-item a.md-button .navbar-item i
+.admin-navbar-menu .navbar-identity
+  height 100%
+
+.admin-navbar-menu .navbar-subsection md-list-item a.md-button .navbar-item .navbar-icon
   line-height inherit
   width 13px
   margin-right 2px
+
+.left-sidebar-menu .navbar-subsection-item
+  height 26px
+  min-height 26px
+
+.left-sidebar-menu.navbar-account-section .navbar-subsection-item
+  height 31px
+  min-height 31px
 
 /* hover, focus */
 /* remove underline on focus */
@@ -136,7 +189,7 @@ $submenu-font-size = 0.9em
 .admin-navbar-menu section.navbar-subsection md-list md-item.navbar-subsection-item md-list-item a.md-button.che-navbar-selected,
 .admin-navbar-menu section.navbar-subsection md-list md-item.navbar-subsection-item md-list-item a.md-button:hover,
 .navbar-submenu-content md-menu-item a.md-button:hover
-  background-color $active-background-color
+  background-color $navbar-active-menu-background-color
 
 .admin-navbar-menu a:hover, .admin-navbar-menu a.che-navbar-selected
   color inherit
@@ -145,10 +198,10 @@ $submenu-font-size = 0.9em
 .admin-navbar-menu .che-navbar-selected:before
   content ""
   left 0
-  top 4px
-  bottom 4px
+  top 0
+  bottom 0
   position absolute
-  border-left solid 3px $active-border-color
+  border-left solid 2px $navbar-active-menu-mark-color
 
 /* animations */
 .admin-navbar-menu .animation.ng-enter
@@ -183,9 +236,6 @@ $submenu-font-size = 0.9em
 /* user avatar */
 .admin-navbar-menu .navbar-identity .developers-face
   che-developers-face()
-  -webkit-box-shadow 0 0 0 1px $faces-shadow
-  -moz-box-shadow 0 0 0 1px $faces-shadow
-  box-shadow 0 0 0 1px $faces-shadow
 
 /* fonts sizes */
 .admin-navbar-menu .navbar-header,
@@ -196,10 +246,12 @@ $submenu-font-size = 0.9em
 
 .navbar-identity
   outline 0
-  padding-left 7px
 
 .admin-navbar-menu section a.md-button
   font-size $submenu-font-size
+
+.admin-navbar-menu .workspace-status-indicator span
+  font-size $circle-indicator-font-size
 
 /* remove focus effect on fold/unfold button */
 .admin-navbar-menu .navbar-identity i.material-design:focus
@@ -229,3 +281,12 @@ $submenu-font-size = 0.9em
 .admin-navbar-menu md-divider
   margin-top 8px
   margin-bottom 8px
+
+.navbar-iframe-button-left-border
+  position absolute
+  top 4px
+  right 0
+  width 0
+  height 16px
+  border-right 1px solid $navbar-ide-iframe-button-border-color
+  z-index 10

@@ -22,32 +22,44 @@ class IdeIFrameSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($timeout, $compile) {
+  constructor ($timeout, $compile, $rootScope, $location, $window) {
     this.iframeAdded = false;
     this.$timeout = $timeout;
     this.$compile = $compile;
 
+    $window.addEventListener("message", (event) => {
+      if ("ide-loaded" === event.data) {
+        // check whether user is still waiting for IDE
+        if (/\/ide\//.test($location.path())) {
+          $rootScope.$apply(() => {
+            $rootScope.showIDE = true;
+            $rootScope.hideLoader = true;
+          });
+        }
+      } else if ("show-workspaces" === event.data){
+        $rootScope.$apply(() => {
+          $location.path('/workspaces');
+        });
+      }
+    }, false);
   }
-
 
   addIFrame() {
     if (!this.iframeAdded) {
       this.iframeAdded = true;
         // The new element to be added
-        var $div = $('<ide-iframe id="ide-iframe-window" ng-show="showIDE" flex style="height: 100%"></ide-iframe>');
+        var $div = angular.element('<ide-iframe id="ide-iframe-window" ng-show="showIDE" flex style="height: 100%"></ide-iframe>');
 
         // The parent of the new element
-        var $target = $('body');
+        var $target = angular.element('body');
 
       let $scope = angular.element($target).scope();
       let insertHtml = this.$compile($div)($scope);
-      $target.append(insertHtml);
+      angular.element('body').find('.main-page').append(insertHtml);
 
     }
   }
 
-
 }
 
 export default IdeIFrameSvc;
-

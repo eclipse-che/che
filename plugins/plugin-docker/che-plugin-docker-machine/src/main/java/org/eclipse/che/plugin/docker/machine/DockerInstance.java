@@ -27,7 +27,6 @@ import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
@@ -51,7 +50,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
-import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
 
 /**
  * Docker implementation of {@link Instance}
@@ -91,7 +89,7 @@ public class DockerInstance extends AbstractInstance {
     private final String                                      image;
     private final LineConsumer                                outputConsumer;
     private final String                                      registry;
-    private final String                                      username;
+    private final String                                      registryNamespace;
     private final DockerNode                                  node;
     private final DockerInstanceStopDetector                  dockerInstanceStopDetector;
     private final DockerInstanceProcessesCleaner              processesCleaner;
@@ -103,7 +101,7 @@ public class DockerInstance extends AbstractInstance {
     @Inject
     public DockerInstance(DockerConnector docker,
                           @Named("machine.docker.registry") String registry,
-                          @Named("docker.registry.auth.username") @Nullable String username,
+                          @Named("machine.docker.snapshot.registry_namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
                           @Assisted Machine machine,
                           @Assisted("container") String container,
@@ -120,7 +118,7 @@ public class DockerInstance extends AbstractInstance {
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;
-        this.username = username;
+        this.registryNamespace = registryNamespace;
         this.node = node;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.processesCleaner = processesCleaner;
@@ -205,15 +203,12 @@ public class DockerInstance extends AbstractInstance {
     @Override
     public MachineSource saveToSnapshot(String owner) throws MachineException {
         try {
-            String image = generateImageName();
+            String image = generateRepository();
             if(!snapshotUseRegistry) {
                 commitContainer(owner, image, LATEST_TAG);
                 return new DockerMachineSource(image).withTag(LATEST_TAG);
             }
 
-            if (username != null && DEFAULT_REGISTRY.contains(registry)) {
-                image = username + '/' + image; // username is used only for docker hub
-            }
             PushParams pushParams = PushParams.create(image)
                                               .withRegistry(registry)
                                               .withTag(LATEST_TAG);
@@ -253,7 +248,10 @@ public class DockerInstance extends AbstractInstance {
                                   .withComment(comment));
     }
 
-    private String generateImageName() {
+    private String generateRepository() {
+        if (registryNamespace != null) {
+            return registryNamespace + '/' + NameGenerator.generate(null, 16);
+        }
         return NameGenerator.generate(null, 16);
     }
 
