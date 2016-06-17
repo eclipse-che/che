@@ -64,18 +64,14 @@
                 }
             ]
         },
-        "permissions": {
-            "groups": [
-                {
-                    "acl": [
-                        "read",
-                        "search"
-                    ],
-                    "name": "public"
-                }
-            ],
-            "users": {}
-        },
+        "acl": [
+            {
+                "user": "*",
+                "actions": [
+                    "search"
+                ]
+            }
+        ],
         "stackIcon" : {
             "name": "type-java.svg",
             "mediaType": "image/svg+xml"
@@ -161,17 +157,13 @@
                 }
             ]
         },
-        "permissions": {
-            "groups": [
-                {
-                    "acl": [
-                        "read",
-                        "search"
-                    ],
-                    "name": "public"
-                }
-            ],
-            "users": {}
-        }
+        "acl": [
+            {
+                "user": "*",
+                "actions": [
+                    "search"
+                ]
+            }
+        ]
     }
 ]
