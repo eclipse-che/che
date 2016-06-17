@@ -15,13 +15,14 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.project.server.RegisteredProject.Problem;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
+import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
@@ -84,7 +85,19 @@ public class ProjectRegistry {
             final String path = projectConfig.getPath();
             final VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
             final FolderEntry projectFolder = ((vf == null) ? null : new FolderEntry(vf, this));
-            putProject(projectConfig, projectFolder, false, false);
+            // need that to make "problematic" project and not break the workspace
+            try {
+                putProject(projectConfig, projectFolder, false, false);
+            } catch (ProjectTypeConstraintException e) {
+                //in case bad config
+                projects.put(path, new RegisteredProject(projectFolder, false, false, projectTypeRegistry, new Problem(12, e.getMessage())));
+            } catch (NotFoundException e) {
+                //in case project type not found
+                projects.put(path, new RegisteredProject(projectFolder, false, false, projectTypeRegistry, new Problem(13, e.getMessage())));
+            } catch (ValueStorageException e) {
+                //in case can't calculate Attributes
+                projects.put(path, new RegisteredProject(projectFolder, false, false, projectTypeRegistry, new Problem(14, e.getMessage())));
+            }
         }
 
         initUnconfiguredFolders();
@@ -197,6 +210,8 @@ public class ProjectRegistry {
 
         return project;
     }
+
+
 
     /**
      * Removes all projects on and under the incoming path.
