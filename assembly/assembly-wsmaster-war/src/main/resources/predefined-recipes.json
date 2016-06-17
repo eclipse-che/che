@@ -12,14 +12,6 @@
       "gwt"
     ],
     "name": "UBUNTU_JDK8",
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "read"
-        ]
-      }
-    ],
     "id": "recipe_ubuntu",
     "type": "docker",
     "script": "FROM codenvy/ubuntu_jdk8"
@@ -36,14 +28,6 @@
       "tomcat"
     ],
     "name": "DEBIAN_JDK8",
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "read"
-        ]
-      }
-    ],
     "id": "recipe_debian",
     "type": "docker",
     "script": "FROM codenvy/debian_jdk8"
