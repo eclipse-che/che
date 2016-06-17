@@ -469,7 +469,7 @@ public class WorkspaceService extends Service {
                   notes = "This operation can be performed only by the workspace owner")
     @ApiResponses({@ApiResponse(code = 204, message = "The command successfully removed"),
                    @ApiResponse(code = 403, message = "The user does not have access delete the command"),
-                   @ApiResponse(code = 404, message = "The workspace not found"),
+                   @ApiResponse(code = 404, message = "The workspace or the command not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public void deleteCommand(@ApiParam("The id of the workspace")
                               @PathParam("id")
@@ -484,6 +484,8 @@ public class WorkspaceService extends Service {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         if (workspace.getConfig().getCommands().removeIf(command -> command.getName().equals(commandName))) {
             workspaceManager.updateWorkspace(id, workspace);
+        } else {
+            throw new NotFoundException(String.format("Command with name '%s' was not found in workspace with id %s", commandName, id));
         }
     }
 
