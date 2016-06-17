@@ -85,6 +85,7 @@ public class ProjectRegistry {
             final String path = projectConfig.getPath();
             final VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
             final FolderEntry projectFolder = ((vf == null) ? null : new FolderEntry(vf, this));
+            // need that to make "problematic" project and not break the workspace
             try {
                 putProject(projectConfig, projectFolder, false, false);
             } catch (ProjectTypeConstraintException e) {

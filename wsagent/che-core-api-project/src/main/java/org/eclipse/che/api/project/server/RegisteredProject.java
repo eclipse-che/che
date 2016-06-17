@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import com.google.common.collect.ImmutableList;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
@@ -118,7 +120,6 @@ public class RegisteredProject implements ProjectConfig {
                                                                       ProjectTypeConstraintException,
                                                                       ServerException,
                                                                       ValueStorageException {
-        problems = new ArrayList<>();
         attributes = new HashMap<>();
 
         this.folder = folder;
@@ -126,7 +127,7 @@ public class RegisteredProject implements ProjectConfig {
         this.updated = updated;
         this.detected = detected;
         types = new ProjectTypes(folder.getPath().toString(), BaseProjectType.ID, null, projectTypeRegistry);
-        problems.add(problem);
+        problems = ImmutableList.of(problem);
     }
 
 
