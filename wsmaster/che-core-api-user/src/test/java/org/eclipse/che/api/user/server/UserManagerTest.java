@@ -18,6 +18,7 @@ import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -43,11 +44,18 @@ public class UserManagerTest {
     @Mock
     PreferenceDao  preferenceDao;
 
+    UserManager manager;
+
+    @BeforeMethod
+    public void setUp() {
+        manager = new UserManager(userDao, profileDao, preferenceDao, new String[0]);
+    }
+
     @Test
     public void shouldCreateProfileAndPreferencesOnUserCreation() throws Exception {
         final User user = new User().withEmail("test@email.com").withName("testName");
 
-        new UserManager(userDao, profileDao, preferenceDao, new String[0]).create(user, false);
+        manager.create(user, false);
 
         verify(profileDao).create(any(Profile.class));
         verify(preferenceDao).setPreferences(anyString(), anyMapOf(String.class, String.class));
@@ -57,7 +65,7 @@ public class UserManagerTest {
     public void shouldGeneratedPasswordWhenCreatingUserAndItIsMissing() throws Exception {
         final User user = new User().withEmail("test@email.com").withName("testName");
 
-        new UserManager(userDao, profileDao, preferenceDao, new String[0]).create(user, false);
+        manager.create(user, false);
 
         verify(userDao).create(eq(user.withPassword("<none>")));
     }

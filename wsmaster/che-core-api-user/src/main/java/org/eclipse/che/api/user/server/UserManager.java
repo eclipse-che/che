@@ -74,7 +74,7 @@ public class UserManager {
      *         when any other error occurs
      */
     public void create(User user, boolean isTemporary) throws ConflictException, ServerException {
-        if (reservedNames.contains(user.getName())) {
+        if (reservedNames.contains(user.getName().toLowerCase())) {
             throw new ConflictException(String.format("Username \"%s\" is reserved", user.getName()));
         }
         user.withId(generate("user", ID_LENGTH))
