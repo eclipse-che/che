@@ -23,6 +23,7 @@
     "gulp-eslint": "~1.0.0",
     "gulp-filter": "~3.0.1",
     "gulp-flatten": "~0.2.0",
+    "gulp-header": "1.8.2",
     "gulp-iconfont": "2.0.0",
     "gulp-iconfont-css": "0.0.9",
     "gulp-inject": "~1.5.0",

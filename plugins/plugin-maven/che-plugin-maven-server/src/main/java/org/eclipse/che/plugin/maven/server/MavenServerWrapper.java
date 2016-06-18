@@ -59,9 +59,10 @@ public abstract class MavenServerWrapper extends RmiObjectWrapper<MavenServer> {
         if (customization != null) {
             uncustomize();
         }
-
+        MavenTerminal mavenTerminalWrapper;
         try {
-            UnicastRemoteObject.exportObject(mavenTerminal, 0);
+            mavenTerminalWrapper = new MavenTerminalWrapper(mavenTerminal);
+            UnicastRemoteObject.exportObject(mavenTerminalWrapper, 0);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -75,7 +76,7 @@ public abstract class MavenServerWrapper extends RmiObjectWrapper<MavenServer> {
         }
 
 
-        customization = new MavenCustomization(cache, mavenTerminal, wrapper, failOnUnresolvedDependency, alwaysUpdateSnapshot);
+        customization = new MavenCustomization(cache, mavenTerminalWrapper, wrapper, failOnUnresolvedDependency, alwaysUpdateSnapshot);
         perform(this::customizeMaven);
     }
 
@@ -225,6 +226,20 @@ public abstract class MavenServerWrapper extends RmiObjectWrapper<MavenServer> {
         public boolean isCanceled() throws RemoteException {
 //            return delegate.isCanceled();
             return false;
+        }
+    }
+
+    private static class MavenTerminalWrapper implements MavenTerminal{
+
+        private MavenTerminal delegate;
+
+        public MavenTerminalWrapper(MavenTerminal delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void print(int level, String message, Throwable throwable) throws RemoteException {
+            delegate.print(level, message, throwable);
         }
     }
 }

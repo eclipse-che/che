@@ -651,7 +651,7 @@ export class CheCountriesConfig {
                 name: 'Syrian Arab Republic',
                 code: 'SY'
             }, {
-                name: 'Taiwan, Province of China',
+                name: 'Taiwan',
                 code: 'TW'
             }, {
                 name: 'Tajikistan',

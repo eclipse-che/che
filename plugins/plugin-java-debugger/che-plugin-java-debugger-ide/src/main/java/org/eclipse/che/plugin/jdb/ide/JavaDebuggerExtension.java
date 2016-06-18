@@ -27,7 +27,7 @@ import org.eclipse.che.plugin.jdb.ide.fqn.JavaFqnResolver;
  * @author Artem Zatsarynnyi
  * @author Valeriy Svydenko
  * @author Anatoliy Bazko
- * @author Morhun Mykola
+ * @author Mykola Morhun
  */
 @Singleton
 @Extension(title = "Java Debugger", version = "4.1.0")

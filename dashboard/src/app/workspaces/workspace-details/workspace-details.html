@@ -46,10 +46,10 @@
           <div layout="row" flex>
             <che-label-container flex layout="row" che-label-name="State">
               <div layout="row">
-                <workspace-status-indicator che-status="workspaceDetailsCtrl.getWorkspaceStatus()"
-                                            layout-align="start start"></workspace-status-indicator>
+                <workspace-status che-status="workspaceDetailsCtrl.getWorkspaceStatus()"
+                                            layout-align="start start"></workspace-status>
                 <che-link che-link-text="Show more"
-                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}?showLogs"
+                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
                           layout-align="end start"
                           ng-show="(workspaceDetailsCtrl.showShowMore === true && (workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'ERROR'))"></che-link>
               </div>

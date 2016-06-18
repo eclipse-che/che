@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2015-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<svg width="14px" height="14px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-11.000000, -67.000000)" fill="#808B9C">
+            <g id="Dashboard-Icon" transform="translate(11.000000, 67.000000)">
+                <rect id="Rectangle-17" x="0" y="8" width="6" height="6"></rect>
+                <rect id="Rectangle-17-Copy" x="8" y="8" width="6" height="6"></rect>
+                <rect id="Rectangle-17-Copy-3" x="0" y="0" width="6" height="6"></rect>
+                <rect id="Rectangle-17-Copy-2" x="8" y="0" width="6" height="6"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

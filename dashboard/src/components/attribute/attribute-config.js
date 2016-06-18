@@ -15,7 +15,8 @@ import {CheAutoScroll} from './scroll/che-automatic-scroll.directive';
 import {CheListOnScrollBottom} from './scroll/che-list-on-scroll-bottom.directive';
 import {CheReloadHref} from './reload-href/che-reload-href.directive';
 import {CheFormatOutput} from './format-output/che-format-output.directive';
-
+import {CheOnLongTouch} from './touch/che-on-long-touch.directive';
+import {CheOnRightClick} from './click/che-on-right-click.directive';
 
 export class AttributeConfig {
 
@@ -31,5 +32,8 @@ export class AttributeConfig {
 
     register.directive('cheFormatOutput', CheFormatOutput);
 
+    register.directive('cheOnLongTouch', CheOnLongTouch);
+
+    register.directive('cheOnRightClick', CheOnRightClick);
   }
 }
