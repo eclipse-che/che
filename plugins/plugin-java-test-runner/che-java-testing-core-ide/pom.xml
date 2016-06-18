@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.4.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>che-plugin-java-ext-testing-ide</artifactId>
+    <artifactId>che-java-testing-core-ide</artifactId>
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -71,11 +71,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-client</artifactId>
+            <artifactId>che-java-testing-core-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-testing-shared</artifactId>
+            <artifactId>che-plugin-java-ext-lang-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

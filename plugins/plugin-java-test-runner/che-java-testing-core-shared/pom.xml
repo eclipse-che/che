@@ -6,7 +6,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.4.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>che-plugin-java-ext-testing-shared</artifactId>
+    <artifactId>che-java-testing-core-shared</artifactId>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>

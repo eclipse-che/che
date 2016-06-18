@@ -21,16 +21,16 @@
     <artifactId>che-plugin-java-test-runner-parent</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>che-plugin-java-ext-testing-server</module>
-        <module>che-plugin-java-ext-testing-ide</module>
-        <module>che-plugin-java-ext-testing-shared</module>
+        <module>che-java-testing-core-server</module>
+        <module>che-java-testing-core-ide</module>
+        <module>che-java-testing-core-shared</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-testing-shared</artifactId>
+                <artifactId>che-java-testing-core-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

@@ -448,17 +448,17 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-testing-ide</artifactId>
+                <artifactId>che-java-testing-core-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-testing-server</artifactId>
+                <artifactId>che-java-testing-core-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-testing-shared</artifactId>
+                <artifactId>che-java-testing-core-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
