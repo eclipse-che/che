@@ -3,8 +3,11 @@ package org.eclipse.che.ide.ext.java.testing.server.junit4x;
 //import org.junit.runner.JUnitCore;
 //import org.junit.runner.Result;
 
+import com.google.inject.Inject;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.eclipse.che.ide.ext.java.testing.server.FrameworkFactory;
 import org.eclipse.che.ide.ext.java.testing.server.TestRunner;
+import org.eclipse.che.ide.ext.java.testing.server.TestRunner2;
 import org.eclipse.che.ide.ext.java.testing.shared.Failure;
 import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
 
@@ -17,14 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class JUnit4TestRunner extends TestRunner {
+public class JUnit4TestRunner implements TestRunner2 {
 
-    public JUnit4TestRunner(String projectPath, ClassLoader projectClassloader) {
-        super(projectPath, projectClassloader);
-    }
 
-    @Override
-    public TestResult run(String testClass) throws Exception {
+    String projectPath;
+    ClassLoader projectClassLoader;
+
+
+    private TestResult run(String testClass) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTest = Class.forName(testClass, true, classLoader);
 //        Result r = JUnitCore.runClasses(clsTest);
@@ -32,8 +35,7 @@ public class JUnit4TestRunner extends TestRunner {
 
     }
 
-    @Override
-    public TestResult runAll() throws Exception {
+    private TestResult runAll() throws Exception {
         List<String> testClassNames = new ArrayList<>();
         Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
@@ -130,5 +132,23 @@ public class JUnit4TestRunner extends TestRunner {
         dtoResult.setFailures(jUnitFailures);
 
         return dtoResult;
+    }
+
+    @Override
+    public TestResult execute(String path, ClassLoader classLoader) {
+        projectPath = path;
+        projectClassLoader = classLoader;
+        TestResult a = null;
+        try {
+            a = runAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return a;
+    }
+
+    @Override
+    public String getName() {
+        return "junit";
     }
 }

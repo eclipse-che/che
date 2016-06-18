@@ -4,7 +4,6 @@ package org.eclipse.che.ide.ext.java.testing.server;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ProcessUtil;
-import org.eclipse.che.ide.ext.java.testing.server.junit4x.JUnit4TestRunner;
 
 
 import java.io.BufferedReader;
@@ -34,7 +33,7 @@ public class TestRunnerFactory {
             case JUNIT3x:
                 break;
             case JUNIT4x:
-                return new JUnit4TestRunner(projectPath,classLoader);
+                return null;
             case TESTNG:
                 break;
             default:
@@ -104,5 +103,12 @@ public class TestRunnerFactory {
         classUrls.add(Paths.get(projectPath, "target", "test-classes").toUri().toURL());
 
         return classUrls;
+    }
+
+    public ClassLoader getProjectClassLoader(String propath) throws IOException, InterruptedException {
+        buildClasspath(propath);
+        List<URL> classUrls = getProjectClasspath(propath);
+        ClassLoader classLoader = new URLClassLoader(classUrls.toArray(new URL[classUrls.size()]),null);
+        return classLoader;
     }
 }
